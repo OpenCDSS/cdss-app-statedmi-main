@@ -1,0 +1,8 @@
+setOutputYearType(Water)
+# ADANETCO - ADAMS TUNNEL AT EAST PORTAL-COMPUTED FLOW
+ADANETCO.DWR.Streamflow.Month~HydroBase
+# 09013000 - ALVA B. ADAMS TUNNEL AT EAST PORTAL NEAR ESTES PARK
+09013000.DWR.Streamflow.Month~HydroBase
+blend(09013000.DWR.Streamflow.Month,ADANETCO.DWR.Streamflow.Month,BlendAtEnd)
+TS 514634 = copy(TSID="09013000.DWR.Streamflow.Month",NewTSID="514634")
+writeStateMod(TSList=AllMatchingTSID,TSID="514634",OutputFile="514634.stm",OutputStart="10/1908",OutputEnd="9/2004",Precision=0)

@@ -1,0 +1,732 @@
+<!-- StateDMI build file 
+	Author  :  Kurt Tometich
+	Date    :  10/30/2006 			
+-->
+
+<project name="buildTemplate" basedir="../" default="compile">
+
+	<!-- set the javac location for OS type -->
+	<condition property="executable" value="/sharedLibs/j2sdk1.4.2_12/bin/javac">
+		<and>
+	       		<os family="unix" />
+		</and>
+	</condition>
+	<condition property="executable" value="S:\develop\jdk_142\bin\javac">
+		<and>
+	       		<os family="windows" />
+		</and>
+	</condition>
+	
+	<!--============= General Properties =============-->
+	<property name="VERSION"		 value="2.01.00" />
+	<property name="src.dir"	     location="src"         />
+	<property name="build.dir"	     location="build"       />
+	<property name="dist.dir"        location="dist" />
+	<property name="doc.dir"		 location="doc" />
+	<property name="buildwork.dir"   location="build/work"   />
+	<property name="buildtest.dir"   location="build/test"      />
+	<property name="test.dir"	     location="test/unit/src"        />
+	<property name="jdoc.dir"	     location="doc/javadoc" />
+	<property name="ext.dir"         location="externals"       />
+	<property name="graphics.dir"    location="graphics"        />
+	<property name="system.dir"  	 location="test/system"        />
+	<property name="CDSS_OP.dir"     location="test/operational/CDSS" />
+	<property name="logs.dir"    	 location="test/logs"        />
+	<property name="package"     	 value="DWR/DMI/StateDMI" />
+	<property name="nsis.dir"		 location="installer" />
+	<property name="executable"  	 location="S:/develop/jdk_142/bin/javac" />
+	<property name="classname"   	 value="DWR.DMI.StateDMI.StateDMI" />
+	<property name="testSuite"  	 value="DWR.DMI.StateDMI.StateDMITestSuite" />
+	<property name="jarfname"    	 value="StateDMI_142.jar" />
+	<property name="regTest.dir"	 location="test/regression" />
+	<property name="unitTest.dir"	 location="test/unit" />
+	<property name="command_file"    value="Regression.StateDMI" />
+	<property name="proj_name"		 value="StateDMI" />
+	<property name="costello" 		 value="abbot.editor.Costello" />
+	<property name="AbbotSuite"		 value="AbbotTestSuite" />
+	<property name="ProductTester" 	 value="${ext.dir}/ProductTester" />
+	<property name="nativejc"		 
+		value="${ext.dir}/NativeJ/nativejc.exe" />
+	<property name="NJProj"			 value="${proj_name}.njp" />
+	<property name="NJProj_Reg"	 	 value="${proj_name}_Regression.njp" />
+	<property name="CDSS_install.dir" location="installer/CDSS" />
+	<property name="tmp.dir"		 location="tmp" />
+	
+	<!--================ Dependencies ==================-->
+	<property name="Hydrobase"	 
+		value="${ext.dir}/HydroBaseDMI/HydroBaseDMI_142.jar" />
+	<property name="RTi_Common"	 
+		value="${ext.dir}/RTi_Common/RTi_Common_142.jar" />
+	<property name="TSCommandProcessor"	 
+		value="${ext.dir}/TSCommandProcessor/TSCommandProcessor_142.jar" />
+	<property name="StateCU"	 
+		value="${ext.dir}/StateCU/StateCU_142.jar" />
+	<property name="StateMod"	 
+		value="${ext.dir}/StateMod/StateMod_142.jar" />
+	<property name="Xerces"	 
+		value="${ext.dir}/Xerces/Xerces.jar" />
+	<property name="msbase"	 
+		value="${ext.dir}/Microsoft_SQL_Server_Java_ODBC_Driver/msbase.jar" />
+	<property name="mssql"	 
+		value="${ext.dir}/Microsoft_SQL_Server_Java_ODBC_Driver/mssqlserver.jar" />
+	<property name="msutil"	 
+		value="${ext.dir}/Microsoft_SQL_Server_Java_ODBC_Driver/msutil.jar" />
+	<property name="junit"
+		value="${ext.dir}/junit.jar" />
+	
+	<!-- Abbot jar files -->
+	<property name="Abbot.jar" 
+		value="externals/Abbot/abbot.jar" />
+	<property name="jdom.jar" 
+		value="externals/Abbot/jdom.jar" />
+	<property name="xerces.jar" 
+		value="externals/Abbot/xerces.jar" />
+	<property name="xml-apis.jar" 
+			value="externals/Abbot/xml-apis.jar" />
+	<property name="jgraph.jar" 
+		value="externals/Abbot/jgraph.jar" />
+	<property name="bsh.jar" 
+		value="externals/Abbot/bsh.jar" />
+	<property name="MRJ.zip" 
+			value="externals/Abbot/MRJToolkitStubs.zip" />
+	<property name="gnu-regexp.jar" 
+				value="externals/Abbot/gnu-regexp.jar" />
+	<property name="ant4eclipse.jar" 
+		value="externals/Abbot/ant4eclipse.jar" />
+	
+	
+	<!-- =========== Compiler Properties ===============-->
+	<property name="compiler" value="modern" />
+	
+
+	<!-- set classpath -->
+	<path id="classpath">
+		<pathelement location="${junit}" />
+		<pathelement location="${buildwork.dir}"/>
+		<pathelement location="${buildtest.dir}" />
+		<pathelement location="${Hydrobase}"/>
+		<pathelement location="${RTi_Common}"/>
+		<pathelement location="${TSCommandProcessor}"/>
+		<pathelement location="${StateCU}"/>
+		<pathelement location="${StateMod}"/>
+		<pathelement location="${Xerces}" />
+		<pathelement location="${msbase}" />
+		<pathelement location="${msutil}" />
+		<pathelement location="${mssql}" />
+		<pathelement location="${Satmon}" />
+		<pathelement location="${Abbot.jar}" />
+		<pathelement location="${buildtest.dir}" />
+		<pathelement location="${jdom.jar}" />
+		<pathelement location="${xerces.jar}" />
+		<pathelement location="${xml-apis.jar}" />
+		<pathelement location="${bsh.jar}" />
+		<pathelement location="${jgraph.jar}" />
+		<pathelement location="${MRJ.zip}" />
+		<pathelement location="${gnu-regexp.jar}" />
+		<pathelement location="${ant4eclipse.jar}" />
+		<pathelement location="."/>
+	</path>
+	
+	<path id="classpathOp">
+		<pathelement location="${Hydrobase}"/>
+		<pathelement location="${RTi_Common}"/>
+		<pathelement location="${TSCommandProcessor}"/>
+		<pathelement location="${StateCU}"/>
+		<pathelement location="${StateMod}"/>
+		<pathelement location="${Xerces}" />
+		<pathelement location="${msbase}" />
+		<pathelement location="${msutil}" />
+		<pathelement location="${mssql}" />
+		<pathelement location="${Satmon}" />
+		<pathelement location="${Abbot.jar}" />
+		<pathelement location="${buildtest.dir}" />
+		<pathelement location="${jdom.jar}" />
+		<pathelement location="${xerces.jar}" />
+		<pathelement location="${xml-apis.jar}" />
+		<pathelement location="${bsh.jar}" />
+		<pathelement location="${jgraph.jar}" />
+		<pathelement location="${MRJ.zip}" />
+		<pathelement location="${gnu-regexp.jar}" />
+		<pathelement location="${ant4eclipse.jar}" />
+		<pathelement location="${dist.dir}/${jarfname}" />
+		<pathelement location="."/>
+	</path>
+	
+	<!-- current timestamp -->
+	<tstamp>
+	  <format property="TODAY" pattern="MM/dd/yyyy hh:mm" locale="en"/> 	
+  	  <format property="jarDate" pattern="yyyy-MM-dd hh:mm" locale="en" />
+	</tstamp>
+	
+
+<!-- calls product tester ant file -->
+<macrodef name="addTestsToSet">
+	<attribute name="dataset" />
+	<sequential>
+		<ant antfile="${ext.dir}/RTiBuild/product-tester.xml"
+			target="addTestsToSet">
+			<property name="reg_dataset" value="@{dataset}"/>
+		</ant>
+	</sequential>
+</macrodef>
+
+<!-- calls product tester ant file -->
+<macrodef name="buildProdTesterWindows">
+	<attribute name="dataset" />
+	<sequential>
+		<ant antfile="${ext.dir}/RTiBuild/product-tester.xml" 
+			 target="buildProdTesterWindows">
+			<property name="reg_dataset" value="@{dataset}"/>
+		</ant>
+	</sequential>
+</macrodef>
+	
+<!-- calls product tester ant file -->
+<macrodef name="buildProdTesterLinux">
+	<attribute name="dataset" />
+	<sequential>
+		<ant antfile="${ext.dir}/RTiBuild/product-tester.xml" 
+			 target="buildProdTesterLinux">
+			<property name="reg_dataset" value="@{dataset}"/>
+		</ant>
+	</sequential>
+</macrodef>
+		
+<!-- several targets for building product testers for Windows -->
+<target name="buildWinProdTester_All" >
+	<addTestsToSet dataset="CDSS_General"/>
+	<addTestsToSet dataset="CDSS_RioGrande"/>
+	<addTestsToSet dataset="CDSS_StateCU"/>
+	<addTestsToSet dataset="SP2005"/>
+	<addTestsToSet dataset="CDSS_UpperColorado_200701"/>
+	<addTestsToSet dataset="CDSS_Gunnison"/>
+	<addTestsToSet dataset="CDSS_Yampa"/>
+	<buildProdTesterWindows dataset="CDSS_StateMod" />
+</target>
+<target name="buildWinProdTester_CDSS_General" >
+	<buildProdTesterWindows dataset="CDSS_General" />
+</target>
+<target name="buildWinProdTester_CDSS_Gunnison" >
+	<buildProdTesterWindows dataset="CDSS_Gunnison" />
+</target>
+<target name="buildWinProdTester_CDSS_RioGrande" >
+	<buildProdTesterWindows dataset="CDSS_RioGrande" />
+</target>
+<target name="buildWinProdTester_CDSS_StateCU" >
+	<buildProdTesterWindows dataset="CDSS_StateCU" />
+</target>
+<target name="buildWinProdTester_CDSS_StateMod" >
+	<buildProdTesterWindows dataset="CDSS_StateMod" />
+</target>	
+<target name="buildWinProdTester_SP2005" >
+	<buildProdTesterWindows dataset="SP2005" />
+</target>	
+<target name="buildWinProdTester_CDSS_UpperColorado_200701" >
+	<buildProdTesterWindows dataset="CDSS_UpperColorado_200701" />
+</target>
+<target name="buildWinProdTester_CDSS_Yampa" >
+	<buildProdTesterWindows dataset="CDSS_Yampa" />
+</target>
+	
+<!-- several targets for building product testers for Linux -->
+<target name="buildLinuxProdTester_All" >
+	<addTestsToSet dataset="CDSS_General"/>
+	<addTestsToSet dataset="CDSS_RioGrande"/>
+	<addTestsToSet dataset="CDSS_StateCU"/>
+	<addTestsToSet dataset="SP2005"/>
+	<addTestsToSet dataset="CDSS_UpperColorado_200701"/>
+	<addTestsToSet dataset="CDSS_Gunnison"/>
+	<addTestsToSet dataset="CDSS_Yampa"/>
+	<buildProdTesterLinux dataset="CDSS_StateMod" />	
+</target>	
+	
+<target name="buildLinuxProdTester_CDSS_General" >
+	<buildProdTesterLinux dataset="CDSS_General" />
+</target>
+<target name="buildLinuxProdTester_CDSS_Gunnison" >
+	<buildProdTesterLinux dataset="CDSS_Gunnison" />
+</target>
+<target name="buildLinuxProdTester_CDSS_RioGrande" >
+	<buildProdTesterLinux dataset="CDSS_RioGrande" />
+</target>
+<target name="buildLinuxProdTester_CDSS_StateMod" >
+	<buildProdTesterLinux dataset="CDSS_StateMod" />
+</target>
+<target name="buildLinuxProdTester_CDSS_StateCU" >
+	<buildProdTesterLinux dataset="CDSS_StateCU" />
+</target>
+<target name="buildLinuxProdTester_SP2005" >
+	<buildProdTesterLinux dataset="SP2005" />
+</target>	
+<target name="buildLinuxProdTester_CDSS_UpperColorado_200701" >
+	<buildProdTesterLinux dataset="CDSS_UpperColorado_200701" />
+</target>
+<target name="buildLinuxProdTester_CDSS_Yampa" >
+	<buildProdTesterLinux dataset="CDSS_Yampa" />
+</target>
+	
+<target name="CDSS_runDev" depends="compile"
+	description="runs CDSS env. class files">
+	
+	<runMacro home.dir="${CDSS_OP.dir}" cp.ref="classpath" />
+
+</target>
+
+<target name="CDSS_runDevD30" depends="compile"
+	description="runs CDSS env. with class files and debug=30">
+
+	<runMacroDebug home.dir="${CDSS_OP.dir}" cp.ref="classpath" />
+
+</target>
+	
+<target name="CDSS_runOp" depends="jar"
+	description="runs CDSS env. with final jar file">
+		
+	<runMacro home.dir="${CDSS_OP.dir}" cp.ref="classpathOp" />
+
+</target>
+	
+<target name="CDSS_runOpD30" depends="jar"
+	description="runs CDSS env. with final jar file with debug=30">
+	
+	<runMacroDebug home.dir="${CDSS_OP.dir}" cp.ref="classpathOp" />
+
+</target>
+
+<!--===================================================
+	Target:   clean
+	Function: cleans the build/work and build/test
+	          directories to ensure a clean compilation
+====================================================-->
+<target name="clean" description="remove compiled files">
+	
+	<!-- delete build stuff -->
+	<delete dir="${buildwork.dir}" />
+	<delete dir="${build.dir}" />
+
+	<!-- delete javadoc stuff -->
+	<delete dir="${jdoc.dir}" />
+	<delete dir="test/output" />	
+	<delete dir="Release" />
+	
+	<delete includeEmptyDirs="true">
+		<fileset dir="test/unit/results" />
+		<fileset dir="test/operational/results" />
+		<fileset dir="test/regression/results" />
+		<fileset dir="${CDSS_install.dir}" includes="**/*.exe" />
+		<fileset dir="${dist.dir}" />
+	</delete>
+	
+</target>
+
+<!--===================================================
+	Target:   compile
+	Function: compiles code for this project and places
+			  the compiled code in the build/work dir
+====================================================-->
+<target name="compile" >
+	
+	<mkdir dir="${buildwork.dir}" />
+	
+	<javac srcdir 		= "${src.dir}"
+           destdir 		= "${buildwork.dir}"
+		   classpathref = "classpath"
+           debug 		= "on"
+	       fork 		= "yes"
+	       listfiles 	= "true"
+	       deprecation 	= "true"
+	       executable 	= "${executable}"
+	       compiler 	= "${compiler}"
+	/>
+
+</target>
+
+<target name="compileTest" depends="compile"
+ description="compiles unit tests">
+
+	<mkdir dir="${build.dir}/test" />
+	
+	<javac srcdir 		= "${test.dir}"
+	       destdir 	    = "${build.dir}/test"
+           classpathref = "classpath"
+           debug 		= "on"
+	       fork 		= "yes"
+	       listfiles 	= "true"
+	       deprecation 	= "true"
+	       executable 	= "${executable}"
+	       compiler 	= "${compiler}"
+	/>
+
+</target>
+
+<target name="costello" description="Runs Costello editor for Abbot">
+
+	<java dir="." classname="${costello}" fork="true" >
+		<jvmarg value="-Djava.compiler=NONE" />
+		<classpath refid="classpath" />
+	</java>
+
+</target>	
+
+<!--===================================================
+	Target:   createInstaller
+	Function: Runs NSIS to create the installer
+====================================================-->
+<target name="createInstaller" depends="clean,jar"
+	description="runs NSIS to create an executable installer">
+	
+	<ant antfile="${ext.dir}/RTiBuild/common-install.xml" 
+	 target="createNJandNSIS" >
+		<property name="NJProj.dir" value="installer/CDSS" />
+		<property name="nsis.script" value="${proj_name}.nsi" />
+	</ant>
+	
+</target>	
+
+<!-- create all files and folders needed for a release
+	 of TSTool into a folder named Release -->
+<target name="createRelease" 
+	depends="clean,test,javadoc,createInstaller" >
+
+	<!-- make a temp directory (Release) and copy all
+	     release specific files and docs here -->
+	<mkdir dir="Release" />
+	<mkdir dir="Release/javadoc" />
+	<mkdir dir="Release/testResults" />
+	<mkdir dir="Release/testResults/unit" />
+	<mkdir dir="Release/testResults/regression" />
+	
+	<!-- CDSS -->
+	<mkdir dir="Release/${proj_name}_CDSS" />
+	<mkdir dir="Release/${proj_name}_CDSS/doc" />
+	<mkdir dir="Release/${proj_name}_CDSS/installer" />
+	
+	<!-- move CDSS files and docs -->
+	<move todir="Release/${proj_name}_CDSS/installer" >
+		<fileset dir="${CDSS_install.dir}" includes="**/*Setup.exe" />
+	</move>
+	<copy todir="Release/${proj_name}_CDSS/doc" >
+		<fileset dir="doc/${proj_name}/CDSS" />
+	</copy>
+	
+	<!-- move TestResults and Javadocs -->
+	<copy todir="Release/testResults/unit" >
+		<fileset dir="${unitTest.dir}/results" 
+		 includes="*.xml" />
+	</copy>
+	
+	<copy todir="Release/testResults/regression" >
+		<fileset dir="${regTest.dir}/results" 
+		 includes="*" />
+	</copy>
+	
+	<copy todir="Release/javadoc">
+	   <fileset dir="${jdoc.dir}"/>
+	 </copy>
+		
+</target>
+	
+<target name="createUserManual"
+ description="Merges PDF documentation into doc/dist_CDSS folder" >
+	
+	<ant antfile="${ext.dir}/RTiBuild/common-doc.xml" target="mergePDF" >
+		<property name="filelist" 
+		 value="doc/UserManual/merge_PDF/filelist.txt" />
+	<property name="pdf_file" 
+		 value="doc/UserManual/dist_CDSS/StateDMI.pdf" />
+	</ant>
+	
+</target>
+
+<target name="help" description="prints out info on targets" >
+
+	<echo>
+		
+TARGET         FUNCTION
+===========================================================
+compile        compiles source code
+
+compileTest    compiles the test source code
+
+test           runs the junit tests for this product
+
+clean          removes the build directories
+
+CDSS_runDev    runs the application using class files using CDSS env.
+		
+RTi_runDev     runs the application using class files using RTi env.
+		
+CDSS_runOp     runs the application from the dist jar file using CDSS env.
+
+RTi_runOp      runs the application from the dist jar file using RTi env.
+
+javadoc        generates javadocs from source code
+
+jar            copies class files into a single jar file in dist 
+		
+createInstaller        creates an executable installer in the installer dir
+
+regTest        runs a regression test and stores results in regression/results dir
+		
+help           shows the help for this build file
+===========================================================
+	
+	</echo>
+
+</target>
+	
+<target name="jar" depends="compile" 
+ description="creates and application jar in the dist directory" >
+    
+	<!-- UnComment if graphics are needed -->
+	<copy todir="${buildwork.dir}/DWR/DMI/StateDMI" >
+		<fileset dir="graphics" />
+	</copy>
+
+    <mkdir dir="${dist.dir}"/>
+    <jar jarfile="${dist.dir}/${jarfname}" basedir="${buildwork.dir}" >
+	<manifest >
+    	<attribute name="Author"    value="Riverside Technology, inc. (RTi)"/>
+      	<attribute name="Address1"  value="2290 E. Prospect Road, Suite 1"/>
+      	<attribute name="Address2"  value="Fort Collins, CO 80525"/>
+        <attribute name="Phone"     value="970-484-7573"/>
+		<attribute name="Web"       value="http://www.riverside.com"/>
+		<attribute name="BuildDate" value="${jarDate}"/>
+        <attribute name="Contents"  value="Contains StateDMI Classes"/>
+      </manifest>
+
+    </jar>
+
+</target>	
+	
+<target name="javadoc" description="creates javadocs">
+
+	<!-- cleanup old javadocs -->
+	<delete dir="${jdoc.dir}" />
+
+	<!-- make dir jdocs --> 
+	<mkdir dir="${jdoc.dir}" />
+
+	<javadoc destdir="${jdoc.dir}" >
+		<classpath refid="classpath"/>
+		<fileset dir="${src.dir}/${package}" >
+    	  		<include name="*.java"/>
+    		</fileset>
+	</javadoc>	
+
+
+</target>	
+	
+	
+<target name="createRegExe" 
+ description="creates CDSS regression executable">
+	
+	<ant antfile="${ext.dir}/RTiBuild/common-install.xml"
+		 target="createAppExe" >
+		<property name="NJProj.dir" value="installer/CDSS" />
+		<property name="NJProj" value="${NJProj_Reg}" />
+	</ant>
+		
+</target>
+		
+<!-- regression tests all data sets using CDSS config -->
+<target name="regTestAll" depends="jar" >
+	<addTestsToSet dataset="CDSS_RioGrande" />
+	<addTestsToSet dataset="CDSS_General" />
+	<addTestsToSet dataset="CDSS_StateCU"/>
+	<addTestsToSet dataset="SP2005" />
+	<addTestsToSet dataset="CDSS_UpperColorado_200701"/>
+	<antcall target="regTestCDSS_StateMod" />
+</target>
+	
+<target name="regTestCDSS_General" 
+	description="runs regression tests for general data set"
+	depends="clean,jar,createRegExe">
+	
+	<ant antfile="${ext.dir}/RTiBuild/product-tester.xml" 
+	 target="regTest">
+		<property name="reg_dataset" value="CDSS_General"/>
+		<property name="reg_install.dir" 
+			value="${CDSS_install.dir}"/>
+		<property name="reg_proj_file" value="${NJProj_Reg}"/>
+	</ant>
+	
+</target>	
+	
+<target name="regTestCDSS_Gunnison" 
+	description="runs regression tests for general data set"
+	depends="clean,jar,createRegExe">
+	
+	<ant antfile="${ext.dir}/RTiBuild/product-tester.xml" 
+	 target="regTest">
+		<property name="reg_dataset" value="CDSS_Gunnison"/>
+		<property name="reg_install.dir" 
+			value="${CDSS_install.dir}"/>
+		<property name="reg_proj_file" value="${NJProj_Reg}"/>
+	</ant>
+	
+</target>	
+	
+<target name="regTestCDSS_RioGrande" depends="clean,jar,createRegExe"
+	description="runs regression tests for RioGrande data set">
+		
+	<ant antfile="${ext.dir}/RTiBuild/product-tester.xml" 
+	 target="regTest">
+		<property name="reg_dataset" value="CDSS_RioGrande"/>
+		<property name="reg_install.dir" 
+			value="${CDSS_install.dir}"/>
+		<property name="reg_proj_file" value="${NJProj_Reg}"/>
+	</ant>
+	
+</target>
+
+<target name="regTest_SP2005" depends="clean,jar,createRegExe"
+	description="runs regression tests for general data set">
+	
+	<ant antfile="${ext.dir}/RTiBuild/product-tester.xml" 
+	 target="regTest">
+		<property name="reg_dataset" value="SP2005"/>
+		<property name="reg_install.dir" 
+			value="${CDSS_install.dir}"/>
+		<property name="reg_proj_file" value="${NJProj_Reg}"/>
+	</ant>
+	
+</target>
+	
+<target name="regTest_CDSS_UpperColorado_200701" depends="clean,jar,createRegExe"
+	description="runs regression tests for general data set">
+	
+	<ant antfile="${ext.dir}/RTiBuild/product-tester.xml" 
+	 target="regTest">
+		<property name="reg_dataset" 
+			value="CDSS_UpperColorado_200701"/>
+		<property name="reg_install.dir" 
+			value="${CDSS_install.dir}"/>
+		<property name="reg_proj_file" value="${NJProj_Reg}"/>
+	</ant>
+	
+</target>
+	
+<target name="regTestCDSS_Yampa" 
+	description="runs regression tests for general data set"
+	depends="clean,jar,createRegExe">
+	
+	<ant antfile="${ext.dir}/RTiBuild/product-tester.xml" 
+	 target="regTest">
+		<property name="reg_dataset" value="CDSS_Yampa"/>
+		<property name="reg_install.dir" 
+			value="${CDSS_install.dir}"/>
+		<property name="reg_proj_file" value="${NJProj_Reg}"/>
+	</ant>
+	
+</target>	
+	
+<target name="regTestCDSS_StateCU" depends="clean,jar,createRegExe"
+	description="runs regression tests for StateCU data set">
+		
+	<ant antfile="${ext.dir}/RTiBuild/product-tester.xml" 
+	 target="regTest">
+		<property name="reg_dataset" value="CDSS_StateCU"/>
+		<property name="reg_install.dir" 
+			value="${CDSS_install.dir}"/>
+		<property name="reg_proj_file" value="${NJProj_Reg}"/>
+	</ant>
+	
+</target>
+	
+<target name="regTestCDSS_StateMod" depends="clean,jar,createRegExe"
+	description="runs regression tests for StateMod data set">
+		
+	<ant antfile="${ext.dir}/RTiBuild/product-tester.xml" 
+	 target="regTest">
+		<property name="reg_dataset" value="CDSS_StateMod"/>
+		<property name="reg_install.dir" 
+			value="${CDSS_install.dir}"/>
+		<property name="reg_proj_file" value="${NJProj_Reg}"/>
+	</ant>
+	
+</target>
+
+<macrodef name="runMacro" description="General method for running product" >
+	
+	<attribute name="home.dir" />
+	<attribute name="cp.ref" />
+	<sequential>
+		<!-- need to copy graphics files -->
+		<copy todir="${buildwork.dir}/DWR/StateModGUI" >
+			<fileset dir="graphics" />
+		</copy>
+		
+		<java classname="${classname}" fork="true">
+			<jvmarg value = "-mx768m" />
+			<jvmarg value = "-Djava.compiler=NONE" />
+			<arg value = "-home" />
+			<arg value = "@{home.dir}" />
+			<classpath refid = "@{cp.ref}" />   
+		</java>	
+	</sequential>
+	
+</macrodef>
+	
+<macrodef name="runMacroDebug" 
+ description="General method for running product with debug" >
+	
+	<attribute name="home.dir" />
+	<attribute name="cp.ref" />
+	<sequential>
+		<!-- need to copy graphics files -->
+		<copy todir="${buildwork.dir}/DWR/StateModGUI" >
+			<fileset dir="graphics" />
+		</copy>
+		
+		<java classname="${classname}" fork="true">
+			<jvmarg    value = "-mx768m" />
+			<jvmarg    value = "-Djava.compiler=NONE" />
+			<arg       value = "-home" />
+			<arg	   value = "@{home.dir}" />
+			<arg		value = "-d" />
+			<arg		value = ",30" />
+			<classpath refid = "@{cp.ref}" />   
+		</java>	
+	</sequential>
+		
+</macrodef>
+	
+<target name="test" depends="compileTest" description="runs JUnit tests" >
+
+	<junit printsummary="yes" fork="yes" dir="./">
+		<formatter type="xml"/>
+		<classpath refid="classpath" />
+		<test name="${testSuite}"
+		 outfile="test/unit/results/${proj_name}" />
+	</junit>
+	
+</target>	
+	
+<target name="testAll" depends="test,regTestAll,testGUI"
+	description="runs unit, regression and Abbot GUI tests.">
+</target>
+	
+<!--========================================================
+	Target: testGui
+	Function: runs Abbot script files using Junit framework
+=========================================================-->
+<target name="testGUI" depends="compile">
+
+	<!-- compile Abbot Test Suite src  -->
+	<javac srcdir="${regTest.dir}/src" destdir="${buildwork.dir}" 
+		classpathref="classpath" fork="yes" listfiles="true"
+		executable="${executable}" compiler="${compiler}" />
+	
+	<junit printsummary="yes" dir="." fork="yes" haltonfailure="yes">
+		<formatter type="xml"/>	
+		<classpath refid="classpath" />
+		<test name="${AbbotSuite}" 
+		  outfile="test/regression/results/AbbotResults" />
+	</junit>
+		
+</target>	
+	
+</project>
+
+

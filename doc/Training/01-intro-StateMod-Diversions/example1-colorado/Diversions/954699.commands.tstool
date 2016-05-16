@@ -1,0 +1,12 @@
+# 954699.commands.TSTool
+#
+#  Creates demand for the Boustead Summary Node
+#
+381594...MONTH~StateMod~381594.stm
+384625...MONTH~StateMod~384625.stm
+TS 954699 = copy(TSID="381594...MONTH",NewTSID="954699")
+add(TSID="954699",TSList="SpecifiedTS",AddTSID="384625...MONTH",HandleMissingHow=SetMissingIfAnyMissing)
+free(TSID="381594...MONTH")
+free(TSID="384625...MONTH")
+setOutputYearType(Water)
+writeStateMod(TSList=AllTS,OutputFile="954699.stm",OutputStart="10/1908",OutputEnd="09/2005",Precision=0)

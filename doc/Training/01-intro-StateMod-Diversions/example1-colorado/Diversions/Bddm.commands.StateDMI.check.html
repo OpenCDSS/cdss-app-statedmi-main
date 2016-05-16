@@ -1,0 +1,2315 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"><html>
+<head>
+<title>StateDMI Check File (C:\CDSS\data\colorado_1_2007_verify20100218\colorado_1_2007\Diversions\Bddm.commands-updated.StateDMI)
+</title><style>
+#titles { font-weight:bold; color:#303044 }
+table { background-color:black; text-align:left; border:1; bordercolor:black; cellspacing:1; cellpadding:1 }
+th { background-color:#333366; text-align:center; vertical-align:bottom; color:white }
+tr { valign:bottom }
+td { background-color:white; text-align:left; vertical-align:bottom; }
+body { text-align:left; font-size:12pt; }
+pre { font-size:12pt; margin: 0px }
+p { font-size:12pt; }
+/* The following controls formatting of severity column in tables */
+.warning { background-color:yellow; }
+.failure { background-color:red; }
+.success { background-color:green; }
+.unknown { background-color:white; }
+</style>
+</head>
+<body>
+
+<h1>StateDMI Check Results</h1>
+
+<h2>StateDMI Check File (C:\CDSS\data\colorado_1_2007_verify20100218\colorado_1_2007\Diversions\Bddm.commands-updated.StateDMI)</h2>
+
+<h2>Check File Table of Contents</h2>
+<a href="#environment">Program/Environment Information</a>
+ - generated at runtime<br>
+<a href="#notes">Command File Comments</a>
+ - as written to output file headers<br>
+<a href="#commands">Command Details</a>
+ - command run times and warning/failure counts<br>
+<a href="#summary">Command Problem Summary</a>
+ - command problem summary<br>
+
+<h2><a name="environment">Program/Environment Information</h2>
+<p>
+<table>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+<tr>
+<td>Command file
+</td>
+<td>C:\CDSS\data\colorado_1_2007_verify20100218\colorado_1_2007\Diversions\Bddm.commands-updated.StateDMI
+</td>
+</tr>
+<tr>
+<td>Program
+</td>
+<td>StateDMI 3.09.01 (2010-02-18)
+</td>
+</tr>
+<tr>
+<td>User
+</td>
+<td>sam
+</td>
+</tr>
+<tr>
+<td>Creation time
+</td>
+<td>2010-02-18 13:19:33 MST
+</td>
+</tr>
+<tr>
+<td>Computer
+</td>
+<td>AMAZON
+</td>
+</tr>
+<tr>
+<td>Processor initial working directory
+</td>
+<td>C:\CDSS\data\colorado_1_2007_verify20100218\colorado_1_2007\Diversions
+</td>
+</tr>
+<tr>
+<td>Command line
+</td>
+<td>StateDMI -home test\operational\CDSS
+</td>
+</tr>
+</table>
+</p>
+
+<h2><a name="notes">Command File Comments</h2>
+<pre>
+StateDMI check file containing all warning/failure messages from run.
+
+-----------------------------------------------------------------------
+Command file name: "C:\CDSS\data\colorado_1_2007_verify20100218\colorado_1_2007\Diversions\Bddm.commands-updated.StateDMI"
+Commands: 
+StartLog(LogFile="Bddm.commands.StateDMI.log")
+# Bddm.commands.StateDMI
+#
+#  StateDMI command file to create the Baseline demand file
+#
+#  Step 1 - set time-series period and year type
+#
+SetOutputPeriod(OutputStart="10/1908",OutputEnd="09/2005")
+SetOutputYearType(OutputYearType=Water)
+#
+#  Step 2 - read calculated demand file
+#
+ReadDiversionDemandTSMonthlyFromStateMod(InputFile="..\statemod\cm2005C.ddm")
+#
+#  Step 3 - set baseline demand that vary from calculated demand
+#
+#	TRANSBASIN DIVERSIONS
+#
+#  Con-Hoosier Transbasin Demands
+SetDiversionDemandTSMonthly(ID="954683",TSID="954683..DivTotal.MONTH~StateMod~954683_baseline.stm")
+#  Boustead Transbasin Demands
+SetDiversionDemandTSMonthly(ID="954699",TSID="954699..DivTotal.MONTH~StateMod~954699_baseline.stm")
+#  Moffat Transbasin Demands
+SetDiversionDemandTSMonthly(ID="514655",TSID="514655..DivTotal.MONTH~StateMod~514655_baseline.stm")
+#  Vidler Tunnel
+SetDiversionDemandTSMonthly(ID="364626",TSID="364626..DivTotal.MONTH~StateMod~364626_baseline.stm")
+#  Robert's Tunnel
+SetDiversionDemandTSMonthly(ID="364684",TSID="364684..DivTotal.MONTH~StateMod~364684_baseline.stm")
+#  BOREAS PASS DITCH
+SetDiversionDemandTSMonthly(ID="364685",TSID="364685..DivTotal.MONTH~StateMod~364685_baseline.stm")
+#  EWING DITCH AT TENNESSEE PASS, CO.
+SetDiversionDemandTSMonthly(ID="371091",TSID="371091..DivTotal.MONTH~StateMod~371091_baseline.stm")
+#  HOMESTAKE PROJ TUNNEL
+SetDiversionDemandTSMonthly(ID="374614",TSID="374614..DivTotal.MONTH~StateMod~374614_baseline.stm")
+#  COLUMBINE DITCH
+SetDiversionDemandTSMonthly(ID="374641",TSID="374641..DivTotal.MONTH~StateMod~374641_baseline.stm")
+#  WARREN E WURTS DITCH
+SetDiversionDemandTSMonthly(ID="374648",TSID="374648..DivTotal.MONTH~StateMod~374648_baseline.stm")
+#  BUSK - IVANHOE TUNNEL
+SetDiversionDemandTSMonthly(ID="384613",TSID="384613..DivTotal.MONTH~StateMod~384613_baseline.stm")
+#  INDEPENDENCE PASS TM DVR TUNNEL NO 1
+SetDiversionDemandTSMonthly(ID="384617",TSID="384617..DivTotal.MONTH~StateMod~384617_baseline.stm")
+#  BERTHOUD CANAL TUNNEL
+SetDiversionDemandTSMonthly(ID="514625",TSID="514625..DivTotal.MONTH~StateMod~514625_baseline.stm")
+#  ADAMS TUNNEL
+SetDiversionDemandTSMonthly(ID="514634",TSID="514634..DivTotal.MONTH~StateMod~514634_baseline.stm")
+#  WILLOW CREEK FEEDER
+SetDiversionDemandTSMonthly(ID="510958",TSID="510958..DivTotal.MONTH~StateMod~510958_baseline.stm")
+#  WINDY GAP PUMP
+SetDiversionDemandTSMonthly(ID="514700",TSID="514700..DivTotal.MONTH~StateMod~514700_baseline.stm")
+#  WEST THREE MILE DITCH
+SetDiversionDemandTSMonthly(ID="384717",TSID="384717..DivTotal.MONTH~StateMod~384717_baseline.stm")
+#
+#
+#	MUNICIPAL AND INDUSTRIAL
+#
+#  DILLON_VALLEY_W&SD_(RANKIN_NO._1_DITCH)
+SetDiversionDemandTSMonthly(ID="360784",TSID="360784..DivTotal.MONTH~StateMod~360784_baseline.stm")
+#  TOWN_OF_DILLON_(Straight_Creek_Ditch)
+SetDiversionDemandTSMonthly(ID="360829",TSID="360829..DivTotal.MONTH~StateMod~360829_baseline.stm")
+#  TENMILE DIVERSION NO 1 (Climax)
+SetDiversionDemandTSMonthlyConstant(ID="360841",Constant=0)
+#  Keystone Resort Snowmaking
+SetDiversionDemandTSMonthly(ID="360908",TSID="360908..DivTotal.MONTH~StateMod~360908_baseline.stm")
+#  TOWN_OF_BRECKENRIDGE_(Breckenridge_Pipeline)
+SetDiversionDemandTSMonthly(ID="361008",TSID="361008..DivTotal.MONTH~StateMod~361008_baseline.stm")
+#  COPPER_MOUNTAIN_SKI_AREA_SNOWMAKING
+SetDiversionDemandTSMonthly(ID="361016",TSID="361016..DivTotal.MONTH~StateMod~361016_baseline.stm")
+#  UPPER_EAGLE_VALLEY_WATER_AUTHORITY_(Metcalf_Ditch)
+SetDiversionDemandTSMonthly(ID="370708",TSID="370708..DivTotal.MONTH~StateMod~370708_baseline.stm")
+#  CARBONDALE WTR SYS & PL
+SetDiversionDemandTSMonthly(ID="381052",TSID="381052..DivTotal.MONTH~StateMod~381052_baseline.stm")
+#  Snowmass Water and Utility
+SetDiversionDemandTSMonthly(ID="381441",TSID="381441..DivTotal.MONTH~StateMod~381441_baseline.stm")
+#  RIFLE TOWN OF PUMP & PL
+SetDiversionDemandTSMonthly(ID="390967",TSID="390967..DivTotal.MONTH~StateMod~390967_baseline.stm")
+#  GRAND JCT GUNNISON P-L
+SetDiversionDemandTSMonthly(ID="420520",TSID="420520..DivTotal.MONTH~StateMod~420520_baseline.stm")
+#  REDLANDS POWER CANAL
+SetDiversionDemandTSMonthly(ID="420541",TSID="420541..DivTotal.MONTH~StateMod~420541_baseline.stm")
+#  HENDERSON MINE WTR SYS
+SetDiversionDemandTSMonthly(ID="511070",TSID="511070..DivTotal.MONTH~StateMod~511070_baseline.stm")
+#  SHOSHONE POWER PLANT
+SetDiversionDemandTSMonthly(ID="530584",TSID="530584..DivTotal.MONTH~StateMod~530584_baseline.stm")
+#  GLENWOOD L WATER CO SYS
+SetDiversionDemandTSMonthly(ID="530585",TSID="530585..DivTotal.MONTH~StateMod~530585_baseline.stm")
+#  TOWN_OF_CLIFTON_(Grand_Junction_Colorado_River_PL)
+SetDiversionDemandTSMonthly(ID="720644",TSID="720644..DivTotal.MONTH~StateMod~720644_baseline.stm")
+#  MOLINA POWER PLANT
+SetDiversionDemandTSMonthly(ID="720807",TSID="720807..DivTotal.MONTH~StateMod~720807_baseline.stm")
+#  PALISADE_TOWN_PIPELINE_(720816)_(TREATED_PLANT_FLOW)
+SetDiversionDemandTSMonthly(ID="720816",TSID="720816..DivTotal.MONTH~StateMod~720816_baseline.stm")
+#  Ute Water Treatment
+SetDiversionDemandTSMonthly(ID="950020",TSID="950020..DivTotal.MONTH~StateMod~950020_baseline.stm")
+#  CITY_OF_GRAND_JUNCTION
+SetDiversionDemandTSMonthly(ID="950051",TSID="950051..DivTotal.MONTH~StateMod~950051_baseline.stm")
+#  VAIL VALLEY CONSOLIDATED WATER DISTRICT - irr. season
+SetDiversionDemandTSMonthly(ID="955001",TSID="955001..DivTotal.MONTH~StateMod~955001_baseline.stm")
+#  TOTAL FOR ALL SNAKE RIVER WATER DISTRICT WELLS (KEYSTONE_MUNICIPAL)
+SetDiversionDemandTSMonthly(ID="955002",TSID="955002..DivTotal.MONTH~StateMod~955002_baseline.stm")
+#  VAIL VALLEY CONSOLIDATED WATER DISTRICT - nonirr. season
+SetDiversionDemandTSMonthly(ID="955003",TSID="955003..DivTotal.MONTH~StateMod~955003_baseline.stm")
+#
+#
+#	RESERVOIR STRUCTURES
+#
+#  GRN MTN HYDRO-ELECTRIC
+SetDiversionDemandTSMonthly(ID="360881",TSID="360881..DivTotal.MONTH~StateMod~360881_baseline.stm")
+#  WILLIAMS FORK POWER COND
+SetDiversionDemandTSMonthly(ID="511237",TSID="511237..DivTotal.MONTH~StateMod~511237_baseline.stm")
+#  Green Mountain Contract water
+SetDiversionDemandTSMonthly(ID="950060",TSID="950060..DivTotal.MONTH~StateMod~950060_baseline.stm")
+#  FRASER BASIN demands out of Wolford Mountain Reservoir
+SetDiversionDemandTSMonthly(ID="953101",TSID="953101..DivTotal.MONTH~StateMod~953101_baseline.stm")
+#  MIDDLE PARK demands out of Wolford Mountain Reservoir
+SetDiversionDemandTSMonthly(ID="953102",TSID="953102..DivTotal.MONTH~StateMod~953102_baseline.stm")
+#  Green Mtn Annual Rep Est
+SetDiversionDemandTSMonthly(ID="950061",TSID="950061..DivTotal.MONTH~StateMod~950061_baseline.stm")
+#  Ruedi Rnd 1-Muni Demand
+SetDiversionDemandTSMonthly(ID="953001",TSID="953001..DivTotal.MONTH~StateMod~953001_baseline.stm")
+#  Ruedi Rnd 1-Ind Demand
+SetDiversionDemandTSMonthly(ID="953002",TSID="953002..DivTotal.MONTH~StateMod~953002_baseline.stm")
+#  Ruedi Rnd 2-Muni Demand
+SetDiversionDemandTSMonthly(ID="953003",TSID="953003..DivTotal.MONTH~StateMod~953003_baseline.stm")
+#  Ruedi Rnd 2-Ind Demand
+SetDiversionDemandTSMonthly(ID="953004",TSID="953004..DivTotal.MONTH~StateMod~953004_baseline.stm")
+#
+#
+#	CAMEO DEMAND / GRAND VALLEY AREA
+#
+#  GRAND VALLEY PROJECT IRRIGATION (fill in years from 1909 to 1916)
+SetDiversionDemandTSMonthly(ID="950001",TSID="950001..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+#  Orchard Mesa Irrigation District (OMID power) demand
+SetDiversionDemandTSMonthlyConstant(ID="950002",Constant=0)
+#  ORCHARD_MESA_CHECK
+SetDiversionDemandTSMonthly(ID="950003",TSID="950003..DivTotal.MONTH~StateMod~950003_baseline.stm")
+#  Orchard Mesa Irrigation District (OMID pump) demand
+SetDiversionDemandTSMonthly(ID="950004",TSID="950004..DivTotal.MONTH~StateMod~950004_baseline.stm")
+#  OMID Bypass (950005) time series for baseline data set
+SetDiversionDemandTSMonthlyConstant(ID="950005",Constant=0)
+#  OMID Bypass (950006) time series for baseline data set
+SetDiversionDemandTSMonthly(ID="950006",TSID="950006..DivTotal.MONTH~StateMod~950006_baseline.stm")
+#  USA PP-Winter-OM Stip
+SetDiversionDemandTSMonthly(ID="950007",TSID="950007..DivTotal.MONTH~StateMod~950007_baseline.stm")
+#  USA PP-Summer-OM Stip
+SetDiversionDemandTSMonthly(ID="950008",TSID="950008..DivTotal.MONTH~StateMod~950008_baseline.stm")
+#
+#
+#	FISH DEMAND (in Baseline it is located at instream flow node 952002)
+#
+#  15 Mile Reach area for endangered fish
+SetDiversionDemandTSMonthlyConstant(ID="952001",Constant=0)
+#
+#   Step 4 - set calculated demand to current demand for structures whose historical acreage is different from current
+#
+SetDiversionDemandTSMonthly(ID="360687",TSID="360687..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="360725",TSID="360725..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="360728",TSID="360728..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="360729",TSID="360729..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="360765",TSID="360765..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="360780",TSID="360780..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="360800",TSID="360800..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="370519",TSID="370519..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="370571",TSID="370571..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="370723",TSID="370723..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="370848",TSID="370848..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="380528",TSID="380528..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="380572",TSID="380572..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="380663",TSID="380663..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="380939",TSID="380939..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="380996",TSID="380996..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="381062",TSID="381062..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="381078",TSID="381078..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+#
+#   Step 5 - create baseline demand file
+#
+WriteDiversionDemandTSMonthlyToStateMod(OutputFile="..\statemod\cm2005B.ddm")
+#
+# Check the results
+CheckDiversionDemandTSMonthly(ID="*")
+WriteCheckFile(OutputFile="Bddm.commands.StateDMI.check.html")
+
+-----------------------------------------------------------------------------
+HydroBase database is: HydroBase on hbserver
+HydroBase.db_version:  design version: 20080701  last data change: 20090701
+HydroBase table structure for software is at least 2007052520070525
+HydroBase input name is "".
+Stored procedures are being used.
+-----------------------------------------------------------------------------
+
+</pre>
+
+<h2><a name="commands">Command Details</h2>
+<p>
+Total number of failures: 0<br>
+Total number of commands with failures: 0<br>
+Total number of warnings: 0<br>
+Total number of commands with warnings: 0<br>
+</p>
+<p>
+<table>
+<tr>
+<th>#</th>
+<th>Time, sec.</th>
+<th>Warnings</th>
+<th>Failures</th>
+<th>Command</th>
+</tr>
+<tr>
+<td>1
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c0">StartLog(LogFile="Bddm.commands.StateDMI.log")</a></td>
+</tr>
+<tr>
+<td>2
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c1"># Bddm.commands.StateDMI</a></td>
+</tr>
+<tr>
+<td>3
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c2">#</a></td>
+</tr>
+<tr>
+<td>4
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c3">#  StateDMI command file to create the Baseline demand file</a></td>
+</tr>
+<tr>
+<td>5
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c4">#</a></td>
+</tr>
+<tr>
+<td>6
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c5">#  Step 1 - set time-series period and year type</a></td>
+</tr>
+<tr>
+<td>7
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c6">#</a></td>
+</tr>
+<tr>
+<td>8
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c7">SetOutputPeriod(OutputStart="10/1908",OutputEnd="09/2005")</a></td>
+</tr>
+<tr>
+<td>9
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c8">SetOutputYearType(OutputYearType=Water)</a></td>
+</tr>
+<tr>
+<td>10
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c9">#</a></td>
+</tr>
+<tr>
+<td>11
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c10">#  Step 2 - read calculated demand file</a></td>
+</tr>
+<tr>
+<td>12
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c11">#</a></td>
+</tr>
+<tr>
+<td>13
+</td>
+<td>0.313
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c12">ReadDiversionDemandTSMonthlyFromStateMod(InputFile="..\statemod\cm2005C.ddm")</a></td>
+</tr>
+<tr>
+<td>14
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c13">#</a></td>
+</tr>
+<tr>
+<td>15
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c14">#  Step 3 - set baseline demand that vary from calculated demand</a></td>
+</tr>
+<tr>
+<td>16
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c15">#</a></td>
+</tr>
+<tr>
+<td>17
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c16">#	TRANSBASIN DIVERSIONS</a></td>
+</tr>
+<tr>
+<td>18
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c17">#</a></td>
+</tr>
+<tr>
+<td>19
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c18">#  Con-Hoosier Transbasin Demands</a></td>
+</tr>
+<tr>
+<td>20
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c19">SetDiversionDemandTSMonthly(ID="954683",TSID="954683..DivTotal.MONTH~StateMod~954683_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>21
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c20">#  Boustead Transbasin Demands</a></td>
+</tr>
+<tr>
+<td>22
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c21">SetDiversionDemandTSMonthly(ID="954699",TSID="954699..DivTotal.MONTH~StateMod~954699_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>23
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c22">#  Moffat Transbasin Demands</a></td>
+</tr>
+<tr>
+<td>24
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c23">SetDiversionDemandTSMonthly(ID="514655",TSID="514655..DivTotal.MONTH~StateMod~514655_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>25
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c24">#  Vidler Tunnel</a></td>
+</tr>
+<tr>
+<td>26
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c25">SetDiversionDemandTSMonthly(ID="364626",TSID="364626..DivTotal.MONTH~StateMod~364626_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>27
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c26">#  Robert's Tunnel</a></td>
+</tr>
+<tr>
+<td>28
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c27">SetDiversionDemandTSMonthly(ID="364684",TSID="364684..DivTotal.MONTH~StateMod~364684_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>29
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c28">#  BOREAS PASS DITCH</a></td>
+</tr>
+<tr>
+<td>30
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c29">SetDiversionDemandTSMonthly(ID="364685",TSID="364685..DivTotal.MONTH~StateMod~364685_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>31
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c30">#  EWING DITCH AT TENNESSEE PASS, CO.</a></td>
+</tr>
+<tr>
+<td>32
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c31">SetDiversionDemandTSMonthly(ID="371091",TSID="371091..DivTotal.MONTH~StateMod~371091_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>33
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c32">#  HOMESTAKE PROJ TUNNEL</a></td>
+</tr>
+<tr>
+<td>34
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c33">SetDiversionDemandTSMonthly(ID="374614",TSID="374614..DivTotal.MONTH~StateMod~374614_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>35
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c34">#  COLUMBINE DITCH</a></td>
+</tr>
+<tr>
+<td>36
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c35">SetDiversionDemandTSMonthly(ID="374641",TSID="374641..DivTotal.MONTH~StateMod~374641_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>37
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c36">#  WARREN E WURTS DITCH</a></td>
+</tr>
+<tr>
+<td>38
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c37">SetDiversionDemandTSMonthly(ID="374648",TSID="374648..DivTotal.MONTH~StateMod~374648_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>39
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c38">#  BUSK - IVANHOE TUNNEL</a></td>
+</tr>
+<tr>
+<td>40
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c39">SetDiversionDemandTSMonthly(ID="384613",TSID="384613..DivTotal.MONTH~StateMod~384613_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>41
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c40">#  INDEPENDENCE PASS TM DVR TUNNEL NO 1</a></td>
+</tr>
+<tr>
+<td>42
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c41">SetDiversionDemandTSMonthly(ID="384617",TSID="384617..DivTotal.MONTH~StateMod~384617_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>43
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c42">#  BERTHOUD CANAL TUNNEL</a></td>
+</tr>
+<tr>
+<td>44
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c43">SetDiversionDemandTSMonthly(ID="514625",TSID="514625..DivTotal.MONTH~StateMod~514625_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>45
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c44">#  ADAMS TUNNEL</a></td>
+</tr>
+<tr>
+<td>46
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c45">SetDiversionDemandTSMonthly(ID="514634",TSID="514634..DivTotal.MONTH~StateMod~514634_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>47
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c46">#  WILLOW CREEK FEEDER</a></td>
+</tr>
+<tr>
+<td>48
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c47">SetDiversionDemandTSMonthly(ID="510958",TSID="510958..DivTotal.MONTH~StateMod~510958_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>49
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c48">#  WINDY GAP PUMP</a></td>
+</tr>
+<tr>
+<td>50
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c49">SetDiversionDemandTSMonthly(ID="514700",TSID="514700..DivTotal.MONTH~StateMod~514700_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>51
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c50">#  WEST THREE MILE DITCH</a></td>
+</tr>
+<tr>
+<td>52
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c51">SetDiversionDemandTSMonthly(ID="384717",TSID="384717..DivTotal.MONTH~StateMod~384717_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>53
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c52">#</a></td>
+</tr>
+<tr>
+<td>54
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c53">#</a></td>
+</tr>
+<tr>
+<td>55
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c54">#	MUNICIPAL AND INDUSTRIAL</a></td>
+</tr>
+<tr>
+<td>56
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c55">#</a></td>
+</tr>
+<tr>
+<td>57
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c56">#  DILLON_VALLEY_W&SD_(RANKIN_NO._1_DITCH)</a></td>
+</tr>
+<tr>
+<td>58
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c57">SetDiversionDemandTSMonthly(ID="360784",TSID="360784..DivTotal.MONTH~StateMod~360784_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>59
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c58">#  TOWN_OF_DILLON_(Straight_Creek_Ditch)</a></td>
+</tr>
+<tr>
+<td>60
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c59">SetDiversionDemandTSMonthly(ID="360829",TSID="360829..DivTotal.MONTH~StateMod~360829_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>61
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c60">#  TENMILE DIVERSION NO 1 (Climax)</a></td>
+</tr>
+<tr>
+<td>62
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c61">SetDiversionDemandTSMonthlyConstant(ID="360841",Constant=0)</a></td>
+</tr>
+<tr>
+<td>63
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c62">#  Keystone Resort Snowmaking</a></td>
+</tr>
+<tr>
+<td>64
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c63">SetDiversionDemandTSMonthly(ID="360908",TSID="360908..DivTotal.MONTH~StateMod~360908_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>65
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c64">#  TOWN_OF_BRECKENRIDGE_(Breckenridge_Pipeline)</a></td>
+</tr>
+<tr>
+<td>66
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c65">SetDiversionDemandTSMonthly(ID="361008",TSID="361008..DivTotal.MONTH~StateMod~361008_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>67
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c66">#  COPPER_MOUNTAIN_SKI_AREA_SNOWMAKING</a></td>
+</tr>
+<tr>
+<td>68
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c67">SetDiversionDemandTSMonthly(ID="361016",TSID="361016..DivTotal.MONTH~StateMod~361016_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>69
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c68">#  UPPER_EAGLE_VALLEY_WATER_AUTHORITY_(Metcalf_Ditch)</a></td>
+</tr>
+<tr>
+<td>70
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c69">SetDiversionDemandTSMonthly(ID="370708",TSID="370708..DivTotal.MONTH~StateMod~370708_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>71
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c70">#  CARBONDALE WTR SYS & PL</a></td>
+</tr>
+<tr>
+<td>72
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c71">SetDiversionDemandTSMonthly(ID="381052",TSID="381052..DivTotal.MONTH~StateMod~381052_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>73
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c72">#  Snowmass Water and Utility</a></td>
+</tr>
+<tr>
+<td>74
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c73">SetDiversionDemandTSMonthly(ID="381441",TSID="381441..DivTotal.MONTH~StateMod~381441_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>75
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c74">#  RIFLE TOWN OF PUMP & PL</a></td>
+</tr>
+<tr>
+<td>76
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c75">SetDiversionDemandTSMonthly(ID="390967",TSID="390967..DivTotal.MONTH~StateMod~390967_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>77
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c76">#  GRAND JCT GUNNISON P-L</a></td>
+</tr>
+<tr>
+<td>78
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c77">SetDiversionDemandTSMonthly(ID="420520",TSID="420520..DivTotal.MONTH~StateMod~420520_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>79
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c78">#  REDLANDS POWER CANAL</a></td>
+</tr>
+<tr>
+<td>80
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c79">SetDiversionDemandTSMonthly(ID="420541",TSID="420541..DivTotal.MONTH~StateMod~420541_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>81
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c80">#  HENDERSON MINE WTR SYS</a></td>
+</tr>
+<tr>
+<td>82
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c81">SetDiversionDemandTSMonthly(ID="511070",TSID="511070..DivTotal.MONTH~StateMod~511070_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>83
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c82">#  SHOSHONE POWER PLANT</a></td>
+</tr>
+<tr>
+<td>84
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c83">SetDiversionDemandTSMonthly(ID="530584",TSID="530584..DivTotal.MONTH~StateMod~530584_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>85
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c84">#  GLENWOOD L WATER CO SYS</a></td>
+</tr>
+<tr>
+<td>86
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c85">SetDiversionDemandTSMonthly(ID="530585",TSID="530585..DivTotal.MONTH~StateMod~530585_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>87
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c86">#  TOWN_OF_CLIFTON_(Grand_Junction_Colorado_River_PL)</a></td>
+</tr>
+<tr>
+<td>88
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c87">SetDiversionDemandTSMonthly(ID="720644",TSID="720644..DivTotal.MONTH~StateMod~720644_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>89
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c88">#  MOLINA POWER PLANT</a></td>
+</tr>
+<tr>
+<td>90
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c89">SetDiversionDemandTSMonthly(ID="720807",TSID="720807..DivTotal.MONTH~StateMod~720807_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>91
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c90">#  PALISADE_TOWN_PIPELINE_(720816)_(TREATED_PLANT_FLOW)</a></td>
+</tr>
+<tr>
+<td>92
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c91">SetDiversionDemandTSMonthly(ID="720816",TSID="720816..DivTotal.MONTH~StateMod~720816_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>93
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c92">#  Ute Water Treatment</a></td>
+</tr>
+<tr>
+<td>94
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c93">SetDiversionDemandTSMonthly(ID="950020",TSID="950020..DivTotal.MONTH~StateMod~950020_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>95
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c94">#  CITY_OF_GRAND_JUNCTION</a></td>
+</tr>
+<tr>
+<td>96
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c95">SetDiversionDemandTSMonthly(ID="950051",TSID="950051..DivTotal.MONTH~StateMod~950051_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>97
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c96">#  VAIL VALLEY CONSOLIDATED WATER DISTRICT - irr. season</a></td>
+</tr>
+<tr>
+<td>98
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c97">SetDiversionDemandTSMonthly(ID="955001",TSID="955001..DivTotal.MONTH~StateMod~955001_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>99
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c98">#  TOTAL FOR ALL SNAKE RIVER WATER DISTRICT WELLS (KEYSTONE_MUNICIPAL)</a></td>
+</tr>
+<tr>
+<td>100
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c99">SetDiversionDemandTSMonthly(ID="955002",TSID="955002..DivTotal.MONTH~StateMod~955002_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>101
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c100">#  VAIL VALLEY CONSOLIDATED WATER DISTRICT - nonirr. season</a></td>
+</tr>
+<tr>
+<td>102
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c101">SetDiversionDemandTSMonthly(ID="955003",TSID="955003..DivTotal.MONTH~StateMod~955003_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>103
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c102">#</a></td>
+</tr>
+<tr>
+<td>104
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c103">#</a></td>
+</tr>
+<tr>
+<td>105
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c104">#	RESERVOIR STRUCTURES</a></td>
+</tr>
+<tr>
+<td>106
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c105">#</a></td>
+</tr>
+<tr>
+<td>107
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c106">#  GRN MTN HYDRO-ELECTRIC</a></td>
+</tr>
+<tr>
+<td>108
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c107">SetDiversionDemandTSMonthly(ID="360881",TSID="360881..DivTotal.MONTH~StateMod~360881_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>109
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c108">#  WILLIAMS FORK POWER COND</a></td>
+</tr>
+<tr>
+<td>110
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c109">SetDiversionDemandTSMonthly(ID="511237",TSID="511237..DivTotal.MONTH~StateMod~511237_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>111
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c110">#  Green Mountain Contract water</a></td>
+</tr>
+<tr>
+<td>112
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c111">SetDiversionDemandTSMonthly(ID="950060",TSID="950060..DivTotal.MONTH~StateMod~950060_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>113
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c112">#  FRASER BASIN demands out of Wolford Mountain Reservoir</a></td>
+</tr>
+<tr>
+<td>114
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c113">SetDiversionDemandTSMonthly(ID="953101",TSID="953101..DivTotal.MONTH~StateMod~953101_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>115
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c114">#  MIDDLE PARK demands out of Wolford Mountain Reservoir</a></td>
+</tr>
+<tr>
+<td>116
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c115">SetDiversionDemandTSMonthly(ID="953102",TSID="953102..DivTotal.MONTH~StateMod~953102_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>117
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c116">#  Green Mtn Annual Rep Est</a></td>
+</tr>
+<tr>
+<td>118
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c117">SetDiversionDemandTSMonthly(ID="950061",TSID="950061..DivTotal.MONTH~StateMod~950061_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>119
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c118">#  Ruedi Rnd 1-Muni Demand</a></td>
+</tr>
+<tr>
+<td>120
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c119">SetDiversionDemandTSMonthly(ID="953001",TSID="953001..DivTotal.MONTH~StateMod~953001_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>121
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c120">#  Ruedi Rnd 1-Ind Demand</a></td>
+</tr>
+<tr>
+<td>122
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c121">SetDiversionDemandTSMonthly(ID="953002",TSID="953002..DivTotal.MONTH~StateMod~953002_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>123
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c122">#  Ruedi Rnd 2-Muni Demand</a></td>
+</tr>
+<tr>
+<td>124
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c123">SetDiversionDemandTSMonthly(ID="953003",TSID="953003..DivTotal.MONTH~StateMod~953003_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>125
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c124">#  Ruedi Rnd 2-Ind Demand</a></td>
+</tr>
+<tr>
+<td>126
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c125">SetDiversionDemandTSMonthly(ID="953004",TSID="953004..DivTotal.MONTH~StateMod~953004_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>127
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c126">#</a></td>
+</tr>
+<tr>
+<td>128
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c127">#</a></td>
+</tr>
+<tr>
+<td>129
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c128">#	CAMEO DEMAND / GRAND VALLEY AREA</a></td>
+</tr>
+<tr>
+<td>130
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c129">#</a></td>
+</tr>
+<tr>
+<td>131
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c130">#  GRAND VALLEY PROJECT IRRIGATION (fill in years from 1909 to 1916)</a></td>
+</tr>
+<tr>
+<td>132
+</td>
+<td>0.078
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c131">SetDiversionDemandTSMonthly(ID="950001",TSID="950001..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>133
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c132">#  Orchard Mesa Irrigation District (OMID power) demand</a></td>
+</tr>
+<tr>
+<td>134
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c133">SetDiversionDemandTSMonthlyConstant(ID="950002",Constant=0)</a></td>
+</tr>
+<tr>
+<td>135
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c134">#  ORCHARD_MESA_CHECK</a></td>
+</tr>
+<tr>
+<td>136
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c135">SetDiversionDemandTSMonthly(ID="950003",TSID="950003..DivTotal.MONTH~StateMod~950003_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>137
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c136">#  Orchard Mesa Irrigation District (OMID pump) demand</a></td>
+</tr>
+<tr>
+<td>138
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c137">SetDiversionDemandTSMonthly(ID="950004",TSID="950004..DivTotal.MONTH~StateMod~950004_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>139
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c138">#  OMID Bypass (950005) time series for baseline data set</a></td>
+</tr>
+<tr>
+<td>140
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c139">SetDiversionDemandTSMonthlyConstant(ID="950005",Constant=0)</a></td>
+</tr>
+<tr>
+<td>141
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c140">#  OMID Bypass (950006) time series for baseline data set</a></td>
+</tr>
+<tr>
+<td>142
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c141">SetDiversionDemandTSMonthly(ID="950006",TSID="950006..DivTotal.MONTH~StateMod~950006_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>143
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c142">#  USA PP-Winter-OM Stip</a></td>
+</tr>
+<tr>
+<td>144
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c143">SetDiversionDemandTSMonthly(ID="950007",TSID="950007..DivTotal.MONTH~StateMod~950007_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>145
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c144">#  USA PP-Summer-OM Stip</a></td>
+</tr>
+<tr>
+<td>146
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c145">SetDiversionDemandTSMonthly(ID="950008",TSID="950008..DivTotal.MONTH~StateMod~950008_baseline.stm")</a></td>
+</tr>
+<tr>
+<td>147
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c146">#</a></td>
+</tr>
+<tr>
+<td>148
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c147">#</a></td>
+</tr>
+<tr>
+<td>149
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c148">#	FISH DEMAND (in Baseline it is located at instream flow node 952002)</a></td>
+</tr>
+<tr>
+<td>150
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c149">#</a></td>
+</tr>
+<tr>
+<td>151
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c150">#  15 Mile Reach area for endangered fish</a></td>
+</tr>
+<tr>
+<td>152
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c151">SetDiversionDemandTSMonthlyConstant(ID="952001",Constant=0)</a></td>
+</tr>
+<tr>
+<td>153
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c152">#</a></td>
+</tr>
+<tr>
+<td>154
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c153">#   Step 4 - set calculated demand to current demand for structures whose historical acreage is different from current</a></td>
+</tr>
+<tr>
+<td>155
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c154">#</a></td>
+</tr>
+<tr>
+<td>156
+</td>
+<td>0.078
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c155">SetDiversionDemandTSMonthly(ID="360687",TSID="360687..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>157
+</td>
+<td>0.078
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c156">SetDiversionDemandTSMonthly(ID="360725",TSID="360725..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>158
+</td>
+<td>0.062
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c157">SetDiversionDemandTSMonthly(ID="360728",TSID="360728..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>159
+</td>
+<td>0.078
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c158">SetDiversionDemandTSMonthly(ID="360729",TSID="360729..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>160
+</td>
+<td>0.079
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c159">SetDiversionDemandTSMonthly(ID="360765",TSID="360765..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>161
+</td>
+<td>0.078
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c160">SetDiversionDemandTSMonthly(ID="360780",TSID="360780..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>162
+</td>
+<td>0.062
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c161">SetDiversionDemandTSMonthly(ID="360800",TSID="360800..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>163
+</td>
+<td>0.062
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c162">SetDiversionDemandTSMonthly(ID="370519",TSID="370519..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>164
+</td>
+<td>0.078
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c163">SetDiversionDemandTSMonthly(ID="370571",TSID="370571..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>165
+</td>
+<td>0.079
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c164">SetDiversionDemandTSMonthly(ID="370723",TSID="370723..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>166
+</td>
+<td>0.062
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c165">SetDiversionDemandTSMonthly(ID="370848",TSID="370848..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>167
+</td>
+<td>0.078
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c166">SetDiversionDemandTSMonthly(ID="380528",TSID="380528..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>168
+</td>
+<td>0.078
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c167">SetDiversionDemandTSMonthly(ID="380572",TSID="380572..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>169
+</td>
+<td>0.078
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c168">SetDiversionDemandTSMonthly(ID="380663",TSID="380663..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>170
+</td>
+<td>0.063
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c169">SetDiversionDemandTSMonthly(ID="380939",TSID="380939..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>171
+</td>
+<td>0.078
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c170">SetDiversionDemandTSMonthly(ID="380996",TSID="380996..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>172
+</td>
+<td>0.078
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c171">SetDiversionDemandTSMonthly(ID="381062",TSID="381062..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>173
+</td>
+<td>0.063
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c172">SetDiversionDemandTSMonthly(ID="381078",TSID="381078..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")</a></td>
+</tr>
+<tr>
+<td>174
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c173">#</a></td>
+</tr>
+<tr>
+<td>175
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c174">#   Step 5 - create baseline demand file</a></td>
+</tr>
+<tr>
+<td>176
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c175">#</a></td>
+</tr>
+<tr>
+<td>177
+</td>
+<td>1.610
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c176">WriteDiversionDemandTSMonthlyToStateMod(OutputFile="..\statemod\cm2005B.ddm")</a></td>
+</tr>
+<tr>
+<td>178
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c177">#</a></td>
+</tr>
+<tr>
+<td>179
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c178"># Check the results</a></td>
+</tr>
+<tr>
+<td>180
+</td>
+<td>0.937
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c179">CheckDiversionDemandTSMonthly(ID="*")</a></td>
+</tr>
+<tr>
+<td>181
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c180">WriteCheckFile(OutputFile="Bddm.commands.StateDMI.check.html")</a></td>
+</tr>
+<td>
+</td>
+<td>4.485
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td>
+</td>
+</table>
+
+<h2><a name="summary">Command Problem Summary</h2>
+<p>
+Total number of failures: 0<br>
+Total number of commands with failures: 0<br>
+Total number of warnings: 0<br>
+Total number of commands with warnings: 0<br>
+</p>
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+# Hddm.commands.StateDMI - Creates Upper Colorado River Historical Demand file
+#
+#
+#  Step 1 - set the output period, used to compute averages...
+#
+setOutputPeriod(10/1908,9/2005)
+setOutputYearType(Water)
+#
+#  Step 2 - read historical diversion file -defined structures for *.ddm file
+#
+readDiversionHistoricalTSMonthlyFromStateMod(InputFile="..\statemod\cm2005.ddh")
+#
+#  Step 3 - override specific demands with time series...
+#
+setDiversionHistoricalTSMonthly(ID="720807",TSID="720807..DivTotal.Month~StateMod~720807.stm")
+# Set carrier structures to zero
+setDiversionHistoricalTSMonthlyConstant(ID="360606",Constant=0)
+setDiversionHistoricalTSMonthlyConstant(ID="720542",Constant=0)
+setDiversionHistoricalTSMonthlyConstant(ID="720583",Constant=0)
+setDiversionHistoricalTSMonthlyConstant(ID="720746",Constant=0)
+setDiversionHistoricalTSMonthlyConstant(ID="720820",Constant=0)
+setDiversionHistoricalTSMonthlyConstant(ID="720879",Constant=0)
+setDiversionHistoricalTSMonthlyConstant(ID="724721",Constant=0)
+# Set GVP specific demands
+setDiversionHistoricalTSMonthlyConstant(ID="950003",SetStart="11/1926",Constant=100000)
+setDiversionHistoricalTSMonthlyConstant(ID="950005",SetEnd="9/1984",Constant=60000)
+setDiversionHistoricalTSMonthlyConstant(ID="950006",SetStart="10/1984",Constant=60000)
+# Set Excess HUP node demands for Homestake, Dillon, Williams Fork, and Wolford Reservoirs
+setDiversionHistoricalTSMonthlyConstant(ID="954516D",Constant=999999)
+setDiversionHistoricalTSMonthlyConstant(ID="954512D",Constant=999999)
+setDiversionHistoricalTSMonthlyConstant(ID="953709D",Constant=999999)
+setDiversionHistoricalTSMonthlyConstant(ID="953668D",Constant=999999)
+#
+#  Step 4 - write the time series to the StateMod file...
+#
+writeDiversionHistoricalTSMonthlyToStateMod(OutputFile="..\statemod\cm2005H.ddm")
+		
+		
+		
+		
+		
+		

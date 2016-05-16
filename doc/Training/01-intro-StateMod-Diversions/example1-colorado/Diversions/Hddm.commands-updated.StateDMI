@@ -1,0 +1,41 @@
+StartLog(LogFile="Hddm.commands.StateDMI.log")
+# Hddm.commands.StateDMI - Creates Upper Colorado River Historical Demand file
+#
+#
+#  Step 1 - set the output period, used to compute averages...
+#
+SetOutputPeriod(OutputStart="10/1908",OutputEnd="9/2005")
+SetOutputYearType(OutputYearType=Water)
+#
+#  Step 2 - read historical diversion file -defined structures for *.ddm file
+#
+ReadDiversionHistoricalTSMonthlyFromStateMod(InputFile="..\statemod\cm2005.ddh")
+#
+#  Step 3 - override specific demands with time series...
+#
+SetDiversionHistoricalTSMonthly(ID="720807",TSID="720807..DivTotal.Month~StateMod~720807.stm")
+# Set carrier structures to zero
+SetDiversionHistoricalTSMonthlyConstant(ID="360606",Constant=0)
+SetDiversionHistoricalTSMonthlyConstant(ID="720542",Constant=0)
+SetDiversionHistoricalTSMonthlyConstant(ID="720583",Constant=0)
+SetDiversionHistoricalTSMonthlyConstant(ID="720746",Constant=0)
+SetDiversionHistoricalTSMonthlyConstant(ID="720820",Constant=0)
+SetDiversionHistoricalTSMonthlyConstant(ID="720879",Constant=0)
+SetDiversionHistoricalTSMonthlyConstant(ID="724721",Constant=0)
+# Set GVP specific demands
+SetDiversionHistoricalTSMonthlyConstant(ID="950003",Constant=100000,SetStart="11/1926")
+SetDiversionHistoricalTSMonthlyConstant(ID="950005",Constant=60000,SetEnd="9/1984")
+SetDiversionHistoricalTSMonthlyConstant(ID="950006",Constant=60000,SetStart="10/1984")
+# Set Excess HUP node demands for Homestake, Dillon, Williams Fork, and Wolford Reservoirs
+SetDiversionHistoricalTSMonthlyConstant(ID="954516D",Constant=999999)
+SetDiversionHistoricalTSMonthlyConstant(ID="954512D",Constant=999999)
+SetDiversionHistoricalTSMonthlyConstant(ID="953709D",Constant=999999)
+SetDiversionHistoricalTSMonthlyConstant(ID="953668D",Constant=999999)
+#
+#  Step 4 - write the time series to the StateMod file...
+#
+WriteDiversionHistoricalTSMonthlyToStateMod(OutputFile="..\statemod\cm2005H.ddm")
+#
+# Check the results.
+CheckDiversionHistoricalTSMonthly(ID="*")
+WriteCheckFile(OutputFile="Hddm.commands.StatedDMI.check.html")

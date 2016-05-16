@@ -1,0 +1,11 @@
+setOutputPeriod(10/1908,9/2005)
+setOutputYearType(Water)
+setPatternFile("fill2005.pat")
+720807.DWR.DivTotal.Month~HydroBase
+720807.DWR.iDivTotal.Month~HydroBase
+fillFromTS(720807.DWR.DivTotal.Month,720807.DWR.iDivTotal.Month,*,*)
+free(TSID="720807.DWR.iDivTotal.Month")
+fillPattern(TSList=AllTS,PatternID="09095500")
+fillHistMonthAverage(TSList=AllTS)
+setConstant(TSID="720807.DWR.DivTotal.Month",ConstantValue=0,SetEnd="12/1962")
+writeStateMod(TSList=AllTS,OutputFile="test",Precision=0)

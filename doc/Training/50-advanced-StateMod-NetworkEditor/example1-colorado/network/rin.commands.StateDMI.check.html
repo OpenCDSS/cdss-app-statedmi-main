@@ -1,0 +1,455 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"><html>
+<head>
+<title>StateDMI Check File (C:\Develop\StateDMI_SourceBuild\StateDMI\doc\Training\50-advanced-StateMod-NetworkEditor\example1-colorado\network\rin.commands-updated.StateDMI)
+</title><style>
+#titles { font-weight:bold; color:#303044 }
+table { background-color:black; text-align:left; border:1; bordercolor:black; cellspacing:1; cellpadding:1 }
+th { background-color:#333366; text-align:center; vertical-align:bottom; color:white }
+tr { valign:bottom }
+td { background-color:white; text-align:left; vertical-align:bottom; }
+body { text-align:left; font-size:12pt; }
+pre { font-size:12pt; margin: 0px }
+p { font-size:12pt; }
+/* The following controls formatting of severity column in tables */
+.warning { background-color:yellow; }
+.failure { background-color:red; }
+.success { background-color:green; }
+.unknown { background-color:white; }
+</style>
+</head>
+<body>
+
+<h1>StateDMI Check Results</h1>
+
+<h2>StateDMI Check File (C:\Develop\StateDMI_SourceBuild\StateDMI\doc\Training\50-advanced-StateMod-NetworkEditor\example1-colorado\network\rin.commands-updated.StateDMI)</h2>
+
+<h2>Check File Table of Contents</h2>
+<a href="#environment">Program/Environment Information</a>
+ - generated at runtime<br>
+<a href="#notes">Command File Comments</a>
+ - as written to output file headers<br>
+<a href="#commands">Command Details</a>
+ - command run times and warning/failure counts<br>
+<a href="#summary">Command Problem Summary</a>
+ - command problem summary<br>
+
+<h2><a name="environment">Program/Environment Information</h2>
+<p>
+<table>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+<tr>
+<td>Command file
+</td>
+<td>C:\Develop\StateDMI_SourceBuild\StateDMI\doc\Training\50-advanced-StateMod-NetworkEditor\example1-colorado\network\rin.commands-updated.StateDMI
+</td>
+</tr>
+<tr>
+<td>Program
+</td>
+<td>StateDMI 3.10.00 (2010-04-01)
+</td>
+</tr>
+<tr>
+<td>User
+</td>
+<td>sam
+</td>
+</tr>
+<tr>
+<td>Creation time
+</td>
+<td>2010-05-10 14:33:42 MDT
+</td>
+</tr>
+<tr>
+<td>Computer
+</td>
+<td>AMAZON
+</td>
+</tr>
+<tr>
+<td>Processor initial working directory
+</td>
+<td>C:\Develop\StateDMI_SourceBuild\StateDMI\doc\Training\50-advanced-StateMod-NetworkEditor\example1-colorado\network
+</td>
+</tr>
+<tr>
+<td>Command line
+</td>
+<td>StateDMI -home test\operational\CDSS
+</td>
+</tr>
+</table>
+</p>
+
+<h2><a name="notes">Command File Comments</h2>
+<pre>
+StateDMI check file containing all warning/failure messages from run.
+
+-----------------------------------------------------------------------
+Command file name: "C:\Develop\StateDMI_SourceBuild\StateDMI\doc\Training\50-advanced-StateMod-NetworkEditor\example1-colorado\network\rin.commands-updated.StateDMI"
+Commands: 
+StartLog(LogFile="rin.commands.StateDMI.log")
+# rin.commands.StateDMI
+#
+# creates the river newtork file for the Colorado River monthly/daily models
+#
+#  Step 1 - read river nodes from the network file and create file framework
+#
+ReadNetworkFromStateMod(InputFile="cm2005.net")
+CreateRiverNetworkFromNetwork()
+#
+#  Step 2 - get node (diversion, stream stations, reservoirs, instream flows)
+#           names from from HydroBase
+#
+FillRiverNetworkFromHydroBase(ID="*",NameFormat=StationName_NodeType)
+#
+#  Step 3 - read missing node names from network file
+#
+FillRiverNetworkFromNetwork(ID="*",NameFormat="StationName_NodeType",CommentFormat="StationID")
+#
+#  Step 4 - create StateMod river network file
+#
+WriteRiverNetworkToStateMod(OutputFile="..\StateMod\cm2005.rin")
+#
+# Check the results
+CheckRiverNetwork(ID="*")
+WriteCheckFile(OutputFile="rin.commands.StateDMI.check.html")
+
+-----------------------------------------------------------------------------
+HydroBase database is: HydroBase on hbserver
+HydroBase.db_version:  design version: 20080701  last data change: 20090701
+HydroBase table structure for software is at least 2007052520070525
+HydroBase input name is "".
+Stored procedures are being used.
+-----------------------------------------------------------------------------
+
+</pre>
+
+<h2><a name="commands">Command Details</h2>
+<p>
+Total number of failures: 0<br>
+Total number of commands with failures: 0<br>
+Total number of warnings: 0<br>
+Total number of commands with warnings: 0<br>
+</p>
+<p>
+<table>
+<tr>
+<th>#</th>
+<th>Time, sec.</th>
+<th>Warnings</th>
+<th>Failures</th>
+<th>Command</th>
+</tr>
+<tr>
+<td>1
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c0">StartLog(LogFile="rin.commands.StateDMI.log")</a></td>
+</tr>
+<tr>
+<td>2
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c1"># rin.commands.StateDMI</a></td>
+</tr>
+<tr>
+<td>3
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c2">#</a></td>
+</tr>
+<tr>
+<td>4
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c3"># creates the river newtork file for the Colorado River monthly/daily models</a></td>
+</tr>
+<tr>
+<td>5
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c4">#</a></td>
+</tr>
+<tr>
+<td>6
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c5">#  Step 1 - read river nodes from the network file and create file framework</a></td>
+</tr>
+<tr>
+<td>7
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c6">#</a></td>
+</tr>
+<tr>
+<td>8
+</td>
+<td>0.032
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c7">ReadNetworkFromStateMod(InputFile="cm2005.net")</a></td>
+</tr>
+<tr>
+<td>9
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c8">CreateRiverNetworkFromNetwork()</a></td>
+</tr>
+<tr>
+<td>10
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c9">#</a></td>
+</tr>
+<tr>
+<td>11
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c10">#  Step 2 - get node (diversion, stream stations, reservoirs, instream flows)</a></td>
+</tr>
+<tr>
+<td>12
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c11">#           names from from HydroBase</a></td>
+</tr>
+<tr>
+<td>13
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c12">#</a></td>
+</tr>
+<tr>
+<td>14
+</td>
+<td>7.172
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c13">FillRiverNetworkFromHydroBase(ID="*",NameFormat=StationName_NodeType)</a></td>
+</tr>
+<tr>
+<td>15
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c14">#</a></td>
+</tr>
+<tr>
+<td>16
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c15">#  Step 3 - read missing node names from network file</a></td>
+</tr>
+<tr>
+<td>17
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c16">#</a></td>
+</tr>
+<tr>
+<td>18
+</td>
+<td>0.125
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c17">FillRiverNetworkFromNetwork(ID="*",NameFormat="StationName_NodeType",CommentFormat="StationID")</a></td>
+</tr>
+<tr>
+<td>19
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c18">#</a></td>
+</tr>
+<tr>
+<td>20
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c19">#  Step 4 - create StateMod river network file</a></td>
+</tr>
+<tr>
+<td>21
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c20">#</a></td>
+</tr>
+<tr>
+<td>22
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c21">WriteRiverNetworkToStateMod(OutputFile="..\StateMod\cm2005.rin")</a></td>
+</tr>
+<tr>
+<td>23
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c22">#</a></td>
+</tr>
+<tr>
+<td>24
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c23"># Check the results</a></td>
+</tr>
+<tr>
+<td>25
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c24">CheckRiverNetwork(ID="*")</a></td>
+</tr>
+<tr>
+<td>26
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c25">WriteCheckFile(OutputFile="rin.commands.StateDMI.check.html")</a></td>
+</tr>
+<td>
+</td>
+<td>7.345
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td>
+</td>
+</table>
+
+<h2><a name="summary">Command Problem Summary</h2>
+<p>
+Total number of failures: 0<br>
+Total number of commands with failures: 0<br>
+Total number of warnings: 0<br>
+Total number of commands with warnings: 0<br>
+</p>
+
+</body>
+</html>

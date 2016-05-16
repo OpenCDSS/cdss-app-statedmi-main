@@ -1,0 +1,15 @@
+setOutputPeriod(10/1950,9/2005)
+setOutputYearType(Water)
+720766.DWR.DivClass-S:1 F:7077 U:2 T:A.Month~HydroBase
+720766.DWR.DivClass-S:1 F: U:8 T:.Month~HydroBase
+720766.DWR.DivClass-S:1 F: U:2 T:.Month~HydroBase
+721334.DWR.DivClass-S:1 F: U:2 T:.Month~HydroBase
+721334.DWR.DivClass-S:1 F: U:8 T:.Month~HydroBase
+TS 950030 = copy(TSID="720766.DWR.DivClass-S:1 F:7077 U:2 T:A.Month",NewTSID="950030")
+add(TSID="950030",TSList="SpecifiedTS",AddTSID="720766.DWR.DivClass-S:1 F: U:8 T:.Month,720766.DWR.DivClass-S:1 F: U:2 T:.Month,721334.DWR.DivClass-S:1 F: U:2 T:.Month,721334.DWR.DivClass-S:1 F: U:8 T:.Month",HandleMissingHow=IgnoreMissing)
+writeStateMod(TSList=AllMatchingTSID,TSID="950030",OutputFile="test950030",Precision=0)
+720766.DWR.DivTotal.Month~HydroBase
+721334.DWR.DivTotal.Month~HydroBase
+add(TSID="720766.DWR.DivTotal.Month",TSList="SpecifiedTS",AddTSID="721334.DWR.DivTotal.Month",HandleMissingHow=IgnoreMissing)
+subtract(TSID="720766.DWR.DivTotal.Month",TSList="SpecifiedTS",SubtractTSID="950030",HandleMissingHow=IgnoreMissing)
+writeStateMod(TSList=AllMatchingTSID,TSID="720766.DWR.DivTotal.Month",OutputFile="test720766",Precision=0)

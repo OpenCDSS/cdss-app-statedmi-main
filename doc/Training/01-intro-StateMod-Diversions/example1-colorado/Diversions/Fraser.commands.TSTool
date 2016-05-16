@@ -1,0 +1,54 @@
+# This file was created by James Heath (heath@lrcwe.com) on 4/14/2006 to generate diversion data for the tributary
+# feeders to the Moffat Tunnel. This data had to be generated because it was not yet available from Denver and will
+# not be ready in calendar year 2006. Data from 1991 through 1996 had been generated in previous Upper Colorado
+# River modeling efforts and was not altered. Extension of the generated diversions from 1996 through 2005 was conducted
+# under the following guidelines:
+#
+#	1. Gage data for the MOFFAT WATER TUNNEL AT E (09022500) and AUGUST P. GUMLICK TUNNEL (APGTUNCO) are used
+#          as a known for calculations.
+#	2. Order of operations was provided by Mike Lluelen at Denver Water and is
+#		1. Jim Creek Diversions (510639)
+#		2. Vasquez Creek Diversions (511310)
+#		3. St. Louis Creek Diversions (511309)
+#		4. Ranch Creek Diversions (511269)
+#		5. Gumlick Tunnel - Williams Fork Diversions (514603)
+#		6. Englewood/Hamilton Creek Diversions (510728)
+#		7. Meadow Creek Reservoir (513686)
+#	3. The remaining demand at the Moffat Tunnel should be met through operating rules to pull
+#	   water from Meadow Creek Reservoir. All other operating rules should be turned off and demand
+#	   driven at individual diversion points by historic diversions and estimated diversions from this file.
+#	   (Operation of deliveries from Meadow Creek Reservoir to Englewood/Hamilton Creek remains on)
+#	4. The output file generated in this command file should be used only until data is available from
+#	   Denver Water and then replaced with actual data.
+#
+#
+514655...MONTH~StateMod~514655.stm
+510639...MONTH~StateMod~510639.stm
+fillRegression(TSID="510639...MONTH",IndependentTSID="514655...MONTH",Transformation=None)
+subtract(TSID="514655...MONTH",TSList="SpecifiedTS",SubtractTSID="510639...MONTH",HandleMissingHow=IgnoreMissing)
+replaceValue(514655...MONTH,-999999,-1,0,*,*)
+511310...MONTH~StateMod~511310.stm
+fillRegression(TSID="511310...MONTH",IndependentTSID="514655...MONTH",NumberOfEquations=MonthlyEquations,Transformation=None)
+subtract(TSID="514655...MONTH",TSList="SpecifiedTS",SubtractTSID="511310...MONTH",HandleMissingHow=IgnoreMissing)
+replaceValue(514655...MONTH,-999999,-1,0,*,*)
+511309...MONTH~StateMod~511309.stm
+fillRegression(TSID="511309...MONTH",IndependentTSID="514655...MONTH",NumberOfEquations=MonthlyEquations,Transformation=None)
+replaceValue(511309...MONTH,-999999,-1,0,*,*)
+subtract(TSID="514655...MONTH",TSList="SpecifiedTS",SubtractTSID="511309...MONTH",HandleMissingHow=IgnoreMissing)
+replaceValue(514655...MONTH,-999999,-1,0,*,*)
+511269...MONTH~StateMod~511269.stm
+fillRegression(TSID="511269...MONTH",IndependentTSID="514655...MONTH",NumberOfEquations=MonthlyEquations,Transformation=None)
+subtract(TSID="514655...MONTH",TSList="SpecifiedTS",SubtractTSID="511269...MONTH",HandleMissingHow=IgnoreMissing)
+replaceValue(514655...MONTH,-999999,-1,0,*,*)
+514603...MONTH~StateMod~514603.stm
+fillRegression(TSID="514603...MONTH",IndependentTSID="514655...MONTH",NumberOfEquations=MonthlyEquations,Transformation=None)
+subtract(TSID="514655...MONTH",TSList="SpecifiedTS",SubtractTSID="514603...MONTH",HandleMissingHow=IgnoreMissing)
+replaceValue(514655...MONTH,-999999,-1,0,*,*)
+510728...MONTH~StateMod~510728.stm
+fillRegression(TSID="510728...MONTH",IndependentTSID="514655...MONTH",NumberOfEquations=MonthlyEquations,Transformation=None)
+replaceValue(510728...MONTH,-999999,-1,0,*,*)
+subtract(TSID="514655...MONTH",TSList="SpecifiedTS",SubtractTSID="510728...MONTH",HandleMissingHow=IgnoreMissing)
+replaceValue(514655...MONTH,-999999,-1,0,*,*)
+setOutputPeriod(10/1908,9/2005)
+setOutputYearType(Water)
+writeStateMod(TSList=AllTS,OutputFile="Fraser.stm")

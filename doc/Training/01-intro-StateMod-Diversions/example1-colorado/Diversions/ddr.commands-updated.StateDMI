@@ -1,0 +1,346 @@
+StartLog(LogFile="ddr.commands.StateDMI.log")
+# ddr.commands.StateDMI
+#
+#
+#
+#  StateDMI command file to create the direct diversion rights file for the Colorado model
+#
+#  Step 1 - read structures from preliminary direct diversion station file
+#
+ReadDiversionStationsFromStateMod(InputFile="cm2005_dds.dds")
+#
+#  Step 2 - read aggregate and diversion system structure assignments.  Note that
+#        want to combine water rights for aggs and diversion systems, but
+#        water rights are assigned to primary and secondary components of multistructures
+#
+SetDiversionAggregateFromList(ListFile="cm_agg.csv",IDCol=1,NameCol=2,PartIDsCol=3,PartsListedHow=InRow)
+SetDiversionSystemFromList(ListFile="cm_divsys.csv",IDCol=1,NameCol=2,PartIDsCol=3,PartsListedHow=InRow)
+#
+#  Step 3 - read diversion rights from HydroBase and define water rights classes
+#           used for aggregate structures - but NOT for diversion systems
+#
+ReadDiversionRightsFromHydroBase(ID="*",OnOffDefault=1,AdminNumClasses="14854.00000,20427.18999,22729.21241,30895.21241,31258.00000,32023.28989,39095.38998,43621.42906,46674.00000,48966.00000,99999.")
+#
+#  Step 4 - set water rights for structure IDs different from or not included in HydroBase
+#
+# Grand Valley Area - many rights obtain water through operations
+SetDiversionRight(ID="720646.02",Name="Orchard Mesa Irr Dist Sys",StationID="ID",OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720646.03",Name="Orchard Mesa Irr Dist Sys",StationID="ID",OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720646.05",Name="USA Power Plant",StationID="ID",Decree=800.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720646.07",Name="Grand Valley Proj",StationID="ID",AdministrationNumber=22729.19544,Decree=40.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720646.08",Name="USA_PP_Winter_OM-Stip",StationID="ID",AdministrationNumber=30895.21241,Decree=800.00,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720646.09",Name="USA_PP_SummerSr_OM-Stip",StationID="ID",AdministrationNumber=30895.21241,Decree=490,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720646.10",Name="USA_PP_SummerJr_OM-Stip",StationID="ID",AdministrationNumber=100000.1000,Decree=999.00,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720813.01",Name="Orchard Mesa Irr Dist Sys",StationID="ID",AdministrationNumber=99999.99999,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="950001.01",Name="Grand Valley Proj - Irr",StationID="ID",AdministrationNumber=99999.99999,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950002.01",Name="USA Power Plant",StationID="ID",AdministrationNumber=99999.99999,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950003.01",Name="Orchard Mesa Check",StationID="ID",AdministrationNumber=999999.0000,Decree=640.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950004.01",Name="OMID Hydraulic Pump",StationID="ID",AdministrationNumber=99999.99999,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950005.01",Name="OMID Pre-1985 Bypass",StationID="ID",AdministrationNumber=999998.0000,Decree=1100.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950006.01",Name="OMID Post-1985 Bypass",StationID="ID",AdministrationNumber=30895.23492,Decree=1100.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950007.01",Name="USA PP Winter OM-Stip",StationID="ID",AdministrationNumber=99999.90009,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950008.01",Name="USA PP Summer OM-Stip",StationID="ID",AdministrationNumber=100000.1000,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#
+#
+# Con-Hoosier Tunnel - 364683.01 is a combination of many rights associated with the Con-Hoosier collection system
+SetDiversionRight(ID="364683.01",Name="Con-Hoosier 1948 WR",StationID="ID",AdministrationNumber=35927.00000,Decree=540.0,OnOff=1,IfNotFound=Warn,IfFound=Set)
+SetDiversionRight(ID="364699.01",Name="Con-Hoosier Blue R Div",StationID="ID",AdministrationNumber=30184.29071,Decree=77.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+#
+# Denver's Roberts Tunnel set junior to Colorado Springs' Con-Hoosier project
+SetDiversionRight(ID="364684.01",StationID="ID",AdministrationNumber=35927.00004,OnOff=1,IfNotFound=Warn,IfFound=Set)
+#
+# Hunter Tunnel - modified admin. no. so that it fires after Boustead Tunnel to match historical operations
+SetDiversionRight(ID="381594.01",Name="Hunter_Tunnel_Collection",StationID="ID",AdministrationNumber=39291.00001,Decree=1262,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# Busk Ivanhoe Tunnel and Ivanhoe Reservoir feeder ditches
+SetDiversionRight(ID="384613.02",Name="Ivanhoe Reservoir Tunnel",StationID="ID",AdministrationNumber=28394.27306,Decree=25.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="384613.03",Name="Ivanhoe Reservoir Tunnel",StationID="ID",AdministrationNumber=28394.27299,Decree=50.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="384613.04",Name="Ivanhoe Reservoir Tunnel",StationID="ID",AdministrationNumber=28394.28365,Decree=70.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# Moffat Tunnel and Collection Point rights
+SetDiversionRight(ID="510639.01",Name="Jim Creek Div",StationID="ID",AdministrationNumber=30870.26117,Decree=75.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="511309.01",StationID="ID",AdministrationNumber=30870.26117,OnOff=1,IfNotFound=Warn,IfFound=Set)
+SetDiversionRight(ID="511309.02",Name="St Louis Creek Div",StationID="ID",AdministrationNumber=30870.26117,Decree=214.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="511310.01",Name="Vasquez Creek Div",StationID="ID",AdministrationNumber=30870.26117,Decree=105.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="511269.01",Name="Den Ranch Creek Div",StationID="ID",AdministrationNumber=30870.26117,Decree=180.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# Vidler Tunnel and Collection Points rights based on the Vidler Tunnel Task 4 Memo (less the Blue Danube Ditch on Barton Creek-No Active Water Rights, and current Absolute amounts for Admin No. 40020.00000)
+SetDiversionRight(ID="364626.01",Name="Vidler Tunnel Collection Sys",StationID="ID",AdministrationNumber=15829.00000,Decree=4.5,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="364626.02",Name="Vidler Tunnel Collection Sys",StationID="ID",AdministrationNumber=19875.00000,Decree=4.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="364626.03",Name="Vidler Tunnel Collection Sys",StationID="ID",AdministrationNumber=23296.22400,Decree=4.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="364626.04",Name="Vidler Tunnel Collection Sys",StationID="ID",AdministrationNumber=30184.16801,Decree=5.48,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="364626.05",Name="Vidler Tunnel Collection Sys",StationID="ID",AdministrationNumber=30184.23561,Decree=10.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="364626.06",Name="Vidler Tunnel Collection Sys",StationID="ID",AdministrationNumber=30951.00000,Decree=3.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="364626.07",Name="Vidler Tunnel Collection Sys",StationID="ID",AdministrationNumber=32075.18444,Decree=2.72,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="364626.08",Name="Vidler Tunnel Collection Sys",StationID="ID",AdministrationNumber=32075.23561,Decree=10.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="364626.09",Name="Vidler Tunnel Collection Sys",StationID="ID",AdministrationNumber=33289.00000,Decree=12.96,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="364626.10",Name="Vidler Tunnel Collection Sys",StationID="ID",AdministrationNumber=40020.00000,Decree=31.8,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# Windy Gap - modified admin no. to be junior to downstream instream flows, modified to be off, pulled by operating rules
+SetDiversionRight(ID="514700.01",Name="Windy Gap Pump PL Canal",StationID="ID",AdministrationNumber=47671.00001,Decree=300.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="514700.02",Name="Windy Gap Pump PL Canal",StationID="ID",AdministrationNumber=47671.00002,Decree=100.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="514700.03",Name="Windy Gap Pump PL Canal",StationID="ID",AdministrationNumber=47671.00003,Decree=200.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+#
+# Willow Creek Feeder Canal - modified to be off, pulled by operating rules
+SetDiversionRight(ID="510958.01",Name="CBT WILLOW CREEK FEEDER",StationID="ID",OnOff=1,IfNotFound=Add,IfFound=Set)
+#
+# Bunte Highline Ditch - set second and third rights section to CBT right
+SetDiversionRight(ID="510546.02",Name="Bunte Highline Ditch",StationID="ID",AdministrationNumber=31257.99998,Decree=14.14,OnOff=1,IfNotFound=Warn,IfFound=Set)
+SetDiversionRight(ID="510546.03",Name="Bunte Highline Ditch",StationID="ID",AdministrationNumber=31257.99999,Decree=8.04,OnOff=1,IfNotFound=Warn,IfFound=Set)
+#
+# Stillwater Ditch - structure in 53_ADC024 agg list, set so will use transbasin water
+SetDiversionRight(ID="53_ADC024.02",Name="Stillwater Ditch",StationID="ID",AdministrationNumber=1.00000,Decree=9.87,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#
+# Con-Hoosier, Moffat, and Boustead summary nodes that receive water through operations only
+SetDiversionRight(ID="954683.01",Name="Con-Hoosier Summary",StationID="ID",AdministrationNumber=99999.99999,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="514655.01",Name="Moffat Summary",StationID="ID",AdministrationNumber=99999.99999,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="954699.01",Name="Boustead Summary",StationID="ID",AdministrationNumber=99999.99999,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Set)
+#
+#
+# Municipal Water Rights
+SetDiversionRight(ID="955002.01",Name="Snake R Water Dist Well 1",StationID="ID",AdministrationNumber=18181.00000,Decree=0.03,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="955002.02",Name="Snake R Water Dist Well 1",StationID="ID",AdministrationNumber=32075.25333,Decree=0.12,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="955002.03",Name="Snake R Water Dist Well 1",StationID="ID",AdministrationNumber=44741.00000,Decree=1.23,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="955001.01",Name="Vail Valley Water - Irr",StationID="ID",AdministrationNumber=15646.00000,Decree=11.2,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="955003.01",Name="Vail Valley Water - NonIrr",StationID="ID",AdministrationNumber=42420.41366,Decree=13.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950051.01",Name="City of Grand Jnct",StationID="ID",AdministrationNumber=1.00000,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.01",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=12753.00000,Decree=4.03,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.02",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=30895.12724,Decree=1.95,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.03",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=30895.24260,Decree=0.74,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.04",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=32811.00000,Decree=2.12,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.05",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=38847.00000,Decree=20.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.06",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=46751.46599,Decree=11.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.07",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=46995.00000,Decree=4.1,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.08",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=41791.00000,Decree=15.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="720816.01",Name="Palisade Town Pipeline",StationID="ID",AdministrationNumber=12797.00000,Decree=1.44,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="720816.02",Name="Palisade Town Pipeline",StationID="ID",AdministrationNumber=14222.00000,Decree=3.55,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# Glenwood Springs Water - setting alternate point water rights to both structures, don't need to setup a multi structure setup or operating rules
+# to limit diversions because they are the only diversion demands on their respective tributaries.
+SetDiversionRight(ID="530585.02",Name="Glenwood L Water Sys Co",StationID="ID",AdministrationNumber=33023.31607,Decree=3.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="531051.03",Name="GLENWOOD L WATER CO SYS",StationID="ID",AdministrationNumber=19573.13680,Decree=12.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# Ute Pipeline Hdg No. 2 - set diversion b/c alternate point is modeled b/c diversions are located at AP structure
+SetDiversionRight(ID="720920.01",Name="Ute Pipeline Hdg No.2",StationID="ID",AdministrationNumber=38847.00000,Decree=20.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# Mason Eddy - Ute water for irrigation and municipal uses
+SetDiversionRight(ID="950030.01",Name="Mason Eddy Ditch-Ute",StationID="ID",AdministrationNumber=12753.00000,Decree=4.03,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950030.02",Name="Mason Eddy Ditch-Ute",StationID="ID",AdministrationNumber=30895.12724,Decree=1.95,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950030.03",Name="Mason Eddy Ditch-Ute",StationID="ID",AdministrationNumber=30895.24260,Decree=0.74,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950030.04",Name="Mason Eddy Ditch-Ute",StationID="ID",AdministrationNumber=32811.00000,Decree=2.12,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950030.05",Name="Carver Ranch PL-Ute",StationID="ID",AdministrationNumber=46751.46599,Decree=11.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# Industrial Water Rights
+SetDiversionRight(ID="360989.01",Name="Maggie Pond Snowmaking",StationID="ID",AdministrationNumber=99999.99999,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="361016.01",Name="Copper Mtn Snowmaking",StationID="ID",AdministrationNumber=99999.99999,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="720807.01",Name="Molina Power Plant",StationID="ID",AdministrationNumber=99999.99999,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# TenMile Diversion No. 1 - set diversion b/c it has been "Transferred From" in 1996 database
+SetDiversionRight(ID="360841.01",Name="TenMile Diversion No.1",StationID="ID",AdministrationNumber=31566.00000,Decree=35.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#
+#
+# Redlands Power Canal and Irrigation rights (420541 has 3 rights of which only the first is modified, James Heath (heath@lrcwe.com))
+SetDiversionRight(ID="420541.01",Name="Redlands Power Canal",StationID="ID",AdministrationNumber=22283.20300,Decree=610.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="950050.01",Name="Redlands Power Canal-Irr",StationID="ID",AdministrationNumber=22283.20300,Decree=60.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950050.02",Name="Redlands Power Canal-Irr",StationID="ID",AdministrationNumber=34419.33414,Decree=80.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#
+#
+# Silt Project default water rights - water obtained through operations
+SetDiversionRight(ID="950010.01",Name="Dry Elk Valley Irr",StationID="ID",AdministrationNumber=99999.99999,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950011.01",Name="Farmers Irrigation Comp",StationID="ID",AdministrationNumber=99999.99999,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#
+#
+# 15-Mile Reach - LR-2
+SetDiversionRight(ID="952001.01",Name="15-Mile Fish Require",StationID="ID",AdministrationNumber=99999.91000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#
+#
+# Excess HUP Releases from Homestake, Dillon, Williams Fork, and Wolford Reservoirs Water Rights
+SetDiversionRight(ID="954516D.01",Name="HUP Release Node",StationID="ID",AdministrationNumber=99999.99999,Decree=0.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="954512D.01",Name="HUP Release Node",StationID="ID",AdministrationNumber=99999.99999,Decree=0.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="953709D.01",Name="HUP Release Node",StationID="ID",AdministrationNumber=99999.99999,Decree=0.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="953668D.01",Name="HUP Release Node",StationID="ID",AdministrationNumber=99999.99999,Decree=0.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#
+#
+# WOLFORD MOUNTAIN RESERVOIR DEMAND
+SetDiversionRight(ID="953101.01",Name="Wolford_Fraser_Dem",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="953102.01",Name="Wolford_MidPark_Dem",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="953103.01",Name="Wolford_Market_Dem",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# WOLCOTT RESERVOIR SUPPLY - demand is currently zero af
+SetDiversionRight(ID="371146.01",Name="Wolcott_Pumping_Plant",StationID="ID",AdministrationNumber=42485.00000,Decree=500,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# RUEDI RESERVOIR DEMAND
+SetDiversionRight(ID="953001.01",Name="Ruedi_Rnd_1-Mun.Demand",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="953002.01",Name="Ruedi_Rnd_1-Ind.Demand",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="953003.01",Name="Ruedi_Rnd_2-Mun.Demand",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="953004.01",Name="Ruedi_Rnd_2-Ind.Demand",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="953005.01",Name="Ruedi_Add'l_Dem",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# GREEN MOUNTAIN DEMAND - Operating rule driven
+SetDiversionRight(ID="950060.01",Name="Grn_Mtn_Contract_Dem",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950061.01",Name="Grn_Mtn_Annual_Rep_Est.",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="360606.01",StationID="ID",OnOff=1,IfNotFound=Warn,IfFound=Set)
+#
+#
+#
+# FUTURE DEPLETIONS
+SetDiversionRight(ID="956001.01",Name="Future_Depletion_#1",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="956002.01",Name="Future_Depletion_#2",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#
+#
+#
+# Cliff Ditch - both water rights reside under WDID 500539 - set 12 cfs of second water right to 500731
+# and reduce to 12 cfs at 500539 - this water right serves both 500539 & 500731
+SetDiversionRight(ID="500731.01",Name="Cliff Ditch Hdg No 2",StationID="ID",AdministrationNumber=20676.19665,Decree=12.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="500539.02",Name="Cliff Ditch",StationID="ID",AdministrationNumber=20676.19665,Decree=12.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+#
+#
+#
+#  Step 5 - Add Free water rights for structures historically diverting more than water rights
+# Example from San Juan - replace section when we get a list of free river water rights
+#setDiversionRight(ID="290550.05",Name="C H  LOUCKS DITCH",StationID="290550",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="360662.99",Name="HOAGLAND CANAL SPRUCE",StationID="360662",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="360729.99",Name="MAT NO 2 DITCH",StationID="360729",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="360734.99",Name="MCKAY DITCH",StationID="360734",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="360765.99",Name="PALMER-MCKINLEY DITCH",StationID="360765",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="360780.99",Name="PLUNGER DITCH",StationID="360780",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="360800.99",Name="SLATE CREEK DITCH",StationID="360800",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="360801.99",Name="SMITH DITCH",StationID="360801",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="360841.99",Name="TenMile Diversion No.1",StationID="360841",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="360868.99",Name="WESTLAKE DITCH",StationID="360868",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="364626.99",Name="Vidler Tunnel Collection",StationID="364626",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="370519.99",Name="BRAGG NO 1 DITCH",StationID="370519",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="370548.99",Name="C M STREMME GATES DITCH",StationID="370548",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="370571.99",Name="J M DODD DITCH",StationID="370571",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="370655.99",Name="H O R DITCH",StationID="370655",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="370723.99",Name="NEILSON SOUTH DITCH",StationID="370723",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="370743.99",Name="ONEILL AND HOLLAND DITCH",StationID="370743",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="370823.99",Name="STRATTON AND CO DITCH",StationID="370823",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="370830.99",Name="TERRELL AND FORD DITCH",StationID="370830",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="370848.99",Name="WARREN DITCH",StationID="370848",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="371091.99",Name="EWING PLACER DITCH",StationID="371091",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380517.99",Name="ATKINSON CANAL",StationID="380517",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380547.99",Name="BOWLES AND HOLLAND DITCH",StationID="380547",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380573.99",Name="CAPITOL PARK DITCH",StationID="380573",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380618.99",Name="CRANE AND PEEBLES DITCH",StationID="380618",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380663.99",Name="ELLA DITCH",StationID="380663",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380667.99",Name="EUREKA NO 1 DITCH",StationID="380667",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380688.99",Name="FOUR MILE DITCH",StationID="380688",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380712.99",Name="GLENWOOD DITCH",StationID="380712",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380715.99",Name="GRACE AND SHEHI DITCH",StationID="380715",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380720.99",Name="GREEN MEADOW DITCH",StationID="380720",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380740.99",Name="HARRIS & REED DITCH",StationID="380740",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380757.99",Name="HOME SUPPLY DITCH",StationID="380757",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380838.99",Name="LOWER DITCH",StationID="380838",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380840.99",Name="LOWLINE DITCH",StationID="380840",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380854.99",Name="MAROON DITCH",StationID="380854",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380881.99",Name="MOUNTAIN MEADOW DITCH",StationID="380881",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380890.99",Name="MCKENZIE WILDCAT DITCH",StationID="380890",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380893.99",Name="MCKOWN DITCH",StationID="380893",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380925.99",Name="PARK DITCH",StationID="380925",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380930.99",Name="PATERSON D JACOB EXT",StationID="380930",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380939.99",Name="PIONEER DITCH",StationID="380939",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380959.99",Name="RED ROCK BLUFF DITCH",StationID="380959",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380968.99",Name="ROBINSON DITCH",StationID="380968",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380970.99",Name="ROCKFORD DITCH",StationID="380970",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="380981.99",Name="SALVATION DITCH",StationID="380981",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="381018.99",Name="SOUTHARD AND CAVANAUGH D",StationID="381018",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="381038.99",Name="SWEET JESSUP CANAL",StationID="381038",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="381073.99",Name="WACO DITCH",StationID="381073",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="381101.99",Name="WILLOW CREEK DITCH",StationID="381101",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="381121.99",Name="ALEXIS ARBANEY DITCH",StationID="381121",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="381132.99",Name="WALTHEN DITCH",StationID="381132",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="381147.99",Name="KAISER AND SIEVERS DITCH",StationID="381147",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="384613.99",Name="IVANHOE RESERVOIR TUNNEL",StationID="384613",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="390532.99",Name="CLOUGH NO 1 DITCH",StationID="390532",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="390537.99",Name="CORNELL DITCH",StationID="390537",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="390540.99",Name="CORYELL JOINT STOCK IRRI",StationID="390540",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="390562.99",Name="GRANLEE DITCH",StationID="390562",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="390590.99",Name="JANGLE DITCH",StationID="390590",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="390610.99",Name="LOW COST DITCH",StationID="390610",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="390612.99",Name="LOWER CACTUS VALLEY D",StationID="390612",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="390635.99",Name="PARACHUTE DITCH",StationID="390635",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="390638.99",Name="PIERSON AND HARRIS DITCH",StationID="390638",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="390645.99",Name="RIFLE CREEK CANON DITCH",StationID="390645",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="390672.99",Name="THOMPKINS DITCH",StationID="390672",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="390687.99",Name="WARE AND HINDS DITCH",StationID="390687",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="390825.99",Name="WILLIAMS CANAL",StationID="390825",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="450616.99",Name="H AND S DITCH",StationID="450616",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="450668.99",Name="LAST CHANCE DITCH",StationID="450668",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="450685.99",Name="MAMM CREEK DITCH",StationID="450685",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="450704.99",Name="MULTA-TRINA DITCH",StationID="450704",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="450743.99",Name="RISING SUN DITCH",StationID="450743",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="450788.99",Name="SYKES AND ALVORD DITCH",StationID="450788",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="450793.99",Name="TAUGHENBAUGH DITCH",StationID="450793",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="450818.99",Name="WEST DIVIDE CREEK DITCH",StationID="450818",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="450861.99",Name="LARKIN DITCH",StationID="450861",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="500539.99",Name="CLIFF DITCH",StationID="500539",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="500582.99",Name="HERDE DITCH",StationID="500582",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="500627.99",Name="PASS CREEK DITCH",StationID="500627",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="500628.99",Name="PICKERING DITCH",StationID="500628",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="500654.99",Name="TROUBLESOME DITCH",StationID="500654",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="500656.99",Name="TYLER DITCH",StationID="500656",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="500731.99",Name="Cliff Ditch Hdg No 2",StationID="500731",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="500734.99",Name="DEBERARD DITCH",StationID="500734",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="510546.99",Name="BUNTE HIGHLINE DITCH",StationID="510546",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="510585.99",Name="COFFEE MCQUEARY DITCH",StationID="510585",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="510660.99",Name="GASKILL DITCH",StationID="510660",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="510699.99",Name="HAMMOND NO 1 DITCH",StationID="510699",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="510763.99",Name="KINNEY BARRIGER DITCH",StationID="510763",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="510829.99",Name="PEAVEY NO 2 DITCH",StationID="510829",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="510831.99",Name="PETERSON DITCH NO 1",StationID="510831",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="510876.99",Name="SCYBERT DITCH",StationID="510876",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="510880.99",Name="SELAK LARRABEE DITCH",StationID="510880",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="510883.99",Name="SHERIFF DITCH 156",StationID="510883",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="510893.99",Name="SOPHRONIA DAY DITCH",StationID="510893",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="510934.99",Name="TRAIL CREEK DITCH",StationID="510934",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="510939.99",Name="UTE BILL NO 2 DITCH",StationID="510939",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="511070.99",Name="HENDERSON MINE WTR SYS",StationID="511070",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="520559.99",Name="GUTZLER DITCH",StationID="520559",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="520658.99",Name="WILMOT DITCH",StationID="520658",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="530555.99",Name="CABIN CREEK DITCH",StationID="530555",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="530632.99",Name="HORSE MEADOWS DITCH",StationID="530632",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="530783.99",Name="ROYAL FLUSH DITCH",StationID="530783",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="700550.99",Name="H V C AND S DITCH",StationID="700550",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="700584.99",Name="ROAN CREEK NO 3 DITCH",StationID="700584",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720533.99",Name="BERTHOLF LANHAM UPDIKE D",StationID="720533",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720580.99",Name="COOK DITCH",StationID="720580",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720645.99",Name="GRAND VALLEY CANAL",StationID="720645",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720911.99",Name="TEMS DITCH",StationID="720911",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="950050.99",Name="Redlands Power Canal-Irr",StationID="950050",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="38_ADC035.99",Name="Frying Pan River",StationID="38_ADC035",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="38_ADC036.99",Name="West Sopris Creek",StationID="38_ADC036",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="45_ADC047.99",Name="Colorado River bl Cache",StationID="45_ADC047",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="50_ADC012.99",Name="Troublesome Creek",StationID="50_ADC012",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="50_ADC016.99",Name="Lower Muddy Creek",StationID="50_ADC016",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="51_ADC001.99",Name="Colorado River nr Granby",StationID="51_ADC001",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="51_ADC002.99",Name="Willow Creek",StationID="51_ADC002",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="51_ADC003.99",Name="Ranch Creek",StationID="51_ADC003",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="51_ADC006.99",Name="Fraser River at Granby",StationID="51_ADC006",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="51_ADC007.99",Name="Colorado River abv Hot S",StationID="51_ADC007",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="51_ADC008.99",Name="Colorado River abv Willi",StationID="51_ADC008",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="51_ADC011.99",Name="Colorado River abv Troub",StationID="51_ADC011",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="53_ADC024.99",Name="Egeria Creek abv Toponas",StationID="53_ADC024",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="53_ADC028.99",Name="Derby Creek",StationID="53_ADC028",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="53_ADC032.99",Name="Colorado River abv Glenw",StationID="53_ADC032",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+#
+#  Step 6 - add municipal aggregate rights - this agg node water right is set to zero as no M&I uses need to be aggregated and accounted for.
+#                                            the node is included to maintain consistency with other basins and for potential future use
+#
+SetDiversionRight(ID="72_AMC001.01",Name="72_AMC001 Colorado River nr Stateline",StationID="ID",AdministrationNumber=1.00000,Decree=0.0,IfNotFound=Add,IfFound=Set)
+#
+#  Step 7 - create direct diverison rights file
+#
+WriteDiversionRightsToStateMod(OutputFile="..\STATEMOD\cm2005.ddr")
+#
+# Check the results
+CheckDiversionRights(ID="*")
+WriteCheckFile(OutputFile="ddr.commands.StateDMI.check.html")

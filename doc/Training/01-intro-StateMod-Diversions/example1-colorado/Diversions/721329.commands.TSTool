@@ -1,0 +1,6 @@
+setOutputPeriod(10/1950,9/2005)
+setOutputYearType(Water)
+721235.DWR.DivTotal.Month~HydroBase
+721329.DWR.DivTotal.Month~HydroBase
+add(TSID="721329.DWR.DivTotal.Month",TSList="AllTS",HandleMissingHow=IgnoreMissing)
+writeStateMod(TSList=AllMatchingTSID,TSID="721329.DWR.DivTotal.Month",OutputFile="test",Precision=0)

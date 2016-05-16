@@ -1,0 +1,3982 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"><html>
+<head>
+<title>StateDMI Check File (C:\Develop\StateDMI_SourceBuild\StateDMI\doc\Training\01-intro-StateMod-Diversions\example1-colorado\Diversions\ddh.commands-updated.StateDMI)
+</title><style>
+#titles { font-weight:bold; color:#303044 }
+table { background-color:black; text-align:left; border:1; bordercolor:black; cellspacing:1; cellpadding:1 }
+th { background-color:#333366; text-align:center; vertical-align:bottom; color:white }
+tr { valign:bottom }
+td { background-color:white; text-align:left; vertical-align:bottom; }
+body { text-align:left; font-size:12pt; }
+pre { font-size:12pt; margin: 0px }
+p { font-size:12pt; }
+/* The following controls formatting of severity column in tables */
+.warning { background-color:yellow; }
+.failure { background-color:red; }
+.success { background-color:green; }
+.unknown { background-color:white; }
+</style>
+</head>
+<body>
+
+<h1>StateDMI Check Results</h1>
+
+<h2>StateDMI Check File (C:\Develop\StateDMI_SourceBuild\StateDMI\doc\Training\01-intro-StateMod-Diversions\example1-colorado\Diversions\ddh.commands-updated.StateDMI)</h2>
+
+<h2>Check File Table of Contents</h2>
+<a href="#environment">Program/Environment Information</a>
+ - generated at runtime<br>
+<a href="#notes">Command File Comments</a>
+ - as written to output file headers<br>
+<a href="#commands">Command Details</a>
+ - command run times and warning/failure counts<br>
+<a href="#summary">Command Problem Summary</a>
+ - command problem summary<br>
+
+<h2><a name="environment">Program/Environment Information</h2>
+<p>
+<table>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+<tr>
+<td>Command file
+</td>
+<td>C:\Develop\StateDMI_SourceBuild\StateDMI\doc\Training\01-intro-StateMod-Diversions\example1-colorado\Diversions\ddh.commands-updated.StateDMI
+</td>
+</tr>
+<tr>
+<td>Program
+</td>
+<td>StateDMI 3.10.00 (2010-04-01)
+</td>
+</tr>
+<tr>
+<td>User
+</td>
+<td>sam
+</td>
+</tr>
+<tr>
+<td>Creation time
+</td>
+<td>2010-05-07 13:08:39 MDT
+</td>
+</tr>
+<tr>
+<td>Computer
+</td>
+<td>AMAZON
+</td>
+</tr>
+<tr>
+<td>Processor initial working directory
+</td>
+<td>C:\Develop\StateDMI_SourceBuild\StateDMI\doc\Training\01-intro-StateMod-Diversions\example1-colorado\Diversions
+</td>
+</tr>
+<tr>
+<td>Command line
+</td>
+<td>StateDMI -home test\operational\CDSS
+</td>
+</tr>
+</table>
+</p>
+
+<h2><a name="notes">Command File Comments</h2>
+<pre>
+StateDMI check file containing all warning/failure messages from run.
+
+-----------------------------------------------------------------------
+Command file name: "C:\Develop\StateDMI_SourceBuild\StateDMI\doc\Training\01-intro-StateMod-Diversions\example1-colorado\Diversions\ddh.commands-updated.StateDMI"
+Commands: 
+StartLog(LogFile="ddh.commands.StateDMI.log")
+# ddh.commands.StateDMI
+#
+#  StateDMI command file to create the historical diversion file
+#           and the "step 2" direct diversion structure file, updated so structure
+#           capacity = maximum historical diversion
+#
+#  Step 1 - set time-series period and year type
+#
+SetOutputPeriod(OutputStart="10/1908",OutputEnd="09/2005")
+SetOutputYearType(OutputYearType=Water)
+#
+#  Step 2 - read structure list from preliminary direct diversion structure file
+#
+ReadDiversionStationsFromStateMod(InputFile="cm2005_dds.dds")
+#
+#  Step 3 - read aggregate and diversion system structure assignments.  Note that
+#        want to combine historical diversions for aggs and diversion systems, but
+#        historical diversions are separate for primary and secondary components of multistructures
+#
+SetDiversionAggregateFromList(ListFile="cm_agg.csv",IDCol=1,NameCol=2,PartIDsCol=3,PartsListedHow=InRow)
+SetDiversionSystemFromList(ListFile="cm_divsys.csv",IDCol=1,NameCol=2,PartIDsCol=3,PartsListedHow=InRow)
+#
+#  Step 4 - read historical diversions from HydroBase. Note that want individual structures
+#           in aggregates and diversion systems to be filled first, then diversions combined.
+#
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="*",IncludeCollections=False,UseDiversionComments=True)
+#
+#  Step 5 - read fill pattern file, and assign patterns to water districts
+#
+ReadPatternFile(InputFile="fill2005.pat")
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="36*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="37*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="38*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="39*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="42*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09152500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="45*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09095500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="50*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09034500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="51*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09034500",FillPatternOrder=1,FillAverageOrder=2)
+#
+# Other District 51 structures that are represented by 09037500
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="514603",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="511070",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="510788",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="510529",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="511237",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="51_ADC009",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="51_ADC010",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)
+#
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="52*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="53*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="70*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09095500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="72*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09095500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="95*",IncludeExplicit=False,UseDiversionComments=False,PatternID="09095500",FillPatternOrder=1,FillAverageOrder=2)
+# Con. Hoosier Summary and Keystone Municipal
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="954683",IncludeExplicit=False,UseDiversionComments=False,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="955002",IncludeExplicit=False,UseDiversionComments=False,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)
+# Vail Valley Consolidated Ditches
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="955001",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="955003",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)
+# Other WDIDs 95* not represented by Fill PatternID=09095500
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="953101",IncludeExplicit=False,UseDiversionComments=False,PatternID="09034500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="953102",IncludeExplicit=False,UseDiversionComments=False,PatternID="09034500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="950060",IncludeExplicit=False,UseDiversionComments=False,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="950061",IncludeExplicit=False,UseDiversionComments=False,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="950040",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="954699",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="950010",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="950011",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="953103",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="953005",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)
+#
+#  Step 6 - assign transbasin diversions from streamflow gages
+#
+SetDiversionHistoricalTSMonthly(ID="364626",TSID="09047300.DWR.Streamflow.Month~HydroBase")
+SetDiversionHistoricalTSMonthly(ID="374648",TSID="09062500.DWR.Streamflow.Month~HydroBase")
+SetDiversionHistoricalTSMonthly(ID="514601",TSID="09010000.DWR.Streamflow.Month~HydroBase")
+SetDiversionHistoricalTSMonthly(ID="514625",TSID="09021500.DWR.Streamflow.Month~HydroBase")
+SetDiversionHistoricalTSMonthly(ID="374614",TSID="09063700.DWR.Streamflow.Month~HydroBase")
+SetDiversionHistoricalTSMonthly(ID="384617",TSID="09073000.DWR.Streamflow.Month~HydroBase")
+SetDiversionHistoricalTSMonthly(ID="384613",TSID="09077500.DWR.Streamflow.Month~HydroBase")
+SetDiversionHistoricalTSMonthly(ID="364685",TSID="09046000.DWR.Streamflow.Month~HydroBase")
+SetDiversionHistoricalTSMonthly(ID="954683",TSID="HSPTUNCO.DWR.Streamflow.Month~HydroBase")
+SetDiversionHistoricalTSMonthly(ID="364684",TSID="09050590.DWR.Streamflow.Month~HydroBase")
+SetDiversionHistoricalTSMonthly(ID="371091",TSID="09062000.DWR.Streamflow.Month~HydroBase")
+SetDiversionHistoricalTSMonthly(ID="374641",TSID="09061500.DWR.Streamflow.Month~HydroBase")
+# note that adams tunnel streamgage ID changed in 10/1996 from 09013000 to ADANETCO
+SetDiversionHistoricalTSMonthly(ID="514634",TSID="514634...MONTH~StateMod~514634.stm")
+#     Con-Hoosier System - Blue River Diversion, driven by operating rules to con-hoosier summary demand
+SetDiversionHistoricalTSMonthly(ID="364683",TSID="364683...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="364699",TSID="364699...MONTH~StateMod~zero.stm")
+#     Fryingpan-Arkansas Project
+SetDiversionHistoricalTSMonthly(ID="381594",TSID="381594...MONTH~StateMod~381594.stm")
+SetDiversionHistoricalTSMonthly(ID="384625",TSID="384625...MONTH~StateMod~384625.stm")
+SetDiversionHistoricalTSMonthly(ID="954699",TSID="954699...MONTH~StateMod~zero.stm")
+#     Fraser River Diversion Project
+SetDiversionHistoricalTSMonthly(ID="510639",TSID="510639...MONTH~StateMod~Fraser.stm")
+SetDiversionHistoricalTSMonthly(ID="510728",TSID="510728...MONTH~StateMod~Fraser.stm")
+SetDiversionHistoricalTSMonthly(ID="511269",TSID="511269...MONTH~StateMod~Fraser.stm")
+SetDiversionHistoricalTSMonthly(ID="511309",TSID="511309...MONTH~StateMod~Fraser.stm")
+SetDiversionHistoricalTSMonthly(ID="511310",TSID="511310...MONTH~StateMod~Fraser.stm")
+SetDiversionHistoricalTSMonthly(ID="514603",TSID="514603...MONTH~StateMod~Fraser.stm")
+SetDiversionHistoricalTSMonthly(ID="514655",TSID="514655...MONTH~StateMod~Fraser.stm")
+#     Homestake - Missouri Tunnel
+SetDiversionHistoricalTSMonthly(ID="374643",TSID="374643...MONTH~StateMod~zero.stm")
+#
+#  Step 7 - set diversions from external time-series files
+#
+# The following commands are added to access Task 11.2 replacement files
+SetDiversionHistoricalTSMonthly(ID="380757",TSID="380757...MONTH~StateMod~380757.stm")
+SetDiversionHistoricalTSMonthly(ID="450969",TSID="450969...MONTH~StateMod~450969.stm")
+SetDiversionHistoricalTSMonthly(ID="510529",TSID="510529...MONTH~StateMod~510529.stm")
+#
+# The following structures are set for Municipal and Industrial Diversions
+SetDiversionHistoricalTSMonthly(ID="360784",TSID="360784...MONTH~StateMod~360784.stm")
+SetDiversionHistoricalTSMonthly(ID="360829",TSID="360829...MONTH~StateMod~360829.stm")
+SetDiversionHistoricalTSMonthly(ID="360841",TSID="360841...MONTH~StateMod~360841.stm")
+SetDiversionHistoricalTSMonthly(ID="360908",TSID="360908...MONTH~StateMod~360908.stm")
+SetDiversionHistoricalTSMonthly(ID="360989",TSID="360989...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="361008",TSID="361008...MONTH~StateMod~361008.stm")
+SetDiversionHistoricalTSMonthly(ID="361016",TSID="361016...MONTH~StateMod~361016.stm")
+SetDiversionHistoricalTSMonthly(ID="370708",TSID="370708...MONTH~StateMod~370708.stm")
+SetDiversionHistoricalTSMonthly(ID="381441",TSID="381441...MONTH~StateMod~381441.stm")
+SetDiversionHistoricalTSMonthly(ID="380869",TSID="380869...MONTH~StateMod~380869.stm")
+SetDiversionHistoricalTSMonthly(ID="381052",TSID="381052...MONTH~StateMod~381052.stm")
+SetDiversionHistoricalTSMonthly(ID="420520",TSID="420520...MONTH~StateMod~420520.stm")
+SetDiversionHistoricalTSMonthly(ID="511070",TSID="511070...MONTH~StateMod~511070.stm")
+SetDiversionHistoricalTSMonthly(ID="530584",TSID="530584...MONTH~StateMod~530584.stm")
+SetDiversionHistoricalTSMonthly(ID="531051",TSID="531051...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="720644",TSID="720644...MONTH~StateMod~720644.stm")
+SetDiversionHistoricalTSMonthly(ID="720807",TSID="720807...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="720816",TSID="720816...MONTH~StateMod~720816.stm")
+SetDiversionHistoricalTSMonthly(ID="720920",TSID="720920...MONTH~StateMod~720920.stm")
+SetDiversionHistoricalTSMonthly(ID="950020",TSID="950020...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="955001",TSID="955001...MONTH~StateMod~955001.stm")
+SetDiversionHistoricalTSMonthly(ID="955002",TSID="955002...MONTH~StateMod~955002.stm")
+SetDiversionHistoricalTSMonthly(ID="955003",TSID="955003...MONTH~StateMod~955003.stm")
+#
+# The following structures are diversions that need to be set
+SetDiversionHistoricalTSMonthly(ID="510958",TSID="510958...MONTH~StateMod~510958.stm")
+SetDiversionHistoricalTSMonthly(ID="511237",TSID="511237...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="514700",TSID="514700...MONTH~StateMod~514700.stm")
+SetDiversionHistoricalTSMonthly(ID="721339",TSID="721339...MONTH~StateMod~721339.stm")
+SetDiversionHistoricalTSMonthly(ID="950030",TSID="950030...MONTH~StateMod~950030.stm")
+SetDiversionHistoricalTSMonthly(ID="953101",TSID="953101...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="953102",TSID="953102...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="950060",TSID="950060...MONTH~StateMod~950060.stm")
+#
+# The following structures are part of the Silt Project
+SetDiversionHistoricalTSMonthly(ID="390563",TSID="390563...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="390663",TSID="390663...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="950010",TSID="950010...MONTH~StateMod~950010.stm")
+SetDiversionHistoricalTSMonthly(ID="950011",TSID="950011...MONTH~StateMod~950011.stm")
+#
+# The following structures are part of the Collbran and Molina Projects
+SetDiversionHistoricalTSMonthly(ID="720542",TSID="720542...MONTH~StateMod~720542.stm")
+SetDiversionHistoricalTSMonthly(ID="720583",TSID="720583...MONTH~StateMod~720583.stm")
+SetDiversionHistoricalTSMonthly(ID="724715",TSID="720758...MONTH~StateMod~720758.stm")
+SetDiversionHistoricalTSMonthly(ID="720746",TSID="720746...MONTH~StateMod~720746.stm")
+SetDiversionHistoricalTSMonthly(ID="720820",TSID="720820...MONTH~StateMod~720820.stm")
+SetDiversionHistoricalTSMonthly(ID="720879",TSID="720879...MONTH~StateMod~720879.stm")
+SetDiversionHistoricalTSMonthly(ID="720628",TSID="720628...MONTH~StateMod~720628.stm")
+#
+# The following structures are part of the Cameo Demand / Grand Valley Area
+SetDiversionHistoricalTSMonthly(ID="420541",TSID="420541...MONTH~StateMod~420541.stm")
+SetDiversionHistoricalTSMonthly(ID="720646",TSID="720646...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="720813",TSID="720813...MONTH~StateMod~720813.stm")
+#       721330 is a supplimental source for the OMID Project that is and has only been used to
+#       maintain diligence and has no diversion data in HydroBase.
+SetDiversionHistoricalTSMonthly(ID="721330",TSID="721330...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="950001",TSID="950001...MONTH~StateMod~950001.stm")
+SetDiversionHistoricalTSMonthly(ID="950002",TSID="950002...MONTH~StateMod~950002.stm")
+SetDiversionHistoricalTSMonthly(ID="950003",TSID="950003...MONTH~StateMod~950003.stm")
+SetDiversionHistoricalTSMonthly(ID="950004",TSID="950004...MONTH~StateMod~950004.stm")
+SetDiversionHistoricalTSMonthly(ID="950005",TSID="950005...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="950006",TSID="950006...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="950007",TSID="950007...MONTH~StateMod~950007.stm")
+SetDiversionHistoricalTSMonthly(ID="950008",TSID="950008...MONTH~StateMod~950008.stm")
+SetDiversionHistoricalTSMonthly(ID="950050",TSID="950050...MONTH~StateMod~950050.stm")
+SetDiversionHistoricalTSMonthly(ID="950051",TSID="950051...MONTH~StateMod~950051.stm")
+SetDiversionHistoricalTSMonthly(ID="952001",TSID="952001...MONTH~StateMod~952001.stm")
+#
+SetDiversionHistoricalTSMonthly(ID="72_AMC001",TSID="72_AMC001...MONTH~StateMod~zero.stm")
+#
+# The following structures are miscellaneous structures
+SetDiversionHistoricalTSMonthly(ID="510941",TSID="510941...MONTH~StateMod~510941.stm")
+SetDiversionHistoricalTSMonthly(ID="720766",TSID="720766...MONTH~StateMod~720766.stm")
+SetDiversionHistoricalTSMonthly(ID="720852",TSID="720852...MONTH~StateMod~720852.stm")
+#     Structures used in the Baseline and C1 scenarios
+SetDiversionHistoricalTSMonthly(ID="950061",TSID="950061...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="953001",TSID="953001...MONTH~StateMod~953001.stm")
+SetDiversionHistoricalTSMonthly(ID="953002",TSID="953002...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="953003",TSID="953003...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="953004",TSID="953004...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="953005",TSID="953005...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="956001",TSID="956001...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="956002",TSID="956002...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="953103",TSID="953103...MONTH~StateMod~zero.stm")
+#     Wolcott Pumping Plant
+SetDiversionHistoricalTSMonthly(ID="371146",TSID="371146...MONTH~StateMod~zero.stm")
+#     Excess HUP nodes for Homestake, Dillon, Williams Fork, and Wolford Reservoirs (set to zero)
+SetDiversionHistoricalTSMonthly(ID="954516D",TSID="954516D...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="954512D",TSID="954512D...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="953709D",TSID="953709D...MONTH~StateMod~zero.stm")
+SetDiversionHistoricalTSMonthly(ID="953668D",TSID="953668D...MONTH~StateMod~zero.stm")
+#
+# Set transbasin diversions to "0" prior to construction
+#
+#      Wurtz Ditch
+SetDiversionHistoricalTSMonthlyConstant(ID="374648",Constant=0,SetEnd="01/1929")
+#      Vidler Tunnel
+SetDiversionHistoricalTSMonthlyConstant(ID="364626",Constant=0,SetEnd="01/1969")
+#      Homestake Project
+SetDiversionHistoricalTSMonthlyConstant(ID="374614",Constant=0,SetEnd="04/1968")
+#      Idependence Pass / Twin Lakes Tunnel
+SetDiversionHistoricalTSMonthlyConstant(ID="384617",Constant=0,SetEnd="01/1935")
+#      Busk-Ivanhoe Tunnel
+SetDiversionHistoricalTSMonthlyConstant(ID="384613",Constant=0,SetEnd="01/1925")
+#      Con-Hoosier Project
+SetDiversionHistoricalTSMonthlyConstant(ID="954683",Constant=0,SetEnd="08/1929")
+SetDiversionHistoricalTSMonthlyConstant(ID="364683",Constant=0,SetEnd="08/1929")
+SetDiversionHistoricalTSMonthlyConstant(ID="364699",Constant=0,SetEnd="08/1929")
+#      Roberts Tunnel
+SetDiversionHistoricalTSMonthlyConstant(ID="364684",Constant=0,SetEnd="07/1964")
+#      Columbine Ditch
+SetDiversionHistoricalTSMonthlyConstant(ID="374641",Constant=0,SetEnd="01/1930")
+#      Fraser Collection System
+SetDiversionHistoricalTSMonthlyConstant(ID="514655",Constant=0,SetEnd="06/1936")
+#      Bousted Tunnel
+SetDiversionHistoricalTSMonthlyConstant(ID="954699",Constant=0,SetEnd="10/1971")
+#      Berthoud Pass Ditch
+SetDiversionHistoricalTSMonthlyConstant(ID="514625",Constant=0,SetEnd="1/1910")
+#
+# Operations at Molina began December 1962 (John Ozga, 3/31/99)
+SetDiversionHistoricalTSMonthlyConstant(ID="720807",Constant=0,SetEnd="12/1962")
+SetDiversionHistoricalTSMonthlyConstant(ID="720542",Constant=0,SetEnd="12/1962")
+SetDiversionHistoricalTSMonthlyConstant(ID="720583",Constant=0,SetEnd="12/1962")
+#
+# OM Check operated 1926-1984
+SetDiversionHistoricalTSMonthlyConstant(ID="950003",Constant=0,SetEnd="10/1926")
+#
+# Vega Feeder Canals - Online in March 1960
+SetDiversionHistoricalTSMonthlyConstant(ID="720746",Constant=0,SetEnd="03/1960")
+SetDiversionHistoricalTSMonthlyConstant(ID="720820",Constant=0,SetEnd="03/1960")
+#
+# CWCB demands for 15-mile reach begin in August 1991
+SetDiversionHistoricalTSMonthlyConstant(ID="952001",Constant=0,SetEnd="7/1991")
+SetDiversionHistoricalTSMonthlyConstant(ID="952001",Constant=0,SetStart="10/1996")
+#
+# hdt 00/03/05; Set diversions to Southside Canal to zero prior to March 1961
+SetDiversionHistoricalTSMonthlyConstant(ID="720879",Constant=0,SetEnd="3/1961")
+#
+# hdt 00/03/05; Set diversions to Adams Tunnel to zero prior to July 1947
+SetDiversionHistoricalTSMonthlyConstant(ID="514634",Constant=0,SetEnd="7/1947")
+#
+# JRH 2/17/2006; set diversions for snow making to zero prior to their start
+SetDiversionHistoricalTSMonthlyConstant(ID="360908",Constant=0,SetEnd="9/1981")
+SetDiversionHistoricalTSMonthlyConstant(ID="360989",Constant=0,SetEnd="9/1988")
+SetDiversionHistoricalTSMonthlyConstant(ID="361016",Constant=0,SetEnd="9/1988")
+#
+# JRH 6/9/2006; set diversions for municipal and industrial demands to zero prior to their start
+SetDiversionHistoricalTSMonthlyConstant(ID="955002",Constant=0,SetEnd="9/1981")
+SetDiversionHistoricalTSMonthlyConstant(ID="360841",Constant=0,SetEnd="9/1917")
+#
+# JRH 2/27/2006; set diversions at the Ute WCD Rapid Creek Pumping Plant to zero prior to diversion
+# records in HydroBase based on conversation with Tom Crumpton (Ute WCD)
+SetDiversionHistoricalTSMonthlyConstant(ID="721329",Constant=0,SetEnd="9/1984")
+#
+#  Step 8 - fill historical diversion using pattern approach
+#
+FillDiversionHistoricalTSMonthlyPattern(ID="36*",PatternID="09034500")
+FillDiversionHistoricalTSMonthlyPattern(ID="37*",PatternID="09085000")
+FillDiversionHistoricalTSMonthlyPattern(ID="38*",PatternID="09085000")
+FillDiversionHistoricalTSMonthlyPattern(ID="39*",PatternID="09085000")
+FillDiversionHistoricalTSMonthlyPattern(ID="42*",PatternID="09152500")
+FillDiversionHistoricalTSMonthlyPattern(ID="45*",PatternID="09095500")
+FillDiversionHistoricalTSMonthlyPattern(ID="50*",PatternID="09034500")
+FillDiversionHistoricalTSMonthlyPattern(ID="51*",PatternID="09034500")
+FillDiversionHistoricalTSMonthlyPattern(ID="52*",PatternID="09085000")
+FillDiversionHistoricalTSMonthlyPattern(ID="53*",PatternID="09085000")
+FillDiversionHistoricalTSMonthlyPattern(ID="70*",PatternID="09095500")
+FillDiversionHistoricalTSMonthlyPattern(ID="72*",PatternID="09095500")
+FillDiversionHistoricalTSMonthlyPattern(ID="954683",PatternID="09034500")
+FillDiversionHistoricalTSMonthlyPattern(ID="955002",PatternID="09034500")
+FillDiversionHistoricalTSMonthlyPattern(ID="955001",PatternID="09085000")
+FillDiversionHistoricalTSMonthlyPattern(ID="955003",PatternID="09085000")
+FillDiversionHistoricalTSMonthlyPattern(ID="953101",PatternID="09034500")
+FillDiversionHistoricalTSMonthlyPattern(ID="953102",PatternID="09034500")
+FillDiversionHistoricalTSMonthlyPattern(ID="950060",PatternID="09034500")
+FillDiversionHistoricalTSMonthlyPattern(ID="950061",PatternID="09034500")
+FillDiversionHistoricalTSMonthlyPattern(ID="950040",PatternID="09085000")
+FillDiversionHistoricalTSMonthlyPattern(ID="954699",PatternID="09085000")
+FillDiversionHistoricalTSMonthlyPattern(ID="950010",PatternID="09085000")
+FillDiversionHistoricalTSMonthlyPattern(ID="950011",PatternID="09085000")
+FillDiversionHistoricalTSMonthlyPattern(ID="95*",PatternID="09095500")
+#
+#   Step 9 - Fill remaining missing with month average
+#
+FillDiversionHistoricalTSMonthlyAverage(ID="*")
+#
+#   Step 10 - Limit filled diversion to water rights. Exceptions include structure
+#             receiving significant reservoir supply, carrier structures, etc.
+#
+LimitDiversionHistoricalTSMonthlyToRights(InputFile="..\statemod\cm2005.ddr",ID="*",IgnoreID="954683,952001,950010,950011")
+#
+#   Step 11 - sort structures and create historical diversion file
+#
+SortDiversionHistoricalTSMonthly(Order=Ascending)
+WriteDiversionHistoricalTSMonthlyToStateMod(OutputFile="..\StateMod\cm2005.ddh")
+#
+#  Step 12 - update capacities and create final direct diversion station file
+#
+SetDiversionStationCapacitiesFromTS(ID="*")
+WriteDiversionStationsToStateMod(OutputFile="..\statemod\cm2005.dds")
+#
+# Check the results.
+CheckDiversionHistoricalTSMonthly(ID="*")
+WriteCheckFile(OutputFile="ddh.commands.StateDMI.check.html")
+
+-----------------------------------------------------------------------------
+HydroBase database is: HydroBase on hbserver
+HydroBase.db_version:  design version: 20080701  last data change: 20090701
+HydroBase table structure for software is at least 2007052520070525
+HydroBase input name is "".
+Stored procedures are being used.
+-----------------------------------------------------------------------------
+
+</pre>
+
+<h2><a name="commands">Command Details</h2>
+<p>
+Total number of failures: 0<br>
+Total number of commands with failures: 0<br>
+Total number of warnings: 1<br>
+Total number of commands with warnings: 1<br>
+</p>
+<p>
+<table>
+<tr>
+<th>#</th>
+<th>Time, sec.</th>
+<th>Warnings</th>
+<th>Failures</th>
+<th>Command</th>
+</tr>
+<tr>
+<td>1
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c0">StartLog(LogFile="ddh.commands.StateDMI.log")</a></td>
+</tr>
+<tr>
+<td>2
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c1"># ddh.commands.StateDMI</a></td>
+</tr>
+<tr>
+<td>3
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c2">#</a></td>
+</tr>
+<tr>
+<td>4
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c3">#  StateDMI command file to create the historical diversion file</a></td>
+</tr>
+<tr>
+<td>5
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c4">#           and the "step 2" direct diversion structure file, updated so structure</a></td>
+</tr>
+<tr>
+<td>6
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c5">#           capacity = maximum historical diversion</a></td>
+</tr>
+<tr>
+<td>7
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c6">#</a></td>
+</tr>
+<tr>
+<td>8
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c7">#  Step 1 - set time-series period and year type</a></td>
+</tr>
+<tr>
+<td>9
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c8">#</a></td>
+</tr>
+<tr>
+<td>10
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c9">SetOutputPeriod(OutputStart="10/1908",OutputEnd="09/2005")</a></td>
+</tr>
+<tr>
+<td>11
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c10">SetOutputYearType(OutputYearType=Water)</a></td>
+</tr>
+<tr>
+<td>12
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c11">#</a></td>
+</tr>
+<tr>
+<td>13
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c12">#  Step 2 - read structure list from preliminary direct diversion structure file</a></td>
+</tr>
+<tr>
+<td>14
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c13">#</a></td>
+</tr>
+<tr>
+<td>15
+</td>
+<td>0.046
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c14">ReadDiversionStationsFromStateMod(InputFile="cm2005_dds.dds")</a></td>
+</tr>
+<tr>
+<td>16
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c15">#</a></td>
+</tr>
+<tr>
+<td>17
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c16">#  Step 3 - read aggregate and diversion system structure assignments.  Note that</a></td>
+</tr>
+<tr>
+<td>18
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c17">#        want to combine historical diversions for aggs and diversion systems, but</a></td>
+</tr>
+<tr>
+<td>19
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c18">#        historical diversions are separate for primary and secondary components of multistructures</a></td>
+</tr>
+<tr>
+<td>20
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c19">#</a></td>
+</tr>
+<tr>
+<td>21
+</td>
+<td>0.032
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c20">SetDiversionAggregateFromList(ListFile="cm_agg.csv",IDCol=1,NameCol=2,PartIDsCol=3,PartsListedHow=InRow)</a></td>
+</tr>
+<tr>
+<td>22
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c21">SetDiversionSystemFromList(ListFile="cm_divsys.csv",IDCol=1,NameCol=2,PartIDsCol=3,PartsListedHow=InRow)</a></td>
+</tr>
+<tr>
+<td>23
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c22">#</a></td>
+</tr>
+<tr>
+<td>24
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c23">#  Step 4 - read historical diversions from HydroBase. Note that want individual structures</a></td>
+</tr>
+<tr>
+<td>25
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c24">#           in aggregates and diversion systems to be filled first, then diversions combined.</a></td>
+</tr>
+<tr>
+<td>26
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c25">#</a></td>
+</tr>
+<tr>
+<td>27
+</td>
+<td>14.532
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c26">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="*",IncludeCollections=False,UseDiversionComments=True)</a></td>
+</tr>
+<tr>
+<td>28
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c27">#</a></td>
+</tr>
+<tr>
+<td>29
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c28">#  Step 5 - read fill pattern file, and assign patterns to water districts</a></td>
+</tr>
+<tr>
+<td>30
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c29">#</a></td>
+</tr>
+<tr>
+<td>31
+</td>
+<td>0.047
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c30">ReadPatternFile(InputFile="fill2005.pat")</a></td>
+</tr>
+<tr>
+<td>32
+</td>
+<td>4.531
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c31">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="36*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>33
+</td>
+<td>4.438
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c32">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="37*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>34
+</td>
+<td>9.343
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c33">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="38*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>35
+</td>
+<td>4.969
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c34">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="39*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>36
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c35">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="42*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09152500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>37
+</td>
+<td>9.703
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c36">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="45*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09095500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>38
+</td>
+<td>5.406
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c37">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="50*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09034500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>39
+</td>
+<td>7.969
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c38">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="51*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09034500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>40
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c39">#</a></td>
+</tr>
+<tr>
+<td>41
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c40"># Other District 51 structures that are represented by 09037500</a></td>
+</tr>
+<tr>
+<td>42
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c41">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="514603",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>43
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c42">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="511070",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>44
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c43">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="510788",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>45
+</td>
+<td>0.063
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c44">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="510529",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>46
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c45">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="511237",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>47
+</td>
+<td>0.515
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c46">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="51_ADC009",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>48
+</td>
+<td>1.329
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c47">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="51_ADC010",IncludeExplicit=False,UseDiversionComments=True,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>49
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c48">#</a></td>
+</tr>
+<tr>
+<td>50
+</td>
+<td>3.719
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c49">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="52*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>51
+</td>
+<td>6.781
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c50">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="53*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>52
+</td>
+<td>2.516
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c51">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="70*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09095500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>53
+</td>
+<td>11.343
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c52">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="72*",IncludeExplicit=False,UseDiversionComments=True,PatternID="09095500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>54
+</td>
+<td>0.032
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c53">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="95*",IncludeExplicit=False,UseDiversionComments=False,PatternID="09095500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>55
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c54"># Con. Hoosier Summary and Keystone Municipal</a></td>
+</tr>
+<tr>
+<td>56
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c55">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="954683",IncludeExplicit=False,UseDiversionComments=False,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>57
+</td>
+<td>0.031
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c56">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="955002",IncludeExplicit=False,UseDiversionComments=False,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>58
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c57"># Vail Valley Consolidated Ditches</a></td>
+</tr>
+<tr>
+<td>59
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c58">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="955001",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>60
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c59">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="955003",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>61
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c60"># Other WDIDs 95* not represented by Fill PatternID=09095500</a></td>
+</tr>
+<tr>
+<td>62
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c61">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="953101",IncludeExplicit=False,UseDiversionComments=False,PatternID="09034500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>63
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c62">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="953102",IncludeExplicit=False,UseDiversionComments=False,PatternID="09034500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>64
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c63">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="950060",IncludeExplicit=False,UseDiversionComments=False,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>65
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c64">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="950061",IncludeExplicit=False,UseDiversionComments=False,PatternID="09037500",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>66
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c65">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="950040",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>67
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c66">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="954699",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>68
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c67">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="950010",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>69
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c68">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="950011",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>70
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c69">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="953103",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>71
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c70">ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="953005",IncludeExplicit=False,UseDiversionComments=False,PatternID="09085000",FillPatternOrder=1,FillAverageOrder=2)</a></td>
+</tr>
+<tr>
+<td>72
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c71">#</a></td>
+</tr>
+<tr>
+<td>73
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c72">#  Step 6 - assign transbasin diversions from streamflow gages</a></td>
+</tr>
+<tr>
+<td>74
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c73">#</a></td>
+</tr>
+<tr>
+<td>75
+</td>
+<td>0.031
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c74">SetDiversionHistoricalTSMonthly(ID="364626",TSID="09047300.DWR.Streamflow.Month~HydroBase")</a></td>
+</tr>
+<tr>
+<td>76
+</td>
+<td>0.031
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c75">SetDiversionHistoricalTSMonthly(ID="374648",TSID="09062500.DWR.Streamflow.Month~HydroBase")</a></td>
+</tr>
+<tr>
+<td>77
+</td>
+<td>0.031
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c76">SetDiversionHistoricalTSMonthly(ID="514601",TSID="09010000.DWR.Streamflow.Month~HydroBase")</a></td>
+</tr>
+<tr>
+<td>78
+</td>
+<td>0.032
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c77">SetDiversionHistoricalTSMonthly(ID="514625",TSID="09021500.DWR.Streamflow.Month~HydroBase")</a></td>
+</tr>
+<tr>
+<td>79
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c78">SetDiversionHistoricalTSMonthly(ID="374614",TSID="09063700.DWR.Streamflow.Month~HydroBase")</a></td>
+</tr>
+<tr>
+<td>80
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c79">SetDiversionHistoricalTSMonthly(ID="384617",TSID="09073000.DWR.Streamflow.Month~HydroBase")</a></td>
+</tr>
+<tr>
+<td>81
+</td>
+<td>0.047
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c80">SetDiversionHistoricalTSMonthly(ID="384613",TSID="09077500.DWR.Streamflow.Month~HydroBase")</a></td>
+</tr>
+<tr>
+<td>82
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c81">SetDiversionHistoricalTSMonthly(ID="364685",TSID="09046000.DWR.Streamflow.Month~HydroBase")</a></td>
+</tr>
+<tr>
+<td>83
+</td>
+<td>0.031
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c82">SetDiversionHistoricalTSMonthly(ID="954683",TSID="HSPTUNCO.DWR.Streamflow.Month~HydroBase")</a></td>
+</tr>
+<tr>
+<td>84
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c83">SetDiversionHistoricalTSMonthly(ID="364684",TSID="09050590.DWR.Streamflow.Month~HydroBase")</a></td>
+</tr>
+<tr>
+<td>85
+</td>
+<td>0.031
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c84">SetDiversionHistoricalTSMonthly(ID="371091",TSID="09062000.DWR.Streamflow.Month~HydroBase")</a></td>
+</tr>
+<tr>
+<td>86
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c85">SetDiversionHistoricalTSMonthly(ID="374641",TSID="09061500.DWR.Streamflow.Month~HydroBase")</a></td>
+</tr>
+<tr>
+<td>87
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c86"># note that adams tunnel streamgage ID changed in 10/1996 from 09013000 to ADANETCO</a></td>
+</tr>
+<tr>
+<td>88
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c87">SetDiversionHistoricalTSMonthly(ID="514634",TSID="514634...MONTH~StateMod~514634.stm")</a></td>
+</tr>
+<tr>
+<td>89
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c88">#     Con-Hoosier System - Blue River Diversion, driven by operating rules to con-hoosier summary demand</a></td>
+</tr>
+<tr>
+<td>90
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c89">SetDiversionHistoricalTSMonthly(ID="364683",TSID="364683...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>91
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c90">SetDiversionHistoricalTSMonthly(ID="364699",TSID="364699...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>92
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c91">#     Fryingpan-Arkansas Project</a></td>
+</tr>
+<tr>
+<td>93
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c92">SetDiversionHistoricalTSMonthly(ID="381594",TSID="381594...MONTH~StateMod~381594.stm")</a></td>
+</tr>
+<tr>
+<td>94
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c93">SetDiversionHistoricalTSMonthly(ID="384625",TSID="384625...MONTH~StateMod~384625.stm")</a></td>
+</tr>
+<tr>
+<td>95
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c94">SetDiversionHistoricalTSMonthly(ID="954699",TSID="954699...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>96
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c95">#     Fraser River Diversion Project</a></td>
+</tr>
+<tr>
+<td>97
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c96">SetDiversionHistoricalTSMonthly(ID="510639",TSID="510639...MONTH~StateMod~Fraser.stm")</a></td>
+</tr>
+<tr>
+<td>98
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c97">SetDiversionHistoricalTSMonthly(ID="510728",TSID="510728...MONTH~StateMod~Fraser.stm")</a></td>
+</tr>
+<tr>
+<td>99
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c98">SetDiversionHistoricalTSMonthly(ID="511269",TSID="511269...MONTH~StateMod~Fraser.stm")</a></td>
+</tr>
+<tr>
+<td>100
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c99">SetDiversionHistoricalTSMonthly(ID="511309",TSID="511309...MONTH~StateMod~Fraser.stm")</a></td>
+</tr>
+<tr>
+<td>101
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c100">SetDiversionHistoricalTSMonthly(ID="511310",TSID="511310...MONTH~StateMod~Fraser.stm")</a></td>
+</tr>
+<tr>
+<td>102
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c101">SetDiversionHistoricalTSMonthly(ID="514603",TSID="514603...MONTH~StateMod~Fraser.stm")</a></td>
+</tr>
+<tr>
+<td>103
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c102">SetDiversionHistoricalTSMonthly(ID="514655",TSID="514655...MONTH~StateMod~Fraser.stm")</a></td>
+</tr>
+<tr>
+<td>104
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c103">#     Homestake - Missouri Tunnel</a></td>
+</tr>
+<tr>
+<td>105
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c104">SetDiversionHistoricalTSMonthly(ID="374643",TSID="374643...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>106
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c105">#</a></td>
+</tr>
+<tr>
+<td>107
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c106">#  Step 7 - set diversions from external time-series files</a></td>
+</tr>
+<tr>
+<td>108
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c107">#</a></td>
+</tr>
+<tr>
+<td>109
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c108"># The following commands are added to access Task 11.2 replacement files</a></td>
+</tr>
+<tr>
+<td>110
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c109">SetDiversionHistoricalTSMonthly(ID="380757",TSID="380757...MONTH~StateMod~380757.stm")</a></td>
+</tr>
+<tr>
+<td>111
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c110">SetDiversionHistoricalTSMonthly(ID="450969",TSID="450969...MONTH~StateMod~450969.stm")</a></td>
+</tr>
+<tr>
+<td>112
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c111">SetDiversionHistoricalTSMonthly(ID="510529",TSID="510529...MONTH~StateMod~510529.stm")</a></td>
+</tr>
+<tr>
+<td>113
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c112">#</a></td>
+</tr>
+<tr>
+<td>114
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c113"># The following structures are set for Municipal and Industrial Diversions</a></td>
+</tr>
+<tr>
+<td>115
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c114">SetDiversionHistoricalTSMonthly(ID="360784",TSID="360784...MONTH~StateMod~360784.stm")</a></td>
+</tr>
+<tr>
+<td>116
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c115">SetDiversionHistoricalTSMonthly(ID="360829",TSID="360829...MONTH~StateMod~360829.stm")</a></td>
+</tr>
+<tr>
+<td>117
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c116">SetDiversionHistoricalTSMonthly(ID="360841",TSID="360841...MONTH~StateMod~360841.stm")</a></td>
+</tr>
+<tr>
+<td>118
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c117">SetDiversionHistoricalTSMonthly(ID="360908",TSID="360908...MONTH~StateMod~360908.stm")</a></td>
+</tr>
+<tr>
+<td>119
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c118">SetDiversionHistoricalTSMonthly(ID="360989",TSID="360989...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>120
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c119">SetDiversionHistoricalTSMonthly(ID="361008",TSID="361008...MONTH~StateMod~361008.stm")</a></td>
+</tr>
+<tr>
+<td>121
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c120">SetDiversionHistoricalTSMonthly(ID="361016",TSID="361016...MONTH~StateMod~361016.stm")</a></td>
+</tr>
+<tr>
+<td>122
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c121">SetDiversionHistoricalTSMonthly(ID="370708",TSID="370708...MONTH~StateMod~370708.stm")</a></td>
+</tr>
+<tr>
+<td>123
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c122">SetDiversionHistoricalTSMonthly(ID="381441",TSID="381441...MONTH~StateMod~381441.stm")</a></td>
+</tr>
+<tr>
+<td>124
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c123">SetDiversionHistoricalTSMonthly(ID="380869",TSID="380869...MONTH~StateMod~380869.stm")</a></td>
+</tr>
+<tr>
+<td>125
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c124">SetDiversionHistoricalTSMonthly(ID="381052",TSID="381052...MONTH~StateMod~381052.stm")</a></td>
+</tr>
+<tr>
+<td>126
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c125">SetDiversionHistoricalTSMonthly(ID="420520",TSID="420520...MONTH~StateMod~420520.stm")</a></td>
+</tr>
+<tr>
+<td>127
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c126">SetDiversionHistoricalTSMonthly(ID="511070",TSID="511070...MONTH~StateMod~511070.stm")</a></td>
+</tr>
+<tr>
+<td>128
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c127">SetDiversionHistoricalTSMonthly(ID="530584",TSID="530584...MONTH~StateMod~530584.stm")</a></td>
+</tr>
+<tr>
+<td>129
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c128">SetDiversionHistoricalTSMonthly(ID="531051",TSID="531051...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>130
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c129">SetDiversionHistoricalTSMonthly(ID="720644",TSID="720644...MONTH~StateMod~720644.stm")</a></td>
+</tr>
+<tr>
+<td>131
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c130">SetDiversionHistoricalTSMonthly(ID="720807",TSID="720807...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>132
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c131">SetDiversionHistoricalTSMonthly(ID="720816",TSID="720816...MONTH~StateMod~720816.stm")</a></td>
+</tr>
+<tr>
+<td>133
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c132">SetDiversionHistoricalTSMonthly(ID="720920",TSID="720920...MONTH~StateMod~720920.stm")</a></td>
+</tr>
+<tr>
+<td>134
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c133">SetDiversionHistoricalTSMonthly(ID="950020",TSID="950020...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>135
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c134">SetDiversionHistoricalTSMonthly(ID="955001",TSID="955001...MONTH~StateMod~955001.stm")</a></td>
+</tr>
+<tr>
+<td>136
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c135">SetDiversionHistoricalTSMonthly(ID="955002",TSID="955002...MONTH~StateMod~955002.stm")</a></td>
+</tr>
+<tr>
+<td>137
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c136">SetDiversionHistoricalTSMonthly(ID="955003",TSID="955003...MONTH~StateMod~955003.stm")</a></td>
+</tr>
+<tr>
+<td>138
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c137">#</a></td>
+</tr>
+<tr>
+<td>139
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c138"># The following structures are diversions that need to be set</a></td>
+</tr>
+<tr>
+<td>140
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c139">SetDiversionHistoricalTSMonthly(ID="510958",TSID="510958...MONTH~StateMod~510958.stm")</a></td>
+</tr>
+<tr>
+<td>141
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c140">SetDiversionHistoricalTSMonthly(ID="511237",TSID="511237...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>142
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c141">SetDiversionHistoricalTSMonthly(ID="514700",TSID="514700...MONTH~StateMod~514700.stm")</a></td>
+</tr>
+<tr>
+<td>143
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c142">SetDiversionHistoricalTSMonthly(ID="721339",TSID="721339...MONTH~StateMod~721339.stm")</a></td>
+</tr>
+<tr>
+<td>144
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c143">SetDiversionHistoricalTSMonthly(ID="950030",TSID="950030...MONTH~StateMod~950030.stm")</a></td>
+</tr>
+<tr>
+<td>145
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c144">SetDiversionHistoricalTSMonthly(ID="953101",TSID="953101...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>146
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c145">SetDiversionHistoricalTSMonthly(ID="953102",TSID="953102...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>147
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c146">SetDiversionHistoricalTSMonthly(ID="950060",TSID="950060...MONTH~StateMod~950060.stm")</a></td>
+</tr>
+<tr>
+<td>148
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c147">#</a></td>
+</tr>
+<tr>
+<td>149
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c148"># The following structures are part of the Silt Project</a></td>
+</tr>
+<tr>
+<td>150
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c149">SetDiversionHistoricalTSMonthly(ID="390563",TSID="390563...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>151
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c150">SetDiversionHistoricalTSMonthly(ID="390663",TSID="390663...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>152
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c151">SetDiversionHistoricalTSMonthly(ID="950010",TSID="950010...MONTH~StateMod~950010.stm")</a></td>
+</tr>
+<tr>
+<td>153
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c152">SetDiversionHistoricalTSMonthly(ID="950011",TSID="950011...MONTH~StateMod~950011.stm")</a></td>
+</tr>
+<tr>
+<td>154
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c153">#</a></td>
+</tr>
+<tr>
+<td>155
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c154"># The following structures are part of the Collbran and Molina Projects</a></td>
+</tr>
+<tr>
+<td>156
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c155">SetDiversionHistoricalTSMonthly(ID="720542",TSID="720542...MONTH~StateMod~720542.stm")</a></td>
+</tr>
+<tr>
+<td>157
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c156">SetDiversionHistoricalTSMonthly(ID="720583",TSID="720583...MONTH~StateMod~720583.stm")</a></td>
+</tr>
+<tr>
+<td>158
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c157">SetDiversionHistoricalTSMonthly(ID="724715",TSID="720758...MONTH~StateMod~720758.stm")</a></td>
+</tr>
+<tr>
+<td>159
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c158">SetDiversionHistoricalTSMonthly(ID="720746",TSID="720746...MONTH~StateMod~720746.stm")</a></td>
+</tr>
+<tr>
+<td>160
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c159">SetDiversionHistoricalTSMonthly(ID="720820",TSID="720820...MONTH~StateMod~720820.stm")</a></td>
+</tr>
+<tr>
+<td>161
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c160">SetDiversionHistoricalTSMonthly(ID="720879",TSID="720879...MONTH~StateMod~720879.stm")</a></td>
+</tr>
+<tr>
+<td>162
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c161">SetDiversionHistoricalTSMonthly(ID="720628",TSID="720628...MONTH~StateMod~720628.stm")</a></td>
+</tr>
+<tr>
+<td>163
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c162">#</a></td>
+</tr>
+<tr>
+<td>164
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c163"># The following structures are part of the Cameo Demand / Grand Valley Area</a></td>
+</tr>
+<tr>
+<td>165
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c164">SetDiversionHistoricalTSMonthly(ID="420541",TSID="420541...MONTH~StateMod~420541.stm")</a></td>
+</tr>
+<tr>
+<td>166
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c165">SetDiversionHistoricalTSMonthly(ID="720646",TSID="720646...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>167
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c166">SetDiversionHistoricalTSMonthly(ID="720813",TSID="720813...MONTH~StateMod~720813.stm")</a></td>
+</tr>
+<tr>
+<td>168
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c167">#       721330 is a supplimental source for the OMID Project that is and has only been used to</a></td>
+</tr>
+<tr>
+<td>169
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c168">#       maintain diligence and has no diversion data in HydroBase.</a></td>
+</tr>
+<tr>
+<td>170
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c169">SetDiversionHistoricalTSMonthly(ID="721330",TSID="721330...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>171
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c170">SetDiversionHistoricalTSMonthly(ID="950001",TSID="950001...MONTH~StateMod~950001.stm")</a></td>
+</tr>
+<tr>
+<td>172
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c171">SetDiversionHistoricalTSMonthly(ID="950002",TSID="950002...MONTH~StateMod~950002.stm")</a></td>
+</tr>
+<tr>
+<td>173
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c172">SetDiversionHistoricalTSMonthly(ID="950003",TSID="950003...MONTH~StateMod~950003.stm")</a></td>
+</tr>
+<tr>
+<td>174
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c173">SetDiversionHistoricalTSMonthly(ID="950004",TSID="950004...MONTH~StateMod~950004.stm")</a></td>
+</tr>
+<tr>
+<td>175
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c174">SetDiversionHistoricalTSMonthly(ID="950005",TSID="950005...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>176
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c175">SetDiversionHistoricalTSMonthly(ID="950006",TSID="950006...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>177
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c176">SetDiversionHistoricalTSMonthly(ID="950007",TSID="950007...MONTH~StateMod~950007.stm")</a></td>
+</tr>
+<tr>
+<td>178
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c177">SetDiversionHistoricalTSMonthly(ID="950008",TSID="950008...MONTH~StateMod~950008.stm")</a></td>
+</tr>
+<tr>
+<td>179
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c178">SetDiversionHistoricalTSMonthly(ID="950050",TSID="950050...MONTH~StateMod~950050.stm")</a></td>
+</tr>
+<tr>
+<td>180
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c179">SetDiversionHistoricalTSMonthly(ID="950051",TSID="950051...MONTH~StateMod~950051.stm")</a></td>
+</tr>
+<tr>
+<td>181
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c180">SetDiversionHistoricalTSMonthly(ID="952001",TSID="952001...MONTH~StateMod~952001.stm")</a></td>
+</tr>
+<tr>
+<td>182
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c181">#</a></td>
+</tr>
+<tr>
+<td>183
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c182">SetDiversionHistoricalTSMonthly(ID="72_AMC001",TSID="72_AMC001...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>184
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c183">#</a></td>
+</tr>
+<tr>
+<td>185
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c184"># The following structures are miscellaneous structures</a></td>
+</tr>
+<tr>
+<td>186
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c185">SetDiversionHistoricalTSMonthly(ID="510941",TSID="510941...MONTH~StateMod~510941.stm")</a></td>
+</tr>
+<tr>
+<td>187
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c186">SetDiversionHistoricalTSMonthly(ID="720766",TSID="720766...MONTH~StateMod~720766.stm")</a></td>
+</tr>
+<tr>
+<td>188
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c187">SetDiversionHistoricalTSMonthly(ID="720852",TSID="720852...MONTH~StateMod~720852.stm")</a></td>
+</tr>
+<tr>
+<td>189
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c188">#     Structures used in the Baseline and C1 scenarios</a></td>
+</tr>
+<tr>
+<td>190
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c189">SetDiversionHistoricalTSMonthly(ID="950061",TSID="950061...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>191
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c190">SetDiversionHistoricalTSMonthly(ID="953001",TSID="953001...MONTH~StateMod~953001.stm")</a></td>
+</tr>
+<tr>
+<td>192
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c191">SetDiversionHistoricalTSMonthly(ID="953002",TSID="953002...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>193
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c192">SetDiversionHistoricalTSMonthly(ID="953003",TSID="953003...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>194
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c193">SetDiversionHistoricalTSMonthly(ID="953004",TSID="953004...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>195
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c194">SetDiversionHistoricalTSMonthly(ID="953005",TSID="953005...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>196
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c195">SetDiversionHistoricalTSMonthly(ID="956001",TSID="956001...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>197
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c196">SetDiversionHistoricalTSMonthly(ID="956002",TSID="956002...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>198
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c197">SetDiversionHistoricalTSMonthly(ID="953103",TSID="953103...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>199
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c198">#     Wolcott Pumping Plant</a></td>
+</tr>
+<tr>
+<td>200
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c199">SetDiversionHistoricalTSMonthly(ID="371146",TSID="371146...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>201
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c200">#     Excess HUP nodes for Homestake, Dillon, Williams Fork, and Wolford Reservoirs (set to zero)</a></td>
+</tr>
+<tr>
+<td>202
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c201">SetDiversionHistoricalTSMonthly(ID="954516D",TSID="954516D...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>203
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c202">SetDiversionHistoricalTSMonthly(ID="954512D",TSID="954512D...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>204
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c203">SetDiversionHistoricalTSMonthly(ID="953709D",TSID="953709D...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>205
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c204">SetDiversionHistoricalTSMonthly(ID="953668D",TSID="953668D...MONTH~StateMod~zero.stm")</a></td>
+</tr>
+<tr>
+<td>206
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c205">#</a></td>
+</tr>
+<tr>
+<td>207
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c206"># Set transbasin diversions to "0" prior to construction</a></td>
+</tr>
+<tr>
+<td>208
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c207">#</a></td>
+</tr>
+<tr>
+<td>209
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c208">#      Wurtz Ditch</a></td>
+</tr>
+<tr>
+<td>210
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c209">SetDiversionHistoricalTSMonthlyConstant(ID="374648",Constant=0,SetEnd="01/1929")</a></td>
+</tr>
+<tr>
+<td>211
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c210">#      Vidler Tunnel</a></td>
+</tr>
+<tr>
+<td>212
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c211">SetDiversionHistoricalTSMonthlyConstant(ID="364626",Constant=0,SetEnd="01/1969")</a></td>
+</tr>
+<tr>
+<td>213
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c212">#      Homestake Project</a></td>
+</tr>
+<tr>
+<td>214
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c213">SetDiversionHistoricalTSMonthlyConstant(ID="374614",Constant=0,SetEnd="04/1968")</a></td>
+</tr>
+<tr>
+<td>215
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c214">#      Idependence Pass / Twin Lakes Tunnel</a></td>
+</tr>
+<tr>
+<td>216
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c215">SetDiversionHistoricalTSMonthlyConstant(ID="384617",Constant=0,SetEnd="01/1935")</a></td>
+</tr>
+<tr>
+<td>217
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c216">#      Busk-Ivanhoe Tunnel</a></td>
+</tr>
+<tr>
+<td>218
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c217">SetDiversionHistoricalTSMonthlyConstant(ID="384613",Constant=0,SetEnd="01/1925")</a></td>
+</tr>
+<tr>
+<td>219
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c218">#      Con-Hoosier Project</a></td>
+</tr>
+<tr>
+<td>220
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c219">SetDiversionHistoricalTSMonthlyConstant(ID="954683",Constant=0,SetEnd="08/1929")</a></td>
+</tr>
+<tr>
+<td>221
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c220">SetDiversionHistoricalTSMonthlyConstant(ID="364683",Constant=0,SetEnd="08/1929")</a></td>
+</tr>
+<tr>
+<td>222
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c221">SetDiversionHistoricalTSMonthlyConstant(ID="364699",Constant=0,SetEnd="08/1929")</a></td>
+</tr>
+<tr>
+<td>223
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c222">#      Roberts Tunnel</a></td>
+</tr>
+<tr>
+<td>224
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c223">SetDiversionHistoricalTSMonthlyConstant(ID="364684",Constant=0,SetEnd="07/1964")</a></td>
+</tr>
+<tr>
+<td>225
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c224">#      Columbine Ditch</a></td>
+</tr>
+<tr>
+<td>226
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c225">SetDiversionHistoricalTSMonthlyConstant(ID="374641",Constant=0,SetEnd="01/1930")</a></td>
+</tr>
+<tr>
+<td>227
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c226">#      Fraser Collection System</a></td>
+</tr>
+<tr>
+<td>228
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c227">SetDiversionHistoricalTSMonthlyConstant(ID="514655",Constant=0,SetEnd="06/1936")</a></td>
+</tr>
+<tr>
+<td>229
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c228">#      Bousted Tunnel</a></td>
+</tr>
+<tr>
+<td>230
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c229">SetDiversionHistoricalTSMonthlyConstant(ID="954699",Constant=0,SetEnd="10/1971")</a></td>
+</tr>
+<tr>
+<td>231
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c230">#      Berthoud Pass Ditch</a></td>
+</tr>
+<tr>
+<td>232
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c231">SetDiversionHistoricalTSMonthlyConstant(ID="514625",Constant=0,SetEnd="1/1910")</a></td>
+</tr>
+<tr>
+<td>233
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c232">#</a></td>
+</tr>
+<tr>
+<td>234
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c233"># Operations at Molina began December 1962 (John Ozga, 3/31/99)</a></td>
+</tr>
+<tr>
+<td>235
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c234">SetDiversionHistoricalTSMonthlyConstant(ID="720807",Constant=0,SetEnd="12/1962")</a></td>
+</tr>
+<tr>
+<td>236
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c235">SetDiversionHistoricalTSMonthlyConstant(ID="720542",Constant=0,SetEnd="12/1962")</a></td>
+</tr>
+<tr>
+<td>237
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c236">SetDiversionHistoricalTSMonthlyConstant(ID="720583",Constant=0,SetEnd="12/1962")</a></td>
+</tr>
+<tr>
+<td>238
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c237">#</a></td>
+</tr>
+<tr>
+<td>239
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c238"># OM Check operated 1926-1984</a></td>
+</tr>
+<tr>
+<td>240
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c239">SetDiversionHistoricalTSMonthlyConstant(ID="950003",Constant=0,SetEnd="10/1926")</a></td>
+</tr>
+<tr>
+<td>241
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c240">#</a></td>
+</tr>
+<tr>
+<td>242
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c241"># Vega Feeder Canals - Online in March 1960</a></td>
+</tr>
+<tr>
+<td>243
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c242">SetDiversionHistoricalTSMonthlyConstant(ID="720746",Constant=0,SetEnd="03/1960")</a></td>
+</tr>
+<tr>
+<td>244
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c243">SetDiversionHistoricalTSMonthlyConstant(ID="720820",Constant=0,SetEnd="03/1960")</a></td>
+</tr>
+<tr>
+<td>245
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c244">#</a></td>
+</tr>
+<tr>
+<td>246
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c245"># CWCB demands for 15-mile reach begin in August 1991</a></td>
+</tr>
+<tr>
+<td>247
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c246">SetDiversionHistoricalTSMonthlyConstant(ID="952001",Constant=0,SetEnd="7/1991")</a></td>
+</tr>
+<tr>
+<td>248
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c247">SetDiversionHistoricalTSMonthlyConstant(ID="952001",Constant=0,SetStart="10/1996")</a></td>
+</tr>
+<tr>
+<td>249
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c248">#</a></td>
+</tr>
+<tr>
+<td>250
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c249"># hdt 00/03/05; Set diversions to Southside Canal to zero prior to March 1961</a></td>
+</tr>
+<tr>
+<td>251
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c250">SetDiversionHistoricalTSMonthlyConstant(ID="720879",Constant=0,SetEnd="3/1961")</a></td>
+</tr>
+<tr>
+<td>252
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c251">#</a></td>
+</tr>
+<tr>
+<td>253
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c252"># hdt 00/03/05; Set diversions to Adams Tunnel to zero prior to July 1947</a></td>
+</tr>
+<tr>
+<td>254
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c253">SetDiversionHistoricalTSMonthlyConstant(ID="514634",Constant=0,SetEnd="7/1947")</a></td>
+</tr>
+<tr>
+<td>255
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c254">#</a></td>
+</tr>
+<tr>
+<td>256
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c255"># JRH 2/17/2006; set diversions for snow making to zero prior to their start</a></td>
+</tr>
+<tr>
+<td>257
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c256">SetDiversionHistoricalTSMonthlyConstant(ID="360908",Constant=0,SetEnd="9/1981")</a></td>
+</tr>
+<tr>
+<td>258
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c257">SetDiversionHistoricalTSMonthlyConstant(ID="360989",Constant=0,SetEnd="9/1988")</a></td>
+</tr>
+<tr>
+<td>259
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c258">SetDiversionHistoricalTSMonthlyConstant(ID="361016",Constant=0,SetEnd="9/1988")</a></td>
+</tr>
+<tr>
+<td>260
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c259">#</a></td>
+</tr>
+<tr>
+<td>261
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c260"># JRH 6/9/2006; set diversions for municipal and industrial demands to zero prior to their start</a></td>
+</tr>
+<tr>
+<td>262
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c261">SetDiversionHistoricalTSMonthlyConstant(ID="955002",Constant=0,SetEnd="9/1981")</a></td>
+</tr>
+<tr>
+<td>263
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c262">SetDiversionHistoricalTSMonthlyConstant(ID="360841",Constant=0,SetEnd="9/1917")</a></td>
+</tr>
+<tr>
+<td>264
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c263">#</a></td>
+</tr>
+<tr>
+<td>265
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c264"># JRH 2/27/2006; set diversions at the Ute WCD Rapid Creek Pumping Plant to zero prior to diversion</a></td>
+</tr>
+<tr>
+<td>266
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c265"># records in HydroBase based on conversation with Tom Crumpton (Ute WCD)</a></td>
+</tr>
+<tr>
+<td>267
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c266">SetDiversionHistoricalTSMonthlyConstant(ID="721329",Constant=0,SetEnd="9/1984")</a></td>
+</tr>
+<tr>
+<td>268
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c267">#</a></td>
+</tr>
+<tr>
+<td>269
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c268">#  Step 8 - fill historical diversion using pattern approach</a></td>
+</tr>
+<tr>
+<td>270
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c269">#</a></td>
+</tr>
+<tr>
+<td>271
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c270">FillDiversionHistoricalTSMonthlyPattern(ID="36*",PatternID="09034500")</a></td>
+</tr>
+<tr>
+<td>272
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c271">FillDiversionHistoricalTSMonthlyPattern(ID="37*",PatternID="09085000")</a></td>
+</tr>
+<tr>
+<td>273
+</td>
+<td>0.047
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c272">FillDiversionHistoricalTSMonthlyPattern(ID="38*",PatternID="09085000")</a></td>
+</tr>
+<tr>
+<td>274
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c273">FillDiversionHistoricalTSMonthlyPattern(ID="39*",PatternID="09085000")</a></td>
+</tr>
+<tr>
+<td>275
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c274">FillDiversionHistoricalTSMonthlyPattern(ID="42*",PatternID="09152500")</a></td>
+</tr>
+<tr>
+<td>276
+</td>
+<td>0.031
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c275">FillDiversionHistoricalTSMonthlyPattern(ID="45*",PatternID="09095500")</a></td>
+</tr>
+<tr>
+<td>277
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c276">FillDiversionHistoricalTSMonthlyPattern(ID="50*",PatternID="09034500")</a></td>
+</tr>
+<tr>
+<td>278
+</td>
+<td>0.031
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c277">FillDiversionHistoricalTSMonthlyPattern(ID="51*",PatternID="09034500")</a></td>
+</tr>
+<tr>
+<td>279
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c278">FillDiversionHistoricalTSMonthlyPattern(ID="52*",PatternID="09085000")</a></td>
+</tr>
+<tr>
+<td>280
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c279">FillDiversionHistoricalTSMonthlyPattern(ID="53*",PatternID="09085000")</a></td>
+</tr>
+<tr>
+<td>281
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c280">FillDiversionHistoricalTSMonthlyPattern(ID="70*",PatternID="09095500")</a></td>
+</tr>
+<tr>
+<td>282
+</td>
+<td>0.047
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c281">FillDiversionHistoricalTSMonthlyPattern(ID="72*",PatternID="09095500")</a></td>
+</tr>
+<tr>
+<td>283
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c282">FillDiversionHistoricalTSMonthlyPattern(ID="954683",PatternID="09034500")</a></td>
+</tr>
+<tr>
+<td>284
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c283">FillDiversionHistoricalTSMonthlyPattern(ID="955002",PatternID="09034500")</a></td>
+</tr>
+<tr>
+<td>285
+</td>
+<td>0.015
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c284">FillDiversionHistoricalTSMonthlyPattern(ID="955001",PatternID="09085000")</a></td>
+</tr>
+<tr>
+<td>286
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c285">FillDiversionHistoricalTSMonthlyPattern(ID="955003",PatternID="09085000")</a></td>
+</tr>
+<tr>
+<td>287
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c286">FillDiversionHistoricalTSMonthlyPattern(ID="953101",PatternID="09034500")</a></td>
+</tr>
+<tr>
+<td>288
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c287">FillDiversionHistoricalTSMonthlyPattern(ID="953102",PatternID="09034500")</a></td>
+</tr>
+<tr>
+<td>289
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c288">FillDiversionHistoricalTSMonthlyPattern(ID="950060",PatternID="09034500")</a></td>
+</tr>
+<tr>
+<td>290
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c289">FillDiversionHistoricalTSMonthlyPattern(ID="950061",PatternID="09034500")</a></td>
+</tr>
+<tr>
+<td>291
+</td>
+<td>0.000
+</td>
+<td class=warning >1
+</td>
+<td>0
+</td>
+<td><a name="c290">FillDiversionHistoricalTSMonthlyPattern(ID="950040",PatternID="09085000")</a></td>
+</tr>
+<tr>
+<td>292
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c291">FillDiversionHistoricalTSMonthlyPattern(ID="954699",PatternID="09085000")</a></td>
+</tr>
+<tr>
+<td>293
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c292">FillDiversionHistoricalTSMonthlyPattern(ID="950010",PatternID="09085000")</a></td>
+</tr>
+<tr>
+<td>294
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c293">FillDiversionHistoricalTSMonthlyPattern(ID="950011",PatternID="09085000")</a></td>
+</tr>
+<tr>
+<td>295
+</td>
+<td>0.031
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c294">FillDiversionHistoricalTSMonthlyPattern(ID="95*",PatternID="09095500")</a></td>
+</tr>
+<tr>
+<td>296
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c295">#</a></td>
+</tr>
+<tr>
+<td>297
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c296">#   Step 9 - Fill remaining missing with month average</a></td>
+</tr>
+<tr>
+<td>298
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c297">#</a></td>
+</tr>
+<tr>
+<td>299
+</td>
+<td>0.234
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c298">FillDiversionHistoricalTSMonthlyAverage(ID="*")</a></td>
+</tr>
+<tr>
+<td>300
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c299">#</a></td>
+</tr>
+<tr>
+<td>301
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c300">#   Step 10 - Limit filled diversion to water rights. Exceptions include structure</a></td>
+</tr>
+<tr>
+<td>302
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c301">#             receiving significant reservoir supply, carrier structures, etc.</a></td>
+</tr>
+<tr>
+<td>303
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c302">#</a></td>
+</tr>
+<tr>
+<td>304
+</td>
+<td>0.375
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c303">LimitDiversionHistoricalTSMonthlyToRights(InputFile="..\statemod\cm2005.ddr",ID="*",IgnoreID="954683,952001,950010,950011")</a></td>
+</tr>
+<tr>
+<td>305
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c304">#</a></td>
+</tr>
+<tr>
+<td>306
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c305">#   Step 11 - sort structures and create historical diversion file</a></td>
+</tr>
+<tr>
+<td>307
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c306">#</a></td>
+</tr>
+<tr>
+<td>308
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c307">SortDiversionHistoricalTSMonthly(Order=Ascending)</a></td>
+</tr>
+<tr>
+<td>309
+</td>
+<td>3.328
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c308">WriteDiversionHistoricalTSMonthlyToStateMod(OutputFile="..\StateMod\cm2005.ddh")</a></td>
+</tr>
+<tr>
+<td>310
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c309">#</a></td>
+</tr>
+<tr>
+<td>311
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c310">#  Step 12 - update capacities and create final direct diversion station file</a></td>
+</tr>
+<tr>
+<td>312
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c311">#</a></td>
+</tr>
+<tr>
+<td>313
+</td>
+<td>0.031
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c312">SetDiversionStationCapacitiesFromTS(ID="*")</a></td>
+</tr>
+<tr>
+<td>314
+</td>
+<td>0.016
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c313">WriteDiversionStationsToStateMod(OutputFile="..\statemod\cm2005.dds")</a></td>
+</tr>
+<tr>
+<td>315
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c314">#</a></td>
+</tr>
+<tr>
+<td>316
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c315"># Check the results.</a></td>
+</tr>
+<tr>
+<td>317
+</td>
+<td>0.781
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c316">CheckDiversionHistoricalTSMonthly(ID="*")</a></td>
+</tr>
+<tr>
+<td>318
+</td>
+<td>0.000
+</td>
+<td>0
+</td>
+<td>0
+</td>
+<td><a name="c317">WriteCheckFile(OutputFile="ddh.commands.StateDMI.check.html")</a></td>
+</tr>
+<td>
+</td>
+<td>93.312
+</td>
+<td class=warning >1
+</td>
+<td>0
+</td>
+<td>
+</td>
+</table>
+
+<h2><a name="summary">Command Problem Summary</h2>
+<p>
+Total number of failures: 0<br>
+Total number of commands with failures: 0<br>
+Total number of warnings: 1<br>
+Total number of commands with warnings: 1<br>
+</p>
+<table>
+<tr>
+<th>#</th>
+<th>Severity</th>
+<th>Type</th>
+<th>Command</th>
+<th>Problem</th>
+<th>Recommendation</th>
+</tr>
+<tr>
+<td>1
+</td>
+<td class=warning >WARNING
+</td>
+<td>CommandRun
+</td>
+<td><a href="#c290">FillDiversionHistoricalTSMonthlyPattern(ID="950040",PatternID="09085000")</a></td>
+<td>Identifier &quot;950040&quot; was not matched: warning and not filling.
+</td>
+<td>Verify that the identifier is correct or use IfNotFound=Ignore.
+</td>
+</tr>
+</table>
+
+</body>
+</html>

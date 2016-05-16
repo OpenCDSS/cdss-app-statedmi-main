@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="StateDMI" default="compile" basedir="../">
+
+    <import file="../../rtibuild/common-build.xml"/>
+    <import file="../../rtibuild/common-doc.xml"/>
+    <import file="../../rtibuild/common-installer.xml"/>
+    
+    <property name="nsis.dir" value="installer/CDSS"/>
+    <property name="nsis.file" value="StateDMI.nsi"/>
+    <property name="license.file" value="installer/CDSS/License.txt"/>
+    <!-- icon is relative to dist directory, since launch4j xml is created there-->
+    <property name="product.icon" value="externals/CDSS/graphics/waterMark.ico"/>
+    
+    <target name="-pre-installer" depends="-clean-logs"/>
+    
+    <target name="-clean-logs" description="clean log directories before installer">
+        <delete dir="${install.dir}/logs" includes="*"/>
+    </target>
+    
+    <target name="nsi" description="nsi" depends="-init">
+        <nsisinstaller nsi="${nsis.file}"/>
+    </target>
+	
+	<!-- Create the StateDMI CDSS PDF user manual -->
+	<target name="create-user-manual-cdss"
+	 description="Merges PDF documentation into doc/UserManual/dist_CDSS folder" >
+		<property name="filelist" location="doc/UserManual/merge_PDF/fileList.txt" />
+		<property name="pdfsrc.dir" location="doc/UserManual/Word" />
+        <mkdir dir="doc/UserManual/dist_CDSS/"/>
+		<property name="pdf_file" location="doc/UserManual/dist_CDSS/StateDMI.pdf" />
+		<antcall target="mergePDF" inheritall="true"></antcall>
+	</target>
+    
+    <!-- this is called after standard-local-install and allows common resources to be copied in -->
+    <target name="-install-local" depends="-standard-exe">
+    	<!-- Run-time binary files. -->
+        <!--<copy todir="${install.dir}/bin" file="externals/shellcon/shellcon.exe"/>-->
+        <!-- <copy todir="${install.dir}/bin" file="scripts/StateDMI.bat"/>-->
+    	<copy todir="${install.dir}/bin" file="installer/CDSS/StateDMI.l4j.ini"/>
+    	<!-- Documentation -->
+    	<mkdir dir="${install.dir}/doc/UserManual"/>
+        <copy todir="${install.dir}/doc/UserManual" file="doc/UserManual/dist_CDSS/StateDMI.pdf"/>
+        <!-- this gives an absolute path -->
+        <property name="install.home" location="${install.dir}"/>
+        <!--
+        <replace file="${install.dir}/bin/TSTool.ini" token="@HOME@" value="${install.home}"/>
+        -->
+    	<!-- Log file folder -->
+        <mkdir dir="${install.dir}/logs"/>
+    	<!-- System configuration files -->
+        <copy todir="${install.dir}/system" file="externals/CDSS/system/DATAUNIT"/>
+    	<!-- Training slideshows under doc/Training -->
+    	<!-- If this becomes onerous, put in a separate target so it can be run like the PDF build -->
+    	<!-- Omit bit files that can be regenerated, but otherwise include files for users to poke around -->
+    	<mkdir dir="${install.dir}/doc/Training"/>
+    	<copy todir="${install.dir}/doc/Training">
+    		<fileset dir="doc/Training">
+    			<include name="**/*.*"/>
+    			<exclude name="**/*.chk"/>
+    			<exclude name="**/*.log"/>
+    			<exclude name="**/*.check.html"/>
+    			<exclude name="**/*.ppt"/>
+    			<exclude name="**/graphics/**"/>
+    			</fileset>
+    		</copy>
+    	<!-- CDSS overview -->
+    	<mkdir dir="${install.dir}/doc/CDSS-overview"/>
+    	<copy todir="${install.dir}/doc/CDSS-overview" file="doc/CDSSOverview/CDSS-overview.pdf"/>
+    </target>
+    
+    <target name="-standard-exe" depends="-init-installer" description="create StateDMI.exe">
+        <launch4j-exe exe="StateDMI" 
+            mainClass="DWR.DMI.StateDMI.StateDMI">
+            <opts>
+                <opt>"-Dstatedmi.home=%EXEDIR%/.."</opt>
+            </opts>
+        </launch4j-exe>
+    </target>
+
+</project>

@@ -1,0 +1,50 @@
+#  HENDERSON MINE WATER SYSTEM
+#       Based on tonnage estimates.
+#       Structure is modeled as 100% consumptive
+#       Time series of depletions developed by consultant (W.W.Wheeler)
+#       WY75-91 - Phase II .stm file
+#       WY92-96 - from W.W.Wheeler (Gary Thompson) 9/22/98
+#
+#
+#   WY 97-98 updated with HydroBase by James Heath (heath@lrcwe.com)
+#	HydroBase contains data for the updated time period designated as infrequent data and has been used where available.
+#	WY 99-05 had annual totals (based on irrigation year - Nov 1 through Oct 31) in the infrequent dataset which were used to generate monthly data.
+#		First the monthly average diversion was calculated based on both complete and infrequent data.
+#		Second the monthly averages were summed to determine an annual average.
+#		Third monthly factors were created by dividing the monthly averages by the annual average.
+#		Fourth the annual values in the infrequient data set were multiplied by the monthly factors.
+#		Last these values were hand entered into this stm file.
+#
+# Yr                 OCT     NOV     DEC     JAN     FEB     MAR     APR     MAY     JUN     JUL     AUG    SEPT
+   10/1974  -      9/2005 ACFT  WYR
+1975 511070            0.      0.      0.      0.      0.      0.    100.    300.    400.    200.      0.      0.     1000.
+1976 511070            0.      0.      0.      0.      0.      0.      0.     50.    200.     50.     50.      0.      350.
+1977 511070            0.      0.      0.      0.      0.      0.      0.    400.    600.    220.      0.    200.     1420.
+1978 511070          200.    190.    100.    100.    100.    100.    400.    700.    300.    100.      0.    200.     2490.
+1979 511070          200.    200.    200.    200.    100.    200.    400.   1000.    400.    200.      0.    200.     3300.
+1980 511070          300.    300.    200.    200.    120.    200.    400.   1000.    600.    200.      0.    200.     3720.
+1981 511070          300.    200.    200.    200.    200.    200.    200.    800.    600.    300.      0.    300.     3500.
+1982 511070          300.      0.      0.    200.    100.    110.    200.    400.    300.    100.      0.      0.     1710.
+1983 511070            0.      0.      0.      0.      0.      0.    200.    200.    100.      0.      0.      0.      500.
+1984 511070            0.      0.      0.      0.      0.    100.    100.    620.    800.    200.      0.    200.     2020.
+1985 511070          200.    100.    100.    100.    100.      0.    200.    500.    400.    200.      0.    200.     2100.
+1986 511070          190.    100.    200.    100.    200.    100.    200.    600.    500.    200.      0.    200.     2590.
+1987 511070          200.    100.    100.    100.    200.    100.    100.    400.    300.    200.      0.      0.     1800.
+1988 511070          170.      0.    100.    100.      0.    100.    200.    600.    500.    200.      0.    200.     2170.
+1989 511070          130.    200.    200.    200.    200.    200.    300.    800.    500.    400.      0.    200.     3330.
+1990 511070          130.    100.    200.    200.    200.    200.    200.    700.    400.    300.      0.    100.     2730.
+1991 511070          110.    170.    100.    100.    200.    200.    200.    600.    400.    300.      0.    100.     2480.
+1992 511070          327.    195.    115.    115.    115.    115.    115.    251.     74.    343.      0.    375.     2140.
+1993 511070          285.    153.     73.     73.     73.     73.     73.    968.   1593.    901.      0.    333.     4598.
+1994 511070          290.    158.     78.     78.     78.     78.     78.    714.   1126.    506.      0.    338.     3522.
+1995 511070          341.    209.    129.    129.    129.    129.    129.    665.   1168.    457.      0.    389.     3874.
+1996 511070          325.    193.    113.    113.    113.    113.    113.    649.    841.    441.      0.    373.     3387.
+1997 511070            9.      9.      8.      9.     10.     16.    156.    299.    240.    142.     98.     68.     1065.
+1998 511070           58.     15.      9.      6.      5.    564.    400.    441.    156.     79.     82.     70.     1884.
+1999 511070          123.    120.    104.     64.     52.    191.    534.    672.    307.    157.    191.    182.
+2000 511070          239.     31.     27.     17.     14.     50.    140.    176.     80.     41.     50.     48.
+2001 511070           63.     31.     27.     17.     14.     50.    140.    176.     80.     41.     50.     48.
+2002 511070           63.     34.     29.     18.     15.     54.    151.    190.     87.     44.     54.     52.
+2003 511070           68.    125.    108.     67.     54.    200.    559.    703.    321.    164.    200.    191.
+2004 511070          250.    109.     94.     58.     47.    173.    485.    610.    279.    142.    173.    165.
+2005 511070          150.     65.     56.     35.     28.    104.    291.    366.    168.     85.    104.     99.
