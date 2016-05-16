@@ -1,0 +1,106 @@
+# dds.commands.StateDMI
+#
+#  StateDMI command file to create the "step 1" direct diversion station file
+#
+#  Step 1 - set year type and read list of direct diversion stations from network file
+#
+setOutputYearType(Water)
+readDiversionStationsFromNetwork(InputFile="..\Network\gm2004.net")
+#
+#  Step 2 - read aggregate and diversion system structure assignments.  Note that
+#        want to combine historical acreage and capacites for aggs and diversion systems.
+#
+setDiversionAggregateFromList(ListFile="gm_agg.csv",IDCol=1,NameCol=2,PartIDsCol=3,PartsListedHow=InRow)
+setDiversionSystemFromList(ListFile="gm_divsys.csv",IDCol=1,NameCol=2,PartIDsCol=3,PartsListedHow=InRow)
+#
+#  Step 3 - read diversion station information from HydroBase and sort alphabetically
+#
+fillDiversionStationsFromHydroBase(ID="*")
+sortDiversionStations(Order=Alphabetical)
+#
+#  Step 4 - set global options for all structures
+#
+setDiversionStation(ID="*",RiverNodeID="ID",OnOff=1,ReplaceResOption=0,DailyID="4",DemandType=1,UseType=1,DemandSource=1,EffAnnual=60,IfNotFound=Warn)
+setDiversionStationDelayTablesFromNetwork(ID="*",DefaultTable="1")
+#
+#  Step 5 - overwrite downstream return flow location, efficiencies and delay patterns based
+#           on return flow file: read annual average irrigation efficiencies from StateCU (*.def)
+#
+setDiversionStationDelayTablesFromRTN(InputFile="gm2004.rtn",SetEfficiency=True)
+setDiversionStationsFromList(ListFile="gm2004.def",IDCol="1",EffMonthlyCol="2",Delim="Space",MergeDelim=True)
+#
+#  Step 6 - overide HydroBase capacities and demand sources
+#
+#960051 Grand Junction demand (export out of Kannah Creek)
+setDiversionStation(ID="960051",Name="Grand_Junction_Demand",Capacity=21,IrrigatedAcres=0,DemandSource=6,IfNotFound=Warn)
+#
+#Project 7 Authority is municipal supply
+setDiversionStation(ID="Proj_7",Name="Project_7",Capacity=999,IrrigatedAcres=0,DemandSource=6,IfNotFound=Warn)
+#
+# following demands for future subordination are M&I or TM (demscr=6)
+setDiversionStation(ID="95USUB_M",Name="Subordinate_Upper_M&I",Capacity=999,IrrigatedAcres=0,DemandSource=6,IfNotFound=Warn)
+setDiversionStation(ID="95MSUB_M",Name="Subordinate_Morrow_M&I",Capacity=999,IrrigatedAcres=0,DemandSource=6,IfNotFound=Warn)
+setDiversionStation(ID="95CSUB_M",Name="Subordinate_Crystal_M&I",Capacity=999,IrrigatedAcres=0,DemandSource=6,IfNotFound=Warn)
+setDiversionStation(ID="95U_MY",Name="Upper_Market_Yield",Capacity=999,IrrigatedAcres=0,DemandSource=6,IfNotFound=Warn)
+#
+#Gunnison Tunnel is carrier and feeder to Fairview Reservoir
+setDiversionStation(ID="620617",DemandSource=7,IfNotFound=Warn)
+#
+#Transfer Ditch (400821) is feeder for Fruitgrowers Reservoir
+setDiversionStation(ID="400821",DemandSource=7,IfNotFound=Warn)
+#
+#Cimmarron Canal (620560) is feeder for Cerro Reservoir and IrrCim
+setDiversionStation(ID="620560",DemandSource=7,EffAnnual=0,IfNotFound=Warn)
+#
+#Irrigation portion of Cimarron Canal diversions
+setDiversionStation(ID="62_IrrCim",Name="Cimmaron_Canal",IrrigatedAcres=9321.40,DemandSource=8,IfNotFound=Warn)
+#
+#Includes Fruitland Canal (400549), and land assigned to Meeker Tun.(400576)
+setDiversionStation(ID="40_Fruitl",Name="Fruitland",IrrigatedAcres=7063.94,DemandSource=8,IfNotFound=Warn)
+setDiversionStation(ID="400549",EffAnnual=0,IfNotFound=Warn)
+#
+#Upper Overland Ditch (400585) is a carrier to Vandeford Ditch (401213).  Water is diverted from Overland Reservoir and
+# released in West Reservoir #1 and available to diversions on the N.F. Gunnison.  It does not irrigate lands
+# along the way.
+setDiversionStation(ID="400585",DemandSource=7,IfNotFound=Warn)
+#
+# Multistructures
+#
+#Primary Structures
+setDiversionStation(ID="400501",Capacity=59.8,DemandSource=3,IfNotFound=Warn)
+setDiversionStation(ID="400503",Capacity=155,DemandSource=3,IfNotFound=Warn)
+#
+#Secondary Structures
+setDiversionStation(ID="400509",DemandSource=5,IfNotFound=Warn)
+setDiversionStation(ID="400508",DemandSource=5,IfNotFound=Warn)
+#
+#Carrier
+setDiversionStation(ID="400549",DemandSource=7,IfNotFound=Warn)
+setDiversionStation(ID="400605",DemandSource=7,IfNotFound=Warn)
+#
+# REDLANDS POWER CANAL- taken from coloup               
+setDiversionStation(ID="420541",Capacity=610.0,DemandSource=6,IfNotFound=Warn)
+#
+#REDLANDS POWER CANAL - IRRIGATION  (acres from 724713)
+#950050 cooresponds to cm2005.net(redlands irrigation node)
+setDiversionStation(ID="960050",Name="REDLANDS_POWER_CANAL-IRR",Capacity=140,IrrigatedAcres=4296.7,DemandSource=8,IfNotFound=Warn)
+#
+# Set name,diverison capacity and demand source for agg. M&I nodes
+setDiversionStation(ID="62_AMG001",Name="Upper_M&I",Capacity=2,IrrigatedAcres=0,DemandSource=6,IfNotFound=Warn)
+setDiversionStation(ID="40_AMG002",Name="Lower_M&I",Capacity=2,IrrigatedAcres=0,DemandSource=6,IfNotFound=Warn)
+setDiversionStation(ID="41_AMG003",Name="Uncomp_M&I",Capacity=2,IrrigatedAcres=0,DemandSource=6,IfNotFound=Warn)
+#
+#
+#	StateDMI expects monthly values to be entered in Calendar Year.
+#
+#  Step 7 - setting efficiencies for specific structures
+#           Future demand irrigation efficiencies (from StateCU Upper Gunnison Depletion Analysis)
+# 
+setDiversionStation(ID="95USUB_I",Capacity=999,IrrigatedAcres=0,EffMonthly="40,40,24,17,22,16,15,17,20,9,40,40",IfNotFound=Warn)
+setDiversionStation(ID="95MSUB_I",Capacity=999,IrrigatedAcres=0,EffMonthly="40,40,24,17,22,16,15,17,20,9,40,40",IfNotFound=Warn)
+setDiversionStation(ID="95CSUB_I",Capacity=999,IrrigatedAcres=0,EffMonthly="40,40,24,17,22,16,15,17,20,9,40,40",IfNotFound=Warn)
+setDiversionStation(ID="95L_MY",Capacity=999,IrrigatedAcres=0,EffMonthly="40,40,24,17,22,16,15,17,20,9,40,40",IfNotFound=Warn)
+#
+#  Step 8 - create "step 1" direct diversion station file
+#
+writeDiversionStationsToStateMod(OutputFile="gm2004_dds.dds")

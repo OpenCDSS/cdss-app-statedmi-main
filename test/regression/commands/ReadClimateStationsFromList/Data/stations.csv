@@ -1,0 +1,6 @@
+# Test climate stations list
+#ID,Name,Latitude,Elevation,Region1,Region2
+0130,StationA,41,4001,CountyA
+0776,StationB,42,4002,CountyB
+# In-line comment
+1458,StationC,43,4003,CountyC

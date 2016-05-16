@@ -1,0 +1,15 @@
+# Test setting well station capacities from historical pumping monthly TS
+StartLog(LogFile="Results/Test_SetWellStationCapacitiesFromTS.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SetWellStationCapacitiesFromTS_out.wes")
+# Define stations
+SetWellStation(ID="2000505",Capacity=10,IfNotFound=Add)
+SetWellStation(ID="2000812",Capacity=20,IfNotFound=Add)
+# Define time series to analyze
+SetOutputPeriod(OutputStart="1950-01",OutputEnd="1955-12")
+SetWellHistoricalPumpingTSMonthlyConstant(ID="2000505",Constant=1111,IfNotFound=Add)
+SetWellHistoricalPumpingTSMonthlyConstant(ID="2000812",Constant=2222,IfNotFound=Add)
+SetWellStationCapacitiesFromTS(ID="20005*")
+# Uncomment the following command to regenerate the expected results.
+# WriteWellStationsToStateMod(OutputFile="ExpectedResults/Test_SetWellStationCapacitiesFromTS_out.wes")
+WriteWellStationsToStateMod(OutputFile="Results/Test_SetWellStationCapacitiesFromTS_out.wes")
+CompareFiles(InputFile1="ExpectedResults/Test_SetWellStationCapacitiesFromTS_out.wes",InputFile2="Results/Test_SetWellStationCapacitiesFromTS_out.wes",WarnIfDifferent=True)

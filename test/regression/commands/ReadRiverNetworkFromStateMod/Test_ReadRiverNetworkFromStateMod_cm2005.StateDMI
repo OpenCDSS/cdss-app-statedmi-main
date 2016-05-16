@@ -1,0 +1,7 @@
+# Test reading the river network nodes from StateMod file - use full Colorado file for input
+StartLog(LogFile="Results/Test_ReadRiverNetworkFromStateMod_cm2005.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadRiverNetworkFromStateMod_cm2005_out.rin")
+ReadRiverNetworkFromStateMod(InputFile="Data\cm2005.rin")
+# Write the file again and compare with the original file.
+WriteRiverNetworkToStateMod(OutputFile="Results/Test_ReadRiverNetworkFromStateMod_cm2005_out.rin")
+CompareFiles(InputFile1="Data/cm2005.rin",InputFile2="Results/Test_ReadRiverNetworkFromStateMod_cm2005_out.rin",WarnIfDifferent=True)

@@ -1,0 +1,15 @@
+# Don't ignore this file (Eclipse EGit issue?)
+!.gitignore
+
+# Ignore compiled Java class and other binary files
+/bin
+
+# Ignore the distribution folder created for local distribution and setup.exe files
+/dist
+
+# Ignore vi editor swap files
+*.swp
+*.swo
+
+# Ignore Microsoft Office temporary files
+~$*

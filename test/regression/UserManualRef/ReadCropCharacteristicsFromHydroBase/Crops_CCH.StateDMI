@@ -1,0 +1,28 @@
+StartLog(LogFile="Crops_CCH.StateDMI.log")
+#
+# StateDMI commands to create the Rio Grande Crop Characteristics File
+#
+# History:
+#
+# 2004-03-16 Steven A. Malers, RTi  Initial version using StateDMI.
+# 2007-04-22 SAM, RTi               Use new directory structure, current
+#                                   software and HydroBase.
+#
+# Step 1 - read data from HydroBase
+#
+# Read the general TR-21 characteristics first and then override with Rio Grande
+# data.
+ReadCropCharacteristicsFromHydroBase(CUMethod="BLANEY-CRIDDLE_TR-21")
+ReadCropCharacteristicsFromHydroBase(CUMethod="BLANEY-CRIDDLE_RIO_GRANDE")
+#
+# Step 2 - adjust crop characteristics if needed
+#    No resets are needed.
+#
+# Step 3 - write the file
+#
+WriteCropCharacteristicsToStateCU(OutputFile="rg2007.cch")
+#
+# Check the results
+#
+CheckCropCharacteristics(ID="*")
+WriteCheckFile(OutputFile="rg2007.cch.check.html")

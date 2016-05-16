@@ -1,0 +1,18 @@
+StartLog(LogFile="Crops_KPM.StateDMI.log")
+#
+# StateDMI commands to create the Penman-Monteith crop coefficients file
+#
+# Step 1 - read data from HydroBase
+#
+# Read the general ASCE standardized coefficients
+ReadPenmanMonteithFromHydroBase(PenmanMonteithMethod="PENMAN-MONTEITH_ALFALFA")
+#
+# Step 3 - write the file
+#
+SortPenmanMonteith()
+WritePenmanMonteithToStateCU(OutputFile="rg2007.kpm")
+#
+# Check the results
+#
+CheckPenmanMonteith(ID="*")
+WriteCheckFile(OutputFile="Crops_KPM.StateDMI.check.html")

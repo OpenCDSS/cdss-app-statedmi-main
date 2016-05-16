@@ -1,0 +1,5 @@
+# Test printing generalized Sp2008L network file, full network, D-size paper to an XPS file
+StartLog(LogFile="Results/Test_PrintNetwork_Sp2008L_all_D_XPS.StateDMI.log")
+# SetDebugLevel(LogFileLevel=20)
+RemoveFile(InputFile="Results\Test_ReadNetworkFromStateMod_Sp2008L_all_D_XPS.xps",IfNotFound=Ignore)
+PrintNetwork(InputFile="Data\Sp2008L.net",PageLayout="Page Layout D",PrinterName="Microsoft XPS Document Writer",OutputFile="Results/Test_PrintNetwork_Sp2008L_all_D_XPS.xps")

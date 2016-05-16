@@ -1,0 +1,7 @@
+# Test reading irrigation practice TS from StateCU file version 12+ (current) file
+StartLog(LogFile="Results/Test_ReadIrrigationPracticeTSFromStateCU.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadIrrigationPracticeTSFromStateCU_out.ipy")
+ReadIrrigationPracticeTSFromStateCU(InputFile="Data\simple_v12.ipy")
+# Compare with the original data file
+WriteIrrigationPracticeTSToStateCU(OutputFile="Results/Test_ReadIrrigationPracticeTSFromStateCU_out.ipy",PrecisionForArea="0")
+CompareFiles(InputFile1="Data\simple_v12.ipy",InputFile2="Results/Test_ReadIrrigationPracticeTSFromStateCU_out.ipy",WarnIfDifferent=True)

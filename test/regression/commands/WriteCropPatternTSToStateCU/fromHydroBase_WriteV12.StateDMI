@@ -1,0 +1,8 @@
+startLog(LogFile="fromHydroBase_Writev12.log")
+setOutputPeriod(1950,2002)
+setCULocation(ID="200812",IfNotFound=Add)
+fillCULocationsFromHydroBase(ID="*",CULocType="Structure",Region1Type="County",Region2Type="HUC")
+createCropPatternTSForCULocations(ID="*",Units="ACRE")
+readCropPatternTSFromHydroBase(ID="*")
+writeCropPatternTSToStateCU(OutputFile="../output/fromHydroToV12.cds",WriteHow=OverwriteFile)
+compareFiles(InputFile1="fromHydroToV12.cds.expected",InputFile2="../output/fromHydroToV12.cds",WarnIfDifferent=True)

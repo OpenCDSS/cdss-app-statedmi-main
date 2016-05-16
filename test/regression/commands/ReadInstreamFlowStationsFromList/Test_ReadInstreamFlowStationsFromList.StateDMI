@@ -1,0 +1,8 @@
+# Test reading instream flow from list
+StartLog(LogFile="Results/Test_ReadInstreamFlowStationsFromList.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadInstreamFlowStationsFromList_out.csv")
+ReadInstreamFlowStationsFromList(ListFile="Data\stations.csv",IDCol=1,NameCol=2)
+# Uncomment the following command to regenerate the expected results.
+# WriteInstreamFlowStationsToList(OutputFile="ExpectedResults/Test_ReadInstreamFlowStationsFromList_out.csv")
+WriteInstreamFlowStationsToList(OutputFile="Results/Test_ReadInstreamFlowStationsFromList_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadInstreamFlowStationsFromList_out.csv",InputFile2="Results/Test_ReadInstreamFlowStationsFromList_out.csv",WarnIfDifferent=True)

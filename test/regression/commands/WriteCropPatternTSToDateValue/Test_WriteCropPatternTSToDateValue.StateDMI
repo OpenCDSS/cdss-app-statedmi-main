@@ -1,0 +1,15 @@
+# Test writing crop pattern TS to DateValue file
+StartLog(LogFile="Results/Test_WriteCropPatternTSToDateValue.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteCropPatternTSToDateValue_out.dv",IfNotFound=Ignore)
+SetCULocation(ID="2000505",IfNotFound=Add)
+SetCULocation(ID="2000623",IfNotFound=Add)
+SetCULocation(ID="2000812",IfNotFound=Add)
+SetOutputPeriod(OutputStart="1998",OutputEnd="2002")
+CreateCropPatternTSForCULocations(ID="*",Units="ACRE")
+SetCropPatternTS(ID="2000505",SetStart=1998,SetEnd=1998,CropPattern="ALFALFA,101,CORN,102",IrrigationMethod=Flood,SupplyType=Ground)
+SetCropPatternTS(ID="2000623",SetStart=1998,SetEnd=2000,CropPattern="ALFALFA,201,CORN,202",IrrigationMethod=Sprinkler,SupplyType=Surface)
+SetCropPatternTS(ID="2000812",SetStart=1998,SetEnd=2002,CropPattern="ALFALFA,301,CORN,302",IrrigationMethod=Sprinkler,SupplyType=Ground)
+# Uncomment the following command to regenerate the expected results.
+# WriteCropPatternTSToDateValue(OutputFile="ExpectedResults/Test_WriteCropPatternTSToDateValue_out.dv")
+WriteCropPatternTSToDateValue(OutputFile="Results/Test_WriteCropPatternTSToDateValue_out.dv")
+CompareFiles(InputFile1="ExpectedResults/Test_WriteCropPatternTSToDateValue_out.dv",InputFile2="Results/Test_WriteCropPatternTSToDateValue_out.dv",WarnIfDifferent=True)

@@ -1,0 +1,10 @@
+# Test filling instream flow stations from HydroBase information
+StartLog(LogFile="Results/Test_FillReservoirStationsFromHydroBase.StateDMI.log")
+RemoveFile(InputFile="Results\Test_FillReservoirStationsFromHydroBase_out.csv",IfNotFound=Ignore)
+SetReservoirStation(ID="363543",IfNotFound=Add)
+SetReservoirStation(ID="364512",IfNotFound=Add)
+FillReservoirStationsFromHydroBase(ID="*")
+# Uncomment the following command to regenerate the expected results.
+# WriteReservoirStationsToList(OutputFile="ExpectedResults/Test_FillReservoirStationsFromHydroBase_out.csv")
+WriteReservoirStationsToList(OutputFile="Results/Test_FillReservoirStationsFromHydroBase_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_FillReservoirStationsFromHydroBase_out.csv",InputFile2="Results/Test_FillReservoirStationsFromHydroBase_out.csv",WarnIfDifferent=True)

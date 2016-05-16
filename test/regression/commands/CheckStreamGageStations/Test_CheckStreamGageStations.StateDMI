@@ -1,0 +1,25 @@
+# Test check stream gage station data where each checked value is in error
+# The set command won't let invalid data be set from parameters so use
+# missing values to trigger the check warnings.
+# Compare the data csv to make sure the data are being produced as expected
+# and the check file csv to make sure the checks are working.
+# The expected status is Warning because the check will detect the missing values.
+#@expectedStatus Warning
+StartLog(LogFile="Results/Test_CheckStreamGageStations.StateDMI.log")
+RemoveFile(InputFile="Results\Test_CheckStreamGageStations_out.csv",IfNotFound=Ignore)
+RemoveFile(InputFile="Results\Test_CheckStreamGageStations_out_check.csv",IfNotFound=Ignore)
+RemoveFile(InputFile="Results\Test_CheckStreamGageStations_out_check.html",IfNotFound=Ignore)
+SetRiverNetworkNode(ID="Node1",IfNotFound=Add)
+SetStreamGageStation(ID="Location1",IfNotFound=Add)
+# Uncomment the following command to regenerate the expected results.
+# WriteStreamGageStationsToList(OutputFile="ExpectedResults/Test_CheckStreamGageStations_out.csv")
+WriteStreamGageStationsToList(OutputFile="Results/Test_CheckStreamGageStations_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_CheckStreamGageStations_out.csv",InputFile2="Results/Test_CheckStreamGageStations_out.csv",WarnIfDifferent=True)
+#
+# Check the data and create the check file.
+CheckStreamGageStations(ID="*")
+# Uncomment the following command to regenerate the expected results.
+# WriteCheckFile(OutputFile="ExpectedResults/Test_CheckStreamGageStations_out_check.csv")
+WriteCheckFile(OutputFile="Results/Test_CheckStreamGageStations_out_check.csv")
+WriteCheckFile(OutputFile="Results/Test_CheckStreamGageStations_out_check.html")
+CompareFiles(InputFile1="ExpectedResults/Test_CheckStreamGageStations_out_check.csv",InputFile2="Results/Test_CheckStreamGageStations_out_check.csv",WarnIfDifferent=True)

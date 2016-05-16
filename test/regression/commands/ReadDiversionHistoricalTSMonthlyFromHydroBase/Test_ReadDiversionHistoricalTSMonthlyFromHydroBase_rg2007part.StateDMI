@@ -1,0 +1,30 @@
+# Test reading diversion historical TS monthly data from HydroBase for a subset of structures
+StartLog(LogFile="Results/Test_ReadDiversionHistoricalTSMonthlyFromHydroBase_rg2007part.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadDiversionHistoricalTSMonthlyFromHydroBase_rg2007part_out.ddh",IfNotFound=Ignore)
+SetOutputPeriod(OutputStart="1950-01",OutputEnd="2007-12")
+####################################################
+# Start defining test stations and aggregate information...
+# The selected locations represent the combinations of cases to test but are
+# small enough to run quickly.  Full data sets are validated in other tests.
+#
+## Below are D&W structures
+#
+SetDiversionStation(ID="200511",Name="ANACONDA D",IfNotFound=Add)
+#
+## Below are diversion aggregate structures - define div and aggregates
+#
+SetDiversionStation(ID="20ADW02",Name="20ADW02",IfNotFound=Add)
+SetDiversionAggregate(ID="20ADW02",PartIDs="200895,200561,200721,200751,200695")
+#
+## Below are diversion system structures - define div and system
+#
+SetDiversionStation(ID="20MS01",Name="20MS01",IfNotFound=Add)
+SetDiversionSystem(ID="20MS01",PartIDs="200516, 200613, 201004")
+#
+##...end defining test stations and aggregates
+####################################################
+ReadDiversionHistoricalTSMonthlyFromHydroBase(ID="*")
+# Uncomment the following command to regenerate the expected results.
+# WriteDiversionHistoricalTSMonthlyToStateMod(OutputFile="ExpectedResults/Test_ReadDiversionHistoricalTSMonthlyFromHydroBase_rg2007part_out.ddh")
+WriteDiversionHistoricalTSMonthlyToStateMod(OutputFile="Results/Test_ReadDiversionHistoricalTSMonthlyFromHydroBase_rg2007part_out.ddh")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadDiversionHistoricalTSMonthlyFromHydroBase_rg2007part_out.ddh",InputFile2="Results/Test_ReadDiversionHistoricalTSMonthlyFromHydroBase_rg2007part_out.ddh",IfDifferent=Warn)

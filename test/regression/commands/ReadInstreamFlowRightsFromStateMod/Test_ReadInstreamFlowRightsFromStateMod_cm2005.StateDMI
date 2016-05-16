@@ -1,0 +1,7 @@
+# Test reading instream flow rights from StateMod file - use full Colorado file for input
+StartLog(LogFile="Results/Test_ReadInstreamFlowRightsFromStateMod_cm2005.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadInstreamFlowRightsFromStateMod_cm2005_out.ifr")
+ReadInstreamFlowRightsFromStateMod(InputFile="Data\cm2005.ifr")
+# Write the file again and compare with the original file.
+WriteInstreamFlowRightsToStateMod(OutputFile="Results/Test_ReadInstreamFlowRightsFromStateMod_cm2005_out.ifr")
+CompareFiles(InputFile1="Data/cm2005.ifr",InputFile2="Results/Test_ReadInstreamFlowRightsFromStateMod_cm2005_out.ifr",WarnIfDifferent=True)

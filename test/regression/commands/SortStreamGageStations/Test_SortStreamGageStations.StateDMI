@@ -1,0 +1,11 @@
+# Test sorting stream gage stations
+StartLog(LogFile="Results/Test_SortStreamGageStations.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SortStreamGageStations_out.csv")
+SetStreamGageStation(ID="StreamGage2",Name="StreamGage 2",IfNotFound=Add)
+SetStreamGageStation(ID="StreamGage3",Name="StreamGage 3",IfNotFound=Add)
+SetStreamGageStation(ID="StreamGage1",Name="StreamGage 1",IfNotFound=Add)
+SortStreamGageStations()
+# Uncomment the following command to regenerate the expected results.
+# WriteStreamGageStationsToList(OutputFile="ExpectedResults/Test_SortStreamGageStations_out.csv")
+WriteStreamGageStationsToList(OutputFile="Results/Test_SortStreamGageStations_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_SortStreamGageStations_out.csv",InputFile2="Results/Test_SortStreamGageStations_out.csv",WarnIfDifferent=True)

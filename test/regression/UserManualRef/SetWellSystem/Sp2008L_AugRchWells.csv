@@ -1,0 +1,38 @@
+#
+# sp2007L_AugRchWells.csv
+# _______________________________________________________
+#
+# rrb Augmentation and recharge wells from SmOpr
+#        SmOpr 
+#        State of Colorado
+#        Version:  1.00
+#        Last revision date: 2006/10/27
+#
+# rrb 2008/10/08 count = 17 + 4 21
+# _______________________________________________________
+#
+0102522_AuW ,"RIVERSIDE AUG           ",' ', ' ', ' ', ' ', ' ','NA'
+0102528_AuW ,"FT MORGAN CNL AUG PLAN  ",' ', ' ', ' ', ' ', ' ','NA'
+0102529_AuW ,"UPPER PLATTE BEAVER AUG ",' ', ' ', ' ', ' ', ' ','NA'
+0102535_ReW ,"LOWER PLATTE BEAVER AUG ",' ', ' ', ' ', ' ', ' ','NA'
+0102535_AuW ,"LOWER PLATTE BEAVER AUG ",' ', ' ', ' ', ' ', ' ','NA'
+6402015_ReW ,"TAMARAK                 ",' ', ' ', ' ', ' ', ' ','NA'
+6402027_ReW ,"OVERLAND                ",' ', ' ', ' ', ' ', ' ','NA'
+6402518_AuW ,"HARMONY Aug Well        ",' ', ' ', ' ', ' ', ' ','NA'
+6402519_ReW ,"DINSDALE AUG            ",' ', ' ', ' ', ' ', ' ','NA'
+6402519_AuW ,"DINSDALE AUG            ",' ', ' ', ' ', ' ', ' ','NA'
+6402525_ReW ,"CONDON                  ",' ', ' ', ' ', ' ', ' ','NA'
+6402539_ReW ,"LOGAN WELL USERS AUG    ",' ', ' ', ' ', ' ', ' ','NA'
+6402539_AuW ,"LOGAN WELL USERS AUG    ",' ', ' ', ' ', ' ', ' ','NA'
+6402540_AuW ,"LOW LINE DITCH CO AUG   ",' ', ' ', ' ', ' ', ' ','NA'
+6402540_ReW ,"LOW LINE                ",' ', ' ', ' ', ' ', ' ','NA'
+6402542_AuW ,"LSPWCD AUG              ",' ', ' ', ' ', ' ', ' ','NA'
+6402546_ReW ,"PAWNEE WELL USERS AUG   ",' ', ' ', ' ', ' ', ' ','NA'
+6402546_AuW ,"PAWNEE WELL USERS AUG   ",' ', ' ', ' ', ' ', ' ','NA'
+6403392_ReW ,"NORTH Recharge Well     ",' ', ' ', ' ', ' ', ' ','NA'
+# _______________________________________________________
+#
+# rrb data not in smopr.dat
+# rrb data not in *.wes
+# rrb 0103334_AuW ,"CENTRAL-REPL.           ",' ', ' ', ' ', ' ', ' ','NA'
+6402536_ReW ,"LOWER LOGAN             ",' ', ' ', ' ', ' ', ' ','NA'

@@ -1,0 +1,10 @@
+# Test filling climate stations
+StartLog(LogFile="Results/Test_FillClimateStations.StateDMI.log")
+RemoveFile(InputFile="Results\Test_FillClimateStations_out.csv")
+SetClimateStation(ID="3005",IfNotFound=Add)
+SetClimateStation(ID="7167",IfNotFound=Add)
+FillClimateStation(ID="*",Name="Test Name",Latitude=44,Elevation=4401,Region1="TestCounty",Region2="Test HUC")
+# Uncomment the following command to regenerate the expected results.
+# WriteClimateStationsToList(OutputFile="ExpectedResults/Test_FillClimateStations_out.csv")
+WriteClimateStationsToList(OutputFile="Results/Test_FillClimateStations_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_FillClimateStations_out.csv",InputFile2="Results/Test_FillClimateStations_out.csv",IfDifferent=Warn)

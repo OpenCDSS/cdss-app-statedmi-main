@@ -1,0 +1,11 @@
+# Test setting well statios from a list file
+StartLog(LogFile="Results/Test_SetWellStationsFromList.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SetWellStationsFromList_out.csv")
+SetWellStation(ID="2000505",IfNotFound=Add)
+SetWellStation(ID="2000631",IfNotFound=Add)
+SetWellStation(ID="2000812",IfNotFound=Add)
+SetWellStationsFromList(ListFile="Data\wells.csv",IDCol="1",NameCol="2",RiverNodeIDCol="3",OnOffCol="4",CapacityCol="5",DailyIDCol="8",AdminNumShiftCol="6",DiversionIDCol="7",DemandTypeCol="9",IrrigatedAcresCol="10",UseTypeCol="11",DemandSourceCol="12",EffAnnualCol="13",EffMonthlyCol="14")
+# Uncomment the following command to regenerate the expected results.
+# WriteWellStationsToList(OutputFile="ExpectedResults/Test_SetWellStationsFromList_out.csv")
+WriteWellStationsToList(OutputFile="Results/Test_SetWellStationsFromList_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_SetWellStationsFromList_out.csv",InputFile2="Results/Test_SetWellStationsFromList_out.csv",WarnIfDifferent=True)

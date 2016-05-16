@@ -1,0 +1,2 @@
+ReadWellRightsFromStateMod(InputFile="..\WriteWellRightsToList\Sp2008L.wer")
+WriteWellRightsToList(OutputFile="Sp2008L.wer.csv")

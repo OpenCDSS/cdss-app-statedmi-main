@@ -1,0 +1,13 @@
+# Test creating the network from indidual station files - use cm2005 full files
+StartLog(LogFile="Results/Test_CreateNetworkFromRiverNetwork_cm2005.StateDMI.log")
+RemoveFile(InputFile="Results/Test_CreateNetworkFromRiverNetwork_cm2005_out.net",IfNotFound=Ignore)
+ReadRiverNetworkFromStateMod(InputFile="Data\cm2005.rin")
+ReadStreamGageStationsFromStateMod(InputFile="Data\cm2005.ris")
+ReadDiversionStationsFromStateMod(InputFile="Data\cm2005.dds")
+ReadReservoirStationsFromStateMod(InputFile="Data\cm2005.res")
+ReadInstreamFlowStationsFromStateMod(InputFile="Data\cm2005.ifs")
+CreateNetworkFromRiverNetwork()
+# Uncomment the following command to regenerate the expected results.
+# WriteNetworkToStateMod(OutputFile="ExpectedResults/Test_CreateNetworkFromRiverNetwork_cm2005_out.net")
+WriteNetworkToStateMod(OutputFile="Results\Test_CreateNetworkFromRiverNetwork_cm2005_out.net")
+CompareFiles(InputFile1="ExpectedResults/Test_CreateNetworkFromRiverNetwork_cm2005_out.net",InputFile2="Results\Test_CreateNetworkFromRiverNetwork_cm2005_out.net",IfDifferent=Warn)

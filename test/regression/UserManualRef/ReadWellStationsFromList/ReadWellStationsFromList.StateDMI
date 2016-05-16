@@ -1,0 +1,1 @@
+ReadWellStationsFromList(ListFile="Sp2008L_AugRchWells.csv",IDCol=1)

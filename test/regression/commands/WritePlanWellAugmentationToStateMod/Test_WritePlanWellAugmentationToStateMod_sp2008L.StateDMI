@@ -1,0 +1,7 @@
+# Test writing plan well augmentation data to StateMod file - use short SP2008L file for input
+StartLog(LogFile="Results/Test_WritePlanWellAugmentationToStateMod_Sp2008L.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WritePlanWellAugmentationToStateMod_Sp2008L_out.plw",IfNotFound=Ignore)
+ReadPlanWellAugmentationFromStateMod(InputFile="Data\Sp2008L-short.plw")
+# Write the file again and compare with the original file.
+WritePlanWellAugmentationToStateMod(OutputFile="Results/Test_WritePlanWellAugmentationToStateMod_Sp2008L_out.plw")
+CompareFiles(InputFile1="Data/Sp2008L-short.plw",InputFile2="Results/Test_WritePlanWellAugmentationToStateMod_Sp2008L_out.plw",IgnoreWhitespace=True,IfDifferent=Warn)

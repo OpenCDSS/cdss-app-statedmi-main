@@ -1,0 +1,60 @@
+StartLog(LogFile="ifs.commands.StateDMI.log")
+#
+# Create the Colorad Instream Flow Stations file
+#
+#  Step 1 - read instream flow structures from network file, sort alphabetically.
+#
+ReadInstreamFlowStationsFromNetwork(InputFile="..\Network\cm2005.net")
+SortInstreamFlowStations(Order=Ascending)
+#
+#  Step 2 - create file and set daily flags
+#
+SetInstreamFlowStation(ID="*",DailyID="0",DemandType=2)
+#
+#  Step 3 - set instream flow information for non-HB structures
+#
+# Following insf are reservoir bypasses
+SetInstreamFlowStation(ID="953508",Name="Rifle_Gap_Res_Bypass",UpstreamRiverNodeID="953508",DownstreamRiverNodeID="953508_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+SetInstreamFlowStation(ID="953543",Name="Green_Mtn_Res_Bypass",UpstreamRiverNodeID="953543",DownstreamRiverNodeID="953543_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+SetInstreamFlowStation(ID="953668",Name="Wolford_Res_Bypass",UpstreamRiverNodeID="953668",DownstreamRiverNodeID="953668_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+SetInstreamFlowStation(ID="953695",Name="Shadow_Mtn_Res_Bypass",UpstreamRiverNodeID="953695",DownstreamRiverNodeID="953695_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+SetInstreamFlowStation(ID="953709",Name="Williams_Fork_Res_Bypass",UpstreamRiverNodeID="953709",DownstreamRiverNodeID="953709_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+SetInstreamFlowStation(ID="953710",Name="Willow_Crk_Res_Bypass",UpstreamRiverNodeID="953710",DownstreamRiverNodeID="953710_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+SetInstreamFlowStation(ID="953713",Name="Ruedi_Res_Bypass",UpstreamRiverNodeID="953713",DownstreamRiverNodeID="953713_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+SetInstreamFlowStation(ID="951146",Name="Wolcott_PP_Bypass",UpstreamRiverNodeID="951146",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+# Following insf are minimum reservoir release requirements (operating rules control)
+SetInstreamFlowStation(ID="954512",Name="Dillon_Res_Min_Rel",UpstreamRiverNodeID="954512",DownstreamRiverNodeID="954512_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+SetInstreamFlowStation(ID="954620",Name="Granby_Res_Min_Rel",UpstreamRiverNodeID="954620",DownstreamRiverNodeID="954620_Dwn",OnOff=1,DailyID="0",DemandType=1,IfNotFound=Warn)
+# Following insf are Fraser collection system bypass requirements (Denver's Moffat)
+SetInstreamFlowStation(ID="950639",Name="Jim_Creek_Bypass",UpstreamRiverNodeID="950639",DownstreamRiverNodeID="950639_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+SetInstreamFlowStation(ID="951269",Name="Den_Ranch_Crk_Bypass",UpstreamRiverNodeID="951269",DownstreamRiverNodeID="951269_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+SetInstreamFlowStation(ID="951309",Name="St_Louis_Crk_Bypass",UpstreamRiverNodeID="951309",DownstreamRiverNodeID="951309_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+SetInstreamFlowStation(ID="951310",Name="Vasquez_Crk_Bypass",UpstreamRiverNodeID="951310",DownstreamRiverNodeID="951310_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+# Following insf are minimum bypass for Williams Fork Diversion Project (Denver)
+SetInstreamFlowStation(ID="954603",Name="Gumlick_Tunnel_Bypass",UpstreamRiverNodeID="954603",DownstreamRiverNodeID="954603_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+# Following insf are minimum bypass for Fry-Ark Project
+SetInstreamFlowStation(ID="950786",Name="Thomasville_Gage_Bypass",UpstreamRiverNodeID="950786",DownstreamRiverNodeID="950786_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+SetInstreamFlowStation(ID="951594",Name="Hunter_Crk_Bypass",UpstreamRiverNodeID="951594",DownstreamRiverNodeID="951594_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+SetInstreamFlowStation(ID="954625",Name="Boustead_Tunnel_Bypass",UpstreamRiverNodeID="954625",DownstreamRiverNodeID="954625_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+# Following insf is minimum bypass below Homestake Tunnel (Col. Springs)
+SetInstreamFlowStation(ID="954516",Name="Gold_Park_Gage_Min_Flow",UpstreamRiverNodeID="954516",DownstreamRiverNodeID="954516_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+# Following insf is minimum release for the Clinton Res. agreement
+SetInstreamFlowStation(ID="954655",Name="Winter_Park_Ski_Min_Flow",UpstreamRiverNodeID="954655",DownstreamRiverNodeID="954655_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+# Insf node added above the Shoshone Power Plant to allow simulation of Green Mtn. Res. operations prior to 1985
+SetInstreamFlowStation(ID="950500",Name="Shoshone_Call_Flows",UpstreamRiverNodeID="950500",DownstreamRiverNodeID="950500_Dwn",OnOff=1,DailyID="0",DemandType=1,IfNotFound=Warn)
+# CWCB insf in 15-mile reach
+SetInstreamFlowStation(ID="952002",Name="USFWS_Recomm._Fish_Flow",UpstreamRiverNodeID="952002",DownstreamRiverNodeID="952002_Dwn",OnOff=1,DailyID="0",DemandType=1,IfNotFound=Warn)
+# GVWM Bypass
+SetInstreamFlowStation(ID="950099",Name="GVWM_Bypass",UpstreamRiverNodeID="950099",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+# Eagle River Minimum Flow Second Reach
+SetInstreamFlowStation(ID="372059_2",Name="MIN_FLOW_EAGLE_RIVER_2",UpstreamRiverNodeID="372059_2",DownstreamRiverNodeID="372059_2_Dwn",OnOff=1,DailyID="0",DemandType=2,IfNotFound=Warn)
+#
+#  Step 4 - fill remaining instream flow information from HB and output file
+#
+#
+FillInstreamFlowStationsFromHydroBase(ID="*")
+WriteInstreamFlowStationsToStateMod(OutputFile="..\StateMod\cm2005.ifs",WriteHow=OverwriteFile)
+#
+# Check the results
+CheckInstreamFlowStations(ID="*")
+WriteCheckFile(OutputFile="ifs.commands.StateDMI.check.html")

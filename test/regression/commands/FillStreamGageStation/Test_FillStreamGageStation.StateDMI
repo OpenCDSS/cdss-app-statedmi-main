@@ -1,0 +1,10 @@
+# Test filling stream gage station data where the edited location is found
+StartLog(LogFile="Results/Test_FillStreamGageStation.StateDMI.log")
+RemoveFile(InputFile="Results\Test_FillStreamGageStation_out.csv")
+SetStreamGageStation(ID="Location1",IfNotFound=Add)
+SetStreamGageStation(ID="Location2",Name="Location 2",IfNotFound=Add)
+FillStreamGageStation(ID="Location1*",Name="Location 1 edited")
+# Uncomment the following command to regenerate the expected results.
+# WriteStreamGageStationsToList(OutputFile="ExpectedResults/Test_FillStreamGageStation_out.csv")
+WriteStreamGageStationsToList(OutputFile="Results/Test_FillStreamGageStation_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_FillStreamGageStation_out.csv",InputFile2="Results/Test_FillStreamGageStation_out.csv",WarnIfDifferent=True)

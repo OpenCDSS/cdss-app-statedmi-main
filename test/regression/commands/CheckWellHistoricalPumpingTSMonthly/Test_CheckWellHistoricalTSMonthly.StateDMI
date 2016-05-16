@@ -1,0 +1,27 @@
+# Test checking well historical time series (monthly) data
+# The set command won't let invalid data be set from parameters so read bad data
+# to trigger the check warnings.
+# Compare the data date value file to make sure the data are being produced as expected
+# and the check file csv to make sure the checks are working.
+# The expected status is Warning because the check will detect the missing values.
+#@expectedStatus Warning
+StartLog(LogFile="Results/Test_CheckWellHistoricalPumpingTSMonthly.StateDMI.log")
+RemoveFile(InputFile="Results\Test_CheckWellHistoricalPumpingTSMonthly_out.stm",IfNotFound=Ignore)
+RemoveFile(InputFile="Results\Test_CheckWellHistoricalPumpingTSMonthly_out_check.csv",IfNotFound=Ignore)
+RemoveFile(InputFile="Results\Test_CheckWellHistoricalPumpingTSMonthly_out_check.html",IfNotFound=Ignore)
+# Define a well station to trigger the check of stations
+SetWellStation(ID="Well1",IfNotFound=Add)
+# Read some bad data...
+ReadWellHistoricalPumpingTSMonthlyFromStateMod(InputFile="Data\simple.weh")
+# Uncomment the following command to regenerate the expected results.
+# WriteWellHistoricalPumpingTSMonthlyToStateMod(OutputFile="ExpectedResults/Test_CheckWellHistoricalPumpingTSMonthly_out.stm")
+WriteWellHistoricalPumpingTSMonthlyToStateMod(OutputFile="Results/Test_CheckWellHistoricalPumpingTSMonthly_out.stm")
+CompareFiles(InputFile1="ExpectedResults/Test_CheckWellHistoricalPumpingTSMonthly_out.stm",InputFile2="Results/Test_CheckWellHistoricalPumpingTSMonthly_out.stm",WarnIfDifferent=True)
+#
+# Check the data and create the check file.
+CheckWellHistoricalPumpingTSMonthly(ID="*")
+# Uncomment the following command to regenerate the expected results.
+# WriteCheckFile(OutputFile="ExpectedResults/Test_CheckWellHistoricalPumpingTSMonthly_out_check.csv")
+WriteCheckFile(OutputFile="Results/Test_CheckWellHistoricalPumpingTSMonthly_out_check.csv")
+WriteCheckFile(OutputFile="Results/Test_CheckWellHistoricalPumpingTSMonthly_out_check.html")
+CompareFiles(InputFile1="ExpectedResults/Test_CheckWellHistoricalPumpingTSMonthly_out_check.csv",InputFile2="Results/Test_CheckWellHistoricalPumpingTSMonthly_out_check.csv",WarnIfDifferent=True)

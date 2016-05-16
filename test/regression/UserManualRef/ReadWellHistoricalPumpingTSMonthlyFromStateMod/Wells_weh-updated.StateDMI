@@ -1,0 +1,57 @@
+StartLog(LogFile="Wells_weh.StateDMI.log")
+# weh.commands.Statedmi - Creates Rio Grande Historic well pumping file
+#
+#
+# Step 1 - set output period
+#
+# rrb 2007/10/05; Revise
+SetOutputPeriod(OutputStart="01/1950",OutputEnd="12/2005")
+#
+# Step 2 - read well station file and ground water pumping file
+#
+# rrb 2007/10/05; Revise
+ReadWellStationsFromStateMod(InputFile="..\STATEMOD\Historic\rg2007.wes")
+#
+# rrb 2007/10/05; Revise
+# readWellHistoricalPumpingTSMonthlyFromStateCU(InputFile="..\statecu\Historic\rgall_2004.gwp",IgnoreDiversions=True)
+ReadWellHistoricalPumpingTSMonthlyFromStateCU(InputFile="..\statecu\Historic\rg2007.gwp",IgnoreDiversions="True")
+#
+# Step 3 - Set pumping from external time series
+#
+# Set municipal pumping (not provided by StateCU)
+# _________________________________________________________
+# Cities
+SetWellHistoricalPumpingTSMonthly(ID="20DELNOR",TSID="20DELNOR..PumpingHist.MONTH~StateMod~.\Tsfiles_2007\20DELNOR.stm",IfNotFound=Add)
+SetWellHistoricalPumpingTSMonthly(ID="20MONTEV",TSID="20MONTEV..PumpingHist.MONTH~StateMod~.\Tsfiles_2007\20MONTEV.stm",IfNotFound=Add)
+SetWellHistoricalPumpingTSMonthly(ID="20ALAMOS",TSID="20ALAMOS..PumpingHist.MONTH~StateMod~.\Tsfiles_2007\20ALAMOS.stm",IfNotFound=Add)
+# _________________________________________________________
+# aggregated M&I
+SetWellHistoricalPumpingTSMonthly(ID="20AMR01",TSID="20AMR01..PumpingHist.MONTH~StateMod~.\Tsfiles_2007\20AMR01.stm",IfNotFound=Add)
+SetWellHistoricalPumpingTSMonthly(ID="20AMR02",TSID="20AMR02..PumpingHist.MONTH~StateMod~.\Tsfiles_2007\20AMR02.stm",IfNotFound=Add)
+SetWellHistoricalPumpingTSMonthly(ID="22AMR01",TSID="22AMR01..PumpingHist.MONTH~StateMod~.\Tsfiles_2007\22AMR01.stm",IfNotFound=Add)
+SetWellHistoricalPumpingTSMonthly(ID="24AMR01",TSID="24AMR01..PumpingHist.MONTH~StateMod~.\Tsfiles_2007\24AMR01.stm",IfNotFound=Add)
+SetWellHistoricalPumpingTSMonthly(ID="26AMR01",TSID="26AMR01..PumpingHist.MONTH~StateMod~.\Tsfiles_2007\26AMR01.stm",IfNotFound=Add)
+# _________________________________________________________
+# Miscellaneous
+SetWellHistoricalPumpingTSMonthly(ID="220643",TSID="220643..PumpingHist.MONTH~StateMod~.\Tsfiles_2007\220643W.stm",IfNotFound=Add)
+#
+# Set 210521 (Empire-La Jara) requires setting to zero (this is a D&W but pumping included with 20MS02)
+SetWellHistoricalPumpingTSMonthly(ID="210521",TSID="210521..PumpingHist.MONTH~StateMod~.\Tsfiles_2007\210521.stm",IfNotFound=Add)
+#
+# _________________________________________________________
+# CBP Pumping
+# Set CBP pumping (not provided by StateCU)- historical pumping evenly distributed among aggregated wells
+SetWellHistoricalPumpingTSMonthly(ID="CBPAGGZ22",TSID="CBPAGGZ22..PumpingHist.MONTH~StateMod~.\Tsfiles_2007\CBPAGGZ22.stm",IfNotFound=Add)
+SetWellHistoricalPumpingTSMonthly(ID="CBPAGGZ25",TSID="CBPAGGZ25..PumpingHist.MONTH~StateMod~.\Tsfiles_2007\CBPAGGZ25.stm",IfNotFound=Add)
+SetWellHistoricalPumpingTSMonthly(ID="CBPAGGZ27",TSID="CBPAGGZ27..PumpingHist.MONTH~StateMod~.\Tsfiles_2007\CBPAGGZ27.stm",IfNotFound=Add)
+SetWellHistoricalPumpingTSMonthly(ID="CBPAGGZ31",TSID="CBPAGGZ31..PumpingHist.MONTH~StateMod~.\Tsfiles_2007\CBPAGGZ31.stm",IfNotFound=Add)
+#
+# Step 4 - Sort and write to StateMod file...
+#
+SortWellHistoricalPumpingTSMonthly(Order=Ascending)
+WriteWellHistoricalPumpingTSMonthlyToStateMod(OutputFile="rg2007.weh")
+WriteWellHistoricalPumpingTSMonthlyToStateMod(OutputFile="..\StateMod\Historic\rg2007.weh")
+#
+# Check the results
+CheckWellHistoricalPumpingTSMonthly(ID="*")
+WriteCheckFile(OutputFile="Wells_weh.StateDMI.check.html")

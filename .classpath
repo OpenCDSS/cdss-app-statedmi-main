@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test/regression/src/Abbot"/>
+	<classpathentry kind="src" path="test/unit/src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/cdss-lib-cdss-java"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/cdss-lib-common-java"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/cdss-lib-dmi-hydrobase-java"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/cdss-lib-models-java"/>
+	<classpathentry kind="lib" path="/cdss-util-buildtools/lib/junit-3.8.1.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -1,0 +1,13 @@
+# Test writing instream flow demand TS average monthly data from rights with a couple of generated rights
+# Use water year
+StartLog(LogFile="Results/Test_WriteInstreamFlowDemandTSAverageMonthlyToStateMod_WaterYear.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteInstreamFlowDemandTSAverageMonthlyToStateMod_WaterYear_out.ifa",IfNotFound=Ignore)
+SetOutputYearType(OutputYearType=Water)
+SetInstreamFlowRight(ID="362000",Name="InstreamFlow 1",StationID="ID",AdministrationNumber=11111.11111,Decree=10,OnOff=1,IfNotFound=Add)
+SetInstreamFlowRight(ID="362002",Name="InstreamFlow 2",StationID="ID",AdministrationNumber=22222.22222,Decree=20,OnOff=1,IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="362000",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="362002",IfNotFound=Add)
+# Uncomment the following command to regenerate the expected results.
+# WriteInstreamFlowDemandTSAverageMonthlyToStateMod(OutputFile="ExpectedResults/Test_WriteInstreamFlowDemandTSAverageMonthlyToStateMod_WaterYear_out.ifa")
+WriteInstreamFlowDemandTSAverageMonthlyToStateMod(OutputFile="Results/Test_WriteInstreamFlowDemandTSAverageMonthlyToStateMod_WaterYear_out.ifa")
+CompareFiles(InputFile1="ExpectedResults/Test_WriteInstreamFlowDemandTSAverageMonthlyToStateMod_WaterYear_out.ifa",InputFile2="Results/Test_WriteInstreamFlowDemandTSAverageMonthlyToStateMod_WaterYear_out.ifa",WarnIfDifferent=True)

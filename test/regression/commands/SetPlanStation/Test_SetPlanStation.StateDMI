@@ -1,0 +1,9 @@
+# Test setting plan stations to StateMod file with a couple of generated stations
+StartLog(LogFile="Results/Test_SetPlanStation.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SetPlanStation_out.pln",IfNotFound=Ignore)
+SetPlanStation(ID="2000505",Name="Plan 1",RiverNodeID="ID",OnOff=1,PlanType=2,EffType=1,EffMonthly="60,61,62,63,64,65,66,67,68,69,70,71",ReturnType=8,FailureSwitch=1,InitialStorage=1313,SourceID="Source1",SourceAccount="Account1",IfNotFound=Add)
+SetPlanStation(ID="2000506",Name="Plan 2",RiverNodeID="RiverNode2",OnOff=0,PlanType=8,EffType=999,ReturnType=999,FailureSwitch=0,InitialStorage=2222,SourceID="Source2",SourceAccount="Account2",IfNotFound=Add)
+# Uncomment the following command to regenerate the expected results.
+# WritePlanStationsToStateMod(OutputFile="ExpectedResults/Test_SetPlanStation_out.pln")
+WritePlanStationsToStateMod(OutputFile="Results/Test_SetPlanStation_out.pln")
+CompareFiles(InputFile1="ExpectedResults/Test_SetPlanStation_out.pln",InputFile2="Results/Test_SetPlanStation_out.pln",IfDifferent=Warn)

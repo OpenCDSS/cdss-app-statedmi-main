@@ -1,0 +1,6 @@
+# Irrigation practice data to set
+"ID","Year","Acres","IrrigationMethod","SupplyType"
+2000505,1990,101,Flood,Surface
+2000505,2000,102,Sprinkler,Ground
+2000623,1995,201,Flood,Surface
+2000623,2005,202,Sprinkler,Ground

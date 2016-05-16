@@ -1,0 +1,158 @@
+# Htar.commands.TSTOOL
+#
+# Targets for Step 1 calibration (release to target)
+# Minimum targets set to "0", Maximum targets same as eom file
+#
+SetOutputPeriod(OutputStart="10/1908",OutputEnd="09/2005")
+SetOutputYearType(OutputYearType=Water)
+#
+# Green Mountain Reservoir
+363543...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="363543...MONTH",ConstantValue=0)
+363543...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# UPPER BLUE RESERVOIR
+363570...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="363570...MONTH",ConstantValue=0)
+363570...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="363570...MONTH",MonthValues="0,0,0,2113,2113,2113,2113,1850,2113,2113,0,0",SetStart="04/1962")
+#
+# CLINTON GULCH RESERVOIR
+363575...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="363575...MONTH",ConstantValue=0)
+363575...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="363575...MONTH",ConstantValue=4300,SetStart="04/1977")
+#
+# DILLON RESERVOIR
+364512...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="364512...MONTH",ConstantValue=0)
+364512...MONTH~StateMod~..\statemod\cm2005.eom
+#
+36_ARC001...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="36_ARC001...MONTH",ConstantValue=0)
+36_ARC001...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# WOLCOTT RESERVOIR
+373639...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="373639...MONTH",ConstantValue=0)
+373639...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# EAGLE PARK RESERVOIR
+373699...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="373699...MONTH",ConstantValue=0)
+373699...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# HOMESTAKE PROJ RESERVOIR
+374516...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="374516...MONTH",ConstantValue=0)
+374516...MONTH~StateMod~..\statemod\cm2005.eom
+#
+37_ARC002...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="37_ARC002...MONTH",ConstantValue=0)
+37_ARC002...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# RUEDI RESERVOIR
+383713...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="383713...MONTH",ConstantValue=0)
+383713...MONTH~StateMod~..\statemod\cm2005.eom
+#
+38_ARC003...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="38_ARC003...MONTH",ConstantValue=0)
+38_ARC003...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# GRASS VALLEY RESERVOIR
+393505...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="393505...MONTH",ConstantValue=0)
+393505...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# RIFLE GAP RESERVOIR
+393508...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="393508...MONTH",ConstantValue=0)
+393508...MONTH~StateMod~..\statemod\cm2005.eom
+#
+39_ARC004...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="39_ARC004...MONTH",ConstantValue=0)
+39_ARC004...MONTH~StateMod~..\statemod\cm2005.eom
+#
+45_ARC005...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="45_ARC005...MONTH",ConstantValue=0)
+45_ARC005...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# WOLFORD MOUNTAIN RES
+503668...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="503668...MONTH",ConstantValue=0)
+503668...MONTH~StateMod~..\statemod\cm2005.eom
+#
+50_ARC006...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="50_ARC006...MONTH",ConstantValue=0)
+50_ARC006...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# MEADOW CREEK RESERVOIR
+513686...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="513686...MONTH",ConstantValue=0)
+513686...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# CBT SHADOW MTN GRAND L
+513695...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="513695...MONTH",ConstantValue=0)
+513695...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# WILLIAMS FORK RESERVOIR
+513709...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="513709...MONTH",ConstantValue=0)
+513709...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# CBT WILLOW CREEK RES
+513710...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="513710...MONTH",ConstantValue=0)
+513710...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# CBT GRANBY RESERVOIR
+514620...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="514620...MONTH",ConstantValue=0)
+514620...MONTH~StateMod~..\statemod\cm2005.eom
+#
+51_ARC007...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="51_ARC007...MONTH",ConstantValue=0)
+51_ARC007...MONTH~StateMod~..\statemod\cm2005.eom
+#
+52_ARC008...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="52_ARC008...MONTH",ConstantValue=0)
+52_ARC008...MONTH~StateMod~..\statemod\cm2005.eom
+#
+53_ARC009...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="53_ARC009...MONTH",ConstantValue=0)
+53_ARC009...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# VEGA RESERVOIR
+723844...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="723844...MONTH",ConstantValue=0)
+723844...MONTH~StateMod~..\statemod\cm2005.eom
+#
+72_ARC010...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="72_ARC010...MONTH",ConstantValue=0)
+72_ARC010...MONTH~StateMod~..\statemod\cm2005.eom
+#
+72_ASC001...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="72_ASC001...MONTH",ConstantValue=0)
+72_ASC001...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# BONHAM AGGREGATED RES
+953800...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="953800...MONTH",ConstantValue=0)
+953800...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# COTTONWOOD AGGREG RES
+953801...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="953801...MONTH",ConstantValue=0)
+953801...MONTH~StateMod~..\statemod\cm2005.eom
+#
+# LEON CREEK AGGREG RES
+953802...MONTH~StateMod~..\statemod\cm2005.eom
+SetConstant(TSList=LastMatchingTSID,TSID="953802...MONTH",ConstantValue=0)
+953802...MONTH~StateMod~..\statemod\cm2005.eom
+#
+#
+WriteStateMod(TSList=AllTS,OutputFile="..\StateMod\cm2005H.tar",Precision=0)
+CheckTimeSeries(CheckCriteria="Missing")
+WriteCheckFile(OutputFile="Htar.commands.TSTool.check.html")

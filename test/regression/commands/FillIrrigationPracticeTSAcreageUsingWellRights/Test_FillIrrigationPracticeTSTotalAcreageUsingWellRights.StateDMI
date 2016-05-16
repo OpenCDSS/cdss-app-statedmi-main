@@ -1,0 +1,28 @@
+# Test filling irrigation practice acres using well rights
+StartLog(LogFile="Results/Test_FillIrrigationPracticeTSAcreageUsingWellRights.StateDMI.log")
+RemoveFile(InputFile="Results\Test_FillIrrigationPracticeTSAcreageUsingWellRights_out.ipy")
+SetCULocation(ID="2000505",IfNotFound=Add)
+SetCULocation(ID="2000623",IfNotFound=Add)
+SetCULocation(ID="200812",IfNotFound=Add)
+SetOutputPeriod(OutputStart="1998",OutputEnd="2002")
+CreateCropPatternTSForCULocations(ID="*",Units="ACRE")
+CreateIrrigationPracticeTSForCULocations(ID="*")
+# Set CDS data
+SetCropPatternTS(ID="2000505",SetStart=1998,SetEnd=1998,CropPattern="ALFALFA,101,CORN,102",IrrigationMethod=Flood,SupplyType=Ground)
+SetCropPatternTS(ID="2000623",SetStart=1998,SetEnd=2000,CropPattern="ALFALFA,201,CORN,202",IrrigationMethod=Sprinkler,SupplyType=Surface)
+SetCropPatternTS(ID="200812",SetStart=1998,SetEnd=2002,CropPattern="ALFALFA,301,CORN,302",IrrigationMethod=Sprinkler,SupplyType=Ground)
+# Need to set the total acreage to drive the process
+SetIrrigationPracticeTSTotalAcreageToCropPatternTSTotalAcreage(ID="*")
+# Set the groundwater sprinkler acreage to the total to avoid warnings about
+# irrigation method acreage not adding to total.
+SetIrrigationPracticeTS(ID="2000505",SetStart=1998,SetEnd=1998,AcresSWFlood=0,AcresSWSprinkler=0,AcresGWFlood=0,AcresGWSprinkler=203)
+SetIrrigationPracticeTS(ID="2000623",SetStart=1998,SetEnd=2002,AcresSWFlood=0,AcresSWSprinkler=0,AcresGWFlood=0,AcresGWSprinkler=403)
+SetIrrigationPracticeTS(ID="200812",SetStart=1998,SetEnd=2002,AcresSWFlood=0,AcresSWSprinkler=0,AcresGWFlood=0,AcresGWSprinkler=603)
+# Read well rights that include parcel year (unmerged).
+ReadWellRightsFromStateMod(InputFile="Data\rg2007_NotMerged.wer")
+# Fill the total acreage from rights
+FillIrrigationPracticeTSAcreageUsingWellRights(ID="*",ParcelYear=1998)
+# Uncomment the following command to regenerate the expected results.
+# WriteIrrigationPracticeTSToStateCU(OutputFile="ExpectedResults/Test_FillIrrigationPracticeTSAcreageUsingWellRights_out.ipy")
+WriteIrrigationPracticeTSToStateCU(OutputFile="Results/Test_FillIrrigationPracticeTSAcreageUsingWellRights_out.ipy")
+CompareFiles(InputFile1="ExpectedResults/Test_FillIrrigationPracticeTSAcreageUsingWellRights_out.ipy",InputFile2="Results/Test_FillIrrigationPracticeTSAcreageUsingWellRights_out.ipy",IfDifferent=Warn)

@@ -1,0 +1,12 @@
+# Test sorting diversion historical time series
+StartLog(LogFile="Results/Test_SortDiversionHistoricalTSMonthly.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SortDiversionHistoricalTSMonthly_out.ddh")
+SetOutputPeriod(OutputStart="1950-01",OutputEnd="1955-12")
+SetDiversionHistoricalTSMonthlyConstant(ID="Diversion2",Constant=2222,IfNotFound=Add)
+SetDiversionHistoricalTSMonthlyConstant(ID="Diversion3",Constant=3333,IfNotFound=Add)
+SetDiversionHistoricalTSMonthlyConstant(ID="Diversion1",Constant=1111,IfNotFound=Add)
+SortDiversionHistoricalTSMonthly()
+# Uncomment the following command to regenerate the expected results.
+# WriteDiversionHistoricalTSMonthlyToStateMod(OutputFile="ExpectedResults/Test_SortDiversionHistoricalTSMonthly_out.ddh")
+WriteDiversionHistoricalTSMonthlyToStateMod(OutputFile="Results/Test_SortDiversionHistoricalTSMonthly_out.ddh")
+CompareFiles(InputFile1="ExpectedResults/Test_SortDiversionHistoricalTSMonthly_out.ddh",InputFile2="Results/Test_SortDiversionHistoricalTSMonthly_out.ddh",WarnIfDifferent=True)

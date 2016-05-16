@@ -1,0 +1,57 @@
+SetOutputPeriod(OutputStart="01/1950",OutputEnd="12/2002")
+SetOutputYearType(OutputYearType=Calendar)
+#
+# _________________________________________________________
+# 2184 - DEL NORTE 2 E
+2184.NOAA.TempMean.Month~HydroBase
+#
+# _________________________________________________________
+# 0130 - ALAMOSA SAN LUIS VALLEY RGNL
+0130.NOAA.TempMean.Month~HydroBase
+FillRegression(TSID="2184.NOAA.TempMean.Month",IndependentTSID="0130.NOAA.TempMean.Month",NumberOfEquations=OneEquation)
+# perform regress operation on the following
+# _________________________________________________________
+FillRegression(TSID="0130.NOAA.TempMean.Month",IndependentTSID="2184.NOAA.TempMean.Month",NumberOfEquations=OneEquation)
+TS AlamosaFill = Copy(TSID="0130.NOAA.TempMean.Month",NewTSID="0130.NOAA.TempMean.Month.copy")
+#
+# _________________________________________________________
+# 0776 - BLANCA
+0776.NOAA.TempMean.Month~HydroBase
+FillRegression(TSID="0776.NOAA.TempMean.Month",IndependentTSID="AlamosaFill",NumberOfEquations=OneEquation)
+#
+# _________________________________________________________
+# 1458 - CENTER 4 SSW
+1458.NOAA.TempMean.Month~HydroBase
+FillRegression(TSID="1458.NOAA.TempMean.Month",IndependentTSID="AlamosaFill",NumberOfEquations=OneEquation)
+#
+# _________________________________________________________
+# 3541 - GREAT SAND DUNES N M
+3541.NOAA.TempMean.Month~HydroBase
+FillRegression(TSID="3541.NOAA.TempMean.Month",IndependentTSID="AlamosaFill",NumberOfEquations=OneEquation)
+#
+# _________________________________________________________
+# 3951 - HERMIT 7 ESE
+3951.NOAA.TempMean.Month~HydroBase
+FillRegression(TSID="3951.NOAA.TempMean.Month",IndependentTSID="0130.NOAA.TempMean.Month",NumberOfEquations=OneEquation)
+# _________________________________________________________
+#
+# 5322 - MANASSA
+5322.NOAA.TempMean.Month~HydroBase
+FillRegression(TSID="5322.NOAA.TempMean.Month",IndependentTSID="AlamosaFill",NumberOfEquations=OneEquation)
+#
+# _________________________________________________________
+# 5706 - MONTE VISTA 2 W
+5706.NOAA.TempMean.Month~HydroBase
+FillRegression(TSID="5706.NOAA.TempMean.Month",IndependentTSID="AlamosaFill",NumberOfEquations=OneEquation)
+#
+# _________________________________________________________
+# 7337 - SAGUACHE
+7337.NOAA.TempMean.Month~HydroBase
+FillRegression(TSID="7337.NOAA.TempMean.Month",IndependentTSID="AlamosaFill",NumberOfEquations=OneEquation)
+# _________________________________________________________
+#
+Free(TSList=LastMatchingTSID,TSID="AlamosaFill")
+# _________________________________________________________
+WriteStateMod(TSList=AllTS,OutputFile="..\StateCU\temp2002.stm")
+CheckTimeSeries(CheckCriteria="Missing")
+WriteCheckFile(OutputFile="rg2002_tmp.TSTool.check.html")

@@ -1,0 +1,95 @@
+# South Platte Decesion Support System
+# Historic Consumptive Use Model
+# Ground Water Model Area Sturcture File (*.str)
+# 
+#  Step 1 - Read Structure List File (WDID, Name)
+# 
+#  Structure List includes Key Structures from Task 3, Aggregate GW, and Aggregate SW
+readCULocationsFromList(ListFile="..\SP_GWStructList.csv",IDCol="1",NameCol="3")
+# 
+#  Step 2 - Read structure information from HydroBase (Latitude, County, HUC)
+fillCULocationsFromHydroBase(ID="*",CULocType="Structure",Region1Type="County",Region2Type="HUC")
+# 
+#  Step 3 - Assign AWC values based on Task 57, generate using the CDSS Toolbox
+
+# # Key Structure AWC Values
+setCULocationsFromList(ListFile="AWC_2001.csv",IDCol="1",AWCCol="2")
+# 
+# # GW AGG Structure AWC Values
+setCULocationsFromList(ListFile="AWC_Agg_GW.csv",IDCol="1",AWCCol="2")
+#
+# # SW AGG Structure AWC Values
+setCULocationsFromList(ListFile="AWC_Agg_SW.csv",IDCol="1",AWCCol="2")
+# 
+#  Step 4 - Assign Elevation
+fillCULocationsFromList(ListFile="Key_Elev.csv",IDCol="1",ElevationCol="3")
+# 
+# Step 5 - Set Demand Structure Information based on Demand Carrier 
+setCULocation(ID="0100503_I",Latitude=40.38,Elevation=4533.00,Region1="WELD",Region2="10190003",AWC=0.1375,IfNotFound=Warn)
+setCULocation(ID="0100507_I",Latitude=40.32,Elevation=4495.00,Region1="WELD",Region2="10190003",AWC=0.1268,IfNotFound=Warn)
+setCULocation(ID="0100687_I",Latitude=40.35,Elevation=4157.00,Region1="WELD",Region2="10190012",AWC=0.1418,IfNotFound=Warn)
+setCULocation(ID="0103817_I",Latitude=40.31,Elevation=4460.00,Region1="WELD",Region2="10190003",AWC=0.1310,IfNotFound=Warn)
+setCULocation(ID="0200805_I",Latitude=39.79,Elevation=5142,Region1="Adams",Region2="10190003",AWC=0.1672,IfNotFound=Warn)
+setCULocation(ID="0200817_I",Latitude=40.13,Elevation=4862.00,Region1="WELD",Region2="10190003",AWC=0.1171,IfNotFound=Warn)
+setCULocation(ID="0200828_I",Latitude=40.31,Elevation=4713.00,Region1="WELD",Region2="10190003",AWC=0.1276,IfNotFound=Warn)
+setCULocation(ID="0200834_I",Latitude=40.36,Elevation=4652.00,Region1="WELD",Region2="10190003",AWC=0.1270,IfNotFound=Warn)
+setCULocation(ID="0203876_I",Elevation=4862,Region1="WELD",Region2="10190003",AWC=0.1151,IfNotFound=Warn)
+setCULocation(ID="0203837_C",Elevation=5150.0,Region1="ADAMS",Region2="010190003",AWC=0.1145,IfNotFound=Warn)
+setCULocation(ID="0203837_I",Elevation=5150.0,Region1="ADAMS",Region2="010190003",AWC=0.1145,IfNotFound=Warn)
+setCULocation(ID="0300911_I",Latitude=40.66,Elevation=5162.00,Region1="LARIMER",Region2="10190007",AWC=0.1237,IfNotFound=Warn)
+setCULocation(ID="0300915_I",Latitude=40.63,Elevation=5073.00,Region1="LARIMER",Region2="10190007",AWC=0.1037,IfNotFound=Warn)
+setCULocation(ID="0300919_I",Latitude=40.61,Elevation=5004.00,Region1="LARIMER",Region2="10190007",AWC=0.1252,IfNotFound=Warn)
+setCULocation(ID="0300929_I",Latitude=40.50,Elevation=4834.00,Region1="LARIMER",Region2="10190007",AWC=0.1290,IfNotFound=Warn)
+setCULocation(ID="0400524_I",Latitude=40.42,Elevation=5264.00,Region1="LARIMER",Region2="10190006",AWC=0.1544,IfNotFound=Warn)
+setCULocation(ID="0400532_I",Latitude=40.41,Elevation=5046.00,Region1="LARIMER",Region2="10190006",AWC=0.1320,IfNotFound=Warn)
+setCULocation(ID="0400588_I",Latitude=40.26,Elevation=5146.00,Region1="BOULDER",Region2="10190006",AWC=0.1460,IfNotFound=Warn)
+setCULocation(ID="6400511_I",Latitude=40.82,Elevation=3744.00,Region1="LOGAN",Region2="10190012",AWC=0.1319,IfNotFound=Warn)
+# 
+# Missing AWC values assigned using aggregates
+setCULocation(ID="6400526",AWC=0.1393,IfNotFound=Warn)
+# 
+# Missing values assigned to Diversion Systems
+setCULocation(ID="0100503_D",Latitude=40.28567,Region1="MORGAN",IfNotFound=Warn)
+setCULocation(ID="0100507_D",Latitude=40.28567,Region1="MORGAN",IfNotFound=Warn)
+setCULocation(ID="0100519_D",Latitude=40.28567,Region1="MORGAN",IfNotFound=Warn)
+# Need Latitude  setCULocation(ID="0300913_D",Latitude=40.65924,Region1="LARIMER",IfNotFound=Warn)
+setCULocation(ID="0300913_D",Latitude=40.65924,Region1="LARIMER",IfNotFound=Warn)
+setCULocation(ID="0400502_D",Latitude=40.34618,Region1="WELD",IfNotFound=Warn)
+setCULocation(ID="0600515_D",Latitude=40.05559,Region1="BOULDER",IfNotFound=Warn)
+setCULocation(ID="0600538_D",Latitude=40.04648,Region1="BOULDER",IfNotFound=Warn)
+setCULocation(ID="0700527_D",Latitude=39.77348,Region1="JEFFERSON",IfNotFound=Warn)
+setCULocation(ID="0700652_D",Latitude=39.76822,Region1="JEFFERSON",IfNotFound=Warn)
+setCULocation(ID="0801009_D",Latitude=39.55947,Region1="JEFFERSON",IfNotFound=Warn)
+setCULocation(ID="6400511_D",Latitude=40.67946,Region1="LOGAN",IfNotFound=Warn)
+setCULocation(ID="6400522_D",Latitude=40.67946,Region1="LOGAN",IfNotFound=Warn)
+# 
+# DivSys and Aggregate use weighted latitude from climate station assignments
+# County and HUC information not assigned to DivSys or Aggregate Structures 
+# 
+# Step 6 - Read structure climate weights from list created from the CDSS Toolbox Climate Tool 
+setCULocationClimateStationWeightsFromList(ListFile="Climate_2001.csv",IDCol="1",StationIDCol="2",TempWtCol="3",PrecWtCol="3")
+setCULocationClimateStationWeightsFromList(ListFile="Climate_IRR.csv",IDCol="1",StationIDCol="2",TempWtCol="3",PrecWtCol="3")
+#*****************NEEED To RE-RUN Aggregate Climate Weights and fix DWHA List********************
+setCULocationClimateStationWeightsFromList(ListFile="Climate_AGG_SW.csv",IDCol="1",StationIDCol="2",TempWtCol="3",PrecWtCol="3")
+setCULocationClimateStationWeightsFromList(ListFile="Climate_AGG_GW.csv",IDCol="1",StationIDCol="2",TempWtCol="3",PrecWtCol="3")
+# Set Climate Stations above 6500
+setCULocationClimateStationWeightsFromList(ListFile="SP2008_DWHA_OroAdj.csv",IDCol="1",StationIDCol="2",TempWtCol="3",PrecWtCol="4",OrographicTempAdjCol="6",OrographicPrecAdjCol="5")
+# 
+# Step 8 - Fill Key Climate Station
+fillCULocationClimateStationWeights(ID="01*",Weights="0945,1.0,1.0",IncludeOrographicTempAdj=False,IncludeOrographicPrecAdj=False)
+fillCULocationClimateStationWeights(ID="02*",Weights="3553,1.0,1.0",IncludeOrographicTempAdj=False,IncludeOrographicPrecAdj=False)
+fillCULocationClimateStationWeights(ID="03*",Weights="3005,1.0,1.0",IncludeOrographicTempAdj=False,IncludeOrographicPrecAdj=False)
+fillCULocationClimateStationWeights(ID="04*",Weights="5116,1.0,1.0",IncludeOrographicTempAdj=False,IncludeOrographicPrecAdj=False)
+# fillCULocationClimateStationWeights(ID="05*",Weights="5116,1.0,1.0",IncludeOrographicTempAdj=False,IncludeOrographicPrecAdj=False)
+# fillCULocationClimateStationWeights(ID="06*",Weights="0848,1.0,1.0",IncludeOrographicTempAdj=False,IncludeOrographicPrecAdj=False)
+# fillCULocationClimateStationWeights(ID="07*",Weights="4762,1.0,1.0",IncludeOrographicTempAdj=False,IncludeOrographicPrecAdj=False)
+fillCULocationClimateStationWeights(ID="08*",Weights="1401,1.0,1.0",IncludeOrographicTempAdj=False,IncludeOrographicPrecAdj=False)
+# fillCULocationClimateStationWeights(ID="09*",Weights="4762,1.0,1.0",IncludeOrographicTempAdj=False,IncludeOrographicPrecAdj=False)
+# fillCULocationClimateStationWeights(ID="23*",Weights="0263,1.0,1.0",IncludeOrographicTempAdj=False,IncludeOrographicPrecAdj=False)
+# fillCULocationClimateStationWeights(ID="48*",Weights="6921,1.0,1.0",IncludeOrographicTempAdj=False,IncludeOrographicPrecAdj=False)
+fillCULocationClimateStationWeights(ID="64*",Weights="7950,1.0,1.0",IncludeOrographicTempAdj=False,IncludeOrographicPrecAdj=False)
+# fillCULocationClimateStationWeights(ID="76*",Weights="6921,1.0,1.0",IncludeOrographicTempAdj=False,IncludeOrographicPrecAdj=False)
+# fillCULocationClimateStationWeights(ID="80*",Weights="0454,1.0,1.0",IncludeOrographicTempAdj=False,IncludeOrographicPrecAdj=False)
+# 
+# Step 7 - Write Structure File
+writeCULocationsToStateCU(OutputFile="..\StateCU\SP2008GW.str")

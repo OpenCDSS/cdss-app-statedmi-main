@@ -1,0 +1,92 @@
+#
+# Sp2008L_CDS.StateDMI
+# ____________________________________________________________________________________
+#
+# StartLog(LogFile="Sp2008L_CDS.log")
+# Crop Distribution File (*.cds) for the SPDSS Consumptive Use Model
+#
+# Step 1 - Set output period and read CU locations
+SetOutputPeriod(OutputStart="1950",OutputEnd="2006")
+ReadCULocationsFromStateCU(InputFile="..\LocationCU\SP2008L.str")
+#
+# Step 2 - Read SW aggregates, divsys, demandsys, and GW aggregates
+#
+SetDiversionAggregateFromList(ListFile="..\Sp2008L_SWAgg.csv",IDCol=1,NameCol=2,PartIDsCol=3,PartsListedHow=InColumn)
+SetDiversionSystemFromList(ListFile="..\Sp2008L_DivSys_CDS.csv",IDCol=1,NameCol=2,PartIDsCol=3,PartsListedHow=InRow)
+#
+SetWellSystemFromList(ListFile="..\SP_GWAGG_1956.csv",Year=1956,Div=1,PartType=Parcel,IDCol=1,PartIDsCol=2,PartsListedHow=InColumn)
+SetWellSystemFromList(ListFile="..\SP_GWAGG_1976.csv",Year=1976,Div=1,PartType=Parcel,IDCol=1,PartIDsCol=2,PartsListedHow=InColumn)
+SetWellSystemFromList(ListFile="..\SP_GWAGG_1987.csv",Year=1987,Div=1,PartType=Parcel,IDCol=1,PartIDsCol=2,PartsListedHow=InColumn)
+SetWellSystemFromList(ListFile="..\SP_GWAGG_2001.csv",Year=2001,Div=1,PartType=Parcel,IDCol=1,PartIDsCol=2,PartsListedHow=InColumn)
+SetWellSystemFromList(ListFile="..\SP_GWAGG_2005.csv",Year=2005,Div=1,PartType=Parcel,IDCol=1,PartIDsCol=2,PartsListedHow=InColumn)
+#
+# Step 3 - Create *.cds file form and read acreage/crops from HydroBase
+CreateCropPatternTSForCULocations(ID="*",Units="ACRE")
+ReadCropPatternTSFromHydroBase(ID="*")
+#
+# # Step 4 - Read well rights and determine gw-only structure acreage in 1950
+#
+ReadWellRightsFromStateMod(InputFile="..\Wells\Sp2008L_NotMerged.wer")
+FillCropPatternTSUsingWellRights(ID="*",IncludeSurfaceWaterSupply=False,CropType="*",FillStart=1950,FillEnd=1955,ParcelYear=1956)
+#
+# Step 5 -
+#      Fill SW structure acreage backward from 1956 to 1950
+#      Linearly interpolate acreage for all structures between 1956, 1976, 1987, 2001, and 2005
+#      Fill acreage forward for all structures from 2005 to 2006
+FillCropPatternTSRepeat(ID="*",CropType="*",FillStart=1950,FillEnd=1956,FillDirection=Backward)
+FillCropPatternTSInterpolate(ID="*",CropType="*",FillStart=1956,FillEnd=1976)
+FillCropPatternTSInterpolate(ID="*",CropType="*",FillStart=1976,FillEnd=1987)
+FillCropPatternTSInterpolate(ID="*",CropType="*",FillStart=1987,FillEnd=2001)
+FillCropPatternTSInterpolate(ID="*",CropType="*",FillStart=2001,FillEnd=2005)
+FillCropPatternTSRepeat(ID="*",CropType="*",FillStart=2005,FillEnd=2006,FillDirection=Forward)
+#
+# Step 6 - Set to Missing and Fill primary WDID of Demand Structure = 0
+SetCropPatternTS(ID="0100503_D",SetStart=1950,SetEnd=2006,CropPattern="ALFALFA,0,CORN_GRAIN.TR21,0,SUGAR_BEETS, 0, GRASS_PASTURE,0,VEGETABLES,0,SPRING_GRAIN.TR21,0",IrrigationMethod=Flood,SupplyType=Ground,ProcessWhen=Now)
+SetCropPatternTS(ID="0100507_D",SetStart=1950,SetEnd=2006,CropPattern="ALFALFA,0,CORN_GRAIN.TR21,0,SUGAR_BEETS, 0, GRASS_PASTURE,0,VEGETABLES,0,SPRING_GRAIN.TR21,0",IrrigationMethod=Flood,SupplyType=Ground,ProcessWhen=Now)
+SetCropPatternTS(ID="0100687",SetStart=1950,SetEnd=2006,CropPattern="ALFALFA,0,CORN_GRAIN.TR21,0,SUGAR_BEETS, 0, GRASS_PASTURE,0,VEGETABLES,0,SPRING_GRAIN.TR21,0",IrrigationMethod=Flood,SupplyType=Ground,ProcessWhen=Now)
+SetCropPatternTS(ID="0200834",SetStart=1950,SetEnd=2006,CropPattern="ALFALFA,0,CORN_GRAIN.TR21,0,SUGAR_BEETS, 0, GRASS_PASTURE,0,VEGETABLES,0,SPRING_GRAIN.TR21,0",IrrigationMethod=Flood,SupplyType=Ground,ProcessWhen=Now)
+#
+SetCropPatternTS(ID="6400511_D",SetStart=1950,SetEnd=2006,CropPattern="ALFALFA,0,CORN_GRAIN.TR21,0,SUGAR_BEETS, 0, GRASS_PASTURE,0,VEGETABLES,0,SPRING_GRAIN.TR21,0",IrrigationMethod=Flood,SupplyType=Ground,ProcessWhen=Now)
+# Step 7 - No Acreage in HydroBase, Set to Missing = 0
+SetCropPatternTS(ID="0100501",SetStart=1950,SetEnd=2006,CropPattern="ALFALFA,0,CORN_GRAIN.TR21,0,SUGAR_BEETS, 0, GRASS_PASTURE,0,VEGETABLES,0,SPRING_GRAIN.TR21,0",IrrigationMethod=Flood,SupplyType=Ground,ProcessWhen=Now)
+SetCropPatternTS(ID="0100513",SetStart=1950,SetEnd=2006,CropPattern="ALFALFA,0,CORN_GRAIN.TR21,0,SUGAR_BEETS, 0, GRASS_PASTURE,0,VEGETABLES,0,SPRING_GRAIN.TR21,0",IrrigationMethod=Flood,SupplyType=Ground,ProcessWhen=Now)
+SetCropPatternTS(ID="0100829",SetStart=1950,SetEnd=2006,CropPattern="ALFALFA,0,CORN_GRAIN.TR21,0,SUGAR_BEETS, 0, GRASS_PASTURE,0,VEGETABLES,0,SPRING_GRAIN.TR21,0",IrrigationMethod=Flood,SupplyType=Ground,ProcessWhen=Now)
+#
+SetCropPatternTS(ID="6400519",SetStart=1950,SetEnd=2006,CropPattern="ALFALFA,0,CORN_GRAIN.TR21,0,SUGAR_BEETS, 0, GRASS_PASTURE,0,VEGETABLES,0,SPRING_GRAIN.TR21,0",IrrigationMethod=Flood,SupplyType=Ground,ProcessWhen=Now)
+# Step 8 - Translate crop names to Locally Calibrated based on structure location and elevation
+# Source: Translate.xls (20070809)
+# Alfalfa
+TranslateCropPatternTS(ID="*",OldCropType="ALFALFA",NewCropType="ALFALFA.TR21")
+TranslateCropPatternTS(ListFile="SP2008_CCLP.csv",IDCol=1,OldCropType="ALFALFA.TR21",NewCropType="ALFALFA.CCLP")
+TranslateCropPatternTS(ListFile="SP2008_CCUP.csv",IDCol=1,OldCropType="ALFALFA.TR21",NewCropType="ALFALFA.CCUP")
+# CORN_GRAIN
+TranslateCropPatternTS(ID="*",OldCropType="CORN",NewCropType="CORN_GRAIN.TR21")
+TranslateCropPatternTS(ListFile="SP2008_CCLP.csv",IDCol=1,OldCropType="CORN_GRAIN.TR21",NewCropType="CORN_GRAIN.CCLP")
+TranslateCropPatternTS(ListFile="SP2008_CCUP.csv",IDCol=1,OldCropType="CORN_GRAIN.TR21",NewCropType="CORN_GRAIN.CCUP")
+# DRY_BEANS
+TranslateCropPatternTS(ID="*",OldCropType="DRY_BEANS",NewCropType="DRY_BEANS.TR21")
+TranslateCropPatternTS(ListFile="SP2008_CCLP.csv",IDCol=1,OldCropType="DRY_BEANS.TR21",NewCropType="DRY_BEANS.CCLP")
+TranslateCropPatternTS(ListFile="SP2008_CCUP.csv",IDCol=1,OldCropType="DRY_BEANS.TR21",NewCropType="DRY_BEANS.CCUP")
+# GRASS_PASTURE
+TranslateCropPatternTS(ID="*",OldCropType="GRASS_PASTURE",NewCropType="GRASS_PASTURE.TR21")
+TranslateCropPatternTS(ListFile="SP2008_CCLP.csv",IDCol=1,OldCropType="GRASS_PASTURE.TR21",NewCropType="GRASS_PASTURE.CCLP")
+TranslateCropPatternTS(ListFile="SP2008_CCUP.csv",IDCol=1,OldCropType="GRASS_PASTURE.TR21",NewCropType="GRASS_PASTURE.CCUP")
+TranslateCropPatternTS(ListFile="SP2008_DWHA_OroAdj.csv",IDCol=1,OldCropType="GRASS_PASTURE.TR21",NewCropType="GRASS_PASTURE.DWHA")
+# SMALL_GRAINS
+TranslateCropPatternTS(ID="*",OldCropType="SMALL_GRAINS",NewCropType="SPRING_GRAIN.TR21")
+TranslateCropPatternTS(ListFile="SP2008_CCLP.csv",IDCol=1,OldCropType="SPRING_GRAIN.TR21",NewCropType="SPRING_GRAIN.CCLP")
+TranslateCropPatternTS(ListFile="SP2008_CCUP.csv",IDCol=1,OldCropType="SPRING_GRAIN.TR21",NewCropType="SPRING_GRAIN.CCUP")
+# SUGAR_BEETS
+TranslateCropPatternTS(ID="*",OldCropType="SUGAR_BEETS",NewCropType="SUGAR_BEETS.TR21")
+TranslateCropPatternTS(ListFile="SP2008_CCLP.csv",IDCol=1,OldCropType="SUGAR_BEETS.TR21",NewCropType="SUGAR_BEETS.CCLP")
+TranslateCropPatternTS(ListFile="SP2008_CCUP.csv",IDCol=1,OldCropType="SUGAR_BEETS.TR21",NewCropType="SUGAR_BEETS.CCUP")
+# SUGAR_BEETS
+TranslateCropPatternTS(ID="*",OldCropType="VEGETABLES",NewCropType="VEGETABLES.TR21")
+# SOD_FARM
+TranslateCropPatternTS(ID="*",OldCropType="SOD_FARM",NewCropType="BLUEGRASS.POCHOP")
+# ORCHARD_WO_COVER
+TranslateCropPatternTS(ID="*",OldCropType="ORCHARD_WO_COVER",NewCropType="ORCHARD_WO_COVER.TR21")
+#
+# Step 9 - Write final *.cds file
+WriteCropPatternTSToStateCU(OutputFile="..\StateCU\Historic\SP2008L.cds",WriteHow=OverwriteFile)
+WriteCropPatternTSToStateCU(OutputFile="SP2008L.cds",WriteHow=OverwriteFile)

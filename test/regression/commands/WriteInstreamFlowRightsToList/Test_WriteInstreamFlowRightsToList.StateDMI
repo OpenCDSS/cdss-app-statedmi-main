@@ -1,0 +1,9 @@
+# Test writing instream flow right data to a list file
+StartLog(LogFile="Results/Test_WriteInstreamFlowRightsToList.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteInstreamFlowRightsToList_out.csv")
+SetInstreamFlowRight(ID="362000",Name="InstreamFlow 1",StationID="Station1",AdministrationNumber=11111.11111,Decree=10,OnOff=1,IfNotFound=Add)
+SetInstreamFlowRight(ID="362002",Name="InstreamFlow 2",StationID="ID",AdministrationNumber=22222.2222,Decree=20,OnOff=1,IfNotFound=Add)
+# Uncomment the following command to regenerate the expected results.
+# WriteInstreamFlowRightsToList(OutputFile="ExpectedResults/Test_WriteInstreamFlowRightsToList_out.csv")
+WriteInstreamFlowRightsToList(OutputFile="Results/Test_WriteInstreamFlowRightsToList_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_WriteInstreamFlowRightsToList_out.csv",InputFile2="Results/Test_WriteInstreamFlowRightsToList_out.csv",WarnIfDifferent=True)

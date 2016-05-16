@@ -1,0 +1,2 @@
+ReadCULocationsFromStateCU(InputFile="cm2006.str")
+WriteCULocationsToList(OutputFile="cm2006.csv")

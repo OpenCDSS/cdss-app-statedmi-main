@@ -1,0 +1,7 @@
+# Test reading plan stations from StateMod file - use full SP2008L file for input
+StartLog(LogFile="Results/Test_ReadPlanStationsFromStateMod_Sp2008L.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadPlanStationsFromStateMod_Sp2008L_out.pln",IfNotFound=Ignore)
+ReadPlanStationsFromStateMod(InputFile="Data\Sp2008L.pln")
+# Write the file again and compare with the original file.
+WritePlanStationsToStateMod(OutputFile="Results/Test_ReadPlanStationsFromStateMod_Sp2008L_out.pln")
+CompareFiles(InputFile1="Data/Sp2008L.pln",InputFile2="Results/Test_ReadPlanStationsFromStateMod_Sp2008L_out.pln",IgnoreWhitespace=True,IfDifferent=Warn)

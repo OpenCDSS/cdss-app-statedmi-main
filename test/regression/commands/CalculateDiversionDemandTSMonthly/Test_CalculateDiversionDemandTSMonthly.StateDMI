@@ -1,0 +1,15 @@
+# Test calculating diversion demand monthly TS from IWR and efficiencies
+StartLog(LogFile="Results/Test_CalculateDiversionDemandTSMonthly.StateDMI.log")
+RemoveFile(InputFile="Results\Test_CalculateDiversionDemandTSMonthly_out.ddm",IfNotFound=Ignore)
+SetOutputPeriod(OutputStart="1950-01",OutputEnd="1955-12")
+# Define stations for ID pattern checks
+SetDiversionStation(ID="200505",EffMonthly="40,41,42,43,44,45,45,44,43,42,41,40",IfNotFound=Add)
+SetDiversionStation(ID="200812",EffMonthly="50,51,52,53,54,55,55,54,53,52,51,50",IfNotFound=Add)
+# Read CWR (IWR) time series.
+ReadIrrigationWaterRequirementTSMonthlyFromStateCU(InputFile="Data\rg2007.ddc")
+# Calculate demand as max of the above time series.
+CalculateDiversionDemandTSMonthly(ID="*")
+# Uncomment the following command to regenerate the expected results.
+# WriteDiversionDemandTSMonthlyToStateMod(OutputFile="ExpectedResults/Test_CalculateDiversionDemandTSMonthly_out.ddm")
+WriteDiversionDemandTSMonthlyToStateMod(OutputFile="Results/Test_CalculateDiversionDemandTSMonthly_out.ddm")
+CompareFiles(InputFile1="ExpectedResults/Test_CalculateDiversionDemandTSMonthly_out.ddm",InputFile2="Results/Test_CalculateDiversionDemandTSMonthly_out.ddm",IfDifferent=Warn)

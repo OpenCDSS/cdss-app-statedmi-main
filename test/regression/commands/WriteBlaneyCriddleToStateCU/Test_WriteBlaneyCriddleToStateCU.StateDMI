@@ -1,0 +1,7 @@
+# Test writing Blaney-Criddle data to StateCU file
+StartLog(LogFile="Results/Test_WriteBlaneyCriddleToStateCU.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteBlaneyCriddleToStateCU_out.kbc")
+ReadBlaneyCriddleFromStateCU(InputFile="Data\simple_v12.kbc")
+# Compare with the original data file
+WriteBlaneyCriddleToStateCU(OutputFile="Results/Test_WriteBlaneyCriddleToStateCU_out.kbc")
+CompareFiles(InputFile1="Data\simple_v12.kbc",InputFile2="Results/Test_WriteBlaneyCriddleToStateCU_out.kbc",WarnIfDifferent=True)

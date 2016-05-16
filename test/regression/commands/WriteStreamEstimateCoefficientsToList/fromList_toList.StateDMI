@@ -1,0 +1,4 @@
+startLog(LogFile="fromList_toList.log")
+readStreamEstimateStationsFromList(ListFile="../data/streamEstimateCoefficients.lst")
+setStreamEstimateCoefficients(ID="*",ProrationFactor=1,BaseData="1,ABC",GainData="2,XYZ",IfNotFound=Add)
+writeStreamEstimateCoefficientsToList(OutputFile="../output/coeff.lst")

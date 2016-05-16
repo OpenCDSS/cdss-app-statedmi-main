@@ -1,0 +1,136 @@
+StartLog(LogFile="ddr.commands.StateDMI.log")
+# ddr.commands.StateDMI
+#
+#  StateDMI command file to create the direct diversion rights file for the Colorado model
+#
+#  Step 1 - read structures from preliminary direct diversion station file
+#
+ReadDiversionStationsFromStateMod(InputFile="cm2005_dds.dds")
+#
+#  Step 2 - read aggregate and diversion system structure assignments.  Note that
+#        want to combine water rights for aggs and diversion systems, but
+#        water rights are assigned to primary and secondary components of multistructures
+#
+SetDiversionAggregateFromList(ListFile="cm_agg.csv",IDCol=1,NameCol=2,PartIDsCol=3,PartsListedHow=InRow)
+SetDiversionSystemFromList(ListFile="cm_divsys.csv",IDCol=1,NameCol=2,PartIDsCol=3,PartsListedHow=InRow)
+#
+#  Step 3 - read diversion rights from HydroBase and define water rights classes
+#           used for aggregate structures - but NOT for diversion systems
+#
+ReadDiversionRightsFromHydroBase(ID="*",OnOffDefault=1,AdminNumClasses="14854.00000,20427.18999,22729.21241,30895.21241,31258.00000,32023.28989,39095.38998,43621.42906,46674.00000,48966.00000,99999.")
+#
+#  Step 4 - set water rights for structure IDs different from or not included in HydroBase
+#
+# Grand Valley Area - many rights obtain water through operations
+SetDiversionRight(ID="720646.02",Name="Orchard Mesa Irr Dist Sys",StationID="ID",OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720646.03",Name="Orchard Mesa Irr Dist Sys",StationID="ID",OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720646.05",Name="USA Power Plant",StationID="ID",Decree=800.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720646.07",Name="Grand Valley Proj",StationID="ID",AdministrationNumber=22729.19544,Decree=40.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720646.08",Name="USA_PP_Winter_OM-Stip",StationID="ID",AdministrationNumber=30895.21241,Decree=800.00,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720646.09",Name="USA_PP_SummerSr_OM-Stip",StationID="ID",AdministrationNumber=30895.21241,Decree=490,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720646.10",Name="USA_PP_SummerJr_OM-Stip",StationID="ID",AdministrationNumber=100000.1000,Decree=999.00,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="720813.01",Name="Orchard Mesa Irr Dist Sys",StationID="ID",AdministrationNumber=99999.99999,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="950001.01",Name="Grand Valley Proj - Irr",StationID="ID",AdministrationNumber=99999.99999,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950002.01",Name="USA Power Plant",StationID="ID",AdministrationNumber=99999.99999,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950003.01",Name="Orchard Mesa Check",StationID="ID",AdministrationNumber=999999.0000,Decree=640.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950004.01",Name="OMID Hydraulic Pump",StationID="ID",AdministrationNumber=99999.99999,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950005.01",Name="OMID Pre-1985 Bypass",StationID="ID",AdministrationNumber=999998.0000,Decree=1100.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950006.01",Name="OMID Post-1985 Bypass",StationID="ID",AdministrationNumber=30895.23492,Decree=1100.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950007.01",Name="USA PP Winter OM-Stip",StationID="ID",AdministrationNumber=99999.90009,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950008.01",Name="USA PP Summer OM-Stip",StationID="ID",AdministrationNumber=100000.1000,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+... similar commands omitted...
+#
+#
+# Municipal Water Rights
+SetDiversionRight(ID="955002.01",Name="Snake R Water Dist Well 1",StationID="ID",AdministrationNumber=18181.00000,Decree=0.03,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="955002.02",Name="Snake R Water Dist Well 1",StationID="ID",AdministrationNumber=32075.25333,Decree=0.12,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="955002.03",Name="Snake R Water Dist Well 1",StationID="ID",AdministrationNumber=44741.00000,Decree=1.23,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="955001.01",Name="Vail Valley Water - Irr",StationID="ID",AdministrationNumber=15646.00000,Decree=11.2,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="955003.01",Name="Vail Valley Water - NonIrr",StationID="ID",AdministrationNumber=42420.41366,Decree=13.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950051.01",Name="City of Grand Jnct",StationID="ID",AdministrationNumber=1.00000,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.01",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=12753.00000,Decree=4.03,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.02",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=30895.12724,Decree=1.95,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.03",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=30895.24260,Decree=0.74,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.04",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=32811.00000,Decree=2.12,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.05",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=38847.00000,Decree=20.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.06",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=46751.46599,Decree=11.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.07",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=46995.00000,Decree=4.1,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950020.08",Name="Ute Water Treatment Plant",StationID="ID",AdministrationNumber=41791.00000,Decree=15.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="720816.01",Name="Palisade Town Pipeline",StationID="ID",AdministrationNumber=12797.00000,Decree=1.44,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="720816.02",Name="Palisade Town Pipeline",StationID="ID",AdministrationNumber=14222.00000,Decree=3.55,OnOff=1,IfNotFound=Add,IfFound=Warn)
+...similar commands omitted...
+#
+# Industrial Water Rights
+SetDiversionRight(ID="360989.01",Name="Maggie Pond Snowmaking",StationID="ID",AdministrationNumber=99999.99999,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="361016.01",Name="Copper Mtn Snowmaking",StationID="ID",AdministrationNumber=99999.99999,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="720807.01",Name="Molina Power Plant",StationID="ID",AdministrationNumber=99999.99999,Decree=999.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# TenMile Diversion No. 1 - set diversion b/c it has been "Transferred From" in 1996 database
+SetDiversionRight(ID="360841.01",Name="TenMile Diversion No.1",StationID="ID",AdministrationNumber=31566.00000,Decree=35.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#
+#
+# Redlands Power Canal and Irrigation rights (420541 has 3 rights of which only the first is modified, James Heath (heath@lrcwe.com))
+SetDiversionRight(ID="420541.01",Name="Redlands Power Canal",StationID="ID",AdministrationNumber=22283.20300,Decree=610.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="950050.01",Name="Redlands Power Canal-Irr",StationID="ID",AdministrationNumber=22283.20300,Decree=60.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950050.02",Name="Redlands Power Canal-Irr",StationID="ID",AdministrationNumber=34419.33414,Decree=80.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#
+#
+# Silt Project default water rights - water obtained through operations
+SetDiversionRight(ID="950010.01",Name="Dry Elk Valley Irr",StationID="ID",AdministrationNumber=99999.99999,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="950011.01",Name="Farmers Irrigation Comp",StationID="ID",AdministrationNumber=99999.99999,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#
+#
+# 15-Mile Reach - LR-2
+SetDiversionRight(ID="952001.01",Name="15-Mile Fish Require",StationID="ID",AdministrationNumber=99999.91000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#
+#
+# Excess HUP Releases from Homestake, Dillon, Williams Fork, and Wolford Reservoirs Water Rights
+SetDiversionRight(ID="954516D.01",Name="HUP Release Node",StationID="ID",AdministrationNumber=99999.99999,Decree=0.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="954512D.01",Name="HUP Release Node",StationID="ID",AdministrationNumber=99999.99999,Decree=0.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="953709D.01",Name="HUP Release Node",StationID="ID",AdministrationNumber=99999.99999,Decree=0.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="953668D.01",Name="HUP Release Node",StationID="ID",AdministrationNumber=99999.99999,Decree=0.0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#
+#
+# WOLFORD MOUNTAIN RESERVOIR DEMAND
+SetDiversionRight(ID="953101.01",Name="Wolford_Fraser_Dem",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="953102.01",Name="Wolford_MidPark_Dem",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="953103.01",Name="Wolford_Market_Dem",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+...similar commands omitted...
+# FUTURE DEPLETIONS
+SetDiversionRight(ID="956001.01",Name="Future_Depletion_#1",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetDiversionRight(ID="956002.01",Name="Future_Depletion_#2",StationID="ID",AdministrationNumber=99999.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#
+# Cliff Ditch - both water rights reside under WDID 500539 - set 12 cfs of second water right to 500731
+# and reduce to 12 cfs at 500539 - this water right serves both 500539 & 500731
+SetDiversionRight(ID="500731.01",Name="Cliff Ditch Hdg No 2",StationID="ID",AdministrationNumber=20676.19665,Decree=12.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="500539.02",Name="Cliff Ditch",StationID="ID",AdministrationNumber=20676.19665,Decree=12.0,OnOff=1,IfNotFound=Add,IfFound=Set)
+#
+#
+#  Step 5 - Add Free water rights for structures historically diverting more than water rights
+# Example from San Juan - replace section when we get a list of free river water rights
+SetDiversionRight(ID="360662.99",Name="HOAGLAND CANAL SPRUCE",StationID="360662",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="360729.99",Name="MAT NO 2 DITCH",StationID="360729",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="360734.99",Name="MCKAY DITCH",StationID="360734",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+SetDiversionRight(ID="360765.99",Name="PALMER-MCKINLEY DITCH",StationID="360765",AdministrationNumber=99999.99999,Decree=999.00,IfNotFound=Add,IfFound=Set)
+...similar commands omitted...
+#
+#  Step 6 - add municipal aggregate rights - this agg node water right is set to zero as no M&I uses need to be aggregated and accounted for.
+#                                            the node is included to maintain consistency with other basins and for potential future use
+#
+SetDiversionRight(ID="72_AMC001.01",Name="72_AMC001 Colorado River nr Stateline",StationID="ID",AdministrationNumber=1.00000,Decree=0.0,IfNotFound=Add,IfFound=Set)
+#
+#  Step 7 - create direct diverison rights file
+#
+WriteDiversionRightsToStateMod(OutputFile="..\STATEMOD\cm2005.ddr")
+#
+# Check the results
+CheckDiversionRights(ID="*")
+WriteCheckFile(OutputFile="ddr.commands.StateDMI.check.html")

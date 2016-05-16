@@ -1,0 +1,7 @@
+# Test writing stream estimate coefficients to StateMod file - use full Colorado file for input
+StartLog(LogFile="Results/Test_WriteStreamEstimateCoefficientsToStateMod_cm2005.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteStreamEstimateCoefficientsToStateMod_cm2005_out.rib")
+ReadStreamEstimateCoefficientsFromStateMod(InputFile="Data\cm2005.rib")
+# Write the file again and compare with the original file.
+WriteStreamEstimateCoefficientsToStateMod(OutputFile="Results/Test_WriteStreamEstimateCoefficientsToStateMod_cm2005_out.rib")
+CompareFiles(InputFile1="Data/cm2005.rib",InputFile2="Results/Test_WriteStreamEstimateCoefficientsToStateMod_cm2005_out.rib",WarnIfDifferent=True)

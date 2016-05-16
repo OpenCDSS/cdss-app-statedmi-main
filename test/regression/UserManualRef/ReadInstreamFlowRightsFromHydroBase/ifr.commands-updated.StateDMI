@@ -1,0 +1,60 @@
+StartLog(LogFile="ifr.commands.StateDMI.log")
+# ifr.commands.StateDMI
+#
+#  StateDMI command file to create the annual instream flow rights file for the
+#           Colorado model Historical and Calibrated models
+#
+#  Step 1 - read instream flow structures from instream flow structure file
+#
+ReadInstreamFlowStationsFromStateMod(InputFile="..\STATEMOD\cm2005.ifs")
+#
+#  Step 2 - read instream flow rights from HydroBase
+#
+ReadInstreamFlowRightsFromHydroBase(ID="*",OnOffDefault=1)
+#
+#  Step 3 - set instream flow rights for non-HydroBase structures
+#
+# Following insf are reservoir bypasses
+SetInstreamFlowRight(ID="953508.01",Name="Rifle_Gap_Res_Bypass",StationID="ID",AdministrationNumber=37503.36898,Decree=5.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetInstreamFlowRight(ID="953543.01",Name="Green_Mtn_Res_Bypass",StationID="ID",AdministrationNumber=31257.99994,Decree=85.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetInstreamFlowRight(ID="953668.01",Name="Wolford_Res_Bypass",StationID="ID",AdministrationNumber=50385.99999,Decree=13.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetInstreamFlowRight(ID="953695.01",Name="Shadow_Mtn_Res_Bypass",StationID="ID",AdministrationNumber=31257.99999,Decree=50.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetInstreamFlowRight(ID="953709.01",Name="Williams_Fork_Res_Bypass",StationID="ID",AdministrationNumber=31358.99999,Decree=15.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetInstreamFlowRight(ID="953710.01",Name="Willow_Crk_Res_Bypass",StationID="ID",AdministrationNumber=31257.99999,Decree=7.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetInstreamFlowRight(ID="953713.01",Name="Ruedi_Res_Bypass",StationID="ID",AdministrationNumber=39290.99999,Decree=110.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetInstreamFlowRight(ID="951146.01",Name="Wolcott_PP_Bypass",StationID="ID",AdministrationNumber=42484.99999,Decree=110.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+# Following insf are minimum reservoir release requirements (operating rules control)
+SetInstreamFlowRight(ID="954512.01",Name="Dillon_Res_Min_Rel",StationID="ID",AdministrationNumber=31257.99997,Decree=50.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetInstreamFlowRight(ID="954620.01",Name="Granby_Res_Min_Rel",StationID="ID",AdministrationNumber=31257.99999,Decree=75.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+# Following insf are Fraser collection system bypass requirements (Denver's Moffat)
+SetInstreamFlowRight(ID="950639.01",Name="Jim_Creek_Bypass",StationID="ID",AdministrationNumber=30870.26116,Decree=10.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetInstreamFlowRight(ID="951269.01",Name="Den_Ranch_Crk_Bypass",StationID="ID",AdministrationNumber=30870.26116,Decree=4.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetInstreamFlowRight(ID="951309.01",Name="St_Louis_Crk_Bypass",StationID="ID",AdministrationNumber=30870.26116,Decree=10.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetInstreamFlowRight(ID="951310.01",Name="Vasquez_Crk_Bypass",StationID="ID",AdministrationNumber=30870.26116,Decree=8.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+# Following insf are minimum bypass for Williams Fork Diversion Project (Denver)
+SetInstreamFlowRight(ID="954603.01",Name="Gumlick_Tunnel_Bypass",StationID="ID",AdministrationNumber=30870.26116,Decree=1.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+# Following insf are minimum bypass for Fry-Ark Project
+SetInstreamFlowRight(ID="950786.01",Name="Thomasville_Gage_Bypass",StationID="ID",AdministrationNumber=39290.99999,Decree=200.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetInstreamFlowRight(ID="951594.01",Name="Hunter_Crk_Bypass",StationID="ID",AdministrationNumber=39290.99999,Decree=21.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetInstreamFlowRight(ID="954625.01",Name="Boustead_Tunnel_Bypass",StationID="ID",AdministrationNumber=39290.99999,Decree=30.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+# Following insf is minimum bypass below Homestake Tunnel (Col. Springs)
+SetInstreamFlowRight(ID="954516.01",Name="Gold_Park_Gage_Min_Flow",StationID="ID",AdministrationNumber=39650.37519,Decree=24.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+# Following insf is minimum release for the Clinton Res. agreement
+SetInstreamFlowRight(ID="954655.01",Name="Winter_Park_Ski_Min_Flow",StationID="ID",AdministrationNumber=30870.26116,Decree=3.90,OnOff=1,IfNotFound=Add,IfFound=Warn)
+# Insf node added above the Shoshone Power Plant to allow simulation of Green Mtn. Res. operations prior to 1985
+SetInstreamFlowRight(ID="950500.01",Name="Shoshone_Call_Flows",StationID="ID",AdministrationNumber=99999.80000,Decree=1250.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+# CWCB insf in 15-mile reach
+SetInstreamFlowRight(ID="952002.01",Name="USFWS_Recomm._Fish_Flow",StationID="ID",AdministrationNumber=99999.92000,Decree=16000.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+# GVWM Bypass
+SetInstreamFlowRight(ID="950099.01",Name="GVWM_Bypass",StationID="ID",AdministrationNumber=99999.00000,Decree=0.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+# Eagle River Minimum Flow Second Reach
+SetInstreamFlowRight(ID="372059_2.01",Name="MIN_FLOW_EAGLE_RIVER_2",StationID="ID",AdministrationNumber=47558.00000,Decree=155.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#  Step 4 - create output file
+#
+WriteInstreamFlowRightsToStateMod(OutputFile="..\STATEMOD\cm2005.ifr")
+
+#
+# Check the results
+CheckInstreamFlowRights(ID="*")
+WriteCheckFile(OutputFile="ifr.commands.StateDMI.check.html")

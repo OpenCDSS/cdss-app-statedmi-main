@@ -1,0 +1,10 @@
+# Test filling instream flow station data with a couple of generated stations
+StartLog(LogFile="Results/Test_FillInstreamFlowStation.StateDMI.log")
+RemoveFile(InputFile="Results\Test_FillInstreamFlowStation_out.csv",IfNotFound=Ignore)
+SetInstreamFlowStation(ID="Station1",IfNotFound=Add)
+SetInstreamFlowStation(ID="Station2",IfNotFound=Add)
+FillInstreamFlowStation(ID="Station1*",Name="Station1 - filled",UpstreamRiverNodeID="upfilled",DownstreamRiverNodeID="downfilled",OnOff=1,DailyID="ID",DemandType=1)
+# Uncomment the following command to regenerate the expected results.
+# WriteInstreamFlowStationsToList(OutputFile="ExpectedResults/Test_FillInstreamFlowStation_out.csv")
+WriteInstreamFlowStationsToList(OutputFile="Results/Test_FillInstreamFlowStation_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_FillInstreamFlowStation_out.csv",InputFile2="Results/Test_FillInstreamFlowStation_out.csv",WarnIfDifferent=True)

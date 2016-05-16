@@ -1,0 +1,8 @@
+# Test reading Blaney-Criddle crop coefficients from HydroBase
+StartLog(LogFile="Results/Test_ReadBlaneyCriddleFromHydroBase.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadBlaneyCriddleFromHydroBase_out.csv")
+ReadBlaneyCriddleFromHydroBase(BlaneyCriddleMethod="BLANEY-CRIDDLE_TR-21")
+# Uncomment the following command to regenerate the expected results.
+# WriteBlaneyCriddleToList(OutputFile="ExpectedResults/Test_ReadBlaneyCriddleFromHydroBase_out.csv")
+WriteBlaneyCriddleToList(OutputFile="Results/Test_ReadBlaneyCriddleFromHydroBase_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadBlaneyCriddleFromHydroBase_out.csv",InputFile2="Results/Test_ReadBlaneyCriddleFromHydroBase_out.csv",WarnIfDifferent=True)

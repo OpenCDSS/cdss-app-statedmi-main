@@ -1,0 +1,7 @@
+# Test reading plan return data from StateMod file - use full SP2008L file for input
+StartLog(LogFile="Results/Test_ReadPlanReturnFromStateMod_Sp2008L.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadPlanReturnFromStateMod_Sp2008L_out.prf",IfNotFound=Ignore)
+ReadPlanReturnFromStateMod(InputFile="Data\Sp2008L.prf")
+# Write the file again and compare with the original file.
+WritePlanReturnToStateMod(OutputFile="Results/Test_ReadPlanReturnFromStateMod_Sp2008L_out.prf")
+CompareFiles(InputFile1="Data/Sp2008L.prf",InputFile2="Results/Test_ReadPlanReturnFromStateMod_Sp2008L_out.prf",IgnoreWhitespace=True,IfDifferent=Warn)

@@ -1,0 +1,7 @@
+# Test reading instream flow demand time series (average monthly) from StateMod file - use full Colorado file for input
+StartLog(LogFile="Results/Test_ReadInstreamFlowDemandTSAverageMonthlyFromStateMod_cm2005.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadInstreamFlowDemandTSAverageMonthlyFromStateMod_cm2005_out.ifa",IfNotFound=Ignore)
+ReadInstreamFlowDemandTSAverageMonthlyFromStateMod(InputFile="Data\cm2005.ifa")
+# Write the file again and compare with the original file.
+WriteInstreamFlowDemandTSAverageMonthlyToStateMod(OutputFile="Results/Test_ReadInstreamFlowDemandTSAverageMonthlyFromStateMod_cm2005_out.ifa",OutputYearType=Water)
+CompareFiles(InputFile1="Data/cm2005.ifa",InputFile2="Results/Test_ReadInstreamFlowDemandTSAverageMonthlyFromStateMod_cm2005_out.ifa",IfDifferent=Warn)

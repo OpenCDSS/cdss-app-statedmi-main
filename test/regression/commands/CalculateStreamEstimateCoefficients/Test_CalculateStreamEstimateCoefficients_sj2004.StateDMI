@@ -1,0 +1,77 @@
+# Test calculating stream estimate coefficients from the sj2004 network file
+# @expectedStatus warning (because of out of range proration factors)
+StartLog(LogFile="Results/Test_CalculateStreamEstimateCoefficients_sj2004.StateDMI.log")
+RemoveFile(InputFile="Results\Test_CalculateStreamEstimateCoefficients_sj2004.rib",IfNotFound=Ignore)
+# rib.commands.stateDMI
+#
+# Creates the Stream Estimate Station Coefficient Data file
+#
+#  Step 1 - read river nodes from the network file and create file framework
+#
+ReadStreamEstimateStationsFromNetwork(InputFile="Data\sj2004.net")
+#
+#  Step 2 - set preferred gages for "neighboring" gage approach
+#           this baseflow nodes are generally on smaller non-gaged tribs and have
+#           different flow characteristics than next downstream gages
+#
+SetStreamEstimateCoefficientsPFGage(ID="290582",GageID="09343300")
+SetStreamEstimateCoefficientsPFGage(ID="290588",GageID="09343300")
+SetStreamEstimateCoefficientsPFGage(ID="290613",GageID="09343300")
+SetStreamEstimateCoefficientsPFGage(ID="290729",GageID="09339900")
+SetStreamEstimateCoefficientsPFGage(ID="292005",GageID="09342000")
+SetStreamEstimateCoefficientsPFGage(ID="300510",GageID="09357500")
+SetStreamEstimateCoefficientsPFGage(ID="303536",GageID="09357500")
+SetStreamEstimateCoefficientsPFGage(ID="301902",GageID="09357500")
+SetStreamEstimateCoefficientsPFGage(ID="301056",GageID="09357500")
+SetStreamEstimateCoefficientsPFGage(ID="301219",GageID="09357500")
+SetStreamEstimateCoefficientsPFGage(ID="314637",GageID="09352900")
+SetStreamEstimateCoefficientsPFGage(ID="340560",GageID="09368500")
+SetStreamEstimateCoefficientsPFGage(ID="340535",GageID="09368500")
+SetStreamEstimateCoefficientsPFGage(ID="340508",GageID="09371000")
+SetStreamEstimateCoefficientsPFGage(ID="600521",GageID="09173000")
+SetStreamEstimateCoefficientsPFGage(ID="600611",GageID="09172500")
+SetStreamEstimateCoefficientsPFGage(ID="600672",GageID="09173000")
+SetStreamEstimateCoefficientsPFGage(ID="600670",GageID="09173000")
+SetStreamEstimateCoefficientsPFGage(ID="600777",GageID="09175500")
+SetStreamEstimateCoefficientsPFGage(ID="601397",GageID="09171200")
+SetStreamEstimateCoefficientsPFGage(ID="601320",GageID="09171200")
+SetStreamEstimateCoefficientsPFGage(ID="601374",GageID="09171200")
+SetStreamEstimateCoefficientsPFGage(ID="601319",GageID="09171200")
+SetStreamEstimateCoefficientsPFGage(ID="603527",GageID="09171200")
+SetStreamEstimateCoefficientsPFGage(ID="610527",GageID="09165000")
+SetStreamEstimateCoefficientsPFGage(ID="BFL_29",GageID="09165000")
+SetStreamEstimateCoefficientsPFGage(ID="630644",GageID="09177000")
+SetStreamEstimateCoefficientsPFGage(ID="713612",GageID="09165000")
+SetStreamEstimateCoefficientsPFGage(ID="710531",GageID="09165000")
+SetStreamEstimateCoefficientsPFGage(ID="710504",GageID="09165000")
+SetStreamEstimateCoefficientsPFGage(ID="73_ADS025",GageID="09177000")
+SetStreamEstimateCoefficientsPFGage(ID="780562",GageID="09352900")
+SetStreamEstimateCoefficientsPFGage(ID="320558",GageID="09371500")
+SetStreamEstimateCoefficientsPFGage(ID="310593",GageID="09355000")
+SetStreamEstimateCoefficientsPFGage(ID="310710",GageID="09355000")
+SetStreamEstimateCoefficientsPFGage(ID="460503",GageID="09355000")
+SetStreamEstimateCoefficientsPFGage(ID="780692",GageID="09352900")
+SetStreamEstimateCoefficientsPFGage(ID="600607",GageID="09173000")
+SetStreamEstimateCoefficientsPFGage(ID="600569",GageID="09173000")
+SetStreamEstimateCoefficientsPFGage(ID="600574",GageID="09173000")
+SetStreamEstimateCoefficientsPFGage(ID="600585",GageID="09173000")
+SetStreamEstimateCoefficientsPFGage(ID="600733",GageID="09173000")
+SetStreamEstimateCoefficientsPFGage(ID="601378",GageID="09172500")
+SetStreamEstimateCoefficientsPFGage(ID="601388",GageID="09172500")
+SetStreamEstimateCoefficientsPFGage(ID="680636",GageID="09173000")
+SetStreamEstimateCoefficientsPFGage(ID="600669",GageID="09173000")
+#
+#  Step 3 - calculate stream coefficients
+#
+CalculateStreamEstimateCoefficients()
+#
+#  Step 4 - set proration factors directly
+#
+SetStreamEstimateCoefficients(ID="314638",ProrationFactor=0.20,IfNotFound=Warn)
+SetStreamEstimateCoefficients(ID="300523",ProrationFactor=0.40,IfNotFound=Warn)
+#
+#  Step 5 - create streamflow estimate coefficient file
+#
+WriteStreamEstimateCoefficientsToStateMod(OutputFile="Results/Test_CalculateStreamEstimateCoefficients_sj2004.rib")
+# Compare for the test
+CompareFiles(InputFile1="Data/sj2004.rib",InputFile2="Results/Test_CalculateStreamEstimateCoefficients_sj2004.rib",IfDifferent=Fail)

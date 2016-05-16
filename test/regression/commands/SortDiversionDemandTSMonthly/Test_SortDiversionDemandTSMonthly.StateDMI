@@ -1,0 +1,12 @@
+# Test sorting diversion demand time series
+StartLog(LogFile="Results/Test_SortDiversionDemandTSMonthly.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SortDiversionDemandTSMonthly_out.ddm")
+SetOutputPeriod(OutputStart="1950-01",OutputEnd="1955-12")
+SetDiversionDemandTSMonthlyConstant(ID="Diversion2",Constant=2222,IfNotFound=Add)
+SetDiversionDemandTSMonthlyConstant(ID="Diversion3",Constant=3333,IfNotFound=Add)
+SetDiversionDemandTSMonthlyConstant(ID="Diversion1",Constant=1111,IfNotFound=Add)
+SortDiversionDemandTSMonthly()
+# Uncomment the following command to regenerate the expected results.
+# WriteDiversionDemandTSMonthlyToStateMod(OutputFile="ExpectedResults/Test_SortDiversionDemandTSMonthly_out.ddm")
+WriteDiversionDemandTSMonthlyToStateMod(OutputFile="Results/Test_SortDiversionDemandTSMonthly_out.ddm")
+CompareFiles(InputFile1="ExpectedResults/Test_SortDiversionDemandTSMonthly_out.ddm",InputFile2="Results/Test_SortDiversionDemandTSMonthly_out.ddm",WarnIfDifferent=True)

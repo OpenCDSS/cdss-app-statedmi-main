@@ -1,0 +1,10 @@
+#@readOnly
+# Test writing delay tables (monthly) to a list file, using a legacy command name
+StartLog(LogFile="Results/Test_WriteDelayTablesMonthlyToList_Legacy.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteDelayTablesMonthlyToList_Legacy_out.csv",IfNotFound=Ignore)
+ReadDelayTablesMonthlyFromStateMod(InputFile="Data\cm2005.dly")
+# Uncomment the following to regenerate expected results
+#WriteDelayTablesMonthlyToList(OutputFile="ExpectedResults/Test_WriteDelayTablesMonthlyToList_Legacy_out.csv")
+# Legacy command is WriteMonthlyDelayTablesToList(), not WriteDelayTablesMonthlyToList()
+WriteMonthlyDelayTablesToList(OutputFile="Results/Test_WriteDelayTablesMonthlyToList_Legacy_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_WriteDelayTablesMonthlyToList_Legacy_out.csv",InputFile2="Results/Test_WriteDelayTablesMonthlyToList_Legacy_out.csv",WarnIfDifferent=True)

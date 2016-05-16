@@ -1,0 +1,19 @@
+# Test setting CU location climate station weights from HydroBase
+# First fill the County/HUC from HydroBase and then fill the weights
+StartLog(LogFile="Results/Test_SetCULocationClimateStationWeightsFromHydroBase.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SetCULocationClimateStationWeightsFromHydroBase_out.csv")
+RemoveFile(InputFile="Results\Test_SetCULocationClimateStationWeightsFromHydroBase_out_ClimateStations.csv")
+RemoveFile(InputFile="Results\Test_SetCULocationClimateStationWeightsFromHydroBase_out_Collections.csv")
+# Use structures in the Colorado basin because later Rio Grande data does not
+# appear to have been loaded.
+SetCULocation(ID="5100501",IfNotFound=Add)
+SetCULocation(ID="5100502",IfNotFound=Add)
+SetCULocation(ID="5100503",IfNotFound=Add)
+FillCULocationsFromHydroBase(ID="*")
+SetCULocationClimateStationWeightsFromHydroBase(ID="*")
+# Uncomment the following command to regenerate the expected results.
+# WriteCULocationsToList(OutputFile="ExpectedResults/Test_SetCULocationClimateStationWeightsFromHydroBase_out.csv")
+WriteCULocationsToList(OutputFile="Results/Test_SetCULocationClimateStationWeightsFromHydroBase_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_SetCULocationClimateStationWeightsFromHydroBase_out.csv",InputFile2="Results/Test_SetCULocationClimateStationWeightsFromHydroBase_out.csv",WarnIfDifferent=True)
+CompareFiles(InputFile1="ExpectedResults/Test_SetCULocationClimateStationWeightsFromHydroBase_out_ClimateStations.csv",InputFile2="Results/Test_SetCULocationClimateStationWeightsFromHydroBase_out_ClimateStations.csv",WarnIfDifferent=True)
+CompareFiles(InputFile1="ExpectedResults/Test_SetCULocationClimateStationWeightsFromHydroBase_out_Collections.csv",InputFile2="Results/Test_SetCULocationClimateStationWeightsFromHydroBase_out_Collections.csv",WarnIfDifferent=True)

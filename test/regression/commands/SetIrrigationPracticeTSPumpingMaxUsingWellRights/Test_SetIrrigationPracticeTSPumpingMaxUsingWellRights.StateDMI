@@ -1,0 +1,24 @@
+# Test setting irrigation practice time series max pumping from rights
+StartLog(LogFile="Results/Test_SetIrrigationPracticeTSPumpingMaxUsingWellRights.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SetIrrigationPracticeTSPumpingMaxUsingWellRights_out.ipy")
+SetCULocation(ID="2000505",IfNotFound=Add)
+SetCULocation(ID="2000623",IfNotFound=Add)
+SetCULocation(ID="2000812",IfNotFound=Add)
+SetOutputPeriod(OutputStart="1990",OutputEnd="2007")
+CreateIrrigationPracticeTSForCULocations(ID="*")
+SetIrrigationPracticeTS(ID="2000505",SetStart=1998,SetEnd=1998,SurfaceDelEffMax=.11,FloodAppEffMax=.12,SprinklerAppEffMax=.13,AcresSWFlood=11,AcresSWSprinkler=12,AcresGWFlood=13,AcresGWSprinkler=14,PumpingMax=10,GWMode=1)
+SetIrrigationPracticeTS(ID="2000623",SetStart=1998,SetEnd=2000,SurfaceDelEffMax=.21,FloodAppEffMax=.22,SprinklerAppEffMax=.23,AcresSWFlood=21,AcresSWSprinkler=22,AcresGWFlood=23,AcresGWSprinkler=24,PumpingMax=20,GWMode=2)
+SetIrrigationPracticeTS(ID="2000812",SetStart=1998,SetEnd=2002,SurfaceDelEffMax=.31,FloodAppEffMax=.32,SprinklerAppEffMax=.33,AcresSWFlood=31,AcresSWSprinkler=32,AcresGWFlood=33,AcresGWSprinkler=34,PumpingMax=30,GWMode=3)
+# Define some well rights
+SetWellRight(ID="2000505.01",StationID="2000505",AdministrationNumber=52000.00000,Decree=100,IfNotFound=Add)
+SetWellRight(ID="2000505.02",StationID="2000505",AdministrationNumber=52500.00000,Decree=120,IfNotFound=Add)
+SetWellRight(ID="2000623.01",StationID="2000623",AdministrationNumber=52000.00000,Decree=200,IfNotFound=Add)
+SetWellRight(ID="2000623.02",StationID="2000623",AdministrationNumber=52500.00000,Decree=220,IfNotFound=Add)
+SetWellRight(ID="2000812.01",StationID="2000812",AdministrationNumber=52000.00000,Decree=300,IfNotFound=Add)
+SetWellRight(ID="2000812.02",StationID="2000812",AdministrationNumber=52500.00000,Decree=320,IfNotFound=Add)
+# Set to the well rights.
+SetIrrigationPracticeTSPumpingMaxUsingWellRights(ID="*")
+# Uncomment the following command to regenerate the expected results.
+# WriteIrrigationPracticeTSToStateCU(OutputFile="ExpectedResults/Test_SetIrrigationPracticeTSPumpingMaxUsingWellRights_out.ipy")
+WriteIrrigationPracticeTSToStateCU(OutputFile="Results/Test_SetIrrigationPracticeTSPumpingMaxUsingWellRights_out.ipy")
+CompareFiles(InputFile1="ExpectedResults/Test_SetIrrigationPracticeTSPumpingMaxUsingWellRights_out.ipy",InputFile2="Results/Test_SetIrrigationPracticeTSPumpingMaxUsingWellRights_out.ipy",WarnIfDifferent=True)

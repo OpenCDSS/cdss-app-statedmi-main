@@ -1,0 +1,10 @@
+# Test translating Blaney-Criddle crop coefficients
+StartLog(LogFile="Results/Test_TranslateBlaneyCriddle.StateDMI.log")
+RemoveFile(InputFile="Results\Test_TranslateBlaneyCriddle_out.kbc")
+SetBlaneyCriddle(CropType="Crop1",CurveType=Percent,BlaneyCriddleMethod=0,Coefficients=".01,.02,.03,.04,.05,.06,.07,.08,.09,.10,.11,.12,.13,.14,.15,.16,.17,.18,.19,.20,.21",IfNotFound=Add)
+SetBlaneyCriddle(CropType="Crop2",CurveType=Percent,BlaneyCriddleMethod=0,Coefficients=".01,.02,.03,.04,.05,.06,.07,.08,.09,.10,.11,.12,.13,.14,.15,.16,.17,.18,.19,.20,.21",IfNotFound=Add)
+TranslateBlaneyCriddle(OldCropType="Crop1",NewCropType="Crop1Trans")
+# Uncomment the following command to regenerate the expected results.
+# WriteBlaneyCriddleToStateCU(OutputFile="ExpectedResults/Test_TranslateBlaneyCriddle_out.kbc")
+WriteBlaneyCriddleToStateCU(OutputFile="Results/Test_TranslateBlaneyCriddle_out.kbc")
+CompareFiles(InputFile1="ExpectedResults/Test_TranslateBlaneyCriddle_out.kbc",InputFile2="Results/Test_TranslateBlaneyCriddle_out.kbc",WarnIfDifferent=True)

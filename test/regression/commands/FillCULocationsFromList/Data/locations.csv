@@ -1,0 +1,7 @@
+# Test CU locations list, without climate station assignments,
+# Since that information is in a separate list
+#ID,Name,Latitude,Elevation,Region1,AWC
+0130,StationA,41,4001,CountyA,.501
+0776,StationB,42,4002,CountyB,.502
+# In-line comment
+1458,StationC,43,4003,CountyC,.503

@@ -1,0 +1,8 @@
+# Test reading stream estimate stations from list
+StartLog(LogFile="Results/Test_ReadStreamEstimateStationsFromList.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadStreamEstimateStationsFromList_out.csv")
+ReadStreamEstimateStationsFromList(ListFile="Data\stations.csv",IDCol=1,NameCol=2,RiverNodeIDCol=3,DailyIDCol=4)
+# Uncomment the following command to regenerate the expected results.
+# WriteStreamEstimateStationsToList(OutputFile="ExpectedResults/Test_ReadStreamEstimateStationsFromList_out.csv")
+WriteStreamEstimateStationsToList(OutputFile="Results/Test_ReadStreamEstimateStationsFromList_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadStreamEstimateStationsFromList_out.csv",InputFile2="Results/Test_ReadStreamEstimateStationsFromList_out.csv",WarnIfDifferent=True)

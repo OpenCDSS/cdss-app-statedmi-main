@@ -1,0 +1,11 @@
+# Test setting reservoir aggregate from a list file for reservoir stations
+StartLog(LogFile="Results/Test_SetReservoirAggregateFromList.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SetReservoirAggregateFromList_out_Collections.csv")
+SetReservoirStation(ID="Location1",Name="Reservoir 1",IfNotFound=Add)
+SetReservoirStation(ID="Location2",Name="Reservoir 2",IfNotFound=Add)
+SetReservoirStation(ID="Location3",Name="Reservoir 3",IfNotFound=Add)
+SetReservoirAggregateFromList(ListFile="Data\aggregates.csv",IDCol=1,NameCol=2,PartIDsCol=3,PartsListedHow=InRow)
+# Uncomment the following command to regenerate the expected results.
+# WriteReservoirStationsToList(OutputFile="ExpectedResults/Test_SetReservoirAggregateFromList_out.csv")
+WriteReservoirStationsToList(OutputFile="Results/Test_SetReservoirAggregateFromList_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_SetReservoirAggregateFromList_out_Collections.csv",InputFile2="Results/Test_SetReservoirAggregateFromList_out_Collections.csv",WarnIfDifferent=True)

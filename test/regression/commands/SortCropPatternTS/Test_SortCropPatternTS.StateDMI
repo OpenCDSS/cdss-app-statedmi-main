@@ -1,0 +1,16 @@
+# Test sorting crop pattern time series
+StartLog(LogFile="Results/Test_SortCropPatternTS.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SortCropPatternTS_out.cds")
+SetOutputPeriod(OutputStart="2000",OutputEnd="2002")
+SetCULocation(ID="Loc3",IfNotFound=Add)
+SetCULocation(ID="Loc1",IfNotFound=Add)
+SetCULocation(ID="Loc2",IfNotFound=Add)
+CreateCropPatternTSForCULocations(ID="*",Units="ACRE")
+SetCropPatternTS(ID="Loc1",SetStart=2000,SetEnd=2002,CropPattern="ALFALFA,100.1,CORN,100.2",IrrigationMethod=Flood,SupplyType=Surface,ProcessWhen=Now)
+SetCropPatternTS(ID="Loc2",SetStart=2000,SetEnd=2002,CropPattern="ALFALFA,200.1,CORN,200.2",IrrigationMethod=Flood,SupplyType=Surface,ProcessWhen=Now)
+SetCropPatternTS(ID="Loc3",SetStart=2000,SetEnd=2002,CropPattern="ALFALFA,300.1,CORN,300.2",IrrigationMethod=Flood,SupplyType=Surface,ProcessWhen=Now)
+SortCropPatternTS()
+# Uncomment the following command to regenerate the expected results.
+# WriteCropPatternTSToStateCU(OutputFile="ExpectedResults/Test_SortCropPatternTS_out.cds")
+WriteCropPatternTSToStateCU(OutputFile="Results/Test_SortCropPatternTS_out.cds")
+CompareFiles(InputFile1="ExpectedResults/Test_SortCropPatternTS_out.cds",InputFile2="Results/Test_SortCropPatternTS_out.cds",IfDifferent=Warn)

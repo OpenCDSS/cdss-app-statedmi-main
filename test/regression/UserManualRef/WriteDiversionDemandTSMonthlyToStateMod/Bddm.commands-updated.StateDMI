@@ -1,0 +1,181 @@
+StartLog(LogFile="Bddm.commands.StateDMI.log")
+# Bddm.commands.StateDMI
+#
+#  StateDMI command file to create the Baseline demand file
+#
+#  Step 1 - set time-series period and year type
+#
+SetOutputPeriod(OutputStart="10/1908",OutputEnd="09/2005")
+SetOutputYearType(OutputYearType=Water)
+#
+#  Step 2 - read calculated demand file
+#
+ReadDiversionDemandTSMonthlyFromStateMod(InputFile="..\statemod\cm2005C.ddm")
+#
+#  Step 3 - set baseline demand that vary from calculated demand
+#
+#	TRANSBASIN DIVERSIONS
+#
+#  Con-Hoosier Transbasin Demands
+SetDiversionDemandTSMonthly(ID="954683",TSID="954683..DivTotal.MONTH~StateMod~954683_baseline.stm")
+#  Boustead Transbasin Demands
+SetDiversionDemandTSMonthly(ID="954699",TSID="954699..DivTotal.MONTH~StateMod~954699_baseline.stm")
+#  Moffat Transbasin Demands
+SetDiversionDemandTSMonthly(ID="514655",TSID="514655..DivTotal.MONTH~StateMod~514655_baseline.stm")
+#  Vidler Tunnel
+SetDiversionDemandTSMonthly(ID="364626",TSID="364626..DivTotal.MONTH~StateMod~364626_baseline.stm")
+#  Robert's Tunnel
+SetDiversionDemandTSMonthly(ID="364684",TSID="364684..DivTotal.MONTH~StateMod~364684_baseline.stm")
+#  BOREAS PASS DITCH
+SetDiversionDemandTSMonthly(ID="364685",TSID="364685..DivTotal.MONTH~StateMod~364685_baseline.stm")
+#  EWING DITCH AT TENNESSEE PASS, CO.
+SetDiversionDemandTSMonthly(ID="371091",TSID="371091..DivTotal.MONTH~StateMod~371091_baseline.stm")
+#  HOMESTAKE PROJ TUNNEL
+SetDiversionDemandTSMonthly(ID="374614",TSID="374614..DivTotal.MONTH~StateMod~374614_baseline.stm")
+#  COLUMBINE DITCH
+SetDiversionDemandTSMonthly(ID="374641",TSID="374641..DivTotal.MONTH~StateMod~374641_baseline.stm")
+#  WARREN E WURTS DITCH
+SetDiversionDemandTSMonthly(ID="374648",TSID="374648..DivTotal.MONTH~StateMod~374648_baseline.stm")
+#  BUSK - IVANHOE TUNNEL
+SetDiversionDemandTSMonthly(ID="384613",TSID="384613..DivTotal.MONTH~StateMod~384613_baseline.stm")
+#  INDEPENDENCE PASS TM DVR TUNNEL NO 1
+SetDiversionDemandTSMonthly(ID="384617",TSID="384617..DivTotal.MONTH~StateMod~384617_baseline.stm")
+#  BERTHOUD CANAL TUNNEL
+SetDiversionDemandTSMonthly(ID="514625",TSID="514625..DivTotal.MONTH~StateMod~514625_baseline.stm")
+#  ADAMS TUNNEL
+SetDiversionDemandTSMonthly(ID="514634",TSID="514634..DivTotal.MONTH~StateMod~514634_baseline.stm")
+#  WILLOW CREEK FEEDER
+SetDiversionDemandTSMonthly(ID="510958",TSID="510958..DivTotal.MONTH~StateMod~510958_baseline.stm")
+#  WINDY GAP PUMP
+SetDiversionDemandTSMonthly(ID="514700",TSID="514700..DivTotal.MONTH~StateMod~514700_baseline.stm")
+#  WEST THREE MILE DITCH
+SetDiversionDemandTSMonthly(ID="384717",TSID="384717..DivTotal.MONTH~StateMod~384717_baseline.stm")
+#
+#
+#	MUNICIPAL AND INDUSTRIAL
+#
+#  DILLON_VALLEY_W&SD_(RANKIN_NO._1_DITCH)
+SetDiversionDemandTSMonthly(ID="360784",TSID="360784..DivTotal.MONTH~StateMod~360784_baseline.stm")
+#  TOWN_OF_DILLON_(Straight_Creek_Ditch)
+SetDiversionDemandTSMonthly(ID="360829",TSID="360829..DivTotal.MONTH~StateMod~360829_baseline.stm")
+#  TENMILE DIVERSION NO 1 (Climax)
+SetDiversionDemandTSMonthlyConstant(ID="360841",Constant=0)
+#  Keystone Resort Snowmaking
+SetDiversionDemandTSMonthly(ID="360908",TSID="360908..DivTotal.MONTH~StateMod~360908_baseline.stm")
+#  TOWN_OF_BRECKENRIDGE_(Breckenridge_Pipeline)
+SetDiversionDemandTSMonthly(ID="361008",TSID="361008..DivTotal.MONTH~StateMod~361008_baseline.stm")
+#  COPPER_MOUNTAIN_SKI_AREA_SNOWMAKING
+SetDiversionDemandTSMonthly(ID="361016",TSID="361016..DivTotal.MONTH~StateMod~361016_baseline.stm")
+#  UPPER_EAGLE_VALLEY_WATER_AUTHORITY_(Metcalf_Ditch)
+SetDiversionDemandTSMonthly(ID="370708",TSID="370708..DivTotal.MONTH~StateMod~370708_baseline.stm")
+#  CARBONDALE WTR SYS & PL
+SetDiversionDemandTSMonthly(ID="381052",TSID="381052..DivTotal.MONTH~StateMod~381052_baseline.stm")
+#  Snowmass Water and Utility
+SetDiversionDemandTSMonthly(ID="381441",TSID="381441..DivTotal.MONTH~StateMod~381441_baseline.stm")
+#  RIFLE TOWN OF PUMP & PL
+SetDiversionDemandTSMonthly(ID="390967",TSID="390967..DivTotal.MONTH~StateMod~390967_baseline.stm")
+#  GRAND JCT GUNNISON P-L
+SetDiversionDemandTSMonthly(ID="420520",TSID="420520..DivTotal.MONTH~StateMod~420520_baseline.stm")
+#  REDLANDS POWER CANAL
+SetDiversionDemandTSMonthly(ID="420541",TSID="420541..DivTotal.MONTH~StateMod~420541_baseline.stm")
+#  HENDERSON MINE WTR SYS
+SetDiversionDemandTSMonthly(ID="511070",TSID="511070..DivTotal.MONTH~StateMod~511070_baseline.stm")
+#  SHOSHONE POWER PLANT
+SetDiversionDemandTSMonthly(ID="530584",TSID="530584..DivTotal.MONTH~StateMod~530584_baseline.stm")
+#  GLENWOOD L WATER CO SYS
+SetDiversionDemandTSMonthly(ID="530585",TSID="530585..DivTotal.MONTH~StateMod~530585_baseline.stm")
+#  TOWN_OF_CLIFTON_(Grand_Junction_Colorado_River_PL)
+SetDiversionDemandTSMonthly(ID="720644",TSID="720644..DivTotal.MONTH~StateMod~720644_baseline.stm")
+#  MOLINA POWER PLANT
+SetDiversionDemandTSMonthly(ID="720807",TSID="720807..DivTotal.MONTH~StateMod~720807_baseline.stm")
+#  PALISADE_TOWN_PIPELINE_(720816)_(TREATED_PLANT_FLOW)
+SetDiversionDemandTSMonthly(ID="720816",TSID="720816..DivTotal.MONTH~StateMod~720816_baseline.stm")
+#  Ute Water Treatment
+SetDiversionDemandTSMonthly(ID="950020",TSID="950020..DivTotal.MONTH~StateMod~950020_baseline.stm")
+#  CITY_OF_GRAND_JUNCTION
+SetDiversionDemandTSMonthly(ID="950051",TSID="950051..DivTotal.MONTH~StateMod~950051_baseline.stm")
+#  VAIL VALLEY CONSOLIDATED WATER DISTRICT - irr. season
+SetDiversionDemandTSMonthly(ID="955001",TSID="955001..DivTotal.MONTH~StateMod~955001_baseline.stm")
+#  TOTAL FOR ALL SNAKE RIVER WATER DISTRICT WELLS (KEYSTONE_MUNICIPAL)
+SetDiversionDemandTSMonthly(ID="955002",TSID="955002..DivTotal.MONTH~StateMod~955002_baseline.stm")
+#  VAIL VALLEY CONSOLIDATED WATER DISTRICT - nonirr. season
+SetDiversionDemandTSMonthly(ID="955003",TSID="955003..DivTotal.MONTH~StateMod~955003_baseline.stm")
+#
+#
+#	RESERVOIR STRUCTURES
+#
+#  GRN MTN HYDRO-ELECTRIC
+SetDiversionDemandTSMonthly(ID="360881",TSID="360881..DivTotal.MONTH~StateMod~360881_baseline.stm")
+#  WILLIAMS FORK POWER COND
+SetDiversionDemandTSMonthly(ID="511237",TSID="511237..DivTotal.MONTH~StateMod~511237_baseline.stm")
+#  Green Mountain Contract water
+SetDiversionDemandTSMonthly(ID="950060",TSID="950060..DivTotal.MONTH~StateMod~950060_baseline.stm")
+#  FRASER BASIN demands out of Wolford Mountain Reservoir
+SetDiversionDemandTSMonthly(ID="953101",TSID="953101..DivTotal.MONTH~StateMod~953101_baseline.stm")
+#  MIDDLE PARK demands out of Wolford Mountain Reservoir
+SetDiversionDemandTSMonthly(ID="953102",TSID="953102..DivTotal.MONTH~StateMod~953102_baseline.stm")
+#  Green Mtn Annual Rep Est
+SetDiversionDemandTSMonthly(ID="950061",TSID="950061..DivTotal.MONTH~StateMod~950061_baseline.stm")
+#  Ruedi Rnd 1-Muni Demand
+SetDiversionDemandTSMonthly(ID="953001",TSID="953001..DivTotal.MONTH~StateMod~953001_baseline.stm")
+#  Ruedi Rnd 1-Ind Demand
+SetDiversionDemandTSMonthly(ID="953002",TSID="953002..DivTotal.MONTH~StateMod~953002_baseline.stm")
+#  Ruedi Rnd 2-Muni Demand
+SetDiversionDemandTSMonthly(ID="953003",TSID="953003..DivTotal.MONTH~StateMod~953003_baseline.stm")
+#  Ruedi Rnd 2-Ind Demand
+SetDiversionDemandTSMonthly(ID="953004",TSID="953004..DivTotal.MONTH~StateMod~953004_baseline.stm")
+#
+#
+#	CAMEO DEMAND / GRAND VALLEY AREA
+#
+#  GRAND VALLEY PROJECT IRRIGATION (fill in years from 1909 to 1916)
+SetDiversionDemandTSMonthly(ID="950001",TSID="950001..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+#  Orchard Mesa Irrigation District (OMID power) demand
+SetDiversionDemandTSMonthlyConstant(ID="950002",Constant=0)
+#  ORCHARD_MESA_CHECK
+SetDiversionDemandTSMonthly(ID="950003",TSID="950003..DivTotal.MONTH~StateMod~950003_baseline.stm")
+#  Orchard Mesa Irrigation District (OMID pump) demand
+SetDiversionDemandTSMonthly(ID="950004",TSID="950004..DivTotal.MONTH~StateMod~950004_baseline.stm")
+#  OMID Bypass (950005) time series for baseline data set
+SetDiversionDemandTSMonthlyConstant(ID="950005",Constant=0)
+#  OMID Bypass (950006) time series for baseline data set
+SetDiversionDemandTSMonthly(ID="950006",TSID="950006..DivTotal.MONTH~StateMod~950006_baseline.stm")
+#  USA PP-Winter-OM Stip
+SetDiversionDemandTSMonthly(ID="950007",TSID="950007..DivTotal.MONTH~StateMod~950007_baseline.stm")
+#  USA PP-Summer-OM Stip
+SetDiversionDemandTSMonthly(ID="950008",TSID="950008..DivTotal.MONTH~StateMod~950008_baseline.stm")
+#
+#
+#	FISH DEMAND (in Baseline it is located at instream flow node 952002)
+#
+#  15 Mile Reach area for endangered fish
+SetDiversionDemandTSMonthlyConstant(ID="952001",Constant=0)
+#
+#   Step 4 - set calculated demand to current demand for structures whose historical acreage is different from current
+#
+SetDiversionDemandTSMonthly(ID="360687",TSID="360687..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="360725",TSID="360725..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="360728",TSID="360728..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="360729",TSID="360729..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="360765",TSID="360765..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="360780",TSID="360780..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="360800",TSID="360800..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="370519",TSID="370519..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="370571",TSID="370571..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="370723",TSID="370723..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="370848",TSID="370848..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="380528",TSID="380528..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="380572",TSID="380572..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="380663",TSID="380663..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="380939",TSID="380939..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="380996",TSID="380996..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="381062",TSID="381062..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+SetDiversionDemandTSMonthly(ID="381078",TSID="381078..DivTotal.MONTH~StateMod~..\StateMod\cm2005C-AcreageChange.ddm")
+#
+#   Step 5 - create baseline demand file
+#
+WriteDiversionDemandTSMonthlyToStateMod(OutputFile="..\statemod\cm2005B.ddm")
+#
+# Check the results
+CheckDiversionDemandTSMonthly(ID="*")
+WriteCheckFile(OutputFile="Bddm.commands.StateDMI.check.html")

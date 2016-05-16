@@ -1,0 +1,3 @@
+startLog(LogFile="from2004RioNetwork_toList.log")
+readNetworkFromStateMod(InputFile="../data/rgtw.net")
+writeNetworkToList(OutputFile="../output/networkList.lst")

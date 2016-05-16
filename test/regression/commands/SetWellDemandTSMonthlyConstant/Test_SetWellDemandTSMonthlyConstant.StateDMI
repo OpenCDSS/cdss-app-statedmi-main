@@ -1,0 +1,11 @@
+# Test setting well demand monthly TS to constant (add and then overwrite)
+StartLog(LogFile="Results/Test_SetWellDemandTSMonthlyConstant.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SetWellDemandTSMonthlyConstant_out.wem")
+SetOutputPeriod(OutputStart="1950-01",OutputEnd="1955-12")
+SetWellDemandTSMonthlyConstant(ID="2000505",Constant=1111,IfNotFound=Add)
+SetWellDemandTSMonthlyConstant(ID="2000812",Constant=2222,IfNotFound=Add)
+SetWellDemandTSMonthlyConstant(ID="2000812",Constant=3333,SetStart="1950-09",SetEnd="1953-05")
+# Uncomment the following command to regenerate the expected results.
+# WriteWellDemandTSMonthlyToStateMod(OutputFile="ExpectedResults/Test_SetWellDemandTSMonthlyConstant_out.wem")
+WriteWellDemandTSMonthlyToStateMod(OutputFile="Results/Test_SetWellDemandTSMonthlyConstant_out.wem")
+CompareFiles(InputFile1="ExpectedResults/Test_SetWellDemandTSMonthlyConstant_out.wem",InputFile2="Results/Test_SetWellDemandTSMonthlyConstant_out.wem",WarnIfDifferent=True)

@@ -1,0 +1,10 @@
+# Test setting the output year type to calendar
+StartLog(LogFile="Results/Test_SetOutputYearType_OutputYearType=Calendar.StateDMI.log")
+RemoveFile(InputFile="Results/Test_SetOutputYearType_OutputYearType=Calendar_out.txt",IfNotFound=Ignore)
+SetOutputYearType(OutputYearType=Calendar)
+# Uncomment the following command to regenerate the expected results file.
+# WriteProperty(OutputFile="ExpectedResults\Test_SetOutputYearType_OutputYearType=Calendar_out.txt",PropertyName="OutputYearType",Append=False)
+# Generate new output...
+WriteProperty(OutputFile="Results/Test_SetOutputYearType_OutputYearType=Calendar_out.txt",PropertyName="OutputYearType",Append=False)
+# Do regression comparison...
+CompareFiles(InputFile1="ExpectedResults\Test_SetOutputYearType_OutputYearType=Calendar_out.txt",InputFile2="Results/Test_SetOutputYearType_OutputYearType=Calendar_out.txt",WarnIfDifferent=True)

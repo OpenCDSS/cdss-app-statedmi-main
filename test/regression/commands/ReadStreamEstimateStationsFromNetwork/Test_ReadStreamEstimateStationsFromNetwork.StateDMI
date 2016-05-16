@@ -1,0 +1,8 @@
+# Test reading stream estimate stations from a network file
+StartLog(LogFile="Results/Test_ReadStreamEstimateStationsFromNetwork.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadStreamEstimateStationsFromNetwork_out.csv",IfNotFound=Ignore)
+ReadStreamEstimateStationsFromNetwork(InputFile="Data\rg2007.net")
+# Uncomment the following command to regenerate the original output
+# WriteStreamEstimateStationsToList(OutputFile="ExpectedResults/Test_ReadStreamEstimateStationsFromNetwork_out.csv")
+WriteStreamEstimateStationsToList(OutputFile="Results/Test_ReadStreamEstimateStationsFromNetwork_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadStreamEstimateStationsFromNetwork_out.csv",InputFile2="Results/Test_ReadStreamEstimateStationsFromNetwork_out.csv",WarnIfDifferent=True)

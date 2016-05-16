@@ -1,0 +1,21 @@
+# Test limiting diversion historical monthly TS to rights
+StartLog(LogFile="Results/Test_LimitDiversionHistoricalTSMonthlyToRights.StateDMI.log")
+RemoveFile(InputFile="Results\Test_LimitDiversionHistoricalTSMonthlyToRights_out.ddh",IfNotFound=Ignore)
+SetOutputPeriod(OutputStart="1950-01",OutputEnd="2007-12")
+# Define stations
+SetDiversionStation(ID="2000505",RiverNodeID="2000505",IfNotFound=Add)
+SetDiversionStation(ID="2000812",RiverNodeID="2000812",IfNotFound=Add)
+# Define time series - AF/M - use large values that will be reduced
+SetDiversionHistoricalTSMonthlyConstant(ID="2000505",Constant=11111,IfNotFound=Add)
+SetDiversionHistoricalTSMonthlyConstant(ID="2000812",Constant=22222,IfNotFound=Add)
+# Define water rights to limit
+SetDiversionRight(ID="2000505.11",Name="Right 11",StationID="2000505",AdministrationNumber=36500.00000,Decree=11,IfNotFound=Add)
+SetDiversionRight(ID="2000505.12",Name="Right 12",StationID="2000505",AdministrationNumber=40000.00000,Decree=12,IfNotFound=Add)
+SetDiversionRight(ID="2000812.11",Name="Right 21",StationID="2000812",AdministrationNumber=36500.00000,Decree=21,IfNotFound=Add)
+SetDiversionRight(ID="2000812.22",Name="Right 22",StationID="2000812",AdministrationNumber=40000.00000,Decree=22,IfNotFound=Add)
+# Limit the time series to the water rights.
+LimitDiversionHistoricalTSMonthlyToRights(ID="*")
+# Uncomment the following command to regenerate the expected results.
+# WriteDiversionHistoricalTSMonthlyToStateMod(OutputFile="ExpectedResults/Test_LimitDiversionHistoricalTSMonthlyToRights_out.ddh")
+WriteDiversionHistoricalTSMonthlyToStateMod(OutputFile="Results/Test_LimitDiversionHistoricalTSMonthlyToRights_out.ddh")
+CompareFiles(InputFile1="ExpectedResults/Test_LimitDiversionHistoricalTSMonthlyToRights_out.ddh",InputFile2="Results/Test_LimitDiversionHistoricalTSMonthlyToRights_out.ddh",IfDifferent=Warn)

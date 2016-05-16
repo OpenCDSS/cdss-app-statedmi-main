@@ -1,0 +1,2 @@
+SetCropPatternTS(ID="200506",SetStart=1998,SetEnd=1998,CropPattern="GRASS_PASTURE,100",IrrigationMethod=Flood,SupplyType=Surface,ProcessWhen=WithParcels)
+SetCropPatternTS(ID="90ACEQM",CropPattern="GRASS_PASTURE,800",IrrigationMethod=Flood,SupplyType=Surface,ProcessWhen=Now)

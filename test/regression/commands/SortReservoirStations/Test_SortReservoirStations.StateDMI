@@ -1,0 +1,11 @@
+# Test sorting reservoir stations
+StartLog(LogFile="Results/Test_SortReservoirStations.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SortReservoirStations_out.csv")
+SetReservoirStation(ID="Reservoir2",Name="Reservoir 2",IfNotFound=Add)
+SetReservoirStation(ID="Reservoir3",Name="Reservoir 3",IfNotFound=Add)
+SetReservoirStation(ID="Reservoir1",Name="Reservoir 1",IfNotFound=Add)
+SortReservoirStations()
+# Uncomment the following command to regenerate the expected results.
+# WriteReservoirStationsToList(OutputFile="ExpectedResults/Test_SortReservoirStations_out.csv")
+WriteReservoirStationsToList(OutputFile="Results/Test_SortReservoirStations_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_SortReservoirStations_out.csv",InputFile2="Results/Test_SortReservoirStations_out.csv",WarnIfDifferent=True)

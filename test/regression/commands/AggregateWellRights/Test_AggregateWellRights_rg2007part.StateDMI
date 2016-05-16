@@ -1,0 +1,11 @@
+# Test aggregating well rights from a StateMod file
+StartLog(LogFile="Results/Test_AggregateWellRights_rg2007part.StateDMI.log")
+RemoveFile(InputFile="Results\Test_AggregateWellRights_rg2007part_out.wer",IfNotFound=Ignore)
+SetWellStation(ID="200511",IfNotFound=Add)
+ReadWellRightsFromStateMod(InputFile="Data\rg2007part.wer")
+AggregateWellRights(AdminNumClasses="10000.00000,20000.00000,25000.00000,30000.00000,35000.00000,40000.00000,45000.00000,99999.99999")
+SortWellRights(Order=LocationIDAscending,Order2=IDAscending)
+# Uncomment the following command to regenerate expected results.
+#WriteWellRightsToStateMod(OutputFile="ExpectedResults/Test_AggregateWellRights_rg2007part_out.wer")
+WriteWellRightsToStateMod(OutputFile="Results/Test_AggregateWellRights_rg2007part_out.wer")
+CompareFiles(InputFile1="ExpectedResults/Test_AggregateWellRights_rg2007part_out.wer",InputFile2="Results/Test_AggregateWellRights_rg2007part_out.wer",WarnIfDifferent=True)

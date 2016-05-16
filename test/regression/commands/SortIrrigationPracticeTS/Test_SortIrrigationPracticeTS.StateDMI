@@ -1,0 +1,16 @@
+# Test sorting irrigation practice time series
+StartLog(LogFile="Results/Test_SortIrrigationPracticeTS.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SortIrrigationPracticeTS_out.ipy")
+SetOutputPeriod(OutputStart="2000",OutputEnd="2002")
+SetCULocation(ID="Loc3",IfNotFound=Add)
+SetCULocation(ID="Loc1",IfNotFound=Add)
+SetCULocation(ID="Loc2",IfNotFound=Add)
+CreateIrrigationPracticeTSForCULocations(ID="*")
+SetIrrigationPracticeTS(ID="Loc1",SetStart=2000,SetEnd=2002,AcresTotal=100)
+SetIrrigationPracticeTS(ID="Loc2",SetStart=2000,SetEnd=2002,AcresTotal=200)
+SetIrrigationPracticeTS(ID="Loc3",SetStart=2000,SetEnd=2002,AcresTotal=300)
+SortIrrigationPracticeTS()
+# Uncomment the following command to regenerate the expected results.
+# WriteIrrigationPracticeTSToStateCU(OutputFile="ExpectedResults/Test_SortIrrigationPracticeTS_out.ipy")
+WriteIrrigationPracticeTSToStateCU(OutputFile="Results/Test_SortIrrigationPracticeTS_out.ipy")
+CompareFiles(InputFile1="ExpectedResults/Test_SortIrrigationPracticeTS_out.ipy",InputFile2="Results/Test_SortIrrigationPracticeTS_out.ipy",IfDifferent=Warn)

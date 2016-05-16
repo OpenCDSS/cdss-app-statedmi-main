@@ -1,0 +1,16 @@
+# Test filling well demand monthly TS with constant
+StartLog(LogFile="Results/Test_FillWellDemandTSMonthlyConstant.StateDMI.log")
+RemoveFile(InputFile="Results\Test_FillWellDemandTSMonthlyConstant_out.wem",IfNotFound=Ignore)
+# Generate data with missing on the start and end of the period.
+SetOutputPeriod(OutputStart="1950-01",OutputEnd="1959-12")
+SetWellDemandTSMonthlyConstant(ID="2000505",Constant=1000,SetStart="1953-01",SetEnd="1954-12",IfNotFound=Add)
+SetWellDemandTSMonthlyConstant(ID="2000505",Constant=1100,SetStart="1955-01",SetEnd="1956-12")
+# The following will not currently cause original limits to be recalculated.
+SetWellDemandTSMonthlyConstant(ID="2000812",Constant=2000,SetStart="1953-01",SetEnd="1954-12",IfNotFound=Add)
+SetWellDemandTSMonthlyConstant(ID="2000812",Constant=2100,SetStart="1955-01",SetEnd="1956-12",IfNotFound=Add)
+# Fill the start and end of the period
+FillWellDemandTSMonthlyConstant(ID="20005*",Constant=1333,FillFlag=A)
+# Uncomment the following command to regenerate the expected results.
+# WriteWellDemandTSMonthlyToStateMod(OutputFile="ExpectedResults/Test_FillWellDemandTSMonthlyConstant_out.wem")
+WriteWellDemandTSMonthlyToStateMod(OutputFile="Results/Test_FillWellDemandTSMonthlyConstant_out.wem")
+CompareFiles(InputFile1="ExpectedResults/Test_FillWellDemandTSMonthlyConstant_out.wem",InputFile2="Results/Test_FillWellDemandTSMonthlyConstant_out.wem",IfDifferent=Warn)

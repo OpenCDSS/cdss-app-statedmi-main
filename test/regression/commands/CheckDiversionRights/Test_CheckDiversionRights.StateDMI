@@ -1,0 +1,28 @@
+# Test check diversion rights data where each checked value is in error
+# The set command won't let invalid data be set from parameters so read bad data
+# to trigger the check warnings.
+# Compare the data csv to make sure the data are being produced as expected
+# and the check file csv to make sure the checks are working.
+# The expected status is Warning because the check will detect the missing values.
+#@expectedStatus Warning
+StartLog(LogFile="Results/Test_CheckDiversionRights.StateDMI.log")
+RemoveFile(InputFile="Results\Test_CheckDiversionRights_out.csv",IfNotFound=Ignore)
+RemoveFile(InputFile="Results\Test_CheckDiversionRights_out_check.csv",IfNotFound=Ignore)
+RemoveFile(InputFile="Results\Test_CheckDiversionRights_out_check.html",IfNotFound=Ignore)
+# Define a diversion station to trigger the check of stations
+SetDiversionStation(ID="Diversion1",IfNotFound=Add)
+SetDiversionRight(ID="Location1",IfNotFound=Add)
+# Also read some bad data...
+ReadDiversionRightsFromStateMod(InputFile="Data\simple.ddr")
+# Uncomment the following command to regenerate the expected results.
+# WriteDiversionRightsToList(OutputFile="ExpectedResults/Test_CheckDiversionRights_out.csv")
+WriteDiversionRightsToList(OutputFile="Results/Test_CheckDiversionRights_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_CheckDiversionRights_out.csv",InputFile2="Results/Test_CheckDiversionRights_out.csv",WarnIfDifferent=True)
+#
+# Check the data and create the check file.
+CheckDiversionRights(ID="*")
+# Uncomment the following command to regenerate the expected results.
+# WriteCheckFile(OutputFile="ExpectedResults/Test_CheckDiversionRights_out_check.csv")
+WriteCheckFile(OutputFile="Results/Test_CheckDiversionRights_out_check.csv")
+WriteCheckFile(OutputFile="Results/Test_CheckDiversionRights_out_check.html")
+CompareFiles(InputFile1="ExpectedResults/Test_CheckDiversionRights_out_check.csv",InputFile2="Results/Test_CheckDiversionRights_out_check.csv",WarnIfDifferent=True)

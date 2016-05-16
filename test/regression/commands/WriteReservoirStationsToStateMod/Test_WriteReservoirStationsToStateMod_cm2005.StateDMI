@@ -1,0 +1,7 @@
+# Test writing reservoir stations to StateMod file - use full Colorado file for input
+StartLog(LogFile="Results/Test_WriteReservoirStationsToStateMod_cm2005.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteReservoirStationsToStateMod_cm2005_out.res")
+ReadReservoirStationsFromStateMod(InputFile="Data\cm2005.res")
+# Write the file again and compare with the original file.
+WriteReservoirStationsToStateMod(OutputFile="Results/Test_WriteReservoirStationsToStateMod_cm2005_out.res")
+CompareFiles(InputFile1="Data/cm2005.res",InputFile2="Results/Test_WriteReservoirStationsToStateMod_cm2005_out.res",WarnIfDifferent=True)

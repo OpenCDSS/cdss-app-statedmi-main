@@ -1,0 +1,31 @@
+#
+# Sp2008L_WEH.TsTool
+#
+SetOutputPeriod(OutputStart="1950-01",OutputEnd="2006-12")
+#
+# Read a list of recharge wells and set to zero.
+# Note that the following says to read a StateMod file with name "x".
+# An input type is needed but use the above and HandleMissingTSHow to trick it:
+# Specify the HandleMissingTSHow parameter to default to all missing values.
+# Then fill with zero below.
+CreateFromList(ListFile="Sp2008L_AugRchWells.csv",IDCol=1,DataType="WellPumping",Interval=Month,InputType=StateMod,InputName="x",HandleMissingTSHow=DefaultMissingTS)
+FillConstant(TSList=AllTS,ConstantValue=0)
+#
+# Read a list of Alternate Point Structures (ID col = 2) and set to zero using same approach as above
+CreateFromList(ListFile="Sp2008L_AlternatePoint.csv",IDCol=2,DataType="WellPumping",Interval=Month,InputType=StateMod,InputName="x",HandleMissingTSHow=DefaultMissingTS)
+FillConstant(TSList=AllTS,ConstantValue=0)
+#
+# Now read time series from the historical well pumping file produced by StateCU.
+# Don't read the time series file directly because it contains diversions and
+# wells.  Instead, read the list of well stations with CreateFromList() and
+# specify the well pumping time series file to read.  This takes a little
+# longer to run because the time series file is opened and read for each ID
+# in the list, but at least only the wells are added as time series.
+#
+CreateFromList(ListFile="..\Network\Sp2008L_Wells.csv",IDCol=1,DataType="WellPumping",Interval=Month,InputType=StateMod,InputName="..\StateCU\Historic\Sp2008L.gwp",HandleMissingTSHow=DefaultMissingTS)
+#
+# Now output all of the time series
+#
+SortTimeSeries()
+WriteStateMod(TSList=AllTS,OutputFile="Sp2008L.weh")
+WriteStateMod(TSList=AllTS,OutputFile="..\StateMod\Historic\Sp2008L.weh")

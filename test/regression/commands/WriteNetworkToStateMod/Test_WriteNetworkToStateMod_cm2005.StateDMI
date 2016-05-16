@@ -1,0 +1,9 @@
+# Test writing the generalized network file - results will differ due to new
+# isNaturalFlow property
+#@expectedStatus Warning
+StartLog(LogFile="Results/Test_WriteNetworkToStateMod_cm2005.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteNetworkToStateMod_cm2005_out.net",IfNotFound=Ignore)
+ReadNetworkFromStateMod(InputFile="Data\cm2005.net")
+# Compare with the original file
+WriteNetworkToStateMod(OutputFile="Results/Test_WriteNetworkToStateMod_cm2005_out.net")
+CompareFiles(InputFile1="Data/cm2005.net",InputFile2="Results/Test_WriteNetworkToStateMod_cm2005_out.net",WarnIfDifferent=True)

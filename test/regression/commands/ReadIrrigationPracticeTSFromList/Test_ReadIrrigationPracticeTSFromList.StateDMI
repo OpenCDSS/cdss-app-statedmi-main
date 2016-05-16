@@ -1,0 +1,14 @@
+# Test reading irrigation practice time series data from a list file
+StartLog(LogFile="Results/Test_ReadIrrigationPracticeTSFromList.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadIrrigationPracticeTSFromList_out.ipy")
+SetCULocation(ID="2000505",IfNotFound=Add)
+SetCULocation(ID="2000623",IfNotFound=Add)
+SetCULocation(ID="2000812",IfNotFound=Add)
+SetOutputPeriod(OutputStart="1985",OutputEnd="2007")
+CreateIrrigationPracticeTSForCULocations(ID="*")
+# Set some data from the list
+ReadIrrigationPracticeTSFromList(ListFile="Data\crops.csv",ID="*",YearCol=2,IDCol="1",AcresCol="3",IrrigationMethodCol="4",SupplyTypeCol="5")
+# Uncomment the following command to regenerate the expected results.
+# WriteIrrigationPracticeTSToStateCU(OutputFile="ExpectedResults/Test_ReadIrrigationPracticeTSFromList_out.ipy")
+WriteIrrigationPracticeTSToStateCU(OutputFile="Results/Test_ReadIrrigationPracticeTSFromList_out.ipy")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadIrrigationPracticeTSFromList_out.ipy",InputFile2="Results/Test_ReadIrrigationPracticeTSFromList_out.ipy",WarnIfDifferent=True)

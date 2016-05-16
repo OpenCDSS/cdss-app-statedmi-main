@@ -1,0 +1,13 @@
+# Test reading the generalized network file from a legacy file.
+# Results will differ due to new isNaturalFlow property - the cm2005 test
+# uses only the new format.  Also the new file will generally have different
+# bounds due to how the limits are recalculated.
+StartLog(LogFile="Results/Test_ReadNetworkFromStateMod_cm2005_Legacy.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadNetworkFromStateMod_cm2005_Legacy_out.net",IfNotFound=Ignore)
+ReadNetworkFromStateMod(InputFile="Data\cm2005-legacy.net")
+# Uncomment to regenerate expected results.
+# WriteNetworkToStateMod(OutputFile="ExpectedResults/Test_ReadNetworkFromStateMod_cm2005_Legacy_out.net")
+WriteNetworkToStateMod(OutputFile="Results/Test_ReadNetworkFromStateMod_cm2005_Legacy_out.net")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadNetworkFromStateMod_cm2005_Legacy_out.net",InputFile2="Results/Test_ReadNetworkFromStateMod_cm2005_Legacy_out.net",IfDifferent=Warn)
+# Compare with the original file
+# CompareFiles(InputFile1="Data/cm2005-legacy.net",InputFile2="Results/Test_ReadNetworkFromStateMod_cm2005_Legacy_out.net",IfDifferent=Warn)

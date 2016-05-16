@@ -1,0 +1,201 @@
+# eom.commands.TSTool
+#
+# commands in this file either pull historical EOM contents from the CRDSS database
+# (i.e. Rifle Gap) or from user-defined *.stm files
+#
+# rrb 98/09/29; Revised aggregated reservoir and stockpond ID's (e.g. 36_ADC_001 = 36_ADC001)
+#
+# Phase IIIb modifications
+# 	Include extended replacement files from Task 11.1 and Cont. Auth. #5
+# 	Add Wolford Mtn EOM Data from River District
+# 	Fill missing data using water district indicator gages determined in demandts runs
+# 	Fill with historical monthly average if no wetness pattern average available
+# 	Set start dates for reservoirs in March of year listed in Ray A fax (9/8/98)
+#
+# James Heath, LRE (heath@lrcwe.com) updated the previous version of the file to reflect changes
+#	in the TSTool commands and formatting. Data has also been updated through 2005. Some underlying
+#	engineering estimates have changed and are reflected in this command file.
+#
+#
+SetOutputPeriod(OutputStart="10/1908",OutputEnd="09/2005")
+SetOutputYearType(OutputYearType=Water)
+ReadPatternFile(PatternFile="..\Diversions\fill2005.pat")
+#
+# GREEN MOUNTAIN RESERVOIR
+363543...MONTH~StateMod~363543.stm
+#
+# UPPER BLUE RESERVOIR (ConHoosier)
+# Data from HydroBase is used to better represent actual opperations of the reservoir in the cm2005 update
+# rather than setting the contents to its maximum as in previous model versions.
+363570.DWR.ResMeasStorage.Day~HydroBase
+TS ConHoosier363570 = NewEndOfMonthTSFromDayTS(DayTSID="363570.DWR.ResMeasStorage.Day",Bracket=16)
+Free(TSList=LastMatchingTSID,TSID="363570.DWR.ResMeasStorage.Day")
+FillPattern(TSList=LastMatchingTSID,TSID="ConHoosier363570",PatternID="09037500")
+SetConstant(TSList=LastMatchingTSID,TSID="ConHoosier363570",ConstantValue=0,SetEnd="03/1962")
+FillInterpolate(TSList=LastMatchingTSID,TSID="ConHoosier363570",MaxIntervals=0,Transformation=None)
+#
+# CLINTON GULCH RESERVOIR
+# Data from HydroBase is used to better represent actual opperations of the reservoir in the cm2005 update
+# rather than setting the contents to its maximum as in previous model versions.
+363575.DWR.ResMeasStorage.Day~HydroBase
+TS ClintonGulch363575 = NewEndOfMonthTSFromDayTS(DayTSID="363575.DWR.ResMeasStorage.Day",Bracket=16)
+Free(TSList=LastMatchingTSID,TSID="363575.DWR.ResMeasStorage.Day")
+#FIXME! The following command had errors and needs to be corrected below and this comment removed.
+#FIXME! fillInterpolate(ClintonGulch363575,0,Linear,10/1992,9/2004)
+FillInterpolate()
+FillPattern(TSList=LastMatchingTSID,TSID="ClintonGulch363575",PatternID="09037500")
+SetConstant(TSList=LastMatchingTSID,TSID="ClintonGulch363575",ConstantValue=0,SetEnd="03/1977")
+FillInterpolate(TSList=LastMatchingTSID,TSID="ClintonGulch363575",MaxIntervals=0,Transformation=None)
+#
+# DILLON RESERVOIR
+364512...MONTH~StateMod~364512.stm
+#
+36_ARC001...MONTH~StateMod~36_ARC001.stm
+FillPattern(TSList=LastMatchingTSID,TSID="36_ARC001...MONTH",PatternID="09037500")
+#
+# WOLCOTT RESERVOIR
+373639...MONTH~StateMod~zero.stm
+#
+# EAGLE PARK RESERVOIR
+373699...MONTH~StateMod~zero.stm
+# Data is available in HydroBase for Eagle Park Reservoir but currently the reservor is only a placeholder
+# for future updates to fill in the details at a later date.
+#373699.DWR.ResMeasStorage.Day~HydroBase
+#TS EaglePark373699 = newEndOfMonthTSFromDayTS(373699.DWR.ResMeasStorage.Day,16)
+#free(TSID="373699.DWR.ResMeasStorage.Day")
+#fillPattern(EaglePark373699,09085000)
+#setConstant(TSID="EaglePark373699",ConstantValue=0,SetEnd="04/1997")
+#fillInterpolate(EaglePark373699,0,Linear)
+#
+# HOMESTAKE PROJ RESERVOIR
+# Data from HydroBase is used exclusively as it was representative of what was previously in the .stm file
+# as used in previous model versions. This allows for easier updating in the future.
+374516.DWR.ResMeasStorage.Day~HydroBase
+TS Homestake374516 = NewEndOfMonthTSFromDayTS(DayTSID="374516.DWR.ResMeasStorage.Day",Bracket=16)
+Free(TSList=LastMatchingTSID,TSID="374516.DWR.ResMeasStorage.Day")
+FillPattern(TSList=LastMatchingTSID,TSID="Homestake374516",PatternID="09085000")
+SetConstant(TSList=LastMatchingTSID,TSID="Homestake374516",ConstantValue=0,SetEnd="03/1967")
+FillInterpolate(TSList=LastMatchingTSID,TSID="Homestake374516",MaxIntervals=0,Transformation=None)
+#
+37_ARC002...MONTH~StateMod~37_ARC002.stm
+FillPattern(TSList=LastMatchingTSID,TSID="37_ARC002...MONTH",PatternID="09085000")
+#
+# RUEDI RESERVOIR
+383713...MONTH~StateMod~383713.stm
+#
+38_ARC003...MONTH~StateMod~38_ARC003.stm
+FillPattern(TSList=LastMatchingTSID,TSID="38_ARC003...MONTH",PatternID="09085000")
+#
+# GRASS VALLEY RESERVOIR
+# Data from HydroBase is used exclusively as it was representative of what was previously in the .stm file
+# as used in previous model versions. This allows for easier updating in the future.
+# There was one data point, in April 1981, that was replaced with 5989 af (mis-key).
+393505.DWR.ResMeasStorage.Day~HydroBase
+TS GrassValley393505 = NewEndOfMonthTSFromDayTS(DayTSID="393505.DWR.ResMeasStorage.Day",Bracket=16)
+Free(TSList=LastMatchingTSID,TSID="393505.DWR.ResMeasStorage.Day")
+FillPattern(TSList=LastMatchingTSID,TSID="GrassValley393505",PatternID="09095500")
+FillInterpolate(TSList=LastMatchingTSID,TSID="GrassValley393505",MaxIntervals=0,Transformation=None)
+SetConstant(TSList=LastMatchingTSID,TSID="GrassValley393505",ConstantValue=5989,SetStart="04/1981",SetEnd="04/1981")
+#
+# RIFLE GAP RESERVOIR
+# Data from HydroBase is used exclusively as it was previously in past model versions.
+# August of 2004 appeared to be a typo and has been corrected below to what apeared to be the correct value.
+393508.DWR.ResMeasStorage.Day~HydroBase
+TS RifleGap393508 = NewEndOfMonthTSFromDayTS(DayTSID="393508.DWR.ResMeasStorage.Day",Bracket=16)
+Free(TSList=LastMatchingTSID,TSID="393508.DWR.ResMeasStorage.Day")
+SetConstant(TSList=LastMatchingTSID,TSID="RifleGap393508",ConstantValue=700.16,SetStart="08/2004",SetEnd="08/2004")
+FillPattern(TSList=LastMatchingTSID,TSID="RifleGap393508",PatternID="09095500")
+SetConstant(TSList=LastMatchingTSID,TSID="RifleGap393508",ConstantValue=0,SetEnd="03/1967")
+FillInterpolate(TSList=LastMatchingTSID,TSID="RifleGap393508",MaxIntervals=0,Transformation=None)
+#
+39_ARC004...MONTH~StateMod~39_ARC004.stm
+FillPattern(TSList=LastMatchingTSID,TSID="39_ARC004...MONTH",PatternID="09095500")
+#
+45_ARC005...MONTH~StateMod~45_ARC005.stm
+FillPattern(TSList=LastMatchingTSID,TSID="45_ARC005...MONTH",PatternID="09095500")
+#
+# WOLFORD MOUNTAIN RES
+503668...MONTH~StateMod~503668.stm
+SetConstant(TSList=LastMatchingTSID,TSID="503668...MONTH",ConstantValue=0,SetEnd="03/1995")
+#
+50_ARC006...MONTH~StateMod~50_ARC006.stm
+FillPattern(TSList=LastMatchingTSID,TSID="50_ARC006...MONTH",PatternID="09034500")
+#
+# MEADOW CREEK RESERVOIR
+# Data from HydroBase is used exclusively as it was representative of what was previously in the .stm file
+# as used in previous model versions. This allows for easier updating in the future.
+# Additionally a shift has been added as it represents 300 af additional dead storage not represented in the
+# HydroBase records (as stated in the previous model version's .stm file).
+513686.DWR.ResMeasStorage.Day~HydroBase
+TS MeadowCreek513686 = NewEndOfMonthTSFromDayTS(DayTSID="513686.DWR.ResMeasStorage.Day",Bracket=16)
+Free(TSList=LastMatchingTSID,TSID="513686.DWR.ResMeasStorage.Day")
+FillPattern(TSList=LastMatchingTSID,TSID="MeadowCreek513686",PatternID="09034500")
+AddConstant(TSList=LastMatchingTSID,TSID="MeadowCreek513686",ConstantValue=300)
+SetConstant(TSList=LastMatchingTSID,TSID="MeadowCreek513686",ConstantValue=0,SetEnd="03/1956")
+FillInterpolate(TSList=LastMatchingTSID,TSID="MeadowCreek513686",MaxIntervals=0,Transformation=None)
+#
+# CBT SHADOW MTN GRAND L
+# Data from HydroBase is used exclusively as it was previously in past model versions.
+513695.DWR.ResMeasStorage.Day~HydroBase
+TS ShadowMountainGrandLake513695 = NewEndOfMonthTSFromDayTS(DayTSID="513695.DWR.ResMeasStorage.Day",Bracket=16)
+Free(TSList=LastMatchingTSID,TSID="513695.DWR.ResMeasStorage.Day")
+FillPattern(TSList=LastMatchingTSID,TSID="ShadowMountainGrandLake513695",PatternID="09034500")
+SetConstant(TSList=LastMatchingTSID,TSID="ShadowMountainGrandLake513695",ConstantValue=0,SetEnd="03/1946")
+FillInterpolate(TSList=LastMatchingTSID,TSID="ShadowMountainGrandLake513695",MaxIntervals=0,Transformation=None)
+#
+# WILLIAMS FORK RESERVOIR
+513709...MONTH~StateMod~513709.stm
+#
+# CBT WILLOW CREEK RES
+# Data from HydroBase is used exclusively as it was previously in past model versions.
+513710.DWR.ResMeasStorage.Day~HydroBase
+TS WillowCreek513710 = NewEndOfMonthTSFromDayTS(DayTSID="513710.DWR.ResMeasStorage.Day",Bracket=16)
+Free(TSList=LastMatchingTSID,TSID="513710.DWR.ResMeasStorage.Day")
+FillPattern(TSList=LastMatchingTSID,TSID="WillowCreek513710",PatternID="09034500")
+SetConstant(TSList=LastMatchingTSID,TSID="WillowCreek513710",ConstantValue=0,SetEnd="03/1953")
+FillInterpolate(TSList=LastMatchingTSID,TSID="WillowCreek513710",MaxIntervals=0,Transformation=None)
+#
+# CBT GRANBY RESERVOIR
+514620...MONTH~StateMod~514620.stm
+# Setting specific descrepencies that Meg Frantz and Heather Thompson found
+#  durring the Windy Gap Firming Project modeling by Boyle Engineering
+SetDataValue(TSList=LastMatchingTSID,TSID="514620...MONTH",SetDateTime="03/1954",NewValue=372900)
+SetDataValue(TSList=LastMatchingTSID,TSID="514620...MONTH",SetDateTime="10/1960",NewValue=411100)
+SetDataValue(TSList=LastMatchingTSID,TSID="514620...MONTH",SetDateTime="10/1961",NewValue=478100)
+SetDataValue(TSList=LastMatchingTSID,TSID="514620...MONTH",SetDateTime="06/1967",NewValue=263400)
+#
+51_ARC007...MONTH~StateMod~51_ARC007.stm
+FillPattern(TSList=LastMatchingTSID,TSID="51_ARC007...MONTH",PatternID="09034500")
+#
+52_ARC008...MONTH~StateMod~52_ARC008.stm
+FillPattern(TSList=LastMatchingTSID,TSID="52_ARC008...MONTH",PatternID="09085000")
+#
+53_ARC009...MONTH~StateMod~53_ARC009.stm
+FillPattern(TSList=LastMatchingTSID,TSID="53_ARC009...MONTH",PatternID="09085000")
+#
+# VEGA RESERVOIR
+723844...MONTH~StateMod~723844.stm
+SetConstant(TSList=LastMatchingTSID,TSID="723844...MONTH",ConstantValue=0,SetEnd="03/1960")
+#
+72_ARC010...MONTH~StateMod~72_ARC010.stm
+FillPattern(TSList=LastMatchingTSID,TSID="72_ARC010...MONTH",PatternID="09095500")
+#
+72_ASC001...MONTH~StateMod~72_ASC001.stm
+FillPattern(TSList=LastMatchingTSID,TSID="72_ASC001...MONTH",PatternID="09095500")
+#
+# BONHAM AGGREGATED RES
+953800...MONTH~StateMod~953800.stm
+FillPattern(TSList=LastMatchingTSID,TSID="953800...MONTH",PatternID="09095500")
+#
+# COTTONWOOD AGGREG RES
+953801...MONTH~StateMod~953801.stm
+FillPattern(TSList=LastMatchingTSID,TSID="953801...MONTH",PatternID="09095500")
+#
+# LEON CREEK AGGRES RES
+953802...MONTH~StateMod~953802.stm
+FillPattern(TSList=LastMatchingTSID,TSID="953802...MONTH",PatternID="09095500")
+FillHistMonthAverage(TSList=AllTS)
+#
+WriteStateMod(TSList=AllTS,OutputFile="..\statemod\cm2005.eom",Precision=0)
+CheckTimeSeries(CheckCriteria="Missing")
+WriteCheckFile(OutputFile="eom.commands.TSTool.check.html")

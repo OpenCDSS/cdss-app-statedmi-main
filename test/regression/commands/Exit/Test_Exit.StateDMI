@@ -1,0 +1,7 @@
+# Test the Exit() command
+StartLog(LogFile="Results/Test_Exit.StateDMI.log")
+SetClimateStation(ID="Station1",Name="Station 1",Latitude=44,Elevation=4001,Region1="ADAMS",IfNotFound=Add)
+Exit()
+# The following command is an error so if Exit() does not occur an error will occur running the test,
+# indicating that the Exit() command failed.
+SetClimateStation(ID="Station2",Name="Station 1",Latitude=44,Elevation=4001,Region1="ADAMS",IfNotFound=Fail)

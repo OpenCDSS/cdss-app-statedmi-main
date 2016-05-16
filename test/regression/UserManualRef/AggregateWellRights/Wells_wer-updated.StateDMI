@@ -1,0 +1,234 @@
+StartLog(LogFile="Wells_wer.StateDMI.log")
+# Wells_WER.StateDMI
+#
+# rrb 2007/11/24; Correct syntex for Town of Antonito
+# rrb 2007/11/07; Revised to exclude 1936 and 2002 since 2002
+#                 since 2002 is not curently used and the way
+#                 well only structures get filled the 1936 data
+#                 is only used when a structure has data in 1998.
+#
+# rrb 2007/06/18; Copied from Sam via FTP per Email 6/19/2007.
+#
+# rrb 2008/08/31; Revise the default appropriation date to be consistent with Phase 4
+#
+# rrb 2007/06/20; Includes 2002 because of the following enhancement
+# rrb 2007/06/20; To be consistent between years and the URF coverage
+#                 Revised GW only lands from:
+#     Nosurf_1936.csv to 1936_GWonly_Agg.csv
+#     Nosurf_1998.csv to 1998_GWonly_Agg.csv
+#     Nosurf_2002.csv to 2002_GWonly_Agg.csv
+#
+#
+#
+# _________________________________________________________
+# Step 1 - open a log file for this run
+#
+StartLog(LogFile="Wells_WER.StateDMI.log")
+#
+# Create Rio Grande StateMod Well Rights file
+#
+# _________________________________________________________
+# Step 2 - read stations
+# readWellStationsFromStateMod(InputFile="rg2007_Temp.wes")
+ReadWellStationsFromStateMod(InputFile="rg2007_Temp.wes")
+# Use the following for a shorter test - includes select examples.
+# readWellStationsFromStateMod(InputFile="rg2007_Temp.ShortTest.wes")
+#
+# _________________________________________________________
+# Step 3 - define aggregates and systems
+#     Diversions are collections using a list of WDIDs, and the list of IDs is
+#     constant through the model period.
+#         Aggregates will result in well rights being aggregated.
+#         Systems will be modeled with all well rights (no aggregation).
+#     Well-only lands are collections using a list of parcel identifiers, and
+#     the lists are specified for each year where data are available because the
+#     parcel identifiers change from year to year.
+#
+# Diversions with and without groundwater supply...
+SetDiversionAggregateFromList(ListFile="..\Diversions\rgTW_divaggregates.csv",IDCol=1,PartIDsCol=2,PartsListedHow=InRow)
+SetDiversionSystemFromList(ListFile="..\Diversions\rgTW_divsystems.csv",IDCol=1,PartIDsCol=2,PartsListedHow=InRow)
+# Wells with only groundwater supply...
+# rrb revise GW only land names:
+#
+# rrb 2007/11/07; Exclude 1936 and 2002 (see top of file for explanation
+# setWellSystemFromList(ListFile="..\Wells\1936_GWonly_agg.csv",Year=1936,Div=3,PartType=Parcel,IDCol=1,PartIDsCol=2,PartsListedHow=InColumn)
+# setWellSystemFromList(ListFile="..\Wells\2002_GWonly_agg.csv",Year=2002,Div=3,PartType=Parcel,IDCol=1,PartIDsCol=2,PartsListedHow=InColumn)
+SetWellSystemFromList(ListFile="..\Wells\1998_GWonly_agg.csv",Year=1998,Div=3,PartType=Parcel,IDCol=1,PartIDsCol=2,PartsListedHow=InColumn)
+#
+#
+# _________________________________________________________
+# Step 4 - read rights from HydroBase (NO AGGREGATION)
+#     Include Appropriation Date for on/off
+#     1936 is included for more rights and because used in later data filling.
+#     APEX is NOT used.
+#
+# rrb 2008/08/31; Revise the default appropriation date to be consistent with Phase 4
+# readWellRightsFromHydroBase(ID="*",IDFormat="HydroBaseID",Year="1936,1998,2002",Div="3",DefaultAppropriationDate="2006-12-31",DefineRightHow=RightIfAvailable,ReadWellRights=True,UseApex=False,OnOffDefault=AppropriationDate)
+#
+# rrb 2007/11/07; Exclude 1936 and 2002 (see top of file for explanation
+# readWellRightsFromHydroBase(ID="*",IDFormat="HydroBaseID",Year="1936,1998,2002",Div="3",DefaultAppropriationDate="1950-01-01",DefineRightHow=RightIfAvailable,ReadWellRights=True,UseApex=False,OnOffDefault=AppropriationDate)
+ReadWellRightsFromHydroBase(ID="*",IDFormat="HydroBaseID",Year="1998",Div="3",DefaultAppropriationDate="1950-01-01",DefineRightHow=RightIfAvailable,ReadWellRights=True,UseApex=False,OnOffDefault=AppropriationDate)
+#
+# _________________________________________________________
+# Step 5 - set data not in HydroBase
+#     M&I are not tied to an irrigated parcel and therefore may not be in
+#     HydroBase.
+#     Also, StateDMI does not currently read well rights/permits for explicit
+#     non-irrigation well locations.
+#
+# 5a; Set Alamosa Refuge
+# Mumm Well and estimated small wells (4 cfs) (refine only with additional information received from USFWS)
+SetWellRight(ID="20MS06W.98",Name="Small_ANWR_Wells",StationID="20MS06",AdministrationNumber=90000.00000,Decree=4.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20MS06W.99",Name="Mumm_Well",StationID="20MS06",AdministrationNumber=90000.00000,Decree=6.38,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# 5b; Set Blanca
+# No wells set until additional information received from BLM
+#
+# 5c; Set Eastdale Reservoir (24Eland) - well amount as established by Rice
+SetWellRight(ID="24ELANDW.01",Name="24ELAND_Well",StationID="24ELAND",AdministrationNumber=90000.00000,Decree=3.96,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+#
+# 5d; Set TOWN OF DEL NORTE
+SetWellRight(ID="20DELNOR.01",Name="Town_of_Del_Norte",StationID="20DELNOR",AdministrationNumber=90000.00000,Decree=1.34,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20DELNOR.02",Name="Town_of_Del_Norte",StationID="20DELNOR",AdministrationNumber=90000.00000,Decree=2.01,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# 5e; Set TOWN OF MONTE VISTA
+SetWellRight(ID="20MONTEV.01",Name="Town_of_Monte_Vista",StationID="20MONTEV",AdministrationNumber=90000.00000,Decree=4.47,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20MONTEV.02",Name="Town_of_Monte_Vista",StationID="20MONTEV",AdministrationNumber=90000.00000,Decree=2.46,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20MONTEV.03",Name="Town_of_Monte_Vista",StationID="20MONTEV",AdministrationNumber=90000.00000,Decree=4.03,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20MONTEV.04",Name="Town_of_Monte_Vista",StationID="20MONTEV",AdministrationNumber=90000.00000,Decree=2.68,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20MONTEV.05",Name="Town_of_Monte_Vista",StationID="20MONTEV",AdministrationNumber=90000.00000,Decree=1.34,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20MONTEV.06",Name="Town_of_Monte_Vista",StationID="20MONTEV",AdministrationNumber=90000.00000,Decree=4.47,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20MONTEV.07",Name="Town_of_Monte_Vista",StationID="20MONTEV",AdministrationNumber=90000.00000,Decree=0.45,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20MONTEV.08",Name="Town_of_Monte_Vista",StationID="20MONTEV",AdministrationNumber=90000.00000,Decree=0.11,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20MONTEV.09",Name="Town_of_Monte_Vista",StationID="20MONTEV",AdministrationNumber=90000.00000,Decree=0.03,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20MONTEV.10",Name="Town_of_Monte_Vista",StationID="20MONTEV",AdministrationNumber=90000.00000,Decree=0.56,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# 5f; Set TOWN OF ALAMOSA
+SetWellRight(ID="20ALAMOS.01",Name="Town_of_Alamosa",StationID="20ALAMOS",AdministrationNumber=90000.00000,Decree=4.03,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20ALAMOS.02",Name="Town_of_Alamosa",StationID="20ALAMOS",AdministrationNumber=90000.00000,Decree=2.01,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20ALAMOS.03",Name="Town_of_Alamosa",StationID="20ALAMOS",AdministrationNumber=90000.00000,Decree=4.03,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20ALAMOS.04",Name="Town_of_Alamosa",StationID="20ALAMOS",AdministrationNumber=90000.00000,Decree=1.34,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20ALAMOS.05",Name="Town_of_Alamosa",StationID="20ALAMOS",AdministrationNumber=90000.00000,Decree=1.34,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20ALAMOS.06",Name="Town_of_Alamosa",StationID="20ALAMOS",AdministrationNumber=90000.00000,Decree=1.79,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="20ALAMOS.07",Name="Town_of_Alamosa",StationID="20ALAMOS",AdministrationNumber=90000.00000,Decree=4.92,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# Set MUNICIPAL WELLS (AGGREGATED MUNCIPALITIES)
+#20AMR01 = Hooper
+#20AMR02 = Creede
+#22AMR01 = Manassa, LaJara, Romeo, Sanford
+#24AMR01 = Blanca, San Luis
+#26AMR01 = Saguache, Center, Moffitt, Crestone
+#
+# 5g; Set AGGREGATE 20AMR01
+SetWellRight(ID="20AMR01.01",Name="AGMUNI_AlamosaCty",StationID="20AMR01",AdministrationNumber=90000.00000,Decree=0.45,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# 5h; Set AGGREGATE 20AMR02
+SetWellRight(ID="20AMR02.01",Name="AGMUNI_MineralCty",StationID="20AMR02",AdministrationNumber=90000.00000,Decree=0.67,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# 5i; AGGREGATE 22AMR01
+SetWellRight(ID="22AMR01.01",Name="AGMUNI_ConejosCty",StationID="22AMR01",AdministrationNumber=90000.00000,Decree=0.33,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="22AMR01.02",Name="AGMUNI_ConejosCty",StationID="22AMR01",AdministrationNumber=90000.00000,Decree=1.56,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="22AMR01.03",Name="AGMUNI_ConejosCty",StationID="22AMR01",AdministrationNumber=90000.00000,Decree=2.23,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="22AMR01.04",Name="AGMUNI_ConejosCty",StationID="22AMR01",AdministrationNumber=90000.00000,Decree=2.01,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="22AMR01.05",Name="AGMUNI_ConejosCty",StationID="22AMR01",AdministrationNumber=90000.00000,Decree=1.34,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="22AMR01.06",Name="AGMUNI_ConejosCty",StationID="22AMR01",AdministrationNumber=90000.00000,Decree=1.00,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="22AMR01.07",Name="AGMUNI_ConejosCty",StationID="22AMR01",OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# 5j; Set AGGREGATE 24AMR01
+SetWellRight(ID="24AMR01.01",Name="AGMUNI_CostillaCty",StationID="24AMR01",AdministrationNumber=90000.00000,Decree=1.02,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="24AMR02.02",Name="AGMUNI_CostillaCty",StationID="24AMR01",AdministrationNumber=90000.00000,Decree=0.67,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="24AMR03.03",Name="AGMUNI_CostillaCty",StationID="24AMR01",AdministrationNumber=90000.00000,Decree=0.27,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# 5k; Set AGGREGATE 26AMR01
+SetWellRight(ID="26AMR01.01",Name="AGMUNI_SaguacheCty",StationID="26AMR01",AdministrationNumber=90000.00000,Decree=1.50,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="26AMR01.02",Name="AGMUNI_SaguacheCty",StationID="26AMR01",AdministrationNumber=90000.00000,Decree=2.73,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="26AMR01.03",Name="AGMUNI_SaguacheCty",StationID="26AMR01",AdministrationNumber=90000.00000,Decree=2.67,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="26AMR01.04",Name="AGMUNI_SaguacheCty",StationID="26AMR01",AdministrationNumber=90000.00000,Decree=1.34,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="26AMR01.05",Name="AGMUNI_SaguacheCty",StationID="26AMR01",AdministrationNumber=90000.00000,Decree=0.45,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="26AMR01.06",Name="AGMUNI_SaguacheCty",StationID="26AMR01",AdministrationNumber=90000.00000,Decree=0.45,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="26AMR01.07",Name="AGMUNI_SaguacheCty",StationID="26AMR01",AdministrationNumber=90000.00000,Decree=0.45,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="26AMR01.08",Name="AGMUNI_SaguacheCty",StationID="26AMR01",AdministrationNumber=90000.00000,Decree=0.45,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# 5l; Set TOWN OF ANTONITO
+# rrb 2007/11/24; Correction (decree is missing)
+# setWellRight(ID="220643W.01",Name="Antonito_Well",StationID="220643",AdministrationNumber=90000.00000,2.58,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="220643W.01",Name="Antonito_Well",StationID="220643",AdministrationNumber=90000.00000,Decree=2.58,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# 5m; Set Empire - La Jara well acreage and rights to zero - accounted for in 20MS02
+#
+/*
+# Email from Ray Bennett to SAM on 2007-06-13 - resulting in the following
+# being commented out.
+#
+210521 Empire-La Jara is a diversion that originates from the Rio
+Grande, gets dumped into the La Jara then gets rediverted from the La
+Jara. It is in the *.dds file with 0 acres (possibly for baseflow
+calculations but it maybe a hold over from originally treating it
+explicitly then later treating it as part of the Empire System.) Anyway
+I recommend you remove these from the well right file since the
+structure is not in the well station file and is modeled with any
+irrigated acreage.
+#
+SetWellRight(ID="210521W.03",Name="EMPIRE-LAJARA",StationID="210521",AdministrationNumber=20590.00000,Decree=0,OnOff=1,IfNotFound=Warn,IfFound=Set)
+SetWellRight(ID="210521W.05",Name="EMPIRE-LAJARA",StationID="210521",AdministrationNumber=33676.00000,Decree=0,OnOff=1,IfNotFound=Add,IfFound=Set)
+SetWellRight(ID="210521W.06",Name="EMPIRE-LAJARA",StationID="210521",AdministrationNumber=38269.00000,Decree=0,OnOff=1,IfNotFound=Warn,IfFound=Set)
+SetWellRight(ID="210521W.07",Name="EMPIRE-LAJARA",StationID="210521",AdministrationNumber=41035.00000,Decree=0,OnOff=1,IfNotFound=Warn,IfFound=Set)
+SetWellRight(ID="210521W.08",Name="EMPIRE-LAJARA",StationID="210521",AdministrationNumber=42393.00000,Decree=0,OnOff=1,IfNotFound=Warn,IfFound=Set)
+*/
+#SAM setWellStation(ID="210521",Capacity=0.0)
+#
+# EW - Steve, not sure how to handle this. The acreage for this "structure"
+#      is in the GIS under 243577. 472.65 acres
+#divsystem(24ELAND,243577)
+#
+# 5n; Set CLOSED BASIN PROJECT
+SetWellRight(ID="CBPAGGZ22.01",Name="ClosedBasinProject_URF22",StationID="CBPAGGZ22",AdministrationNumber=1.00000,Decree=40.20,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="CBPAGGZ25.01",Name="ClosedBasinProject_URF25",StationID="CBPAGGZ25",AdministrationNumber=1.00000,Decree=34.28,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="CBPAGGZ27.01",Name="ClosedBasinProject_URF27",StationID="CBPAGGZ27",AdministrationNumber=1.00000,Decree=15.37,OnOff=1,IfNotFound=Add,IfFound=Warn)
+SetWellRight(ID="CBPAGGZ31.01",Name="ClosedBasinProject_URF31",StationID="CBPAGGZ31",AdministrationNumber=1.00000,Decree=9.71,OnOff=1,IfNotFound=Add,IfFound=Warn)
+#
+# _________________________________________________________
+# Step 6 - write rights from multiple years of irrigated lands
+#     Note since not aggregating, the ID's assigned will be
+#     true Well IDs, not structure id.01, etc.
+#     The *wer file is written containing all parcel years and
+#     "data comments" on the right side of the file are written to
+#     facilitate use when filling the *cds and *ipy files.
+#     The following is used to fill the CDS and IPY acreage prior to 1998,
+#     using the rights resulting from 1998 parcels.
+#
+SortWellRights(Order=LocationIDAscending,Order2=IDAscending)
+WriteWellRightsToStateMod(OutputFile="rg2007_NotMerged.wer",WriteDataComments=True)
+#
+# _________________________________________________________
+# Step 7 - merge multiple years (but do not aggregate)
+#    The water rights resulting from multiple years of parcel data (above) are
+#    merged.  Blocks of rights with the same right ID and location ID are
+#    checked.  If all are the same in two years, then all are kept in the
+#    result.  Otherwise, the rights from the year resulting in the highest
+#    decree sum are kept in the result.  The process compares two years at a
+#    time, going through all years where data are available.
+#    The following version of the file is used to set IPY max pumping.
+#
+MergeWellRights()
+SortWellRights(Order=LocationIDAscending,Order2=IDAscending)
+WriteWellRightsToStateMod(OutputFile="rg2007.wer")
+#
+# rrb Write merged file to StateMod directory
+WriteWellRightsToStateMod(OutputFile="rg2007.wer")
+WriteWellRightsToStateMod(OutputFile="..\StateMod\Historic\rg2007.wer")
+#
+# _________________________________________________________
+# Step 8 - aggregate into water rights classes
+#    This step is needed in the Rio Grande but not in the South Platte.
+#    Rights are aggregated by weighting by decree and administration number.
+#    The right identifiers are set to LocationID.##, where ## is the class.
+#
+AggregateWellRights(AdminNumClasses="10000.00000,20000.00000,25000.00000,30000.00000,35000.00000,40000.00000,45000.00000,99999.99999",OnOffDefault="AppropriationDate")
+WriteWellRightsToStateMod(OutputFile="rg2007_Agg.wer")
+WriteWellRightsToStateMod(OutputFile="..\StateMod\Historic\rg2007_Agg.wer")
+#
+# Check the results
+CheckWellRights(ID="*")
+WriteCheckFile(OutputFile="Wells_wer.StateDMI.check.html")

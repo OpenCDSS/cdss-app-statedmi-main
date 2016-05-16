@@ -1,0 +1,7 @@
+# Test reading well stations from a StateMod file
+StartLog(LogFile="Results/Test_ReadWellStationsFromStateMod.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadWellStationsFromStateMod_out.wes",IfNotFound=Ignore)
+ReadWellStationsFromStateMod(InputFile="Data\Data_ReadWellStationsFromStateMod.wes")
+# Compare with the original data file
+WriteWellStationsToStateMod(OutputFile="Results/Test_ReadWellStationsFromStateMod_out.wes")
+CompareFiles(InputFile1="Data/Data_ReadWellStationsFromStateMod.wes",InputFile2="Results/Test_ReadWellStationsFromStateMod_out.wes",WarnIfDifferent=True)

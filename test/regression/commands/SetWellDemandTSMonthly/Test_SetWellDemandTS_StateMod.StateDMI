@@ -1,0 +1,11 @@
+# Test setting well demand monthly TS to StateMod file (add and then overright)
+StartLog(LogFile="Results/Test_SetWellDemandTSMonthly_StateMod.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SetWellDemandTSMonthly_StateMod_out.ddm",IfNotFound=Ignore)
+SetOutputPeriod(OutputStart="2003-01",OutputEnd="2005-12")
+SetWellDemandTSMonthlyConstant(ID="2000505",Constant=11,IfNotFound=Add)
+SetWellDemandTSMonthlyConstant(ID="2000812",Constant=22,IfNotFound=Add)
+SetWellDemandTSMonthly(ID="2000505",TSID="2000505..DivTotal.Month~StateMod~Data/replace-cy.stm")
+# Uncomment the following command to regenerate the expected results.
+# WriteWellDemandTSMonthlyToStateMod(OutputFile="ExpectedResults/Test_SetWellDemandTSMonthly_StateMod_out.ddm")
+WriteWellDemandTSMonthlyToStateMod(OutputFile="Results/Test_SetWellDemandTSMonthly_StateMod_out.ddm")
+CompareFiles(InputFile1="ExpectedResults/Test_SetWellDemandTSMonthly_StateMod_out.ddm",InputFile2="Results/Test_SetWellDemandTSMonthly_StateMod_out.ddm",IfDifferent=Warn)

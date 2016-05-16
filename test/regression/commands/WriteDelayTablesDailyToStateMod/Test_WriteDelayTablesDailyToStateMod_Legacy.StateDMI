@@ -1,0 +1,9 @@
+#@readOnly
+# Test writing delay tables (daily) to a StateMod file, using legacy command format
+StartLog(LogFile="Results/Test_WriteDelayTablesToStateMod_Legacy.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteDelayTablesToStateMod_Legacy_out.dld",IfNotFound=Ignore)
+# Legacy command does not have "Daily" in command name and has Interval=Day parameter
+ReadDelayTablesFromStateMod(InputFile="Data\cm2005.dld",Interval=Day)
+# Compare with the original data file
+WriteDelayTablesDailyToStateMod(OutputFile="Results/Test_WriteDelayTablesDailyToStateMod_Legacy_out.dld",Interval=Day,Precision=4)
+CompareFiles(InputFile1="Data/cm2005.dld",InputFile2="Results/Test_WriteDelayTablesDailyToStateMod_Legacy_out.dld",WarnIfDifferent=True)

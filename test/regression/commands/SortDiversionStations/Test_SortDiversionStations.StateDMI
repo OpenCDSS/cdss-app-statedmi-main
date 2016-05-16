@@ -1,0 +1,11 @@
+# Test sorting diversion stations
+StartLog(LogFile="Results/Test_SortDiversionStations.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SortDiversionStations_out.csv")
+SetDiversionStation(ID="Diversion2",Name="Diversion 2",IfNotFound=Add)
+SetDiversionStation(ID="Diversion3",Name="Diversion 3",IfNotFound=Add)
+SetDiversionStation(ID="Diversion1",Name="Diversion 1",IfNotFound=Add)
+SortDiversionStations()
+# Uncomment the following command to regenerate the expected results.
+# WriteDiversionStationsToList(OutputFile="ExpectedResults/Test_SortDiversionStations_out.csv")
+WriteDiversionStationsToList(OutputFile="Results/Test_SortDiversionStations_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_SortDiversionStations_out.csv",InputFile2="Results/Test_SortDiversionStations_out.csv",WarnIfDifferent=True)

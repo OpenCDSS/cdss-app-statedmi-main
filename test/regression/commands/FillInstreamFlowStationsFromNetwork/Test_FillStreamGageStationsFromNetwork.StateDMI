@@ -1,0 +1,11 @@
+# Test filling instream flow stations from network information
+StartLog(LogFile="Results/Test_FillInstreamFlowStationsFromNetwork.StateDMI.log")
+RemoveFile(InputFile="Results\Test_FillInstreamFlowStationsFromNetwork_out.csv",IfNotFound=Ignore)
+SetInstreamFlowStation(ID="201611",IfNotFound=Add)
+SetInstreamFlowStation(ID="201619",IfNotFound=Add)
+ReadNetworkFromStateMod(InputFile="Data\rg2007.net")
+FillInstreamFlowStationsFromNetwork(ID="*")
+# Uncomment the following command to regenerate the expected results.
+# WriteInstreamFlowStationsToList(OutputFile="ExpectedResults/Test_FillInstreamFlowStationsFromNetwork_out.csv")
+WriteInstreamFlowStationsToList(OutputFile="Results/Test_FillInstreamFlowStationsFromNetwork_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_FillInstreamFlowStationsFromNetwork_out.csv",InputFile2="Results/Test_FillInstreamFlowStationsFromNetwork_out.csv",WarnIfDifferent=True)

@@ -1,0 +1,9 @@
+# Merging two columns from a list file...
+StartLog(LogFile="Results/Test_MergeListFileColumns_1.TSTool.log")
+RemoveFile(InputFile="Results/Test_MergeListFileColumns_1_out.csv",IfNotFound=Ignore)
+# Uncomment the following command to regenerate the expected results file.
+# MergeListFileColumns(ListFile="Data\SimpleList.csv",OutputFile="ExpectedResults\Test_MergeListFileColumns_1_out.csv",Columns="1,2",NewColumnName="WDID",SimpleMergeFormat="02,05")
+# Generate new output...
+MergeListFileColumns(ListFile="Data\SimpleList.csv",OutputFile="Results\Test_MergeListFileColumns_1_out.csv",Columns="1,2",NewColumnName="WDID",SimpleMergeFormat="02,05")
+# Do regression comparison...
+CompareFiles(InputFile1="ExpectedResults\Test_MergeListFileColumns_1_out.csv",InputFile2="Results\Test_MergeListFileColumns_1_out.csv",IfDifferent=Warn)

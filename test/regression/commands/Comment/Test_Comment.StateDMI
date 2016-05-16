@@ -1,0 +1,13 @@
+# If the test is working, only one climate station will be written to the output
+StartLog(LogFile="Results/Test_Comment.TSTool.log")
+RemoveFile(InputFile="Results/Test_Comment_out.dv",IfNotFound=Ignore)
+SetClimateStation(ID="Station1",Name="Test station",Latitude=44,Elevation=4001,Region1="TestCounty",Region2="TestHUC",IfNotFound=Add)
+#
+# SetClimateStation(ID="Station2",Name="Test station 2",Latitude=45,Elevation=4002,Region1="TestCounty2",Region2="TestHUC2",IfNotFound=Add)
+#
+# Uncomment the following command to regenerate the expected results file.
+# WriteClimateStationsToList(OutputFile="ExpectedResults/Test_Comment_out.csv")
+# Generate new output...
+WriteClimateStationsToList(OutputFile="Results/Test_Comment_out.csv")
+# Do regression comparison...
+CompareFiles(InputFile1="ExpectedResults\Test_Comment_out.csv",InputFile2="Results/Test_Comment_out.csv",IfDifferent=Warn)

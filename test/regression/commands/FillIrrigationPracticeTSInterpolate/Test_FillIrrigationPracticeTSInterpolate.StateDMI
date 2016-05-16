@@ -1,0 +1,17 @@
+# Test filling irrigation practice time series data by interpolating values
+StartLog(LogFile="Results/Test_FillIrrigationPracticeTSInterpolate.StateDMI.log")
+RemoveFile(InputFile="Results\Test_FillIrrigationPracticeTSInterpolate_out.ipy")
+SetCULocation(ID="2000505",IfNotFound=Add)
+SetCULocation(ID="2000623",IfNotFound=Add)
+SetCULocation(ID="2000812",IfNotFound=Add)
+SetOutputPeriod(OutputStart="1998",OutputEnd="2002")
+CreateIrrigationPracticeTSForCULocations(ID="*")
+SetIrrigationPracticeTS(ID="2000505",SetStart=1998,SetEnd=1998,SurfaceDelEffMax=.11,FloodAppEffMax=.12,SprinklerAppEffMax=.13,AcresSWFlood=11,AcresSWSprinkler=12,AcresGWFlood=13,AcresGWSprinkler=14,PumpingMax=100,GWMode=1)
+SetIrrigationPracticeTS(ID="2000623",SetStart=1998,SetEnd=2000,SurfaceDelEffMax=.21,FloodAppEffMax=.22,SprinklerAppEffMax=.23,AcresSWFlood=21,AcresSWSprinkler=22,AcresGWFlood=23,AcresGWSprinkler=24,PumpingMax=200,GWMode=2)
+SetIrrigationPracticeTS(ID="2000812",SetStart=1998,SetEnd=1998,SurfaceDelEffMax=.31,FloodAppEffMax=.32,SprinklerAppEffMax=.33,AcresSWFlood=31,AcresSWSprinkler=32,AcresGWFlood=33,AcresGWSprinkler=34,PumpingMax=300,GWMode=3)
+SetIrrigationPracticeTS(ID="2000812",SetStart=2002,SetEnd=2002,SurfaceDelEffMax=.31,FloodAppEffMax=.32,SprinklerAppEffMax=.33,AcresSWFlood=31,AcresSWSprinkler=32,AcresGWFlood=33,AcresGWSprinkler=34,PumpingMax=300,GWMode=3)
+FillIrrigationPracticeTSInterpolate(ID="*")
+# Uncomment the following command to regenerate the expected results.
+# WriteIrrigationPracticeTSToStateCU(OutputFile="ExpectedResults/Test_FillIrrigationPracticeTSInterpolate_out.ipy")
+WriteIrrigationPracticeTSToStateCU(OutputFile="Results/Test_FillIrrigationPracticeTSInterpolate_out.ipy")
+CompareFiles(InputFile1="ExpectedResults/Test_FillIrrigationPracticeTSInterpolate_out.ipy",InputFile2="Results/Test_FillIrrigationPracticeTSInterpolate_out.ipy",WarnIfDifferent=True)

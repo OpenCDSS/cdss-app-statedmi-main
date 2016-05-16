@@ -1,0 +1,10 @@
+# Test filling climate stations from HydroBase
+StartLog(LogFile="Results/Test_FillClimateStationsFromHydroBase.StateDMI.log")
+RemoveFile(InputFile="Results\Test_FillClimateStationsFromHydroBase_out.csv")
+SetClimateStation(ID="3005",IfNotFound=Add)
+SetClimateStation(ID="7167",IfNotFound=Add)
+FillClimateStationsFromHydroBase(ID="*")
+# Uncomment the following command to regenerate the expected results.
+# WriteClimateStationsToList(OutputFile="ExpectedResults/Test_FillClimateStationsFromHydroBase_out.csv")
+WriteClimateStationsToList(OutputFile="Results/Test_FillClimateStationsFromHydroBase_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_FillClimateStationsFromHydroBase_out.csv",InputFile2="Results/Test_FillClimateStationsFromHydroBase_out.csv",IfDifferent=Warn)

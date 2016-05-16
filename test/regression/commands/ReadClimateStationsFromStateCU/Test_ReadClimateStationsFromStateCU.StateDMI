@@ -1,0 +1,8 @@
+# Test reading climate stations from StateCU file
+StartLog(LogFile="Results/Test_ReadClimateStationsFromStateCU.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadClimateStationsFromStateCU_out.cli",IfNotFound=Ignore)
+ReadClimateStationsFromStateCU(InputFile="Data\stations.cli")
+# Compare with the original data file - ignore whitespace because new format
+# will have spaces at the end for the measurement heights
+WriteClimateStationsToStateCU(OutputFile="Results/Test_ReadClimateStationsFromStateCU_out.cli")
+CompareFiles(InputFile1="Data/stations.cli",InputFile2="Results/Test_ReadClimateStationsFromStateCU_out.cli",IgnoreWhitespace=True,IfDifferent=Warn)

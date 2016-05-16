@@ -1,0 +1,2 @@
+ReadBlaneyCriddleFromHydroBase(BlaneyCriddleMethod="BLANEY-CRIDDLE_TR-21")
+TranslateBlaneyCriddle(OldCropType="GRASS_PASTURE.TR21",NewCropType="GRASS_PASTURE")

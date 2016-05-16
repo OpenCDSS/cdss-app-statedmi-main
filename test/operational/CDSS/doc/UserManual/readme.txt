@@ -1,0 +1,3 @@
+The StateDMI.pdf file is just the cover page and is used to test the Help...
+View Documentation menu in the GUI.  There is no reason to include the full
+user manual here.

@@ -1,0 +1,25 @@
+StartLog(LogFile="Crops_KBC.StateDMI.log")
+#
+# StateDMI commands to create the Rio Grande Blaney-Criddle coefficients File
+#
+# History:
+#
+# 2004-03-16 Steven A. Malers, RTi  Initial version using StateDMI.
+# 2007-04-23 SAM, RTi               Update for Rio Grande Phase 5.
+#
+# Step 1 - read data from HydroBase
+#
+# Read the general Blaney-Criddle coefficients first and then override with Rio Grande
+# data.
+ReadBlaneyCriddleFromHydroBase(BlaneyCriddleMethod="BLANEY-CRIDDLE_TR-21")
+ReadBlaneyCriddleFromHydroBase(BlaneyCriddleMethod="BLANEY-CRIDDLE_RIO_GRANDE")
+#
+# Step 3 - write the file
+#
+SortBlaneyCriddle(Order=Ascending)
+WriteBlaneyCriddleToStateCU(OutputFile="rg2007.kbc")
+#
+# Check the results
+#
+CheckBlaneyCriddle(ID="*")
+WriteCheckFile(OutputFile="rg2007.kbc.check.html")

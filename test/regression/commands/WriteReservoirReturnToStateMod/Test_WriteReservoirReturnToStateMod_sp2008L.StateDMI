@@ -1,0 +1,7 @@
+# Test writing reservoir return data to StateMod file - use full SP2008L file for input
+StartLog(LogFile="Results/Test_WriteReservoirReturnFromStateMod_Sp2008L.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteReservoirReturnFromStateMod_Sp2008L_out.rrf",IfNotFound=Ignore)
+ReadReservoirReturnFromStateMod(InputFile="Data\Sp2008L.rrf")
+# Write the file again and compare with the original file.
+WriteReservoirReturnToStateMod(OutputFile="Results/Test_WriteReservoirReturnFromStateMod_Sp2008L_out.rrf")
+CompareFiles(InputFile1="Data/Sp2008L.rrf",InputFile2="Results/Test_WriteReservoirReturnFromStateMod_Sp2008L_out.rrf",IgnoreWhitespace=True,IfDifferent=Warn)

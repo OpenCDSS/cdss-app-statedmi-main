@@ -1,0 +1,4 @@
+startLog(LogFile="readv12_Writev12.log")
+readCropPatternTSFromStateCU("../data/v12_dataSets/simple.cds")
+writeCropPatternTSToStateCU(OutputFile="../output/v12.cds",WriteHow=OverwriteFile)
+compareFiles(InputFile1="v12.cds.expected",InputFile2="../output/v12.cds",WarnIfDifferent=True)

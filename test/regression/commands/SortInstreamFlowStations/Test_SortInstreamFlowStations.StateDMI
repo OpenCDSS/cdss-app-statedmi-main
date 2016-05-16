@@ -1,0 +1,11 @@
+# Test sorting instream flow stations
+StartLog(LogFile="Results/Test_SortInstreamFlowStations.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SortInstreamFlowStations_out.csv")
+SetInstreamFlowStation(ID="InstreamFlow2",Name="InstreamFlow 2",IfNotFound=Add)
+SetInstreamFlowStation(ID="InstreamFlow3",Name="InstreamFlow 3",IfNotFound=Add)
+SetInstreamFlowStation(ID="InstreamFlow1",Name="InstreamFlow 1",IfNotFound=Add)
+SortInstreamFlowStations()
+# Uncomment the following command to regenerate the expected results.
+# WriteInstreamFlowStationsToList(OutputFile="ExpectedResults/Test_SortInstreamFlowStations_out.csv")
+WriteInstreamFlowStationsToList(OutputFile="Results/Test_SortInstreamFlowStations_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_SortInstreamFlowStations_out.csv",InputFile2="Results/Test_SortInstreamFlowStations_out.csv",WarnIfDifferent=True)

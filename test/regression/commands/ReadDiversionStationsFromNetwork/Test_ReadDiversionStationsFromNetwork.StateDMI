@@ -1,0 +1,8 @@
+# Test reading diversion stations from a network file
+StartLog(LogFile="Results/Test_ReadDiversionStationsFromNetwork.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadDiversionStationsFromNetwork_out.csv",IfNotFound=Ignore)
+ReadDiversionStationsFromNetwork(InputFile="Data\rg2007.net")
+# Uncomment the following command to regenerate the original output
+# WriteDiversionStationsToList(OutputFile="ExpectedResults/Test_ReadDiversionStationsFromNetwork_out.csv")
+WriteDiversionStationsToList(OutputFile="Results/Test_ReadDiversionStationsFromNetwork_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadDiversionStationsFromNetwork_out.csv",InputFile2="Results/Test_ReadDiversionStationsFromNetwork_out.csv",WarnIfDifferent=True)

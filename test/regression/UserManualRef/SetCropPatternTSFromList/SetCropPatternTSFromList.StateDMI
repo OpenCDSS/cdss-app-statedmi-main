@@ -1,0 +1,1 @@
+SetCropPatternTSFromList(ListFile="NoGIS_1936.csv",ID="*",SetStart=1936,SetEnd=1936,IDCol="1",CropTypeCol="2",AreaCol="3",ProcessWhen=WithParcels,IrrigationMethodCol="4",SupplyTypeCol="5")

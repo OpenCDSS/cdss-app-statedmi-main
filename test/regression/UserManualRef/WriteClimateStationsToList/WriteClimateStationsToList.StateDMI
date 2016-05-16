@@ -1,0 +1,2 @@
+ReadClimateStationsFromStateCU(InputFile="COclim2006.cli")
+WriteClimateStationsToList(OutputFile="COclim2006.csv")

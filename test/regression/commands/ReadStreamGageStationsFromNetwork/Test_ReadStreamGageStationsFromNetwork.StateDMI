@@ -1,0 +1,8 @@
+# Test reading stream gage stations from a network file
+StartLog(LogFile="Results/Test_ReadStreamGageStationsFromNetwork.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadStreamGageStationsFromNetwork_out.csv",IfNotFound=Ignore)
+ReadStreamGageStationsFromNetwork(InputFile="Data\rg2007.net")
+# Uncomment the following command to regenerate the original output
+# WriteStreamGageStationsToList(OutputFile="ExpectedResults/Test_ReadStreamGageStationsFromNetwork_out.csv")
+WriteStreamGageStationsToList(OutputFile="Results/Test_ReadStreamGageStationsFromNetwork_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadStreamGageStationsFromNetwork_out.csv",InputFile2="Results/Test_ReadStreamGageStationsFromNetwork_out.csv",WarnIfDifferent=True)

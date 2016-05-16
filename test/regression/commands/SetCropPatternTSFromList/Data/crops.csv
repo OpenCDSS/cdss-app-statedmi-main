@@ -1,0 +1,6 @@
+# Crop data to set
+"ID","Crop","Acres","IrrigationMethod","SupplyType"
+2000505,GRASS_PASTURE,0,Flood,Surface
+2000505,WHEAT,100,Flood,Surface
+2000623,GRASS_PASTURE,200,Flood,Surface
+2000623,WHEAT,201,Flood,Surface

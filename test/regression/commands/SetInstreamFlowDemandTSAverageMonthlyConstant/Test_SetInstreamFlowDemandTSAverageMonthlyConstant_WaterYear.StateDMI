@@ -1,0 +1,11 @@
+# Test setting instream flow demand TS average monthly data with a couple of generated stations
+# Use water year
+StartLog(LogFile="Results/Test_SetInstreamFlowDemandTSAverageMonthlyConstant_WaterYear.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SetInstreamFlowDemandTSAverageMonthlyConstant_WaterYear_out.ifa")
+SetOutputYearType(OutputYearType=Water)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="362000",MonthValues="1,2,3,4,5,6,7,8,9,10,11,12",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="362002",MonthValues="1,2,3,4,5,6,7,8,9,10,11,12",IfNotFound=Add)
+# Uncomment the following command to regenerate the expected results.
+# WriteInstreamFlowDemandTSAverageMonthlyToStateMod(OutputFile="ExpectedResults/Test_SetInstreamFlowDemandTSAverageMonthlyConstant_WaterYear_out.ifa")
+WriteInstreamFlowDemandTSAverageMonthlyToStateMod(OutputFile="Results/Test_SetInstreamFlowDemandTSAverageMonthlyConstant_WaterYear_out.ifa")
+CompareFiles(InputFile1="ExpectedResults/Test_SetInstreamFlowDemandTSAverageMonthlyConstant_WaterYear_out.ifa",InputFile2="Results/Test_SetInstreamFlowDemandTSAverageMonthlyConstant_WaterYear_out.ifa",WarnIfDifferent=True)

@@ -1,0 +1,4 @@
+# Test comparing different files and generate a warning when the files are different
+#@expectedStatus Warning
+StartLog(LogFile="Results/Test_CompareFiles_DifferentFiles_WarnIfDifferent=True.StateDMI.log")
+CompareFiles(InputFile1="Data/A1.txt",InputFile2="Data/B1.txt",WarnIfDifferent=True)

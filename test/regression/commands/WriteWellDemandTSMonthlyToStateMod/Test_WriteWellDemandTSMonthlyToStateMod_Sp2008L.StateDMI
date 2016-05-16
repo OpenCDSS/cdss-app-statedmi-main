@@ -1,0 +1,7 @@
+# Test writing well demand TS monthly to StateMod file - use part of SP file
+StartLog(LogFile="Results/Test_WriteWellDemandTSMonthlyToStateMod_Sp2008L.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteWellDemandTSMonthlyToStateMod_Sp2008L_out.wem")
+ReadWellDemandTSMonthlyFromStateMod(InputFile="Data\Sp2008L.wem")
+# Write the file again and compare with the original file.
+WriteWellDemandTSMonthlyToStateMod(OutputFile="Results/Test_WriteWellDemandTSMonthlyToStateMod_Sp2008L_out.wem",OutputYearType=Calendar,Precision=2)
+CompareFiles(InputFile1="Data/Sp2008L.wem",InputFile2="Results/Test_WriteWellDemandTSMonthlyToStateMod_Sp2008L_out.wem",WarnIfDifferent=True)

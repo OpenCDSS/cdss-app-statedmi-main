@@ -1,0 +1,7 @@
+# Test reading delay tables (daily) from a StateMod file
+StartLog(LogFile="Results/Test_ReadDelayTablesDailyFromStateMod.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadDelayTablesDailyFromStateMod_out.dld",IfNotFound=Ignore)
+ReadDelayTablesDailyFromStateMod(InputFile="Data\cm2005.dld")
+# Compare with the original data file
+WriteDelayTablesDailyToStateMod_Command(OutputFile="Results/Test_ReadDelayTablesDailyFromStateMod_out.dld",Precision=4)
+CompareFiles(InputFile1="Data/cm2005.dld",InputFile2="Results/Test_ReadDelayTablesDailyFromStateMod_out.dld",WarnIfDifferent=True)

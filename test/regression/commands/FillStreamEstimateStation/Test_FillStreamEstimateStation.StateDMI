@@ -1,0 +1,10 @@
+# Test filling stream estimate station data where the edited location is found
+StartLog(LogFile="Results/Test_FillStreamEstimateStation.StateDMI.log")
+RemoveFile(InputFile="Results\Test_FillStreamEstimateStation_out.csv")
+SetStreamEstimateStation(ID="Location1",IfNotFound=Add)
+SetStreamEstimateStation(ID="Location2",Name="Location 2",IfNotFound=Add)
+FillStreamEstimateStation(ID="Location1*",Name="Location 1 edited")
+# Uncomment the following command to regenerate the expected results.
+# WriteStreamEstimateStationsToList(OutputFile="ExpectedResults/Test_FillStreamEstimateStation_out.csv")
+WriteStreamEstimateStationsToList(OutputFile="Results/Test_FillStreamEstimateStation_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_FillStreamEstimateStation_out.csv",InputFile2="Results/Test_FillStreamEstimateStation_out.csv",WarnIfDifferent=True)

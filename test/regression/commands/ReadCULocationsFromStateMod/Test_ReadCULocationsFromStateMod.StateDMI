@@ -1,0 +1,9 @@
+# Test reading CU locations from StateMod file - read WES and DDS
+StartLog(LogFile="Results/Test_ReadCULocationsFromStateMod.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadCULocationsFromStateMod_out.str",IfNotFound=Warn)
+ReadCULocationsFromStateMod(InputFile="Data\rg2007.dds")
+ReadCULocationsFromStateMod(InputFile="Data\rg2007_Temp.wes")
+# Uncomment the following to generate the expected results
+# WriteCULocationsToStateCU(OutputFile="ExpectedResults/Test_ReadCULocationsFromStateMod_out.str")
+WriteCULocationsToStateCU(OutputFile="Results/Test_ReadCULocationsFromStateMod_out.str")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadCULocationsFromStateMod_out.str",InputFile2="Results/Test_ReadCULocationsFromStateMod_out.str",IfDifferent=Warn)

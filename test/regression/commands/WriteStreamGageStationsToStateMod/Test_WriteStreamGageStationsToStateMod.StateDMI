@@ -1,0 +1,9 @@
+# Test writing stream gage stations to StateMod file
+StartLog(LogFile="Results/Test_WriteStreamGageStationsToStateMod.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteStreamGageStationsToStateMod_out.ris")
+SetStreamGageStation(ID="08217000",Name="StreamGage 1",RiverNodeID="RiverNodeID1",DailyID="DailyID1",IfNotFound=Add)
+SetStreamGageStation(ID="08217500",Name="StreamGage 2",RiverNodeID="RiverNodeID2",DailyID="DailyID2",IfNotFound=Add)
+# Uncomment the following command to regenerate the expected results.
+# WriteStreamGageStationsToStateMod(OutputFile="ExpectedResults/Test_WriteStreamGageStationsToStateMod_out.ris")
+WriteStreamGageStationsToStateMod(OutputFile="Results/Test_WriteStreamGageStationsToStateMod_out.ris")
+CompareFiles(InputFile1="ExpectedResults/Test_WriteStreamGageStationsToStateMod_out.ris",InputFile2="Results/Test_WriteStreamGageStationsToStateMod_out.ris",WarnIfDifferent=True)

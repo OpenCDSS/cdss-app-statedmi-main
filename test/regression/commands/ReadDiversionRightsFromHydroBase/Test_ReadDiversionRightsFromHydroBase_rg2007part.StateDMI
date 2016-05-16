@@ -1,0 +1,29 @@
+# Test reading diversion rights data from HydroBase for a subset of structures
+StartLog(LogFile="Results/Test_ReadDiversionRightsFromHydroBase.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadDiversionRightsFromHydroBase_rg2007part_out.csv")
+####################################################
+# Start defining test stations and aggregate information...
+# The selected locations represent the combinations of cases to test but are
+# small enough to run quickly.  Full data sets are validated in other tests.
+#
+## Below are D&W structures
+#
+SetDiversionStation(ID="200511",Name="ANACONDA D",IfNotFound=Add)
+#
+## Below are diversion aggregate structures - define div and aggregates
+#
+SetDiversionStation(ID="20ADW02",Name="20ADW02",IfNotFound=Add)
+SetDiversionAggregate(ID="20ADW02",PartIDs="200895,200561,200721,200751,200695")
+#
+## Below are diversion system structures - define div and system
+#
+SetDiversionStation(ID="20MS01",Name="20MS01",IfNotFound=Add)
+SetDiversionSystem(ID="20MS01",PartIDs="200516, 200613, 201004")
+#
+##...end defining test stations and aggregates
+####################################################
+ReadDiversionRightsFromHydroBase(ID="*")
+# Uncomment the following command to regenerate the expected results.
+# WriteDiversionRightsToList(OutputFile="ExpectedResults/Test_ReadDiversionRightsFromHydroBase_rg2007part_out.csv")
+WriteDiversionRightsToList(OutputFile="Results/Test_ReadDiversionRightsFromHydroBase_rg2007part_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadDiversionRightsFromHydroBase_rg2007part_out.csv",InputFile2="Results/Test_ReadDiversionRightsFromHydroBase_rg2007part_out.csv",WarnIfDifferent=True)

@@ -1,0 +1,8 @@
+# Test reading crop characteristics data from HydroBase
+StartLog(LogFile="Results/Test_ReadCropCharacteristicsFromHydroBase.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadCropCharacteristicsFromHydroBase_out.csv")
+ReadCropCharacteristicsFromHydroBase(CUMethod="BLANEY-CRIDDLE_TR-21")
+# Uncomment the following command to regenerate the expected results.
+# WriteCropCharacteristicsToList(OutputFile="ExpectedResults/Test_ReadCropCharacteristicsFromHydroBase_out.csv")
+WriteCropCharacteristicsToList(OutputFile="Results/Test_ReadCropCharacteristicsFromHydroBase_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadCropCharacteristicsFromHydroBase_out.csv",InputFile2="Results/Test_ReadCropCharacteristicsFromHydroBase_out.csv",WarnIfDifferent=True)

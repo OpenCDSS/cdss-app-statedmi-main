@@ -1,0 +1,203 @@
+# The original file was modified for testing as follows, to allow input and output to be compared:
+#
+# * Psource in section was shorted from 14 to 12 characters (since StateMod only supports 12)
+# * Extra information after Pacct was removed since it is not in the specification
+# * Standardized column formatting according to variable types and internal data dimensions
+# * Added records at the bottom to test reading the efficiency data
+# _______________________________________________________
+#
+#        SmPlan 
+#        State of Colorado
+#        Version:  1.30
+#        Last revision date: 2009/03/11
+#
+#        Plans with at least     1 entries
+#        In water districts   1 64
+#
+# _______________________________________________________
+#                                                                                                                                                               
+#     Card 1   Control                                                                                                                                          
+#     format:  Free or (a12, 1x, a24, 1x, 6i8, (1x,a12)                                                                                                         
+#                                                                                                                                                               
+#     Plan ID:          	PId                                                                                                                                    
+#     Plan Name:        	PName                                                                                                                                  
+#     Plan Location     	iPsta                                                                                                                                  
+#     Plan On/Off:      	POn:                                                                                                                                   
+#     Plan Type                 iptype 1=Terms and Conditions (T&C)                                                                                             
+#                              		2=Well Augmentation                                                                                                            
+#                                       3=CU Reuse to a Reservoir                                                                                               
+#                                       4=CU Reuse to a Diversion                                                                                               
+#                                       5=Reuse to a Reservoir from Tmtn                                                                                        
+#                                       6=Reust to a Diversion from TMtn                                                                                        
+#                                       7=Tmtn Reuse                                                                                                            
+#                                       8=Recharge Plan                                                                                                         
+#                                       9=OOP Plan   
+#                                      10=Administrative                                                                                                           
+#     Plan Efficiency (%)       Peff (enter 999 to use default (source structures data)                                                                         
+#                               enter -n to read 12 values                                                                                                      
+#     Plan Return Flow ID       iPrf (enter 999 to use default (source structures data)                                                                         
+#     Plan Failure Switch       iPfail  0=do not stop for a failure                                                                                             
+#                                      1=do stop for a failure                                                                                                  
+#     Plan Source               Psource A referece (comment) typically used to describe                                                                         
+#                                       the source this plan is associted with.                                                                                 
+#                                       Note this data is currently only used in reporting                                                                      
+#                                                                                                                                                               
+#                                                                                                                                                               
+#> ID          Name                      RiverLoc    On/Off  iPtype  Peff    iPrf    iPfail  Psto1     Psource       PAcct
+#>---------exxb----------------------exxb----------eb------eb------eb------eb------eb------eb------exxb----------exxb------e
+0102513      "ROTHE AUG               " 0102513            1       2       0       0       0     0.0 "Pumping     "        0
+0102513_PlC  "ROTHE AUG               " 0102513            1       8       0     999       0     0.0 "Diversion   "        0
+0102513_PlR  "ROTHE AUG               " 0102513            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+0102518      "PIONEER AUG PLAN        " 0102518            1       2       0       0       0     0.0 "Pumping     "        0
+0102518_PlC  "PIONEER AUG PLAN        " 0102518            1       8       0     999       0     0.0 "Diversion   "        0
+0102518_PlR  "PIONEER AUG PLAN        " 0102518            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+0102522      "RIVERSIDE AUG           " 0102522            1       2       0       0       0     0.0 "Pumping     "        0
+0102522_PlC  "RIVERSIDE AUG           " 0102522            1       8       0     999       0     0.0 "Diversion   "        0
+0102522_PlR  "RIVERSIDE AUG           " 0102522            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+0102528      "FT MORGAN CNL AUG PLAN  " 0102528            1       2       0       0       0     0.0 "Pumping     "        0
+0102528_PlC  "FT MORGAN CNL AUG PLAN  " 0102528            1       8       0     999       0     0.0 "Diversion   "        0
+0102528_PlR  "FT MORGAN CNL AUG PLAN  " 0102528            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+0102529      "UPPER PLATTE BEAVER AUG " 0102529            1       2       0       0       0     0.0 "Pumping     "        0
+0102529_PlC  "UPPER PLATTE BEAVER AUG " 0102529            1       8       0     999       0     0.0 "Diversion   "        0
+0102529_PlR  "UPPER PLATTE BEAVER AUG " 0102529            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+0102535      "LOWER PLATTE BEAVER AUG " 0102535            1       2       0       0       0     0.0 "Pumping     "        0
+0102535_PlC  "LOWER PLATTE BEAVER AUG " 0102535            1       8       0     999       0     0.0 "Diversion   "        0
+0102535_PlR  "LOWER PLATTE BEAVER AUG " 0102535            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+0102557      "ORPHAN WELLS OF WIGGINS " 0102557            1       2       0       0       0     0.0 "Pumping     "        0
+#
+0102624      "NATIONAL HOG FARMS AUG  " 0102624            1       2       0       0       0     0.0 "Pumping     "        0
+0102624_PlC  "NATIONAL HOG FARMS AUG  " 0102624            1       8       0     999       0     0.0 "Diversion   "        0
+0102624_PlR  "NATIONAL HOG FARMS AUG  " 0102624            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+0102673      "KERSEY WELL USERS AUG   " 0102673            1       2       0       0       0     0.0 "Pumping     "        0
+0102673_PlC  "KERSEY WELL USERS AUG   " 0102673            1       8       0     999       0     0.0 "Diversion   "        0
+0102673_PlR  "KERSEY WELL USERS AUG   " 0102673            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+0103332      "LOWER LATHAM RES CO AUG " 0103332            1       2       0       0       0     0.0 "Pumping     "        0
+#
+0103334      "CENTRAL-REPL.           " 0103334            1       2       0       0       0     0.0 "Pumping     "        0
+0103334_PlC  "CENTRAL-REPL.           " 0103334            1       8       0     999       0     0.0 "Diversion   "        0
+0103334_PlR  "CENTRAL-REPL.           " 0103334            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+0103339      "BIJOU AUG PLAN          " 0103339            1       2       0       0       0     0.0 "Pumping     "        0
+0103339_PlC  "BIJOU AUG PLAN          " 0103339            1       8       0     999       0     0.0 "Diversion   "        0
+0103339_PlR  "BIJOU AUG PLAN          " 0103339            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+0103394      "CENTRAL WAS AUG         " 0103394            1       2       0       0       0     0.0 "Pumping     "        0
+0103394_PlC  "CENTRAL WAS AUG         " 0103394            1       8       0     999       0     0.0 "Diversion   "        0
+0103394_PlR  "CENTRAL WAS AUG         " 0103394            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+0103397      "NEW CACHE AUG           " 0103397            1       2       0       0       0     0.0 "Pumping     "        0
+#
+6402517      "SEDGWICK CTY WL USERS AU" 6402517            1       2       0       0       0     0.0 "Pumping     "        0
+6402517_PlC  "SEDGWICK CTY WL USERS AU" 6402517            1       8       0     999       0     0.0 "Diversion   "        0
+6402517_PlR  "SEDGWICK CTY WL USERS AU" 6402517            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+6402518      "HARMONY DITCH CO AUG    " 6402518            1       2       0       0       0     0.0 "Pumping     "        0
+6402518_PlC  "HARMONY DITCH CO AUG    " 6402518            1       8       0     999       0     0.0 "Diversion   "        0
+6402518_PlR  "HARMONY DITCH CO AUG    " 6402518            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+6402519      "DINSDALE AUG            " 6402519            1       2       0       0       0     0.0 "Pumping     "        0
+6402519_PlC  "DINSDALE AUG            " 6402519            1       8       0     999       0     0.0 "Diversion   "        0
+6402519_PlR  "DINSDALE AUG            " 6402519            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+6402525      "CONDON AUG              " 6402525            1       2       0       0       0     0.0 "Pumping     "        0
+6402525_PlC  "CONDON AUG              " 6402525            1       8       0     999       0     0.0 "Diversion   "        0
+6402525_PlR  "CONDON AUG              " 6402525            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+6402526      "STERLING AUG            " 6402526            1       2       0       0       0     0.0 "Pumping     "        0
+6402526_PlC  "STERLING AUG            " 6402526            1       8       0     999       0     0.0 "Diversion   "        0
+6402526_PlR  "STERLING AUG            " 6402526            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+6402536      "LOWER LOGAN WELL USERS A" 6402536            1       2       0       0       0     0.0 "Pumping     "        0
+6402536_PlC  "LOWER LOGAN WELL USERS A" 6402536            1       8       0     999       0     0.0 "Diversion   "        0
+6402536_PlR  "LOWER LOGAN WELL USERS A" 6402536            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+6402539      "LOGAN WELL USERS AUG    " 6402539            1       2       0       0       0     0.0 "Pumping     "        0
+6402539_PlC  "LOGAN WELL USERS AUG    " 6402539            1       8       0     999       0     0.0 "Diversion   "        0
+6402539_PlR  "LOGAN WELL USERS AUG    " 6402539            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+6402540      "LOWLINE DITCH CO AUG    " 6402540            1       2       0       0       0     0.0 "Pumping     "        0
+6402540_PlC  "LOWLINE DITCH CO AUG    " 6402540            1       8       0     999       0     0.0 "Diversion   "        0
+6402540_PlR  "LOWLINE DITCH CO AUG    " 6402540            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+6402542      "LSPWCD AUG              " 6402542            1       2       0       0       0     0.0 "Pumping     "        0
+6402542_PlC  "LSPWCD AUG              " 6402542            1       8       0     999       0     0.0 "Diversion   "        0
+6402542_PlR  "LSPWCD AUG              " 6402542            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+6402546      "PAWNEE WELL USERS AUG   " 6402546            1       2       0       0       0     0.0 "Pumping     "        0
+6402546_PlC  "PAWNEE WELL USERS AUG   " 6402546            1       8       0     999       0     0.0 "Diversion   "        0
+6402546_PlR  "PAWNEE WELL USERS AUG   " 6402546            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+6402552      "STERLING WELL USERS AUG " 6402552            1       2       0       0       0     0.0 "Pumping     "        0
+6402552_PlC  "STERLING WELL USERS AUG " 6402552            1       8       0     999       0     0.0 "Diversion   "        0
+6402552_PlR  "STERLING WELL USERS AUG " 6402552            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+6402799      "BROWN AUG               " 6402799            1       2       0       0       0     0.0 "Pumping     "        0
+6402799_PlC  "BROWN AUG               " 6402799            1       8       0     999       0     0.0 "Diversion   "        0
+6402799_PlR  "BROWN AUG               " 6402799            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+6403392      "NORTH STERLING AUG      " 6403392            1       2       0       0       0     0.0 "Pumping     "        0
+6403392_PlC  "NORTH STERLING AUG      " 6403392            1       8       0     999       0     0.0 "Diversion   "        0
+6403392_PlR  "NORTH STERLING AUG      " 6403392            1       8       0       8       0     0.0 "Reservoir   "        1
+#
+#                                                      
+# ID           Name                      RiverLoc    ON/Off  iPtype  Peff    iPrf    iPfail  Psto1     Psource       PAcct
+#----------exxb----------------------exxb----------eb------eb------eb------eb------eb------eb------exxb----------exxb------e
+#                                                                                                                                   
+6402015      "TAMARACK RECHARGE A 1   " 6402015            1       2       0       0       0     0.0 "Pumping     "        0   
+6402015_PlR  "TAMARACK RECHARGE A 1   " 6402015            1       8       0       8       0     0.0 "Reservoir   "        0   
+6402015_PlC  "TAMARACK RECHARGE A 1   " 6402015            1       8       0     999       0     0.0 "Diversion   "        0   
+#
+6402027      "OVERLAND TRAIL R RCHRG  " 6402027            1       2       0       0       0     0.0 "Pumping     "        0   
+6402027_PlR  "OVERLAND TRAIL R RCHRG  " 6402027            1       8       0       8       0     0.0 "Reservoir   "        0   
+6402027_PlC  "OVERLAND TRAIL R RCHRG  " 6402027            1       8       0     999       0     0.0 "Diversion   "        0   
+#
+# Ground Water Only Default
+#  
+#                                                      
+# ID           Name                      RiverLoc    ON/Off  iPtype  Peff    iPrf    iPfail  Psto1     Psource       PAcct
+#----------exxb----------------------exxb----------eb------eb------eb------eb------eb------eb------exxb----------exxb------e
+#                                                                                                                                   
+GwOnly_01    "GwOnly_01               " 06754000           1       2       0       0       0     0.0 "Pumping     "        0
+GwOnly_64    "GwOnly_64               " 06754000           1       2       0       0       0     0.0 "Pumping     "        0
+#
+# Aggregated Well Default
+#                                                      
+# ID           Name                      RiverLoc    ON/Off  iPtype  Peff    iPrf    iPfail  Psto1     Psource       PAcct
+#----------exxb----------------------exxb----------eb------eb------eb------eb------eb------eb------exxb----------exxb------e
+#                                                                                                                                   
+AggWell_01   "AggWell_01              " 06754000           1       2       0       0       0     0.0 "Pumping     "        0
+AggWell_64   "AggWell_64              " 06754000           1       2       0       0       0     0.0 "Pumping     "        0
+AggWell_02   "AggWell_02              " 06754000           1       2       0       0       0     0.0 "Pumping     "        0
+#
+#
+# Administrative Coffin_Wells and Designated Basins
+# Plan ID for tracking Coffin_Wells  plan type 10
+#                                                      
+# ID           Name                      RiverLoc    ON/Off  iPtype  Peff    iPrf    iPfail  Psto1     Psource       PAcct
+#----------exxb----------------------exxb----------eb------eb------eb------eb------eb------eb------exxb----------exxb------e
+#                                                                                                                                   
+Coffin_Well  "Coffin_Well             " 06754000           1      10       0       0       0     0.0 "Pumping     "        0
+Lost_Creek   "Lost_Creek              " 06754000           1      10       0       0       0     0.0 "Pumping     "        0
+Camp_Creek   "Camp_Creek              " 06754000           1      10       0       0       0     0.0 "Pumping     "        0
+Kiowa_Bijou  "Kiowa_Bijou             " 06754000           1      10       0       0       0     0.0 "Pumping     "        0
+#
+# Compact Plan
+#                                                      
+# ID           Name                      RiverLoc    ON/Off  iPtype  Peff    iPrf    iPfail  Psto1     Psource       PAcct
+#----------exxb----------------------exxb----------eb------eb------eb------eb------eb------eb------exxb----------exxb------e
+Compact_Pln  "Compact_Plan            " 6499999            1      10       0       0       0     0.0 "Diversion   "        0
+#
+# Test reading efficiency flag 999
+Compact_Pln2 "Compact_Plan            " 6499999            1      10     999       0       0     0.0 "Diversion   "        0
+#
+# Test reading efficiency flag 1, with second record with efficiencies
+Compact_Pln3 "Compact_Plan            " 6499999            1      10       1       0       0     0.0 "Diversion   "        0
+ 50.00  50.00  50.00  50.00  50.00  50.00  50.00  50.00  50.00  50.00  50.00  50.00 

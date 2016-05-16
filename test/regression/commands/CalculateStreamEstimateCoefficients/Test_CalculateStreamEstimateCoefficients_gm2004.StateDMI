@@ -1,0 +1,40 @@
+# Test calculating stream estimate coefficients from the gm2004 network file
+# @expectedStatus warning (because of out of range proration factors)
+StartLog(LogFile="Results/Test_CalculateStreamEstimateCoefficients_gm2004.StateDMI.log")
+RemoveFile(InputFile="Results\Test_CalculateStreamEstimateCoefficients_gm2004.rib",IfNotFound=Ignore)
+# rib.commands.StateDMI
+#
+# Creates the Stream Estimate Station Coefficient Data file
+#
+#  Step 1 - read river nodes from the network file and create file framework
+#
+ReadStreamEstimateStationsFromNetwork(InputFile="Data\gm2004.net")
+#
+#  Step 2 - set preferred gages for "neighboring" gage approach
+#           this baseflow nodes are generally on smaller non-gaged tribs and have
+#           different flow characteristics than next downstream gages
+#
+SetStreamEstimateCoefficientsPFGage(ID="403365",GageID="09137050")
+SetStreamEstimateCoefficientsPFGage(ID="400586",GageID="09128500")
+SetStreamEstimateCoefficientsPFGage(ID="403395",GageID="09128500")
+SetStreamEstimateCoefficientsPFGage(ID="281077",GageID="09118000")
+SetStreamEstimateCoefficientsPFGage(ID="400506",GageID="09134050")
+SetStreamEstimateCoefficientsPFGage(ID="401190",GageID="09131200")
+SetStreamEstimateCoefficientsPFGage(ID="590544",GageID="09127500")
+SetStreamEstimateCoefficientsPFGage(ID="590606",GageID="09113300")
+SetStreamEstimateCoefficientsPFGage(ID="591402",GageID="09113300")
+SetStreamEstimateCoefficientsPFGage(ID="620672",GageID="09124500")
+SetStreamEstimateCoefficientsPFGage(ID="621339",GageID="09124500")
+SetStreamEstimateCoefficientsPFGage(ID="680683",GageID="09147100")
+#
+#  Step 3 - calculate stream coefficients
+CalculateStreamEstimateCoefficients()
+#
+#  Step 4 - set proration factors directly
+#
+#
+#  Step 5 - create streamflow estimate coefficient file
+#
+WriteStreamEstimateCoefficientsToStateMod(OutputFile="Results/Test_CalculateStreamEstimateCoefficients_gm2004.rib")
+# Compare for the test
+CompareFiles(InputFile1="Data/gm2004.rib",InputFile2="Results/Test_CalculateStreamEstimateCoefficients_gm2004.rib",IfDifferent=Fail)

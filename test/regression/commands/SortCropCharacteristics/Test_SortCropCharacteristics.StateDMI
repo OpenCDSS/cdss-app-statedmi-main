@@ -1,0 +1,11 @@
+# Test sorting crop characteristics
+StartLog(LogFile="Results/Test_SortCropCharacteristics.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SortCropCharacteristics_out.csv")
+SetCropCharacteristics(CropType="Crop2",SpringFrostFlag=0,FallFrostFlag=0,IfNotFound=Add)
+SetCropCharacteristics(CropType="Crop3",SpringFrostFlag=0,FallFrostFlag=0,IfNotFound=Add)
+SetCropCharacteristics(CropType="Crop1",SpringFrostFlag=0,FallFrostFlag=0,IfNotFound=Add)
+SortCropCharacteristics()
+# Uncomment the following command to regenerate the expected results.
+# WriteCropCharacteristicsToList(OutputFile="ExpectedResults/Test_SortCropCharacteristics_out.csv")
+WriteCropCharacteristicsToList(OutputFile="Results/Test_SortCropCharacteristics_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_SortCropCharacteristics_out.csv",InputFile2="Results/Test_SortCropCharacteristics_out.csv",WarnIfDifferent=True)

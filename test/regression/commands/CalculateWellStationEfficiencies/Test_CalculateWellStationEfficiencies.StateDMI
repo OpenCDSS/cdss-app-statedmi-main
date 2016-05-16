@@ -1,0 +1,21 @@
+# Test calculating well station efficiencies from IWR and historical time series
+StartLog(LogFile="Results/Test_CalculateWellStationEfficiencies.StateDMI.log")
+RemoveFile(InputFile="Results\Test_CalculateWellStationEfficiencies_out.wes")
+RemoveFile(InputFile="Results\Test_CalculateWellStationEfficiencies_out.txt")
+SetOutputPeriod(OutputStart="1950-01",OutputEnd="1955-12")
+# Define stations for ID pattern checks
+SetWellStation(ID="200505",DemandType=1,DemandSource=1,IfNotFound=Add)
+SetWellStation(ID="200812",DemandType=1,DemandSource=1,IfNotFound=Add)
+# Read CWR (IWR) time series.
+ReadIrrigationWaterRequirementTSMonthlyFromStateCU(InputFile="Data\rg2007.ddc")
+# Generate historical time series
+SetWellHistoricalPumpingTSMonthlyConstant(ID="200505",Constant=1000,IfNotFound=Add)
+SetWellHistoricalPumpingTSMonthlyConstant(ID="200812",Constant=50000,IfNotFound=Add)
+# Calculate diversion station efficiencies
+CalculateWellStationEfficiencies(ID="*",EffReportFile="Results/Test_CalculateWellStationEfficiencies_out.txt")
+# Uncomment the following 2 commands to regenerate the expected results.
+# WriteWellStationsToStateMod(OutputFile="ExpectedResults/Test_CalculateWellStationEfficiencies_out.wes")
+# CalculateWellStationEfficiencies(ID="*",EffReportFile="ExpectedResults/Test_CalculateWellStationEfficiencies_out.txt")
+WriteWellStationsToStateMod(OutputFile="Results/Test_CalculateWellStationEfficiencies_out.wes")
+CompareFiles(InputFile1="ExpectedResults/Test_CalculateWellStationEfficiencies_out.wes",InputFile2="Results/Test_CalculateWellStationEfficiencies_out.wes",WarnIfDifferent=True)
+CompareFiles(InputFile1="ExpectedResults/Test_CalculateWellStationEfficiencies_out.txt",InputFile2="Results/Test_CalculateWellStationEfficiencies_out.txt",WarnIfDifferent=True)

@@ -1,0 +1,10 @@
+# Test calculating stream estimate coefficients from a network file
+#@expectedStatus warning (because some out of range proration factors are reported)
+StartLog(LogFile="Results/Test_CalculateStreamEstimateCoefficients.StateDMI.log")
+RemoveFile(InputFile="Results\Test_CalculateStreamEstimateCoefficients_out.rib",IfNotFound=Ignore)
+ReadStreamEstimateStationsFromNetwork(InputFile="Data\rg2007b.net")
+CalculateStreamEstimateCoefficients()
+# Uncomment the following command to regenerate the original output
+# WriteStreamEstimateCoefficientsToStateMod(OutputFile="ExpectedResults/Test_CalculateStreamEstimateCoefficients_out.rib")
+WriteStreamEstimateCoefficientsToStateMod(OutputFile="Results/Test_CalculateStreamEstimateCoefficients_out.rib")
+CompareFiles(InputFile1="ExpectedResults/Test_CalculateStreamEstimateCoefficients_rg2007b.rib",InputFile2="Results/Test_CalculateStreamEstimateCoefficients_rg2007b.rib",IfDifferent=Warn)

@@ -1,0 +1,13 @@
+# Test setting CU locations from a list file
+StartLog(LogFile="Results/Test_SetCULocationsFromList.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SetCULocationsFromList_out.csv")
+RemoveFile(InputFile="Results\Test_SetCULocationsFromList_out_ClimateStations.csv")
+RemoveFile(InputFile="Results\Test_SetCULocationsFromList_out_Collections.csv")
+SetCULocation(ID="0130",IfNotFound=Add)
+SetCULocation(ID="0776",IfNotFound=Add)
+SetCULocation(ID="1458",IfNotFound=Add)
+SetCULocationsFromList(ListFile="Data\locations.csv",IDCol=1,NameCol=2,LatitudeCol=3,ElevationCol=4,Region1Col=5,AWCCol=6)
+# Uncomment the following command to regenerate the expected results.
+# WriteCULocationsToList(OutputFile="ExpectedResults/Test_SetCULocationsFromList_out.csv")
+WriteCULocationsToList(OutputFile="Results/Test_SetCULocationsFromList_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_SetCULocationsFromList_out.csv",InputFile2="Results/Test_SetCULocationsFromList_out.csv",WarnIfDifferent=True)

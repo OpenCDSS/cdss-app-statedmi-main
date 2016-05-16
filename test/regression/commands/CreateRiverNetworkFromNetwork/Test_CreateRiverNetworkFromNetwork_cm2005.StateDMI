@@ -1,0 +1,9 @@
+# Test creating the river network from the general network - use cm2005 full files
+StartLog(LogFile="Results/Test_CreateRiverNetworkFromNetwork_cm2005.StateDMI.log")
+RemoveFile(InputFile="Results\Test_CreateRiverNetworkFromNetwork_cm2005_out.net")
+ReadNetworkFromStateMod(InputFile="Data\cm2005.net")
+CreateRiverNetworkFromNetwork()
+# Uncomment the following command to regenerate the expected results.
+# WriteRiverNetworkToList(OutputFile="ExpectedResults/Test_CreateRiverNetworkFromNetwork_cm2005_out.net")
+WriteRiverNetworkToList(OutputFile="Results/Test_CreateRiverNetworkFromNetwork_cm2005_out.net")
+CompareFiles(InputFile1="ExpectedResults/Test_CreateRiverNetworkFromNetwork_cm2005_out.net",InputFile2="Results/Test_CreateRiverNetworkFromNetwork_cm2005_out.net",WarnIfDifferent=True)

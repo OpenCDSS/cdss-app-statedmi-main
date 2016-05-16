@@ -1,0 +1,681 @@
+#
+# FileFormatVersion 2
+#
+# Default.opr; Operational right file for SPDSS Historic Simulation
+# File that gets the following appended to the bottom:
+# 	Augmentation plan data from ..\SmOpr
+# 	Alternate Point data from ..\SmAltP
+#
+#________________________________________________________________________________________________________________________________________________________________________________________________________________________
+# Edits
+# rrb 2009/01/10; Release to target on
+# rrb 2009/01/10; Diversions to storage by storage rights
+# rrb 2008/12/30; Remove release to target, except at Prewitt
+# rrb 2008/12/30; Control diversion to North Sterling with reservoir rights
+#                 to get 1 fill rule limit
+#
+# rrb 1008/10/01; Remove 0100711, it has no water rights
+#
+#
+#________________________________________________________________________________________________________________________________________________________________________________________________________________________
+#
+#
+# ID        Name                    NA                    Admin#   # Str  On/Off Dest Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     Sou2 Ac     Type ReusePlan     Div Type    OprLoss    Limit   ioBeg   ioEnd Comment
+# ---------eb----------------------eb----------exxxxb----------eb------eb------e-b----------eb------e-b----------eb------e-b----------eb------eb------exb----------exb----------exb------eb------eb------eb------exb----- 
+# 1. BIJOU IRRIGATION SYSTEM (EMPIRE & BIJOU RESERVOIRS)
+#   
+# Empire to Storage                                 
+01035700.01 Opr_Empire_Res01                        20226.00000       1.       1 0103816            1 0103816.01         0 0100501          100      45 NA           Diversion         0.0     0.0       0    9999  Empire Res through Empire Ditch Wr1
+                                    0100501 25 Carrier                                                                                                                                                      
+01035700.02 Opr_Empire_Res02                        26302.20226       1.       1 0103816            1 0103816.02         0 0100501          100      45 NA           Diversion         0.0     0.0       0    9999  Empire Res through Empire Ditch Wr2
+                                    0100501 25 Carrier                                                                                                                                                       
+01035700.03 Opr_Empire_Res03                        31423.29219       1.       1 0103816            1 0103816.03         0 0100501          100      45 NA           Diversion         0.0     0.0       0    9999  Empire Res through Empire Ditch Wr3
+                                    0100501 25 Carrier   
+#
+# 
+# Target                                    
+# Note, the next command is commented out for a calculation simulation                                                                                                                                                                                                                              
+#
+# rrb Spill to target 
+# rrb 01035700.04 Opr_Empire_Res04                        99999.00000       0.       1 NA                 0 0103816            0 NA                 0       9 NA           NA                0.0     0.0       0    9999  Empire Res release to target
+#
+# Empire Reservoir to Users assigned to Bijou (0100507_I)
+01035700.05 Opr_Empire_Res05                        20543.10000       0.       1 0100507_I          1 0103816            1 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Empire Reservoir to Irrigate
+#
+#________________________________________________________________________________________________________________________________________________________________________________________________________________________
+#
+#
+# ID        Name                    NA                    Admin#   # Str  On/Off Dest Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     Sou2 Ac     Type ReusePlan     Div Type    OprLoss    Limit   ioBeg   ioEnd Comment
+# ---------eb----------------------eb----------exxxxb----------eb------eb------e-b----------eb------e-b----------eb------e-b----------eb------eb------exb----------exb----------exb------eb------eb------eb------exb----- 
+#   
+# Bijou to Storage                                 
+01035700.07 Opr_Bijou_Res02                         21564.00000       1.       1 0103570            1 0103570.01         0 0100507_D        100      45 NA           Diversion         0.0     0.0       0    9999  Bijou Res through Bijou Canal Wr1
+                                    0100507_D 33 Carrier                                                                                                                                                       
+01035700.08 Opr_Bijou_Res03                         31423.29219       1.       1 0103570            1 0103570.02         0 0100507_D        100      45 NA           Diversion         0.0     0.0       0    9999  Bijou Res through Bijou Canal Wr2
+                                    0100507_D 33 Carrier                                                                                                                                                       
+#                                    
+# Target
+# Note, the next command is commented out for calculation simulation                                                                                                                                                                                                                              
+#
+# rrb Spill to target 
+# rrb 01035700.09 Opr_Bijou_Res04                         99999.00000       0.       1 NA                 0 0103570            0 NA                 0       9 NA           NA                0.0     0.0       0    9999  Bijou Res release to target#
+#
+# Bijou Reservoir to Users
+01035700.10 Opr_Bijou_Res05                         31423.490000      0.       1 0100507_I          1 0103570            1 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Empire to Irrigate
+#
+# Bijou & Empire from River to Irrigate
+#   Note: *.01 is 40 cfs, *.02 is 16.32 cfs, *.03 is 21 cfs; *.04 is 10 cfs; *.05 is 30 cfs
+#	   *.06 is 35 cfs; .07 is 450 cfs; *.08 is 50 cfs; *.09 is 17.13 cfs; *.10 is 84 cfs
+01035700.11 Opr_Bijou_Res06                           7944.00000      1.       1 0100507_I          1 0100507_D.01       0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Bijou River to Irrigate
+                                    0100507_D 33 Carrier
+01035700.12 Opr_Bijou_Res07                           8511.00000      1.       1 0100507_I          1 0100507_D.02       0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Bijou River to Irrigate
+                                    0100507_D 33 Carrier
+01035700.13 Opr_Bijou_Res08                           9283.00000      1.       1 0100507_I          1 0100507_D.03       0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Bijou River to Irrigate
+                                    0100507_D 33 Carrier
+01035700.14 Opr_Bijou_Res09                          11049.00000      1.       1 0100507_I          1 0100507_D.04       0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Bijou River to Irrigate
+                                    0100507_D 33 Carrier
+01035700.15 Opr_Bijou_Res10                          11804.00000      1.       1 0100507_I          1 0100507_D.05       0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Bijou River to Irrigate
+                                    0100507_D 33 Carrier
+01035700.16 Opr_Bijou_Res11                          13468.00000      1.       1 0100507_I          1 0100507_D.06       0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Bijou River to Irrigate
+                                    0100507_D 33 Carrier
+01035700.17 Opr_Bijou_Res12                          14154.00000      1.       1 0100507_I          1 0100507_D.07       0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Bijou River to Irrigate
+                                    0100507_D 33 Carrier
+01035700.18 Opr_Bijou_Res13                          18353.00000      1.       1 0100507_I          1 0100507_D.08       0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Bijou River to Irrigate
+                                    0100507_D 33 Carrier
+#________________________________________________________________________________________________________________________________________________________________________________________________________________________
+#
+# 2. RIVERSIDE
+#
+# ID        Name                    NA                    Admin#   # Str  On/Off Dest Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     Sou2 Ac     Type ReusePlan     Div Type    OprLoss    Limit   ioBeg   ioEnd Comment
+# ---------eb----------------------eb----------exxxxb----------eb------eb------e-b----------eb------e-b----------eb------e-b----------eb------eb------exb----------exb----------exb------eb------eb------eb------exb----- 
+#      
+# Riverside to Storage                                                                                                                                                                                           
+01036510.01 Opr_Riverside_Res01                     19083.00000       1.       1 0103651            1 0103651.01         0 0100503_D        100      45 NA           Diversion         0.0     0.0       0    9999  Riverside Res through Riverside Canal Wr1
+                                    0100503_D 25 Carrier                                                                                                                                                       
+01036510.02 Opr_Riverside_Res02                     21031.00000       1.       1 0103651            1 0103651.02         0 0100503_D        100      45 NA           Diversion         0.0     0.0       0    9999  Riverside Res through Riverside Canal Wr2
+                                    0100503_D 25 Carrier                                                                                                                                                        
+01036510.03 Opr_Riverside_Res03                     22212.00000       1.       1 0103651            1 0103651.03         0 0100503_D        100      45 NA           Diversion         0.0     0.0       0    9999  Riverside Res through Riverside Canal Wr3
+                                    0100503_D 25 Carrier                                                                                                                                                        
+01036510.04 Opr_Riverside_Res04                     31423.29219       1.       1 0103651            1 0103651.04         0 0100503_D        100      45 NA           Diversion         0.0     0.0       0    9999  Riverside Res through Riverside Canal Wr4
+                                    0100503_D 25 Carrier                                                                                                                                                        
+01036510.05 Opr_Riverside_Res05                     50466.00000       1.       1 0103651            1 0103651.05         0 0100503_D        100      45 NA           Diversion         0.0     0.0       0    9999  Riverside Res through Riverside Canal Wr5
+                                    0100503_D 25 Carrier                                                                                                                                                        
+01036510.06 Opr_Riverside_Res06                     50769.49378       1.       1 0103651            1 0103651.06         0 0100503_D        100      45 NA           Diversion         0.0     0.0       0    9999  Riverside Res through Riverside Canal Wr6
+                                    0100503_D 25 Carrier 
+01036510.07 Opr_Riverside_Res07                     51356.00000       1.       1 0103651            1 0103651.07         0 0100503_D        100      45 NA           Diversion         0.0     0.0       0    9999  Riverside Res through Riverside Canal Wr6
+                                    0100503_D 25 Carrier 
+#                                    
+# Target
+# Note, the next command is commented out for calculation simulation                                                                                                                                                                                                                              
+#
+# rrb Spill to target 
+# rrb 01036510.08 Opr_Riverside_Res_08                    99999.00000       0.       1 NA                 0 0103651            0 NA                 0       9 NA           NA                0.0     0.0       0    9999  Riverside Res release to target
+#
+# Riverside Reservoir to Users
+01036510.09 Opr_Riverside_Res09                     50466.10000       0.       1 0100503_I          1 0103651            1 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Riverside to Irrigate
+#
+# Riverside from River to Irrigate 
+#  Note: *.01 is 22 cfs; *.03 is 417 cfs)
+01036510.10 Opr_Riverside_Res10                      9497.00000       1.       1 0100503_I          1 0100503_D.01       0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Riverside River to Irrigate
+                                   0100503_D 25 Carrier   
+01036510.11 Opr_Riverside_Res11                     13482.00000       1.       1 0100503_I          1 0100503_D.03       0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Riverside River to Irrigate
+                                   0100503_D 25 Carrier   
+#________________________________________________________________________________________________________________________________________________________________________________________________________________________
+#
+# 3. JACKSON
+#
+# ID        Name                    NA                    Admin#   # Str  On/Off Dest Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     Sou2 Ac     Type ReusePlan     Div Type    OprLoss    Limit   ioBeg   ioEnd Comment
+# ---------eb----------------------eb----------exxxxb----------eb------eb------e-b----------eb------e-b----------eb------e-b----------eb------eb------exb----------exb----------exb------eb------eb------eb------exb----- 
+#
+# Jackson to Storage                                                                                                                                                                                                  
+01038170.01 Opr_Jackson_Res01                       18765.00000       1.       1 0103817           -7 0103817.01         0 0100513          100      45 NA           Diversion         0.0     0.0       0    9999  Jackson Lake Res through Jackson Inlet Ditch Wr1
+                                    0100513 25 Carrier
+01038170.02 Opr_Jackson_Res02                       31423.29219       1.       1 0103817           -7 0103817.02         0 0100513          100      45 NA           Diversion         0.0     0.0       0    9999  Jackson Lake Res through Jackson Inlet Ditch Wr2
+                                    0100513 25 Carrier                                                                                                                                                      
+#                                    
+# Target
+# Note, the next command is commented out for calculation simulation                                                                                                                                                                                                                               
+#
+# rrb Spill to target 
+01038170.03 Opr_Jackson_Res03                       99999.00000       0.       1 NA                 0 0103817            0 NA                 0       9 NA           NA                0.0     0.0       0    9999  Jackson Res release to target
+#
+# Jackson to Users
+01038170.04 Opr_Jackson_FtMorgan                    31423.39219       0.       1 0100514            1 0103817            1 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Jackson to Irrigate
+01038170.05 Opr_Jackson_LP&Beaver                   31423.39219       0.       1 0100518            1 0103817            2 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Jackson to Irrigate
+01038170.06 Opr_Jackson_UP&Beaver                   31423.39219       0.       1 0100515            1 0103817            3 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Jackson to Irrigate
+01038170.07 Opr_Jackson_Misc                        31423.39219       0.       0 NA                 1 NA                 4 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Jackson to Irrigate
+01038170.08 Opr_Jackson_Riverside                   31423.39219       0.       1 0100503_D          1 0103817            5 NA                 0       4 NA           Diversion         0.0     0.0       0    9999  Jackson to Irrigate
+01038170.09 Opr_Jackson_Duel&Snyder                 31423.39219       0.       1 0100517            1 0103817            6 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Jackson to Irrigate
+01038170.10 Opr_Jackson_Bijou                       31423.39219       0.       1 0100507_D          1 0103817            7 NA                 0       4 NA           Diversion         0.0     0.0       0    9999  Jackson to Irrigate
+#
+#________________________________________________________________________________________________________________________________________________________________________________________________________________________
+#
+# 4. NORTH STERLING
+#
+# ID        Name                    NA                    Admin#   # Str  On/Off Dest Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     Sou2 Ac     Type ReusePlan     Div Type    OprLoss    Limit   ioBeg   ioEnd Comment
+# ---------eb----------------------eb----------exxxxb----------eb------eb------e-b----------eb------e-b----------eb------e-b----------eb------eb------exb----------exb----------exb------eb------eb------eb------exb----- 
+# 
+# North Sterling to Storage                                                                                                                                                                                                
+64035510.01 Opr_NSter_Res01                         21350.00000       1.       1 6403551            1 0103551.01         0 0100687          100      45 NA           Diversion         0.0     0.0       0    9999 NorthSterling Res through NorthSterling Inlet Wr1
+                                    0100687 25 Carrier
+64035510.02 Opr_NSter_Res02                         26298.23953       1.       1 6403551            1 0103551.02         0 0100687          100      45 NA           Diversion         0.0     0.0       0    9999  NorthSterling Res through NorthSterling Inlet Wr2
+                                    0100687 25 Carrier                                                                                                                                                       
+64035510.03 Opr_NSter_Res03                         23172.21350       1.       1 6403551            1 6403551.01         0 6403551_Paw        1      11 NA           Diversion         0.0     0.0       0    9999  NorthSterling Res through Pawnee Wr3
+                                    6403551_Paw                                                                                                                                                
+64035510.04 Opr_NSter_Res03                         23172.21350       1.       1 6403551            1 6403551.02         0 6403551_Ced        1      11 NA           Diversion         0.0     0.0       0    9999  NorthSterling Res through Cedar Wr4
+                                    6403551_Ced   
+#
+# rrb Spill to target 
+64035510.04 Opr_NSter_Target04                      99999.00000       0.       1 NA                 0 6403551            0 NA                 0       9 NA           NA                0.0     0.0       0    9999  NorthSterling Res release to target#
+#
+# Reservoir to Irrigate                                   
+64035510.05 Opr_NSter_Res05                         26302.23523       0.       1 0100687_I          1 6403551            1 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  NorthSterling Res to Irrigate
+#
+# River to Irrigate
+#   Note *.01 is 460 cfs
+64035510.06 Opr_NSter_Res06                         26302.23522       1.       1 0100687_I          1 0100687.01         0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  NorthSterling River to Irrigate
+                                    0100687 25 Carrier
+#________________________________________________________________________________________________________________________________________________________________________________________________________________________
+#
+# 5. PREWITT
+#
+# ID        Name                    NA                    Admin#   # Str  On/Off Dest Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     Sou2 Ac     Type ReusePlan     Div Type    OprLoss    Limit   ioBeg   ioEnd Comment
+# ---------eb----------------------eb----------exxxxb----------eb------eb------e-b----------eb------e-b----------eb------e-b----------eb------eb------exb----------exb----------exb------eb------eb------eb------exb----- 
+#
+# Prewitt to Storage                                    
+64035520.01 Opr_Prewitt_Res01                       22059.00000       1.       1 6403552           -3 0103552.01         0 0100829          100      45 NA           Diversion         0.0     0.0       0    9999  Prewitt Res through Prewitt Inlet Wr1
+                                    0100829 19 Carrier
+64035520.02 Opr_Prewitt_Res02                       31423.29219       1.       1 6403552           -3 0103552.02         0 0100829          100      45 NA           Diversion         0.0     0.0       0    9999  Prewitt Res through Prewitt Inlet Wr2
+                                    0100829 19 Carrier
+#                                    
+# Target
+# Note, the next command is commented out for calculation simulation                                                                                                                                                                                                                               
+#
+# rrb Spill to target 
+64035520.03 Opr_Prewitt_Target                      99999.00000       0.       1 NA                 0 6403552            0 NA                 0       9 NA           NA                0.0     0.0       0    9999  Prewitt Res release to target
+#
+# Prewitt to Logan Users)
+64035520.11 Opr_Prewitt_Logan01                     16893.10000       0.       1 6400535            1 6403552            1 NA                 0       4 NA           Diversion         0.0     0.0       0    9999  Prewitt to South Platte Ditch
+64035520.12 Opr_Prewitt_Logan02                     16893.10000       0.       1 6400533            1 6403552            1 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Prewitt to South Pawnee
+64035520.13 Opr_Prewitt_Logan03                     16893.10000       0.       1 6400532            1 6403552            1 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Prewitt to Davis
+64035520.14 Opr_Prewitt_Logan04                     16893.10000       0.       1 6400531            1 6403552            1 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Prewitt to Schneider
+64035520.15 Opr_Prewitt_Logan05                     16893.10000       0.       1 6400530            1 6403552            1 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Prewitt to Springdale
+#
+# Prewitt to Iliff Users
+64035520.21 Opr_Prewitt_Iliff01                     16893.10000       0.       1 6400522_D          1 6403552            2 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Prewitt to Bravo
+64035520.22 Opr_Prewitt_Iliff02                     16893.10000       0.       1 6400518            1 6403552            2 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Prewitt to Iliff & Platte Valley
+64035520.23 Opr_Prewitt_Iliff03                     16893.10000       0.       1 6400516            1 6403552            2 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Prewitt to Lone Tree
+#
+# 64035520.24 Opr_Prewitt_Iliff04                     16893.10000       0.       1 6400515            1 6403552            2 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Prewitt to Powell
+64035520.25 Opr_Prewitt_Iliff05                     16893.10000       0.       1 6400514            1 6403552            2 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Prewitt to Harmony No.2
+64035520.26 Opr_Prewitt_Iliff06                     16893.10000       0.       1 6400520            1 6403552            2 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Prewitt to Harmony No.1
+64035520.27 Opr_Prewitt_Iliff07                     16893.10000       1.       1 6400511_I          1 6403552            2 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Prewitt to Ramsey
+                                    6400511_D                                 
+#
+# Prewitt to Morgan-Prewitt Users
+64035520.31 Opr_Prewitt_MorganP01                   16893.10000       0.       1 6400535            1 6403552            3 NA                 0       4 NA           Diversion         0.0     0.0       0    9999  Prewitt to Bravo
+64035520.32 Opr_Prewitt_MorganP02                   16893.10000       0.       1 6400533            1 6403552            3 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Prewitt to Bravo
+64035520.33 Opr_Prewitt_MorganP03                   16893.10000       0.       1 6400532            1 6403552            3 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Prewitt to Bravo
+64035520.34 Opr_Prewitt_MorganP04                   16893.10000       0.       1 6400530            1 6403552            3 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Prewitt to Bravo
+64035520.35 Opr_Prewitt_MorganP05                   16893.10000       0.       1 6400526            1 6403552            3 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Prewitt to Bravo
+#________________________________________________________________________________________________________________________________________________________________________________________________________________________
+#
+# 6. JULSEBURG
+#
+# ID        Name                    NA                    Admin#   # Str  On/Off Dest Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     Sou2 Ac     Type ReusePlan     Div Type    OprLoss    Limit   ioBeg   ioEnd Comment
+# ---------eb----------------------eb----------exxxxb----------eb------eb------e-b----------eb------e-b----------eb------e-b----------eb------eb------exb----------exb----------exb------eb------eb------eb------exb----- 
+#
+# Julesburg to Storage                                                                                                                                                                                                 
+64039060.01 Opr_Julesburg_Res01                     19765.00000       1.       1 6403906            1 6403906.01         0 6400511_D        100      45 NA           Diversion          0.0    0.0       0    9999  Julesburg Res through Harmony No. 1 Ditch Wr1
+                                    6400511_D 23 Carrier
+# Target
+# Note, the next command is commented out for calculation simulation                                                                                                                                                                                                                               
+#
+# rrb Spill to target 
+# rrb 64039060.02 Opr_Julesburg_Res02                     99999.00000       0.       1 NA                 0 6403906            0 NA                 0       9 NA           NA                0.0     0.0       0    9999  Julesburg Res release to target                                    #                                    
+#
+# Julesburg Reservoir to  Irrigate
+64039060.03 Opr_JulesBurg_Res03                     19765.10000       0.       1 6400511_I          1 6403906            1 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Julesburg Res to Irrigate
+#
+# Julesburg from River to Irrigate
+#  Note *.01 is 252 cfs; *.02 is 50 cfs; *.03 is 219 cfs
+64039060.04 Opr_JulesBurg_Res04                     16554.00000       1.       1 6400511_I          1 6400511_D.01       0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Julesburg River to Irrigate
+                                    6400511_D 23 Carrier
+64039060.05 Opr_JulesBurg_Res05                     17290.00000       1.       1 6400511_I          1 6400511_D.02       0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Julesburg River to Irrigate
+                                    6400511_D 23 Carrier
+64039060.05 Opr_JulesBurg_Res05                     19490.00000       1.       1 6400511_I          1 6400511_D.03       0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Julesburg River to Irrigate
+                                    6400511_D 23 Carrier
+#________________________________________________________________________________________________________________________________________________________________________________________________________________________
+#
+# 7. LOWER LATHAM
+#
+# ID        Name                    NA                    Admin#   # Str  On/Off Dest Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     Sou2 Ac     Type ReusePlan     Div Type    OprLoss    Limit   ioBeg   ioEnd Comment
+# ---------eb----------------------eb----------exxxxb----------eb------eb------e-b----------eb------e-b----------eb------e-b----------eb------eb------exb----------exb----------exb------eb------eb------eb------exb----- 
+#
+#
+# Lower Latham Reservoir to  Irrigate
+02038580.01 Opr_LowerLatham_Res02                   11620.10000       0.       1 0200834_I          1 0203858            1 NA                 0       2 NA           Diversion         0.0     0.0       0    9999  Lower Latham Res to Irrigate
+# Target
+# rrb Spill to target 
+02038580.02 Opr_LowerLatham_Res01                   99999.00000       0.       1 NA                 0 0203858            0 NA                 0       9 NA           NA                0.0     0.0       0    9999  Lower Latham Res release to target                                                                        
+#
+# Lower Latham from River to Irrigate
+#   Note *.01 is  20.40 cfs; *.02 is 35.77 cfs; *.03 is 97.68 cfs; 
+#        *.04 is 133.88 cfs; *.05 is 34.00 cfs
+02038580.03 Opr_LowerLatham_Res03                    7072.00000       1.       1 0200834_I          1 0200834.01         0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Lower Latham River to Irrigate
+                                    0200834 12 Carrier
+02038580.04 Opr_LowerLatham_Res04                    9112.00000       1.       1 0200834_I          1 0200834.02         0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Lower Latham River to Irrigate
+                                    0200834 12 Carrier
+02038580.05 Opr_LowerLatham_Res05                   10180.00000       1.       1 0200834_I          1 0200834.03         0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Lower Latham River to Irrigate
+                                    0200834 12 Carrier
+02038580.06 Opr_LowerLatham_Res06                   11620.00000       1.       1 0200834_I          1 0200834.04         0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Lower Latham River to Irrigate
+                                    0200834 12 Carrier
+02038580.07 Opr_LowerLatham_Res06                   16607.00000       1.       1 0200834_I          1 0200834.05         0 NA               100      45 NA           Diversion         0.0     0.0       0    9999  Lower Latham River to Irrigate
+                                    0200834 12 Carrier
+#________________________________________________________________________________________________________________________________________________________________________________________________________________________
+#
+# 8. MEADOW RIGHTS
+#
+# ID        Name                    NA                    Admin#   # Str  On/Off Dest Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     Sou2 Ac     Type ReusePlan     Div Type    OprLoss    Limit   ioBeg   ioEnd Comment
+# ---------eb----------------------eb----------exxxxb----------eb------eb------e-b----------eb------e-b----------eb------e-b----------eb------eb------exb----------exb----------exb------eb------eb------eb------exb----- 
+#                                                                                                                                                                                                 
+Opr_Mead.01 Opr_Meadow_D&S_01                         100.00000      12.       1 0100517            1 0100517.01         0 0                  0      36 NA           NA                0.0     0.0       0    9999   Meadow to Irrigate
+ 1 1 1 1 -15 0 0 0 0 0 0 0 
+Opr_Mead.02 Opr_Meadow_D&S_02                         100.00000      12.       1 0100517            1 0100517.02         0 0                  0      36 NA           NA                0.0     0.0       0    9999   Meadow to Irrigate
+ 1 1 1 1 -15 0 0 0 0 0 0 0 
+Opr_Mead.03 Opr_Meadow_J&E_03                         100.00000      12.       1 0100526            1 0100526.01         0 0                  0      36 NA           NA                0.0     0.0       0    9999   Meadow to Irrigate
+ 1 1 1 1 -15 0 0 0 0 0 0 0 
+Opr_Mead.03 Opr_Meadow_Corona_04                      100.00000      12.       1 0100507_D          1 0100507_D.03       0 0                  0      36 NA           NA                0.0     0.0       0    9999   Meadow to Irrigate
+ 1 1 1 1 -15 0 0 0 0 0 0 0 
+Opr_Mead.03 Opr_Meadow_Schneider_05                   100.00000      12.       1 6400531            1 6400531.01         0 0                  0      36 NA           NA                0.0     0.0       0    9999   Meadow to Irrigate
+ 1 1 1 1 -15 0 0 0 0 0 0 0 
+Opr_Mead.03 Opr_Meadow_Davis_06                       100.00000      12.       1 6400532            1 6400532.01         0 0                  0      36 NA           NA                0.0     0.0       0    9999   Meadow to Irrigate
+ 1 1 1 1 -15 0 0 0 0 0 0 0 
+#________________________________________________________________________________________________________________________________________________________________________________________________________________________
+#
+# 9. SPRINKLER AND SOIL MOISTURE (note 1950 for soil = 36525 Admin Date)
+#
+# ID        Name                    NA                    Admin#   # Str  On/Off Dest Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     Sou2 Ac     Type ReusePlan     Div Type    OprLoss    Limit   ioBeg   ioEnd Comment
+# ---------eb----------------------eb----------exxxxb----------eb------eb------e-b----------eb------e-b----------eb------e-b----------eb------eb------exb----------exb----------exb------eb------eb------eb------exb----- 
+Opr_Soil.01 Opr_Soil_Moisture                       36525.00000       0.       1 NA                 0 NA                 0 0                  0      22 NA           NA                0.0     0.0       0    9999   Soil Moisture
+Opr_Spr.01  Opr_Sprinkler                          100000.00000       0.       1 NA                 0 NA                 0 0                  0      21 NA           NA                0.0     0.0       0    9999   Sprinkler
+#________________________________________________________________________________________________________________________________________________________________________________________________________________________
+#
+# 10. Compact
+#
+# ID        Name                    NA                    Admin#   # Str  On/Off Dest Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     Sou2 Ac     Type ReusePlan     Div Type    OprLoss    Limit   ioBeg   ioEnd Comment
+# ---------eb----------------------eb----------exxxxb----------eb------eb------e-b----------eb------e-b----------eb------e-b----------eb------eb------exb----------exb----------exb------eb------eb------eb------exb----- 
+Compact.01  Opr_Compact                              17332.00000      1.       1 6499999            1 06759910           0 06764000           0      40 NA           NA                0.0     0.0       0    9999 Compact
+                                    6499999.01
+#
+# ___________________________________________________________
+# 11. Administrative Source to Coffin and Designated Basins
+#                                                                                                                                                                                                                                     
+# ID        Name                    NA                    Admin#   # Str  On/Off Dest Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     Sou2 Ac     Type ReusePlan     Div Type    OprLoss    Limit   ioBeg   ioEnd Comment            
+# ---------eb----------------------eb----------exxxxb----------eb------eb------e-b----------eb------e-b----------eb------e-b----------eb------eb------exb----------exb----------exb------eb------eb------eb------exb-----             
+Admin.01    Admin_to_Coffin Wells                    99999.00000       0       1 Coffin_Well        0 Coffin_Well        0 NA                 1      48 NA           Diversion        0.00    0.00       0    9999 Administrative Source to a Plan
+Admin.02    Admin_to_Lost Creek DB                   99999.00000       0       1 Lost_Creek         0 Lost_Creek         0 NA                 1      48 NA           Diversion        0.00    0.00       0    9999 Administrative Source to a Plan
+Admin.03    Admin_to_Camp Creek DB                   99999.00000       0       1 Camp_Creek         0 Camp_Creek         0 NA                 1      48 NA           Diversion        0.00    0.00       0    9999 Administrative Source to a Plan
+Admin.04    Admin_to_Kiowa_Bijou DB                  99999.00000       0       1 Kiowa_Bijou        0 Kiowa_Bijou        0 NA                 1      48 NA           Diversion        0.00    0.00       0    9999 Administrative Source to a Plan
+# _______________________________________________________
+#
+#        SmOpr 
+#        State of Colorado
+#        Version:  1.00
+#        Last revision date: 2006/10/27
+#
+# _______________________________________________________
+#                                                                                                                                                                                                                                     
+# SmOpr.opr; Preliminary Operational right file                                                                                                                                                                                       
+#                                                                                                                                                                                                                                     
+#                                                                                                                                                                                                                                     
+#________________________________________________________________________________________________________________________________________________________________________________________________________________________             
+#                                                                                                                                                                                                                                     
+#                                                                                                                                                                                                                                     
+# ID        Name                    NA                    Admin#   # Str  On/Off Dest Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     Sou2 Ac     Type Plan          Div Type    OprLoss    Limit   ioBeg   ioEnd Comment            
+# ---------eb----------------------eb----------exxxxb----------eb------eb------e-b----------eb------e-b----------eb------e-b----------eb------eb------exb----------exb----------exb------eb------eb------eb------exb-----             
+#____________________________________________________________
+#
+# PIONEER AUG PLAN        
+01025180.01 PIONEER In-Priority Lagged               99991.00000       0       1 0102518            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+01025180.02 PIONEER Carrier                          99990.00000       1       1 0102518_R          1 0100519_D.01       0 0100519_D        100      45 0102518_PlC  Diversion        0.00    0.00    1984    9999 Carrier to Rch_Res Loss 
+                                    0100519_D      17 Carrier     
+01025180.03 PIONEER Canal Recharge                   99992.00000       0       1 0102518            1 0102518_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    1984    9999 Canal Recharge to Aug Pl
+01025180.04 PIONEER Res Recharge                     99993.00000       0       1 0102518            1 0102518_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    1984    9999 Res Recharge to Aug Plan
+#____________________________________________________________
+#
+# RIVERSIDE AUG           
+01025220.01 RIVERSIDE In-Priority Lagged             99991.00000       0       1 0102522            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+01025220.02 RIVERSIDE Carrier                        99990.00000       1       1 0102522_R          1 0100503_D.01       0 0100503_D        100      45 0102522_PlC  Diversion        0.00    0.00    1982    9999 Carrier to Rch_Res Loss 
+                                    0100503_D      39 Carrier     
+01025220.03 RIVERSIDE Canal Recharge                 99992.00000       0       1 0102522            1 0102522_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    1982    9999 Canal Recharge to Aug Pl
+01025220.04 RIVERSIDE Res Recharge                   99993.00000       0       1 0102522            1 0102522_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    1982    9999 Res Recharge to Aug Plan
+01025220.05 RIVERSIDE Aug Well                       99994.00000       0       1 0102522            1 0108090            0 0102522            0      37 NA           Diversion        0.00   -1.00    1982    9999 Aug Well to Aug Plan    
+01025220.06 RIVERSIDE Aug Well                       99994.00000       0       1 0102522            1 0108093            0 0102522            0      37 NA           Diversion        0.00   -1.00    1982    9999 Aug Well to Aug Plan    
+01025220.07 RIVERSIDE Aug Well                       99994.00000       0       1 0102522            1 0108095            0 0102522            0      37 NA           Diversion        0.00   -1.00    1982    9999 Aug Well to Aug Plan    
+01025220.08 RIVERSIDE Aug Well                       99994.00000       0       1 0102522            1 0108092            0 0102522            0      37 NA           Diversion        0.00   -1.00    1982    9999 Aug Well to Aug Plan    
+01025220.09 RIVERSIDE Aug Well                       99994.00000       0       1 0102522            1 0108091            0 0102522            0      37 NA           Diversion        0.00   -1.00    1982    9999 Aug Well to Aug Plan    
+#____________________________________________________________
+#
+# FT MORGAN CNL AUG PLAN  
+01025280.01 FT In-Priority Lagged                    99991.00000       0       1 0102528            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+01025280.02 FT Carrier                               99990.00000       1       1 0102528_R          1 0100514.01         0 0100514          100      45 0102528_PlC  Diversion        0.00    0.00    1980    9999 Carrier to Rch_Res Loss 
+                                    0100514        35 Carrier     
+01025280.03 FT Canal Recharge                        99992.00000       0       1 0102528            1 0102528_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    1980    9999 Canal Recharge to Aug Pl
+01025280.04 FT Res Recharge                          99993.00000       0       1 0102528            1 0102528_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    1980    9999 Res Recharge to Aug Plan
+01025280.05 FT Aug Well                              99994.00000       0       1 0102528            1 0109876            0 0102528            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025280.06 FT Aug Well                              99994.00000       0       1 0102528            1 0109877            0 0102528            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025280.07 FT Reservoir                             99995.00000       0       1 0102528            1 0103817            1 NA                 0      49 NA           Diversion        0.00   -1.00    1980    9999 Reservoir to Well Aug   
+#____________________________________________________________
+#
+# UPPER PLATTE BEAVER AUG 
+01025290.01 UPPER In-Priority Lagged                 99991.00000       0       1 0102529            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+01025290.02 UPPER Carrier                            99990.00000       1       1 0102529_R          1 0100515.01         0 0100515          100      45 0102529_PlC  Diversion        0.00    0.00    1983    9999 Carrier to Rch_Res Loss 
+                                    0100515        20 Carrier     
+01025290.03 UPPER Canal Recharge                     99992.00000       0       1 0102529            1 0102529_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    1983    9999 Canal Recharge to Aug Pl
+01025290.04 UPPER Res Recharge                       99993.00000       0       1 0102529            1 0102529_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    1983    9999 Res Recharge to Aug Plan
+01025290.05 UPPER Aug Well                           99994.00000       0       1 0102529            1 0108011            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.06 UPPER Aug Well                           99994.00000       0       1 0102529            1 0108701            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.07 UPPER Aug Well                           99994.00000       0       1 0102529            1 0107700            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.08 UPPER Aug Well                           99994.00000       0       1 0102529            1 0108773            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.09 UPPER Aug Well                           99994.00000       0       1 0102529            1 0108774            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.10 UPPER Aug Well                           99994.00000       0       1 0102529            1 0107472            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.11 UPPER Aug Well                           99994.00000       0       1 0102529            1 0110050            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.12 UPPER Aug Well                           99994.00000       0       1 0102529            1 0107764            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.13 UPPER Aug Well                           99994.00000       0       1 0102529            1 0106270            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.14 UPPER Aug Well                           99994.00000       0       1 0102529            1 0108446            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.15 UPPER Aug Well                           99994.00000       0       1 0102529            1 0109152            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.16 UPPER Aug Well                           99994.00000       0       1 0102529            1 0109240            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.17 UPPER Aug Well                           99994.00000       0       1 0102529            1 0109167            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.18 UPPER Aug Well                           99994.00000       0       1 0102529            1 0106405            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.19 UPPER Aug Well                           99994.00000       0       1 0102529            1 0107853            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.20 UPPER Aug Well                           99994.00000       0       1 0102529            1 0106593            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.21 UPPER Aug Well                           99994.00000       0       1 0102529            1 0108277            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.22 UPPER Aug Well                           99994.00000       0       1 0102529            1 0107046            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+01025290.23 UPPER Aug Well                           99994.00000       0       1 0102529            1 0108318            0 0102529            0      37 NA           Diversion        0.00   -1.00    1983    9999 Aug Well to Aug Plan    
+#____________________________________________________________
+#
+# LOWER PLATTE BEAVER AUG 
+01025350.01 LOWER In-Priority Lagged                 99991.00000       0       1 0102535            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+01025350.02 LOWER Carrier                            99990.00000       1       1 0102535_R          1 0100518.01         0 0100518          100      45 0102535_PlC  Diversion        0.00    0.00    1980    9999 Carrier to Rch_Res Loss 
+                                    0100518        21 Carrier     
+01025350.03 LOWER Recharge Well                      99992.00000       0       1 0102535_R          1 0109882            0 NA                 0      44 NA           Diversion        0.00   -1.00    1980    9999 Rech Well to Rech Res   
+01025350.04 LOWER Canal Recharge                     99993.00000       0       1 0102535            1 0102535_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    1980    9999 Canal Recharge to Aug Pl
+01025350.05 LOWER Res Recharge                       99994.00000       0       1 0102535            1 0102535_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    1980    9999 Res Recharge to Aug Plan
+01025350.06 LOWER Aug Well                           99994.00000       0       1 0102535            1 0108945            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.07 LOWER Aug Well                           99994.00000       0       1 0102535            1 0106692            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.08 LOWER Aug Well                           99994.00000       0       1 0102535            1 0105478            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.09 LOWER Aug Well                           99994.00000       0       1 0102535            1 0106547            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.10 LOWER Aug Well                           99994.00000       0       1 0102535            1 0106197            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.11 LOWER Aug Well                           99994.00000       0       1 0102535            1 0106191            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.12 LOWER Aug Well                           99994.00000       0       1 0102535            1 0106191            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.13 LOWER Aug Well                           99994.00000       0       1 0102535            1 0107894            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.14 LOWER Aug Well                           99994.00000       0       1 0102535            1 0106893            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.15 LOWER Aug Well                           99994.00000       0       1 0102535            1 0105951            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.16 LOWER Aug Well                           99994.00000       0       1 0102535            1 0106193            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.17 LOWER Aug Well                           99994.00000       0       1 0102535            1 0108052            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.18 LOWER Aug Well                           99994.00000       0       1 0102535            1 0109003            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.19 LOWER Aug Well                           99994.00000       0       1 0102535            1 0106922            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.20 LOWER Aug Well                           99994.00000       0       1 0102535            1 0109002            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.21 LOWER Aug Well                           99994.00000       0       1 0102535            1 0107746            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.22 LOWER Aug Well                           99994.00000       0       1 0102535            1 0107474            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.23 LOWER Aug Well                           99994.00000       0       1 0102535            1 0107014            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.24 LOWER Aug Well                           99994.00000       0       1 0102535            1 0105847            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.25 LOWER Aug Well                           99994.00000       0       1 0102535            1 0109239            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.26 LOWER Aug Well                           99994.00000       0       1 0102535            1 0108174            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+01025350.27 LOWER Aug Well                           99994.00000       0       1 0102535            1 0109882            0 0102535            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+#____________________________________________________________
+#
+# FT MORGAN FARMS AUG     
+01033390.01 FT In-Priority Lagged                    99991.00000       0       1 0103339            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+#____________________________________________________________
+#
+# LOWER LATHAM RES CO AUG 
+01033320.01 LOWER In-Priority Lagged                 99991.00000       0       1 0103332            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+#____________________________________________________________
+#
+# BIJOU AUG PLAN          
+01033390.01 BIJOU In-Priority Lagged                 99991.00000       0       1 0103339            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+01033390.02 BIJOU Carrier                            99990.00000       1       1 0103339_R          1 0100507_D.10       0 0100507_D        100      45 0103339_PlC  Diversion        0.00    0.00    1983    9999 Carrier to Rch_Res Loss 
+                                    0100507_D      33 Carrier     
+01033390.03 BIJOU Canal Recharge                     99993.00000       0       1 0103339            1 0103339_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    1983    9999 Canal Recharge to Aug Pl
+01033390.04 BIJOU Res Recharge                       99994.00000       0       1 0103339            1 0103339_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    1983    9999 Res Recharge to Aug Plan
+01033390.05 BIJOU Reservoir                          99996.00000       0       1 0103339            1 0103570            1 NA                 0      48 NA           Diversion        0.00   -1.00    1983    9999 Reservoir to Well Aug   
+#____________________________________________________________
+#
+# SEDGWICK CTY WL USERS A 
+64025170.01 SEDGWICK In-Priority Lagged              99991.00000       0       1 6402517            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+64025170.02 SEDGWICK Carrier                         99990.00000       1       1 6402517_R          1 6400504.04         0 6400504          100      45 6402517_PlC  Diversion        0.00    0.00    1991    9999 Carrier to Rch_Res Loss 
+                                    6400504        30 Carrier     
+64025170.03 SEDGWICK Carrier                         99990.00000       1       1 6402517_R          1 6400508.02         0 6400508          100      45 6402517_PlC  Diversion        0.00    0.00    1991    9999 Carrier to Rch_Res Loss 
+                                    6400508        30 Carrier     
+64025170.04 SEDGWICK Carrier                         99990.00000       1       1 6402517_R          1 6400511_D.03       0 6400511_D        100      45 6402517_PlC  Diversion        0.00    0.00    1991    9999 Carrier to Rch_Res Loss 
+                                    6400511_D      30 Carrier     
+64025170.05 SEDGWICK Carrier                         99990.00000       1       1 6402517_R          1 6400535.05         0 6400535          100      45 6402517_PlC  Diversion        0.00    0.00    1991    9999 Carrier to Rch_Res Loss 
+                                    6400535        30 Carrier     
+64025170.06 SEDGWICK Canal Recharge                  99992.00000       0       1 6402517            1 6402517_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    1991    9999 Canal Recharge to Aug Pl
+64025170.07 SEDGWICK Res Recharge                    99993.00000       0       1 6402517            1 6402517_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    1991    9999 Res Recharge to Aug Plan
+#____________________________________________________________
+#
+# HARMONY DITCH CO AUG    
+64025180.01 HARMONY In-Priority Lagged               99991.00000       0       1 6402518            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+64025180.02 HARMONY Carrier                          56002.00000       1       1 6402518_R          1 6400511_D.03       0 6400511_D        100      45 6402518_PlC  Diversion        0.00    0.00    2001    9999 Carrier to Rch_Res Loss 
+                                    6400511_D      23 Carrier     
+64025180.03 HARMONY Canal Recharge                   99992.00000       0       1 6402518            1 6402518_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    2001    9999 Canal Recharge to Aug Pl
+64025180.04 HARMONY Res Recharge                     99993.00000       0       1 6402518            1 6402518_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    2001    9999 Res Recharge to Aug Plan
+64025180.05 HARMONY Aug Well                         99994.00000       0       1 6402518            1 6405046            0 6402518            0      37 NA           Diversion        0.00   -1.00    2001    9999 Aug Well to Aug Plan    
+64025180.06 HARMONY Aug Well                         99994.00000       0       1 6402518            1 6405722            0 6402518            0      37 NA           Diversion        0.00   -1.00    2001    9999 Aug Well to Aug Plan    
+64025180.07 HARMONY Aug Well                         99994.00000       0       1 6402518            1 6405914            0 6402518            0      37 NA           Diversion        0.00   -1.00    2001    9999 Aug Well to Aug Plan    
+64025180.08 HARMONY Aug Well                         99994.00000       0       1 6402518            1 6406003            0 6402518            0      37 NA           Diversion        0.00   -1.00    2001    9999 Aug Well to Aug Plan    
+64025180.09 HARMONY Reservoir                        99996.00000       0       1 6402518            1 6403552            1 NA                 0      49 NA           Diversion        0.00   -1.00    2001    9999 Reservoir to Well Aug   
+#____________________________________________________________
+#
+# DINSDALE AUG            
+64025190.01 DINSDALE In-Priority Lagged              99991.00000       0       1 6402519            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+64025190.02 DINSDALE Carrier                         53316.00000       1       1 6402519_R          1 6400533.03         0 6400533          100      45 6402519_PlC  Diversion        0.00    0.00    1980    9999 Carrier to Rch_Res Loss 
+                                    6400533        22 Carrier     
+64025190.03 DINSDALE Recharge Well                   55883.00000       0       1 6402519_R          1 6406657            0 NA                 0      44 NA           Diversion        0.00   -1.00    1980    9999 Rech Well to Rech Res   
+64025190.04 DINSDALE Canal Recharge                  99992.00000       0       1 6402519            1 6402519_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    1980    9999 Canal Recharge to Aug Pl
+64025190.05 DINSDALE Res Recharge                    99993.00000       0       1 6402519            1 6402519_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    1980    9999 Res Recharge to Aug Plan
+64025190.06 DINSDALE Aug Well                        99994.00000       0       1 6402519            1 6406296            0 6402519            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025190.07 DINSDALE Aug Well                        99994.00000       0       1 6402519            1 6406276            0 6402519            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025190.08 DINSDALE Aug Well                        99994.00000       0       1 6402519            1 6406279            0 6402519            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+#____________________________________________________________
+#
+# CONDON AUG              
+64025250.01 CONDON In-Priority Lagged                99991.00000       0       1 6402525            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+64025250.02 CONDON Carrier                           99990.00000       1       1 6402525_R          1 6400513.01         0 6400513          100      45 6402525_PlC  Diversion        0.00    0.00    1979    9999 Carrier to Rch_Res Loss 
+                                    6400513        26 Carrier     
+64025250.03 CONDON Recharge Well                     99990.00000       0       1 6402525_R          1 6403001            0 NA                 0      44 NA           Diversion        0.00   -1.00    1979    9999 Rech Well to Rech Res   
+64025250.04 CONDON Canal Recharge                    99992.00000       0       1 6402525            1 6402525_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    1979    9999 Canal Recharge to Aug Pl
+64025250.05 CONDON Res Recharge                      99993.00000       0       1 6402525            1 6402525_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    1979    9999 Res Recharge to Aug Plan
+#____________________________________________________________
+#
+# LOWER LOGAN WELL USERS A
+64025360.01 LOWER In-Priority Lagged                 99991.00000       0       1 6402536            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+64025360.02 LOWER Carrier                            99999.00000       1       1 6402536_R          1 6400511_D.03       0 6400511_D        100      45 6402536_PlC  Diversion        0.00    0.00    2001    9999 Carrier to Rch_Res Loss 
+                                    6400511_D      23 Carrier     
+64025360.03 LOWER Recharge Well                      99990.00000       0       1 6402536_R          1 6400631            0 NA                 0      44 NA           Diversion        0.00   -1.00    2001    9999 Rech Well to Rech Res   
+64025360.04 LOWER Recharge Well                      99990.00000       0       1 6402536_R          1 6400632            0 NA                 0      44 NA           Diversion        0.00   -1.00    2001    9999 Rech Well to Rech Res   
+64025360.05 LOWER Canal Recharge                     99992.00000       0       1 6402536            1 6402536_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    2001    9999 Canal Recharge to Aug Pl
+64025360.06 LOWER Res Recharge                       99993.00000       0       1 6402536            1 6402536_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    2001    9999 Res Recharge to Aug Plan
+#____________________________________________________________
+#
+# LOGAN WELL USERS AUG    
+64025390.01 LOGAN In-Priority Lagged                 99991.00000       0       1 6402539            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+64025390.02 LOGAN Carrier                            55882.55860       1       1 6402539_R          1 6400535.01         0 6400535          100      45 6402539_PlC  Diversion        0.00    0.00    1980    9999 Carrier to Rch_Res Loss 
+                                    6400535        33 Carrier     
+64025390.03 LOGAN Canal Recharge                     99992.00000       0       1 6402539            1 6402539_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    1980    9999 Canal Recharge to Aug Pl
+64025390.04 LOGAN Recharge Well                      99990.00000       0       1 6402539_R          1 6400631            0 NA                 0      44 NA           Diversion        0.00   -1.00    1980    9999 Rech Well to Rech Res   
+64025390.05 LOGAN Recharge Well                      99990.00000       0       1 6402539_R          1 6400632            0 NA                 0      44 NA           Diversion        0.00   -1.00    1980    9999 Rech Well to Rech Res   
+64025390.06 LOGAN Res Recharge                       99993.00000       0       1 6402539            1 6402539_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    1980    9999 Res Recharge to Aug Plan
+64025390.07 LOGAN Aug Well                           99994.00000       0       1 6402539            1 6406082            0 6402539            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025390.08 LOGAN Aug Well                           99994.00000       0       1 6402539            1 6406073            0 6402539            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025390.09 LOGAN Aug Well                           99994.00000       0       1 6402539            1 6405595            0 6402539            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025390.10 LOGAN Aug Well                           99994.00000       0       1 6402539            1 6405044            0 6402539            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025390.11 LOGAN Aug Well                           99994.00000       0       1 6402539            1 6405043            0 6402539            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025390.12 LOGAN Aug Well                           99994.00000       0       1 6402539            1 6405626            0 6402539            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025390.13 LOGAN Reservoir                          99996.00000       0       1 6402539            1 6403552            1 NA                 0      49 NA           Diversion        0.00   -1.00    1980    9999 Reservoir to Well Aug   
+#____________________________________________________________
+#
+# PAWNEE WELL USERS AUG   
+64025460.01 PAWNEE In-Priority Lagged                99991.00000       0       1 6402546            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+64025460.02 PAWNEE Carrier                           47239.00000       1       1 6402546_R          1 6400533.03         0 6400533          100      45 6402546_PlC  Diversion        0.00    0.00    1980    9999 Carrier to Rch_Res Loss 
+                                    6400533        22 Carrier     
+64025460.03 PAWNEE Recharge Well                     99990.00000       0       1 6402546_R          1 6400631            0 NA                 0      44 NA           Diversion        0.00   -1.00    1980    9999 Rech Well to Rech Res   
+64025460.04 PAWNEE Recharge Well                     99990.00000       0       1 6402546_R          1 6400632            0 NA                 0      44 NA           Diversion        0.00   -1.00    1980    9999 Rech Well to Rech Res   
+64025460.05 PAWNEE Canal Recharge                    99992.00000       0       1 6402546            1 6402546_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    1980    9999 Canal Recharge to Aug Pl
+64025460.06 PAWNEE Res Recharge                      99993.00000       0       1 6402546            1 6402546_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    1980    9999 Res Recharge to Aug Plan
+64025460.07 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6406706            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.08 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6405100            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.09 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6406220            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.10 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6406206            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.11 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6406065            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.12 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6406062            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.13 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6406702            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.14 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6405363            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.15 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6406250            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.16 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6405042            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.17 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6405795            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.18 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6405702            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.19 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6405604            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.20 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6405625            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.21 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6406231            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.22 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6406232            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.23 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6405041            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.24 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 0106754            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.25 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 0106755            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.26 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6405857            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.27 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6405368            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.28 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6405369            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.29 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6406422            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+64025460.30 PAWNEE Aug Well                          99994.00000       0       1 6402546            1 6405922            0 6402546            0      37 NA           Diversion        0.00   -1.00    1980    9999 Aug Well to Aug Plan    
+#____________________________________________________________
+#
+# LOW LINE DITCH CO AUG   
+64025400.01 LOW In-Priority Lagged                   99991.00000       0       1 6402540            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+64025400.02 LOW Carrier                              99990.00000       1       1 6402540_R          1 6400524.01         0 6400524          100      45 6402540_PlC  Diversion        0.00    0.00    2003    9999 Carrier to Rch_Res Loss 
+                                    6400524        20 Carrier     
+64025400.03 LOW Recharge Well                        99990.00000       0       1 6402540_R          1 6400637            0 NA                 0      44 NA           Diversion        0.00   -1.00    2003    9999 Rech Well to Rech Res   
+64025400.04 LOW Canal Recharge                       99992.00000       0       1 6402540            1 6402540_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    2003    9999 Canal Recharge to Aug Pl
+64025400.05 LOW Res Recharge                         99993.00000       0       1 6402540            1 6402540_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    2003    9999 Res Recharge to Aug Plan
+64025400.06 LOW Aug Well                             99994.00000       0       1 6402540            1 6406664            0 6402540            0      37 NA           Diversion        0.00   -1.00    2003    9999 Aug Well to Aug Plan    
+64025400.07 LOW Aug Well                             99994.00000       0       1 6402540            1 6405271            0 6402540            0      37 NA           Diversion        0.00   -1.00    2003    9999 Aug Well to Aug Plan    
+64025400.08 LOW Aug Well                             99994.00000       0       1 6402540            1 6406664            0 6402540            0      37 NA           Diversion        0.00   -1.00    2003    9999 Aug Well to Aug Plan    
+#____________________________________________________________
+#
+# LSPWCD AUG              
+64025420.01 LSPWCD In-Priority Lagged                99991.00000       0       1 6402542            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+64025420.02 LSPWCD Carrier                           99990.00000       1       1 6402542_R          1 6400502.02         0 6400502          100      45 6402542_PlC  Diversion        0.00    0.00    1998    9999 Carrier to Rch_Res Loss 
+                                    6400502        25 Carrier     
+64025420.03 LSPWCD Carrier                           99990.00000       1       1 6402542_R          1 6400504.04         0 6400504          100      45 6402542_PlC  Diversion        0.00    0.00    1998    9999 Carrier to Rch_Res Loss 
+                                    6400504        25 Carrier     
+64025420.04 LSPWCD Canal Recharge                    99992.00000       0       1 6402542            1 6402542_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    1998    9999 Canal Recharge to Aug Pl
+64025420.05 LSPWCD Res Recharge                      99993.00000       0       1 6402542            1 6402542_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    1998    9999 Res Recharge to Aug Plan
+64025420.06 LSPWCD Aug Well                          99994.00000       0       1 6402542            1 6406255            0 6402542            0      37 NA           Diversion        0.00   -1.00    1998    9999 Aug Well to Aug Plan    
+64025420.07 LSPWCD Aug Well                          99994.00000       0       1 6402542            1 6406255            0 6402542            0      37 NA           Diversion        0.00   -1.00    1998    9999 Aug Well to Aug Plan    
+#____________________________________________________________
+#
+# STERLING WELL USERS AUG 
+64025520.01 STERLING In-Priority Lagged              99991.00000       0       1 6402552            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+#____________________________________________________________
+#
+# NORTH STERLING AUG      
+64033920.01 NORTH In-Priority Lagged                 99991.00000       0       1 6403392            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+64033920.02 NORTH Canal Recharge                     99992.00000       0       1 6403392            1 6403392_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    1979    9999 Canal Recharge to Aug Pl
+64033920.03 NORTH Res Recharge                       99993.00000       0       1 6403392            1 6403392_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    1979    9999 Res Recharge to Aug Plan
+#____________________________________________________________
+#
+# TAMARACK RECHARGE A 1   
+64020150.01 TAMARACK In-Priority Lagged              99991.00000       0       1 6402015            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+64020150.02 TAMARACK Res Recharge                    99993.00000       0       1 6402015            1 6402015_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    1979    9999 Res Recharge to Aug Plan
+64020150.03 TAMARACK Recharge Well                   99990.00000       0       1 6402015_R          1 6406755            0 NA                 0      44 NA           Diversion        0.00   -1.00    1979    9999 Rech Well to Rech Res   
+64020150.04 TAMARACK Recharge Well                   99990.00000       0       1 6402015_R          1 6406756            0 NA                 0      44 NA           Diversion        0.00   -1.00    1979    9999 Rech Well to Rech Res   
+64020150.05 TAMARACK Recharge Well                   99990.00000       0       1 6402015_R          1 6406759            0 NA                 0      44 NA           Diversion        0.00   -1.00    1979    9999 Rech Well to Rech Res   
+#____________________________________________________________
+#
+# OVERLAND TRAIL R RCHRG A
+64020270.01 OVERLAND In-Priority Lagged              99991.00000       0       1 6402027            1 NA                 0 NA                 0      43 NA           Diversion        0.00   -1.00       0    9999 In-Priority Depletions  
+64020270.02 OVERLAND Canal Recharge                  99992.00000       0       1 6402027            1 6402027_PlC        0 NA                 0      48 NA           Diversion        0.00   -1.00    1979    9999 Canal Recharge to Aug Pl
+64020270.03 OVERLAND Res Recharge                    99993.00000       0       1 6402027            1 6402027_PlR        0 NA                 0      48 NA           Diversion        0.00   -1.00    1979    9999 Res Recharge to Aug Plan
+64020270.04 OVERLAND Recharge Well                   99990.00000       0       1 6402027_R          1 6406316            0 NA                 0      44 NA           Diversion        0.00   -1.00    1979    9999 Rech Well to Rech Res   
+64020270.05 OVERLAND Recharge Well                   99990.00000       0       1 6402027_R          1 6406657            0 NA                 0      44 NA           Diversion        0.00   -1.00    1979    9999 Rech Well to Rech Res   
+64020270.06 OVERLAND Recharge Well                   99990.00000       0       1 6402027_R          1 6406685            0 NA                 0      44 NA           Diversion        0.00   -1.00    1979    9999 Rech Well to Rech Res   
+64020270.07 OVERLAND Recharge Well                   99990.00000       0       1 6402027_R          1 6406727            0 NA                 0      44 NA           Diversion        0.00   -1.00    1979    9999 Rech Well to Rech Res   
+#
+# SmAltP.opr                                                                                                                     
+# _______________________________________________________
+#
+#        SmAltP 
+#        State of Colorado
+#        Version:  2.00
+#        Last revision date: 2008/09/19
+#
+#        In water districts   1 64
+#
+# _______________________________________________________
+#
+#                                                                                                                                                                                                                                     
+#                                                                                                                                                                                                                                     
+#________________________________________________________________________________________________________________________________________________________________________________________________________________________             
+#                                                                                                                                                                                                                                     
+#                                                                                                                                                                                                                                     
+# ID        Name                    NA                    Admin#   # Str  On/Off Dest Id     Dest Ac  Sou1 Id     Sou1 Ac  Sou2 Id     Sou2 Ac     Type ReusePlan     Div Type    OprLoss    Limit   ioBeg   ioEnd Comment            
+# ---------eb----------------------eb----------exxxxb----------eb------eb------e-b----------eb------e-b----------eb------e-b----------eb------eb------exb----------exb----------exb------eb------eb------eb------exb-----             
+#                                                                                                                                                                                                                                     
+#____________________________________________________________
+#
+# GILL STEVENS DITCH      
+01005200.01 GILL STEVENS DITCH                       14491.00000       0       1 0100520            1 0100520.01         1 0100520_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+#____________________________________________________________
+#
+# NA                      
+01005240.01 NA                                       99999.00000       0       1 0100524            1 0100524.01         1 0100524_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+#____________________________________________________________
+#
+# CARLSON DITCH           
+64005010.01 CARLSON DITCH                            17846.16410       0       1 6400501            1 6400501.01         1 6400501_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+#____________________________________________________________
+#
+# RED LION SUPPLY DITCH   
+64005060.01 RED LION SUPPLY DITCH                    17846.16800       0       1 6400506            1 6400506.01         1 6400506_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+#____________________________________________________________
+#
+# LONG ISLAND DITCH       
+64005070.01 LONG ISLAND DITCH                        21526.17190       0       1 6400507            1 6400507.01         1 6400507_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+64005070.02 LONG ISLAND DITCH                        21526.20700       0       1 6400507            1 6400507.02         1 6400507_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+#____________________________________________________________
+#
+# SETTLERS DITCH          
+64005080.01 SETTLERS DITCH                           17846.17580       0       1 6400508            1 6400508.01         1 6400508_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+64005080.02 SETTLERS DITCH                           17846.17770       0       1 6400508            1 6400508.02         1 6400508_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+#____________________________________________________________
+#
+# CHAMBERS DITCH          
+64005130.01 CHAMBERS DITCH                           16560.00000       0       1 6400513            1 6400513.01         1 6400513_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+#____________________________________________________________
+#
+# LONE TREE DITCH         
+64005180.01 LONE TREE DITCH                          16331.00000       0       1 6400518            1 6400518.01         1 6400518_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+64005180.02 LONE TREE DITCH                          16632.00000       0       1 6400518            1 6400518.02         1 6400518_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+64005180.03 LONE TREE DITCH                          47918.00000       0       1 6400518            1 6400518.03         1 6400518_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+#____________________________________________________________
+#
+# JUD BRUSH DITCH         
+64005190.01 JUD BRUSH DITCH                          16506.00000       0       1 6400519            1 6400519.01         1 6400519_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+#____________________________________________________________
+#
+# STERLING IRR CO DITCH 2 
+64005260.01 STERLING IRR CO DITCH 2                  12577.00000       0       1 6400526            1 6400526.01         1 6400526_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+#____________________________________________________________
+#
+# DAVIS BROS DITCH        
+64005320.01 DAVIS BROS DITCH                          8866.00000       0       1 6400532            1 6400532.01         1 6400532_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+64005320.02 DAVIS BROS DITCH                          9327.00000       0       1 6400532            1 6400532.02         1 6400532_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+64005320.03 DAVIS BROS DITCH                         11251.00000       0       1 6400532            1 6400532.03         1 6400532_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+64005320.04 DAVIS BROS DITCH                         14945.00000       0       1 6400532            1 6400532.04         1 6400532_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+64005320.05 DAVIS BROS DITCH                         16334.00000       0       1 6400532            1 6400532.05         1 6400532_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+64005320.06 DAVIS BROS DITCH                         19502.00000       0       1 6400532            1 6400532.06         1 6400532_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+ 0    9999 Alternate Point         
+64005320.05 DAVIS BROS DITCH                         16334.00000       0       1 6400532            1 6400532.05         1 6400532_AlP        1      39 NA           Diversion        0.00    0.00       0    9999 Alternate Point         
+64005320.06 DAVIS BROS DITCH                         19502.00000      

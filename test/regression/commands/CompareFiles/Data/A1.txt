@@ -1,0 +1,4 @@
+#
+# This is test file A1.  It is the same as file A2 except for comments.
+Some data
+Some more data

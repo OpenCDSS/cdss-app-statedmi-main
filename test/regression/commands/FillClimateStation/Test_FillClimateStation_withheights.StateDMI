@@ -1,0 +1,10 @@
+# Test filling climate stations, including heights
+StartLog(LogFile="Results/Test_FillClimateStations_withheights.StateDMI.log")
+RemoveFile(InputFile="Results\Test_FillClimateStations_withheights_out.csv",IfNotFound=Ignore)
+SetClimateStation(ID="3005",IfNotFound=Add)
+SetClimateStation(ID="7167",IfNotFound=Add)
+FillClimateStation(ID="*",Name="Test Name",Latitude=44,Elevation=4401,Region1="TestCounty",Region2="Test HUC",HeightHumidityMeas=5,HeightWindMeas=10)
+# Uncomment the following command to regenerate the expected results.
+# WriteClimateStationsToList(OutputFile="ExpectedResults/Test_FillClimateStations_withheights_out.csv")
+WriteClimateStationsToList(OutputFile="Results/Test_FillClimateStations_withheights_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_FillClimateStations_withheights_out.csv",InputFile2="Results/Test_FillClimateStations_withheights_out.csv",IfDifferent=Warn)

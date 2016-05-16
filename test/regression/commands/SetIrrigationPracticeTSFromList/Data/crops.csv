@@ -1,0 +1,7 @@
+# Irrigation practice data to set
+# For this test make sure that total acreage adds up
+"ID","Year","SwDelEff","FloodEff","SprinkEff","SWFloodAc","SWSprinkAc","GWFloodAc","GWSprinkAc","TotalAc","PumpMax","GWMode"
+2000505,1990,.11,.12,.13,101,102,103,104,410,109,1
+2000505,2000,.21,.22,.23,201,202,203,204,810,209,2
+2000623,1995,.31,.32,.33,301,302,303,304,1210,309,3
+2000623,2005,.41,.42,.43,401,402,403,404,1610,409,4

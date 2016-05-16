@@ -1,0 +1,7 @@
+# Test writing diversion stations to StateMod file - use full Colorado file for input
+StartLog(LogFile="Results/Test_WriteDiversionStationsToStateMod_cm2005.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteDiversionStationsToStateMod_cm2005_out.dds")
+ReadDiversionStationsFromStateMod(InputFile="Data\cm2005.dds")
+# Write the file again and compare with the original file.
+WriteDiversionStationsToStateMod(OutputFile="Results/Test_WriteDiversionStationsToStateMod_cm2005_out.dds")
+CompareFiles(InputFile1="Data/cm2005.dds",InputFile2="Results/Test_WriteDiversionStationsToStateMod_cm2005_out.dds",WarnIfDifferent=True)

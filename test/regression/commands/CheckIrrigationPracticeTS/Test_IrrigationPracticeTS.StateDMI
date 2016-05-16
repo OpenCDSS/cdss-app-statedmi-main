@@ -1,0 +1,23 @@
+# Test checking irrigation practice time series data where some values are in error
+# The set command won't let invalid data be set from parameters so use
+# values in a StateCU input file to trigger the check warnings.
+# Compare the data csv to make sure the data are being produced as expected
+# and the check file csv to make sure the checks are working.
+# The expected status is Warning because the check will detect the missing values.
+#@expectedStatus Warning
+StartLog(LogFile="Results/Test_CheckIrrigationPracticeTS.StateDMI.log")
+RemoveFile(InputFile="Results\Test_CheckIrrigationPracticeTS_out.csv",IfNotFound=Ignore)
+RemoveFile(InputFile="Results\Test_CheckIrrigationPracticeTS_out.html",IfNotFound=Ignore)
+ReadIrrigationPracticeTSFromStateCU(InputFile="Data\simple.ipy")
+# Uncomment the following command to regenerate the expected results.
+# WriteIrrigationPracticeTSToStateCU(OutputFile="ExpectedResults/Test_CheckIrrigationPracticeTS_out.ipy")
+WriteIrrigationPracticeTSToStateCU(OutputFile="Results/Test_CheckIrrigationPracticeTS_out.ipy")
+CompareFiles(InputFile1="ExpectedResults/Test_CheckIrrigationPracticeTS_out.ipy",InputFile2="Results/Test_CheckIrrigationPracticeTS_out.ipy",WarnIfDifferent=True)
+#
+# Check the data and create the check file.
+CheckIrrigationPracticeTS(ID="*")
+# Uncomment the following command to regenerate the expected results.
+# WriteCheckFile(OutputFile="ExpectedResults/Test_CheckIrrigationPracticeTS_out_check.csv")
+WriteCheckFile(OutputFile="Results/Test_CheckIrrigationPracticeTS_out_check.csv")
+WriteCheckFile(OutputFile="Results/Test_CheckIrrigationPracticeTS_out_check.html")
+CompareFiles(InputFile1="ExpectedResults/Test_CheckIrrigationPracticeTS_out_check.csv",InputFile2="Results/Test_CheckIrrigationPracticeTS_out_check.csv",WarnIfDifferent=True)

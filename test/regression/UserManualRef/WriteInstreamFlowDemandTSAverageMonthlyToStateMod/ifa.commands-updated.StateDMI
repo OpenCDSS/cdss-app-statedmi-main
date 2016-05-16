@@ -1,0 +1,94 @@
+StartLog(LogFile="ifa.commands.StateDMI.log")
+# ifa.commands.StateDMI
+#
+#  StateDMI command file to create the annual instream flow demand file for the Colorado model
+#
+SetOutputYearType(OutputYearType=Water)
+#
+#  Structures and total demands (rights) are defined in the instream flow rights file
+#
+ReadInstreamFlowRightsFromStateMod(InputFile="..\StateMod\cm2005.ifr")
+#
+#  Step 1 - Set monthly instream flow demand to water rights for structures that are of DemandType = 2 (*.dds)
+#
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="3*",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="5*",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="7*",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="9500*",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="9506*",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="9507*",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="951*",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="9535*",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="9536*",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="9537*",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="9545*",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="954603",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="954625",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyFromRights(ID="954655",IfNotFound=Add)
+#
+#
+#	StateDMI expects monthly values to be entered in Calendar Year.
+#
+#  Step 2 - Set monthly instream flow demands that vary by month
+#
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="362000",MonthValues="3.00,3.00,3.00,3.00,6.00,6.00,6.00,6.00,6.00,3.00,3.00,3.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="362012",MonthValues="3.00,3.00,3.00,3.00,7.00,7.00,7.00,7.00,7.00,3.00,3.00,3.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="362030",MonthValues="10.00,10.00,10.00,10.00,20.00,20.00,20.00,20.00,20.00,20.00,10.00,10.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="362033",MonthValues="6.00,6.00,6.00,6.00,12.00,12.00,12.00,12.00,12.00,6.00,6.00,6.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="362037",MonthValues="16.00,16.00,16.00,16.00,32.00,32.00,32.00,32.00,32.00,32.00,16.00,16.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="362044",MonthValues="50.00,50.00,50.00,50.00,55.00,55.00,55.00,52.00,52.00,50.00,50.00,50.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="362045",MonthValues="58.00,58.00,58.00,75.00,75.00,75.00,75.00,75.00,75.00,58.00,58.00,58.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="362046",MonthValues="67.00,67.00,67.00,90.00,115.00,115.00,115.00,115.00,90.00,78.00,67.00,67.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="362047",MonthValues=",70.00,70.00,78.00,90.00,125.00,125.00,125.00,125.00,90.00,90.00,70.00,70.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="362048",MonthValues="85.00,85.00,90.00,90.00,125.00,125.00,125.00,125.00,125.00,90.00,90.00,85.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="362049",MonthValues="85.00,85.00,85.00,85.00,60.00,60.00,72.50,85.00,85.00,85.00,85.00,85.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="372012",MonthValues="50.00,50.00,50.00,50.00,130.00,130.00,130.00,130.00,130.00,50.00,50.00,50.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="372028",MonthValues="11.00,11.00,11.00,11.00,25.00,25.00,25.00,25.00,25.00,11.00,11.00,11.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="372034",MonthValues="7.00,7.00,7.00,7.00,15.00,15.00,15.00,15.00,15.00,7.00,7.00,7.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="372041",MonthValues="35.00,35.00,35.00,35.00,85.00,85.00,85.00,85.00,85.00,35.00,35.00,35.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="372042",MonthValues="20.00,20.00,20.00,20.00,50.00,50.00,50.00,50.00,50.00,20.00,20.00,20.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="372046",MonthValues="6.00,6.00,6.00,6.00,12.00,12.00,12.00,12.00,12.00,6.00,6.00,6.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="372056",MonthValues="8.00,8.00,8.00,8.00,22.00,22.00,22.00,22.00,22.00,22.00,8.00,8.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="372057",MonthValues="6.00,6.00,6.00,6.00,16.00,16.00,16.00,16.00,16.00,16.00,6.00,6.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="372059",MonthValues="45.00,45.00,45.00,45.00,110.00,110.00,110.00,110.00,110.00,45.00,45.00,45.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="372059_2",MonthValues="45.00,45.00,45.00,45.00,110.00,110.00,110.00,110.00,110.00,45.00,45.00,45.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="382020",MonthValues="30.00,30.00,30.00,100.00,150.00,200.00,100.00,75.00,65.00,30.00,30.00,30.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="382044",MonthValues="6.00,6.00,6.00,6.00,12.00,12.00,12.00,12.00,12.00,6.00,6.00,6.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="382077",MonthValues="39.00,39.00,39.00,39.00,110.00,110.00,110.00,110.00,110.00,110.00,39.00,39.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="382111",MonthValues="30.00,30.00,30.00,55.00,55.00,55.00,55.00,55.00,55.00,30.00,30.00,30.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="382112",MonthValues="75.00,75.00,75.00,145.00,145.00,145.00,145.00,145.00,145.00,75.00,75.00,75.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="382114",MonthValues="60.00,60.00,60.00,60.00,100.00,100.00,100.00,100.00,100.00,60.00,60.00,60.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="392004",MonthValues="5.00,5.00,5.00,5.00,9.00,9.00,9.00,9.00,9.00,5.00,5.00,5.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="392010",MonthValues="8.00,8.00,8.00,8.00,15.00,15.00,15.00,15.00,15.00,8.00,8.00,8.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="512014",MonthValues="16.00,16.00,16.00,16.00,32.00,32.00,32.00,32.00,32.00,16.00,16.00,16.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="512016",MonthValues="14.00,14.00,14.00,14.00,28.00,28.00,28.00,28.00,28.00,14.00,14.00,14.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="512027",MonthValues="6.00,6.00,6.00,6.00,12.00,12.00,12.00,12.00,12.00,6.00,6.00,6.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="512028",MonthValues="8.00,8.00,8.00,8.00,14.00,14.00,14.00,14.00,14.00,8.00,8.00,8.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="512035",MonthValues="13.00,13.00,13.00,13.00,25.00,25.00,25.00,25.00,25.00,13.00,13.00,13.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="512039",MonthValues="19.00,19.00,19.00,19.00,38.00,38.00,38.00,38.00,38.00,19.00,19.00,19.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="512068",MonthValues="10.00,10.00,10.00,10.00,18.00,18.00,18.00,18.00,18.00,10.00,10.00,10.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="512069",MonthValues="25.00,25.00,25.00,25.00,50.00,50.00,50.00,50.00,50.00,25.00,25.00,25.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="512076",MonthValues="2.75,2.75,2.75,5.38,8.00,8.00,8.00,6.00,4.00,2.75,2.75,2.75",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="953695",MonthValues="20.00,20.00,20.00,20.00,20.00,50.00,50.00,40.00,35.00,35.00,45.00,45.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="953710",MonthValues="7.00,7.00,7.00,7.00,0.00,0.00,0.00,0.00,0.00,7.00,7.00,7.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="950639",MonthValues="4.00,4.00,4.00,4.00,7.00,10.00,10.00,10.00,7.00,4.00,4.00,4.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="954655",MonthValues="3.90,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,3.70,3.90,3.70",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="951310",MonthValues="3.00,3.00,3.00,3.00,5.50,8.00,8.00,8.00,5.50,3.00,3.00,3.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="951309",MonthValues="3.00,3.00,3.00,3.00,6.50,10.00,10.00,10.00,6.50,3.00,3.00,3.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="951269",MonthValues="2.00,2.00,2.00,2.00,3.00,4.00,4.00,4.00,3.00,2.00,2.00,2.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="954603",MonthValues="0.00,0.00,0.00,0.00,0.50,1.00,1.00,1.00,0.50,0.00,0.00,0.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="953543",MonthValues="85.00,85.00,85.00,85.00,60.00,60.00,72.50,85.00,85.00,85.00,85.00,85.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="954516",MonthValues="24.00,24.00,24.00,24.00,24.00,24.00,24.00,24.00,24.00,24.00,24.00,24.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="950786",MonthValues="30.00,30.00,30.00,100.00,150.00,200.00,100.00,75.00,70.00,30.00,30.00,30.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="953713",MonthValues="39.00,39.00,39.00,39.00,110.00,110.00,110.00,110.00,110.00,110.00,39.00,39.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="953508",MonthValues="5.00,5.00,5.00,5.00,0.00,0.00,0.00,0.00,0.00,0.00,5.00,5.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="951146",MonthValues="45.00,45.00,45.00,45.00,110.00,110.00,110.00,110.00,110.00,45.00,45.00,45.00",IfNotFound=Add)
+SetInstreamFlowDemandTSAverageMonthlyConstant(ID="950099",MonthValues="50.00,50.00,50.00,50.00,50.00,50.00,50.00,50.00,50.00,50.00,50.00,50.00",IfNotFound=Add)
+#
+#  Step 3 - Create StateMod file
+#
+WriteInstreamFlowDemandTSAverageMonthlyToStateMod(OutputFile="..\StateMod\cm2005.ifa")
+#
+# Check the results
+CheckInstreamFlowDemandTSAverageMonthly(ID="*")
+WriteCheckFile(OutputFile="ifa.commands.StateDMI.check.html")

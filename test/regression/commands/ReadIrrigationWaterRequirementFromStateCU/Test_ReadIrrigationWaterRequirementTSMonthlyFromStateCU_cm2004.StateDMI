@@ -1,0 +1,16 @@
+# Test reading irrigation water requirement TS monthly from StateCU file - use part of Colorado file for input
+# The input file is the "ddc" which is in StateMod format (not "iwr", which is a report format)
+# Because no write commands exist for IWR, calculate the demand using an
+# efficiency of 100% for everything and write the demands, which should be the
+# same as the IWR input.
+StartLog(LogFile="Results/Test_ReadIrrigationWaterRequirementTSMonthlyFromStateCU_cm2004.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadIrrigationWaterRequirementTSMonthlyFromStateCU_cm2004_out.ddc")
+ReadIrrigationWaterRequirementTSMonthlyFromStateCU(InputFile="Data\cm2004.ddc")
+SetOutputYearType(OutputYearType=Calendar)
+SetOutputPeriod(OutputStart="2000-01",OutputEnd="2002-12")
+ReadDiversionStationsFromList(ListFile="Data\strlist.csv",IDCol=2)
+SetDiversionStation(ID="*",EffMonthly="100,100,100,100,100,100,100,100,100,100,100,100")
+CalculateDiversionDemandTSMonthly(ID="*")
+# Write the file again and compare with the original file.
+WriteDiversionDemandTSMonthlyToStateMod(OutputFile="Results/Test_ReadIrrigationWaterRequirementTSMonthlyFromStateCU_cm2004_out.ddc",OutputYearType=Calendar)
+CompareFiles(InputFile1="Data/cm2004.ddc",InputFile2="Results/Test_ReadIrrigationWaterRequirementTSMonthlyFromStateCU_cm2004_out.ddc",IfDifferent=Warn)

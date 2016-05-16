@@ -1,0 +1,9 @@
+# Test writing reservoir rights to a list file
+StartLog(LogFile="Results/Test_WriteReservoirRightsToList.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteReservoirRightsToList_out.csv")
+SetReservoirRight(ID="363543",Name="Reservoir 1",StationID="Station1",AdministrationNumber=11111.11111,Decree=10,OnOff=1,IfNotFound=Add)
+SetReservoirRight(ID="364512",Name="Reservoir 2",StationID="ID",AdministrationNumber=22222.2222,Decree=20,OnOff=1,IfNotFound=Add)
+# Uncomment the following command to regenerate the expected results.
+# WriteReservoirRightsToList(OutputFile="ExpectedResults/Test_WriteReservoirRightsToList_out.csv")
+WriteReservoirRightsToList(OutputFile="Results/Test_WriteReservoirRightsToList_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_WriteReservoirRightsToList_out.csv",InputFile2="Results/Test_WriteReservoirRightsToList_out.csv",WarnIfDifferent=True)

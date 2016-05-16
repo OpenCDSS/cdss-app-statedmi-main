@@ -1,0 +1,16 @@
+# Test removing crop pattern time series
+StartLog(LogFile="Results/Test_RemoveCropPatternTS.StateDMI.log")
+RemoveFile(InputFile="Results\Test_RemoveCropPatternTS_out.cds")
+SetCULocation(ID="2000505",IfNotFound=Add)
+SetCULocation(ID="2000623",IfNotFound=Add)
+SetCULocation(ID="2000812",IfNotFound=Add)
+SetOutputPeriod(OutputStart="1998",OutputEnd="2002")
+CreateCropPatternTSForCULocations(ID="*",Units="ACRE")
+SetCropPatternTS(ID="2000505",SetStart=1998,SetEnd=1998,CropPattern="ALFALFA,101,CORN,102",IrrigationMethod=Flood,SupplyType=Ground)
+SetCropPatternTS(ID="2000623",SetStart=1998,SetEnd=2000,CropPattern="ALFALFA,201,CORN,202",IrrigationMethod=Sprinkler,SupplyType=Surface)
+SetCropPatternTS(ID="2000812",SetStart=1998,SetEnd=2002,CropPattern="ALFALFA,301,CORN,302",IrrigationMethod=Sprinkler,SupplyType=Ground)
+RemoveCropPatternTS(ID="*623",CropType="CORN")
+# Uncomment the following command to regenerate the expected results.
+# WriteCropPatternTSToStateCU(OutputFile="ExpectedResults/Test_RemoveCropPatternTS_out.cds")
+WriteCropPatternTSToStateCU(OutputFile="Results/Test_RemoveCropPatternTS_out.cds")
+CompareFiles(InputFile1="ExpectedResults/Test_RemoveCropPatternTS_out.cds",InputFile2="Results/Test_RemoveCropPatternTS_out.cds",WarnIfDifferent=True)

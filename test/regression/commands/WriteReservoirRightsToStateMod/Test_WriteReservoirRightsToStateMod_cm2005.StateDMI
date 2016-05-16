@@ -1,0 +1,7 @@
+# Test writing reservoir rights to StateMod file - use full Colorado file for input
+StartLog(LogFile="Results/Test_WriteReservoirRightsToStateMod_cm2005.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteReservoirRightsToStateMod_cm2005_out.rer")
+ReadReservoirRightsFromStateMod(InputFile="Data\cm2005.rer")
+# Write the file again and compare with the original file.
+WriteReservoirRightsToStateMod(OutputFile="Results/Test_WriteReservoirRightsToStateMod_cm2005_out.rer")
+CompareFiles(InputFile1="Data/cm2005.rer",InputFile2="Results/Test_WriteReservoirRightsToStateMod_cm2005_out.rer",WarnIfDifferent=True)

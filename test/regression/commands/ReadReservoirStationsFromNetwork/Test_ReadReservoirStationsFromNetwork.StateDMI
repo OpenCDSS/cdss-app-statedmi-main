@@ -1,0 +1,8 @@
+# Test reading reservoir stations from a network file
+StartLog(LogFile="Results/Test_ReadReservoirStationsFromNetwork.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadReservoirStationsFromNetwork_out.csv",IfNotFound=Ignore)
+ReadReservoirStationsFromNetwork(InputFile="Data\rg2007.net")
+# Uncomment the following command to regenerate the original output
+# WriteReservoirStationsToList(OutputFile="ExpectedResults/Test_ReadReservoirStationsFromNetwork_out.csv")
+WriteReservoirStationsToList(OutputFile="Results/Test_ReadReservoirStationsFromNetwork_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadReservoirStationsFromNetwork_out.csv",InputFile2="Results/Test_ReadReservoirStationsFromNetwork_out.csv",WarnIfDifferent=True)

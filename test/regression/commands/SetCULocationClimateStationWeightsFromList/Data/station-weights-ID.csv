@@ -1,0 +1,7 @@
+# CLimate station weight information to test for structures 5100501...503
+# using the CU location ID to match
+# The county and HUC were determined in HydroBase
+# CULocID,StationID,TempWt,PrecWt,OroTempAdj,OroPrecAdj
+5100501,1001,.1,.9,.91,.1
+5100502,1002,.2,.8,.92,.2
+5100503,1003,.3,.7,.93,.3

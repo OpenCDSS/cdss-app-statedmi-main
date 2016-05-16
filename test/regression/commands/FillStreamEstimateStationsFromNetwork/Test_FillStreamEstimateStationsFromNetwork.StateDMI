@@ -1,0 +1,11 @@
+# Test filling stream estimate stations from network information
+StartLog(LogFile="Results/Test_FillStreamEstimateStationsFromNetwork.StateDMI.log")
+RemoveFile(InputFile="Results\Test_FillStreamEstimateStationsFromNetwork_out.csv",IfNotFound=Ignore)
+SetStreamEstimateStation(ID="203554",IfNotFound=Add)
+SetStreamEstimateStation(ID="203536",IfNotFound=Add)
+ReadNetworkFromStateMod(InputFile="Data\rg2007.net")
+FillStreamEstimateStationsFromNetwork(ID="*")
+# Uncomment the following command to regenerate the expected results.
+# WriteStreamEstimateStationsToList(OutputFile="ExpectedResults/Test_FillStreamEstimateStationsFromNetwork_out.csv")
+WriteStreamEstimateStationsToList(OutputFile="Results/Test_FillStreamEstimateStationsFromNetwork_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_FillStreamEstimateStationsFromNetwork_out.csv",InputFile2="Results/Test_FillStreamEstimateStationsFromNetwork_out.csv",WarnIfDifferent=True)

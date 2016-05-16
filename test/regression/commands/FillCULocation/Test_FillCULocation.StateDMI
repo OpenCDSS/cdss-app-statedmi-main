@@ -1,0 +1,10 @@
+# Test filling CU location data where the edited location is found
+StartLog(LogFile="Results/Test_FillCULocation.StateDMI.log")
+RemoveFile(InputFile="Results\Test_FillCULocation_out.csv")
+SetCULocation(ID="Location1",IfNotFound=Add)
+SetCULocation(ID="Location2",Name="Location 2",Latitude=44,Elevation=4002,Region1="ALAMOSA",AWC=.6,IfNotFound=Add)
+FillCULocation(ID="Location1*",Name="Location 1 edited",Latitude=99,Elevation=9999,Region1="ALAMOSA",AWC=.99)
+# Uncomment the following command to regenerate the expected results.
+# WriteCULocationsToList(OutputFile="ExpectedResults/Test_FillCULocation_out.csv")
+WriteCULocationsToList(OutputFile="Results/Test_FillCULocation_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_FillCULocation_out.csv",InputFile2="Results/Test_FillCULocation_out.csv",WarnIfDifferent=True)

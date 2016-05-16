@@ -1,0 +1,6 @@
+# Test well stations list
+#ID,Name,RiverNodeID,OnOff,Capacity,AdminNumShift,DiversionID,DemandType,IrrigatedAcres,UseType,DemandSource,EffAnnual,EffMonthly
+2000505,Well 1,Node1,1,101.0,1001.0,Diversion1,DailyID1,1,1001.0,1,1,40,41,42,43,44,45,46,47,48,49,50,51,52
+2000631,Well 2,Node2,1,102.0,1002.0,Diversion2,DailyID2,2,1002.0,2,2,50,51,52,53,54,55,56,57,58,59,60,61,62
+# In-line comment
+2000812,Well 3,Node3,1,103.0,1003.0,Diversion3,DailyID3,3,1003.0,3,3,60,61,62,63,64,65,66,67,68,69,70,71,72

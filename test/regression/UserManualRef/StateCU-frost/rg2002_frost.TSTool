@@ -1,0 +1,29 @@
+SetOutputPeriod(OutputStart="1950",OutputEnd="2002")
+# _________________________________________________________
+# 0130 - ALAMOSA SAN LUIS VALLEY RGNL
+0130.NOAA.FrostDateL28S.Year~HydroBase
+0130.NOAA.FrostDateL32S.Year~HydroBase
+0130.NOAA.FrostDateF32F.Year~HydroBase
+0130.NOAA.FrostDateF28F.Year~HydroBase
+#
+# _________________________________________________________
+# 0776 - BLANCA
+0776.NOAA.FrostDateL28S.Year~HydroBase
+0776.NOAA.FrostDateL32S.Year~HydroBase
+0776.NOAA.FrostDateF32F.Year~HydroBase
+0776.NOAA.FrostDateF28F.Year~HydroBase
+#
+# _________________________________________________________
+# 1458 - CENTER 4 SSW
+1458.NOAA.FrostDateL28S.Year~HydroBase
+1458.NOAA.FrostDateL32S.Year~HydroBase
+1458.NOAA.FrostDateF32F.Year~HydroBase
+1458.NOAA.FrostDateF28F.Year~HydroBase
+#
+# _________________________________________________________
+FillHistYearAverage(TSList=AllMatchingTSID,TSID="*")
+#
+# _________________________________________________________
+WriteStateCU(OutputFile="..\StateCU\Frost2002.stm")
+CheckTimeSeries(CheckCriteria="Missing")
+WriteCheckFile(OutputFile="rg2002_frost.TSTool.check.html")

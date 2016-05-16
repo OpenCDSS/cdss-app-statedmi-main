@@ -1,0 +1,22 @@
+# Create a generalized XML network from individual StateMod files
+# Read the network, which contains upstream to downstream connectivity but does
+# not indicate node types
+ReadRiverNetworkFromStateMod(cm2005.rin)
+# Read the stations, which imply the node types
+ReadRiverStreamGageStationsFromStateMod(cm2005.ris)
+ReadRiverDiversionStationsFromStateMod(cm2005.dds)
+ReadRiverReservoirStationsFromStateMod(cm2005.res)
+ReadRiverInstreamFlowStationsFromStateMod(cm2005.ifs)
+ReadRiverWellStationsFromStateMod(cm2005.wes)
+# To be developed...
+#ReadRiverPlanStationsFromStateMod()
+ReadRiverStreamEstimateStationsFromStateMod(cm2005.ris)
+# Now create the generalized network, using the connectivity and node types
+CreateNetworkFromRiverNetwork()
+# Fill in node names and locations from HydroBase, if any is still missing
+FillNetworkFromHydroBase()
+# Write the generalized network
+WriteNetworkToStateMod(OutputFile="cm2005.net")
+# Check for errors (the following is not yet implemented)
+#CheckNetwork()
+WriteCheckFile(OutputFile="cm2005.net.check.html")

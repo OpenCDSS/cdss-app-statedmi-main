@@ -1,0 +1,8 @@
+# Test reading stream gage stations from list
+StartLog(LogFile="Results/Test_ReadStreamGageStationsFromList.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadStreamGageStationsFromList_out.csv")
+ReadStreamGageStationsFromList(ListFile="Data\gages.csv",IDCol=1,NameCol=2,RiverNodeIDCol=3,DailyIDCol=4)
+# Uncomment the following command to regenerate the expected results.
+# WriteStreamGageStationsToList(OutputFile="ExpectedResults/Test_ReadStreamGageStationsFromList_out.csv")
+WriteStreamGageStationsToList(OutputFile="Results/Test_ReadStreamGageStationsFromList_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadStreamGageStationsFromList_out.csv",InputFile2="Results/Test_ReadStreamGageStationsFromList_out.csv",WarnIfDifferent=True)

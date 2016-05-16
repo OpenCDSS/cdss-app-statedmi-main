@@ -1,0 +1,11 @@
+# Test sorting climate stations
+StartLog(LogFile="Results/Test_SortClimateStations.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SortClimateStations_out.csv")
+SetClimateStation(ID="Station2",Name="Station 2",Latitude=44.2,Elevation=4002,Region1="ALAMOSA",IfNotFound=Add)
+SetClimateStation(ID="Station3",Name="Station 3",Latitude=44.3,Elevation=4002,Region1="BACA",IfNotFound=Add)
+SetClimateStation(ID="Station1",Name="Station 1",Latitude=44.1,Elevation=4001,Region1="ADAMS",IfNotFound=Add)
+SortClimateStations()
+# Uncomment the following command to regenerate the expected results.
+# WriteClimateStationsToList(OutputFile="ExpectedResults/Test_SortClimateStations_out.csv")
+WriteClimateStationsToList(OutputFile="Results/Test_SortClimateStations_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_SortClimateStations_out.csv",InputFile2="Results/Test_SortClimateStations_out.csv",IfDifferent=Warn)

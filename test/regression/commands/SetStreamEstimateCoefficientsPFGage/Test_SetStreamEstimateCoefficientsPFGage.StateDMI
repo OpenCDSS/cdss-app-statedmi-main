@@ -1,0 +1,12 @@
+# Test setting stream estimate coefficients proration factor gage
+#@expectedStatus warning (because of out of range proration factors)
+StartLog(LogFile="Results/Test_SetStreamEstimateCoefficientsPFGage.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SetStreamEstimateCoefficientsPFGage_out.rib")
+ReadStreamEstimateStationsFromNetwork(InputFile="Data\rg2007.net")
+SetStreamEstimateCoefficientsPFGage(ID="203554",GageID="08220000")
+SetStreamEstimateCoefficientsPFGage(ID="203536",GageID="08220000")
+CalculateStreamEstimateCoefficients()
+# Uncomment the following command to regenerate the expected results.
+# WriteStreamEstimateCoefficientsToStateMod(OutputFile="ExpectedResults/Test_SetStreamEstimateCoefficientsPFGage_out.rib")
+WriteStreamEstimateCoefficientsToStateMod(OutputFile="Results/Test_SetStreamEstimateCoefficientsPFGage_out.rib")
+CompareFiles(InputFile1="ExpectedResults/Test_SetStreamEstimateCoefficientsPFGage_out.rib",InputFile2="Results/Test_SetStreamEstimateCoefficientsPFGage_out.rib",IfDifferent=Fail)

@@ -1,0 +1,7 @@
+# Test writing delay tables (monthly) to a StateMod file
+StartLog(LogFile="Results/Test_WriteDelayTablesMonthlyToStateMod.StateDMI.log")
+RemoveFile(InputFile="Results\Test_WriteDelayTablesMonthlyToStateMod_out.dld",IfNotFound=Ignore)
+ReadDelayTablesMonthlyFromStateMod(InputFile="Data\cm2005.dly")
+# Compare with the original data file
+WriteDelayTablesMonthlyToStateMod(OutputFile="Results/Test_WriteDelayTablesMonthlyToStateMod_out.dly",Precision=1)
+CompareFiles(InputFile1="Data/cm2005.dly",InputFile2="Results/Test_WriteDelayTablesMonthlyToStateMod_out.dly",WarnIfDifferent=True)

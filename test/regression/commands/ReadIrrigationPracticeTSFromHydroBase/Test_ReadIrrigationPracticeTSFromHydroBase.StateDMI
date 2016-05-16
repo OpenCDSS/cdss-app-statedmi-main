@@ -1,0 +1,13 @@
+# Test reading irrigation practice time series data from HydroBase
+StartLog(LogFile="Results/Test_ReadIrrigationPracticeTSFromHydroBase.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadIrrigationPracticeTSFromHydroBase_out.ipy")
+SetOutputPeriod(OutputStart="1950",OutputEnd="2007")
+SetCULocation(ID="2000505",IfNotFound=Add)
+SetCULocation(ID="2000631",IfNotFound=Add)
+SetCULocation(ID="2000812",IfNotFound=Add)
+CreateIrrigationPracticeTSForCULocations(ID="*")
+ReadIrrigationPracticeTSFromHydroBase(ID="*",Div="3")
+# Uncomment the following command to regenerate the expected results.
+# WriteIrrigationPracticeTSToStateCU(OutputFile="ExpectedResults/Test_ReadIrrigationPracticeTSFromHydroBase_out.ipy")
+WriteIrrigationPracticeTSToStateCU(OutputFile="Results/Test_ReadIrrigationPracticeTSFromHydroBase_out.ipy")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadIrrigationPracticeTSFromHydroBase_out.ipy",InputFile2="Results/Test_ReadIrrigationPracticeTSFromHydroBase_out.ipy",IfDifferent=Warn)

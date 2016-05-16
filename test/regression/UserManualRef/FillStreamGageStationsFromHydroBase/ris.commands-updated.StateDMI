@@ -1,0 +1,156 @@
+StartLog(LogFile="ris.commands.StateDMI.log")
+# ris.commands.StateDMI
+#
+# StateDMI command file to create streamflow station file for the Colorado River
+#
+#  Step 1 - read streamgages and baseflows ids from the network file
+#
+ReadStreamGageStationsFromNetwork(InputFile="..\Network\cm2005.net",IncludeStreamEstimateStations="True")
+#
+#  Step 2 - read baseflow nodes names from HydroBase, fill in missing names from the network file
+#
+FillStreamGageStationsFromHydroBase(ID="*",NameFormat=StationName,CheckStructures=True)
+FillStreamGageStationsFromNetwork(ID="*",NameFormat="StationName")
+#
+#  Step 3 - set streamgage station to use to disaggregate monthly baseflows to daily
+#
+#  add set daily pattern gages for WD 36
+SetStreamGageStation(ID="36*",DailyID="09047500",IfNotFound=Warn)
+SetStreamGageStation(ID="954683",DailyID="09047500",IfNotFound=Warn)
+SetStreamGageStation(ID="09046600",DailyID="09047500",IfNotFound=Warn)
+SetStreamGageStation(ID="09047500",DailyID="09047500",IfNotFound=Warn)
+SetStreamGageStation(ID="09050100",DailyID="09047500",IfNotFound=Warn)
+SetStreamGageStation(ID="09050700",DailyID="09047500",IfNotFound=Warn)
+SetStreamGageStation(ID="09052800",DailyID="09047500",IfNotFound=Warn)
+SetStreamGageStation(ID="09053500",DailyID="09047500",IfNotFound=Warn)
+SetStreamGageStation(ID="09054000",DailyID="09047500",IfNotFound=Warn)
+SetStreamGageStation(ID="09055300",DailyID="09047500",IfNotFound=Warn)
+SetStreamGageStation(ID="09057500",DailyID="09047500",IfNotFound=Warn)
+#  add set daily pattern gages for WD 37
+SetStreamGageStation(ID="37*",DailyID="09063000",IfNotFound=Warn)
+SetStreamGageStation(ID="955003",DailyID="09063000",IfNotFound=Warn)
+SetStreamGageStation(ID="09063000",DailyID="09063000",IfNotFound=Warn)
+SetStreamGageStation(ID="09064000",DailyID="09063000",IfNotFound=Warn)
+SetStreamGageStation(ID="09065100",DailyID="09063000",IfNotFound=Warn)
+SetStreamGageStation(ID="09065500",DailyID="09063000",IfNotFound=Warn)
+SetStreamGageStation(ID="09067300",DailyID="09063000",IfNotFound=Warn)
+SetStreamGageStation(ID="09068000",DailyID="09063000",IfNotFound=Warn)
+SetStreamGageStation(ID="09069500",DailyID="09063000",IfNotFound=Warn)
+SetStreamGageStation(ID="09070000",DailyID="09063000",IfNotFound=Warn)
+#
+#  add set daily pattern gages for WD 38
+SetStreamGageStation(ID="38*",DailyID="09081600",IfNotFound=Warn)
+SetStreamGageStation(ID="954699",DailyID="09081600",IfNotFound=Warn)
+SetStreamGageStation(ID="09073400",DailyID="09081600",IfNotFound=Warn)
+SetStreamGageStation(ID="09074000",DailyID="09081600",IfNotFound=Warn)
+SetStreamGageStation(ID="09074800",DailyID="09081600",IfNotFound=Warn)
+SetStreamGageStation(ID="09075700",DailyID="09081600",IfNotFound=Warn)
+SetStreamGageStation(ID="09078600",DailyID="09081600",IfNotFound=Warn)
+SetStreamGageStation(ID="09080400",DailyID="09081600",IfNotFound=Warn)
+SetStreamGageStation(ID="09080800",DailyID="09081600",IfNotFound=Warn)
+SetStreamGageStation(ID="09081600",DailyID="09081600",IfNotFound=Warn)
+SetStreamGageStation(ID="09082800",DailyID="09081600",IfNotFound=Warn)
+SetStreamGageStation(ID="09084000",DailyID="09081600",IfNotFound=Warn)
+SetStreamGageStation(ID="09084600",DailyID="09081600",IfNotFound=Warn)
+SetStreamGageStation(ID="09085000",DailyID="09081600",IfNotFound=Warn)
+#  add set daily pattern gages for WD 39
+SetStreamGageStation(ID="39*",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09085200",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09087500",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09091500",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09093000",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09093500",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="BaseFlow",DailyID="09089500",IfNotFound=Warn)
+#  add set daily pattern gages for WD 45
+SetStreamGageStation(ID="45*",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09088000",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09089500",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09090700",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09092500",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09092600",DailyID="09089500",IfNotFound=Warn)
+#  add set daily pattern gages for Muddy Creek Drainage in WD 50
+SetStreamGageStation(ID="500601",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="50_ADC013",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="500656",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09041000",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="500627",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="503668",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09041200",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09041500",DailyID="09089500",IfNotFound=Warn)
+#  add set daily pattern gages for Troublesome Creek in WD 50
+SetStreamGageStation(ID="09039000",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="500628",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="500593",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="500598",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="500576",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="09040000",DailyID="09010500",IfNotFound=Warn)
+# set daily pattern gages and baseflow nodes for mainstem gages to above Dotsero Gage
+SetStreamGageStation(ID="09058000",DailyID="09010500",IfNotFound=Warn)
+# set daily pattern gages and baseflow nodes for mainstem gages from Dotsero Gage to Statelinee
+SetStreamGageStation(ID="09070500",DailyID="09063000",IfNotFound=Warn)
+SetStreamGageStation(ID="09072500",DailyID="09063000",IfNotFound=Warn)
+SetStreamGageStation(ID="09085100",DailyID="09063000",IfNotFound=Warn)
+SetStreamGageStation(ID="09093700",DailyID="09063000",IfNotFound=Warn)
+SetStreamGageStation(ID="09095500",DailyID="09063000",IfNotFound=Warn)
+SetStreamGageStation(ID="09163500",DailyID="09063000",IfNotFound=Warn)
+# add daily pattern gages for WD 51
+SetStreamGageStation(ID="51*",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="09010500",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="09011000",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="09019500",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="09021000",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="09024000",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="09025000",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="09026500",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="09032000",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="09032499",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="09032500",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="09033500",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="09034250",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="09034500",DailyID="09010500",IfNotFound=Warn)
+SetStreamGageStation(ID="09034800",DailyID="09010500",IfNotFound=Warn)
+#  add set daily pattern gages for WD 51 - Williams Fork
+SetStreamGageStation(ID="09036000",DailyID="09036000",IfNotFound=Warn)
+SetStreamGageStation(ID="09034900",DailyID="09036000",IfNotFound=Warn)
+SetStreamGageStation(ID="514603",DailyID="09036000",IfNotFound=Warn)
+SetStreamGageStation(ID="09035500",DailyID="09036000",IfNotFound=Warn)
+SetStreamGageStation(ID="09037500",DailyID="09036000",IfNotFound=Warn)
+SetStreamGageStation(ID="513709",DailyID="09036000",IfNotFound=Warn)
+SetStreamGageStation(ID="09038500",DailyID="09036000",IfNotFound=Warn)
+#  add set daily pattern gages for WD 52
+SetStreamGageStation(ID="52*",DailyID="09063000",IfNotFound=Warn)
+#  add set daily pattern gages for WD 53
+SetStreamGageStation(ID="53*",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09060500",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09060700",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09071300",DailyID="09089500",IfNotFound=Warn)
+#  add set daily pattern gages for WD 70
+SetStreamGageStation(ID="70*",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09095000",DailyID="09089500",IfNotFound=Warn)
+#  add set daily pattern gages for WD 72
+SetStreamGageStation(ID="72*",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="953800",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="953801",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="953802",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09096500",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09097500",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09100500",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09101500",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09104000",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09104500",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="09105000",DailyID="09089500",IfNotFound=Warn)
+# Use daily Gunnison gage
+SetStreamGageStation(ID="09152500",DailyID="09152500",IfNotFound=Warn)
+#  add set daily pattern gages that are imports
+SetStreamGageStation(ID="404657",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="950040",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="504600",DailyID="09089500",IfNotFound=Warn)
+SetStreamGageStation(ID="954001",DailyID="09089500",IfNotFound=Warn)
+#
+#  Step 4 - create streamflow station file
+#
+WriteStreamGageStationsToStateMod(OutputFile="..\StateMod\cm2005.ris")
+#
+# Check the results
+CheckStreamGageStations(ID="*")
+WriteCheckFile(OutputFile="ris.commands.StateDMI.check.html")

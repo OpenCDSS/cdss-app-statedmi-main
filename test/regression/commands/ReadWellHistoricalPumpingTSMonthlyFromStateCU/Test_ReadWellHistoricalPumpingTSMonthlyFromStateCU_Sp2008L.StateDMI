@@ -1,0 +1,7 @@
+# Test reading well historical pumping TS monthly from StateCU file - use part of SP file
+StartLog(LogFile="Results/Test_ReadWellHistoricalPumpingTSMonthlyFromStateCU_Sp2008L.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadWellHistoricalPumpingTSMonthlyFromStateCU_Sp2008L_out.weh")
+ReadWellHistoricalPumpingTSMonthlyFromStateCU(InputFile="Data\Sp2008L.weh")
+# Write the file again and compare with the original file.
+WriteWellHistoricalPumpingTSMonthlyToStateMod(OutputFile="Results/Test_ReadWellHistoricalPumpingTSMonthlyFromStateCU_Sp2008L_out.weh",OutputYearType=Calendar,Precision=2)
+CompareFiles(InputFile1="Data/Sp2008L.weh",InputFile2="Results/Test_ReadWellHistoricalPumpingTSMonthlyFromStateCU_Sp2008L_out.weh",WarnIfDifferent=True)

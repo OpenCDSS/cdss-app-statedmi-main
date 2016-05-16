@@ -1,0 +1,11 @@
+# Test sorting well stations
+StartLog(LogFile="Results/Test_SortWellStations.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SortWellStations_out.csv")
+SetWellStation(ID="Well2",Name="Well 2",IfNotFound=Add)
+SetWellStation(ID="Well3",Name="Well 3",IfNotFound=Add)
+SetWellStation(ID="Well1",Name="Well 1",IfNotFound=Add)
+SortWellStations()
+# Uncomment the following command to regenerate the expected results.
+# WriteWellStationsToList(OutputFile="ExpectedResults/Test_SortWellStations_out.csv")
+WriteWellStationsToList(OutputFile="Results/Test_SortWellStations_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_SortWellStations_out.csv",InputFile2="Results/Test_SortWellStations_out.csv",WarnIfDifferent=True)
