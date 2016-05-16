@@ -1,6 +1,6 @@
 # Test calculating diversion demand monthly TS as max of demand and historical
 StartLog(LogFile="Results/Test_CalculateDiversionDemandTSMonthlyAsMax.StateDMI.log")
-RemoveFile(InputFile="Results\Test_CalculateDiversionDemandTSMonthlyAsMax_out.ddm")
+RemoveFile(InputFile="Results\Test_CalculateDiversionDemandTSMonthlyAsMax_out.ddm",IfNotFound=Ignore)
 SetOutputPeriod(OutputStart="1950-01",OutputEnd="1955-12")
 # Define stations for ID pattern checks
 SetDiversionStation(ID="2000505",IfNotFound=Add)
@@ -16,4 +16,4 @@ CalculateDiversionDemandTSMonthlyAsMax(ID="*")
 # Uncomment the following command to regenerate the expected results.
 # WriteDiversionDemandTSMonthlyToStateMod(OutputFile="ExpectedResults/Test_CalculateDiversionDemandTSMonthlyAsMax_out.ddm")
 WriteDiversionDemandTSMonthlyToStateMod(OutputFile="Results/Test_CalculateDiversionDemandTSMonthlyAsMax_out.ddm")
-CompareFiles(InputFile1="ExpectedResults/Test_CalculateDiversionDemandTSMonthlyAsMax_out.ddm",InputFile2="Results/Test_CalculateDiversionDemandTSMonthlyAsMax_out.ddm",WarnIfDifferent=True)
+CompareFiles(InputFile1="ExpectedResults/Test_CalculateDiversionDemandTSMonthlyAsMax_out.ddm",InputFile2="Results/Test_CalculateDiversionDemandTSMonthlyAsMax_out.ddm",IfDifferent=Warn)

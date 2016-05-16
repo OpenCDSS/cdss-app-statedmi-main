@@ -1,7 +1,7 @@
 # Test calculating diversion station efficiencies from IWR and historical time series
 StartLog(LogFile="Results/Test_CalculateDiversionStationEfficiencies.StateDMI.log")
-RemoveFile(InputFile="Results\Test_CalculateDiversionStationEfficiencies_out.dds")
-RemoveFile(InputFile="Results\Test_CalculateDiversionStationEfficiencies_out.txt")
+RemoveFile(InputFile="Results\Test_CalculateDiversionStationEfficiencies_out.dds",IfNotFound=Ignore)
+RemoveFile(InputFile="Results\Test_CalculateDiversionStationEfficiencies_out.txt",IfNotFound=Ignore)
 SetOutputPeriod(OutputStart="1950-01",OutputEnd="1955-12")
 # Define stations for ID pattern checks
 SetDiversionStation(ID="200505",DemandSource=1,IfNotFound=Add)
@@ -17,5 +17,5 @@ CalculateDiversionStationEfficiencies(ID="*",EffReportFile="Results/Test_Calcula
 # WriteDiversionStationsToStateMod(OutputFile="ExpectedResults/Test_CalculateDiversionStationEfficiencies_out.dds")
 # CalculateDiversionStationEfficiencies(ID="*",EffReportFile="ExpectedResults/Test_CalculateDiversionStationEfficiencies_out.txt")
 WriteDiversionStationsToStateMod(OutputFile="Results/Test_CalculateDiversionStationEfficiencies_out.dds")
-CompareFiles(InputFile1="ExpectedResults/Test_CalculateDiversionStationEfficiencies_out.dds",InputFile2="Results/Test_CalculateDiversionStationEfficiencies_out.dds",WarnIfDifferent=True)
-CompareFiles(InputFile1="ExpectedResults/Test_CalculateDiversionStationEfficiencies_out.txt",InputFile2="Results/Test_CalculateDiversionStationEfficiencies_out.txt",WarnIfDifferent=True)
+CompareFiles(InputFile1="ExpectedResults/Test_CalculateDiversionStationEfficiencies_out.dds",InputFile2="Results/Test_CalculateDiversionStationEfficiencies_out.dds",IfDifferent=Warn)
+CompareFiles(InputFile1="ExpectedResults/Test_CalculateDiversionStationEfficiencies_out.txt",InputFile2="Results/Test_CalculateDiversionStationEfficiencies_out.txt",IfDifferent=Warn)
