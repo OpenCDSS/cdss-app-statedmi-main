@@ -1,0 +1,10 @@
+CDSS products include data and software from State of Colorado sources and from 
+external sources like the U. S. Geological Survey (USGS). The following disclaimer 
+applies to CDSS products:
+
+CDSS products and associated access are under development at this time. Access is 
+provided solely to test and demonstrate CDSS capabilities. In the future, this access 
+may be restricted or offered for a fee. The State assumes no legal liability or 
+responsibility for the accuracy, completeness, or usefulness of any information, 
+apparatus, product, or process disclosed herein. It is the user's responsibility to 
+determine the fitness of the data for a particular purpose.

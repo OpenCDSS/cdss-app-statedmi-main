@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.junit.launchconfig">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/cdss-app-statedmi/test/unit/src/DWR/DMI/StateDMI/StateDMITestSuite.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>
+<listAttribute key="org.eclipse.debug.ui.favoriteGroups">
+<listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.hyades.trace.ui.ATTR_DATA_COLLECTOR" value="org.eclipse.tptp.trace.ui.jvmpiMechanism:org.eclipse.tptp.analysisType.methodCoverage"/>
+<stringAttribute key="org.eclipse.hyades.trace.ui.ATTR_DESTINATION_FILE" value=""/>
+<stringAttribute key="org.eclipse.hyades.trace.ui.ATTR_DESTINATION_MONITOR" value="DefaultMonitor"/>
+<stringAttribute key="org.eclipse.hyades.trace.ui.ATTR_DESTINATION_PROJECT" value="ProfileProject"/>
+<intAttribute key="org.eclipse.hyades.trace.ui.ATTR_EXEC_POLLING_FREQ" value="60"/>
+<booleanAttribute key="org.eclipse.hyades.trace.ui.ATTR_EXEC_POLLING_FREQ_MODE" value="true"/>
+<booleanAttribute key="org.eclipse.hyades.trace.ui.ATTR_PROFILE_TO_FILE" value="false"/>
+<stringAttribute key="org.eclipse.hyades.trace.ui.ATTR_PROFILING_SET" value="tptp-dummy-profiling-set-StateDMITestSuite"/>
+<booleanAttribute key="org.eclipse.hyades.trace.ui.ATTR_SHOW_EXECUTION_FLOW" value="false"/>
+<booleanAttribute key="org.eclipse.hyades.trace.ui.ATTR_SHOW_EXEC_BOUNDARY_CLASS" value="false"/>
+<intAttribute key="org.eclipse.hyades.trace.ui.ATTR_SHOW_EXEC_BOUNDARY_CLASS_DEPTH" value="1"/>
+<booleanAttribute key="org.eclipse.hyades.trace.ui.ATTR_SHOW_EXEC_CPU_TIME" value="true"/>
+<booleanAttribute key="org.eclipse.hyades.trace.ui.ATTR_SHOW_EXEC_INSTANCES" value="false"/>
+<stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value=""/>
+<booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
+<stringAttribute key="org.eclipse.jdt.junit.TESTNAME" value=""/>
+<stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit3"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="DWR.DMI.StateDMI.StateDMITestSuite"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="cdss-app-statedmi"/>
+</launchConfiguration>

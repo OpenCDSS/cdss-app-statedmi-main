@@ -1,0 +1,6 @@
+<project name="nb" basedir="../">
+    
+    <import file="../../rtibuild/common-nb.xml"/>
+    <import file="../conf/build.xml"/>
+
+</project>
