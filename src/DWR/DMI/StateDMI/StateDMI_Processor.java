@@ -4891,7 +4891,7 @@ so that a warning can be printed using warnAboutDataMatches().
 protected void findAndAddSMConsumptiveWaterRequirementTSMonthly ( MonthTS ts, boolean replace )
 {	String id = ts.getLocation();
 
-	int pos = TSUtil.indexOf( __SMConsumptiveWaterRequirementTSMonthlyList, id, "Location", -1, 1 );
+	int pos = TSUtil.indexOf( __SMConsumptiveWaterRequirementTSMonthlyList, id, "Location", null, 1 );
 	if ( pos >= 0 ) {
 		// The ts is already in the list...
 		__SMConsumptiveWaterRequirementTSMonthly_match_Vector.add(id);
@@ -4969,7 +4969,7 @@ so that a warning can be printed using warnAboutDataMatches().
 protected void findAndAddSMDemandTSMonthly ( MonthTS ts, boolean replace )
 {	String id = ts.getLocation();
 
-	int pos = TSUtil.indexOf( __SMDemandTSMonthlyList, id, "Location", -1, 1 );
+	int pos = TSUtil.indexOf( __SMDemandTSMonthlyList, id, "Location", null, 1 );
 	if ( pos >= 0 ) {
 		// The ts is already in the list...
 		__SMDemandTSMonthly_match_Vector.add(id);
@@ -5056,7 +5056,7 @@ protected void findAndAddSMDiversionTSMonthly ( MonthTS ts, boolean replace )
 	}
 	String id = ts.getLocation();
 
-	int pos = TSUtil.indexOf( __SMDiversionTSMonthlyList, id, "Location", -1, 1 );
+	int pos = TSUtil.indexOf( __SMDiversionTSMonthlyList, id, "Location", null, 1 );
 	if ( pos >= 0 ) {
 		// The ts is already in the list...
 		__SMDiversionTSMonthly_match_Vector.add(id);
@@ -5083,7 +5083,7 @@ protected void findAndAddSMDiversionTSMonthly2 ( MonthTS ts, boolean replace )
 	}
 	String id = ts.getLocation();
 
-	int pos = TSUtil.indexOf( __SMDiversionTSMonthly2List, id, "Location", -1, 1 );
+	int pos = TSUtil.indexOf( __SMDiversionTSMonthly2List, id, "Location", null, 1 );
 	if ( pos >= 0 ) {
 		// The ts is already in the list...
 		if ( replace ) {
@@ -5131,7 +5131,7 @@ so that a warning can be printed using warnAboutDataMatches().
 protected void findAndAddSMInstreamFlowDemandTSAverageMonthly ( MonthTS ts, boolean replace )
 {	String id = ts.getLocation();
 
-	int pos = TSUtil.indexOf( __SMInstreamFlowDemandTSAverageMonthlyList, id, "Location", -1, 1 );
+	int pos = TSUtil.indexOf( __SMInstreamFlowDemandTSAverageMonthlyList, id, "Location", null, 1 );
 	if ( pos >= 0 ) {
 		// The ts is already in the list...
 		__SMInstreamFlowDemandTSAverageMonthly_match_Vector.add(id);
@@ -5532,7 +5532,7 @@ so that a warning can be printed using warnAboutDataMatches().
 protected void findAndAddSMWellDemandTSMonthly ( MonthTS ts, boolean replace )
 {	String id = ts.getLocation();
 
-	int pos = TSUtil.indexOf( __SMWellDemandTSMonthlyList, id, "Location", -1, 1 );
+	int pos = TSUtil.indexOf( __SMWellDemandTSMonthlyList, id, "Location", null, 1 );
 	if ( pos >= 0 ) {
 		// The ts is already in the list...
 		__SMWellDemandTSMonthly_match_Vector.add(id);
@@ -5558,7 +5558,7 @@ so that a warning can be printed using warnAboutDataMatches().
 protected void findAndAddSMWellHistoricalPumpingTSMonthly(MonthTS ts, boolean replace )
 {	String id = ts.getLocation();
 
-	int pos = TSUtil.indexOf( __SMWellHistoricalPumpingTSMonthlyList, id, "Location", -1, 1 );
+	int pos = TSUtil.indexOf( __SMWellHistoricalPumpingTSMonthlyList, id, "Location", null, 1 );
 	if ( pos >= 0 ) {
 		// The ts is already in the list...
 		__SMWellHistoricalPumpingTSMonthly_match_Vector.add(id);

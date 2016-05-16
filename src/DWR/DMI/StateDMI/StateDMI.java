@@ -338,7 +338,7 @@ public class StateDMI extends JApplet
 {
 
 public static final String PROGRAM_NAME = "StateDMI";
-public static final String PROGRAM_VERSION = "3.12.02 (2013-04-17)";
+public static final String PROGRAM_VERSION = "4.00.00 (2016-05-15)";
 
 /**
 Interface for StateCU commands.
@@ -519,6 +519,14 @@ public static void main ( String args[] )
 	
 		IOUtil.setProgramData ( PROGRAM_NAME, PROGRAM_VERSION, args );
 		JGUIUtil.setAppNameForWindows("StateDMI");
+		
+	    // Set properties for testing.
+	    // TODO SAM 2016-05-15 This needs to go into a StateDMI.cfg file
+	    String diffProg = "C:\\Program Files\\KDiff3\\kdiff3.exe";
+	    File f = new File ( diffProg );
+	    if ( f.exists() && f.canExecute() ) {
+	    	IOUtil.setProp("DiffProgram", diffProg);
+	    }
 	
 		// Note that messages will not be printed to the log file until the log file is opened below.
 	

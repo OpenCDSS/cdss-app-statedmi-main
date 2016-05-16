@@ -53,7 +53,7 @@ protected final String _Fail = "Fail";
 /**
 Values for MonthValues, created in checkCommandParamers() and used when running.
 */
-private double [] __MonthValues_double = null;
+private Double [] __MonthValues_double = null;
 
 /**
 Start of set period.
@@ -124,7 +124,7 @@ throws InvalidCommandParameterException
 			}
 			else {
 				String val;
-				__MonthValues_double = new double[12];
+				__MonthValues_double = new Double[12];
 				for ( int i = 0; i < 12; i++ ) {
 					val = (String)v.get(i);
 					if ( !StringUtil.isDouble(val) ) {

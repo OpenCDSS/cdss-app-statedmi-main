@@ -16,8 +16,8 @@ import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_PenmanMonteith;
 import DWR.StateCU.StateCU_Util;
 import DWR.StateMod.StateMod_TS;
-
 import RTi.TS.MonthTS;
+import RTi.TS.TS;
 import RTi.TS.YearTS;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
@@ -339,7 +339,7 @@ throws Exception
 	processor.resetDataMatches ( processor.getStateModConsumptiveWaterRequirementTSMonthlyMatchList() );
 
 	// If an exception is thrown, let the calling code catch it...
-	List<MonthTS> cwrList = StateMod_TS.readTimeSeriesList (
+	List<TS> cwrList = StateMod_TS.readTimeSeriesList (
 		InputFile_full, OutputStart_DateTime, OutputEnd_DateTime, null, true );
 
 	int size = cwrList.size();
@@ -350,7 +350,7 @@ throws Exception
 
 	MonthTS ts;
 	for ( int i = 0; i < size; i++ ) {
-		ts = cwrList.get(i);
+		ts = (MonthTS)cwrList.get(i);
 		// Replace or add time series list...
 		processor.findAndAddSMConsumptiveWaterRequirementTSMonthly ( ts, true );
 	}

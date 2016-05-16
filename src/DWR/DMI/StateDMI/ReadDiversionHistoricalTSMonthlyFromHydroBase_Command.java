@@ -290,6 +290,32 @@ throws InvalidCommandParameterException
 }
 
 /**
+Creates a Property List with information needed to fill a Time Series with a constant value.
+@param inputTS Time Series to fill.
+@param value Constant used to fill the Time Series.
+@param fillFlag the flag to use for filled values.
+@param fillFlagDesc description for the fill flag
+@return PropList List that contains information on filling a constant value for the given Time Series and dates.
+ */
+private PropList createFillConstantPropList( TS inputTS, String fillFlag, String fillFlagDesc)
+{
+	if( inputTS == null ) {
+		return null;
+	}
+	
+	// Create the PropList
+	PropList prop = new PropList( "List to fill TS with constant value");
+	if ( fillFlag != null && !fillFlag.equals("") ) {
+		prop.add( "FillFlag=" + fillFlag);
+	}
+	if ( fillFlagDesc != null && !fillFlagDesc.equals("") ) {
+		prop.add( "FillFlagDescription=" + fillFlagDesc);
+	}
+	
+	return prop;
+}
+
+/**
 Edit the command.
 @param parent The parent JFrame to which the command dialog will belong.
 @return true if the command was edited (e.g., "OK" was pressed), and false if
@@ -377,10 +403,10 @@ private int fillUsingCIUFlag ( TS ts, HydroBaseDMI hbdmi,
 		// Fill missing data values at end of period with zeros
 		try {
 			// get the nearest data point from the end of the period
-			TSData tmpTSData = TSUtil.findNearestDataPoint(ts, start, end, true);	//reverse
+			TSData tmpTSData = TSUtil.findNearestDataPoint(ts, start, end, true); //reverse
 			if( tmpTSData != null) {
-				PropList const_prop = HydroBase_Util.createFillConstantPropList(ts,
-					fillValue, fillFlag, tmpTSData.getDate(), ts.getDate2());
+				String fillDesc = ""; // TODO SAM 2016-05-15 could set this to something useful
+				PropList const_prop = createFillConstantPropList(ts, fillFlag, fillDesc );
 				// fill time series with zeros from last non-missing value
 				// until the end of the period.
 				TSUtil.fillConstant(ts, start, end, 0, const_prop);
@@ -404,8 +430,8 @@ private int fillUsingCIUFlag ( TS ts, HydroBaseDMI hbdmi,
 			TSData tmpTSData = TSUtil.findNearestDataPoint(ts, start, end, false);
 			if( tmpTSData != null) {
 				// Create propList for fill command
-				PropList const_prop = HydroBase_Util.createFillConstantPropList(ts,
-					fillValue, fillFlag, ts.getDate1(), tmpTSData.getDate());
+				String fillDesc = ""; // TODO SAM 2016-05-15 could set this to something useful
+				PropList const_prop = createFillConstantPropList(ts, fillFlag, fillDesc );
 				// fill time series with zero's from first non-missing value
 				// until the beginning of the period.
 				TSUtil.fillConstant(ts, start, end, 0, const_prop);

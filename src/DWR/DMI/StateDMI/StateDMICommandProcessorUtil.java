@@ -12,6 +12,7 @@ import java.util.Vector;
 import RTi.TS.TS;
 import RTi.TS.TSEnsemble;
 import RTi.TS.TSUtil;
+import RTi.TS.TSUtil_SortTimeSeries;
 import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandException;
 import RTi.Util.IO.CommandLogRecord;
@@ -610,6 +611,7 @@ time identifiers to editor dialogs, using information determined during discover
 @return a List of pattern time series.
 */
 public static List getPatternTSListFromCommandsBeforeCommand( StateDMI_Processor processor, Command command )
+throws Exception
 {   //String routine = "TSCommandProcessorUtil.getPatternTSFromCommandsBeforeCommand";
     // Get the position of the command in the list...
     int pos = processor.indexOf(command);
@@ -638,6 +640,7 @@ Time series are determined as follows:
 @param List of pattern time series provided by commands.
 */
 protected static List getPatternTSListFromCommands ( List commands )
+throws Exception
 {   if ( commands == null ) {
         return new Vector();
     }
@@ -661,7 +664,8 @@ protected static List getPatternTSListFromCommands ( List commands )
         }
     }
     // Sort the time series by identifier...
-    TSUtil.sort(v);
+    TSUtil_SortTimeSeries tsu = new TSUtil_SortTimeSeries(v,"TSID",null,null,1);
+    v = tsu.sortTimeSeries();
     return v;
 }
 

@@ -9,8 +9,8 @@ import java.util.Vector;
 import DWR.StateCU.StateCU_Util;
 import DWR.StateMod.StateMod_Right_Comparator;
 import DWR.StateMod.StateMod_Util;
-
 import RTi.TS.TSUtil;
+import RTi.TS.TSUtil_SortTimeSeries;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.IO.Command;
@@ -326,13 +326,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		else if ( this instanceof SortDiversionHistoricalTSMonthly_Command ) {
 			// Sort by time series identifier.
 			Message.printStatus ( 2, routine, "Sorting time series using the time series identifier..." );
-			sortedDataList = TSUtil.sort ( dataList );
+		    TSUtil_SortTimeSeries tsu = new TSUtil_SortTimeSeries(dataList,"TSID",null,null,1);
+		    sortedDataList = tsu.sortTimeSeries();
 			processor.setPropContents( "StateMod_DiversionHistoricalTSMonthly_List", sortedDataList);
 		}
 		else if ( this instanceof SortDiversionDemandTSMonthly_Command) {
 			// Sort by time series identifier.
 			Message.printStatus ( 2, routine, "Sorting time series using the time series identifier..." );
-			sortedDataList = TSUtil.sort ( dataList );
+		    TSUtil_SortTimeSeries tsu = new TSUtil_SortTimeSeries(dataList,"TSID",null,null,1);
+		    sortedDataList = tsu.sortTimeSeries();
 			processor.setPropContents( "StateMod_DiversionDemandTSMonthly_List", sortedDataList);
 		}
 		else if ( this instanceof SortReservoirStations_Command ) {
@@ -376,13 +378,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		else if ( this instanceof SortWellHistoricalPumpingTSMonthly_Command ) {
 			// Sort by time series identifier.
 			Message.printStatus ( 2, routine, "Sorting time series using the time series identifier..." );
-			sortedDataList = TSUtil.sort ( dataList );
+		    TSUtil_SortTimeSeries tsu = new TSUtil_SortTimeSeries(dataList,"TSID",null,null,1);
+		    sortedDataList = tsu.sortTimeSeries();
 			processor.setPropContents( "StateMod_WellHistoricalPumpingTSMonthly_List", sortedDataList);
 		}
 		else if ( this instanceof SortWellDemandTSMonthly_Command ) {
 			// Sort by time series identifier.
 			Message.printStatus ( 2, routine, "Sorting time series using the time series identifier..." );
-			sortedDataList = TSUtil.sort ( dataList );
+		    TSUtil_SortTimeSeries tsu = new TSUtil_SortTimeSeries(dataList,"TSID",null,null,1);
+		    sortedDataList = tsu.sortTimeSeries();
 			processor.setPropContents( "StateMod_WellDemandTSMonthly_List", sortedDataList);
 		}
 		else if ( this instanceof SortStreamEstimateStations_Command ) {

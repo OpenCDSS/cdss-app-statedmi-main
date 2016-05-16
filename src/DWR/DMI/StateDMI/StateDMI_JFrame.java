@@ -5633,14 +5633,15 @@ public void actionPerformed ( ActionEvent event )
 		"Developed with StateMod Version 12.29 (2009-08-12)\n" +
 		"Developed with StateCU Version 12\n" +
 		"\n" +
-		"Developed by Riverside Technology, inc.\n" +
+		"Developed by the Open Water Foundation\n" +
 		"\n" +
 		"Funded by:\n" +
 		"Colorado Division of Water Resources\n" +
 		"Colorado Water Conservation Board\n" +
 		"\n" +
 		"Send comments to\n" +
-		"cdss@state.co.us";
+		"cdss@state.co.us\n" +
+		"steve.malers@openwaterfoundation.org";
 		new HelpAboutJDialog (this, "About StateDMI", helpString, true );
 	}
 	else if ( command.equals ( __Help_ViewDocumentation_String )) {
@@ -9439,7 +9440,7 @@ Initialize GUI components including menus and the main interfaces.
 */
 private void ui_InitGUI ()
 {	String routine = "StateDMI_JFrame.initGUI";
-	int initial_height = 700, initial_width = 800;
+	int initial_height = 900, initial_width = 1000;
 
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
 
@@ -14132,7 +14133,7 @@ private void uiAction_RunCommands_ShowResultsProblems()
 	//Message.printStatus ( 2, routine, "Entering method.");
 	try {
 		// Get all of the command log messages from all commands for all run phases...
-		List logRecordList = CommandStatusUtil.getLogRecordList ( __statedmiProcessor.getCommands(), null );
+		List logRecordList = CommandStatusUtil.getLogRecordList ( __statedmiProcessor.getCommands(), null, null );
 		Message.printStatus( 2, routine, "There were " + logRecordList.size() + " problems processing the commands.");
 		// Create a new table model for the problem list.
 		// TODO SAM 2009-03-01 Evaluate whether should just update data in existing table model (performance?)

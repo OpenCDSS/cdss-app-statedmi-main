@@ -18,7 +18,6 @@ import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
 import DWR.StateMod.StateMod_Parcel;
 import DWR.StateMod.StateMod_Well;
 import DWR.StateMod.StateMod_WellRight;
-
 import RTi.Util.Math.MathUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
@@ -34,6 +33,7 @@ import RTi.Util.IO.InvalidCommandParameterException;
 import RTi.Util.IO.PropList;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
+import RTi.Util.Time.TimeZoneDefaultType;
 
 /**
 <p>
@@ -1249,7 +1249,8 @@ CommandWarningException, CommandException
 	try {
 		HydroBase_AdministrationNumber an = new HydroBase_AdministrationNumber ( default_admin_number );
 		DateTime dt = an.getAppropriationDate();
-		default_appro_Date = dt.getDate();
+		// This goes to day precision so time zone is irrelevant
+		default_appro_Date = dt.getDate(TimeZoneDefaultType.LOCAL);
 	}
 	catch ( Exception e ) {
 		message = "Error converting default administration number " +
@@ -1268,7 +1269,7 @@ CommandWarningException, CommandException
 			DateTime dt = DateTime.parse(DefaultAppropriationDate);
 				HydroBase_AdministrationNumber an = new HydroBase_AdministrationNumber ( dt );
 			default_admin_number = an.getAdminNumber();
-			default_appro_Date = dt.getDate ();
+			default_appro_Date = dt.getDate (TimeZoneDefaultType.LOCAL);
 			Message.printStatus ( 2, routine, "If well right/permit does not have a date, then " +
 			DefaultAppropriationDate + " (" +
 			StringUtil.formatString(default_admin_number,"%.5f")+ ") will be used." );

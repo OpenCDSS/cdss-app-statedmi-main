@@ -29,8 +29,8 @@ import DWR.StateMod.StateMod_TS;
 import DWR.StateMod.StateMod_Util;
 import DWR.StateMod.StateMod_Well;
 import DWR.StateMod.StateMod_WellRight;
-
 import RTi.TS.MonthTS;
+import RTi.TS.TS;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.IO.Command;
@@ -478,7 +478,7 @@ throws Exception
 	processor.resetDataMatches ( processor.getStateModDiversionDemandTSMonthlyMatchList() );
 
 	// If an exception is thrown, let the calling code catch it...
-	List<MonthTS> ddmList = StateMod_TS.readTimeSeriesList (
+	List<TS> ddmList = StateMod_TS.readTimeSeriesList (
 		InputFile_full, OutputStart_DateTime, OutputEnd_DateTime, null, true );
 
 	int size = ddmList.size();
@@ -488,7 +488,7 @@ throws Exception
 
 	MonthTS ts;
 	for ( int i = 0; i < size; i++ ) {
-		ts = ddmList.get(i);
+		ts = (MonthTS)ddmList.get(i);
 		// Replace or add time series list...
 		processor.findAndAddSMDemandTSMonthly ( ts, true );
 	}
@@ -516,7 +516,7 @@ throws Exception
 	processor.resetDataMatches ( processor.getStateModDiversionHistoricalTSMonthlyMatchList() );
 
 	// If an exception is thrown, let the calling code catch it...
-	List<MonthTS> ddhList = StateMod_TS.readTimeSeriesList (
+	List<TS> ddhList = StateMod_TS.readTimeSeriesList (
 		InputFile_full, OutputStart_DateTime, OutputEnd_DateTime, null, true );
 
 	int size = ddhList.size();
@@ -527,7 +527,7 @@ throws Exception
 
 	MonthTS ts;
 	for ( int i = 0; i < size; i++ ) {
-		ts = ddhList.get(i);
+		ts = (MonthTS)ddhList.get(i);
 		// Replace or add in the diversion time series list...
 		processor.findAndAddSMDiversionTSMonthly ( ts, true );
 	}
@@ -632,7 +632,7 @@ throws Exception
 	processor.resetDataMatches ( processor.getStateModInstreamFlowDemandTSAverageMonthlyMatchList() );
 
 	// If an exception is thrown, let the calling code catch it...
-	List<MonthTS> ifaList = StateMod_TS.readTimeSeriesList (
+	List<TS> ifaList = StateMod_TS.readTimeSeriesList (
 		InputFile_full, null, null, null, true );
 
 	int size = ifaList.size();
@@ -642,7 +642,7 @@ throws Exception
 
 	MonthTS ts;
 	for ( int i = 0; i < size; i++ ) {
-		ts = ifaList.get(i);
+		ts = (MonthTS)ifaList.get(i);
 		// Replace or add time series list...
 		processor.findAndAddSMInstreamFlowDemandTSAverageMonthly ( ts, true );
 	}
@@ -1239,7 +1239,7 @@ throws Exception
 	processor.resetDataMatches ( processor.getStateModWellDemandTSMonthlyMatchList() );
 
 	// If an exception is thrown, let the calling code catch it...
-	List<MonthTS> wemList = StateMod_TS.readTimeSeriesList (
+	List<TS> wemList = StateMod_TS.readTimeSeriesList (
 		InputFile_full, OutputStart_DateTime, OutputEnd_DateTime, null, true );
 
 	int size = wemList.size();
@@ -1252,7 +1252,7 @@ throws Exception
 	String id = null;
 	int pos = 0;
 	for ( int i = 0; i < size; i++ ) {
-		ts = wemList.get(i);
+		ts = (MonthTS)wemList.get(i);
 		id = ts.getLocation();
 		// Find the associated well...
 		pos = StateMod_Util.indexOf( wellList,id );
@@ -1301,7 +1301,7 @@ throws Exception
 	processor.resetDataMatches ( processor.getStateModWellHistoricalPumpingTSMonthlyMatchList() );
 
 	// If an exception is thrown, let the calling code catch it...
-	List<MonthTS> wehList = StateMod_TS.readTimeSeriesList (
+	List<TS> wehList = StateMod_TS.readTimeSeriesList (
 		InputFile_full, OutputStart_DateTime, OutputEnd_DateTime, null, true );
 
 	int size = wehList.size();
@@ -1312,7 +1312,7 @@ throws Exception
 	MonthTS ts;
 	String id = null;
 	for ( int i = 0; i < size; i++ ) {
-		ts = wehList.get(i);
+		ts = (MonthTS)wehList.get(i);
 		id = ts.getLocation();
 		if ( IgnoreDiversions_boolean  ) {
 			// If the ID is not in the well stations file, ignore the time series...
