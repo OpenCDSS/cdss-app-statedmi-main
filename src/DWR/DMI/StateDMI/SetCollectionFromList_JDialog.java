@@ -60,6 +60,7 @@ private JTextField __Div_JTextField = null;
 private SimpleJComboBox __IDCol_JComboBox = null;
 private SimpleJComboBox __NameCol_JComboBox = null;
 private SimpleJComboBox __PartIDsCol_JComboBox = null;
+private JTextField __PartIDTypeColumn_JTextField = null;
 private SimpleJComboBox __PartsListedHow_JComboBox = null;
 private SimpleJComboBox __PartIDsColMax_JComboBox = null;
 private SimpleJComboBox	__IfNotFound_JComboBox = null;
@@ -165,6 +166,7 @@ private void checkInput () {
 	String IDCol = __IDCol_JComboBox.getSelected();
 	String NameCol = __NameCol_JComboBox.getSelected();
 	String PartIDsCol = __PartIDsCol_JComboBox.getSelected();
+	String PartIDTypeColumn = __PartIDTypeColumn_JTextField.getText().trim();
 	String PartsListedHow = __PartsListedHow_JComboBox.getSelected();
 	String PartIDsColMax = __PartIDsColMax_JComboBox.getSelected();
 	String IfNotFound = __IfNotFound_JComboBox.getSelected();
@@ -180,6 +182,9 @@ private void checkInput () {
 	}
 	if ( PartIDsCol.length() > 0 ) {
 		props.set("PartIDsCol", PartIDsCol);
+	}
+	if ( PartIDTypeColumn.length() > 0 ) {
+		props.set("PartIDTypeColumn", PartIDTypeColumn);
 	}
 	if ( PartsListedHow.length() > 0 ) {
 		props.set("PartsListedHow", PartsListedHow);
@@ -259,6 +264,7 @@ private void commitEdits()
 	String IDCol = __IDCol_JComboBox.getSelected();
 	String NameCol = __NameCol_JComboBox.getSelected();
 	String PartIDsCol = __PartIDsCol_JComboBox.getSelected();
+	String PartIDTypeColumn = __PartIDTypeColumn_JTextField.getText().trim();
 	String PartsListedHow = __PartsListedHow_JComboBox.getSelected();
 	String PartIDsColMax = __PartIDsColMax_JComboBox.getSelected();
 	String IfNotFound = __IfNotFound_JComboBox.getSelected();
@@ -267,6 +273,7 @@ private void commitEdits()
 	__command.setCommandParameter("IDCol", IDCol);
 	__command.setCommandParameter("NameCol", NameCol);
 	__command.setCommandParameter("PartIDsCol", PartIDsCol);
+	__command.setCommandParameter("PartIDTypeColumn", PartIDTypeColumn);
 	__command.setCommandParameter("PartsListedHow", PartsListedHow);
 	__command.setCommandParameter("PartIDsColMax", PartIDsColMax);
 	__command.setCommandParameter("IfNotFound", IfNotFound);
@@ -344,15 +351,22 @@ private void initialize ( JFrame parent, Command command )
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
 	getContentPane().add ("North", main_JPanel);
-	int y = 0;
+	int y = -1;
 
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
-	int yy = 0;
+	int yy = -1;
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sets a " + __nodeType + " " + __collectionType +
 		" location's information from a list file." ),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    if ( __command instanceof SetWellAggregateFromList_Command ) {
+		// Not really relevant for other station types.
+		JGUIUtil.addComponent(paragraph, new JLabel (
+    	"<html><b>The aggregate part type \"" + StateMod_Well.COLLECTION_PART_TYPE_PARCEL +
+    	"\" is provided for historical compatibility but is being phased out in favor of using Well with WDID and Receipt.</b></html>"),
+    	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+	}
 	if ( __collectionType.equalsIgnoreCase(StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT) ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
 		"A \"MultiStruct\" is used when demands are met using water from different tributaries." ),
@@ -413,7 +427,7 @@ private void initialize ( JFrame parent, Command command )
 		}
 		else if ( __nodeType.equalsIgnoreCase(__command._Well) ) {
 			JGUIUtil.addComponent(paragraph, new JLabel (
-			"For example, well-only parcels may be grouped as a single identifier."),
+			"For example, well-only groups of wells or parcels may be grouped as a single identifier."),
 			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         	JGUIUtil.addComponent(paragraph, new JLabel (
         	"Wells associated with ditches are grouped by specifying ditch identifiers for the parts."),
@@ -423,7 +437,7 @@ private void initialize ( JFrame parent, Command command )
 			" parts and indicate the year and water division for the parcel data."),
 			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         	JGUIUtil.addComponent(paragraph, new JLabel (
-			"When grouping wells using well identifiers, specify a list of well WDIDs or P:receipt for permits."),
+			"When grouping wells using well identifiers (WDIDs or permit receipt numbers), specify the column for PartIdTypeColumn."),
 			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 		}
 	}
@@ -446,7 +460,7 @@ private void initialize ( JFrame parent, Command command )
 	}
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
-		0, y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("List file:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -483,8 +497,7 @@ private void initialize ( JFrame parent, Command command )
        	JGUIUtil.addComponent(main_JPanel, __Year_JTextField,
 			1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
         JGUIUtil.addComponent(main_JPanel, new JLabel (
-			"Required if part type is " + __command._Ditch + " or " +
-			__command._Parcel + " - year for the parcels."),
+			"Required if part type is " + __command._Parcel + " - year for the parcels."),
 			3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
         JGUIUtil.addComponent(main_JPanel, new JLabel ("Water division (Div):"),
@@ -494,8 +507,7 @@ private void initialize ( JFrame parent, Command command )
     	JGUIUtil.addComponent(main_JPanel, __Div_JTextField,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     	JGUIUtil.addComponent(main_JPanel, new JLabel (
-		"Required if part type is " + __command._Ditch + " or " +
-			__command._Parcel + " - water division for the parcels."),
+		"Required if part type is " + __command._Parcel + " - water division for the parcels."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 	}
 
@@ -536,6 +548,20 @@ private void initialize ( JFrame parent, Command command )
    	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Required - first/only column for the part IDs."), 
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+   	
+   	if ( (__command instanceof SetWellAggregateFromList_Command) || (__command instanceof SetWellSystemFromList_Command) ) {
+	    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Part ID type column:"),
+			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+		__PartIDTypeColumn_JTextField = new JTextField(10);
+		__PartIDTypeColumn_JTextField.setToolTipText("Column name or number for the part ID type - column value will be " +
+			StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_WDID + " or " + StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_RECEIPT );
+		__PartIDTypeColumn_JTextField.addKeyListener (this);
+		JGUIUtil.addComponent(main_JPanel, __PartIDTypeColumn_JTextField,
+			1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	   	JGUIUtil.addComponent(main_JPanel, new JLabel (
+			"Required for " + StateMod_Well.COLLECTION_PART_TYPE_WELL + " " + __collectionType + " part type."), 
+			3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+   	}
    	
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Parts listed how:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -665,6 +691,7 @@ private void refresh ()
 	String IDCol = "";
 	String NameCol = "";
 	String PartIDsCol = "";
+	String PartIDTypeColumn = "";
 	String PartIDsColMax = "";
 	String PartsListedHow = "";
 	String IfNotFound = "";
@@ -682,6 +709,7 @@ private void refresh ()
 		IDCol = parameters.getValue ( "IDCol" );
 		NameCol = parameters.getValue ( "NameCol" );
 		PartIDsCol = parameters.getValue ( "PartIDsCol" );
+		PartIDTypeColumn = parameters.getValue ( "PartIDTypeColumn" );
 		PartsListedHow = parameters.getValue ( "PartsListedHow" );
 		PartIDsColMax = parameters.getValue ( "PartIDsColMax" );
 		IfNotFound = parameters.getValue ( "IfNotFound" );
@@ -760,6 +788,9 @@ private void refresh ()
 				__error_wait = true;
 			}
 		}
+		if ( PartIDTypeColumn != null ) {
+			__PartIDTypeColumn_JTextField.setText (PartIDTypeColumn);
+		}
 		if ( PartsListedHow == null ) {
 			// Select default...
 			__PartsListedHow_JComboBox.select ( 0 );
@@ -830,12 +861,14 @@ private void refresh ()
 	IDCol = __IDCol_JComboBox.getSelected();
 	NameCol = __NameCol_JComboBox.getSelected();
 	PartIDsCol = __PartIDsCol_JComboBox.getSelected();
+	PartIDTypeColumn = __PartIDTypeColumn_JTextField.getText().trim();
 	PartIDsColMax = __PartIDsColMax_JComboBox.getSelected();
 	PartsListedHow = __PartsListedHow_JComboBox.getSelected();
 	IfNotFound = __IfNotFound_JComboBox.getSelected();
 	parameters.add("IDCol=" + IDCol);
 	parameters.add("NameCol=" + NameCol);
 	parameters.add("PartIDsCol=" + PartIDsCol);
+	parameters.add("PartIDTypeColumn=" + PartIDTypeColumn);
 	parameters.add("PartIDsColMax=" + PartIDsColMax);
 	parameters.add("PartsListedHow=" + PartsListedHow);
 	parameters.add("IfNotFound=" + IfNotFound);

@@ -8,4 +8,4 @@ SetWellAggregateFromList(ListFile="Data\aggregates.csv",Year=1998,Div=3,PartType
 # Uncomment the following command to regenerate the expected results.
 # WriteWellStationsToList(OutputFile="ExpectedResults/Test_SetWellAggregateFromList_WellStations_out.csv")
 WriteWellStationsToList(OutputFile="Results/Test_SetWellAggregateFromList_WellStations_out.csv")
-CompareFiles(InputFile1="ExpectedResults/Test_SetWellAggregateFromList_WellStations_out_Collections.csv",InputFile2="Results/Test_SetWellAggregateFromList_WellStations_out_Collections.csv",WarnIfDifferent=True)
+CompareFiles(InputFile1="ExpectedResults/Test_SetWellAggregateFromList_WellStations_out_Collections.csv",InputFile2="Results/Test_SetWellAggregateFromList_WellStations_out_Collections.csv",IfDifferent=Warn)

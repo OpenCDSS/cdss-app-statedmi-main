@@ -1008,7 +1008,7 @@ CommandWarningException, CommandException
 					Message.printStatus ( 2, routine, Loctype + " \"" + id +
 					"\" is associated with a collection of parcels..." );
 					// Aggregate or system, by parcel...
-					parts = culoc.getCollectionPartIDs(parcel_year);
+					parts = culoc.getCollectionPartIDsForYear(parcel_year);
 					warning_count = readHydroBaseIrrigationPracticeTSForParcelList (
 							hbdmi,
 							culoc,
@@ -1033,7 +1033,7 @@ CommandWarningException, CommandException
 						Message.printStatus ( 2, routine, "Location \"" + culoc.getID() + "\" is a " +
 							collection_type + "...processing each part...");
 						// Diversion aggregates are only set once (year is ignored)
-						parts = culoc.getCollectionPartIDs ( parcel_year );
+						parts = culoc.getCollectionPartIDsForYear ( parcel_year );
 					}
 					else {
 						// To reuse code below, just use a single part...

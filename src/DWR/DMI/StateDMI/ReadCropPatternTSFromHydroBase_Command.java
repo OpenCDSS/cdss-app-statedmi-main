@@ -545,7 +545,7 @@ CommandWarningException, CommandException
 					// aggregate/systems are not allowed to vary over time so request the aggregate
 					// information for year 0...
 	
-					collection_ids = culoc.getCollectionPartIDs(0);
+					collection_ids = culoc.getCollectionPartIDsForYear(0);
 					collection_size = 0;
 					if ( collection_ids != null ) {
 						collection_size = collection_ids.size();
@@ -649,7 +649,7 @@ CommandWarningException, CommandException
 					for ( int iy = 0; iy < collection_years.length; iy++ ) {
 						// Get the parcel IDs for the year of interest...
 						year_DateTime.setYear ( collection_years[iy] );
-						collection_ids = culoc.getCollectionPartIDs(collection_years[iy]);
+						collection_ids = culoc.getCollectionPartIDsForYear(collection_years[iy]);
 						collection_size = 0;
 						collection_ids_array = null;
 						if ( collection_ids != null ) {

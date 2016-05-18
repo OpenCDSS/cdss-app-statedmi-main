@@ -375,7 +375,7 @@ private void initialize (JFrame parent, Command command )
 		__Year_JTextField.addKeyListener (this);
        	JGUIUtil.addComponent(main_JPanel, __Year_JTextField,
 			1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-       	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Required for part type + __command._Parcel +" +
+       	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Required for part type " + __command._Parcel +
        		" - year for the parcels."),
 			3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 

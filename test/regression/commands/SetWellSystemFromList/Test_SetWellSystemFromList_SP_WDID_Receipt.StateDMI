@@ -1,0 +1,16 @@
+# Test setting well system from a list file for well stations
+# - system information is set with WDID and receipt numbers (not parcels)
+# - read StateCU locations and StateMod wells so can test both
+StartLog(LogFile="Results/Test_SetWellSystemFromList_SP_WDID_Receipt.StateDMI.log")
+RemoveFile(InputFile="Results\Test_SetWellSystemFromList_SP_WDID_Receipt_outcu_Collections.csv")
+RemoveFile(InputFile="Results\Test_SetWellSystemFromList_SP_WDID_Receipt_out_Collections.csv")
+ReadCULocationsFromStateCU(InputFile="Data\SP2015.str")
+ReadWellStationsFromStateMod(InputFile="Data\SPDSS.wes")
+SetWellSystemFromList(ListFile="Data\SP_GWAgg_04212016.csv",PartType=Well,IDCol=1,PartIDsCol=2,PartIDTypeColumn="3",PartsListedHow=InColumn)
+# Uncomment the following 2 commands to regenerate the expected results.
+# WriteCULocationsToList(OutputFile="ExpectedResults/Test_SetWellSystemFromList_SP_WDID_Receipt_outcu.csv")
+# WriteWellStationsToList(OutputFile="ExpectedResults/Test_SetWellSystemFromList_SP_WDID_Receipt_out.csv")
+WriteCULocationsToList(OutputFile="Results/Test_SetWellSystemFromList_SP_WDID_Receipt_outcu.csv")
+WriteWellStationsToList(OutputFile="Results/Test_SetWellSystemFromList_SP_WDID_Receipt_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_SetWellSystemFromList_SP_WDID_Receipt_outcu_Collections.csv",InputFile2="Results/Test_SetWellSystemFromList_SP_WDID_Receipt_outcu_Collections.csv",IfDifferent=Warn)
+CompareFiles(InputFile1="ExpectedResults/Test_SetWellSystemFromList_SP_WDID_Receipt_out_Collections.csv",InputFile2="Results/Test_SetWellSystemFromList_SP_WDID_Receipt_out_Collections.csv",IfDifferent=Warn)

@@ -1184,18 +1184,14 @@ public static int processTimeSeriesListAfterRead( CommandProcessor processor, Co
 
 /**
 Validate command parameter names and generate standard feedback.  A list of allowed parameter
-names is provided.  If a name is not recognized, it is removed so as to prevent the user from
-continuing.
+names is provided.  If a name is not recognized, it is removed so as to prevent the user from continuing.
 @param valid_Vector List of valid parameter names (others will be flagged as invalid).
 @param command The command being checked.
 @param warning A warning String that is receiving warning messages, for logging.  It
 will be appended to if there are more issues.
 @return the warning string, longer if invalid parameters are detected.
 */
-public static String validateParameterNames (
-		List valid_Vector,
-		Command command,
-		String warning )
+public static String validateParameterNames ( List<String> valid_Vector, Command command, String warning )
 {	if ( command == null ) {
 		return warning;
 	}

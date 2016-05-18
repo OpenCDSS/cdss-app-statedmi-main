@@ -2,6 +2,7 @@ package DWR.DMI.StateDMI;
 
 import javax.swing.JFrame;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -9,7 +10,6 @@ import DWR.StateCU.StateCU_Location;
 import DWR.StateMod.StateMod_Diversion;
 import DWR.StateMod.StateMod_Reservoir;
 import DWR.StateMod.StateMod_Well;
-
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.String.StringUtil;
@@ -25,12 +25,10 @@ import RTi.Util.IO.PropList;
 import RTi.Util.IO.AbstractCommand;
 
 /**
-<p>
 This class initializes, checks, and runs the Set*Aggregate/System() commands (set collection information).
 It is an abstract base class that must be controlled via a derived class.  For example, the
 SetDiversionAggregate() command extends this class in order to uniquely represent the command,
-but much of the functionality is in the base class.
-</p>
+but much of the functionality is in this base class.
 */
 public abstract class SetCollection_Command extends AbstractCommand implements Command
 {
@@ -258,7 +256,7 @@ Run method internal to this class, to handle running in discovery and run mode.
 protected void runCommandInternal ( int command_number, CommandPhaseType command_phase )
 throws InvalidCommandParameterException, CommandWarningException, CommandException
 {
-    String routine = getClass().getName() + ".runCommandInternal", message;
+    String routine = getClass().getSimpleName() + ".runCommandInternal", message;
     int warning_level = 2;
     String command_tag = "" + command_number;
     int warning_count = 0;
@@ -396,7 +394,22 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			continue;
     		}
     		// Have a match so set the data...
-    		List tokens = StringUtil.breakStringList ( PartIDs, ", ", StringUtil.DELIM_SKIP_BLANKS );
+    		List<String> tokens = StringUtil.breakStringList ( PartIDs, ", ", StringUtil.DELIM_SKIP_BLANKS );
+    		List<String> partIdList = new ArrayList<String>();
+    		List<String> partIdTypeList = new ArrayList<String>();
+    		for ( String partId : tokens ) {
+    			// Look for any IDs starting with p: and strip off.
+    			if ( partId.startsWith("p:") ) {
+    				// Assume a receipt number
+    				partIdList.add(partId.substring(2));
+    				partIdTypeList.add(StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_RECEIPT);
+    			}
+    			else {
+    				// Assume a WDID
+    				partIdList.add(partId);
+    				partIdTypeList.add(StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_WDID);
+    			}
+    		}
     		Message.printStatus ( 2, routine,
     			"Setting " + id + " " + collectionType + " parts (" + PartType + ") -> " + tokens );
     		if ( culoc.isCollection() ) {
@@ -418,10 +431,18 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		culoc.setCollectionPartType ( PartType );
     		if ( nodeType.equalsIgnoreCase(_Well) ) {
     			culoc.setCollectionDiv ( Div_int );
-    			culoc.setCollectionPartIDs ( Year_int, tokens );
+    			if ( PartType.equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_PARCEL) ) {
+    				culoc.setCollectionPartIDsForYear ( Year_int, partIdList );
+    			}
+    			else if ( PartType.equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_DITCH) ) {
+    				culoc.setCollectionPartIDs ( partIdList );
+    			}
+    			else if ( PartType.equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_WELL) ) {
+    				culoc.setCollectionPartIDs ( partIdList, partIdTypeList );
+    			}
     		}
     		else {
-    			culoc.setCollectionPartIDs ( tokens );
+    			culoc.setCollectionPartIDs ( partIdList );
     		}
     		matchFound = true;
     		break;
@@ -522,9 +543,24 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				continue;
     			}
     			// Have a match so set the data...
-    			List tokens = StringUtil.breakStringList ( PartIDs, ", ", StringUtil.DELIM_SKIP_BLANKS );
+    			List<String> tokens = StringUtil.breakStringList ( PartIDs, ", ", StringUtil.DELIM_SKIP_BLANKS );
     			Message.printStatus ( 2, routine,
     				"Setting " + id + " " + collectionType + " parts (" + PartType + ") -> " + tokens );
+        		List<String> partIdList = new ArrayList<String>();
+        		List<String> partIdTypeList = new ArrayList<String>();
+        		for ( String partId : tokens ) {
+        			// Look for any IDs starting with p: and strip off.
+        			if ( partId.startsWith("p:") ) {
+        				// Assume a receipt number
+        				partIdList.add(partId.substring(2));
+        				partIdTypeList.add(StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_RECEIPT);
+        			}
+        			else {
+        				// Assume a WDID
+        				partIdList.add(partId);
+        				partIdTypeList.add(StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_WDID);
+        			}
+        		}
     			if ( well.isCollection() ) {
         	        message = "Well \"" + id + "\" is already a collection (" +
     	        	well.getCollectionType() + ").";
@@ -542,7 +578,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				well.setCollectionType ( StateMod_Well.COLLECTION_TYPE_SYSTEM );
     			}
     			well.setCollectionPartType ( PartType );
-    			well.setCollectionPartIDs ( Year_int, tokens );
+    			if ( PartType.equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_PARCEL) ) {
+    				well.setCollectionPartIDsForYear ( Year_int, partIdList );
+    			}
+    			else if ( PartType.equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_DITCH) ) {
+    				well.setCollectionPartIDsForYear ( Year_int, partIdList );
+    			}
+    			else if ( PartType.equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_WELL) ) {
+    				well.setCollectionPartIDs ( partIdList, partIdTypeList );
+    			}
     			well.setCollectionDiv ( Div_int );
     			matchFound = true;
     			break;

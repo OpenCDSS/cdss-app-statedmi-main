@@ -3,14 +3,13 @@ package DWR.DMI.StateDMI;
 import javax.swing.JFrame;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import DWR.StateCU.StateCU_Location;
 import DWR.StateMod.StateMod_Diversion;
 import DWR.StateMod.StateMod_Reservoir;
 import DWR.StateMod.StateMod_Well;
-
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.String.StringUtil;
@@ -30,13 +29,11 @@ import RTi.Util.IO.PropList;
 import RTi.Util.IO.AbstractCommand;
 
 /**
-<p>
 This class initializes, checks, and runs the Set*Aggregate/SystemFromList() commands (set
 collection information).
 It is an abstract base class that must be controlled via a derived class.  For example, the
 SetDiversionAggregateFromList() command extends this class in order to uniquely represent the command,
 but much of the functionality is in the base class.
-</p>
 */
 public abstract class SetCollectionFromList_Command extends AbstractCommand implements Command
 {
@@ -93,6 +90,7 @@ throws InvalidCommandParameterException
 	String IDCol = parameters.getValue ( "IDCol" );
 	String NameCol = parameters.getValue ( "NameCol" );
 	String PartIDsCol = parameters.getValue ( "PartIDsCol" );
+	String PartIDTypeColumn = parameters.getValue ( "PartIDTypeColumn" );
 	String PartsListedHow = parameters.getValue ( "PartsListedHow" );
 	String PartIDsColMax = parameters.getValue ( "PartIDsColMax" );
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
@@ -201,6 +199,16 @@ throws InvalidCommandParameterException
 						message, "Specify the division as an integer.") );
 			}
 		}
+		else if ( (PartType != null) && PartType.equalsIgnoreCase(_Well) ) {
+			// Part ID type column must be specified
+			if ( (PartIDTypeColumn == null) || PartIDTypeColumn.isEmpty() ) {
+				message = "The well aggregate part ID type column must be specified";
+				warning += "\n" + message;
+				status.addToLog ( CommandPhaseType.INITIALIZATION,
+					new CommandLogRecord(CommandStatusType.FAILURE,
+						message, "Specify the part ID type column number or name.") );
+			}
+		}
 	}
 	else if ( (PartType != null) && !PartType.equals("") ) {
 		// DO NOT specify the year or division
@@ -297,18 +305,19 @@ throws InvalidCommandParameterException
 	}
     
 	// Check for invalid parameters...
-	Vector valid_Vector = new Vector();
-	valid_Vector.add ( "ListFile" );
-	valid_Vector.add ( "Year" );
-	valid_Vector.add ( "Div" );
-	valid_Vector.add ( "PartType" );
-	valid_Vector.add ( "IDCol" );
-	valid_Vector.add ( "NameCol" );
-	valid_Vector.add ( "PartIDsCol" );
-	valid_Vector.add ( "PartsListedHow" );
-	valid_Vector.add ( "PartIDsColMax" );
-	valid_Vector.add ( "IfNotFound" );
-    warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	List<String> validList = new ArrayList<String>(11);
+	validList.add ( "ListFile" );
+	validList.add ( "Year" );
+	validList.add ( "Div" );
+	validList.add ( "PartType" );
+	validList.add ( "IDCol" );
+	validList.add ( "NameCol" );
+	validList.add ( "PartIDsCol" );
+	validList.add ( "PartIDTypeColumn" );
+	validList.add ( "PartsListedHow" );
+	validList.add ( "PartIDsColMax" );
+	validList.add ( "IfNotFound" );
+    warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	// Throw an InvalidCommandParameterException in case of errors.
 	if ( warning.length() > 0 ) {		
@@ -365,7 +374,7 @@ Run method internal to this class, to handle running in discovery and run mode.
 private void runCommandInternal ( int command_number, CommandPhaseType command_phase )
 throws InvalidCommandParameterException, CommandWarningException, CommandException
 {
-    String routine = getClass().getName() + ".runCommandInternal", message;
+    String routine = getClass().getSimpleName() + ".runCommandInternal", message;
     int warning_level = 2;
     String command_tag = "" + command_number;
     int warning_count = 0;
@@ -435,6 +444,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     }
     String PartIDsCol = parameters.getValue ( "PartIDsCol" );
     int PartIDsCol_int = Integer.parseInt(PartIDsCol) - 1; // zero reference
+    String PartIDTypeColumn = parameters.getValue ( "PartIDTypeColumn" );
+    int PartIDTypeColumn_int = -1;
     String PartsListedHow = parameters.getValue ( "PartsListedHow" );
     if ( (PartsListedHow == null) || PartsListedHow.equals("") ) {
     	PartsListedHow = _InRow; // Default
@@ -469,10 +480,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     // Get the data needed for the command
     
-    List culocList = null;
-    List divList = null;
-    List resList = null;
-    List wellList = null;
+    List<StateCU_Location> culocList = null;
+    List<StateMod_Diversion> divList = null;
+    List<StateMod_Reservoir> resList = null;
+    List<StateMod_Well> wellList = null;
     try {
 		// Don't know for sure what is being processed so have to get StateCU and StateMod data lists
 		if ( nodeTypeFromCommand.equals(_Diversion) || nodeTypeFromCommand.equals(_Well) ) {
@@ -602,7 +613,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	// Allocate an array for all locations in the list file to indicate when an
     	// aggregate/system was not matched...
     	
-    	List listfile_ids = new Vector();  // Unique list of IDs from the list file
+    	List<String> listfile_ids = new ArrayList<String>();  // Unique list of IDs from the list file
     	TableRecord rec = null;
     	String id;
     	boolean found;
@@ -615,7 +626,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		}
     		found = false;
     		for ( int iv = 0; iv < listfile_ids.size(); iv++ ) {
-    			if ( id.equalsIgnoreCase((String)listfile_ids.get(iv))) {
+    			if ( id.equalsIgnoreCase(listfile_ids.get(iv))) {
     				found = true;
     				break;
     			}
@@ -627,7 +638,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	}
     	boolean [] listrecord_matched = new boolean[listfile_ids.size()];
     	for ( int i = 0; i < listrecord_matched.length; i++ ) {
-    		Message.printStatus( 2, routine, "List file ID = \"" + (String)listfile_ids.get(i) + "\"");
+    		Message.printStatus( 2, routine, "List file ID = \"" + listfile_ids.get(i) + "\"");
     		listrecord_matched[i] = false;
     	}
 
@@ -638,6 +649,31 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			PartIDsColMax_int = table.getNumberOfFields() - 1;
     		}
     	}
+    	
+        if ( (PartIDTypeColumn != null) && !PartIDTypeColumn.isEmpty() ) {
+        	// Get the column number - first try number
+        	try {
+        		PartIDTypeColumn_int = Integer.parseInt(PartIDTypeColumn);
+        		PartIDTypeColumn_int = PartIDTypeColumn_int - 1; // 0-index
+        	}
+        	catch ( NumberFormatException e ) {
+        		// Was specified as column name, not integer
+        		// Try getting the column name from the table
+        		try {
+        			PartIDTypeColumn_int = table.getFieldIndex(PartIDTypeColumn);
+        		}
+        		catch ( Exception e2 ) {
+                    message = "PartIDTypeColumn \"" + PartIDTypeColumn + "\" column is not found in the list file.";
+                    Message.printWarning ( warning_level, 
+	                    MessageUtil.formatMessageTag(command_tag, ++warning_count),
+	                    routine, message );
+                    status.addToLog ( command_phase,
+                        new CommandLogRecord(CommandStatusType.FAILURE,
+                            message, "Verify that column \"" + PartIDTypeColumn + "\" exists in the list file." ) );  		
+            		throw new CommandException ( message );
+        		}
+        	}
+        }
 
     	// Make sure that specified columns are within the table...
 
@@ -674,6 +710,17 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	                message, "Specify a column <= the number of columns in the file." ) );  		
 			throw new CommandException ( message );
     	}
+    	if ( (PartIDTypeColumn_int + 1) > table.getNumberOfFields() ) {
+            message = "PartIDTypeColumn \"" + PartIDTypeColumn + "\" is > than the number of columns in the file: " +
+			table.getNumberOfFields();
+	        Message.printWarning ( warning_level, 
+	        MessageUtil.formatMessageTag(command_tag, ++warning_count),
+	        routine, message );
+	        status.addToLog ( command_phase,
+	            new CommandLogRecord(CommandStatusType.FAILURE,
+	                message, "Specify a column <= the number of columns in the file." ) );  		
+			throw new CommandException ( message );
+    	}
     	if ( (PartIDsColMax_int + 1) > table.getNumberOfFields() ) {
             message = "PartIDsColMax \"" + PartIDsColMax + "\" is > than the number of columns in the file: " +
 			table.getNumberOfFields();
@@ -699,18 +746,20 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		size = culocList.size();
     	}
     	String culoc_id;
-    	String name;	// Name to assign if specified in the list file.
-    	String partid;
-    	int match_count = 0;
-    	List partids = new Vector();
-    	boolean found_match = false;
+    	String name; // Name to assign if specified in the list file.
+    	String partId;
+    	String partIdType;
+    	int matchCount = 0; // TODO SAM 2016-05-17 not sure how this is supposed to be used
+    	List<String> partIds = new ArrayList<String>();
+    	List<String> partIdTypes = new ArrayList<String>();
+    	boolean foundMatch = false;
     	for (int i = 0; i < size; i++) {
-    		match_count = 0;	// Number of matching CU Location ID
+    		matchCount = 0; // Number of matching CU Location ID
     		culoc = (StateCU_Location)culocList.get(i);
     		culoc_id = culoc.getID();
-    		name = null;	// if set below it will be used
+    		name = null; // If set below in the list file it will be used
     		// Now loop through the table and see if there are any matches for the ID.
-    		found_match = false;
+    		foundMatch = false;
     		if ( partsInRow ) {
     			for (int j = 0; j < tsize; j++) {
     				rec = table.getRecord(j);
@@ -719,69 +768,84 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     					// No match...
     					continue;
     				}
-    				// Else have a match.  Need to set the data.  Do not reuse the Vector!
-    				found_match = true;
-    				partids = new Vector();
+    				// Else have a match.  Need to set the data.  Do not reuse the list!
+    				foundMatch = true;
+    				partIds = new ArrayList<String>();
     				// The part IDs are in the same row starting at the indicated column and
     				// continue until the part IDs are blank...
     				for ( int ic = PartIDsCol_int; ic <= PartIDsColMax_int ;ic++ ){
-    					partid = (String)rec.getFieldValue(ic);
-    					if ( partid.length() > 0 ) {
-    						partids.add ( partid );
+    					partId = (String)rec.getFieldValue(ic);
+    					if ( partId.length() > 0 ) {
+    						partIds.add ( partId );
     					}
     				}
     				if ( NameCol_int >= 0 ) {
-    					name = (String)
-    					rec.getFieldValue(NameCol_int);
+    					name = (String)rec.getFieldValue(NameCol_int);
     				}
-    				break;	// First match will be used if duplicates.
+    				break; // First match will be used if duplicates.
     			}
     		}
     		else {
     			// The part IDs are in the multiple rows using the indicated column.
     			// Read data until there are no more items in the table...
-    			partids = new Vector();
+    			partIds = new ArrayList<String>();
+    			partIdTypes = new ArrayList<String>();
     			for ( int j = 0; j < tsize; j++ ) {
     				rec = table.getRecord(j);
     				id=(String)rec.getFieldValue(IDCol_int);
     				if ( id.equalsIgnoreCase( culoc_id) ) {
-    					found_match = true;
-    					partid = (String)rec.getFieldValue(PartIDsCol_int);
-    					if ( partid.length() > 0 ) {
-    						partids.add ( partid );
+    					foundMatch = true;
+    					partId = (String)rec.getFieldValue(PartIDsCol_int);
+    					if ( partId.length() > 0 ) {
+    						partIds.add ( partId );
+    					}
+    					if ( PartIDTypeColumn_int >= 0 ) {
+    						// Also save the part id type
+    						partIdType = (String)rec.getFieldValue(PartIDTypeColumn_int);
+    						partIdTypes.add ( partIdType );
     					}
     				}
     			}
     		}
-    		if ( found_match ) {
-    			++match_count;
+    		if ( foundMatch ) {
+    			++matchCount;
     			culoc.setCollectionType ( collectionType );
     			culoc.setCollectionPartType (PartType);
     			if ( nodeTypeFromCommand.equalsIgnoreCase(_Well) && PartType.equalsIgnoreCase(_Parcel) ) {
     				// Need the division with wells that are collected by parcels...
     				culoc.setCollectionDiv ( Div_int );
-    				culoc.setCollectionPartIDs( Year_int, partids );
-    				Message.printStatus ( 2, routine, "Setting " + culoc_id + " " + nodeTypeFromCommand + " " +
-    					collectionType + " Part (" + PartType + ") IDs " + Year_int + " -> " + partids );
+    				culoc.setCollectionPartIDsForYear( Year_int, partIds );
+    				Message.printStatus ( 2, routine, "Setting CU location " + culoc_id + " " + nodeTypeFromCommand + " " +
+    					collectionType + " Part (" + PartType + ") IDs " + Year_int + " -> " + partIds );
     				if ( (name != null) && (name.length() != 0) ) {
-    					Message.printStatus ( 2, routine, "Setting " + culoc_id + " " + nodeTypeFromCommand
+    					Message.printStatus ( 2, routine, "Setting CU location " + culoc_id + " " + nodeTypeFromCommand
+    					+ " " + collectionType + " Name -> " + name );
+    					culoc.setName ( name );
+    				}
+    			}
+    			else if ( nodeTypeFromCommand.equalsIgnoreCase(_Well) && PartType.equalsIgnoreCase(_Well) ) {
+    				culoc.setCollectionPartIDs( partIds, partIdTypes );
+    				Message.printStatus ( 2, routine, "Setting CU location " + culoc_id + " " + nodeTypeFromCommand + " " +
+    					collectionType + " Part (" + PartType + ") IDs -> " + partIds );
+    				if ( (name != null) && (name.length() != 0) ) {
+    					Message.printStatus ( 2, routine, "Setting CU location " + culoc_id + " " + nodeTypeFromCommand
     					+ " " + collectionType + " Name -> " + name );
     					culoc.setName ( name );
     				}
     			}
     			else {
-    				culoc.setCollectionPartIDs ( partids );
-    				Message.printStatus ( 2, routine, "Setting " + culoc_id + " " + nodeTypeFromCommand
-    				+ " " + collectionType + " Part (" + PartType + ") IDs -> " + partids );
+    				culoc.setCollectionPartIDs ( partIds );
+    				Message.printStatus ( 2, routine, "Setting CU location " + culoc_id + " " + nodeTypeFromCommand
+    				+ " " + collectionType + " Part (" + PartType + ") IDs -> " + partIds );
     				if ( (name != null) && (name.length() != 0) ) {
-    					Message.printStatus ( 2, routine, "Setting " + culoc_id + " " + nodeTypeFromCommand
+    					Message.printStatus ( 2, routine, "Setting CU location " + culoc_id + " " + nodeTypeFromCommand
     					+ " " + collectionType + " Name -> " + name );
     					culoc.setName ( name );
     				}
     			}
     			// Indicate that a list file record match was found...
     			for ( int iv = 0; iv < listrecord_matched.length; iv++ ) {
-    				if ( culoc_id.equalsIgnoreCase((String)listfile_ids.get(iv)) ) {
+    				if ( culoc_id.equalsIgnoreCase(listfile_ids.get(iv)) ) {
     					listrecord_matched[iv] = true;
     				}
     			}
@@ -812,22 +876,22 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	}
     	String sm_id = null;
     	for ( int i = 0; i < size; i++ ) {
-    		match_count = 0;	// Number of matching StateMod data ID
+    		matchCount = 0; // Number of matching StateMod data ID
     		if ( nodeTypeFromCommand.equalsIgnoreCase(_Diversion) ) {
-    			div = (StateMod_Diversion)divList.get(i);
+    			div = divList.get(i);
     			sm_id = div.getID();
     		}
     		else if ( nodeTypeFromCommand.equalsIgnoreCase(_Reservoir) ) {
-    			res = (StateMod_Reservoir)resList.get(i);
+    			res = resList.get(i);
     			sm_id = res.getID();
     		}
     		else if ( nodeTypeFromCommand.equalsIgnoreCase(_Well) ) {
-    			well = (StateMod_Well)wellList.get(i);
+    			well = wellList.get(i);
     			sm_id = well.getID();
     		}
     		// Now loop through the table and see if there are any matches for the ID...
-    		name = null;	// if set below it will be used
-    		found_match = false;
+    		name = null; // if set below it will be used
+    		foundMatch = false;
     		if ( partsInRow ) {
     			for ( int j = 0; j < tsize; j++ ) {
     				rec = table.getRecord(j);
@@ -837,14 +901,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     					continue;
     				}
     				// Else have a match.  Need to set the data.  Do not reuse the Vector!
-    				found_match = true;
-    				partids = new Vector();
+    				foundMatch = true;
+    				partIds = new ArrayList<String>();
+    				partIdTypes = new ArrayList<String>();
     				// The part IDs are in the same row starting at the indicated column and
     				// continue until the part IDs are blank...
     				for ( int ic = PartIDsCol_int; ic <= PartIDsColMax_int ;ic++ ){
-    					partid = (String)rec.getFieldValue(ic);
-    					if ( partid.length() > 0 ) {
-    						partids.add ( partid );
+    					partId = (String)rec.getFieldValue(ic);
+    					if ( partId.length() > 0 ) {
+    						partIds.add ( partId );
     					}
     				}
     				if ( NameCol_int >= 0 ) {
@@ -856,16 +921,21 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		else {
     			// The part IDs are in the multiple rows using the indicated column.
     			// Read data until the sm_id changes or there are no more items in the table...
-    			partids = new Vector();
+    			partIds = new ArrayList<String>();
+    			partIdTypes = new ArrayList<String>();
     			name = null;
     			for ( int j = 0; j < tsize; j++ ) {
     				rec = table.getRecord(j);
     				id = (String)rec.getFieldValue(IDCol_int);
     				if ( id.equalsIgnoreCase( sm_id) ) {
-    					found_match = true;
-    					partid = (String) rec.getFieldValue(PartIDsCol_int);
-    					if ( partid.length() > 0 ) {
-    						partids.add ( partid );
+    					foundMatch = true;
+    					partId = (String) rec.getFieldValue(PartIDsCol_int);
+    					if ( partId.length() > 0 ) {
+    						partIds.add ( partId );
+    					}
+    					if ( PartIDTypeColumn_int >= 0 ) {
+    						partIdType = (String)rec.getFieldValue(PartIDTypeColumn_int);
+    						partIdTypes.add ( partIdType );
     					}
     					// Take the first name in the desired column
         				if ( (NameCol_int >= 0) && (name == null) ) {
@@ -878,13 +948,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				}
     			}
     		}
-    		if ( found_match ) {
-    			++match_count;
+    		if ( foundMatch ) {
+    			++matchCount;
     			if ( nodeTypeFromCommand.equalsIgnoreCase( _Diversion) ) {
     				div.setCollectionType ( collectionType );
-    				div.setCollectionPartIDs ( partids );
-    				Message.printStatus ( 2, routine, "Setting " + sm_id + " " + nodeTypeFromCommand
-    				+ " " + collectionType + " Part IDs (" + PartType + ") -> " + partids );
+    				div.setCollectionPartIDs ( partIds );
+    				Message.printStatus ( 2, routine, "Setting StateMod " + sm_id + " " + nodeTypeFromCommand
+    				+ " " + collectionType + " Part IDs (" + PartType + ") -> " + partIds );
     				if ( (name != null) && (name.length() != 0) ) {
     					Message.printStatus ( 2, routine, "Setting " + sm_id + " " + nodeTypeFromCommand
     					+ " " + collectionType + " Name -> " + name );
@@ -893,9 +963,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			}
     			else if ( nodeTypeFromCommand.equalsIgnoreCase(_Reservoir) ) {
     				res.setCollectionType ( collectionType );
-    				res.setCollectionPartIDs ( partids );
-    				Message.printStatus ( 2, routine, "Setting " + sm_id + " " + nodeTypeFromCommand
-    				+ " " + collectionType + " Part IDs (" + PartType + ") -> " + partids );
+    				res.setCollectionPartIDs ( partIds );
+    				Message.printStatus ( 2, routine, "Setting StateMod " + sm_id + " " + nodeTypeFromCommand
+    				+ " " + collectionType + " Part IDs (" + PartType + ") -> " + partIds );
     				if ( (name != null) && (name.length() != 0) ) {
     					Message.printStatus ( 2, routine, "Setting " + sm_id + " " + nodeTypeFromCommand
     					+ " " + collectionType + " Name -> " + name );
@@ -908,26 +978,32 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				if ( nodeTypeFromCommand.equalsIgnoreCase(_Well) && PartType.equalsIgnoreCase(_Parcel) ) {
         				// Need the division with wells that are collected by parcels...
 	    				well.setCollectionDiv ( Div_int );
-	    				well.setCollectionPartIDs( Year_int, partids);
-	    				Message.printStatus ( 2, routine, "Setting " + sm_id + " " + nodeTypeFromCommand
-	    				+ " " + collectionType + " Part IDs (" + PartType + ") " + Year_int + " -> " + partids );
+	    				well.setCollectionPartIDsForYear( Year_int, partIds);
+	    				Message.printStatus ( 2, routine, "Setting StateMod " + sm_id + " " + nodeTypeFromCommand
+	    				+ " " + collectionType + " Part IDs (" + PartType + ") " + Year_int + " -> " + partIds );
+    				}
+    				else if ( nodeTypeFromCommand.equalsIgnoreCase(_Well) && PartType.equalsIgnoreCase(_Well) ) {
+        				// Set the well collection as a list of part IDs and their types - same over the full period
+	    				well.setCollectionPartIDs( partIds, partIdTypes );
+	    				Message.printStatus ( 2, routine, "Setting StateMod " + sm_id + " " + nodeTypeFromCommand
+	    				+ " " + collectionType + " Part IDs (" + PartType + ") -> " + partIds );
     				}
     				else {
     					// No need to set the division and year...
-    					well.setCollectionPartIDs( 0, partids);
-        				Message.printStatus ( 2, routine, "Setting " + sm_id + " " + nodeTypeFromCommand
-	    				+ " " + collectionType + " Part IDs (" + PartType + ") -> " + partids );
+    					well.setCollectionPartIDsForYear( 0, partIds);
+        				Message.printStatus ( 2, routine, "Setting StateMod " + sm_id + " " + nodeTypeFromCommand
+	    				+ " " + collectionType + " Part IDs (" + PartType + ") -> " + partIds );
 	    				
     				}
     				if ( (name != null) && (name.length() != 0) ) {
-    					Message.printStatus ( 2, routine, "Setting " + sm_id + " " + nodeTypeFromCommand
+    					Message.printStatus ( 2, routine, "Setting StateMod " + sm_id + " " + nodeTypeFromCommand
     					+ " " + collectionType + " Name -> " + name );
     					well.setName ( name );
     				}
     			}
     			// Indicate that a list file record match was found...
     			for ( int iv = 0; iv < listrecord_matched.length; iv++ ) {
-    				if ( sm_id.equalsIgnoreCase((String)listfile_ids.get(iv)) ) {
+    				if ( sm_id.equalsIgnoreCase(listfile_ids.get(iv)) ) {
     					listrecord_matched[iv] = true;
     				}
     			}
@@ -948,10 +1024,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		for ( int j = 0; j < listrecord_matched.length; j++ ) {
     			if ( !listrecord_matched[j]) {
     				if ( b.length() == 0 ) {
-    					b.append ( ((String)listfile_ids.get(j)).toString() );
+    					b.append ( (listfile_ids.get(j)).toString() );
     				}
     				else {
-    					b.append ( ", " + ((String)listfile_ids.get(j)).toString() );
+    					b.append ( ", " + (listfile_ids.get(j)).toString() );
     				}
     			}
     		}
@@ -1019,6 +1095,7 @@ public String toString ( PropList parameters )
 	String IDCol = parameters.getValue ( "IDCol" );
 	String NameCol = parameters.getValue ( "NameCol" );
 	String PartIDsCol = parameters.getValue ( "PartIDsCol" );
+	String PartIDTypeColumn = parameters.getValue ( "PartIDTypeColumn" );
 	String PartIDsColMax = parameters.getValue ( "PartIDsColMax" );
 	String PartsListedHow = parameters.getValue ( "PartsListedHow" );
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
@@ -1065,6 +1142,12 @@ public String toString ( PropList parameters )
 			b.append ( "," );
 		}
 		b.append ( "PartIDsCol=" + PartIDsCol );
+	}
+	if ( (PartIDTypeColumn != null) && (PartIDTypeColumn.length() > 0) ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "PartIDTypeColumn=\"" + PartIDTypeColumn + "\"");
 	}
 	if ( (PartsListedHow != null) && (PartsListedHow.length() > 0) ) {
 		if ( b.length() > 0 ) {
