@@ -33,7 +33,6 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
-import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
@@ -57,6 +56,7 @@ private SimpleJComboBox __ElevationCol_JComboBox = null;
 private SimpleJComboBox __Region1Col_JComboBox = null;
 private SimpleJComboBox __Region2Col_JComboBox = null;
 private SimpleJComboBox __AWCCol_JComboBox = null;
+private JTextField __Top_JTextField = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
 private SimpleJButton __browse_JButton = null;
@@ -70,7 +70,7 @@ Command editor constructor
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
-public ReadCULocationsFromList_JDialog ( JFrame parent, Command command ) {
+public ReadCULocationsFromList_JDialog ( JFrame parent, ReadCULocationsFromList_Command command ) {
 	super(parent, true);
 	initialize (parent, command);
 }
@@ -151,6 +151,7 @@ private void checkInput () {
 	String Region1Col = __Region1Col_JComboBox.getSelected();
 	String Region2Col = __Region2Col_JComboBox.getSelected();
 	String AWCCol = __AWCCol_JComboBox.getSelected();
+	String Top = __Top_JTextField.getText().trim();
 	
 	__error_wait = false;
 	
@@ -178,6 +179,9 @@ private void checkInput () {
 	if (AWCCol.length() > 0 && !AWCCol.equals("")) {
 		props.set("AWCCol", AWCCol);
 	}
+	if (Top.length() > 0 && !Top.equals("")) {
+		props.set("Top", Top);
+	}
 
 	try {
 		// This will warn the user...
@@ -202,6 +206,7 @@ private void commitEdits() {
 	String Region1Col = __Region1Col_JComboBox.getSelected();
 	String Region2Col = __Region2Col_JComboBox.getSelected();
 	String AWCCol = __AWCCol_JComboBox.getSelected();
+	String Top = __Top_JTextField.getText().trim();
 
 	__command.setCommandParameter("ListFile", ListFile);
 	__command.setCommandParameter("IDCol", IDCol);
@@ -211,22 +216,7 @@ private void commitEdits() {
 	__command.setCommandParameter("Region1Col", Region1Col);
 	__command.setCommandParameter("Region2Col", Region2Col);
 	__command.setCommandParameter("AWCCol", AWCCol );
-}
-
-/**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable {
-	__ListFile_JTextField = null;
-	__browse_JButton = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command = null;
-	__ok_JButton = null;
-	__path_JButton = null;
-	__working_dir = null;
-	super.finalize ();
+	__command.setCommandParameter("Top", Top );
 }
 
 /**
@@ -234,8 +224,8 @@ Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
-private void initialize (JFrame parent, Command command) {
-	__command = (ReadCULocationsFromList_Command)command;
+private void initialize (JFrame parent, ReadCULocationsFromList_Command command) {
+	__command = command;
 	CommandProcessor processor = __command.getCommandProcessor();
 	__working_dir = StateDMICommandProcessorUtil.getWorkingDirForCommand ( processor, __command );
 
@@ -362,6 +352,15 @@ private void initialize (JFrame parent, Command command) {
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Optional - column (1+) for AWC."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Top (limit rows):"),
+		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__Top_JTextField = new JTextField(10);
+	__Top_JTextField.addKeyListener (this);
+	JGUIUtil.addComponent(main_JPanel, __Top_JTextField,
+		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Optional - limit read to top N rows (default=read all)."),
+		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -450,6 +449,7 @@ private void refresh ()
 	String Region1Col = "";
 	String Region2Col = "";
 	String AWCCol = "";
+	String Top = "";
 	PropList props = null;
 
 	if (__first_time) {
@@ -465,6 +465,7 @@ private void refresh ()
 		Region1Col = props.getValue ( "Region1Col" );
 		Region2Col = props.getValue ( "Region2Col" );
 		AWCCol = props.getValue ( "AWCCol" );
+		Top = props.getValue ( "Top" );
 		if ( ListFile != null ) {
 			__ListFile_JTextField.setText (ListFile);
 		}
@@ -580,6 +581,9 @@ private void refresh ()
 				__error_wait = true;
 			}
 		}
+		if ( Top != null ) {
+			__Top_JTextField.setText (Top);
+		}
 	}
 	// Regardless, reset the command from the fields...
 	ListFile = __ListFile_JTextField.getText().trim();
@@ -590,13 +594,7 @@ private void refresh ()
 	Region1Col = __Region1Col_JComboBox.getSelected();
 	Region2Col = __Region2Col_JComboBox.getSelected();
 	AWCCol = __AWCCol_JComboBox.getSelected();
-	ListFile = __ListFile_JTextField.getText().trim();
-	IDCol = __IDCol_JComboBox.getSelected();
-	NameCol = __NameCol_JComboBox.getSelected();
-	LatitudeCol = __LatitudeCol_JComboBox.getSelected();
-	ElevationCol = __ElevationCol_JComboBox.getSelected();
-	Region1Col = __Region1Col_JComboBox.getSelected();
-	Region2Col = __Region2Col_JComboBox.getSelected();
+	Top = __Top_JTextField.getText().trim();
 	props = new PropList(__command.getCommandName());
 	props.add("ListFile=" + ListFile);
 	props.add("IDCol=" + IDCol);
@@ -606,6 +604,7 @@ private void refresh ()
 	props.add("Region1Col=" + Region1Col);
 	props.add("Region2Col=" + Region2Col);
 	props.add("AWCCol=" + AWCCol);
+	props.add("Top=" + Top);
 	__command_JTextArea.setText( __command.toString(props) );
 	// Check the path and determine what the label on the path button should be...
 	if (__path_JButton != null) {

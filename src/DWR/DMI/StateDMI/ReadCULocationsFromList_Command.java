@@ -3,12 +3,11 @@ package DWR.DMI.StateDMI;
 import javax.swing.JFrame;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.StateCU.StateCU_Location;
-
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.IO.Command;
@@ -28,9 +27,7 @@ import RTi.Util.Table.DataTable;
 import RTi.Util.Table.TableRecord;
 
 /**
-<p>
 This class initializes, checks, and runs the ReadCULocationsFromList() command.
-</p>
 */
 public class ReadCULocationsFromList_Command 
 extends AbstractCommand implements Command
@@ -54,7 +51,7 @@ cross-reference to the original commands.
 */
 public void checkCommandParameters ( PropList parameters, String command_tag, int warning_level )
 throws InvalidCommandParameterException
-{	String routine = getClass().getName() + ".checkCommandParameters";
+{	String routine = getClass().getSimpleName() + ".checkCommandParameters";
 	//String ID = parameters.getValue ( "ID" );
 	String ListFile = parameters.getValue ( "ListFile" );
 	String IDCol = parameters.getValue ( "IDCol" );
@@ -64,6 +61,7 @@ throws InvalidCommandParameterException
 	String Region1Col = parameters.getValue ( "Region1Col" );
 	String Region2Col = parameters.getValue ( "Region2Col" );
 	String AWCCol = parameters.getValue ( "AWCCol" );
+	String Top = parameters.getValue ( "Top" );
 	String warning = "";
 	String message;
 	
@@ -181,17 +179,26 @@ throws InvalidCommandParameterException
                         message, "Specify the AWC column as a number >= 1." ) );
 	}
 	
+	if ( (Top != null) && (Top.length() != 0) && !StringUtil.isInteger(Top) ) {
+        message = "The Top parameter is invalid.";
+        warning += "\n" + message;
+        status.addToLog ( CommandPhaseType.INITIALIZATION,
+            new CommandLogRecord(CommandStatusType.FAILURE,
+                message, "Specify the Top parameter as a number >= 1." ) );
+	}
+	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
-	valid_Vector.add ( "ListFile" );
-	valid_Vector.add ( "IDCol" );
-	valid_Vector.add ( "NameCol" );
-	valid_Vector.add ( "LatitudeCol" );
-	valid_Vector.add ( "ElevationCol" );
-	valid_Vector.add ( "Region1Col" );
-	valid_Vector.add ( "Region2Col" );
-	valid_Vector.add ( "AWCCol" );
-    warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	List<String> validList = new ArrayList<String>(9);
+	validList.add ( "ListFile" );
+	validList.add ( "IDCol" );
+	validList.add ( "NameCol" );
+	validList.add ( "LatitudeCol" );
+	validList.add ( "ElevationCol" );
+	validList.add ( "Region1Col" );
+	validList.add ( "Region2Col" );
+	validList.add ( "AWCCol" );
+	validList.add ( "Top" );
+    warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	// Throw an InvalidCommandParameterException in case of errors.
 	if ( warning.length() > 0 ) {		
@@ -250,7 +257,7 @@ Run method internal to this class, to handle running in discovery and run mode.
 private void runCommandInternal ( int command_number, CommandPhaseType command_phase )
 throws InvalidCommandParameterException, CommandWarningException, CommandException
 {
-    String routine = getClass().getName() + ".runCommandInternal", message;
+    String routine = getClass().getSimpleName() + ".runCommandInternal", message;
     int warning_level = 2;
     String command_tag = "" + command_number;
     int warning_count = 0;
@@ -269,6 +276,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     String Region1Col = parameters.getValue ( "Region1Col" );
     String Region2Col = parameters.getValue ( "Region2Col" );
     String AWCCol = parameters.getValue ( "AWCCol" );
+    String Top = parameters.getValue ( "Top" );
+    int top = -1;
+    if ( (Top != null) && !Top.isEmpty() ) {
+    	top = Integer.parseInt(Top);
+    }
 
     // Get columns, all zero offset
     
@@ -346,6 +358,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	props.set ( "Delimiter=," );		// see existing prototype
     	props.set ( "CommentLineIndicator=#" );	// New - skip lines that start with this
     	props.set ( "TrimStrings=True" );	// If true, trim strings after reading.
+    	if ( top > 0 ) {
+    		props.set ( "Top=" + top );
+    	}
     	DataTable table = null;
     	try {
     		table = DataTable.parseFile ( ListFile_full, props );
@@ -385,7 +400,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			"AWCCol", AWCCol, AWCCol_int, table.getNumberOfFields(),
     			status, command_phase, routine, command_tag, warning_level, warning_count );
     	
-    	// Remove all the elements for the Vector that tracks when identifiers
+    	// Remove all the elements for the list that tracks when identifiers
     	// are read from more than one main source (e.g., DDS, and STR).
     	// This is used to print a warning.
     	processor.resetDataMatches ( processor.getStateCULocationMatchList() );
@@ -538,6 +553,7 @@ public String toString ( PropList parameters )
 	String Region1Col = parameters.getValue ( "Region1Col" );
 	String Region2Col = parameters.getValue ( "Region2Col" );
 	String AWCCol = parameters.getValue ( "AWCCol" );
+	String Top = parameters.getValue ( "Top" );
 	
 	StringBuffer b = new StringBuffer ();
 	if ( (ListFile != null) && (ListFile.length() > 0) ) {
@@ -584,6 +600,12 @@ public String toString ( PropList parameters )
 			b.append ( "," );
 		}
 		b.append ( "AWCCol=" + AWCCol );
+	}
+	if ( (Top != null) && (Top.length() > 0) ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "Top=" + Top );
 	}
 	
 	return getCommandName() + "(" + b.toString() + ")";

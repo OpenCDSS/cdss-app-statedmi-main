@@ -1,0 +1,11 @@
+# Test reading CU locations from list with all but Region2 specified.
+# - read top 2 lines
+StartLog(LogFile="Results/Test_ReadCULocationsFromList_Top.StateDMI.log")
+RemoveFile(InputFile="Results\Test_ReadCULocationsFromList_Top_out.csv")
+RemoveFile(InputFile="Results\Test_ReadCULocationsFromList_Top_out_ClimateStations.csv")
+RemoveFile(InputFile="Results\Test_ReadCULocationsFromList_Top_out_Collections.csv")
+ReadCULocationsFromList(ListFile="Data\locations.csv",IDCol=1,NameCol=2,LatitudeCol=3,ElevationCol=4,Region1Col=5,AWCCol=6,Top=2)
+# Uncomment the following command to regenerate the expected results.
+# WriteCULocationsToList(OutputFile="ExpectedResults/Test_ReadCULocationsFromList_Top_out.csv")
+WriteCULocationsToList(OutputFile="Results/Test_ReadCULocationsFromList_Top_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ReadCULocationsFromList_Top_out.csv",InputFile2="Results/Test_ReadCULocationsFromList_Top_out.csv",IfDifferent=Warn)

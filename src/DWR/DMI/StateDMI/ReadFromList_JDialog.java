@@ -13,7 +13,6 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -22,9 +21,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-
 import java.io.File;
-
 import java.util.List;
 import java.util.Vector;
 
@@ -58,6 +55,7 @@ private SimpleJComboBox __NameCol_JComboBox = null;
 private SimpleJComboBox __RiverNodeIDCol_JComboBox = null;
 private SimpleJComboBox __DailyIDCol_JComboBox = null;
 private SimpleJComboBox __DiversionIDCol_JComboBox = null; // Only when reading well stations
+private JTextField __Top_JTextField = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
 private SimpleJButton __browse_JButton = null;
@@ -183,6 +181,7 @@ private void checkInput () {
 	String ListFile = __ListFile_JTextField.getText().trim();
 	String IDCol = __IDCol_JComboBox.getSelected();
 	String NameCol = __NameCol_JComboBox.getSelected();
+	String Top = __Top_JTextField.getText().trim();
 	
 	__error_wait = false;
 	
@@ -212,6 +211,9 @@ private void checkInput () {
 			props.set("DiversionIDCol", DiversionIDCol);
 		}
 	}
+	if (Top.length() > 0 && !Top.equals("")) {
+		props.set("Top", Top);
+	}
 
 	try {
 		// This will warn the user...
@@ -231,6 +233,7 @@ private void commitEdits() {
 	String ListFile = __ListFile_JTextField.getText().trim();
 	String IDCol = __IDCol_JComboBox.getSelected();
 	String NameCol = __NameCol_JComboBox.getSelected();
+	String Top = __Top_JTextField.getText().trim();
 
 	__command.setCommandParameter("ListFile", ListFile);
 	__command.setCommandParameter("IDCol", IDCol);
@@ -246,22 +249,7 @@ private void commitEdits() {
 		String DiversionIDCol = __DiversionIDCol_JComboBox.getSelected();
 		__command.setCommandParameter("DiversionIDCol", DiversionIDCol);
 	}
-}
-
-/**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable {
-	__ListFile_JTextField = null;
-	__browse_JButton = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command = null;
-	__ok_JButton = null;
-	__path_JButton = null;
-	__working_dir = null;
-	super.finalize ();
+	__command.setCommandParameter("Top", Top );
 }
 
 /**
@@ -449,6 +437,15 @@ private void initialize ( JFrame parent, Command command )
     		"Optional - column (1+) to link the well to a diversion location."),
     		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 	}
+	
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Top (limit rows):"),
+		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__Top_JTextField = new JTextField(10);
+	__Top_JTextField.addKeyListener (this);
+	JGUIUtil.addComponent(main_JPanel, __Top_JTextField,
+		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Optional - limit read to top N rows (default=read all)."),
+		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -535,6 +532,7 @@ private void refresh ()
 	String RiverNodeIDCol = "";
 	String DailyIDCol = "";
 	String DiversionIDCol = "";
+	String Top = "";
 	PropList props = null;
 
 	if (__first_time) {
@@ -548,6 +546,7 @@ private void refresh ()
 		DailyIDCol = props.getValue ( "DailyIDCol" );
 		RiverNodeIDCol = props.getValue ( "RiverNodeIDCol" );
 		DiversionIDCol = props.getValue ( "DiversionIDCol" );
+		Top = props.getValue ( "Top" );
 		if ( ListFile != null ) {
 			__ListFile_JTextField.setText (ListFile);
 		}
@@ -637,11 +636,15 @@ private void refresh ()
 				}
 			}
 		}
+		if ( Top != null ) {
+			__Top_JTextField.setText (Top);
+		}
 	}
 	// Regardless, reset the command from the fields...
 	ListFile = __ListFile_JTextField.getText().trim();
 	IDCol = __IDCol_JComboBox.getSelected();
 	NameCol = __NameCol_JComboBox.getSelected();
+	Top = __Top_JTextField.getText().trim();
 	if ( __RiverNodeIDCol_JComboBox != null ) {
 		RiverNodeIDCol = __RiverNodeIDCol_JComboBox.getSelected();
 	}
@@ -664,6 +667,7 @@ private void refresh ()
 	if ( __DiversionIDCol_JComboBox != null ) {
 		props.add("DiversionIDCol=" + DiversionIDCol);
 	}
+	props.add("Top=" + Top);
 	__command_JTextArea.setText( __command.toString(props) );
 	// Check the path and determine what the label on the path button should be...
 	if (__path_JButton != null) {

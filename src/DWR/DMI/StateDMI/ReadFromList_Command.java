@@ -2,6 +2,7 @@ package DWR.DMI.StateDMI;
 
 import javax.swing.JFrame;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -12,7 +13,6 @@ import DWR.StateMod.StateMod_Reservoir;
 import DWR.StateMod.StateMod_StreamEstimate;
 import DWR.StateMod.StateMod_StreamGage;
 import DWR.StateMod.StateMod_Well;
-
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.IO.Command;
@@ -32,11 +32,9 @@ import RTi.Util.Table.DataTable;
 import RTi.Util.Table.TableRecord;
 
 /**
-<p>
 This class initializes, checks, and runs the Read*FromList() commands, which are used to read
 StateMod components.  Derived classes should be defined to allow for unique identification of the
 commands, but most work is done in this base class.
-</p>
 */
 public class ReadFromList_Command 
 extends AbstractCommand implements Command
@@ -68,6 +66,7 @@ throws InvalidCommandParameterException
 	String RiverNodeIDCol = parameters.getValue ( "RiverNodeIDCol" ); // Stream gage
 	String DailyIDCol = parameters.getValue ( "DailyIDCol" ); // Stream gage
 	String DiversionIDCol = parameters.getValue ( "DiversionIDCol" ); // Well
+	String Top = parameters.getValue ( "Top" );
 	String warning = "";
 	String message;
 	
@@ -173,20 +172,29 @@ throws InvalidCommandParameterException
 		}
 	}
 	
+	if ( (Top != null) && (Top.length() != 0) && !StringUtil.isInteger(Top) ) {
+        message = "The Top parameter is invalid.";
+        warning += "\n" + message;
+        status.addToLog ( CommandPhaseType.INITIALIZATION,
+            new CommandLogRecord(CommandStatusType.FAILURE,
+                message, "Specify the Top parameter as a number >= 1." ) );
+	}
+	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
-	valid_Vector.add ( "ListFile" );
-	valid_Vector.add ( "IDCol" );
-	valid_Vector.add ( "NameCol" );
+	List<String> validList = new ArrayList<String>(7);
+	validList.add ( "ListFile" );
+	validList.add ( "IDCol" );
+	validList.add ( "NameCol" );
 	if ( (this instanceof ReadStreamGageStationsFromList_Command) ||
 		(this instanceof ReadStreamEstimateStationsFromList_Command) ) {
-		valid_Vector.add ( "RiverNodeIDCol" );
-		valid_Vector.add ( "DailyIDCol" );
+		validList.add ( "RiverNodeIDCol" );
+		validList.add ( "DailyIDCol" );
 	}
 	if ( this instanceof ReadWellStationsFromList_Command ) {
-		valid_Vector.add ( "DiversionIDCol" );
+		validList.add ( "DiversionIDCol" );
 	}
-    warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	validList.add ( "Top" );
+    warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	// Throw an InvalidCommandParameterException in case of errors.
 	if ( warning.length() > 0 ) {		
@@ -578,7 +586,7 @@ Run method internal to this class, to handle running in discovery and run mode.
 private void runCommandInternal ( int command_number, CommandPhaseType command_phase )
 throws InvalidCommandParameterException, CommandWarningException, CommandException
 {
-    String routine = getClass().getName() + ".runCommandInternal", message;
+    String routine = getClass().getSimpleName() + ".runCommandInternal", message;
     int warning_level = 2;
     String command_tag = "" + command_number;
     int warning_count = 0;
@@ -598,6 +606,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     String Delim = parameters.getValue ( "Delim" );
     if ( (Delim == null) || (Delim.length() == 0) ) {
     	Delim = ","; // Default
+    }
+    String Top = parameters.getValue ( "Top" );
+    int top = -1;
+    if ( (Top != null) && !Top.isEmpty() ) {
+    	top = Integer.parseInt(Top);
     }
 
     // Get columns, all zero offset
@@ -669,6 +682,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	props.set ( "Delimiter=" + Delim );
     	props.set ( "CommentLineIndicator=#" );
     	props.set ( "TrimStrings=True" );	// If true, trim strings after reading.
+    	if ( top > 0 ) {
+    		props.set ( "Top=" + top );
+    	}
     	DataTable table = null;
     	try {
     		table = DataTable.parseFile ( ListFile_full, props );
@@ -774,6 +790,7 @@ public String toString ( PropList parameters )
 	String RiverNodeIDCol = parameters.getValue ( "RiverNodeIDCol" );
 	String DailyIDCol = parameters.getValue ( "DailyIDCol" );
 	String DiversionIDCol = parameters.getValue ( "DiversionIDCol" );
+	String Top = parameters.getValue ( "Top" );
 	
 	StringBuffer b = new StringBuffer ();
 	if ( (ListFile != null) && (ListFile.length() > 0) ) {
@@ -813,6 +830,12 @@ public String toString ( PropList parameters )
 			}
 			b.append ( "DiversionIDCol=" + DiversionIDCol  );
 		}
+	}
+	if ( (Top != null) && (Top.length() > 0) ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "Top=" + Top );
 	}
 	
 	return getCommandName() + "(" + b.toString() + ")";
