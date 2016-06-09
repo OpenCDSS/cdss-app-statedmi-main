@@ -6712,7 +6712,7 @@ being passed from the GUI.
 @param createOutput whether to create output (slower) or skip those commands.
 */
 private void commandProcessor_RunCommandsThreaded ( List commands, boolean createOutput )
-{	String routine = "TSTool_JFrame.commandProcessor_RunCommandsThreaded";
+{	String routine = "StateDMI_JFrame.commandProcessor_RunCommandsThreaded";
 
 	PropList request_params = new PropList ( "" );
 	request_params.setUsingObject ( "CommandList", commands );
@@ -6743,7 +6743,7 @@ interface.  In the future the command processor may put together the list withou
 being passed from the GUI.
 */
 private void commandProcessor_RunCommands_OLD ( List commands, boolean create_output )
-{	String routine = "TSTool_JFrame.commandProcessorRunCommandsThreaded";
+{	String routine = "StateDMI_JFrame.commandProcessorRunCommandsThreaded";
 
 	PropList request_params = new PropList ( "" );
 	request_params.setUsingObject ( "CommandList", commands );
@@ -6861,7 +6861,7 @@ public void commandStarted ( int icommand, int ncommand, Command command,
 	String command_string = command.toString();
 	//int max_length = ?;
 	//if ( command_string)
-	ui_UpdateStatusTextFields ( 1, routine, null, "Processing \"" + command_string + "\"", __STATUS_BUSY );
+	ui_UpdateStatusTextFields ( 1, routine, null, "Processing " + (icommand + 1) + " \"" + command_string + "\"", __STATUS_BUSY );
 	if ( icommand == 0 ) {
 		__processor_JProgressBar.setMinimum ( 0 );
 		__processor_JProgressBar.setMaximum ( ncommand );
