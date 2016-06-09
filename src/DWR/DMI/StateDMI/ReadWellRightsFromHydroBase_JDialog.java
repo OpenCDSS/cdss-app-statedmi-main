@@ -5,14 +5,16 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -43,7 +45,10 @@ implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeList
 private boolean __error_wait = false;
 private boolean __first_time = true;
 private boolean __ok = false; // Indicate whether OK has been pressed
+private JTabbedPane __main_JTabbedPane = null;
+private JTextField __PermitIDPreFormat_JTextField=null;
 private SimpleJComboBox __IDFormat_JComboBox = null;
+private JTextField __PermitIDPostFormat_JTextField=null;
 private JTextField __ID_JTextField=null;
 private JTextField __Year_JTextField = null;
 private JTextField __Div_JTextField = null;
@@ -94,7 +99,10 @@ Check the input.  Currently does nothing.
 private void checkInput ()
 {	// Put together a list of parameters to check...
 	String ID = __ID_JTextField.getText().trim();
+	
+	String PermitIDPreFormat = __PermitIDPreFormat_JTextField.getText().trim();
 	String IDFormat = __IDFormat_JComboBox.getSelected();
+	String PermitIDPostFormat = __PermitIDPostFormat_JTextField.getText().trim();
 	String Year = __Year_JTextField.getText().trim();
 	String Div = __Div_JTextField.getText().trim();
 	String DecreeMin = __DecreeMin_JTextField.getText().trim();
@@ -110,8 +118,14 @@ private void checkInput ()
 	if ( ID.length() > 0 ) {
 		props.set ( "ID", ID );
 	}
+	if ( PermitIDPreFormat.length() > 0 ) {
+		props.set ( "PermitIDPreFormat", PermitIDPreFormat );
+	}
 	if ( IDFormat.length() > 0 ) {
 		props.set ( "IDFormat", IDFormat );
+	}
+	if ( PermitIDPostFormat.length() > 0 ) {
+		props.set ( "PermitIDPostFormat", PermitIDPostFormat );
 	}
 	if ( Year.length() > 0 ) {
 		props.set ( "Year", Year );
@@ -157,7 +171,9 @@ already been checked and no errors were detected.
 private void commitEdits ()
 {	
 	String ID = __ID_JTextField.getText().trim();
+	String PermitIDPreFormat = __PermitIDPreFormat_JTextField.getText().trim();
 	String IDFormat = __IDFormat_JComboBox.getSelected();
+	String PermitIDPostFormat = __PermitIDPostFormat_JTextField.getText().trim();
 	String Year = __Year_JTextField.getText().trim();
 	String Div = __Div_JTextField.getText().trim();
 	String DecreeMin = __DecreeMin_JTextField.getText().trim();
@@ -169,7 +185,9 @@ private void commitEdits ()
 	String Optimization = __Optimization_JComboBox.getSelected();
 
 	__command.setCommandParameter ( "ID", ID );
+	__command.setCommandParameter ( "PermitIDPreFormat", PermitIDPreFormat);
 	__command.setCommandParameter ( "IDFormat", IDFormat);
+	__command.setCommandParameter ( "PermitIDPostFormat", PermitIDPostFormat);
 	__command.setCommandParameter ( "Year", Year );
 	__command.setCommandParameter ( "Div", Div );
 	__command.setCommandParameter ( "DecreeMin", DecreeMin);
@@ -179,26 +197,6 @@ private void commitEdits ()
 	__command.setCommandParameter ( "UseApex", UseApex );
 	__command.setCommandParameter ( "OnOffDefault", OnOffDefault );
 	__command.setCommandParameter ( "Optimization", Optimization );
-}
-
-/**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	__ID_JTextField = null;
-	__IDFormat_JComboBox = null;
-	__Year_JTextField = null;
-	__Div_JTextField = null;
-	__DefaultAppropriationDate_JTextField = null;
-	__DefineRightHow_JComboBox = null;
-	__ReadWellRights_JComboBox = null;
-	__UseApex_JComboBox = null;
-	__OnOffDefault_JComboBox = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__ok_JButton = null;
-	super.finalize ();
 }
 
 /**
@@ -218,105 +216,152 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
 	getContentPane().add ("North", main_JPanel);
-	int y = 0;
+	int y = -1;
 
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
-	int yy = 0;
+	int yy = -1;
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"This command reads well rights from HydroBase, using "+
-		"the well station identifiers to find rights."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		"This command reads well rights from HydroBase, using the well station identifiers to find rights."),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"Water rights are determined from summarized well right " +
-		"and permit data, which have been matched with wells and parcels."),
+		"Water rights are determined from cross-referenced well right and permit data, which have been matched with wells and parcels."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(paragraph, new JLabel (
-		"Summary data can be used as is, or well rights can " +
-		"be requeried to obtain individual net amount rights."),
+		"Cross-referenced data can be used as is, or well rights can be requeried to obtain individual net amount rights."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(paragraph, new JLabel (
 		"Alternate point or exchange (APEX) decrees provide additional rights."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(paragraph, new JLabel (
-		"If the well rights are to be aggregates, use the AggregateWellRights() command to reduce" +
-		" the number (but not decree sum) of rights in the model."),
+		"If the well rights are to be aggregated into water right classes, use the AggregateWellRights() command to reduce" +
+		" the number (but retain decree sum) of rights in the model."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(paragraph, new JLabel (
 		"See also MergeWellRights() command, which minimizes duplicate rights due to multiple parcel years."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        
 	JGUIUtil.addComponent(main_JPanel, paragraph,
-		0, y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+		0, ++y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	
-	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Well station ID:"),
-			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-
+    __main_JTabbedPane = new JTabbedPane ();
+    JGUIUtil.addComponent(main_JPanel, __main_JTabbedPane,
+        0, ++y, 7, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+     
+    // Panel for well station filter
+    int yWell = -1;
+    JPanel well_JPanel = new JPanel();
+    well_JPanel.setLayout( new GridBagLayout() );
+    __main_JTabbedPane.addTab ( "Well Stations", well_JPanel );
+    
+   	JGUIUtil.addComponent(well_JPanel, new JLabel (
+		"Specify the following parameter to limit the wells that are processed."),
+		0, ++yWell, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(well_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+		0, ++yWell, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+	
+	JGUIUtil.addComponent(well_JPanel, new JLabel ( "Well station ID:"),
+			0, ++yWell, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__ID_JTextField = new JTextField("*",10);
 	__ID_JTextField.addKeyListener (this);
-    JGUIUtil.addComponent(main_JPanel, __ID_JTextField,
-		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-   	JGUIUtil.addComponent(main_JPanel, new JLabel (
+    JGUIUtil.addComponent(well_JPanel, __ID_JTextField,
+		1, yWell, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(well_JPanel, new JLabel (
 		"Required - well stations to read (use * for wildcard)."),
-		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		3, yWell, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	
-    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Water Division (Div):"),
-		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    // Panel for explicit WDID
+    int yExplicitWDID = -1;
+    JPanel explicitWDID_JPanel = new JPanel();
+    explicitWDID_JPanel.setLayout( new GridBagLayout() );
+    __main_JTabbedPane.addTab ( "Explicit WDID", explicitWDID_JPanel );
+   	
+   	JGUIUtil.addComponent(explicitWDID_JPanel, new JLabel (
+		"Well rights output by StateDMI can originate from structure well rights with WDID, or permits with receipt ID."),
+		0, ++yExplicitWDID, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(explicitWDID_JPanel, new JLabel (
+		"The following parameter indicates that when explicit wells are processed (not aggregate or system), the rights should be read directly "
+		+ "using WDID rather than processing well/parcel data."),
+		0, ++yExplicitWDID, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(explicitWDID_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+		0, ++yExplicitWDID, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+   	
+   	JGUIUtil.addComponent(explicitWDID_JPanel, new JLabel ("Read well rights?:"),
+		0, ++yExplicitWDID, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+   	List read_Vector = new Vector(3);
+   	read_Vector.add ( "" );
+	read_Vector.add ( __command._True );
+	read_Vector.add ( __command._False );
+	__ReadWellRights_JComboBox = new SimpleJComboBox(false);
+	__ReadWellRights_JComboBox.setData ( read_Vector );
+	__ReadWellRights_JComboBox.addItemListener(this);
+	JGUIUtil.addComponent(explicitWDID_JPanel, __ReadWellRights_JComboBox,
+		1, yExplicitWDID, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(explicitWDID_JPanel, new JLabel (
+		"Optional - read well rights rather than relying on well matching results (default=" +
+		__command._True + ")."),
+		3, yExplicitWDID, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	
+    // Panel for well/parcel data
+    int yWellParcel = -1;
+    JPanel wellParcel_JPanel = new JPanel();
+    wellParcel_JPanel.setLayout( new GridBagLayout() );
+    __main_JTabbedPane.addTab ( "Well/Parcel", wellParcel_JPanel );
+   	
+   	JGUIUtil.addComponent(wellParcel_JPanel, new JLabel (
+		"Wells in HydroBase are associated with parcels using irrigated lands assessment spatial data layers as input."),
+		0, ++yWellParcel, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(wellParcel_JPanel, new JLabel (
+		"The well/parcel relationships require division and year as input to match HydroBase data."),
+		0, ++yWellParcel, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(wellParcel_JPanel, new JLabel (
+		"<html><b>Note that more recent versions of HydroBase use parcel identifiers that include water district (older did not).</b></html>"),
+		0, ++yWellParcel, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(wellParcel_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+		0, ++yWellParcel, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+   	
+    JGUIUtil.addComponent(wellParcel_JPanel, new JLabel ( "Water Division (Div):"),
+		0, ++yWellParcel, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__Div_JTextField = new JTextField(10);
 	__Div_JTextField.addKeyListener (this);
-   	JGUIUtil.addComponent(main_JPanel, __Div_JTextField,
-		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-   	JGUIUtil.addComponent(main_JPanel, new JLabel (
+   	JGUIUtil.addComponent(wellParcel_JPanel, __Div_JTextField,
+		1, yWellParcel, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(wellParcel_JPanel, new JLabel (
 		"Required - water division for the parcels."),
-		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+		3, yWellParcel, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
    	
-    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Year:"),
-    	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-   	__Year_JTextField = new JTextField(10);
+    JGUIUtil.addComponent(wellParcel_JPanel, new JLabel ( "Year:"),
+    	0, ++yWellParcel, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+   	__Year_JTextField = new JTextField(30);
 	__Year_JTextField.addKeyListener (this);
-    JGUIUtil.addComponent(main_JPanel, __Year_JTextField,
-		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-   	JGUIUtil.addComponent(main_JPanel, new JLabel (
+    JGUIUtil.addComponent(wellParcel_JPanel, __Year_JTextField,
+		1, yWellParcel, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(wellParcel_JPanel, new JLabel (
 		"Optional - year(s) for the parcels, separated by commas (default=all available)."),
-		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+		3, yWellParcel, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
    	
-    JGUIUtil.addComponent(main_JPanel, new JLabel ("Decree minimum:"),
-		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__DecreeMin_JTextField = new JTextField(10);
-	__DecreeMin_JTextField.addKeyListener (this);
-    JGUIUtil.addComponent(main_JPanel, __DecreeMin_JTextField,
-		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(main_JPanel, new JLabel (
-		"Optional - minimum decree to include (default = .0005 CFS)."),
-		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Right ID format:"),
-		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List format_Vector = new Vector(3);
-	format_Vector.add ( "" );
-	format_Vector.add ( __command._HydroBaseID );
-	format_Vector.add ( __command._StationIDW_NN );
-	__IDFormat_JComboBox = new SimpleJComboBox(false);
-	__IDFormat_JComboBox.setData ( format_Vector );
-	__IDFormat_JComboBox.addItemListener(this);
-	JGUIUtil.addComponent(main_JPanel, __IDFormat_JComboBox,
-		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(main_JPanel, new JLabel (
-		"Optional - format for right identifiers (default=" + __command._StationIDW_NN + ")."),
-		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Default appropriation date:"),
-		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__DefaultAppropriationDate_JTextField = new JTextField("",10);
-	__DefaultAppropriationDate_JTextField.addKeyListener (this);
-    JGUIUtil.addComponent(main_JPanel, __DefaultAppropriationDate_JTextField,
-		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(main_JPanel, new JLabel (
-		"Optional - use if date is not available from right or permit (default=99999.99999 admin. num.)."),
-		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-   	JGUIUtil.addComponent(main_JPanel, new JLabel ("Define right how?:"),
-		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+   	// Panel for right/permit data
+    int yRightPermit = -1;
+    JPanel rightPermit_JPanel = new JPanel();
+    rightPermit_JPanel.setLayout( new GridBagLayout() );
+    __main_JTabbedPane.addTab ( "Well Right/Permit", rightPermit_JPanel );
+   	
+   	JGUIUtil.addComponent(rightPermit_JPanel, new JLabel (
+		"The following parameters indicate how to decide whether to use well right or permit when well/parcel data are used."),
+		0, ++yRightPermit, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(rightPermit_JPanel, new JLabel (
+		"This is necessary because well rights (using WDID and decree) are matched with well permit (using receipt ID and yield) in HydroBase."),
+		0, ++yRightPermit, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(rightPermit_JPanel, new JLabel (
+		"Water rights are desirable but are not always available."),
+		0, ++yRightPermit, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(rightPermit_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+		0, ++yRightPermit, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+   	
+   	JGUIUtil.addComponent(rightPermit_JPanel, new JLabel ("Define right how?:"),
+		0, ++yRightPermit, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
    	List define_Vector = new Vector(4);
    	define_Vector.add ( "" );
 	define_Vector.add ( "" + DefineWellRightHowType.EARLIEST_DATE );
@@ -325,30 +370,55 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 	__DefineRightHow_JComboBox = new SimpleJComboBox(false);
 	__DefineRightHow_JComboBox.setData ( define_Vector );
 	__DefineRightHow_JComboBox.addItemListener(this);
-	JGUIUtil.addComponent(main_JPanel, __DefineRightHow_JComboBox,
-		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-   	JGUIUtil.addComponent(main_JPanel, new JLabel (
+	JGUIUtil.addComponent(rightPermit_JPanel, __DefineRightHow_JComboBox,
+		1, yRightPermit, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(rightPermit_JPanel, new JLabel (
 		"Optional - how to define right from HydroBase right/permit (default=" + DefineWellRightHowType.EARLIEST_DATE + ")."),
-		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-   	JGUIUtil.addComponent(main_JPanel, new JLabel ("Read well rights?:"),
-		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-   	List read_Vector = new Vector(3);
-   	read_Vector.add ( "" );
-	read_Vector.add ( __command._True );
-	read_Vector.add ( __command._False );
-	__ReadWellRights_JComboBox = new SimpleJComboBox(false);
-	__ReadWellRights_JComboBox.setData ( read_Vector );
-	__ReadWellRights_JComboBox.addItemListener(this);
-	JGUIUtil.addComponent(main_JPanel, __ReadWellRights_JComboBox,
-		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-   	JGUIUtil.addComponent(main_JPanel, new JLabel (
-		"Optional - read well rights rather than relying on well matching results (default=" +
-		__command._True + ")."),
-		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-
-   	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Use Apex?:"),
-		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+		3, yRightPermit, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	
+    JGUIUtil.addComponent(rightPermit_JPanel, new JLabel ( "Default appropriation date:"),
+		0, ++yRightPermit, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__DefaultAppropriationDate_JTextField = new JTextField("",10);
+	__DefaultAppropriationDate_JTextField.addKeyListener (this);
+    JGUIUtil.addComponent(rightPermit_JPanel, __DefaultAppropriationDate_JTextField,
+		1, yRightPermit, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(rightPermit_JPanel, new JLabel (
+		"Optional - use if date is not available from right or permit (default=99999.99999 administration number as date)."),
+		3, yRightPermit, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	
+    // Panel for decree value
+    int yDecree = -1;
+    JPanel decree_JPanel = new JPanel();
+    decree_JPanel.setLayout( new GridBagLayout() );
+    __main_JTabbedPane.addTab ( "Decree Value", decree_JPanel );
+   	
+   	JGUIUtil.addComponent(decree_JPanel, new JLabel (
+		"The decree value for water rights is taken from water right decree (explicit WDID) or well yield (if processing well/parcel data)."),
+		0, ++yDecree, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(decree_JPanel, new JLabel (
+		"The cross-referenced well/parcel/right/permit data represent yield in gallons per minute (GPM)."),
+		0, ++yDecree, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(decree_JPanel, new JLabel (
+		"Additionally, an alternate point/exchange (APEX) water right decree may be found with a decree or separate from a water right decree."),
+		0, ++yDecree, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(decree_JPanel, new JLabel (
+		"The APEX amount can be optionally be added to the decree - refer to modeling guidelines."),
+		0, ++yDecree, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(decree_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+		0, ++yDecree, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+   	
+    JGUIUtil.addComponent(decree_JPanel, new JLabel ("Decree minimum:"),
+		0, ++yDecree, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__DecreeMin_JTextField = new JTextField(10);
+	__DecreeMin_JTextField.addKeyListener (this);
+    JGUIUtil.addComponent(decree_JPanel, __DecreeMin_JTextField,
+		1, yDecree, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(decree_JPanel, new JLabel (
+		"Optional - minimum decree to include (default = .0005 CFS)."),
+		3, yDecree, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    
+   	JGUIUtil.addComponent(decree_JPanel, new JLabel ( "Use Apex?:"),
+		0, ++yDecree, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
    	List apex_Vector = new Vector(3);
    	apex_Vector.add ( "" );
 	apex_Vector.add ( __command._True );
@@ -356,14 +426,90 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 	__UseApex_JComboBox = new SimpleJComboBox(false);
 	__UseApex_JComboBox.setData ( apex_Vector );
 	__UseApex_JComboBox.addItemListener(this);
-	JGUIUtil.addComponent(main_JPanel, __UseApex_JComboBox,
-		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-   	JGUIUtil.addComponent(main_JPanel, new JLabel (
+	JGUIUtil.addComponent(decree_JPanel, __UseApex_JComboBox,
+		1, yDecree, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(decree_JPanel, new JLabel (
 		"Optional - add APEX amount to right amount (default=False)."),
-		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		3, yDecree, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	
+    // Panel for right ID format
+    int yId = -1;
+    JPanel id_JPanel = new JPanel();
+    id_JPanel.setLayout( new GridBagLayout() );
+    __main_JTabbedPane.addTab ( "Right ID Format", id_JPanel );
+   	
+   	JGUIUtil.addComponent(id_JPanel, new JLabel (
+		"The water right ID in modeling (StateMod) is restricted to 12 characters."),
+		0, ++yId, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(id_JPanel, new JLabel (
+		"HydroBase identifiers may be a water right WDID (7 digits) or permit receipt (8 digits and possibly characters)."),
+		0, ++yId, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(id_JPanel, new JLabel (
+		"Because WDIDs and permit receipts may have the same numeric values, it may be necessary to add characters to identifiers."),
+		0, ++yId, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(id_JPanel, new JLabel (
+		"The following parameters support flexibility in formatting well right identifiers to facilitate modeling."),
+		0, ++yId, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(id_JPanel, new JLabel (
+		"If the rights will later be processed with MergeWellRights(), format the ID as:  " + __command._HydroBaseID ),
+		0, ++yId, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(id_JPanel, new JLabel (
+		"If the rights will not be processed with MergeWellRights() or AggregateWellRights(), then using the following format is OK:  " + __command._StationIDW_NN ),
+		0, ++yId, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(id_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+		0, ++yId, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
-   	JGUIUtil.addComponent(main_JPanel, new JLabel ( "OnOff default:"),
-		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    JGUIUtil.addComponent(id_JPanel, new JLabel ( "Permit ID (pre)format:"),
+		0, ++yId, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__PermitIDPreFormat_JTextField = new JTextField("",10);
+	__PermitIDPreFormat_JTextField.setToolTipText("Use %s to pass the receipt ID through, or for example %s:P for legacy permit ID");
+	__PermitIDPreFormat_JTextField.addKeyListener (this);
+    JGUIUtil.addComponent(id_JPanel, __PermitIDPreFormat_JTextField,
+		1, yId, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(id_JPanel, new JLabel (
+		"Optional - format for permit receipt BEFORE Right ID format (default= %s:P =legacy format)."),
+		3, yId, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+
+    JGUIUtil.addComponent(id_JPanel, new JLabel ( "Right ID format:"),
+		0, ++yId, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    List format_Vector = new Vector(3);
+	format_Vector.add ( "" );
+	format_Vector.add ( __command._HydroBaseID );
+	format_Vector.add ( __command._StationIDW_NN );
+	__IDFormat_JComboBox = new SimpleJComboBox(false);
+	__IDFormat_JComboBox.setData ( format_Vector );
+	__IDFormat_JComboBox.addItemListener(this);
+	JGUIUtil.addComponent(id_JPanel, __IDFormat_JComboBox,
+		1, yId, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(id_JPanel, new JLabel (
+		"Optional - format for right identifiers (default=" + __command._StationIDW_NN + ")."),
+		3, yId, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+
+    JGUIUtil.addComponent(id_JPanel, new JLabel ( "Permit ID (post)format (currently ignored):"),
+		0, ++yId, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+ 	__PermitIDPostFormat_JTextField = new JTextField("",10);
+	__PermitIDPostFormat_JTextField.setToolTipText("Use %s to pass the receipt ID through, or for example %s:P for legacy permit ID");
+	__PermitIDPostFormat_JTextField.addKeyListener (this);
+    JGUIUtil.addComponent(id_JPanel, __PermitIDPostFormat_JTextField,
+		1, yId, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(id_JPanel, new JLabel (
+		"Optional - format for permit receipt AFTER Right ID format (default= %s =pass-through)."),
+		3, yId, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	
+    // Panel for on/off
+    int yOnOff = -1;
+    JPanel onOff_JPanel = new JPanel();
+    onOff_JPanel.setLayout( new GridBagLayout() );
+    __main_JTabbedPane.addTab ( "StateMod On/Off", onOff_JPanel );
+    
+   	JGUIUtil.addComponent(onOff_JPanel, new JLabel (
+		"StateMod well rights can be turned on or off in a year or use 1 to be on for the full period." ),
+		0, ++yOnOff, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(onOff_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+		0, ++yOnOff, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+
+   	JGUIUtil.addComponent(onOff_JPanel, new JLabel ( "OnOff default:"),
+		0, ++yOnOff, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	List onoff_Vector = new Vector(3);
 	onoff_Vector.add ( "" );
 	onoff_Vector.add ( __command._1 );
@@ -371,11 +517,11 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 	__OnOffDefault_JComboBox = new SimpleJComboBox(false);
 	__OnOffDefault_JComboBox.setData ( onoff_Vector );
 	__OnOffDefault_JComboBox.addItemListener(this);
-	JGUIUtil.addComponent(main_JPanel, __OnOffDefault_JComboBox,
-		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(main_JPanel, new JLabel (
+	JGUIUtil.addComponent(onOff_JPanel, __OnOffDefault_JComboBox,
+		1, yOnOff, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(onOff_JPanel, new JLabel (
 		"Optional - default StateMod OnOff switch (default=" + __command._AppropriationDate + ")."),
-		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		3, yOnOff, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     
    	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Optimization level:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -387,7 +533,7 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 	__Optimization_JComboBox.setData ( Optimization_Vector );
 	__Optimization_JComboBox.addItemListener(this);
 	JGUIUtil.addComponent(main_JPanel, __Optimization_JComboBox,
-		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		1, y, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Optional - optimize performance (default=" + __command._UseMoreMemory + ")."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -469,7 +615,9 @@ Refresh the command from the other text field contents.
 private void refresh ()
 {	String routine = __command.getCommandName() + "_JDialog.refresh";
 	String ID = "";
+	String PermitIDPreFormat = "";
 	String IDFormat = "";
+	String PermitIDPostFormat = "";
 	String Year = "";
 	String Div = "";
 	String DecreeMin = "";
@@ -483,7 +631,9 @@ private void refresh ()
 	if (__first_time) {
 		__first_time = false;
 		ID = props.getValue ( "ID" );
+		PermitIDPreFormat = props.getValue ( "PermitIDPreFormat" );
 		IDFormat = props.getValue ( "IDFormat" );
+		PermitIDPostFormat = props.getValue ( "PermitIDPostFormat" );
 		Div = props.getValue ( "Div" );
 		Year = props.getValue ( "Year" );
 		if ( DecreeMin != null ) {
@@ -499,6 +649,9 @@ private void refresh ()
 		if ( ID != null ) {
 			__ID_JTextField.setText(ID);
 		}
+		if ( PermitIDPreFormat != null ) {
+			__PermitIDPreFormat_JTextField.setText(PermitIDPreFormat);
+		}
 		if ( IDFormat == null ) {
 			// Select default...
 			__IDFormat_JComboBox.select ( 0 );
@@ -512,6 +665,9 @@ private void refresh ()
 				Message.printWarning ( 1, routine, "Existing command references an invalid IDFormat value \"" +
 				IDFormat + "\".  Select a different value or Cancel.");
 			}
+		}
+		if ( PermitIDPostFormat != null ) {
+			__PermitIDPostFormat_JTextField.setText(PermitIDPostFormat);
 		}
 		if ( (Year != null) && (__Year_JTextField != null) ) {
 			__Year_JTextField.setText(Year);
@@ -602,7 +758,9 @@ private void refresh ()
 	// Always get the value that is selected...
 
 	ID = __ID_JTextField.getText().trim();
+	PermitIDPreFormat = __PermitIDPreFormat_JTextField.getText().trim();
 	IDFormat = __IDFormat_JComboBox.getSelected();
+	PermitIDPostFormat = __PermitIDPostFormat_JTextField.getText().trim();
 	if ( __Year_JTextField != null ) {
 		Year = __Year_JTextField.getText().trim();
 	}
@@ -628,7 +786,9 @@ private void refresh ()
 	}
 	props = new PropList ( "");
 	props.add ( "ID=" + ID );
+	props.add ( "PermitIDPreFormat=" + PermitIDPreFormat);
 	props.add ( "IDFormat=" + IDFormat);
+	props.add ( "PermitIDPostFormat=" + PermitIDPostFormat);
 	props.add ( "Year=" + Year );
 	props.add ( "Div=" + Div );
 	props.add ( "DecreeMin=" + DecreeMin );
