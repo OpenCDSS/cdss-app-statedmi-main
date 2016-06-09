@@ -3,8 +3,10 @@ package DWR.DMI.StateDMI;
 import javax.swing.JFrame;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+
 
 //import DWR.StateMod.StateMod_DataSet;
 import DWR.StateMod.StateMod_DataSet;
@@ -26,7 +28,6 @@ import DWR.StateMod.StateMod_StreamEstimate_Coefficients;
 import DWR.StateMod.StateMod_StreamGage;
 import DWR.StateMod.StateMod_Well;
 import DWR.StateMod.StateMod_WellRight;
-
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.String.StringUtil;
@@ -99,6 +100,7 @@ throws InvalidCommandParameterException
 {	String OutputFile = parameters.getValue ( "OutputFile" );
 	//String Version = parameters.getValue ( "Version" );  // Optional for some commands - currently string
 	String WriteDataComments = parameters.getValue ( "WriteDataComments" );
+	String WriteExtendedDataComments = parameters.getValue ( "WriteExtendedDataComments" );
 	String Precision = parameters.getValue ( "Precision" );
 	String WriteHow = parameters.getValue ( "WriteHow" );
 	String warning = "";
@@ -179,6 +181,14 @@ throws InvalidCommandParameterException
 	            new CommandLogRecord(CommandStatusType.FAILURE,
 	                message, "Specify WriteDataComments as " + _False + " (default) or " + _True ) );
 		}
+		if ( (WriteExtendedDataComments != null) && (WriteExtendedDataComments.length() != 0) &&
+			!WriteExtendedDataComments.equals(_False) && !WriteExtendedDataComments.equals(_True) ) {
+	        message = "The value for WriteExtendedDataComments (" + WriteExtendedDataComments + ") is invalid.";
+	        warning += "\n" + message;
+	        status.addToLog ( CommandPhaseType.INITIALIZATION,
+	            new CommandLogRecord(CommandStatusType.FAILURE,
+	                message, "Specify WriteExtendedDataComments as " + _False + " (default) or " + _True ) );
+		}
 	}
     
 	if ( (WriteHow != null) && (WriteHow.length() != 0) &&
@@ -191,17 +201,20 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	Vector valid_Vector = new Vector();
-	valid_Vector.add ( "OutputFile" );
+	List<String> validList = new ArrayList<String>();
+	validList.add ( "OutputFile" );
 	if ( (this instanceof WriteDelayTablesMonthlyToStateMod_Command) ||
 		(this instanceof WriteDelayTablesDailyToStateMod_Command) ){
-		valid_Vector.add ( "Precision" );
+		validList.add ( "Precision" );
 	}
 	if ( this instanceof WriteWellRightsToStateMod_Command ) {
-		valid_Vector.add ( "WriteDataComments" );
+		validList.add ( "WriteDataComments" );
 	}
-	valid_Vector.add ( "WriteHow" );
-    warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	if ( this instanceof WriteWellRightsToStateMod_Command ) {
+		validList.add ( "WriteExtendedDataComments" );
+	}
+	validList.add ( "WriteHow" );
+    warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	// Throw an InvalidCommandParameterException in case of errors.
 	if ( warning.length() > 0 ) {		
@@ -284,6 +297,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     String WriteDataComments = parameters.getValue ( "WriteDataComments" );
     if ( (WriteDataComments == null) || WriteDataComments.equals("") ) {
     	WriteDataComments = _False;	// Default
+    }
+    String WriteExtendedDataComments = parameters.getValue ( "WriteExtendedDataComments" );
+    if ( (WriteExtendedDataComments == null) || WriteExtendedDataComments.equals("") ) {
+    	WriteExtendedDataComments = _False;	// Default
     }
     String WriteHow = parameters.getValue ( "WriteHow" );
     boolean update = false;
@@ -471,6 +488,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	        if ( WriteDataComments != null ) {
 	        	writeProps.set ( "WriteDataComments", "" + WriteDataComments );
 	        }
+	        if ( WriteExtendedDataComments != null ) {
+	        	writeProps.set ( "WriteExtendedDataComments", "" + WriteExtendedDataComments );
+	        }
 			StateMod_WellRight.writeStateModFile(OutputFile_prevFull, OutputFile_full,
 				(List)processor.getPropContents("StateMod_WellRight_List"), OutputComments_List,
 				writeProps );
@@ -591,6 +611,7 @@ public String toString ( PropList parameters )
 	String Precision = parameters.getValue ( "Precision" );
 	String WriteHow = parameters.getValue ( "WriteHow" );
 	String WriteDataComments = parameters.getValue ( "WriteDataComments" );
+	String WriteExtendedDataComments = parameters.getValue ( "WriteExtendedDataComments" );
 
 	StringBuffer b = new StringBuffer ();
 	if ( (OutputFile != null) && (OutputFile.length() > 0) ) {
@@ -611,6 +632,12 @@ public String toString ( PropList parameters )
 				b.append ( "," );
 			}
 			b.append ( "WriteDataComments=" + WriteDataComments );
+		}
+		if ( (WriteExtendedDataComments != null) && (WriteExtendedDataComments.length() > 0) ) {
+			if ( b.length() > 0 ) {
+				b.append ( "," );
+			}
+			b.append ( "WriteExtendedDataComments=" + WriteExtendedDataComments );
 		}
 	}
 	if ( (WriteHow != null) && (WriteHow.length() > 0) ) {

@@ -33,7 +33,6 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
-import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
@@ -55,6 +54,7 @@ private JTextField __OutputFile_JTextField = null;
 private JTextField __Precision_JTextField = null;
 private SimpleJComboBox __WriteHow_JComboBox = null;
 private SimpleJComboBox __WriteDataComments_JComboBox = null;
+private SimpleJComboBox __WriteExtendedDataComments_JComboBox = null;
 private JTextArea __command_JTextArea=null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
@@ -66,7 +66,7 @@ Command editor constructor.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
-public WriteToStateMod_JDialog (JFrame parent, Command command )
+public WriteToStateMod_JDialog (JFrame parent, WriteToStateMod_Command command )
 {	super(parent, true);
 	initialize (parent, command );
 }
@@ -229,10 +229,6 @@ private void checkInput () {
 	//if ( __Version_JTextField != null ) {
 	//	Version = __Version_JTextField.getText().trim();
 	//}
-	String WriteDataComments = "";
-	if ( __WriteDataComments_JComboBox != null ) {
-		WriteDataComments = __WriteDataComments_JComboBox.getSelected();
-	}
 	String WriteHow = __WriteHow_JComboBox.getSelected();
 	
 	if (OutputFile.length() > 0) {
@@ -241,8 +237,13 @@ private void checkInput () {
 	//if (Version.length() > 0) {
 	//	props.set("Version", Version);
 	//}
-	if (WriteDataComments.length() > 0 ) {
+	if ( __WriteDataComments_JComboBox != null ) {
+		String WriteDataComments = __WriteDataComments_JComboBox.getSelected();
 		props.set("WriteDataComments", WriteDataComments);
+	}
+	if ( __WriteExtendedDataComments_JComboBox != null ) {
+		String WriteExtendedDataComments = __WriteExtendedDataComments_JComboBox.getSelected();
+		props.set("WriteExtendedDataComments", WriteExtendedDataComments);
 	}
 	if (WriteHow.length() > 0 ) {
 		props.set("WriteHow", WriteHow);
@@ -280,6 +281,10 @@ private void commitEdits()
 		String WriteDataComments = __WriteDataComments_JComboBox.getSelected();
 		__command.setCommandParameter("WriteDataComments", WriteDataComments);
 	}
+	if ( __WriteExtendedDataComments_JComboBox != null ) {
+		String WriteExtendedDataComments = __WriteExtendedDataComments_JComboBox.getSelected();
+		__command.setCommandParameter("WriteExtendedDataComments", WriteExtendedDataComments);
+	}
 	if ( __Precision_JTextField != null ) {
 		String Precision = __Precision_JTextField.getText().trim();
 		__command.setCommandParameter("Precision", Precision);
@@ -292,30 +297,12 @@ private void commitEdits()
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable {
-	__OutputFile_JTextField = null;
-	__WriteHow_JComboBox = null;
-	__WriteDataComments_JComboBox = null;
-	__browse_JButton = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command = null;
-	__ok_JButton = null;
-	__path_JButton = null;
-	__working_dir = null;
-	super.finalize ();
-}
-
-/**
 Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
-private void initialize ( JFrame parent, Command command )
-{	__command = (WriteToStateMod_Command)command;
+private void initialize ( JFrame parent, WriteToStateMod_Command command )
+{	__command = command;
 	CommandProcessor processor = __command.getCommandProcessor();
 	__working_dir = StateDMICommandProcessorUtil.getWorkingDirForCommand ( processor, __command );
 
@@ -514,6 +501,17 @@ private void initialize ( JFrame parent, Command command )
         JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Optional - write parcel year, well matching class, parcel ID (default=" + __command._False + ")" ),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+        
+        JGUIUtil.addComponent(main_JPanel, new JLabel ("Write extended data comments?:"),
+        		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+       	__WriteExtendedDataComments_JComboBox = new SimpleJComboBox(false);
+       	__WriteExtendedDataComments_JComboBox.setData ( WriteDataComments_Vector );
+       	__WriteExtendedDataComments_JComboBox.addItemListener (this);
+       	JGUIUtil.addComponent(main_JPanel, __WriteExtendedDataComments_JComboBox,
+       		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+        JGUIUtil.addComponent(main_JPanel, new JLabel (
+		"Optional - write parcel, collection, raw data permit/right (default=" + __command._False + ")" ),
+		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 	}
 	
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"), 
@@ -599,6 +597,7 @@ private void refresh ()
 	String Precision = "";
 	String WriteHow = "";
 	String WriteDataComments = "";
+	String WriteExtendedDataComments = "";
 	PropList props = null;
 	
 	if (__first_time) {
@@ -610,6 +609,7 @@ private void refresh ()
 		Precision = props.getValue ( "Precision" );
 		WriteHow = props.getValue ( "WriteHow" );
 		WriteDataComments = props.getValue ( "WriteDataComments" );
+		WriteExtendedDataComments = props.getValue ( "WriteExtendedDataComments" );
 		if ( OutputFile != null ) {
 			__OutputFile_JTextField.setText (OutputFile);
 		}
@@ -651,6 +651,24 @@ private void refresh ()
 				}
 			}
 		}
+		if ( __WriteExtendedDataComments_JComboBox != null ) {
+			if ( WriteExtendedDataComments == null ) {
+				// Select default...
+				__WriteExtendedDataComments_JComboBox.select ( 0 );
+			}
+			else {
+				if ( JGUIUtil.isSimpleJComboBoxItem(
+					__WriteExtendedDataComments_JComboBox, WriteExtendedDataComments, JGUIUtil.NONE, null, null ) ) {
+					__WriteExtendedDataComments_JComboBox.select ( WriteExtendedDataComments );
+				}
+				else {
+					Message.printWarning ( 1, routine,
+					"Existing command references an invalid\nWriteExtendedDataComments value \"" +
+					WriteExtendedDataComments + "\".  Select a different value or Cancel.");
+					__error_wait = true;
+				}
+			}
+		}
 	}
 	// Regardless, reset the command from the fields...
 	props = new PropList(__command.getCommandName());
@@ -666,6 +684,10 @@ private void refresh ()
 	if ( __WriteDataComments_JComboBox != null ) {
 		WriteDataComments = __WriteDataComments_JComboBox.getSelected();
 		props.add("WriteDataComments=" + WriteDataComments);
+	}
+	if ( __WriteExtendedDataComments_JComboBox != null ) {
+		WriteExtendedDataComments = __WriteExtendedDataComments_JComboBox.getSelected();
+		props.add("WriteExtendedDataComments=" + WriteExtendedDataComments);
 	}
 	WriteHow = __WriteHow_JComboBox.getSelected();
 	props.add("WriteHow=" + WriteHow);
