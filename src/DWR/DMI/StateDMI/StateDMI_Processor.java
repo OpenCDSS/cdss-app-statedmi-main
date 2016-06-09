@@ -9872,39 +9872,40 @@ StateDMI_HydroBase_ParcelUseTS objects - the records are
 defined in the setCropPatternTS() and setCropPatternTSFromList() commands.
 If a supplemental record is available that conflicts with existing data,
 the supplemental data will be used and a warning is printed.
-@param crop_patterns Vector of HydroBase_StructureIrrigSummaryTS (e.g., as read
+@param cropPatterns Vector of HydroBase_StructureIrrigSummaryTS (e.g., as read
 from HydroBase) (new is HydroBase_StructureView).  This Vector will be added to and returned.
-@param wdid_list List of WDIDs to be checked.  Each string is parsed into WD
+@param wdidList List of WDIDs to be checked.  Each string is parsed into WD
 and ID parts.  It is assumed that only valid WDIDs are passed - any errors
 parsing are ignored (should not happen).
 @param InputStart_DateTime The starting date to process data.
 @param InputEnd_DateTime The ending date to process data.
 */
-protected List readSupplementalStructureIrrigSummaryTSListForWDIDList ( List crop_patterns, List wdid_list,
+protected List<StateDMI_HydroBase_StructureView> readSupplementalStructureIrrigSummaryTSListForWDIDList (
+	List<StateDMI_HydroBase_StructureView> cropPatterns, List<String> wdidList,
 	DateTime InputStart_DateTime, DateTime InputEnd_DateTime,
-	List HydroBase_Supplemental_StructureIrrigSummaryTS_Vector,
+	List<StateDMI_HydroBase_StructureView> HydroBase_Supplemental_StructureIrrigSummaryTSList,
 	CommandStatus status, String command_tag, int warningLevel, int warning_count )
 {	String routine = "StateDMI_Processor.readSupplementalStructureIrrigSummaryTSListForWDIDList";
-	if ( crop_patterns == null ) {
-		crop_patterns = new Vector();
+	if ( cropPatterns == null ) {
+		cropPatterns = new Vector();
 	}
-	int cpsize = crop_patterns.size();
+	int cpsize = cropPatterns.size();
 	StateDMI_HydroBase_StructureView sits = null; // Supplemental
 	HydroBase_StructureView sits2 = null; // From HydroBase
 	// Get a list of integer WDIDs to process...
 	Message.printStatus ( 2, routine, "Getting supplemental acreage data "+
-		"from setCropPatternTS() commands for:  " + wdid_list );
+		"from setCropPatternTS() commands for:  " + wdidList );
 	int nwdid_list = 0;
-	if ( wdid_list != null ) {
-		nwdid_list = wdid_list.size();
+	if ( wdidList != null ) {
+		nwdid_list = wdidList.size();
 	}
 	int sits_wd, sits_id; // The WDID parts for the "sits" object
 	int iwdid; // For looping through WDIDs.
 	boolean found = false; // Used when searching for matching HydroBase and supplemental records.
 	// Size of all supplemental data...
-	int size=HydroBase_Supplemental_StructureIrrigSummaryTS_Vector.size();
+	int size=HydroBase_Supplemental_StructureIrrigSummaryTSList.size();
 	for ( int i = 0; i < size; i++ ) {
-		sits = (StateDMI_HydroBase_StructureView)HydroBase_Supplemental_StructureIrrigSummaryTS_Vector.get(i);
+		sits = HydroBase_Supplemental_StructureIrrigSummaryTSList.get(i);
 		// Check to see if the record is in the desired year...
 		if ( (InputStart_DateTime != null) && (InputEnd_DateTime != null)
 			&& ((sits.getCal_year() < InputStart_DateTime.getYear()) ||
@@ -9917,7 +9918,7 @@ protected List readSupplementalStructureIrrigSummaryTSListForWDIDList ( List cro
 		sits_id = sits.getID();
 		for ( iwdid = 0; iwdid < nwdid_list; iwdid++ ) {
 			// Now do the lookup on the more generic string ID...
-			if ( !((String)wdid_list.get(iwdid)).equalsIgnoreCase(sits.getLocationID())) {
+			if ( !wdidList.get(iwdid).equalsIgnoreCase(sits.getLocationID())) {
 				// Not a match...
 				continue;
 			}
@@ -9928,7 +9929,7 @@ protected List readSupplementalStructureIrrigSummaryTSListForWDIDList ( List cro
 			// vector is only traversed once.
 			// FIXME SAM 2007-05-14 Need to decide with the State whether this should be flagged as an error.
 			for ( int i2 = 0; i2 < cpsize; i2++ ) {
-				sits2 = (HydroBase_StructureView)crop_patterns.get(i2);
+				sits2 = cropPatterns.get(i2);
 				if ( (sits2.getWD() == sits_wd) && (sits2.getID() == sits_id) &&
 					(sits2.getCal_year() ==	sits.getCal_year()) &&
 					sits2.getLand_use().equalsIgnoreCase(sits.getLand_use()) ) {
@@ -9944,7 +9945,7 @@ protected List readSupplementalStructureIrrigSummaryTSListForWDIDList ( List cro
 			                	"verify the set command." ) );
 					found = true;
 					// This is OK whether previously processed or not, since it is not additive.
-					crop_patterns.set ( i2, sits );
+					cropPatterns.set ( i2, sits );
 				}
 			}
 			if ( !found ) {
@@ -9970,12 +9971,12 @@ protected List readSupplementalStructureIrrigSummaryTSListForWDIDList ( List cro
 						" supplemental acreage data from SetCropPatternTS(): year=" +
 						sits.getCal_year() + " crop=" + sits.getLand_use() + " acres=" +
 						StringUtil.formatString(sits.getAcres_total(),"%.3f") );
-					crop_patterns.add ( sits );
+					cropPatterns.add ( sits );
 				}
 			}
 		}
 	}
-	return crop_patterns;
+	return cropPatterns;
 }
 
 /**

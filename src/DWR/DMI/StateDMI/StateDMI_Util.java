@@ -12,6 +12,7 @@ import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import DWR.StateCU.StateCU_Parcel;
 import DWR.StateCU.StateCU_Supply;
 import DWR.StateMod.StateMod_Util;
+import DWR.StateMod.StateMod_Well;
 import DWR.StateMod.StateMod_WellRight;
 import RTi.DMI.DMIUtil;
 import RTi.Util.IO.CommandLogRecord;
@@ -347,17 +348,17 @@ throws Exception
 Helper method to process well rights from HydroBase, when reading from the
 "wells" table.  A single wells/well_to_parcel object is processed, resulting in
 one or more HydroBase_NetAmts objects being returned. This method handles
-whether to use well rights or permits for the returned data.
+whether to use well rights or permits (receipt number for ID and potentially permit date) for the returned data.
 @param hdmi HydroBaseDMI instance for queries.
 @param command_tag Tag to use when printing messages.
 @param routine Routine to use when printing messages.
 @param warning_count Warning count to use when printing messages.  Increments
 in the warning count is handled by passing the updated value back to the calling code.
-@param id Well station identifier that is being processed.
-@param hbwell_parcel wells/well_to_parcel join object, from HydroBase.  If null, read the well right/permit
+@param locId Well station identifier that is being processed.
+@param hbwellParcel wells/well_to_parcel join object, from HydroBase.  If null, read the well right/permit
 data directly using the well station ID, rather than using the ID information from the well to parcel object.
-@param parcel_id parcel number (from original aggregation data).
-@param parcel_fraction Fraction of a parcel's area that is irrigated by the ditch
+@param parcelId parcel number (from original aggregation data).
+@param ditchParcelFraction Fraction of a parcel's area that is irrigated by the ditch
 being processed (<= 1.0).  A value != 1.0 indicates that more than one ditch irrigate a parcel.
 @param defineWellRightHow _EarliestDate to define the StateMod right using the
 earliest of the well right appropriation date and permit date;
@@ -365,12 +366,14 @@ _LatestDate to define the StateMod right using the
 latest of the well right appropriation date and permit date;
 _RightIfAvailable If true, define the StateMod right using
 the well right appropriation date, if the well right is available.  Otherwise use the permit date.
-@param ReadWellRights_boolean If true, query the water rights.  If false, use the data in the wells table.
-@param UseApex_boolean If true, add the APEX data values to the net amount right
+@param readWellRights If true, query the water rights.  If false, use the data in the wells table.
+@param useApex If true, add the APEX data values to the net amount right
 value. If false, do not add APEX.
-@param default_admin_number Default administration number to use if a date
+@param defaultAdminNumber Default administration number to use if a date
 cannot be determined from the data.
-@param hbwellr_Vector The list to return right(s) in.  The right(s) are
+@param permitIdPreFormat a format using String.format() specifier to format a permit receipt
+(for example use "%s:P" to use legacy behavior to indicate permit).
+@param hbwellrList The list to return right(s) in.  The right(s) are
 transferred to the main list in the calling code.
 @return the number of errors that were found during processing.
 @exception Exception Pass errors to the calling code.
@@ -379,75 +382,79 @@ protected static int readWellRightsFromHydroBaseHelper (
 	HydroBaseDMI hdmi,
 	String commandTag,	int warningLevel, int warningCount, CommandStatus status,
 	String routine,
-	int parcel_year,
-	String id,
-	HydroBase_Wells hbwell_parcel,
-	int parcel_id,
-	double parcel_fraction,
+	int parcelYear,
+	String locId,
+	HydroBase_Wells hbwellParcel,
+	int parcelId,
+	double ditchParcelFraction,
 	DefineWellRightHowType defineWellRightHow,
-	boolean ReadWellRights_boolean,
-	boolean UseApex_boolean,
-	double default_admin_number,
-	Date default_appro_Date,
-	List hbwellr_Vector )
+	boolean readWellRights,
+	boolean useApex,
+	double defaultAdminNumber,
+	Date defaultApproDate,
+	String permitIdPreFormat,
+	List<HydroBase_NetAmts> hbwellrList )
 	throws Exception
 {	String message; // For messages
 	HydroBase_NetAmts hbwellr = null; // Single right from HydroBase
-	HydroBase_AdministrationNumber permit_adminnum;
-	boolean use_right = false;	// Use the water right information
-	boolean use_permit = false;	// Use the water permit information
-	List hbwellr_part_Vector = null; // List of rights from HydroBase
-	Date right_Date = null;
-	if ( hbwell_parcel != null ) {
-	     right_Date = hbwell_parcel.getAppr_date(); // Appropriation date in hbwell_parcel, as Date
+	HydroBase_AdministrationNumber permitAdminnum;
+	boolean useRightDate = false; // Use the water right information
+	boolean usePermitDate = false; // Use the water permit information
+	List<HydroBase_NetAmts> hbwellrPartList = null; // List of rights from HydroBase
+	Date rightDate = null;
+	if ( hbwellParcel != null ) {
+	     rightDate = hbwellParcel.getAppr_date(); // Appropriation date in hbwell_parcel, as Date
 	}
-	DateTime right_DateTime; // Appropriation date in hbwell_parcel, as DateTime
-	Date permit_Date = null;
-	if ( hbwell_parcel != null ) {
-		permit_Date = hbwell_parcel.getPerm_date(); // Permit date in hbwell_parcel, as Date
+	DateTime rightDateTime; // Appropriation date in hbwell_parcel, as DateTime
+	Date permitDate = null;
+	if ( hbwellParcel != null ) {
+		permitDate = hbwellParcel.getPerm_date(); // Permit date in hbwell_parcel, as Date
 	}
-	DateTime permit_DateTime; // Permit date in hbwell_parcel, as DateTime
-	Date appro_Date = null; // The final appropriation date in the HydroBase object.
+	DateTime permitDateTime; // Permit date in hbwell_parcel, as DateTime
+	Date approDate = null; // The final appropriation date in the HydroBase object.
 	double yield = 0.0; // Well yield from "wells" record.
-	double yield_apex = 0.0; // Well yield_apex from "wells" record
+	double yieldApex = 0.0; // Well yield_apex from "wells" record
 	double decree = 0.0; // Final decree in HydroBase object.
 	double apex = 0.0; // Net rate APEX (alternate point/ exchange) decree value.
-	double admin_number = 0.0; // Final administration number in HydroBase object.
-	String right_name = ""; // Final right name in HydroBase object.
-	String right_id = ""; // Final common identifier for right, either a WDID or permit information,
+	double adminNumber = 0.0; // Final administration number in HydroBase object.
+	String rightName = ""; // Final right name in HydroBase object.
+	String rightId = ""; // Final common identifier for right, either a WDID or permit information,
 					// depending on the data used for the right.
-	HydroBase_AdministrationNumber appro_adminnum;
+	HydroBase_AdministrationNumber approAdminnum;
 					// Administration number object used to convert from dates.
 	// Clear out the list to return...
-	hbwellr_Vector.clear();
+	hbwellrList.clear();
 	// The initial decision about whether to use water right or water permit
 	// data is determined based on the DefineRightHow flag in the
 	// ReadWellRightsFromHydroBase() command...
 	//
-	// The following checks for hbwell_parcel != null are used when dealing with parcel data.
+	// The following checks for hbwellParcel != null are used when dealing with parcel data.
 	// If reading well right/permit data directly, use the object will be null.
-	if ( (hbwell_parcel != null) && (defineWellRightHow == DefineWellRightHowType.EARLIEST_DATE) ) {
+	String rightDateReason = "";
+	if ( (hbwellParcel != null) && (defineWellRightHow == DefineWellRightHowType.EARLIEST_DATE) ) {
 		// Determine whether to use the well or permit based on the
 		// earliest of the well right appropriation date or permit date...
-		if ( (right_Date != null) && (permit_Date == null) ) {
+		if ( (rightDate != null) && (permitDate == null) ) {
 			// Only right appropriation date is available...
 			Message.printStatus ( 2, routine, "Rights from earliest date:  using right because no " +
 			"corresponding permit date is available." );
-			use_right = true;
+			useRightDate = true;
+			rightDateReason = "HaveRightDate/NoPermitDate";
 		}
-		else if ( (right_Date == null) && (permit_Date != null) ) {
+		else if ( (rightDate == null) && (permitDate != null) ) {
 			// Only permit date is available...
 			Message.printStatus ( 2, routine, "Rights from earliest date:  using permit because no " +
 			"corresponding right date is available." );
-			use_permit = true;
+			usePermitDate = true;
+			rightDateReason = "NoRightDate/HavePermitDate";
 		}
-		else if ( (right_Date == null) && (permit_Date == null) ) {
+		else if ( (rightDate == null) && (permitDate == null) ) {
 			// Don't have either date.  Use a right if the WDID is
 			// available and permit otherwise (probably will not have WDID)...
-			if ( (hbwell_parcel.getWD() > 0) && (hbwell_parcel.getID() > 0) ) {
+			if ( (hbwellParcel.getWD() > 0) && (hbwellParcel.getID() > 0) ) {
 				// Non-fatal...
 				message = "Wells data has no dates but has WDID " +
-				HydroBase_WaterDistrict.formWDID(hbwell_parcel.getWD(), hbwell_parcel.getID()) + ".";
+				HydroBase_WaterDistrict.formWDID(hbwellParcel.getWD(), hbwellParcel.getID()) + ".";
 				Message.printWarning(warningLevel,
 					MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
 				status.addToLog ( CommandPhaseType.RUN,
@@ -455,52 +462,58 @@ protected static int readWellRightsFromHydroBaseHelper (
 						message, "Verify that well/parcel data in HydroBase are complete." ) );
 				Message.printStatus ( 2, routine, "Rights from earliest date:  using right " +
 				"because have WDID but no right or permit date." );
-				use_right = true;
+				useRightDate = true;
+				rightDateReason = "NoRightDate/NoPermitDate/HaveWDID";
 			}
 			else {
 				Message.printStatus ( 2, routine, "Rights from earliest date:  using permit " +
 				"because no right or permit date and don't have WDID." );
-				use_permit = true;
+				usePermitDate = true;
+				rightDateReason = "NoRightDate/NoPermitDate/NoWDID";
 			}
 			// TODO SAM 2005-03-03 does this make sense?
 		}
 		else {
 			// Have both dates so compare the right and permit dates...
-			if ( permit_Date.before(right_Date) ) {
+			if ( permitDate.before(rightDate) ) {
 				// Permit date is earliest...
-				use_permit = true;
+				usePermitDate = true;
+				rightDateReason = "PermitDate<RightDate";
 				Message.printStatus ( 2, routine, "Rights from earliest date:  using permit " +
 				"because date is earlier than right date." );
 			}
 			else {
-				use_right = true;
+				useRightDate = true;
+				rightDateReason = "RightDate<PermitDate";
 				Message.printStatus ( 2, routine, "Rights from earliest date:  using right " +
 				"because date is earlier than permit date." );
 			}
 		}
 	}
-	else if ( (hbwell_parcel != null) && (defineWellRightHow == DefineWellRightHowType.LATEST_DATE) ) {
+	else if ( (hbwellParcel != null) && (defineWellRightHow == DefineWellRightHowType.LATEST_DATE) ) {
 		// Determine whether to use the well or permit based on the
 		// latest of the well right appropriation date or permit date...
-		if ( (right_Date != null) && (permit_Date == null) ) {
+		if ( (rightDate != null) && (permitDate == null) ) {
 			// Only right appropriation date is available...
 			Message.printStatus ( 2, routine, "Rights from latest date:  using right because no " +
 			"corresponding permit date is available." );
-			use_right = true;
+			useRightDate = true;
+			rightDateReason = "HaveRightDate/NoPermitDate";
 		}
-		else if ( (right_Date == null) && (permit_Date != null) ) {
+		else if ( (rightDate == null) && (permitDate != null) ) {
 			// Only permit date is available...
 			Message.printStatus ( 2, routine, "Rights from latest date:  using permit because no " +
 			"corresponding right date is available." );
-			use_permit = true;
+			usePermitDate = true;
+			rightDateReason = "NoRightDate/HavePermitDate";
 		}
-		else if ( (right_Date == null) && (permit_Date == null) ) {
+		else if ( (rightDate == null) && (permitDate == null) ) {
 			// Don't have either date.  Use a right if the WDID is
 			// available and permit otherwise (probably will not have WDID)...
-			if ( (hbwell_parcel.getWD() > 0) && (hbwell_parcel.getID() > 0) ) {
+			if ( (hbwellParcel.getWD() > 0) && (hbwellParcel.getID() > 0) ) {
 				// Non-fatal...
 				message = "Wells data has no dates but has WDID " +
-				HydroBase_WaterDistrict.formWDID(hbwell_parcel.getWD(), hbwell_parcel.getID()) + ".";
+				HydroBase_WaterDistrict.formWDID(hbwellParcel.getWD(), hbwellParcel.getID()) + ".";
 				Message.printWarning(warningLevel,
 					MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
 				status.addToLog ( CommandPhaseType.RUN,
@@ -508,45 +521,54 @@ protected static int readWellRightsFromHydroBaseHelper (
 						message, "Verify that well/parcel data in HydroBase are complete." ) );
 				Message.printStatus ( 2, routine, "Rights from latest date:  using right " +
 				"because have WDID but no right or permit date." );
-				use_right = true;
+				useRightDate = true;
+				rightDateReason = "NoRightDate/NoPermitDate/HaveWDID";
 			}
 			else {
 				Message.printStatus ( 2, routine, "Rights from latest date:  using permit " +
 				"because no right or permit date and don't have WDID." );
-				use_permit = true;
+				usePermitDate = true;
+				rightDateReason = "NoRightDate/NoPermitDate/NoWDID";
 			}
 			// TODO SAM 2005-03-03 does this make sense?
 		}
 		else {
 			// Have both dates so compare the right and permit dates...
-			if ( permit_Date.after(right_Date) ) {
+			if ( permitDate.after(rightDate) ) {
 				// Permit date is latest...
-				use_permit = true;
+				usePermitDate = true;
+				rightDateReason = "PermitDate>RightDate";
 				Message.printStatus ( 2, routine, "Rights from latest date:  using permit " +
 				"because date is later than right date." );
 			}
 			else {
-				use_right = true;
+				useRightDate = true;
+				rightDateReason = "RightDate>PermitDate";
 				Message.printStatus ( 2, routine, "Rights from latest date:  using right " +
 				"because date is later than permit date." );
 			}
 		}
 	}
-	else if ( (hbwell_parcel != null) && (defineWellRightHow == DefineWellRightHowType.RIGHT_IF_AVAILABLE) ) {
-		if ( (hbwell_parcel.getWD()>0) && (hbwell_parcel.getID() > 0) ){
+	// Above bas EARLIEST_DATE and LATEST_DATE
+	// Below uses right if available and otherwise permit
+	else if ( (hbwellParcel != null) && (defineWellRightHow == DefineWellRightHowType.RIGHT_IF_AVAILABLE) ) {
+		if ( (hbwellParcel.getWD()>0) && (hbwellParcel.getID() > 0) ){
 			// Use the water right information...
-			use_right = true;
-			if ( !ReadWellRights_boolean ) {
+			useRightDate = true;
+			rightDateReason = "HaveWDID";
+			if ( !readWellRights ) {
 				Message.printStatus ( 2, routine, "Using right data because it is available." );
 			}
 		}
 		else {
 			// Use the permit information...
-			use_permit = true;
+			usePermitDate = true;
+			rightDateReason = "NoWDID";
+			// TODO SAM 2016-05-29 but may not have permit date!
 			Message.printStatus ( 2, routine, "Using permit because right is not available." );
 		}
 	}
-	else if ( hbwell_parcel != null ){
+	else if ( hbwellParcel != null ) {
 		// DefineRightHow in calling code is not defined - should not get to this code...
 		message = "DefineRightHow value (" + defineWellRightHow + ") is not handled";
 		Message.printWarning(warningLevel,
@@ -556,36 +578,37 @@ protected static int readWellRightsFromHydroBaseHelper (
 				message, "Verify processing parameters - contact software support." ) );
 		throw new IllegalArgumentException(message);
 	}
-	if ( ((hbwell_parcel != null) && use_right && ReadWellRights_boolean ) || // Reading parcel/well data
-		(hbwell_parcel == null) && HydroBase_WaterDistrict.isWDID(id) ) { // Reading an individual well WDID
+	if ( ((hbwellParcel != null) && useRightDate && readWellRights ) || // Reading parcel/well data
+		(hbwellParcel == null) && HydroBase_WaterDistrict.isWDID(locId) ) { // Reading an individual well WDID
 		// TODO SAM 2009-03-29 Evaluate here - should use_right be checked before querying for rights?
 		// Re-query the rights to get the basic data...
 		// A well structure and a query is requested so query the water rights ...
 		try {
-			if ( hbwell_parcel != null ) {
+			if ( hbwellParcel != null ) {
 				// Get the WDID from the well/parcel supply information...
-				hbwellr_part_Vector = hdmi.readNetAmtsList (
-					DMIUtil.MISSING_INT, hbwell_parcel.getWD(), hbwell_parcel.getID(), false, null );
+				// TODO SAM 2016-05-29 Could this lead to redundant well rights if WDID is used for supply for multiple parcels?
+				hbwellrPartList = hdmi.readNetAmtsList (
+					DMIUtil.MISSING_INT, hbwellParcel.getWD(), hbwellParcel.getID(), false, null );
 			}
 			else {
-				// Get the WDID from the passed in well station ID.
+				// Get the WDID from the passed in well station ID, which will be the WDID.
 				int [] wdid_parts = new int[2];
 				// Should parse since checked above.
-				wdid_parts = HydroBase_WaterDistrict.parseWDID ( id );
-				hbwellr_part_Vector = hdmi.readNetAmtsList (
+				wdid_parts = HydroBase_WaterDistrict.parseWDID ( locId );
+				hbwellrPartList = hdmi.readNetAmtsList (
 					DMIUtil.MISSING_INT, wdid_parts[0], wdid_parts[1], false, null );
 			}
-			// Loop through the returned data and add to returned
-			// vector.  Adjust the amounts by ditch coverage area, if appropriate.
-			int nhbwellr_part = 0;
-			if ( hbwellr_part_Vector != null ) {
-				nhbwellr_part = hbwellr_part_Vector.size();
+			// Loop through the returned data and add to returned list.
+			// Adjust the amounts by ditch coverage area, if appropriate.
+			int nhbwellrPart = 0;
+			if ( hbwellrPartList != null ) {
+				nhbwellrPart = hbwellrPartList.size();
 			}
-			if ( (hbwell_parcel != null) && nhbwellr_part == 0 ) {
+			if ( (hbwellParcel != null) && nhbwellrPart == 0 ) {
 				// Expecting data since the parcel match indicated so
 				message = "No net amount rights data from HydroBase found for " +
-				HydroBase_WaterDistrict.formWDID (hbwell_parcel.getWD(), hbwell_parcel.getID() ) +
-				", " + hbwell_parcel.getWell_name() + " using " + parcel_year + " parcel data.";
+				HydroBase_WaterDistrict.formWDID (hbwellParcel.getWD(), hbwellParcel.getID() ) +
+				", " + hbwellParcel.getWell_name() + " from " + parcelYear + " parcel data.";
 				Message.printWarning(warningLevel,
 					MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
 				status.addToLog ( CommandPhaseType.RUN,
@@ -595,20 +618,20 @@ protected static int readWellRightsFromHydroBaseHelper (
 				return warningCount;
 			}
 			else {
-				if ( hbwell_parcel != null ) {
-					Message.printStatus ( 2, routine, "Read " + nhbwellr_part + " well rights for " +
-					HydroBase_WaterDistrict.formWDID ( hbwell_parcel.getWD(), hbwell_parcel.getID()));
+				if ( hbwellParcel != null ) {
+					Message.printStatus ( 2, routine, "Read " + nhbwellrPart + " well rights for " +
+					HydroBase_WaterDistrict.formWDID ( hbwellParcel.getWD(), hbwellParcel.getID()));
 				}
 				else {
-					Message.printStatus ( 2, routine, "Read " + nhbwellr_part + " well rights for \"" + id + "\"");
+					Message.printStatus ( 2, routine, "Read " + nhbwellrPart + " well rights for \"" + locId + "\"");
 				}
 			}
-			for ( int ihb = 0; ihb < nhbwellr_part; ihb++ ) {
+			for ( int ihb = 0; ihb < nhbwellrPart; ihb++ ) {
 				// Adjust the decree based on the amount of the well's yield that serves the parcel...
-				hbwellr = (HydroBase_NetAmts)hbwellr_part_Vector.get(ihb);
+				hbwellr = hbwellrPartList.get(ihb);
 				decree = hbwellr.getNet_rate_abs();
 				apex = hbwellr.getNet_rate_apex();
-				if ( UseApex_boolean && (apex > 0.0) ) {
+				if ( useApex && (apex > 0.0) ) {
 					if ( DMIUtil.isMissing(decree) ) {
 						decree = apex;
 					}
@@ -618,45 +641,57 @@ protected static int readWellRightsFromHydroBaseHelper (
 				}
 				if ( !DMIUtil.isMissing( decree ) ) {
 					// Reset the decree to consider the APEX and adjusted for ditch and well percent...
-					if ( hbwell_parcel == null ) {
-						hbwellr.setNet_rate_abs(decree * 1.0 * parcel_fraction);
+					if ( hbwellParcel == null ) {
+						hbwellr.setNet_rate_abs(decree * 1.0 * ditchParcelFraction);
 					}
 					else {
-						hbwellr.setNet_rate_abs(decree * hbwell_parcel.getPercent_yield() * parcel_fraction);
+						hbwellr.setNet_rate_abs(decree * hbwellParcel.getPercent_yield() * ditchParcelFraction);
 					}
 					// Make sure the units are "C" for CFS so that aggregation will work...
 					hbwellr.setUnit ( "C" );
 				}
 				// Set information used elsewhere.  The "common ID" is always the WDID.
 				// The water right name was set in the query.
-				if ( hbwell_parcel == null ) {
-					hbwellr.setCommonID ( id );
+				if ( hbwellParcel == null ) {
+					hbwellr.setCommonID ( locId );
 				}
 				else {
 					// Set the well ID to the WDID.
 					hbwellr.setCommonID (
-					HydroBase_WaterDistrict.formWDID ( hbwell_parcel.getWD(), hbwell_parcel.getID() ) );
+					HydroBase_WaterDistrict.formWDID ( hbwellParcel.getWD(), hbwellParcel.getID() ) );
 				}
 				// Set the water right class and parcel_id for help in other processing...
-				if ( hbwell_parcel != null ) {
-					hbwellr.setParcelMatchClass ( hbwell_parcel.get_Class() );
+				if ( hbwellParcel != null ) {
+					hbwellr.setParcelMatchClass ( hbwellParcel.get_Class() );
 				}
-				hbwellr.setParcelID ( parcel_id );
+				hbwellr.setParcelID ( parcelId );
+				// Set extended data to help understand how well rights were determined
+				if ( hbwellParcel != null ) {
+					// The following was added for StateDMI 4.00.00 to clarify groundwater-only processing (and help explain other)
+					hbwellr.setXApproDate(hbwellParcel.getAppr_date());
+					hbwellr.setXFractionYield(hbwellParcel.getPercent_yield());
+					hbwellr.setXDitchFraction(ditchParcelFraction);
+					hbwellr.setXPermitDate(hbwellParcel.getPerm_date());
+					hbwellr.setXPermitReceipt(hbwellParcel.getReceipt());
+					hbwellr.setXYieldApexGPM(hbwellParcel.getYield_apex());
+					hbwellr.setXYieldGPM(hbwellParcel.getYield());
+					// Maybe set reason for date being chosen
+				}
 				// Now add the individual right to the list...
-				hbwellr_Vector.add ( hbwellr );
+				hbwellrList.add ( hbwellr );
 			}
 			// Now return (results will be in hbwellr_Vector)...
 			return warningCount;
 		}
 		catch ( Exception e ) {
 			Message.printWarning ( 3, routine, e );
-			if ( hbwell_parcel != null ) {
+			if ( hbwellParcel != null ) {
 				message = "Unexpected error getting net amount rights data from HydroBase for " +
-				HydroBase_WaterDistrict.formWDID ( hbwell_parcel.getWD(), hbwell_parcel.getID() ) +
-				", " + hbwell_parcel.getWell_name() + " (" + e + ").";
+				HydroBase_WaterDistrict.formWDID ( hbwellParcel.getWD(), hbwellParcel.getID() ) +
+				", " + hbwellParcel.getWell_name() + " (" + e + ").";
 			}
 			else {
-				message = "Unexpected error getting net amount rights data from HydroBase for \"" + id +
+				message = "Unexpected error getting net amount rights data from HydroBase for \"" + locId +
 				"\" (" + e + ").";
 			}
 			Message.printWarning(warningLevel,
@@ -671,12 +706,12 @@ protected static int readWellRightsFromHydroBaseHelper (
 		// This code is executed if:
 		//
 		// 1) Not requerying well rights (even if a WDID)
-		// 2) Reading a well permit
+		// 2) Reading a well permit explicitly
 		//
 		// The well data produced by the well/parcel matching processing are used, which can result in some
 		// aggregated information for WDIDs
-		if ( hbwell_parcel == null ) {
-			message = "The explicit well ID \"" + id + "\" contains characters and is therefore assumed to be a well " +
+		if ( hbwellParcel == null ) {
+			message = "The explicit well ID \"" + locId + "\" contains characters and is therefore assumed to be a well " +
 				"permit - however, the ability to read explicit permits is not implemented.";
 			Message.printWarning(warningLevel,
 				MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
@@ -690,31 +725,31 @@ protected static int readWellRightsFromHydroBaseHelper (
 			// Can process the well/parcel data
 			// Use data from the wells table, which contains rights and permits...
 			// FIXME SAM 2009-02-24 Need to evaluate when reading well permits directly
-			yield = hbwell_parcel.getYield(); // GPM
-			yield_apex = hbwell_parcel.getYield_apex(); // GPM
-			if ( UseApex_boolean ) {
+			yield = hbwellParcel.getYield(); // GPM
+			yieldApex = hbwellParcel.getYield_apex(); // GPM
+			if ( useApex ) {
 				// Add the Apex to the yield.  If the yield is zero, then
 				// the Apex will be the amount shown in the right.
 				if ( yield < 0.0 ) {
 					// Yield was missing...
-					yield = yield_apex;
+					yield = yieldApex;
 				}
 				else {
 					// Add the Apex...
-					yield += yield_apex;
+					yield += yieldApex;
 				}
 			}
 			if ( DMIUtil.isMissing( yield) ) {
 				// No well yield so return...
 				// Print a non-fatal warning (don't know if HydroBase data will always be good...
 				// Non-fatal...
-				if ( UseApex_boolean ) {
-					message = "Well yield for parcel \"" + parcel_id +
-					"\", year " + parcel_year + " is missing.  Output may be incomplete.";
+				if ( useApex ) {
+					message = "Well yield for parcel \"" + parcelId +
+					"\", year " + parcelYear + " is missing.  Output may be incomplete.";
 				}
 				else {
-					message = "Well yield+yield_apex for parcel \"" + parcel_id +
-					"\", year " + parcel_year + " is missing.  Output may be incomplete.";
+					message = "Well yield+yield_apex for parcel \"" + parcelId +
+					"\", year " + parcelYear + " is missing.  Output may be incomplete.";
 				}
 				Message.printWarning(warningLevel,
 					MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
@@ -723,13 +758,13 @@ protected static int readWellRightsFromHydroBaseHelper (
 						message, "Verify that data in HydroBase are complete." ) );
 				return warningCount;
 			}
-			if ( DMIUtil.isMissing( hbwell_parcel.getPercent_yield()) ) {
+			if ( DMIUtil.isMissing( hbwellParcel.getPercent_yield()) ) {
 				// No well percent_yield so return...
 				// Print a non-fatal warning (don't know if HydroBase
 				// data will always be good...
 				// Non-fatal...
-				message = "Well percent yield for parcel \"" + parcel_id +
-				"\", year " + parcel_year + " is missing.  Output may be incomplete.";
+				message = "Well percent yield for parcel \"" + parcelId +
+				"\", year " + parcelYear + " is missing.  Output may be incomplete.";
 				Message.printWarning(warningLevel,
 					MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
 				status.addToLog ( CommandPhaseType.RUN,
@@ -739,88 +774,88 @@ protected static int readWellRightsFromHydroBaseHelper (
 			}
 			// Convert the yield from GPM to CFS and prorate the yield
 			// according to the fraction provided to the parcel...
-			decree = (yield + yield_apex)*.002228	// GPM to CFS
-				*hbwell_parcel.getPercent_yield()
-				*parcel_fraction;	// Will only be different from 1.0 when processing ditches
-			if ( use_right ) {
+			decree = (yield + yieldApex)*.002228 // GPM to CFS
+				*hbwellParcel.getPercent_yield()
+				*ditchParcelFraction; // Will only be different from 1.0 when processing ditches
+			if ( useRightDate ) {
 				// Use the right name...
 				/* TODO SAM	As per Ray Bennett just use name...
 				right_name = HydroBase_WaterDistrict.formWDID (
 					hbwell_parcel.getWD(), hbwell_parcel.getID() ) +
 					", " + hbwell_parcel.getWell_name();
 				*/
-				right_name = hbwell_parcel.getWell_name();
-				if ( right_name.equals("") ) {
-					right_name = HydroBase_WaterDistrict.formWDID (
-					hbwell_parcel.getWD(), hbwell_parcel.getID() ) + ", " + hbwell_parcel.getWell_name();
+				rightName = hbwellParcel.getWell_name();
+				if ( rightName.equals("") ) {
+					rightName = HydroBase_WaterDistrict.formWDID (
+					hbwellParcel.getWD(), hbwellParcel.getID() ) + ", " + hbwellParcel.getWell_name();
 				}
-				// Use the right appropriation date (set at the top of this method)...
-				if ( DMIUtil.isMissing( right_Date) ) {
+				// Use the water right appropriation date (set at the top of this method)...
+				if ( DMIUtil.isMissing( rightDate) ) {
 					// No date so use the user-specified value or the default...
-					admin_number = default_admin_number;
-					appro_Date = default_appro_Date;
-					Message.printStatus ( 2, routine, "Using well/parcel data, parcel \"" + parcel_id +
-					"\", year " + parcel_year + " right appropriation date is missing - using default " +
-					appro_Date );
+					adminNumber = defaultAdminNumber;
+					approDate = defaultApproDate;
+					Message.printStatus ( 2, routine, "Using well/parcel data, parcel \"" + parcelId +
+					"\", year " + parcelYear + " right appropriation date is missing - using default " +
+					approDate );
 				}
 				else {
 					// Convert the right date to an administration number...
-					right_DateTime = new DateTime( right_Date);
-					appro_adminnum = new HydroBase_AdministrationNumber( right_DateTime, null );
-					admin_number = appro_adminnum.getAdminNumber();
+					rightDateTime = new DateTime( rightDate);
+					approAdminnum = new HydroBase_AdministrationNumber( rightDateTime, null );
+					adminNumber = approAdminnum.getAdminNumber();
 					// Save the date in the appropriation date...
-					appro_Date = right_Date;
+					approDate = rightDate;
 				}
 				// Use a 7-digit formatted WDID for rights...
-				right_id = HydroBase_WaterDistrict.formWDID ( hbwell_parcel.getWD(), hbwell_parcel.getID() );
+				rightId = HydroBase_WaterDistrict.formWDID ( hbwellParcel.getWD(), hbwellParcel.getID() );
 				// Estimated wells need to be clearly identified because they are handled in the merge.
-				if ( (hbwell_parcel != null) && isParcelClassForEstimatedWell(hbwell_parcel.get_Class()) ) {
-					right_id = right_id + ":WE";
+				if ( (hbwellParcel != null) && isParcelClassForEstimatedWell(hbwellParcel.get_Class()) ) {
+					rightId = rightId + ":WE";
 				}
 			}
-			else if ( use_permit ) {
+			else if ( usePermitDate ) {
 				// Use the permit information for the name...
 				/* TODO 2006-04-24 As per Ray Bennett, just use right name...
 				right_name = "P:" + hbwell_parcel.getPermitno() + "_" +
 					hbwell_parcel.getPermitsuf() + "_" +
 					hbwell_parcel.getPermitrpl();
 				*/
-				if ( hbwell_parcel != null ) {
-					right_name = hbwell_parcel.getWell_name();
+				if ( hbwellParcel != null ) {
+					rightName = hbwellParcel.getWell_name();
 				}
 				else {
-					right_name = ""; // FIXME SAM 2009-02-24 Decide what to use
+					rightName = ""; // FIXME SAM 2009-02-24 Decide what to use
 				}
-				if ( right_name.equals("") ) {
+				if ( rightName.equals("") ) {
 					/* TODO SAM 2006-05-15 As per Ray Bennett discussion, use the receipt.
 					right_name =
 					"P:" + hbwell_parcel.getPermitno() + "_" +
 					hbwell_parcel.getPermitsuf() + "_" +
 					hbwell_parcel.getPermitrpl();
 					*/
-					if ( hbwell_parcel != null ) {
-						right_name = hbwell_parcel.getReceipt();
+					if ( hbwellParcel != null ) {
+						rightName = hbwellParcel.getReceipt();
 					}
 					else {
-						right_name = ""; // FIXME SAM 2009-02-24 Decide what to use
+						rightName = ""; // FIXME SAM 2009-02-24 Decide what to use
 					}
 				}
 				// Use the permit date (set at the top of this method)...
-				if ( DMIUtil.isMissing( permit_Date) ) {
+				if ( DMIUtil.isMissing( permitDate) ) {
 					// No date so use the user-specified value or the default...
-					admin_number = default_admin_number;
-					appro_Date = default_appro_Date;
-					Message.printStatus ( 2, routine, "Using well/parcel data, parcel \"" + parcel_id +
-						"\", year " + parcel_year + " permit date is missing - using default " +
-						appro_Date );
+					adminNumber = defaultAdminNumber;
+					approDate = defaultApproDate;
+					Message.printStatus ( 2, routine, "Using well/parcel data, parcel \"" + parcelId +
+						"\", year " + parcelYear + " permit date is missing - using default " +
+						approDate );
 				}
 				else {
 					// Convert the permit date to an administration number...
-					permit_DateTime = new DateTime( permit_Date);
-					permit_adminnum = new HydroBase_AdministrationNumber( permit_DateTime, null );
-					admin_number = permit_adminnum.getAdminNumber();
+					permitDateTime = new DateTime( permitDate);
+					permitAdminnum = new HydroBase_AdministrationNumber( permitDateTime, null );
+					adminNumber = permitAdminnum.getAdminNumber();
 					// Save the date in the appropriation date...
-					appro_Date = permit_Date;
+					approDate = permitDate;
 				}
 				/* TODO SAM 2006-05-15 As per Ray Bennett discussion, use the receipt number
 				since this is used in the irrigated lands data.  Because
@@ -831,17 +866,20 @@ protected static int readWellRightsFromHydroBaseHelper (
 					hbwell_parcel.getPermitsuf() + "_" +
 					hbwell_parcel.getPermitrpl();
 				*/
-				if ( hbwell_parcel != null ) {
-					if ( isParcelClassForEstimatedWell(hbwell_parcel.get_Class()) ) {
-						right_id = hbwell_parcel.getReceipt() + ":PE";
+				if ( hbwellParcel != null ) {
+					if ( isParcelClassForEstimatedWell(hbwellParcel.get_Class()) ) {
+						rightId = hbwellParcel.getReceipt() + ":PE";
 					}
 					else {
-						// Just indicate that it is a permit.
-						right_id = hbwell_parcel.getReceipt() + ":P";
+						// Format the permit receipt based on modeler-specified format
+						rightId = String.format(permitIdPreFormat, hbwellParcel.getReceipt());
 					}
 				}
 				else {
-					right_id = ""; // FIXME SAM 2009-02-24 Need to read permit data
+					// FIXME SAM 2009-02-24 Need to read permit data
+					// This may never be implemented because permits are not typically distributed with HydroBase
+					// and modelers use the data where parcels/wells are spatially matched
+					rightId = "";
 				}
 			}
 		}
@@ -854,18 +892,37 @@ protected static int readWellRightsFromHydroBaseHelper (
 	// TODO SAM 2004-09-27 need to set?
 	//hbwellr.setWD ( 0 );
 	//hbwellr.setID ( 0 );
-	hbwellr.setCommonID ( right_id );
-	hbwellr.setWr_name ( right_name );
+	hbwellr.setCommonID ( rightId );
+	hbwellr.setWr_name ( rightName );
 	// Set the dates...
-	hbwellr.setApro_date( appro_Date);
-	hbwellr.setAdmin_no ( admin_number );
-	// Set the water right class for help in other processing...
-	if ( hbwell_parcel != null ) {
-		hbwellr.setParcelMatchClass ( hbwell_parcel.get_Class() );
+	hbwellr.setApro_date( approDate);
+	hbwellr.setAdmin_no ( adminNumber );
+	// Set the water right class and other data for help in other processing...
+	if ( hbwellParcel != null ) {
+		// The following has been around for awhile (RGDSS?)
+		hbwellr.setParcelMatchClass ( hbwellParcel.get_Class() );
+		// The following was added for StateDMI 4.00.00 to clarify groundwater-only processing (and help explain other)
+		hbwellr.setXApproDate(hbwellParcel.getAppr_date());
+		hbwellr.setXFractionYield(hbwellParcel.getPercent_yield());
+		hbwellr.setXDitchFraction(ditchParcelFraction);
+		hbwellr.setXPermitDate(hbwellParcel.getPerm_date());
+		hbwellr.setXPermitReceipt(hbwellParcel.getReceipt());
+		hbwellr.setXYieldApexGPM(hbwellParcel.getYield_apex());
+		hbwellr.setXYieldGPM(hbwellParcel.getYield());
+		// Maybe set reason for date being chosen
 	}
-	hbwellr.setParcelID ( parcel_id );
+	hbwellr.setParcelID ( parcelId );
+	// Indicate that permit was read if necessary
+	// TODO SAM 2016-05-18 Need to fix this if receipt part type was requested
+	// - but needs to be consistent with above
+	if ( usePermitDate ) {
+		hbwellr.setCollectionIdPartType(StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_RECEIPT);
+	}
+	else {
+		hbwellr.setCollectionIdPartType(StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_RECEIPT);
+	}
 	// Add to the return list and return the error count...
-	hbwellr_Vector.add ( hbwellr );
+	hbwellrList.add ( hbwellr );
 	return warningCount;
 }
 
