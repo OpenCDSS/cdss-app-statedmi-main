@@ -360,11 +360,12 @@ private void initialize ( JFrame parent, Command command )
 		"This command sets a " + __nodeType + " " + __collectionType +
 		" location's information from a list file." ),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-    if ( __command instanceof SetWellAggregateFromList_Command ) {
+    if ( (__command instanceof SetWellAggregateFromList_Command) ||
+    	(__command instanceof SetWellSystemFromList_Command) ) {
 		// Not really relevant for other station types.
 		JGUIUtil.addComponent(paragraph, new JLabel (
-    	"<html><b>The aggregate part type \"" + StateMod_Well.COLLECTION_PART_TYPE_PARCEL +
-    	"\" is provided for historical compatibility but is being phased out in favor of using Well with WDID and Receipt.</b></html>"),
+    	"<html><b>The Well aggregate part type \"" + StateMod_Well.COLLECTION_PART_TYPE_PARCEL +
+    	"\" is provided for historical compatibility but may be phased out in favor of using Well with WDID and Receipt.</b></html>"),
     	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	if ( __collectionType.equalsIgnoreCase(StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT) ) {
