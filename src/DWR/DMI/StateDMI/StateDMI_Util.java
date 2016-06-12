@@ -976,10 +976,11 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 	// Read rights corresponding to the part
 	// First read from the HydroBase vw_CDSS_Wells view
 	List<HydroBase_Wells> hbWellsList = null;
+	int wdidParts[] = null;
 	if ( partIdType.equalsIgnoreCase("WDID") ) {
 		// Read rights for well structure WDID
 		// Split the WDID into parts in case it is not always 7 digits
-		int wdidParts[] = HydroBase_WaterDistrict.parseWDID(partId,null);
+		wdidParts = HydroBase_WaterDistrict.parseWDID(partId,null);
 		hbWellsList = hdmi.readWellsList(null, wdidParts[0], wdidParts[1]);
 	}
 	else if ( partIdType.equalsIgnoreCase("RECEIPT") ) {
@@ -1106,6 +1107,47 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 		}
 		else {
 			// Requested a WDID so read from NetAmts using WDID, may return 0 or more records
+			boolean positiveNetRateAbs = false;
+			boolean oldList = false;
+			List orderByList = null;
+			List<HydroBase_NetAmts> hbNetAmtsList = hdmi.readNetAmtsList(-1, wdidParts[0], wdidParts[1],
+				positiveNetRateAbs, orderByList, oldList );
+			// There should be at least one water right
+			if ( hbNetAmtsList.size() == 0 ) {
+				// No well was matched so input data is in error
+				message = "Requested well " + partIdType + " for well station \"" + wellStationId
+					+ "\" part ID \"" + partId + "\" matches no records in the NetAmts table";
+				Message.printWarning(warningLevel,
+					MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
+				status.addToLog ( CommandPhaseType.RUN,
+					new CommandLogRecord(CommandStatusType.WARNING,
+						message, "Verify that specified well WDID is correct." ) );
+			}
+			else {
+				// Convert the NetAmts records into StateMod well rights
+				for ( HydroBase_NetAmts hbNetAmts : hbNetAmtsList ) {
+					// Use the data directly
+					StateMod_WellRight smWellRight = new StateMod_WellRight();
+					// Set as much data in the object as possible, including extended data for troubleshooting
+					smWellRight.setCgoto(wellStationId);
+					smWellRight.setCollectionPartId(partId);
+					smWellRight.setCollectionPartIdType(partIdType);
+					smWellRight.setCollectionPartType(collectionPartType);
+					smWellRight.setCollectionType(collectionType);
+					// Decree is the well yield converted from GPM to CFS, or zero if missing
+					smWellRight.setDecree(hbNetAmts.getNet_rate_abs());
+					// TODO SAM 2016-06-12 What to do with APEX
+					smWellRight.setID(partId);
+					// For "irtem", convert appropriation date to administration number
+					DateTime dt = new DateTime(hbNetAmts.getApro_date());
+					HydroBase_AdministrationNumber an = new HydroBase_AdministrationNumber(dt);
+					smWellRight.setXApproDateAdminNumber(an.toString());
+					smWellRight.setXWDID(partId);	
+					smWellRight.setName(hbNetAmts.getWr_name());
+					// Finally, add the right to the returned list
+					smWellRightList.add(smWellRight);
+				}
+			}
 		}
 	}
 	return warningCount;
