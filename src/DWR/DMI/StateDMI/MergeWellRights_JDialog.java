@@ -6,14 +6,15 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -51,6 +52,9 @@ private SimpleJButton __browse_JButton = null;
 private SimpleJButton __path_JButton = null;
 private String __working_dir = null;
 private JTextField __OutputFile_JTextField = null;
+private JTextField __PermitIDPreFormat_JTextField = null;
+private SimpleJComboBox __IDFormat_JComboBox = null;
+private JTextField __PermitIDPostFormat_JTextField = null;
 private SimpleJComboBox __MergeParcelYears_JComboBox = null;
 private SimpleJComboBox __SumDecrees_JComboBox = null;
 private JTextArea __command_JTextArea=null;
@@ -135,11 +139,23 @@ private void checkInput ()
 {	// Put together a list of parameters to check...
 	PropList props = new PropList ( "" );
 	String OutputFile = __OutputFile_JTextField.getText().trim();
+	String PermitIDPreFormat = __PermitIDPreFormat_JTextField.getText().trim();
+	String IDFormat = __IDFormat_JComboBox.getSelected();
+	String PermitIDPostFormat = __PermitIDPostFormat_JTextField.getText().trim();
 	String MergeParcelYears = __MergeParcelYears_JComboBox.getSelected();
 	String SumDecrees = __SumDecrees_JComboBox.getSelected();
 	__error_wait = false;
 	if (OutputFile.length() > 0) {
 		props.set("OutputFile", OutputFile);
+	}
+	if ( PermitIDPreFormat.length() > 0 ) {
+		props.set ( "PermitIDPreFormat", PermitIDPreFormat );
+	}
+	if ( IDFormat.length() > 0 ) {
+		props.set ( "IDFormat", IDFormat );
+	}
+	if ( PermitIDPostFormat.length() > 0 ) {
+		props.set ( "PermitIDPostFormat", PermitIDPostFormat );
 	}
 	if (MergeParcelYears.length() > 0) {
 		props.set("MergeParcelYears", MergeParcelYears);
@@ -163,23 +179,17 @@ already been checked and no errors were detected.
 */
 private void commitEdits ()
 {	String OutputFile = __OutputFile_JTextField.getText().trim();
+	String PermitIDPreFormat = __PermitIDPreFormat_JTextField.getText().trim();
+	String IDFormat = __IDFormat_JComboBox.getSelected();
+	String PermitIDPostFormat = __PermitIDPostFormat_JTextField.getText().trim();
 	String MergeParcelYears = __MergeParcelYears_JComboBox.getSelected();
 	String SumDecrees = __SumDecrees_JComboBox.getSelected();
 	__command.setCommandParameter("OutputFile", OutputFile);
+	__command.setCommandParameter("PermitIDPreFormat", PermitIDPreFormat);
+	__command.setCommandParameter("IDFormat", IDFormat);
+	__command.setCommandParameter("PermitIDPostFormat", PermitIDPostFormat);
 	__command.setCommandParameter("MergeParcelYears", MergeParcelYears);
 	__command.setCommandParameter("SumDecrees", SumDecrees);
-}
-
-/**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__ok_JButton = null;
-	super.finalize ();
 }
 
 /**
@@ -201,15 +211,15 @@ private void initialize ( JFrame parent, MergeWellRights_Command command )
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
 	getContentPane().add ("North", main_JPanel);
-	int y = 0;
+	int y = -1;
 
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
-	int yy = 0;
+	int yy = -1;
     JGUIUtil.addComponent(paragraph, new JLabel (
 	"This command merges well water rights created using multiple years of irrigated parcel data (" +
 	"output from the ReadWellRightsFromHydroBase() command)."),
-	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(paragraph, new JLabel (
 	"The original water rights for multiple years are replaced by merged rights that apply for the " +
 	"full period."),
@@ -253,7 +263,9 @@ private void initialize ( JFrame parent, MergeWellRights_Command command )
 	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        
 	JGUIUtil.addComponent(main_JPanel, paragraph,
-		0, y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.EAST);
 	
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Output file:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -294,6 +306,42 @@ private void initialize ( JFrame parent, MergeWellRights_Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel (
     	"Optional - at end, sum rights with same ID and admin number (default=" + __command._True + ")."),
 	3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    
+    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Permit ID (pre)format:"),
+		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__PermitIDPreFormat_JTextField = new JTextField("",10);
+	__PermitIDPreFormat_JTextField.setToolTipText("Use %s to pass the permit ID through, or for example %s:P for legacy permit ID");
+	__PermitIDPreFormat_JTextField.addKeyListener (this);
+    JGUIUtil.addComponent(main_JPanel, __PermitIDPreFormat_JTextField,
+		1, y, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(main_JPanel, new JLabel (
+		"Optional - format for permit BEFORE right ID format (default= %s:P =legacy format)."),
+		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    
+    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Right ID format:"),
+		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    List format_Vector = new Vector(3);
+	format_Vector.add ( "" );
+	format_Vector.add ( "" + StateModWellRightIdFormatType.RIGHTID_NN );
+	__IDFormat_JComboBox = new SimpleJComboBox(false);
+	__IDFormat_JComboBox.setData ( format_Vector );
+	__IDFormat_JComboBox.addItemListener(this);
+	JGUIUtil.addComponent(main_JPanel, __IDFormat_JComboBox,
+		1, y, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel (
+		"Optional - format for right identifiers (default=no additional formatting)."),
+		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    
+    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Permit ID (post)format:"),
+		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+ 	__PermitIDPostFormat_JTextField = new JTextField("",10);
+	__PermitIDPostFormat_JTextField.setToolTipText("Use %s to pass the permit ID through, or for example %s:P for legacy permit ID");
+	__PermitIDPostFormat_JTextField.addKeyListener (this);
+    JGUIUtil.addComponent(main_JPanel, __PermitIDPostFormat_JTextField,
+		1, y, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(main_JPanel, new JLabel (
+		"Optional - format for permit ID AFTER right ID format (default= %s =pass-through)."),
+		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -376,18 +424,44 @@ public boolean ok ()
 Refresh the command from the other text field contents.
 */
 private void refresh ()
-{	String routine = getClass().getName() + ".refresh";
+{	String routine = getClass().getSimpleName() + ".refresh";
 	String OutputFile = "";
+	String PermitIDPreFormat = "";
+	String IDFormat = "";
+	String PermitIDPostFormat = "";
 	String MergeParcelYears = "";
 	String SumDecrees = "";
 	PropList props = __command.getCommandParameters();
 	if (__first_time) {
 		__first_time = false;
 		OutputFile = props.getValue ( "OutputFile" );
+		PermitIDPreFormat = props.getValue ( "PermitIDPreFormat" );
+		IDFormat = props.getValue ( "IDFormat" );
+		PermitIDPostFormat = props.getValue ( "PermitIDPostFormat" );
 		MergeParcelYears = props.getValue ( "MergeParcelYears" );
 		SumDecrees = props.getValue ( "SumDecrees" );
 		if ( OutputFile != null ) {
 			__OutputFile_JTextField.setText(OutputFile);
+		}
+		if ( PermitIDPreFormat != null ) {
+			__PermitIDPreFormat_JTextField.setText(PermitIDPreFormat);
+		}
+		if ( IDFormat == null ) {
+			// Select default...
+			__IDFormat_JComboBox.select ( 0 );
+		}
+		else {
+			if ( JGUIUtil.isSimpleJComboBoxItem(
+				__IDFormat_JComboBox, IDFormat, JGUIUtil.NONE, null, null ) ) {
+				__IDFormat_JComboBox.select ( IDFormat );
+			}
+			else {
+				Message.printWarning ( 1, routine, "Existing command references an invalid IDFormat value \"" +
+				IDFormat + "\".  Select a different value or Cancel.");
+			}
+		}
+		if ( PermitIDPostFormat != null ) {
+			__PermitIDPostFormat_JTextField.setText(PermitIDPostFormat);
 		}
 		if ( __MergeParcelYears_JComboBox != null ) {
 			if ( MergeParcelYears == null ) {
@@ -431,9 +505,15 @@ private void refresh ()
 
 	props = new PropList(__command.getCommandName());
 	OutputFile = __OutputFile_JTextField.getText().trim();
+	PermitIDPreFormat = __PermitIDPreFormat_JTextField.getText().trim();
+	IDFormat = __IDFormat_JComboBox.getSelected();
+	PermitIDPostFormat = __PermitIDPostFormat_JTextField.getText().trim();
 	MergeParcelYears =__MergeParcelYears_JComboBox.getSelected();
 	SumDecrees =__SumDecrees_JComboBox.getSelected();
 	props.add("OutputFile=" + OutputFile);
+	props.add ( "PermitIDPreFormat=" + PermitIDPreFormat);
+	props.add("IDFormat=" + IDFormat);
+	props.add ( "PermitIDPostFormat=" + PermitIDPostFormat);
 	props.add("MergeParcelYears=" + MergeParcelYears);
 	props.add("SumDecrees=" + SumDecrees);
 	__command_JTextArea.setText( __command.toString(props) );

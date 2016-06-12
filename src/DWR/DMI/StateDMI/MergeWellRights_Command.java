@@ -3,13 +3,14 @@ package DWR.DMI.StateDMI;
 import javax.swing.JFrame;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
 import DWR.StateMod.StateMod_Right;
 import DWR.StateMod.StateMod_Util;
 import DWR.StateMod.StateMod_WellRight;
-
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.IO.AbstractCommand;
@@ -28,9 +29,7 @@ import RTi.Util.IO.PropList;
 import RTi.Util.String.StringUtil;
 
 /**
-<p>
 This class initializes, checks, and runs the MergeWellRights() command.
-</p>
 */
 public class MergeWellRights_Command extends AbstractCommand implements Command, FileGenerator
 {
@@ -40,7 +39,7 @@ Values for boolean parameters.
 */
 protected final String _False = "False";
 protected final String _True = "True";
-	
+
 /**
 List of output files that are created by this command.
 */
@@ -66,6 +65,7 @@ public void checkCommandParameters ( PropList parameters, String command_tag, in
 throws InvalidCommandParameterException
 {	String routine = "MergeWellRights.checkCommandParameters";
 	String OutputFile = parameters.getValue ( "OutputFile" );
+	String IDFormat = parameters.getValue ( "IDFormat" );
 	String MergeParcelYears = parameters.getValue ( "MergeParcelYears" );
 	String SumDecrees = parameters.getValue ( "SumDecrees" );
 	String message;
@@ -117,6 +117,16 @@ throws InvalidCommandParameterException
 					message, "Verify that output file and working directory paths are compatible." ) );
 		}
 	}
+	
+	if ( (IDFormat != null) && (IDFormat.length() > 0) &&
+		!IDFormat.equalsIgnoreCase(""+StateModWellRightIdFormatType.RIGHTID_NN) ) {
+		message = "The IDFormat value (" + IDFormat + ") is invalid.";
+		warning += "\n" + message;
+		status.addToLog ( CommandPhaseType.INITIALIZATION,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Specify IDFormat as " + StateModWellRightIdFormatType.RIGHTID_NN +
+				" or blank (default=no formatting).") );
+	}
 
 	if ( (MergeParcelYears != null) && (MergeParcelYears.length() > 0) && 
 		!MergeParcelYears.equalsIgnoreCase(_False) && !MergeParcelYears.equalsIgnoreCase(_True) ) {
@@ -137,11 +147,15 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
-	valid_Vector.add ( "OutputFile" );
-	valid_Vector.add ( "SumDecrees" );
+	List<String> validList = new ArrayList<String>(6);
+	validList.add ( "OutputFile" );
+	validList.add ( "MergeParcelYears" );
+	validList.add ( "SumDecrees" );
+    validList.add ( "PermitIDPreFormat" );
+	validList.add ( "IDFormat" );
+    validList.add ( "PermitIDPostFormat" );
 
-	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	if ( warning.length() > 0 ) {
 		Message.printWarning ( warning_level,
@@ -181,6 +195,61 @@ private List extractExplicitRights ( List<StateMod_WellRight> smrightsOrig )
 		}
 	}
 	return extractedRights;
+}
+
+/**
+ * Format the well right IDs
+ */
+private void formatWellRightIds ( List<StateMod_Right> smrights, String permitIDPreFormat,
+	StateModWellRightIdFormatType stateModWellRightIdFormatType, String permitIDPostFormat ) {
+	StateMod_WellRight smWellRight;
+	String id;
+	// Loop through each right and, if originating from a well permit, format as requested
+	if ( (permitIDPreFormat != null) && !permitIDPreFormat.isEmpty() ) {
+		for ( StateMod_Right smright : smrights ) {
+			smWellRight = (StateMod_WellRight)smright;
+			id = smWellRight.getID();
+			if ( smWellRight.getCollectionPartIdType().equalsIgnoreCase("Receipt")) {
+				smWellRight.setID(String.format(permitIDPreFormat, id));
+			}
+		}
+	}
+	if ( stateModWellRightIdFormatType == StateModWellRightIdFormatType.RIGHTID_NN ) {
+		// Loop through each right and add .01, .02, etc. on all unique well rights.
+		// This is needed because well rights are often listed more than once with structures due to
+		// wells serving multiple parcels, etc.
+		// First create a hashmap of all the unique right IDs before formatting and set the key to an integer 0,
+		// meaning no match found.
+		HashMap<String,Integer> idmap = new HashMap<String,Integer>();
+		for ( StateMod_Right smright : smrights ) {
+			if ( idmap.get(smright.getIdentifier()) == null ) {
+				// Not found so add to the list
+				idmap.put(smright.getIdentifier(), new Integer(0) );
+			}
+		}
+		// Now loop through again and assign the identifier
+		Integer idCount;
+		for ( StateMod_Right smright : smrights ) {
+			smWellRight = (StateMod_WellRight)smright;
+			id = smWellRight.getID();
+			idCount = idmap.get(id);
+			// Initialized to 0, so next will be .01
+			idCount = idCount + 1;
+			smWellRight.setID(String.format("%s.%02d", id, idCount));
+			// Update the count to increase the counter
+			idmap.put(id, new Integer(idCount) );
+		}
+	}
+	// Loop through each right and, if originating from a well permit, format as requested
+	if ( (permitIDPostFormat != null) && !permitIDPostFormat.isEmpty() ) {
+		for ( StateMod_Right smright : smrights ) {
+			smWellRight = (StateMod_WellRight)smright;
+			id = smWellRight.getID();
+			if ( smWellRight.getCollectionPartIdType().equalsIgnoreCase("Receipt")) {
+				smWellRight.setID(String.format(permitIDPostFormat, id));
+			}
+		}
+	}
 }
 
 /**
@@ -565,6 +634,19 @@ CommandWarningException, CommandException
 	
 	PropList parameters = getCommandParameters();
 	String OutputFile = parameters.getValue ( "OutputFile" );
+	String PermitIDPreFormat = parameters.getValue ( "PermitIDPreFormat" );
+	if ( (PermitIDPreFormat == null) || PermitIDPreFormat.isEmpty() ) {
+		PermitIDPreFormat = "%s";
+	}
+	String IDFormat = parameters.getValue ( "IDFormat" );
+	String PermitIDPostFormat = parameters.getValue ( "PermitIDPostFormat" );
+	if ( (PermitIDPostFormat == null) || PermitIDPostFormat.isEmpty() ) {
+		PermitIDPostFormat = "%s";
+	}
+	StateModWellRightIdFormatType stateModWellRightIdFormatType = null;
+	if ( (IDFormat != null) && !IDFormat.isEmpty() ) {
+		stateModWellRightIdFormatType = StateModWellRightIdFormatType.valueOfIgnoreCase(IDFormat);
+	}
 	String MergeParcelYears = parameters.getValue ( "MergeParcelYears" );
 	boolean MergeParcelYears_boolean = true; // Default
 	if ( (MergeParcelYears != null) && MergeParcelYears.equalsIgnoreCase(_False) ) {
@@ -602,12 +684,12 @@ CommandWarningException, CommandException
 	}
 	
 	try {
-        List OutputComments_List = null;
+        List<String> OutputComments_List = null;
         try {
         	Object o = processor.getPropContents ( "OutputComments" );
             // Comments are available so use them...
             if ( o != null ) {
-                OutputComments_List = (List)o;
+                OutputComments_List = (List<String>)o;
             }
         }
         catch ( Exception e ) {
@@ -635,6 +717,9 @@ CommandWarningException, CommandException
 		if ( SumDecrees_boolean ) {
 			smrights = sumDecrees ( smrights );
 		}
+		
+		// Format the well right identifiers
+		formatWellRightIds ( smrights, PermitIDPreFormat, stateModWellRightIdFormatType, PermitIDPostFormat );
 		
 		// Set the results back in the processor because it is a new list.
 		
@@ -773,6 +858,9 @@ public String toString ( PropList parameters )
 	String OutputFile = parameters.getValue ( "OutputFile" );
 	String MergeParcelYears = parameters.getValue ( "MergeParcelYears" );
 	String SumDecrees = parameters.getValue ( "SumDecrees" );
+	String PermitIDPreFormat = parameters.getValue ( "PermitIDPreFormat" );
+	String IDFormat = parameters.getValue ( "IDFormat" );
+	String PermitIDPostFormat = parameters.getValue ( "PermitIDPostFormat" );
 
 	StringBuffer b = new StringBuffer ();
 	if ( (OutputFile != null) && (OutputFile.length() > 0) ) {
@@ -783,6 +871,24 @@ public String toString ( PropList parameters )
 	}
 	if ( (SumDecrees != null) && (SumDecrees.length() > 0) ) {
 		b.append ( "SumDecrees=" + SumDecrees );
+	}
+	if ( PermitIDPreFormat != null && PermitIDPreFormat.length() > 0 ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "PermitIDPreFormat=\"" + PermitIDPreFormat + "\"" );
+	}
+	if ( IDFormat != null && IDFormat.length() > 0 ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "IDFormat=\"" + IDFormat + "\"" );
+	}
+	if ( PermitIDPostFormat != null && PermitIDPostFormat.length() > 0 ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "PermitIDPostFormat=\"" + PermitIDPostFormat + "\"" );
 	}
 	
 	return getCommandName() + "(" + b.toString() + ")";
