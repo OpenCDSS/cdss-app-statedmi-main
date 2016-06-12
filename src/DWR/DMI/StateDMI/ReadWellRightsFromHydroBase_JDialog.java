@@ -27,6 +27,7 @@ import java.awt.event.WindowListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -46,6 +47,7 @@ private boolean __error_wait = false;
 private boolean __first_time = true;
 private boolean __ok = false; // Indicate whether OK has been pressed
 private JTabbedPane __main_JTabbedPane = null;
+private SimpleJComboBox __Approach_JComboBox = null;
 private JTextField __PermitIDPreFormat_JTextField=null;
 private SimpleJComboBox __IDFormat_JComboBox = null;
 private JTextField __PermitIDPostFormat_JTextField=null;
@@ -100,6 +102,7 @@ private void checkInput ()
 {	// Put together a list of parameters to check...
 	String ID = __ID_JTextField.getText().trim();
 	
+	String Approach = __Approach_JComboBox.getSelected();
 	String PermitIDPreFormat = __PermitIDPreFormat_JTextField.getText().trim();
 	String IDFormat = __IDFormat_JComboBox.getSelected();
 	String PermitIDPostFormat = __PermitIDPostFormat_JTextField.getText().trim();
@@ -115,6 +118,9 @@ private void checkInput ()
 	__error_wait = false;
 	
 	PropList props = new PropList ( "" );
+	if ( Approach.length() > 0 ) {
+		props.set ( "Approach", Approach );
+	}
 	if ( ID.length() > 0 ) {
 		props.set ( "ID", ID );
 	}
@@ -169,7 +175,8 @@ Commit the edits to the command.  In this case the command parameters have
 already been checked and no errors were detected.
 */
 private void commitEdits ()
-{	
+{
+	String Approach = __Approach_JComboBox.getSelected();
 	String ID = __ID_JTextField.getText().trim();
 	String PermitIDPreFormat = __PermitIDPreFormat_JTextField.getText().trim();
 	String IDFormat = __IDFormat_JComboBox.getSelected();
@@ -184,6 +191,7 @@ private void commitEdits ()
 	String OnOffDefault = __OnOffDefault_JComboBox.getSelected();
 	String Optimization = __Optimization_JComboBox.getSelected();
 
+	__command.setCommandParameter ( "Approach", Approach );
 	__command.setCommandParameter ( "ID", ID );
 	__command.setCommandParameter ( "PermitIDPreFormat", PermitIDPreFormat);
 	__command.setCommandParameter ( "IDFormat", IDFormat);
@@ -225,20 +233,14 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 		"This command reads well rights from HydroBase, using the well station identifiers to find rights."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"Water rights are determined from cross-referenced well right and permit data, which have been matched with wells and parcels."),
+		"Well stations can be explicit or a collection of wells (aggregate or system)."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-   	JGUIUtil.addComponent(paragraph, new JLabel (
-		"Cross-referenced data can be used as is, or well rights can be requeried to obtain individual net amount rights."),
+    JGUIUtil.addComponent(paragraph, new JLabel (
+		"Water right data can be determined from well rights (identified by WDID)"
+		+ "or permits (identified by receipt number)."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-   	JGUIUtil.addComponent(paragraph, new JLabel (
-		"Alternate point or exchange (APEX) decrees provide additional rights."),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-   	JGUIUtil.addComponent(paragraph, new JLabel (
-		"If the well rights are to be aggregated into water right classes, use the AggregateWellRights() command to reduce" +
-		" the number (but retain decree sum) of rights in the model."),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-   	JGUIUtil.addComponent(paragraph, new JLabel (
-		"See also MergeWellRights() command, which minimizes duplicate rights due to multiple parcel years."),
+    JGUIUtil.addComponent(paragraph, new JLabel (
+		"<html><b>A new simple approach is being implemented - see the General tab below</b></html>."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        
 	JGUIUtil.addComponent(main_JPanel, paragraph,
@@ -249,6 +251,43 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
     __main_JTabbedPane = new JTabbedPane ();
     JGUIUtil.addComponent(main_JPanel, __main_JTabbedPane,
         0, ++y, 7, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+    
+    // Panel for general parameters
+    int yGeneral = -1;
+    JPanel general_JPanel = new JPanel();
+    general_JPanel.setLayout( new GridBagLayout() );
+    __main_JTabbedPane.addTab ( "General", general_JPanel );
+    
+   	JGUIUtil.addComponent(general_JPanel, new JLabel (
+		"Well right processing using HydroBase has been complex due to right/permit/parcel/ditch relationships."),
+		0, ++yGeneral, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(general_JPanel, new JLabel (
+		"However, a Simple approach is now the default due to improvements in data and changes in modeling approach."),
+		0, ++yGeneral, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(general_JPanel, new JLabel (
+		"The older approach is referred to as Legacy and parameters are documented as applying to one or both approaches."),
+		0, ++yGeneral, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(general_JPanel, new JLabel (
+		"If the well rights are to be aggregated into water right classes, use the AggregateWellRights() command to reduce" +
+		" the number (but retain decree sum) of rights in the model."),
+		0, ++yGeneral, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(general_JPanel, new JSeparator (SwingConstants.HORIZONTAL),
+		0, ++yGeneral, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+   	
+   	JGUIUtil.addComponent(general_JPanel, new JLabel ("Approach:"),
+		0, ++yGeneral, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+   	List<String> approachList = new ArrayList<String>(3);
+   	approachList.add ( "" );
+   	approachList.add ( __command._Legacy );
+   	approachList.add ( __command._Simple );
+	__Approach_JComboBox = new SimpleJComboBox(false);
+	__Approach_JComboBox.setData ( approachList );
+	__Approach_JComboBox.addItemListener(this);
+	JGUIUtil.addComponent(general_JPanel, __Approach_JComboBox,
+		1, yGeneral, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(general_JPanel, new JLabel (
+		"Optional - approach to process well rights (default="+__command._Simple + ".)."),
+		3, yGeneral, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
      
     // Panel for well station filter
     int yWell = -1;
@@ -347,7 +386,13 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
     JPanel rightPermit_JPanel = new JPanel();
     rightPermit_JPanel.setLayout( new GridBagLayout() );
     __main_JTabbedPane.addTab ( "Well Right/Permit", rightPermit_JPanel );
-   	
+
+    JGUIUtil.addComponent(rightPermit_JPanel, new JLabel (
+		"Water rights are determined from cross-referenced well right and permit data, which have been matched with wells and parcels."),
+		0, ++yRightPermit, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(rightPermit_JPanel, new JLabel (
+		"Cross-referenced data can be used as is, or well rights can be requeried to obtain individual net amount rights."),
+		0, ++yRightPermit, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(rightPermit_JPanel, new JLabel (
 		"The following parameters indicate how to decide whether to use well right or permit when well/parcel data are used."),
 		0, ++yRightPermit, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -614,6 +659,7 @@ Refresh the command from the other text field contents.
 */
 private void refresh ()
 {	String routine = __command.getCommandName() + "_JDialog.refresh";
+	String Approach = "";
 	String ID = "";
 	String PermitIDPreFormat = "";
 	String IDFormat = "";
@@ -630,6 +676,7 @@ private void refresh ()
 	PropList props = __command.getCommandParameters();
 	if (__first_time) {
 		__first_time = false;
+		Approach = props.getValue ( "Approach" );
 		ID = props.getValue ( "ID" );
 		PermitIDPreFormat = props.getValue ( "PermitIDPreFormat" );
 		IDFormat = props.getValue ( "IDFormat" );
@@ -646,6 +693,20 @@ private void refresh ()
 		UseApex = props.getValue ( "UseApex" );
 		OnOffDefault = props.getValue ( "OnOffDefault" );
 		Optimization = props.getValue ( "Optimization" );
+		if ( Approach == null ) {
+			// Select default...
+			__Approach_JComboBox.select ( 0 );
+		}
+		else {
+			if ( JGUIUtil.isSimpleJComboBoxItem(
+				__Approach_JComboBox, Approach, JGUIUtil.NONE, null, null ) ) {
+				__Approach_JComboBox.select ( Approach );
+			}
+			else {
+				Message.printWarning ( 1, routine, "Existing command references an invalid Approach value \"" +
+					Approach + "\".  Select a different value or Cancel.");
+			}
+		}
 		if ( ID != null ) {
 			__ID_JTextField.setText(ID);
 		}
@@ -757,6 +818,7 @@ private void refresh ()
 
 	// Always get the value that is selected...
 
+	Approach = __Approach_JComboBox.getSelected();
 	ID = __ID_JTextField.getText().trim();
 	PermitIDPreFormat = __PermitIDPreFormat_JTextField.getText().trim();
 	IDFormat = __IDFormat_JComboBox.getSelected();
@@ -785,6 +847,7 @@ private void refresh ()
 		Optimization = __Optimization_JComboBox.getSelected();
 	}
 	props = new PropList ( "");
+	props.add ( "Approach=" + Approach );
 	props.add ( "ID=" + ID );
 	props.add ( "PermitIDPreFormat=" + PermitIDPreFormat);
 	props.add ( "IDFormat=" + IDFormat);

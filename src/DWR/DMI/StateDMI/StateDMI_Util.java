@@ -378,7 +378,7 @@ transferred to the main list in the calling code.
 @return the number of errors that were found during processing.
 @exception Exception Pass errors to the calling code.
 */
-protected static int readWellRightsFromHydroBaseHelper (
+protected static int readWellRightsFromHydroBaseWellParcelsHelper (
 	HydroBaseDMI hdmi,
 	String commandTag,	int warningLevel, int warningCount, CommandStatus status,
 	String routine,
@@ -923,6 +923,191 @@ protected static int readWellRightsFromHydroBaseHelper (
 	}
 	// Add to the return list and return the error count...
 	hbwellrList.add ( hbwellr );
+	return warningCount;
+}
+
+/**
+Helper method to read well rights from HydroBase, when reading from the "wells" table.
+A single well (WDID or receipt) is processed, resulting in one or more HydroBase_NetAmts objects being returned.
+This method handles whether to use well rights or permits.
+@param hdmi HydroBaseDMI instance for queries.
+@param commandTag Tag to use when printing messages.
+@param warningCount Warning count to use when printing messages.  Increments
+in the warning count is handled by passing the updated value back to the calling code.
+@param routine Routine to use when printing messages.
+@param wellStationId Well station identifier that is being processed.
+@param partId well part ID that is being processed, same as station ID or part in a collection.
+@param partIdType the part ID type, either 
+@param defineWellRightHow _EarliestDate to define the StateMod right using the
+earliest of the well right appropriation date and permit date;
+_LatestDate to define the StateMod right using the
+latest of the well right appropriation date and permit date;
+_RightIfAvailable If true, define the StateMod right using
+the well right appropriation date, if the well right is available.  Otherwise use the permit date.
+@param useApex If true, add the APEX data values to the net amount right
+value. If false, do not add APEX.
+@param defaultAdminNumber Default administration number to use if a date
+cannot be determined from the data.
+@param defaultApproDate default appropriation date corresponding to defaultAdminNumber
+@param permitIdPreFormat a format using String.format() specifier to format a permit receipt
+(for example use "%s:P" to use legacy behavior to indicate permit).
+@param smWellRightList The list to return right(s) in.  The right(s) are
+transferred to the main list in the calling code.
+@return the number of errors that were found during processing.
+@exception Exception Pass errors to the calling code.
+*/
+protected static int readWellRightsFromHydroBaseWellsHelper (
+	HydroBaseDMI hdmi,
+	String commandTag, int warningLevel, int warningCount, CommandStatus status,
+	String routine,
+	String wellStationId,
+	String collectionType,
+	String collectionPartType,
+	String partId,
+	String partIdType,
+	DefineWellRightHowType defineWellRightHow,
+	boolean useApex,
+	double defaultAdminNumber,
+	Date defaultApproDate,
+	String permitIdPreFormat,
+	List<StateMod_WellRight> smWellRightList )
+	throws Exception
+{	String message; // For messages
+	// Read rights corresponding to the part
+	// First read from the HydroBase vw_CDSS_Wells view
+	List<HydroBase_Wells> hbWellsList = null;
+	if ( partIdType.equalsIgnoreCase("WDID") ) {
+		// Read rights for well structure WDID
+		// Split the WDID into parts in case it is not always 7 digits
+		int wdidParts[] = HydroBase_WaterDistrict.parseWDID(partId,null);
+		hbWellsList = hdmi.readWellsList(null, wdidParts[0], wdidParts[1]);
+	}
+	else if ( partIdType.equalsIgnoreCase("RECEIPT") ) {
+		// Read rights for well permit receipt
+		// Split the WDID into parts in case it is not always 7 digits
+		hbWellsList = hdmi.readWellsList(partId, -1, -1);
+	}
+	else {
+		// Bad input
+		message = "Requested unknown part type \"" + partIdType + "\" for well station \"" + wellStationId + "\".";
+		Message.printWarning(warningLevel,
+			MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.WARNING,
+				message, "Verify that specified well ID type is correct (WDID or Receipt)." ) );
+	}
+	// There should only be one entry for returned value, matching a single well
+	if ( hbWellsList.size() == 0 ) {
+		// No well was matched so input data is in error
+		message = "Requested well " + partIdType + " for well station \"" + wellStationId + "\" matches no records in vw_CDSS_Wells";
+			Message.printWarning(warningLevel,
+				MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
+			status.addToLog ( CommandPhaseType.RUN,
+				new CommandLogRecord(CommandStatusType.WARNING,
+					message, "Verify that specified well ID is correct." ) );
+	}
+	else if ( hbWellsList.size() != 1 ) {
+		// Expecting 1 record so HydroBase is in error (duplicate receipt or WDID)
+		message = "Requested well " + partIdType + " for well station \"" + wellStationId + "\" matches "
+			+ hbWellsList.size() + " records in vw_CDSS_Wells but expecting exactly 1 match";
+		Message.printWarning(warningLevel,
+			MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.WARNING,
+				message, "Verify that HydroBase vw_CDSS_Wells table contents are correct - has duplicate permit/WDID matches." ) );
+	}
+	else {
+		// Now have exactly one HydroBase_Wells object, which contains receipt/WDID cross-reference.
+		// However, one of the parts may be missing.
+		// Base what data are used by the part type that was requested.
+		HydroBase_Wells hbWells = hbWellsList.get(0);
+		if ( partIdType.equalsIgnoreCase("RECEIPT") ) {
+			// Use the data directly
+			StateMod_WellRight smWellRight = new StateMod_WellRight();
+			double yieldGPM = hbWells.getYield();
+			double yieldApexGPM = hbWells.getYield_apex();
+			Date permitDate = hbWells.getPerm_date();
+			Date approDate = hbWells.getAppr_date();
+			int wd = hbWells.getWD();
+			int id = hbWells.getID();
+			// Set as many data in the object as possible, including extended data for troubleshooting
+			smWellRight.setCgoto(wellStationId);
+			smWellRight.setCollectionPartId(partId);
+			smWellRight.setCollectionPartIdType(partIdType);
+			smWellRight.setCollectionPartType(collectionPartType);
+			smWellRight.setCollectionType(collectionType);
+			// Decree is the well yield converted from GPM to CFS, or zero if missing
+			smWellRight.setDecree((yieldGPM < 0.0 || Double.isNaN(yieldGPM) ? 0.0 : yieldGPM*.002228));
+			if ( yieldGPM <= 0 ) {
+				message = "Requested well " + partIdType + " for well station \"" + wellStationId +
+					"\" yield (" + yieldGPM + ") is missing - setting to zero";
+				Message.printWarning(warningLevel,
+					MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
+				status.addToLog ( CommandPhaseType.RUN,
+					new CommandLogRecord(CommandStatusType.WARNING,
+						message, "Verify that HydroBase vw_CDSS_Wells table contents are correct - using 0.0 for right." ) );
+			}
+			smWellRight.setID(hbWells.getReceipt());
+			// For "irtem", convert permit date to administration number
+			if ( permitDate == null ) {
+				if ( defaultApproDate == null ) {
+					message = "Requested well " + partIdType + " for well station \"" + wellStationId +
+						"\" permit date is missing and no default appropriation date provided - cannot add permit";
+					Message.printWarning(warningLevel,
+						MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
+					status.addToLog ( CommandPhaseType.RUN,
+						new CommandLogRecord(CommandStatusType.WARNING,
+							message, "Verify that HydroBase vw_CDSS_Wells table contents are correct - need to assign permit date." ) );
+				}
+				else {
+					// Use the default appropriation date for permit date
+					permitDate = defaultApproDate;
+					smWellRight.setIrtem(String.format("%.5f",defaultAdminNumber));
+				}
+			}
+			else {
+				// Have a permit date so use it
+				DateTime dt = new DateTime(permitDate);
+				HydroBase_AdministrationNumber an = new HydroBase_AdministrationNumber(dt);
+				smWellRight.setIrtem(an.toString());
+				smWellRight.setXPermitDateAdminNumber(an.toString());
+			}
+			// Parcel information left as missing since not used
+			smWellRight.setXApproDate(approDate);
+			if ( approDate != null ) {
+				// Set appropriation date for FYI
+				DateTime dt = new DateTime(approDate);
+				HydroBase_AdministrationNumber an = new HydroBase_AdministrationNumber(dt);
+				smWellRight.setXApproDateAdminNumber(an.toString());
+			}
+			smWellRight.setXPermitDate(permitDate);
+			smWellRight.setXPermitReceipt(hbWells.getReceipt());
+			if ( (wd > 0) && (id > 0) ) {
+				smWellRight.setXWDID(HydroBase_WaterDistrict.formWDID(wd, id));	
+			}
+			smWellRight.setXYieldGPM(yieldGPM);
+			if ( (yieldApexGPM >= 0.0) && !Double.isNaN(yieldApexGPM)) {
+				smWellRight.setXYieldApexGPM(yieldApexGPM);
+				smWellRight.setXYieldApexGPM(yieldApexGPM*.002228);
+			}
+			smWellRight.setName(hbWells.getWell_name());
+			// Warn if receipt was requested but right looks like it has WDID/right data - should adjust input
+			if ( approDate != null ) {
+				message = "Requested well " + partIdType + " for well station \"" + wellStationId +
+					"\" permit date is missing but have appropriation date from water right";
+				Message.printWarning(warningLevel,
+					MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
+				status.addToLog ( CommandPhaseType.RUN,
+					new CommandLogRecord(CommandStatusType.WARNING,
+						message, "Recommend using the well WDID instead of receipt when defining well station." ) );
+			}
+			// Finally, add the right to the returned list
+			smWellRightList.add(smWellRight);
+		}
+		else {
+			// Requested a WDID so read from NetAmts using WDID, may return 0 or more records
+		}
+	}
 	return warningCount;
 }
 

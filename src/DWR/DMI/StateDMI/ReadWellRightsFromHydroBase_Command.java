@@ -2,8 +2,6 @@ package DWR.DMI.StateDMI;
 
 import javax.swing.JFrame;
 
-import us.co.state.dwr.hbguest.ParcelWells;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,7 +15,6 @@ import DWR.DMI.HydroBaseDMI.HydroBase_ParcelUseTSStructureToParcel;
 import DWR.DMI.HydroBaseDMI.HydroBase_StructureView;
 import DWR.DMI.HydroBaseDMI.HydroBase_Util;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
-import DWR.DMI.HydroBaseDMI.HydroBase_WellApplicationView;
 import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
 import DWR.StateMod.StateMod_Parcel;
 import DWR.StateMod.StateMod_Well;
@@ -48,9 +45,12 @@ extends AbstractCommand implements Command
 {
 	
 //	 Possible values for parameters...
-
 protected final String _False = "False";
 protected final String _True = "True";
+
+//Possible values for Approach parameters...
+protected final String _Legacy = "Legacy";
+protected final String _Simple = "Simple";
 
 //Formats for well right identifiers...
 
@@ -277,6 +277,16 @@ private void addHydroBaseRightsToStateModWellRights (
 }
 
 /**
+ * Add the list of StateMod_WellRight (from the simple approach) to the processor water right list.
+ */
+private void addStateModRightsToProcessorRightList ( List<StateMod_WellRight> smWellRightList,
+	List<StateMod_WellRight> processorRightList ) {
+	// For now just add without any additional processing
+	// TODO SAM 2016-06-12 Need to deal with formatting, etc.
+	processorRightList.addAll(smWellRightList);
+}
+
+/**
 Check the command parameter for valid values, combination, etc.
 @param parameters The parameters for the command.
 @param command_tag an indicator to be used when printing messages, to allow a
@@ -286,7 +296,8 @@ cross-reference to the original commands.
 */
 public void checkCommandParameters ( PropList parameters, String command_tag, int warning_level )
 throws InvalidCommandParameterException
-{	String routine = getClass().getName() + ".checkCommandParameters";
+{	String routine = getClass().getSimpleName() + ".checkCommandParameters";
+	String Approach = parameters.getValue ( "Approach" );
 	String ID = parameters.getValue ( "ID" );
 	//String IDFormat = parameters.getValue ( "IDFormat" );
 	String Year = parameters.getValue( "Year" );
@@ -303,6 +314,17 @@ throws InvalidCommandParameterException
 	
 	CommandStatus status = getCommandStatus();
 	status.clearLog(CommandPhaseType.INITIALIZATION);
+	
+	if ( (Approach != null) && !Approach.isEmpty() &&
+		!Approach.equalsIgnoreCase(_Legacy) &&
+		!Approach.equalsIgnoreCase(_Simple) ) {
+		message = "The Approach value (" + Approach + ") is invalid.";
+		warning += "\n" + message;
+		status.addToLog ( CommandPhaseType.INITIALIZATION,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Specify Approach as " + _Legacy +
+				" or " + _Simple + " (default).") );
+	}
 	
 	if ( (ID == null) || (ID.length() == 0) ) {
 		message = "An identifier or pattern must be specified.";
@@ -438,7 +460,8 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List<String> validList = new ArrayList<String>(13);
+	List<String> validList = new ArrayList<String>(14);
+	validList.add ( "Approach" );
     validList.add ( "ID" );
     validList.add ( "PermitIDPreFormat" );
     validList.add ( "IDFormat" );
@@ -843,7 +866,7 @@ private void readHydroBaseWellRightsForParcel (
 		// data directly or querying net amount rights.
 		try {
 			hbwellParcel = hbwellParcelList.get(iwellParcel);
-			warningCount = StateDMI_Util.readWellRightsFromHydroBaseHelper (
+			warningCount = StateDMI_Util.readWellRightsFromHydroBaseWellParcelsHelper (
 				hdmi,
 				commandTag,	warningLevel, warningCount, status,
 				routine,
@@ -1022,7 +1045,7 @@ private List<HydroBase_NetAmts> readHydroBaseWellRightsForWellStation (
 	// Single well - get its water rights...
 	HydroBase_Wells hbwellParcel = null;
 	try {
-		warningCount = StateDMI_Util.readWellRightsFromHydroBaseHelper (
+		warningCount = StateDMI_Util.readWellRightsFromHydroBaseWellParcelsHelper (
 			hdmi,
 			commandTag, warningLevel, warningCount, status,
 			routine,
@@ -1111,7 +1134,7 @@ private List<HydroBase_NetAmts> readHydroBaseWellRightsForWellStationList (
 				// Read like an explicit well - do the same as legacy code did
 				try {
 					List<HydroBase_NetAmts> hbwellr2List = new ArrayList<HydroBase_NetAmts>(); // Rights that are read for this well
-					warningCount = StateDMI_Util.readWellRightsFromHydroBaseHelper (
+					warningCount = StateDMI_Util.readWellRightsFromHydroBaseWellParcelsHelper (
 						hdmi,
 						commandTag, warningLevel, warningCount, status,
 						routine,
@@ -1154,7 +1177,7 @@ private List<HydroBase_NetAmts> readHydroBaseWellRightsForWellStationList (
 						for ( HydroBase_Wells hbwellParcel1 : hbWellParcelList ) {
 							// Translate the records into well rights - because receipt has been requested, always use receipt information
 							List<HydroBase_NetAmts> hbwellr2List = new ArrayList<HydroBase_NetAmts>(); // Rights that are read for this well
-							warningCount = StateDMI_Util.readWellRightsFromHydroBaseHelper (
+							warningCount = StateDMI_Util.readWellRightsFromHydroBaseWellParcelsHelper (
 								hdmi,
 								commandTag, warningLevel, warningCount, status,
 								routine,
@@ -1212,7 +1235,7 @@ private List<HydroBase_NetAmts> readHydroBaseWellRightsForWellStationList (
 			}
 			try {
 				List<HydroBase_NetAmts> hbwellr2List = new ArrayList<HydroBase_NetAmts>(); // Rights that are read for this well
-				warningCount = StateDMI_Util.readWellRightsFromHydroBaseHelper (
+				warningCount = StateDMI_Util.readWellRightsFromHydroBaseWellParcelsHelper (
 					hdmi,
 					commandTag, warningLevel, warningCount, status,
 					routine,
@@ -1246,6 +1269,85 @@ private List<HydroBase_NetAmts> readHydroBaseWellRightsForWellStationList (
 }
 
 /**
+Read well rights from HydroBase for a well station (explicit well, or in the future a well aggregated
+by well IDs).
+ * @param hdmi
+ * @param well
+ * @param wellStationId
+ * @param is_collection
+ * @param div
+ * @param defineWellRightHow
+ * @param readWellRights
+ * @param useApex
+ * @param defaultAdminNumber
+ * @param defaultApproDate
+ * @param permitIdPreFormat the String.format() specifier to apply to permit receipt after reading,
+for example "%s:P" to mimic legacy behavior.
+ * @param warningLevel
+ * @param warningCount
+ * @param commandTag
+ * @param status
+ */
+private List<StateMod_WellRight> readHydroBaseWellRightsForWellStationsSimple (
+	HydroBaseDMI hdmi,
+	String wellStationId,
+	boolean isCollection,
+	String collectionType,
+	String collectionPartType,
+	List<String> partIdList,
+	List<String> partIdTypeList,
+	int div,
+	boolean readWellRights,
+	boolean useApex,
+	double defaultAdminNumber,
+	Date defaultApproDate,
+	String permitIdPreFormat,
+	int warningLevel, int warningCount, String commandTag, CommandStatus status)
+{	String routine = getClass().getSimpleName() + ".readHydroBaseWellRightsForWellStationSimple";
+	String message;
+	List<StateMod_WellRight> smWellRightCombinedList = new ArrayList<StateMod_WellRight>(); // Rights that are read and returned
+	String partId;
+	String partIdType;
+	for ( int iPart = 0; iPart < partIdList.size(); iPart++ ) {
+		partId = partIdList.get(iPart);
+		partIdType = partIdTypeList.get(iPart);
+		// Get water rights for the single well...
+		List<StateMod_WellRight> smWellRightList = new ArrayList<StateMod_WellRight>(); // Rights that are read and returned
+		try {
+			warningCount = StateDMI_Util.readWellRightsFromHydroBaseWellsHelper (
+				hdmi,
+				commandTag, warningLevel, warningCount, status,
+				routine,
+				wellStationId, // The station that is being processed, StateMod station ID, for logging
+				collectionType,
+				collectionPartType,
+				partId, // The well that is being processed (well WDID or receipt)
+				partIdType, // The well type that is being processed "WDID" or "Receipt"
+				DefineWellRightHowType.RIGHT_IF_AVAILABLE, // Always use right if available
+				useApex, // Read 
+				defaultAdminNumber,
+				defaultApproDate,
+				permitIdPreFormat,
+				smWellRightList );
+			// Add the list of rights to the combined list
+			smWellRightCombinedList.addAll(smWellRightList);
+		}
+		catch ( Exception e ) {
+			Message.printWarning ( 3, routine, e );
+			message = "Unexpected error reading well rights for well station \"" + wellStationId + "\" part ID = \""
+				+ partId + "\" part type = \"" + collectionPartType + "\" (" + e + ").";
+			Message.printWarning(warningLevel,
+				MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
+			status.addToLog ( CommandPhaseType.RUN,
+				new CommandLogRecord(CommandStatusType.FAILURE,
+					message, "See the log file - report the problem to software support." ) );
+		}
+	}
+	// Return the collective list of rights as HydroBase_NetAmt instances
+	return smWellRightCombinedList;
+}
+
+/**
 Method to execute the readDiversionHistoricalTSMonthlyFromHydroBase() command.
 @param command_number Command number in sequence.
 @exception Exception if there is an error processing the command.
@@ -1265,6 +1367,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	// Get the input parameters...
 	
 	PropList parameters = getCommandParameters();
+	boolean doSimpleApproach = true; // For now Simple is true and other (Legacy) is false
+	String Simple = parameters.getValue ( "Simple" );
+	if ( (Simple != null) && !Simple.isEmpty() && !Simple.equalsIgnoreCase(_Simple) ) {
+		doSimpleApproach = false;
+	}
 	String ID = parameters.getValue ( "ID" );
 	if ( ID == null ) {
 		ID = "*"; // Default
@@ -1349,9 +1456,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	
 	// Get the list of well rights (probably empty)...
 	
-	List<StateMod_WellRight> rightList = null;
+	List<StateMod_WellRight> processorRightList = null;
 	try {
-		rightList = (List<StateMod_WellRight>)processor.getPropContents ( "StateMod_WellRight_List");
+		processorRightList = (List<StateMod_WellRight>)processor.getPropContents ( "StateMod_WellRight_List");
 	}
 	catch ( Exception e ) {
 		message = "Error requesting well right data from processor.";
@@ -1411,7 +1518,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	}
 	for ( int iparcel_year = 0; iparcel_year < parcelYears.length;	iparcel_year++ ) {
 		Message.printStatus( 2, routine, "Will include division " + Div_int +
-			" parcel data from " + parcelYears[iparcel_year] );
+			" parcel data from " + parcelYears[iparcel_year] + " (if parcel data are needed in processing)");
 	}
 	if ( (parcelYears == null) || (parcelYears.length == 0) ) {
 		message = "No parcel years have been specified or are available from HydroBase - " +
@@ -1540,22 +1647,164 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	}
 	
 	try {
-		StateMod_Well well = null; // StateMod well station to process
-		List<HydroBase_NetAmts> hbwellrList = null; // List of rights from HydroBase
-		List<HydroBase_NetAmts> hbwellrSortedList = new Vector(100); // List of rights from HydroBase, after manual sort on admin number
-		int nhbwellr = 0; // The number of rights read from HydroBase
-		HydroBase_NetAmts hbwellr = null; // Single right from HydroBase
-		int ir = 0; // Counter for rights in loop.
+		// Data objects used throughout following code
 		List<String> partIdList = null; // List of aggregate/system parts
 		List<String> partIdTypeList = null; // List of aggregate/system parts ID types (will contain "WDID" or "Receipt")
 		String collectionType = null;
-		String collectionPartType = null;
-			// Parts used for collection.  Mainly need to key on StateMod_WellStation.
-		String id = null; // Well ID for StateMod or CU location ID for StateCU.
+		String collectionPartType = null; // Parts used for collection.  Mainly need to key on StateMod_WellStation.
+		String wellStationId = null; // Well ID for StateMod or CU location ID for StateCU.
 		boolean isCollection = false; // Indicate whether the well/location is
-		boolean isAggregate = false; // an aggregate or system (each of which
-		boolean isSystem = false;	// will also be a collection).
-			// location through the multi-part code.
+		boolean isSystem = false; // Is well station a system (each of which boolean will also be a collection).
+		boolean isAggregate = false; // Is well station an aggregate (each of which will also be a collection).
+		StateMod_Well well = null; // StateMod well station to process
+		int matchCount = 0; // FIXME SAM 2009-01-19 add more checks later when no matches
+		List<HydroBase_NetAmts> hbwellrList = null; // List of rights from HydroBase for a single station (explicit or collection)
+		if ( doSimpleApproach ) {
+			// Simple approach where basically the full decree/yield for involved wells is used
+			// rather than parcel/split data
+			// A major difference between this and the legacy approach is that there is no leap on the parcel year
+			Message.printStatus(2,routine,"Reading well rights using Simple approach (direct ready of well rights and parcels and not parcel fractions");
+			int parcelYear = -1; // Parcel year is irrelevant
+			List<StateMod_WellRight> smWellRightList = null;
+			for ( int i = 0; i < stationListSize; i++ ) {
+				// Notify command progress listeners which station is being processed...
+				notifyCommandProgressListeners ( i, stationListSize, (float)(((float)(i + 1)/(float)stationListSize)*100.0),
+					"Processing well station " + i + " of " + stationListSize );
+				// Use a well station for processing...
+				well = stationList.get(i);
+				wellStationId = well.getID();
+				if ( !wellStationId.matches(idPatternJava) ) {
+					// Identifier does not match...
+					continue;
+				}
+				++matchCount;
+				// Clear out the parcels saved with the well...
+				isCollection = false;
+				isAggregate = false;
+				isSystem = false;
+				collectionType = ""; // Default...
+				collectionPartType = ""; // Default...
+				isCollection = well.isCollection();
+				partIdList = null; // will be expanded below, used for collections and 1-value array for non-collection
+				// The collection part list may vary by parcel year (although traditionally
+				// D&W aggregation is constant for the period in CDSS modeling).
+				// The collection type should not vary.
+				if ( isCollection ) {
+					collectionType = well.getCollectionType();
+					collectionPartType = well.getCollectionPartType();
+					if ( collectionType.equalsIgnoreCase(StateMod_Well.COLLECTION_TYPE_AGGREGATE)) {
+						isAggregate = true;
+					}
+					if ( collectionType.equalsIgnoreCase(StateMod_Well.COLLECTION_TYPE_SYSTEM)) {
+						isSystem = true;
+					}
+				}
+				// Evaluate the station data to understand how to retrieve the data
+				if ( isCollection ) {
+					// An aggregate or system
+					if ( well.getCollectionPartType().equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_DITCH) ) {
+						if ( well.getIdvcow2().equals("") ||
+							well.getIdvcow2().equalsIgnoreCase("N/A") &&
+							well.getIdvcow2().equalsIgnoreCase("NA") &&
+							collectionPartType.equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_DITCH) ) {
+							// Well stations says no associated diversion but collection type is ditch, so something is wrong
+					        message = "Well " + collectionType + " \"" + wellStationId + "\" is " + collectionPartType +
+					        " but the associated diversion is not set - data definition is incomplete - skipping well.";
+					        Message.printWarning ( warningLevel, 
+					                MessageUtil.formatMessageTag(commandTag, ++warningCount),routine, message );
+					        status.addToLog ( CommandPhaseType.RUN,
+								new CommandLogRecord(CommandStatusType.FAILURE,
+									message, "Verify that the associated diversion is set or use a part type other than " +
+									StateMod_Well.COLLECTION_PART_TYPE_DITCH + "." ) );
+					        continue;
+						} 
+					}
+					else if ( well.getCollectionPartType().equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_PARCEL) ) {
+						// This is not allowed for simple approach since trying to get away from processing parcels, merge rights, etc.
+				        message = "Well " + collectionType + " \"" + wellStationId + "\" is " + collectionPartType +
+				        ", which is not supported in Approach=Simple processing - skipping well.";
+				        Message.printWarning ( warningLevel, 
+				                MessageUtil.formatMessageTag(commandTag, ++warningCount),routine, message );
+				        status.addToLog ( CommandPhaseType.RUN,
+							new CommandLogRecord(CommandStatusType.FAILURE,
+								message, "Approach=Simple cannot be used with parcel aggregate or system" ) );
+				        continue;
+					}
+					else if ( well.getCollectionPartType().equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_WELL) ) {
+						// Read the rights for the list of wells station (parcel year does not matter)
+						partIdList = well.getCollectionPartIDs(parcelYear);
+						partIdTypeList = well.getCollectionPartIDTypes(); // Will not vary by year
+						smWellRightList = readHydroBaseWellRightsForWellStationsSimple (
+							hbdmi,
+							wellStationId,
+							isCollection, // will be false
+							collectionType,
+							collectionPartType,
+							partIdList, // the parts for the collection
+							partIdTypeList, // the types for the parts
+							Div_int, // division as integer
+							readWellRights, // TODO SAM 2016-06-11 need to figure out if used
+							useApex, // TODO SAM 2016-06-11 need to figure out if used
+							defaultAdminNumber, // TODO SAM 2016-06-11 need to figure out if used
+							defaultApproDate, // TODO SAM 2016-06-11 need to figure out if used
+							PermitIDPreFormat, // used to format permit identifiers
+							warningLevel, warningCount, commandTag, status ); // used for logging and error handling
+						addStateModRightsToProcessorRightList ( smWellRightList, processorRightList);
+					}
+					else {
+						// Collection type is not recognized
+				        message = "Well " + collectionType + " \"" + wellStationId + "\" is " + collectionPartType +
+				        ", which is not recognized - skipping well.";
+				        Message.printWarning ( warningLevel, 
+				                MessageUtil.formatMessageTag(commandTag, ++warningCount),routine, message );
+				        status.addToLog ( CommandPhaseType.RUN,
+							new CommandLogRecord(CommandStatusType.FAILURE,
+								message, "Verify that collection type is Ditch or Well, or use explicit structure (not a collection)." ) );
+				        continue;
+					}
+				}
+				else {
+					// Not a collection.
+					// An explicit well structure - either a D&W or well specified with WDID or a permit/receipt
+					if ( !well.getIdvcow2().isEmpty() &&
+						!well.getIdvcow2().equalsIgnoreCase("N/A") &&
+						!well.getIdvcow2().equalsIgnoreCase("NA") ) {
+						// Well is a D&W associated with a diversion station
+						Message.printStatus ( 2, routine, "Well \"" + wellStationId + "\" is explicitly modeled - " +
+							"and is a D&W node (diversion and well) - getting rights for wells from ditch -> parcels -> wells." );
+					}
+					else {
+						Message.printStatus ( 2, routine, "Well \"" + wellStationId + "\" is explicitly modeled - " +
+							"getting water rights for the individual well." );
+						// Read the rights for the specific well station by treating as a single part
+						partIdList = new ArrayList<String>(1);
+						partIdList.add(wellStationId);
+						partIdTypeList = new ArrayList<String>(1);
+						partIdTypeList.add(wellStationId);
+						smWellRightList = readHydroBaseWellRightsForWellStationsSimple (
+							hbdmi,
+							wellStationId,
+							isCollection, // will be false
+							collectionType,
+							collectionPartType,
+							partIdList, // will have a single part, which is the station ID
+							partIdTypeList, // will have single part, containing "WDID" or "Receipt"
+							Div_int, // division as integer
+							readWellRights, // TODO SAM 2016-06-11 need to figure out if used
+							useApex, // TODO SAM 2016-06-11 need to figure out if used
+							defaultAdminNumber, // TODO SAM 2016-06-11 need to figure out if used
+							defaultApproDate, // TODO SAM 2016-06-11 need to figure out if used
+							PermitIDPreFormat, // used to format permit identifiers
+							warningLevel, warningCount, commandTag, status ); // used for logging and error handling
+					}
+				}
+			}
+		}
+		else { // Legacy approach that is more complex
+		List<HydroBase_NetAmts> hbwellrSortedList = new ArrayList<HydroBase_NetAmts>(100); // List of rights from HydroBase, after manual sort on admin number
+		int nhbwellr = 0; // The number of rights read from HydroBase
+		HydroBase_NetAmts hbwellr = null; // Single right from HydroBase
+		int ir = 0; // Counter for rights in loop.
 		double [] irtemArray = null; // Used to sort rights in a collection.
 		int [] sortOrder = null; // Array used when sorting rights in a collection.
 		
@@ -1563,15 +1812,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		int parcelYear2 = 0; // Parcel year in output, may be reset if explicit wells (no parcels used)
 		
 		// Loop through the locations...
-		int matchCount = 0; // FIXME SAM 2009-01-19 add more checks later when no matches
 		for ( int i = 0; i < stationListSize; i++ ) {
 			// Notify command progress listeners which station is being processed...
 			notifyCommandProgressListeners ( i, stationListSize, (float)(((float)(i + 1)/(float)stationListSize)*100.0),
 				"Processing well station " + i + " of " + stationListSize );
 			// Use a well station for processing...
 			well = stationList.get(i);
-			id = well.getID();
-			if ( !id.matches(idPatternJava) ) {
+			wellStationId = well.getID();
+			if ( !wellStationId.matches(idPatternJava) ) {
 				// Identifier does not match...
 				continue;
 			}
@@ -1584,9 +1832,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			collectionType = "";	// Default...
 			collectionPartType = "";	// Default...
 			isCollection = well.isCollection();
-			// The collection part list may vary by parcel year (although traditionally
-			// D&W aggregation is constant for the period in CDSS modeling).
-			// The collection type should not vary.
 			if ( isCollection ) {
 				collectionType = well.getCollectionType();
 				collectionPartType = well.getCollectionPartType();
@@ -1602,7 +1847,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				well.getIdvcow2().equalsIgnoreCase("N/A") &&
 				well.getIdvcow2().equalsIgnoreCase("NA") &&
 				collectionPartType.equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_DITCH) ) {
-		        message = "Well " + collectionType + " \"" + id + "\" is " + collectionPartType +
+		        message = "Well " + collectionType + " \"" + wellStationId + "\" is " + collectionPartType +
 		        " but the associated diversion is not set - data definition is incomplete - skipping well.";
 		        Message.printWarning ( warningLevel, 
 		                MessageUtil.formatMessageTag(commandTag, ++warningCount),routine, message );
@@ -1621,17 +1866,20 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				parcelYear2 = parcelYear;
 				String yearString = "Parcel year " + parcelYears[iParcelYear] + ": ";
 				
-				Message.printStatus ( 2, routine, yearString + "Processing well station ID=" + id + " (" + (i + 1) +
+				Message.printStatus ( 2, routine, yearString + "Processing well station ID=" + wellStationId + " (" + (i + 1) +
 					" of " + stationListSize + ") isCollection=" + isCollection + " collectionType="
 					+ collectionType + " collectionPartType=" + well.getCollectionPartType() + " parcelYear=" + iParcelYear);
 		
 				hbwellrList = null;	// initialize for zero-length list check below
 				if ( isCollection &&
 					well.getCollectionPartType().equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_WELL) ) {
+					// TODO SAM 2016-09-10 How to know whether to go through parcels (irrigation) or directly to net amounts (M&I wells)?
+					// M&I could be an issue if the Well ID is actually a receipt because HydroBase is not distributed with
+					// well permits and well/parcel data might not have a record for the well.
 					if ( (iParcelYear == 0) || (iParcelYear == -999) ) {
 						// StateMod well station that is a collection of wells - only read for first year since rights
 						// will apply for the full period...
-						Message.printStatus ( 2, routine, yearString + locType + " \"" + id +
+						Message.printStatus ( 2, routine, yearString + locType + " \"" + wellStationId +
 						"\" is associated with a collection of wells - processing one time..." );
 						// Aggregate or system, by well...
 						partIdList = well.getCollectionPartIDs(parcelYear);
@@ -1639,7 +1887,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						try {
 							hbwellrList = readHydroBaseWellRightsForWellStationList (
 								hbdmi,
-								id,
+								wellStationId,
 								isCollection,
 								collectionType,
 								parcelYears,
@@ -1651,8 +1899,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								defaultApproDate,
 								PermitIDPreFormat,
 								warningLevel, warningCount, commandTag, status);
-							// Reset the parcel year to be used in final water rights
-							parcelYear2 = -999;
 						}
 						catch ( Exception e ) {
 							message = yearString + "Unexpected error querying HydroBase (" + e + ").";
@@ -1673,7 +1919,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					// stations in StateMod MUST currently be collections)
 					// OR a StateCU Location that is a collection of parcels
 					// (and therefore a well-only location)...
-					Message.printStatus ( 2, routine, yearString + locType + " \"" + id +
+					Message.printStatus ( 2, routine, yearString + locType + " \"" + wellStationId +
 					"\" is associated with a collection of parcels..." );
 					// Aggregate or system, by parcel...
 					partIdList = well.getCollectionPartIDs(parcelYear);
@@ -1681,7 +1927,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						hbwellrList = readHydroBaseWellRightsForParcelList (
 							hbdmi,
 							well,
-							id,
+							wellStationId,
 							locType,
 							partIdList,
 							null,		// No percent_yield for wells (1.0 always)
@@ -1715,7 +1961,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					!well.getIdvcow2().equalsIgnoreCase("NA") && (parcelYear > 0) ) {
 					// StateMod well that is associated with a diversion
 					// and the diversion may or may not be an aggregate.
-					Message.printStatus ( 2, routine, yearString + locType + " \"" + id + "\" is associated with a " +
+					Message.printStatus ( 2, routine, yearString + locType + " \"" + wellStationId + "\" is associated with a " +
 						"diversion.  Determining associated parcels, and then wells..." );
 					// Get the well station parts...
 					if ( well.isCollection() ) {
@@ -1740,7 +1986,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					hbwellrList = readHydroBaseWellRightsForDiversionWDIDList (
 						hbdmi,
 						well,
-						id,
+						wellStationId,
 						locType,
 						collectionType,
 						partIdList,
@@ -1759,11 +2005,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						// Single well - get its water rights.  Only do for the first year read because in this
 						// case there is no relation to parcels or parcel years...
 						if ( iParcelYear == 0 ) {
-							Message.printStatus ( 2, routine, yearString + "Well \"" + id + "\" is explicitly modeled - " +
+							Message.printStatus ( 2, routine, yearString + "Well \"" + wellStationId + "\" is explicitly modeled - " +
 								"getting water rights for the individual well - processing once." );
 							hbwellrList = readHydroBaseWellRightsForWellStation (
 									hbdmi,
-									id,
+									wellStationId,
 									isCollection,
 									partIdList,
 									Div_int,
@@ -1782,7 +2028,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					// Fall through case is not being considered somehow.  This may be an input error
 					// bug checks should always alert users to this condition so that they can fix it.  Otherwise,
 					// water rights may not be read.
-					message = yearString + "unhandled configuration for well \"" + id + "\".";
+					message = yearString + "unhandled configuration for well \"" + wellStationId + "\".";
 					Message.printWarning(warningLevel,
 						MessageUtil.formatMessageTag( commandTag, ++warningCount),
 						routine, message );
@@ -1830,13 +2076,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				if ( hbwellrList != null ) {
 					nhbwellr = hbwellrList.size();
 				}
-				message = yearString + locType + " \"" + id + "\" has "
+				message = yearString + locType + " \"" + wellStationId + "\" has "
 				+ nhbwellr + " HydroBase rights to format for output.";
 				Message.printStatus ( 2, routine, message );
 				
 				addHydroBaseRightsToStateModWellRights ( 
 					locType,
-					id,
+					wellStationId,
 					hbwellrList,
 					DecreeMin,
 					DecreeMin_double,
@@ -1849,7 +2095,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					collectionType,
 					collectionPartType,
 					OnOffDefault_int,
-					rightList,
+					processorRightList,
 					SMWellRight_match_Vector,
 					warningLevel, warningCount, commandTag, status );
 			} // End parcel year
@@ -1859,6 +2105,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		
 		StateDMI_Util.warnAboutDataMatches ( toString(), true, SMWellRight_match_Vector, "Well Rights" );
 	}
+	} // End Legacy
     catch ( Exception e ) {
         message = "Unexpected error reading well rights from HydroBase (" + e + ").";
         Message.printWarning ( warningLevel, 
@@ -1890,6 +2137,7 @@ public String toString ( PropList parameters )
 		return getCommandName() + "()";
 	}
 	
+	String Approach = parameters.getValue ( "Approach" );
 	String ID = parameters.getValue ( "ID" );
 	String PermitIDPreFormat = parameters.getValue ( "PermitIDPreFormat" );
 	String IDFormat = parameters.getValue ( "IDFormat" );
@@ -1906,7 +2154,13 @@ public String toString ( PropList parameters )
 	
 	StringBuffer b = new StringBuffer ();
 
+	if ( Approach != null && !Approach.isEmpty() ) {
+		b.append ( "Approach=\"" + Approach + "\"" );
+	}
 	if ( ID != null && ID.length() > 0 ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
 		b.append ( "ID=\"" + ID + "\"" );
 	}
 	if ( PermitIDPreFormat != null && PermitIDPreFormat.length() > 0 ) {
