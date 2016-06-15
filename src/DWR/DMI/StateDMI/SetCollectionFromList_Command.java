@@ -825,8 +825,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			}
     			else if ( nodeTypeFromCommand.equalsIgnoreCase(_Well) && PartType.equalsIgnoreCase(_Well) ) {
     				culoc.setCollectionPartIDs( partIds, partIdTypes );
+    				StringBuilder b = new StringBuilder("[");
+    				for ( int iPart = 0; iPart < partIds.size(); iPart++ ) {
+    					if ( iPart > 0 ) {
+    						b.append(", ");
+    					}
+    					b.append(partIdTypes.get(iPart) + " " + partIds.get(iPart));
+    				}
+    				b.append("]");
     				Message.printStatus ( 2, routine, "Setting CU location " + culoc_id + " " + nodeTypeFromCommand + " " +
-    					collectionType + " Part (" + PartType + ") IDs -> " + partIds );
+    					collectionType + " Part (" + PartType + ") IDs -> " + b );
     				if ( (name != null) && (name.length() != 0) ) {
     					Message.printStatus ( 2, routine, "Setting CU location " + culoc_id + " " + nodeTypeFromCommand
     					+ " " + collectionType + " Name -> " + name );
@@ -985,8 +993,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				else if ( nodeTypeFromCommand.equalsIgnoreCase(_Well) && PartType.equalsIgnoreCase(_Well) ) {
         				// Set the well collection as a list of part IDs and their types - same over the full period
 	    				well.setCollectionPartIDs( partIds, partIdTypes );
+	    				StringBuilder b = new StringBuilder ( "[" );
+	    				for ( int iPart = 0; iPart < partIds.size(); iPart++ ) {
+	    					if ( iPart > 0 ) {
+	    						b.append(", ");
+	    					}
+	    					b.append(partIdTypes.get(iPart) + " " + partIds.get(iPart));
+	    				}
+	    				b.append("]");
 	    				Message.printStatus ( 2, routine, "Setting StateMod " + sm_id + " " + nodeTypeFromCommand
-	    				+ " " + collectionType + " Part IDs (" + PartType + ") -> " + partIds );
+	    				+ " " + collectionType + " Part IDs (" + PartType + ") -> " + b );
     				}
     				else {
     					// No need to set the division and year...
