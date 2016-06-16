@@ -48,10 +48,11 @@ private boolean __first_time = true;
 private boolean __ok = false; // Indicate whether OK has been pressed
 private JTabbedPane __main_JTabbedPane = null;
 private SimpleJComboBox __Approach_JComboBox = null;
+private JTextField __ID_JTextField=null;
+private JTextField __PermitIDPattern_JTextField=null;
 private JTextField __PermitIDPreFormat_JTextField=null;
 private SimpleJComboBox __IDFormat_JComboBox = null;
 private JTextField __PermitIDPostFormat_JTextField=null;
-private JTextField __ID_JTextField=null;
 private JTextField __Year_JTextField = null;
 private JTextField __Div_JTextField = null;
 private JTextField __DecreeMin_JTextField=null;
@@ -100,9 +101,9 @@ Check the input.  Currently does nothing.
 */
 private void checkInput ()
 {	// Put together a list of parameters to check...
-	String ID = __ID_JTextField.getText().trim();
-	
 	String Approach = __Approach_JComboBox.getSelected();
+	String ID = __ID_JTextField.getText().trim();
+	String PermitIDPattern = __PermitIDPattern_JTextField.getText().trim();
 	String PermitIDPreFormat = __PermitIDPreFormat_JTextField.getText().trim();
 	String IDFormat = __IDFormat_JComboBox.getSelected();
 	String PermitIDPostFormat = __PermitIDPostFormat_JTextField.getText().trim();
@@ -123,6 +124,9 @@ private void checkInput ()
 	}
 	if ( ID.length() > 0 ) {
 		props.set ( "ID", ID );
+	}
+	if ( PermitIDPattern.length() > 0 ) {
+		props.set ( "PermitIDPattern", PermitIDPattern );
 	}
 	if ( PermitIDPreFormat.length() > 0 ) {
 		props.set ( "PermitIDPreFormat", PermitIDPreFormat );
@@ -178,6 +182,7 @@ private void commitEdits ()
 {
 	String Approach = __Approach_JComboBox.getSelected();
 	String ID = __ID_JTextField.getText().trim();
+	String PermitIDPattern = __PermitIDPattern_JTextField.getText().trim();
 	String PermitIDPreFormat = __PermitIDPreFormat_JTextField.getText().trim();
 	String IDFormat = __IDFormat_JComboBox.getSelected();
 	String PermitIDPostFormat = __PermitIDPostFormat_JTextField.getText().trim();
@@ -193,6 +198,7 @@ private void commitEdits ()
 
 	__command.setCommandParameter ( "Approach", Approach );
 	__command.setCommandParameter ( "ID", ID );
+	__command.setCommandParameter ( "PermitIDPattern", PermitIDPattern );
 	__command.setCommandParameter ( "PermitIDPreFormat", PermitIDPreFormat);
 	__command.setCommandParameter ( "IDFormat", IDFormat);
 	__command.setCommandParameter ( "PermitIDPostFormat", PermitIDPostFormat);
@@ -296,7 +302,7 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
     __main_JTabbedPane.addTab ( "Well Stations", well_JPanel );
     
    	JGUIUtil.addComponent(well_JPanel, new JLabel (
-		"Specify the following parameter to limit the wells that are processed."),
+		"Specify the following parameter to limit the wells that are processed and help indicate wells that are explicit permits (not collection)."),
 		0, ++yWell, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(well_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
 		0, ++yWell, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
@@ -309,6 +315,16 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 		1, yWell, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(well_JPanel, new JLabel (
 		"Required - well stations to read (use * for wildcard)."),
+		3, yWell, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	
+	JGUIUtil.addComponent(well_JPanel, new JLabel ( "Well permit ID pattern:"),
+			0, ++yWell, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__PermitIDPattern_JTextField = new JTextField(10);
+	__PermitIDPattern_JTextField.addKeyListener (this);
+    JGUIUtil.addComponent(well_JPanel, __PermitIDPattern_JTextField,
+		1, yWell, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(well_JPanel, new JLabel (
+		"Optional - pattern to indicate well stations that are explicit permit (use * for wildcard such as P:*)."),
 		3, yWell, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	
     // Panel for explicit WDID
@@ -661,6 +677,7 @@ private void refresh ()
 {	String routine = __command.getCommandName() + "_JDialog.refresh";
 	String Approach = "";
 	String ID = "";
+	String PermitIDPattern = "";
 	String PermitIDPreFormat = "";
 	String IDFormat = "";
 	String PermitIDPostFormat = "";
@@ -678,6 +695,7 @@ private void refresh ()
 		__first_time = false;
 		Approach = props.getValue ( "Approach" );
 		ID = props.getValue ( "ID" );
+		PermitIDPattern = props.getValue ( "PermitIDPattern" );
 		PermitIDPreFormat = props.getValue ( "PermitIDPreFormat" );
 		IDFormat = props.getValue ( "IDFormat" );
 		PermitIDPostFormat = props.getValue ( "PermitIDPostFormat" );
@@ -820,6 +838,7 @@ private void refresh ()
 
 	Approach = __Approach_JComboBox.getSelected();
 	ID = __ID_JTextField.getText().trim();
+	PermitIDPattern = __PermitIDPattern_JTextField.getText().trim();
 	PermitIDPreFormat = __PermitIDPreFormat_JTextField.getText().trim();
 	IDFormat = __IDFormat_JComboBox.getSelected();
 	PermitIDPostFormat = __PermitIDPostFormat_JTextField.getText().trim();
@@ -849,6 +868,7 @@ private void refresh ()
 	props = new PropList ( "");
 	props.add ( "Approach=" + Approach );
 	props.add ( "ID=" + ID );
+	props.add ( "PermitIDPattern=" + PermitIDPattern );
 	props.add ( "PermitIDPreFormat=" + PermitIDPreFormat);
 	props.add ( "IDFormat=" + IDFormat);
 	props.add ( "PermitIDPostFormat=" + PermitIDPostFormat);

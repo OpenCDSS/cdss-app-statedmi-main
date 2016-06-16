@@ -53,6 +53,49 @@ issues (i.e., the user probably wanted the result).
 protected static final int _FYI_warning_level = 3;
 
 /**
+ * Determine the ID type for a well station.  It could be a WDID or permit receipt.
+ * This is needed because logic is more robust if the determination is made up front.
+ * @param hdmi HydroBaseDMI for database queries
+ * @param wellStationId well station ID to evaluate
+ * @param permitIdPatter a Java String.matches() regex that if matched indicates a well permit
+ * @return "WDID" or "Receipt"
+ */
+public static String determineWellStationIdType ( HydroBaseDMI hdmi, String wellStationId, String permitIdPattern )
+throws Exception {
+	// First evaluate whether the ID matches WDID form, including having WD in the proper range
+	if ( (permitIdPattern != null) && !permitIdPattern.isEmpty() && wellStationId.matches(permitIdPattern) ) {
+		// Clear-cut case
+		return "Receipt";
+	}
+	// Else have to do more evaluation of the identifier
+	if ( HydroBase_WaterDistrict.isWDID(wellStationId) ) {
+		// Pattern matches WDID format - the above only checks if it parses
+		int wdidParts[] = HydroBase_WaterDistrict.parseWDID(wellStationId);
+		// See if the WDID is available as a water right
+		List<HydroBase_NetAmts> hbNetAmtsList = hdmi.readNetAmtsList(-1, wdidParts[0], wdidParts[1], false, null, false);
+		if ( hbNetAmtsList.size() == 0 ) {
+			// No water right - see if it shows up in a well permit
+			List<HydroBase_Wells> hbWellsList = hdmi.readWellsList(wellStationId, -1, -1);
+			if ( hbWellsList.size() == 0 ) {
+				// No permit so use "WDID" and generate warnings for no data later
+				return "WDID";
+			}
+		}
+		else {
+			return "Receipt";
+		}
+		// Was not found above but return "WDID" since that is preferred
+		// Warnings will result later because of no right/permit
+		return "WDID";
+	}
+	else {
+		// Clearly not a WDID so assume Receipt
+		// If there is no data later then warnings will be shown
+		return "Receipt";
+	}
+}
+
+/**
 Add a StateMod_WellRight instance to the __SMWellRight_Vector.  If
 an existing instance is found (checking the ID), it is optionally replaced
 and added to the __SMWellRight_match_Vector
@@ -990,7 +1033,7 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 	}
 	else {
 		// Bad input
-		message = "Requested unknown part type \"" + partIdType + "\" for well station \"" + wellStationId + "\".";
+		message = "Requested unknown part type \"" + partIdType + "\" for well station \"" + wellStationId + "\" partID \"" + partId + "\".";
 		Message.printWarning(warningLevel,
 			MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
 		status.addToLog ( CommandPhaseType.RUN,
@@ -1000,7 +1043,7 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 	// There should only be one entry for returned value, matching a single well
 	if ( hbWellsList.size() == 0 ) {
 		// No well was matched so input data is in error
-		message = "Requested well " + partIdType + " for well station \"" + wellStationId + "\" matches no records in vw_CDSS_Wells";
+		message = "Requested well " + partIdType + " for well station \"" + wellStationId + "\" partId \"" + partId + "\" matches no records in vw_CDSS_Wells";
 			Message.printWarning(warningLevel,
 				MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
 			status.addToLog ( CommandPhaseType.RUN,
@@ -1009,7 +1052,7 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 	}
 	else if ( hbWellsList.size() != 1 ) {
 		// Expecting 1 record so HydroBase is in error (duplicate receipt or WDID)
-		message = "Requested well " + partIdType + " for well station \"" + wellStationId + "\" matches "
+		message = "Requested well " + partIdType + " for well station \"" + wellStationId + "\" partID \"" + partId + "\" matches "
 			+ hbWellsList.size() + " records in vw_CDSS_Wells but expecting exactly 1 match";
 		Message.printWarning(warningLevel,
 			MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
@@ -1024,6 +1067,8 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 		HydroBase_Wells hbWells = hbWellsList.get(0);
 		if ( partIdType.equalsIgnoreCase("RECEIPT") ) {
 			// Use the data directly
+			message = "Requested well " + partIdType + " for well station \"" + wellStationId +
+					"\" - RECEIPT is requested so using receipt data from Wells table";
 			StateMod_WellRight smWellRight = new StateMod_WellRight();
 			double yieldGPM = hbWells.getYield();
 			double yieldApexGPM = hbWells.getYield_apex();
@@ -1064,6 +1109,7 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 					// Use the default appropriation date for permit date
 					permitDate = defaultApproDate;
 					smWellRight.setIrtem(String.format("%.5f",defaultAdminNumber));
+					Message.printStatus(2,routine,"          Setting appropriation date for well to default " + String.format("%.5f",defaultAdminNumber) );
 				}
 			}
 			else {
@@ -1094,7 +1140,7 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 			smWellRight.setName(hbWells.getWell_name());
 			// Warn if receipt was requested but right looks like it has WDID/right data - should adjust input
 			if ( approDate != null ) {
-				message = "Requested well " + partIdType + " for well station \"" + wellStationId +
+				message = "    Requested well " + partIdType + " for well station \"" + wellStationId +
 					"\" permit date is missing but have appropriation date from water right";
 				Message.printWarning(warningLevel,
 					MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
@@ -1107,6 +1153,8 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 		}
 		else {
 			// Requested a WDID so read from NetAmts using WDID, may return 0 or more records
+			message = "    Requested well " + partIdType + " for well station \"" + wellStationId +
+					"\" - WDID is requested so reading from HydroBase NetAmts table";
 			boolean positiveNetRateAbs = false;
 			boolean oldList = false;
 			List orderByList = null;
@@ -1115,7 +1163,7 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 			// There should be at least one water right
 			if ( hbNetAmtsList.size() == 0 ) {
 				// No well was matched so input data is in error
-				message = "Requested well " + partIdType + " for well station \"" + wellStationId
+				message = "      Requested well " + partIdType + " for well station \"" + wellStationId
 					+ "\" part ID \"" + partId + "\" matches no records in the NetAmts table";
 				Message.printWarning(warningLevel,
 					MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
@@ -1125,7 +1173,26 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 			}
 			else {
 				// Convert the NetAmts records into StateMod well rights
+				Message.printStatus(2, routine, "      Requested well " + partIdType + " for well station \"" + wellStationId +
+						"\" partId = \"" + partId + "\" - has " + hbNetAmtsList.size() + " rights from the NetAmts table:" );
 				for ( HydroBase_NetAmts hbNetAmts : hbNetAmtsList ) {
+					String unit = hbNetAmts.getUnit();
+					double net_rate_apex = hbNetAmts.getNet_rate_apex();
+					double net_rate_abs = hbNetAmts.getNet_rate_abs();
+					Message.printStatus(2,routine,"        WDID = " + partId
+						+ ", appro_date = " + hbNetAmts.getApro_date()
+						+ ", admin_no = " + String.format("%.5f",hbNetAmts.getAdmin_no())
+						+ ", net_rate_abs = " + net_rate_abs
+						+ ", unit = " + unit
+						+ ", net_rate_apex = " + hbNetAmts.getNet_rate_apex());
+					if ( !unit.equalsIgnoreCase("C") ) {
+						Message.printStatus(2,routine,"          Skipping because units are not C (cfs)");
+						continue;
+					}
+					if ( (net_rate_abs < 0) || Double.isNaN(net_rate_abs) ) {
+						Message.printStatus(2,routine,"          Setting net_rate_abs (" + net_rate_abs + ") to zero for computations.");
+						net_rate_abs = 0.0;
+					}
 					// Use the data directly
 					StateMod_WellRight smWellRight = new StateMod_WellRight();
 					// Set as much data in the object as possible, including extended data for troubleshooting
@@ -1135,12 +1202,37 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 					smWellRight.setCollectionPartType(collectionPartType);
 					smWellRight.setCollectionType(collectionType);
 					// Decree is the well yield converted from GPM to CFS, or zero if missing
-					smWellRight.setDecree(hbNetAmts.getNet_rate_abs());
-					// TODO SAM 2016-06-12 What to do with APEX
+					if ( useApex ) {
+						// Add the apex to the decree
+						if ( (net_rate_apex < 0.0) || Double.isNaN(net_rate_apex) ) {
+							// Reset value to zero
+							net_rate_apex = 0.0;
+						}
+						if ( net_rate_apex > 0.0 ) {
+							Message.printStatus(2,routine,"          Adding net_rate_apex " + String.format("%.2f",net_rate_apex) + " to net_rate_abs ("
+								+ String.format("%.2f",net_rate_abs) + ") as requested");
+						}
+					}
+					else {
+						// APEX not added to decree
+						net_rate_apex = 0.0;
+					}
+					if ( (net_rate_abs + net_rate_apex) <= 0.0 ) {
+						if ( useApex ) {
+							Message.printStatus(2,routine,"          Skipping because net_rate_abs + net_rate_apex = 0" );
+						}
+						else {
+							Message.printStatus(2,routine,"          Skipping because net_rate_abs = 0 (APEX has not been requested to be added)" );
+						}
+						continue;
+					}
+					smWellRight.setDecree(net_rate_abs + net_rate_apex);
 					smWellRight.setID(partId);
 					// For "irtem", convert appropriation date to administration number
 					DateTime dt = new DateTime(hbNetAmts.getApro_date());
 					HydroBase_AdministrationNumber an = new HydroBase_AdministrationNumber(dt);
+					smWellRight.setIrtem(an.toString());
+					smWellRight.setXApproDate(hbNetAmts.getApro_date());
 					smWellRight.setXApproDateAdminNumber(an.toString());
 					smWellRight.setXWDID(partId);	
 					smWellRight.setName(hbNetAmts.getWr_name());
