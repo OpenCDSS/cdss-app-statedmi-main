@@ -515,12 +515,12 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 		"If the rights will later be processed with MergeWellRights(), format the ID as:  " + __command._HydroBaseID ),
 		0, ++yId, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(id_JPanel, new JLabel (
-		"If the rights will not be processed with MergeWellRights() or AggregateWellRights(), then using the following format is OK:  " + __command._StationIDW_NN ),
+		"If the rights will not be processed with MergeWellRights() or AggregateWellRights(), then using a format with station ID and NN or NNN count." ),
 		0, ++yId, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(id_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
 		0, ++yId, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
-    JGUIUtil.addComponent(id_JPanel, new JLabel ( "Permit ID (pre)format:"),
+    JGUIUtil.addComponent(id_JPanel, new JLabel ( "Permit ID (pre)format (currently ignored):"),
 		0, ++yId, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__PermitIDPreFormat_JTextField = new JTextField("",10);
 	__PermitIDPreFormat_JTextField.setToolTipText("Use %s to pass the receipt ID through, or for example %s:P for legacy permit ID");
@@ -533,12 +533,23 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 
     JGUIUtil.addComponent(id_JPanel, new JLabel ( "Right ID format:"),
 		0, ++yId, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List format_Vector = new Vector(3);
-	format_Vector.add ( "" );
-	format_Vector.add ( __command._HydroBaseID );
-	format_Vector.add ( __command._StationIDW_NN );
+    List formatChoices = new ArrayList<String>(6);
+	formatChoices.add ( "" );
+	formatChoices.add ( __command._HydroBaseID );
+	formatChoices.add ( __command._StationIDW_NN );
+	formatChoices.add ( __command._StationIDWNN );
+	formatChoices.add ( __command._StationID_NN );
+	formatChoices.add ( __command._StationIDNN );
+	formatChoices.add ( __command._StationIDW_NNN );
+	formatChoices.add ( __command._StationIDWNNN );
+	formatChoices.add ( __command._StationID_NNN );
+	formatChoices.add ( __command._StationIDNNN );
+	formatChoices.add ( __command._StationIDW_AutoN );
+	formatChoices.add ( __command._StationIDWAutoN );
+	formatChoices.add ( __command._StationID_AutoN );
+	formatChoices.add ( __command._StationIDAutoN );
 	__IDFormat_JComboBox = new SimpleJComboBox(false);
-	__IDFormat_JComboBox.setData ( format_Vector );
+	__IDFormat_JComboBox.setData ( formatChoices );
 	__IDFormat_JComboBox.addItemListener(this);
 	JGUIUtil.addComponent(id_JPanel, __IDFormat_JComboBox,
 		1, yId, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -554,7 +565,7 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
     JGUIUtil.addComponent(id_JPanel, __PermitIDPostFormat_JTextField,
 		1, yId, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(id_JPanel, new JLabel (
-		"Optional - format for permit receipt AFTER Right ID format (default= %s =pass-through)."),
+		"Optional - format for permit receipt AFTER Right ID format (default=%s=pass-through)."),
 		3, yId, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	
     // Panel for on/off
@@ -571,12 +582,12 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 
    	JGUIUtil.addComponent(onOff_JPanel, new JLabel ( "OnOff default:"),
 		0, ++yOnOff, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	List onoff_Vector = new Vector(3);
-	onoff_Vector.add ( "" );
-	onoff_Vector.add ( __command._1 );
-	onoff_Vector.add ( __command._AppropriationDate );
+	List onoffList = new ArrayList<String>(3);
+	onoffList.add ( "" );
+	onoffList.add ( __command._1 );
+	onoffList.add ( __command._AppropriationDate );
 	__OnOffDefault_JComboBox = new SimpleJComboBox(false);
-	__OnOffDefault_JComboBox.setData ( onoff_Vector );
+	__OnOffDefault_JComboBox.setData ( onoffList );
 	__OnOffDefault_JComboBox.addItemListener(this);
 	JGUIUtil.addComponent(onOff_JPanel, __OnOffDefault_JComboBox,
 		1, yOnOff, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -586,12 +597,12 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
     
    	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Optimization level:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	List Optimization_Vector = new Vector(3);
-	Optimization_Vector.add ( "" );
-	Optimization_Vector.add ( __command._UseLessMemory );
-	Optimization_Vector.add ( __command._UseMoreMemory );
+	List optimizationList = new ArrayList<String>(3);
+	optimizationList.add ( "" );
+	optimizationList.add ( __command._UseLessMemory );
+	optimizationList.add ( __command._UseMoreMemory );
 	__Optimization_JComboBox = new SimpleJComboBox(false);
-	__Optimization_JComboBox.setData ( Optimization_Vector );
+	__Optimization_JComboBox.setData ( optimizationList );
 	__Optimization_JComboBox.addItemListener(this);
 	JGUIUtil.addComponent(main_JPanel, __Optimization_JComboBox,
 		1, y, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);

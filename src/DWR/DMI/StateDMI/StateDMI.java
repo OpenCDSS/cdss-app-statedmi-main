@@ -338,7 +338,7 @@ public class StateDMI extends JApplet
 {
 
 public static final String PROGRAM_NAME = "StateDMI";
-public static final String PROGRAM_VERSION = "4.02.00beta (2016-06-14)";
+public static final String PROGRAM_VERSION = "4.03.00beta (2016-09-28)";
 
 /**
 Interface for StateCU commands.

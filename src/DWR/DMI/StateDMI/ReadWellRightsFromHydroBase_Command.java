@@ -57,9 +57,32 @@ protected final String _Simple = "Simple";
 
 protected final String _HydroBaseID = "HydroBaseID";
 protected final String _StationIDW_NN = "StationIDW.NN";
+protected final String _StationID_NN = "StationID.NN";
+protected final String _StationIDWNN = "StationIDWNN";
+protected final String _StationIDNN = "StationIDNN";
+protected final String _StationIDW_NNN = "StationIDW.NNN";
+protected final String _StationID_NNN = "StationID.NNN";
+protected final String _StationIDWNNN = "StationIDWNNN";
+protected final String _StationIDNNN = "StationIDNNN";
+protected final String _StationIDW_AutoN = "StationIDW.AutoN";
+protected final String _StationID_AutoN = "StationID.AutoN";
+protected final String _StationIDWAutoN = "StationIDWAutoN";
+protected final String _StationIDAutoN = "StationIDAutoN";
 
+// TODO SAM 2016-09-28 Need to make these enum
 private final int __HydroBaseID_int = 0;
 private final int __StationIDW_NN_int = 1;
+private final int __StationID_NN_int = 2;
+private final int __StationIDWNN_int = 3;
+private final int __StationIDNN_int = 4;
+private final int __StationIDW_NNN_int = 5;
+private final int __StationID_NNN_int = 6;
+private final int __StationIDWNNN_int = 7;
+private final int __StationIDNNN_int = 8;
+private final int __StationIDW_AutoN_int = 9;
+private final int __StationID_AutoN_int = 10;
+private final int __StationIDWAutoN_int = 11;
+private final int __StationIDAutoN_int = 12;
 
 protected final String _1 = "1";
 protected final String _AppropriationDate = "AppropriationDate";
@@ -283,11 +306,105 @@ private void addHydroBaseRightsToStateModWellRights (
 private void addStateModRightsToProcessorRightList ( List<StateMod_WellRight> smWellRightList,
 	List<StateMod_WellRight> processorRightList,
 	int onOffDefault,
+	String permitIDPreFormat, int idFormat, String permitIDPostFormat,
 	int warningLevel, int warningCount, String commandTag, CommandStatus status) {
 	String routine = getClass().getSimpleName() + ".addStateModRightsToProcessorRightList";
 	// TODO SAM 2016-06-12 Need to deal with formatting, etc.
 	// Post-process the rights to set some additional information
+	boolean doPermitIDPreFormat = false;
+	if ( (permitIDPreFormat != null) && !permitIDPreFormat.isEmpty() ) {
+		doPermitIDPreFormat = true;
+	}
+	boolean doPermitIDPostFormat = false;
+	if ( (permitIDPostFormat != null) && !permitIDPostFormat.isEmpty() ) {
+		doPermitIDPostFormat = true;
+	}
+	int count = 0;
 	for ( StateMod_WellRight smWellRight : smWellRightList ) {
+		++count;
+		// Format the right ID
+		StringBuilder idBuilder = new StringBuilder();
+		// First pre-format the permit
+		/*
+		if ( !smWellRight.getXPermitReceipt().isEmpty() ) {
+			if ( doPermitIDPreFormat ) {
+				// Format the receipt
+				idBuilder.append(String.format(permitIDPreFormat,smWellRight.getXPermitReceipt()));
+			}
+		}*/
+		// Format the main part of the ID
+		if ( idFormat == __HydroBaseID_int ) {
+			// Just leave the ID as is
+			idBuilder.append(smWellRight.getID());
+		}
+		else if ( idFormat == __StationIDNN_int ) {
+			// Format the well right identifier as the station ID + count
+			idBuilder.append(String.format("%s%02d",smWellRight.getCgoto(),count));
+		}
+		else if ( idFormat == __StationIDWNN_int ) {
+			// Format the well right identifier as the station ID + count
+			idBuilder.append(String.format("%sW%02d",smWellRight.getCgoto(),count));
+		}
+		else if ( idFormat == __StationID_NN_int ) {
+			// Format the well right identifier as the station ID + count
+			idBuilder.append(String.format("%s.%02d",smWellRight.getCgoto(),count));
+		}
+		else if ( idFormat == __StationIDW_NN_int ) {
+			// Format the well right identifier as the station ID + "W" + count
+			idBuilder.append(String.format("%sW.%02d",smWellRight.getCgoto(),count));
+		}
+		else if ( idFormat == __StationIDNNN_int ) {
+			// Format the well right identifier as the station ID + count
+			idBuilder.append(String.format("%s%03d",smWellRight.getCgoto(),count));
+		}
+		else if ( idFormat == __StationIDWNNN_int ) {
+			// Format the well right identifier as the station ID + count
+			idBuilder.append(String.format("%sW%03d",smWellRight.getCgoto(),count));
+		}
+		else if ( idFormat == __StationID_NNN_int ) {
+			// Format the well right identifier as the station ID + count
+			idBuilder.append(String.format("%s.%03d",smWellRight.getCgoto(),count));
+		}
+		else if ( idFormat == __StationIDW_NNN_int ) {
+			// Format the well right identifier as the station ID + "W" + count
+			idBuilder.append(String.format("%sW.%03d",smWellRight.getCgoto(),count));
+		}
+		else if ( idFormat == __StationIDAutoN_int ) {
+			// Format the well right identifier as the station ID + count
+			String format = "%s%0" + ((int)(Math.log10(smWellRightList.size())) + 1) + "d";
+			idBuilder.append(String.format(format,smWellRight.getCgoto(),count));
+		}
+		else if ( idFormat == __StationIDWAutoN_int ) {
+			// Format the well right identifier as the station ID + count
+			String format = "%sW%0" + ((int)(Math.log10(smWellRightList.size())) + 1) + "d";
+			idBuilder.append(String.format(format,smWellRight.getCgoto(),count));
+		}
+		else if ( idFormat == __StationID_AutoN_int ) {
+			// Format the well right identifier as the station ID + count
+			String format = "%s.%0" + ((int)(Math.log10(smWellRightList.size())) + 1) + "d";
+			idBuilder.append(String.format(format,smWellRight.getCgoto(),count));
+		}
+		else if ( idFormat == __StationIDW_AutoN_int ) {
+			// Format the well right identifier as the station ID + "W" + count
+			String format = "%sW.%0" + ((int)(Math.log10(smWellRightList.size())) + 1) + "d";
+			idBuilder.append(String.format(format,smWellRight.getCgoto(),count));
+		}
+		// Finally post-format the permit
+		if ( doPermitIDPostFormat && !smWellRight.getXPermitReceipt().isEmpty() ) {
+			// Replace with new formatted string
+			String s = idBuilder.toString();
+			idBuilder = new StringBuilder(String.format(permitIDPostFormat,s));
+		}
+		smWellRight.setID(idBuilder.toString());
+		if ( smWellRight.getID().length() > 12 ) {
+			String message = "Well right \"" + smWellRight.getID() + "\" is > 12 characters and will be " +
+				"truncated on output - will cause problems later (e.g., in water right merging).";
+			Message.printWarning(warningLevel,
+				MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
+			status.addToLog ( CommandPhaseType.RUN,
+				new CommandLogRecord(CommandStatusType.WARNING,
+					message, "Report problem to support - need to evaluate ID conventions." ) );
+		}
 		if ( onOffDefault == __AppropriationDate_int ) {
 			// Convert the administration number to a year...
 			String irtem = null;
@@ -1574,7 +1691,7 @@ private List<StateMod_WellRight> readHydroBaseWellRightsForWellStationsSimple (
 }
 
 /**
-Method to execute the readDiversionHistoricalTSMonthlyFromHydroBase() command.
+Method to execute the readWellRightsFromHydroBase() command.
 @param command_number Command number in sequence.
 @exception Exception if there is an error processing the command.
 */
@@ -1620,6 +1737,39 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	int IDFormat_int = __HydroBaseID_int;
 	if ( IDFormat.equalsIgnoreCase(_StationIDW_NN) ) {
 		IDFormat_int = __StationIDW_NN_int;
+	}
+	else if ( IDFormat.equalsIgnoreCase(_StationIDWNN) ) {
+		IDFormat_int = __StationIDWNN_int;
+	}
+	else if ( IDFormat.equalsIgnoreCase(_StationID_NN) ) {
+		IDFormat_int = __StationID_NN_int;
+	}
+	else if ( IDFormat.equalsIgnoreCase(_StationIDNN) ) {
+		IDFormat_int = __StationIDNN_int;
+	}
+	else if ( IDFormat.equalsIgnoreCase(_StationIDW_NNN) ) {
+		IDFormat_int = __StationIDW_NNN_int;
+	}
+	else if ( IDFormat.equalsIgnoreCase(_StationIDWNNN) ) {
+		IDFormat_int = __StationIDWNNN_int;
+	}
+	else if ( IDFormat.equalsIgnoreCase(_StationID_NNN) ) {
+		IDFormat_int = __StationID_NNN_int;
+	}
+	else if ( IDFormat.equalsIgnoreCase(_StationIDNNN) ) {
+		IDFormat_int = __StationIDNNN_int;
+	}
+	else if ( IDFormat.equalsIgnoreCase(_StationIDW_AutoN) ) {
+		IDFormat_int = __StationIDW_AutoN_int;
+	}
+	else if ( IDFormat.equalsIgnoreCase(_StationIDWAutoN) ) {
+		IDFormat_int = __StationIDWAutoN_int;
+	}
+	else if ( IDFormat.equalsIgnoreCase(_StationID_AutoN) ) {
+		IDFormat_int = __StationID_AutoN_int;
+	}
+	else if ( IDFormat.equalsIgnoreCase(_StationIDAutoN) ) {
+		IDFormat_int = __StationIDAutoN_int;
 	}
 	String PermitIDPostFormat = parameters.getValue ( "PermitIDPostFormat" );
 	if ( (PermitIDPostFormat == null) || PermitIDPostFormat.isEmpty() ) {
@@ -1897,7 +2047,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			// A major difference between this and the legacy approach is that there is no leap on the parcel year
 			Message.printStatus(2,routine,"Reading well rights using Simple approach (direct ready of well rights and parcels and not parcel fractions");
 			int parcelYear = -1; // Parcel year is irrelevant
-			List<StateMod_WellRight> smWellRightList = null;
+			List<StateMod_WellRight> smWellRightList = null; // The well rights for the well station
 			for ( int i = 0; i < stationListSize; i++ ) {
 				// Notify command progress listeners which station is being processed...
 				notifyCommandProgressListeners ( i, stationListSize, (float)(((float)(i + 1)/(float)stationListSize)*100.0),
@@ -2111,8 +2261,77 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						}
 					}
 				}
+				// Remove duplicate rights for the structure.  Legacy logic would have retained splits of rights as duplicates.
+				// Now if a right shows up more than once from above processing it should be removed
+				if ( (smWellRightList != null) && (smWellRightList.size() > 0) ) {
+					// Loop through all the rights to be added
+					StateMod_WellRight right1, right2;
+					String decree1Formatted, decree2Formatted;
+					Message.printStatus ( 2, routine, "Well \"" + wellStationId + "\" checking for duplicate rights." );
+					for ( int iright1 = 0; iright1 < smWellRightList.size(); iright1++ ) {
+						// Loop through all the other rights.  If the others are a duplicate, delete them.
+						// Loop backwards so loop counter still works
+						right1 = smWellRightList.get(iright1);
+						decree1Formatted = String.format("%.2f", right1.getDecree());
+						for ( int iright2 = (smWellRightList.size() - 1); iright2 > iright1; iright2-- ) {
+							// Loop through all the other rights.  If the others are a duplicate, delete them
+							// - if right1 and right2 have WDIDs and the same, match the right
+							//   - or if right1 and right2 have permit receipt and the same, match the right
+							// - admin number also must match
+							// - decree also must match to 2 digits
+							right2 = smWellRightList.get(iright2);
+							decree2Formatted = String.format("%.2f", right2.getDecree());
+							if ( !right1.getXWDID().isEmpty() && !right2.getXWDID().isEmpty() ) {
+								// Check for duplicate WDID right
+								if ( right1.getXWDID().equalsIgnoreCase(right2.getXWDID()) && // WDID
+									right1.getIrtem().equalsIgnoreCase(right2.getIrtem()) && // Admin number
+									decree1Formatted.equals(decree2Formatted) ) { // Decree
+									Message.printStatus ( 2, routine, "Well \"" + wellStationId + "\" removing duplicate right for"
+										+ " structure ID \"" + right2.getCgoto() + "\" name=\"" + right2.getName() + "\" adminNum=" + right2.getIrtem() + " WDID=" + right1.getXWDID() + " decree=" + decree2Formatted );
+									smWellRightList.remove(right2);
+								}
+							}
+							else if ( !right1.getXPermitReceipt().isEmpty() && !right2.getXPermitReceipt().isEmpty() ) {
+								// Check for duplicate permit
+								if ( right1.getXPermitReceipt().equalsIgnoreCase(right2.getXPermitReceipt()) && // Receipt
+									right1.getIrtem().equalsIgnoreCase(right2.getIrtem()) && // Admin number
+									decree1Formatted.equals(decree2Formatted) ) { // Decree
+									Message.printStatus ( 2, routine, "Well \"" + wellStationId + "\" removing duplicate permit for"
+										+ " structure ID \"" + right2.getCgoto() + "\" name=\"" + right2.getName() + "\" adminNum=" + right2.getIrtem() + " permitRecipt=" + right1.getXPermitReceipt() + " decree=" + decree2Formatted );
+									smWellRightList.remove(right2);
+								}
+							}
+						}
+					}
+				}
+				//
+				if ( (smWellRightList.size() > 99) &&
+					((IDFormat_int == __StationIDW_NN_int) || (IDFormat_int == __StationIDWNN_int) ||
+					(IDFormat_int == __StationID_NN_int) || (IDFormat_int == __StationIDNN_int)) ) {
+					// Number of rights will overflow the format so warn
+					message = "Number of water rights for well station \"" + wellStationId + "\" is " + smWellRightList.size()
+						+ " and will overflow the specified NN right ID format.";
+					Message.printWarning(warningLevel,
+						MessageUtil.formatMessageTag( commandTag, ++warningCount),routine, message );
+					status.addToLog ( CommandPhaseType.RUN,
+						new CommandLogRecord(CommandStatusType.FAILURE,
+							message, "Specify a NNN right ID format." ) );
+				}
+				else if ( (smWellRightList.size() > 999) &&
+					((IDFormat_int == __StationIDW_NNN_int) || (IDFormat_int == __StationIDWNNN_int) ||
+					(IDFormat_int == __StationID_NNN_int) || (IDFormat_int == __StationIDNN_int)) ) {
+					// Number of rights will overflow the format so warn
+					message = "Number of water rights for well station \"" + wellStationId + "\" is " + smWellRightList.size()
+						+ " and will overflow the specified NNN right ID format.";
+					Message.printWarning(warningLevel,
+						MessageUtil.formatMessageTag( commandTag, ++warningCount),routine, message );
+					status.addToLog ( CommandPhaseType.RUN,
+						new CommandLogRecord(CommandStatusType.FAILURE,
+							message, "Verify why there are so many well rights for a single well station." ) );
+				}
 				// Add the rights that were read for the station
 				addStateModRightsToProcessorRightList ( smWellRightList, processorRightList, OnOffDefault_int,
+					PermitIDPreFormat, IDFormat_int, PermitIDPostFormat,
 					warningLevel, warningCount, commandTag, status );
 			}
 		}
