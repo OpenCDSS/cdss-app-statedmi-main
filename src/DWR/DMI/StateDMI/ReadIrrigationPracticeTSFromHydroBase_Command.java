@@ -14,7 +14,6 @@ import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Util;
-
 import RTi.TS.YearTS;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
@@ -723,7 +722,7 @@ CommandWarningException, CommandException
 		cacheHydroBase = false;
 	}
 
-	String Loctype = "CU location";	// Used with messages
+	String locType = "CU location";	// Used with messages
 	
 	// Get the HydroBase DMI...
 	
@@ -744,10 +743,10 @@ CommandWarningException, CommandException
 	
 	// Get the list of cu locations...
 	
-	List culocList = null;
+	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
 	try {
-		culocList = (List)processor.getPropContents ( "StateCU_Location_List");
+		culocList = (List<StateCU_Location>)processor.getPropContents ( "StateCU_Location_List");
 		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {
@@ -761,10 +760,10 @@ CommandWarningException, CommandException
 	
 	// Get the irrigation practice time series to process.
 	
-	List ipyList = null;
+	List<StateCU_IrrigationPracticeTS> ipyList = null;
 	int ipyListSize = 0;
 	try {
-		ipyList = (List)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List");
+		ipyList = (List<StateCU_IrrigationPracticeTS>)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List");
 		ipyListSize = ipyList.size();
 	}
 	catch ( Exception e ) {
@@ -789,10 +788,10 @@ CommandWarningException, CommandException
 	// Get the supplemental crop pattern data specified with SetCropPatternTS() and
 	// SetCropPatternTSFromList() commands...
 	
-	List hydroBaseSupplementalParcelUseTSList = null;
+	List<StateDMI_HydroBase_ParcelUseTS> hydroBaseSupplementalParcelUseTSList = null;
 	try {
 		hydroBaseSupplementalParcelUseTSList =
-			(List)processor.getPropContents ( "HydroBase_SupplementalParcelUseTS_List");
+			(List<StateDMI_HydroBase_ParcelUseTS>)processor.getPropContents ( "HydroBase_SupplementalParcelUseTS_List");
 	}
 	catch ( Exception e ) {
 		message = "Error requesting supplemental parcel use data from processor.";
@@ -847,17 +846,17 @@ CommandWarningException, CommandException
 	try {
 	
 		// Year_int is set in checkCommandParameters().  If null, get the years by querying HydroBase...
-		int [] parcel_years = null;
+		int [] parcelYears = null;
 		if ( (__Year_int == null) || (__Year_int.length == 0)  ) {
 			try {
-				parcel_years = StateDMI_Util.readParcelYearListFromHydroBase ( hbdmi, Div_int );
+				parcelYears = StateDMI_Util.readParcelYearListFromHydroBase ( hbdmi, Div_int );
 			}
 			catch ( Exception e ) {
-				parcel_years = null;
+				parcelYears = null;
 			}
-			if ( parcel_years == null ) {
+			if ( parcelYears == null ) {
 				message = "Cannot determine years of parcel data from HydroBase.";
-			    Message.printWarning ( warningLevel, 
+			    Message.printWarning ( warningLevel,
 	    	        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
     	        status.addToLog ( commandPhase,
     	            new CommandLogRecord(CommandStatusType.FAILURE,
@@ -867,48 +866,49 @@ CommandWarningException, CommandException
 		}
 		else {
 			// Use the years specified by the user...
-			parcel_years = new int[__Year_int.length];
-			System.arraycopy( __Year_int, 0, parcel_years, 0, __Year_int.length );
+			parcelYears = new int[__Year_int.length];
+			System.arraycopy( __Year_int, 0, parcelYears, 0, __Year_int.length );
 		}
 		// Remove parcel years that are not in the output period...
 		// If the year is outside the output period, then do not process.
 		if ( (OutputStart_DateTime != null) && (OutputEnd_DateTime != null) ) {
-			int [] parcel_years2 = new int[parcel_years.length];
+			int [] parcel_years2 = new int[parcelYears.length];
 			int count = 0;
-			for ( int i = 0; i < parcel_years.length; i++ ) {
-				if ( (parcel_years[i] < OutputStart_DateTime.getYear()) ||
-					(parcel_years[i] > OutputEnd_DateTime.getYear()) ) {
+			for ( int i = 0; i < parcelYears.length; i++ ) {
+				if ( (parcelYears[i] < OutputStart_DateTime.getYear()) ||
+					(parcelYears[i] > OutputEnd_DateTime.getYear()) ) {
 					Message.printStatus ( 2, routine, "Ignoring parcel year " +
-						parcel_years[i] + ".  It is outside the output period " +
+						parcelYears[i] + ".  It is outside the output period " +
 						OutputStart_DateTime.getYear() + " to " + OutputEnd_DateTime.getYear() );
 				}
 				else {
-					parcel_years2[count++] = parcel_years[i];
+					parcel_years2[count++] = parcelYears[i];
 				}
 			}
-			parcel_years = new int[count];
-			System.arraycopy ( parcel_years2, 0, parcel_years, 0, count );
+			parcelYears = new int[count];
+			System.arraycopy ( parcel_years2, 0, parcelYears, 0, count );
 		}
-		for ( int iparcel_year = 0; iparcel_year < parcel_years.length;	iparcel_year++ ) {
+		for ( int iparcel_year = 0; iparcel_year < parcelYears.length;	iparcel_year++ ) {
 			Message.printStatus( 2, routine, "Will include division " + Div_int +
-				" parcel data from " + parcel_years[iparcel_year] );
+				" parcel data from " + parcelYears[iparcel_year] );
 		}
 		
 		StateCU_Location culoc = null;	// StateCU location to process (used when do_ipy = true).
-		List parts = null;
-		String collection_type = null;
-		String id = null;		// Well ID for CU location
-		boolean is_collection = false;	// Indicate whether the well/location is
+		List<String> parts = null;
+		String collectionType = null;
+		String collectionPartType = null;
+		String culocId = null; // Well ID for CU location
+		boolean isCollection = false;	// Indicate whether the well/location is a collection (aggregate or system)
 		
-		int parcel_year = 0;	// Used to process parcel years
+		int parcelYear = 0;	// Used to process parcel years
 	
 		// Loop through the locations...
 		DateTime date = new DateTime ( DateTime.PRECISION_YEAR );
 		for ( int i = 0; i < culocListSize; i++ ) {
 			// Use a CU Location for processing...
-			culoc = (StateCU_Location)culocList.get(i);
-			id = culoc.getID();
-			if ( !id.matches(ID_Java) ) {
+			culoc = culocList.get(i);
+			culocId = culoc.getID();
+			if ( !culocId.matches(ID_Java) ) {
 				// Identifier does not match...
 				continue;
 			}
@@ -917,26 +917,28 @@ CommandWarningException, CommandException
 				"Processing CU location " + i + " of " + culocListSize );
 			// Clear out the parcels saved with the well...
 			//well.getParcels().removeAllElements();
-			is_collection = false;
-			collection_type = "";	// Default...
-			is_collection = culoc.isCollection();
+			isCollection = false;
+			collectionType = "";	// Default...
+			isCollection = culoc.isCollection();
+			collectionPartType = ""; 
 			// The collection part list may vary by parcel year (although traditionally
 			// D&W aggregation is constant for the period in CDSS modeling).
 			// The collection type should not vary.
-			if ( is_collection ) {
-				collection_type = culoc.getCollectionType();
+			if ( isCollection ) {
+				collectionType = culoc.getCollectionType();
+				collectionPartType = culoc.getCollectionPartType();
 			}
 			
 			// Get the irrigation practice time series for the location...
 			
-			int pos = StateCU_Util.indexOf(	ipyList,id);
+			int pos = StateCU_Util.indexOf(	ipyList,culocId);
 			StateCU_IrrigationPracticeTS ipyts = null;
 			if ( pos >= 0 ) {
 				// Get the time series...
-				ipyts = (StateCU_IrrigationPracticeTS)ipyList.get(pos);
+				ipyts = ipyList.get(pos);
 			}
 			if ( (pos < 0) || (ipyts == null) ) {
-				message = "Unable to find irrigation practice time series for \""+ id +
+				message = "Unable to find irrigation practice time series for \""+ culocId +
 				"\".  Not setting data in time series.";
 			    Message.printWarning ( warningLevel, 
 	    	        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
@@ -949,10 +951,10 @@ CommandWarningException, CommandException
 			// Loop through the parcel years.  Put the loop here because the
 			// parts of a collection could theoretically vary by year.
 			YearTS yts = null; // Time series to manipulate.
-			for ( int iparcel_year = 0;	iparcel_year < parcel_years.length;	iparcel_year++ ) {
-				parcel_year = parcel_years[iparcel_year]; // Year to process
+			for ( int iParcelYear = 0;	iParcelYear < parcelYears.length;	iParcelYear++ ) {
+				parcelYear = parcelYears[iParcelYear]; // Year to process
 				
-				Message.printStatus ( 2, routine, "Processing location ID=" + id + " parcel_year=" + parcel_year );
+				Message.printStatus ( 2, routine, "Processing location ID=" + culocId + " parcelYear=" + parcelYear );
 				
 				// Set the values in the time series to zero for the parcel year if
 				// missing.  Later, values will be added.  This will handled using the
@@ -962,17 +964,7 @@ CommandWarningException, CommandException
 				// Fill commands can then be used for years other than observations.
 				
 				// Old file format acreages...
-				date.setYear ( parcel_year );
-				/* FIXME 2007-10-18 Remove when code tests out.
-				yts = ipyts.getGacreTS();
-				if ( yts.getDataValue(date) < 0.0 ) {
-					yts.setDataValue ( date, 0.0 );
-				}
-				yts = ipyts.getSacreTS();
-				if ( yts.getDataValue(date) < 0.0 ) {
-					yts.setDataValue ( date, 0.0 );
-				}
-				*/
+				date.setYear ( parcelYear );
 				// New file format acreages...
 				yts = ipyts.getAcgwflTS();
 				if ( yts.getDataValue(date) < 0.0 ) {
@@ -993,51 +985,61 @@ CommandWarningException, CommandException
 				// Also set the totals to zero (in case no data are
 				// ever set in following code - acreage will be zero).
 				// Recompute the total groundwater from the parts...
-				ipyts.refreshAcgw(parcel_year);
+				ipyts.refreshAcgw(parcelYear);
 				// Recompute the total groundwater from the parts...
-				ipyts.refreshAcsw(parcel_year);
+				ipyts.refreshAcsw(parcelYear);
 				// Used in old and new...
 				yts = ipyts.getTacreTS();
 				if ( yts.getDataValue(date) < 0.0 ) {
 					yts.setDataValue ( date, 0.0 );
 				}
 	
-				if ( culoc.hasGroundwaterOnlySupply() ){
+				if ( culoc.hasGroundwaterOnlySupply() && collectionPartType.equalsIgnoreCase(StateCU_Location.COLLECTION_PART_TYPE_PARCEL) ) {
 					// StateCU Location that is a collection of parcels
 					// (and therefore a well-only location)...
-					Message.printStatus ( 2, routine, Loctype + " \"" + id +
-					"\" is associated with a collection of parcels..." );
+					Message.printStatus ( 2, routine, locType + " \"" + culocId + "\" is associated with a collection of parcels..." );
 					// Aggregate or system, by parcel...
-					parts = culoc.getCollectionPartIDsForYear(parcel_year);
+					parts = culoc.getCollectionPartIDsForYear(parcelYear);
 					warning_count = readHydroBaseIrrigationPracticeTSForParcelList (
 							hbdmi,
 							culoc,
 							ipyts,
-							id,
-							Loctype,
+							culocId,
+							locType,
 							parts,
 							null, // No percent_yield for wells (1.0 always)
 							null, // No ditch aggregate part id
-							parcel_year,
+							parcelYear,
 							Div_int,
 							warningLevel, warning_count, command_tag, status, cacheHydroBase);
+				}
+				else if ( culoc.hasGroundwaterOnlySupply() && collectionPartType.equalsIgnoreCase(StateCU_Location.COLLECTION_PART_TYPE_WELL) ) {
+					// StateCU Location that is a collection of parcels
+					// (and therefore a well-only location)...
+					message = locType + " \"" + culocId + "\" is associated with a collection of wells - not yet supported";
+					Message.printStatus ( 2, routine, message );
+			        Message.printWarning ( warningLevel, 
+			            MessageUtil.formatMessageTag(command_tag, ++warning_count),routine, message );
+			        status.addToLog ( CommandPhaseType.RUN,
+						new CommandLogRecord(CommandStatusType.FAILURE,
+								message, "Check log file for details." ) );
 				}
 				else {
 					// CU location that is associated with a diversion
 					// and the diversion may or may not be an aggregate.
-					Message.printStatus ( 2, routine, Loctype + " \"" + id + "\" is associated with a " +
+					Message.printStatus ( 2, routine, locType + " \"" + culocId + "\" is associated with a " +
 						"diversion.  Determining associated parcels..." );
 					// Get the well station parts...
 					if ( culoc.isCollection() ) {
-						collection_type = culoc.getCollectionType();
+						collectionType = culoc.getCollectionType();
 						Message.printStatus ( 2, routine, "Location \"" + culoc.getID() + "\" is a " +
-							collection_type + "...processing each part...");
+							collectionType + "...processing each part...");
 						// Diversion aggregates are only set once (year is ignored)
-						parts = culoc.getCollectionPartIDsForYear ( parcel_year );
+						parts = culoc.getCollectionPartIDsForYear ( parcelYear );
 					}
 					else {
 						// To reuse code below, just use a single part...
-						collection_type = "(explicit)";
+						collectionType = "(explicit)";
 						// TODO SAM 2006-01-31
 						//name = div.getName();
 						//name = well.getName();
@@ -1050,10 +1052,10 @@ CommandWarningException, CommandException
 						hbdmi,
 						culoc,
 						ipyts,
-						id,
-						Loctype,
+						culocId,
+						locType,
 						parts,
-						parcel_year,
+						parcelYear,
 						Div_int,
 						hydroBaseSupplementalParcelUseTSList,
 						warningLevel, warning_count, command_tag, status, cacheHydroBase );

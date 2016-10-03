@@ -281,10 +281,10 @@ CommandWarningException, CommandException
 
 	// Get the list of well stations...
 	
-	List culocList = null;
+	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
 	try {
-		culocList = (List)processor.getPropContents ( "StateCU_Location_List");
+		culocList = (List<StateCU_Location>)processor.getPropContents ( "StateCU_Location_List");
 		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {
@@ -298,10 +298,10 @@ CommandWarningException, CommandException
 	
 	// Get the list of crop pattern time series...
 	
-	List cdsList = null;
+	List<StateCU_CropPatternTS> cdsList = null;
 	int cdsListSize = 0;
 	try {
-		cdsList = (List)processor.getPropContents ( "StateCU_CropPatternTS_List");
+		cdsList = (List<StateCU_CropPatternTS>)processor.getPropContents ( "StateCU_CropPatternTS_List");
 		cdsListSize = cdsList.size();
 	}
 	catch ( Exception e ) {
@@ -480,7 +480,7 @@ CommandWarningException, CommandException
 		// Loop through locations...
 		int matchCount = 0;
 		for ( int i = 0; i < culocListSize; i++ ) {
-			culoc = (StateCU_Location)culocList.get(i);
+			culoc = culocList.get(i);
 			culoc_id = culoc.getID();
 			if ( !culoc_id.matches(idpattern_Java) ) {
 				// Identifier does not match...
@@ -537,7 +537,7 @@ CommandWarningException, CommandException
 					replace_flag = 0;
 				}
 	
-				else if ( culoc.isCollection() && culoc.getCollectionPartType().equalsIgnoreCase("Ditch")){
+				else if ( culoc.isCollection() && culoc.getCollectionPartType().equalsIgnoreCase(StateCU_Location.COLLECTION_PART_TYPE_DITCH)){
 					processing_ditches = true;
 					Message.printStatus ( 2, routine, "Processing diversion aggregate/system \"" + culoc_id + "\"" );
 					// Aggregate/system diversion...
@@ -762,6 +762,16 @@ CommandWarningException, CommandException
 						}
 					}
 					// continue - code below is for diversions.
+				}
+				else if ( culoc.isCollection() && culoc.getCollectionPartType().
+					equalsIgnoreCase( StateMod_Well.COLLECTION_PART_TYPE_WELL)) {
+					// First get the parcels that are associated with the wells and then use the same logic as if processing parcels
+					message = "CU Location \"" + culoc_id + "\" is a well \"" + culoc.getCollectionType() + " - software does not yet handle.";
+					Message.printWarning ( warningLevel, 
+				        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+			        status.addToLog ( commandPhase,
+			            new CommandLogRecord(CommandStatusType.FAILURE, message,
+			            	"Check the log file - report to software support if necessary." ) );
 				}
 	
 				// If here, a list of HydroBase objects is defined for the CU

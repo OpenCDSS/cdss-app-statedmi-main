@@ -477,13 +477,14 @@ throws InvalidCommandParameterException
 				" or " + _Simple + " (default).") );
 	}
 	
+	/* OK to omit - default to *
 	if ( (ID == null) || (ID.length() == 0) ) {
 		message = "An identifier or pattern must be specified.";
 		warning += "\n" + message;
 		status.addToLog ( CommandPhaseType.INITIALIZATION,
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Specify the identifier pattern to match." ) );
-	}
+	}*/
 	
 	if ( (Year != null) && (Year.length() > 0) ) {
 		List v = StringUtil.breakStringList ( Year, ",", StringUtil.DELIM_SKIP_BLANKS );
@@ -614,6 +615,7 @@ throws InvalidCommandParameterException
 	List<String> validList = new ArrayList<String>(14);
 	validList.add ( "Approach" );
     validList.add ( "ID" );
+    validList.add ( "PermitIDPattern" );
     validList.add ( "PermitIDPreFormat" );
     validList.add ( "IDFormat" );
     validList.add ( "PermitIDPostFormat" );
@@ -988,6 +990,11 @@ private List<StateMod_WellRight> readHydroBaseWellRightsForDWStationsSimple (
 			}
 			if ( !foundMatch ) {
 				// The well/parcel/structure list has a new combination so add to all the lists
+				// - all lists have the same length
+				// - unqueReceiptList contains only receipts and empty strings
+				// - uniqueWDIDList contains only WDIDs and empty strings
+				// - hbDivWellParcelUniqueList is the original data but and may have WDID OR receipt OR WDID/receipt
+				// This ensures that the supply don't get added more than once
 				uniqueReceiptList.add(receipt);
 				uniqueWDIDList.add(wdid);
 				hbDivWellParcelUniqueList.add(hbDivWellParcel);
@@ -996,7 +1003,8 @@ private List<StateMod_WellRight> readHydroBaseWellRightsForDWStationsSimple (
 		// Now should have the list of permit/right to process
 		Message.printStatus(2,routine,"Well station \"" + wellStationId + "\" (diversion part " +
 			partId + ") has " + hbDivWellParcelUniqueList.size() + " well/parcel/structure records (all years) with unique WDID/receipt combinations:" );
-		Message.printStatus(2,routine,"  Listing all rights immediately below and then will loop through each to process after the listing");
+		Message.printStatus(2,routine,"  Listing all rights immediately below and then will loop through each to process after the listing.  "
+			+ "Can have WDID right (not permit), permit (no WDID), or matched WDID right and permit.");
 		for ( int i = 0; i < hbDivWellParcelUniqueList.size(); i++ ) {
 			Message.printStatus(2,routine,"  WDID = " + uniqueWDIDList.get(i) + ", receipt = \"" + uniqueReceiptList.get(i) +
 				"\" yield (GPM) = " + String.format("%.2f",hbDivWellParcelUniqueList.get(i).getYield()) +
@@ -1723,7 +1731,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	String PermitIDPattern = parameters.getValue ( "PermitIDPattern" );
 	String permitIdPattern = null;
 	if ( PermitIDPattern == null ) {
-		PermitIDPattern = "*"; // Default
+		PermitIDPattern = ""; // Default - don't use parameter
 		permitIdPattern = StringUtil.replaceString(PermitIDPattern,"*",".*"); // Java regex
 	}
 	String PermitIDPreFormat = parameters.getValue ( "PermitIDPreFormat" );
@@ -2045,7 +2053,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			// Simple approach where basically the full decree/yield for involved wells is used
 			// rather than parcel/split data
 			// A major difference between this and the legacy approach is that there is no leap on the parcel year
-			Message.printStatus(2,routine,"Reading well rights using Simple approach (direct ready of well rights and parcels and not parcel fractions");
+			Message.printStatus(2,routine,"Reading well rights using Simple approach (direct read of well rights and parcels and not parcel fractions");
+			readWellRights = true; // TODO SAM 2016-09-29 need to remove from code below but for now keep since shared with legacy
 			int parcelYear = -1; // Parcel year is irrelevant
 			List<StateMod_WellRight> smWellRightList = null; // The well rights for the well station
 			for ( int i = 0; i < stationListSize; i++ ) {
@@ -2109,7 +2118,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					        continue;
 						}
 						else {
-							// Read the rights for the specific well station by treating as a single D&W
+							// Read the rights for the specific well station by treating as D&W
 							partIdList = well.getCollectionPartIDs(parcelYear);
 							partIdTypeList = well.getCollectionPartIDTypes(); // Not used here since processing diversion WDID
 							smWellRightList = readHydroBaseWellRightsForDWStationsSimple (
@@ -2120,10 +2129,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								collectionPartType,
 								partIdList, // will have a single part, which is the station ID
 								Div_int, // division as integer
-								readWellRights, // TODO SAM 2016-06-11 need to figure out if used
-								useApex, // TODO SAM 2016-06-11 need to figure out if used
-								defaultAdminNumber, // TODO SAM 2016-06-11 need to figure out if used
-								defaultApproDate, // TODO SAM 2016-06-11 need to figure out if used
+								readWellRights, // TODO SAM 2016-06-11 need to figure out if can remove
+								useApex,
+								defaultAdminNumber,
+								defaultApproDate,
 								PermitIDPreFormat, // used to format permit identifiers
 								warningLevel, warningCount, commandTag, status ); // used for logging and error handling
 						}
@@ -2152,10 +2161,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							partIdList, // the parts for the collection
 							partIdTypeList, // the types for the parts
 							Div_int, // division as integer
-							readWellRights, // TODO SAM 2016-06-11 need to figure out if used
-							useApex, // TODO SAM 2016-06-11 need to figure out if used
-							defaultAdminNumber, // TODO SAM 2016-06-11 need to figure out if used
-							defaultApproDate, // TODO SAM 2016-06-11 need to figure out if used
+							readWellRights, // TODO SAM 2016-06-11 need to figure out if can remove
+							useApex,
+							defaultAdminNumber,
+							defaultApproDate,
 							PermitIDPreFormat, // used to format permit identifiers
 							warningLevel, warningCount, commandTag, status ); // used for logging and error handling
 					}
@@ -2173,7 +2182,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				}
 				else {
 					// Not a collection.
-					// An explicit well structure - either a D&W or well specified with WDID or a permit/receipt
+					// An explicit well structure - either a D&W (one well) or well specified with WDID or a permit/receipt
 					if ( !well.getIdvcow2().isEmpty() &&
 						!well.getIdvcow2().equalsIgnoreCase("N/A") &&
 						!well.getIdvcow2().equalsIgnoreCase("NA") ) {
@@ -2194,10 +2203,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							collectionPartType,
 							partIdList, // will have a single part, which is the station ID
 							Div_int, // division as integer
-							readWellRights, // TODO SAM 2016-06-11 need to figure out if used
-							useApex, // TODO SAM 2016-06-11 need to figure out if used
-							defaultAdminNumber, // TODO SAM 2016-06-11 need to figure out if used
-							defaultApproDate, // TODO SAM 2016-06-11 need to figure out if used
+							readWellRights, // TODO SAM 2016-06-11 need to figure out if can remove
+							useApex,
+							defaultAdminNumber,
+							defaultApproDate,
 							PermitIDPreFormat, // used to format permit identifiers
 							warningLevel, warningCount, commandTag, status ); // used for logging and error handling
 					}
@@ -2208,7 +2217,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						partIdList = new ArrayList<String>(1);
 						partIdList.add(wellStationId);
 						partIdTypeList = new ArrayList<String>(1);
-						collectionPartType = "Ditch"; // Useful for troubleshooting
+						collectionPartType = "Well"; // Useful for troubleshooting
 						// The part ID type can be either WDID or Receipt
 						// If it has the form of a WDID, try to read that first.  If it does not have the form of a WDID assume a Receipt.
 						partIdTypeList.add(StateDMI_Util.determineWellStationIdType(hbdmi,wellStationId,permitIdPattern));
@@ -2221,14 +2230,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							partIdList, // will have a single part, which is the station ID
 							partIdTypeList, // will have single part, containing "WDID" or "Receipt"
 							Div_int, // division as integer
-							readWellRights, // TODO SAM 2016-06-11 need to figure out if used
-							useApex, // TODO SAM 2016-06-11 need to figure out if used
-							defaultAdminNumber, // TODO SAM 2016-06-11 need to figure out if used
-							defaultApproDate, // TODO SAM 2016-06-11 need to figure out if used
+							readWellRights, // TODO SAM 2016-06-11 need to figure out if can remove
+							useApex,
+							defaultAdminNumber,
+							defaultApproDate,
 							PermitIDPreFormat, // used to format permit identifiers
 							warningLevel, warningCount, commandTag, status ); // used for logging and error handling
 						if ( (smWellRightList.size() == 0) && !partIdTypeList.get(0).equalsIgnoreCase("Receipt") ) {
-							// The above tried to read the and did not find rights
+							// The above tried to read and did not find rights
 							// If the above was not receipt, then try receipt - performance hit but allows using same logic
 							List<String> partIdList2 = new ArrayList<String>(1);
 							partIdList2.add(wellStationId);
@@ -2243,10 +2252,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								partIdList2, // will have a single part, which is the well receipt
 								partIdTypeList2, // will have single part, containing "Receipt"
 								-1, // division as integer, not used
-								readWellRights, // TODO SAM 2016-06-11 need to figure out if used
-								useApex, // TODO SAM 2016-06-11 need to figure out if used
-								defaultAdminNumber, // TODO SAM 2016-06-11 need to figure out if used
-								defaultApproDate, // TODO SAM 2016-06-11 need to figure out if used
+								readWellRights, // TODO SAM 2016-06-11 need to figure out if can remove
+								useApex,
+								defaultAdminNumber,
+								defaultApproDate,
 								PermitIDPreFormat, // used to format permit identifiers
 								warningLevel, warningCount, commandTag, status ); // used for logging and error handling
 							if ( smWellRightList.size() == 0 ) {
@@ -2327,7 +2336,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						MessageUtil.formatMessageTag( commandTag, ++warningCount),routine, message );
 					status.addToLog ( CommandPhaseType.RUN,
 						new CommandLogRecord(CommandStatusType.FAILURE,
-							message, "Verify why there are so many well rights for a single well station." ) );
+							message, "Verify why there are so many well rights for a single well station or use an Auto format." ) );
 				}
 				// Add the rights that were read for the station
 				addStateModRightsToProcessorRightList ( smWellRightList, processorRightList, OnOffDefault_int,
@@ -2674,6 +2683,7 @@ public String toString ( PropList parameters )
 	
 	String Approach = parameters.getValue ( "Approach" );
 	String ID = parameters.getValue ( "ID" );
+	String PermitIDPattern = parameters.getValue ( "PermitIDPattern" );
 	String PermitIDPreFormat = parameters.getValue ( "PermitIDPreFormat" );
 	String IDFormat = parameters.getValue ( "IDFormat" );
 	String PermitIDPostFormat = parameters.getValue ( "PermitIDPostFormat" );
@@ -2697,6 +2707,12 @@ public String toString ( PropList parameters )
 			b.append ( "," );
 		}
 		b.append ( "ID=\"" + ID + "\"" );
+	}
+	if ( PermitIDPattern != null && PermitIDPattern.length() > 0 ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "PermitIDPattern=\"" + PermitIDPattern + "\"" );
 	}
 	if ( PermitIDPreFormat != null && PermitIDPreFormat.length() > 0 ) {
 		if ( b.length() > 0 ) {

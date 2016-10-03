@@ -1135,7 +1135,6 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 			smWellRight.setXYieldGPM(yieldGPM);
 			if ( (yieldApexGPM >= 0.0) && !Double.isNaN(yieldApexGPM)) {
 				smWellRight.setXYieldApexGPM(yieldApexGPM);
-				smWellRight.setXYieldApexGPM(yieldApexGPM*.002228);
 			}
 			smWellRight.setName(hbWells.getWell_name());
 			// Warn if receipt was requested but right looks like it has WDID/right data - should adjust input
@@ -1232,11 +1231,16 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 					DateTime dt = new DateTime(hbNetAmts.getApro_date());
 					HydroBase_AdministrationNumber an = new HydroBase_AdministrationNumber(dt);
 					smWellRight.setIrtem(an.toString());
+					// Set extended data directly relevant...
 					smWellRight.setXApproDate(hbNetAmts.getApro_date());
 					smWellRight.setXApproDateAdminNumber(an.toString());
-					smWellRight.setXWDID(partId);	
-					smWellRight.setName(hbNetAmts.getWr_name());
+					smWellRight.setXWDID(partId);
+					// Set extended data for permits for cross-check
+					smWellRight.setXPermitReceipt(hbWells.getReceipt());
+					smWellRight.setXYieldApexGPM(hbWells.getYield_apex());
+					smWellRight.setXPermitDate(hbWells.getPerm_date());
 					// Finally, add the right to the returned list
+					smWellRight.setName(hbNetAmts.getWr_name());
 					smWellRightList.add(smWellRight);
 				}
 			}
