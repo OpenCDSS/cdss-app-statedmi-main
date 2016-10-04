@@ -1137,6 +1137,11 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 				smWellRight.setXYieldApexGPM(yieldApexGPM);
 			}
 			smWellRight.setName(hbWells.getWell_name());
+			// Set extended data to cross-reference...
+			smWellRight.setXApproDate(hbWells.getAppr_date());
+			if ( hbWells.getWd_id() > 0 ) {
+				smWellRight.setXWDID("" + hbWells.getWd_id());
+			}
 			// Warn if receipt was requested but right looks like it has WDID/right data - should adjust input
 			if ( approDate != null ) {
 				message = "    Requested well " + partIdType + " for well station \"" + wellStationId +
@@ -1159,6 +1164,33 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 			List orderByList = null;
 			List<HydroBase_NetAmts> hbNetAmtsList = hdmi.readNetAmtsList(-1, wdidParts[0], wdidParts[1],
 				positiveNetRateAbs, orderByList, oldList );
+			// Further filter rights
+			// TODO SAM 2016-10-03 evaluate adding use criteria to the above read method
+			HydroBase_NetAmts tmp;
+			boolean doRemove = false;
+			for ( int i = hbNetAmtsList.size() -1; i >= 0; i-- ) {
+				tmp = hbNetAmtsList.get(i);
+				if ( tmp.getUse().toUpperCase().indexOf("IRR") < 0 ) {
+					// Include rights only if use includes IRR
+					doRemove = true;
+				}
+				if ( useApex ) {
+					if ( !tmp.getAbs().equalsIgnoreCase("Y") && !tmp.getApex().equalsIgnoreCase("Y")) {
+						// Include if abs or apex is Y
+						doRemove = true;
+					}
+				}
+				else {
+					// Not including APEX so only include absolute
+					if ( !tmp.getAbs().equalsIgnoreCase("Y") ) {
+						// Only include absolute rights
+						doRemove = true;
+					}
+				}
+				if ( doRemove ) {
+					hbNetAmtsList.remove(i);
+				}
+			}
 			// There should be at least one water right
 			if ( hbNetAmtsList.size() == 0 ) {
 				// No well was matched so input data is in error
@@ -1168,7 +1200,7 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 					MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
 				status.addToLog ( CommandPhaseType.RUN,
 					new CommandLogRecord(CommandStatusType.WARNING,
-						message, "Verify that specified well WDID is correct." ) );
+						message, "Verify that specified well WDID is correct - maybe water right is abandoned?" ) );
 			}
 			else {
 				// Convert the NetAmts records into StateMod well rights
@@ -1227,14 +1259,13 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 					}
 					smWellRight.setDecree(net_rate_abs + net_rate_apex);
 					smWellRight.setID(partId);
-					// For "irtem", convert appropriation date to administration number
-					DateTime dt = new DateTime(hbNetAmts.getApro_date());
-					HydroBase_AdministrationNumber an = new HydroBase_AdministrationNumber(dt);
-					smWellRight.setIrtem(an.toString());
+					// Administration number out of the database
+					smWellRight.setIrtem(String.format("%.5f",hbNetAmts.getAdmin_no()));
 					// Set extended data directly relevant...
-					smWellRight.setXApproDate(hbNetAmts.getApro_date());
-					smWellRight.setXApproDateAdminNumber(an.toString());
+					smWellRight.setXApproDate(hbNetAmts.getApro_date()); // Same as main data
+					smWellRight.setXApproDateAdminNumber(String.format("%.5f",hbNetAmts.getAdmin_no())); // Same as main data
 					smWellRight.setXWDID(partId);
+					smWellRight.setXUse(hbNetAmts.getUse());
 					// Set extended data for permits for cross-check
 					smWellRight.setXPermitReceipt(hbWells.getReceipt());
 					smWellRight.setXYieldApexGPM(hbWells.getYield_apex());
