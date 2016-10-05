@@ -43,6 +43,7 @@ Possible values for the PartType parameter.
 */
 protected final String _Ditch = "Ditch";
 protected final String _Parcel = "Parcel";
+//protected final String _Well = "Well"; // Conflict below - editor uses StateMod_Well.COLLECTION_PART_TYPE_WELL
 
 /**
 Possible values for node type, used by the editor and internally for messages.

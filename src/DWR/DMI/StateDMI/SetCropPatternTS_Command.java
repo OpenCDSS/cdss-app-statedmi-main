@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Vector;
 
 import DWR.StateCU.StateCU_CropPatternTS;
-
 import RTi.TS.YearTS;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
@@ -325,10 +324,10 @@ CommandWarningException, CommandException
 		
 	// Get the list of crop pattern time series...
 	
-	List cdsList = null;
+	List<StateCU_CropPatternTS> cdsList = null;
 	int cdsListSize = 0;
 	try {
-		cdsList = (List)processor.getPropContents( "StateCU_CropPatternTS_List");
+		cdsList = (List<StateCU_CropPatternTS>)processor.getPropContents( "StateCU_CropPatternTS_List");
 		cdsListSize = cdsList.size();
 	}
 	catch ( Exception e ) {
@@ -343,10 +342,10 @@ CommandWarningException, CommandException
 	
 	// Get the list of supplemental parcel data...
 	
-	List supplementalParcelList = null;
+	List<StateDMI_HydroBase_ParcelUseTS> supplementalParcelList = null;
 	try {
 		Object o = processor.getPropContents( "HydroBase_Supplemental_ParcelUseTS_List");
-		supplementalParcelList = (List)o;
+		supplementalParcelList = (List<StateDMI_HydroBase_ParcelUseTS>)o;
 	}
 	catch ( Exception e ) {
 		message = "Error requesting HydroBase_Supplemental_ParcelUseTS_List from processor.";

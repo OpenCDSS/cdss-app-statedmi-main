@@ -1500,7 +1500,7 @@ private List<HydroBase_NetAmts> readHydroBaseWellRightsForWellStationList (
 					for ( int iParcelYear = 0; iParcelYear < parcelYears.length; ++iParcelYear ) {
 						swReceipt.clear();
 						swReceipt.start();
-						List<HydroBase_Wells> hbWellParcelList = hdmi.readWellsWellToParcelList( -1, parcelYears[iParcelYear], -1, idPart );
+						List<HydroBase_Wells> hbWellParcelList = hdmi.readWellsWellToParcelList( -1, parcelYears[iParcelYear], -1, idPart, -1, -1 );
 						swReceipt.stop();
 						Message.printStatus ( 2, routine, "" + parcelYears[iParcelYear] + " well receipt \""
 							+ idPart + "\" have " + hbWellParcelList.size() + " rows - took " + swReceipt.getMilliseconds() + " ms");
