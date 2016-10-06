@@ -490,10 +490,10 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 		"Additionally, an alternate point/exchange (APEX) water right decree may be found with a decree or separate from a water right decree."),
 		0, ++yDecree, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(decree_JPanel, new JLabel (
-		"The APEX amount can be optionally be added to the decree - refer to modeling guidelines."),
+		"The APEX (Alternate Point/Exchange) amount can optionally be added to the decree - refer to modeling guidelines."),
 		0, ++yDecree, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(decree_JPanel, new JLabel (
-		"If APEX is used and a decree only has an APEX amount (but no normal decree), then the APEX amount is used for the decree (0+APEX)."),
+		"If APEX is used and a decree has an APEX amount (whether absolute or conditional right), then the decree is (net_abs+APEX)."),
 		0, ++yDecree, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(decree_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
 		0, ++yDecree, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
@@ -508,7 +508,7 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 		"Optional - minimum decree to include (default = .0005 CFS)."),
 		3, yDecree, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     
-   	JGUIUtil.addComponent(decree_JPanel, new JLabel ( "Use Apex?:"),
+   	JGUIUtil.addComponent(decree_JPanel, new JLabel ( "Use APEX?:"),
 		0, ++yDecree, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
    	List apex_Vector = new Vector(3);
    	apex_Vector.add ( "" );

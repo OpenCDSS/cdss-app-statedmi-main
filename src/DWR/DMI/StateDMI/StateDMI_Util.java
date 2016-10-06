@@ -1169,24 +1169,29 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 			HydroBase_NetAmts tmp;
 			boolean doRemove = false;
 			for ( int i = hbNetAmtsList.size() -1; i >= 0; i-- ) {
+				doRemove = false;
 				tmp = hbNetAmtsList.get(i);
 				if ( tmp.getUse().toUpperCase().indexOf("IRR") < 0 ) {
-					// Include rights only if use includes IRR
+					// Include rights only if use includes IRR, and this one does not
 					doRemove = true;
 				}
-				if ( useApex ) {
-					if ( !tmp.getAbs().equalsIgnoreCase("Y") && !tmp.getApex().equalsIgnoreCase("Y")) {
-						// Include if abs or apex is Y
-						doRemove = true;
-					}
-				}
 				else {
-					// Not including APEX so only include absolute
-					if ( !tmp.getAbs().equalsIgnoreCase("Y") ) {
-						// Only include absolute rights
-						doRemove = true;
+					// Also check whether absolute or APEX
+					if ( useApex ) {
+						if ( !tmp.getAbs().equalsIgnoreCase("Y") && !tmp.getApex().equalsIgnoreCase("Y") ) {
+							// Neither abs or apex is Y so remove
+							doRemove = true;
+						}
+					}
+					else {
+						// Not including APEX so only include absolute
+						if ( !tmp.getAbs().equalsIgnoreCase("Y") ) {
+							// Only include absolute rights
+							doRemove = true;
+						}
 					}
 				}
+				//Message.printStatus(2,routine,"getUse()=" + tmp.getUse() + " getAbs()=" + tmp.getAbs() + " getApex()=" + tmp.getApex() + " doRemove="+doRemove );
 				if ( doRemove ) {
 					hbNetAmtsList.remove(i);
 				}
@@ -1194,8 +1199,14 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 			// There should be at least one water right
 			if ( hbNetAmtsList.size() == 0 ) {
 				// No well was matched so input data is in error
-				message = "      Requested well " + partIdType + " for well station \"" + wellStationId
-					+ "\" part ID \"" + partId + "\" matches no records in the NetAmts table";
+				if ( useApex ) {
+					message = "      Requested well " + partIdType + " for well station \"" + wellStationId
+							+ "\" part ID \"" + partId + "\" matches no abs or APEX, IRR records in the NetAmts table";
+				}
+				else {
+					message = "      Requested well " + partIdType + " for well station \"" + wellStationId
+						+ "\" part ID \"" + partId + "\" matches no abs, IRR records in the NetAmts table";
+				}
 				Message.printWarning(warningLevel,
 					MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
 				status.addToLog ( CommandPhaseType.RUN,
