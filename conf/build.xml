@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="StateDMI" default="compile" basedir="../">
 
-    <import file="../../rtibuild/common-build.xml"/>
-    <import file="../../rtibuild/common-doc.xml"/>
-    <import file="../../rtibuild/common-installer.xml"/>
+    <import file="../../cdss-util-buildtools/common-build.xml"/>
+    <import file="../../cdss-util-buildtools/common-doc.xml"/>
+    <import file="../../cdss-util-buildtools/common-installer.xml"/>
     
     <property name="nsis.dir" value="installer/CDSS"/>
     <property name="nsis.file" value="StateDMI.nsi"/>
@@ -48,7 +48,7 @@
     	<!-- Log file folder -->
         <mkdir dir="${install.dir}/logs"/>
     	<!-- System configuration files -->
-        <copy todir="${install.dir}/system" file="externals/CDSS/system/DATAUNIT"/>
+        <copy todir="${install.dir}/system" file="resources/runtime/system/DATAUNIT"/>
     	<!-- Training slideshows under doc/Training -->
     	<!-- If this becomes onerous, put in a separate target so it can be run like the PDF build -->
     	<!-- Omit bit files that can be regenerated, but otherwise include files for users to poke around -->

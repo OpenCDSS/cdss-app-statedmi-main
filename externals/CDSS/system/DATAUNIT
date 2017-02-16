@@ -1,0 +1,129 @@
+# Data units file for CDSS
+#
+# This file provides information for units conversion, labeling, etc.  Use of
+# this file is being phased in to all products.
+#
+# History:
+#
+# 2001-08-21	Steven A. Malers, RTi	Add FRACTION.
+# 2005-11-14	James R. VanShaar, RTi	Corrected error for CFSD factor:  
+#					changed from .50416 to 1.9834973.
+#					Also added CMSD conversion.
+# 2005-11-30	James R. VanShaar, RTi	Added a CMS conversion.
+#					Revised the notes below, as the base
+#                                       discharge is ACFT/D.
+# 2005-12-01	SAM, RTi		Add C, F units for Celsius and
+#					Fahrenheit, since these units are in
+#					HydroBase.
+#
+#------------------------------------------------------------------------------
+# DATAUNIT - CDSS version of DATAUNIT file
+#
+# notes:	(1)	To convert FROM one set of units TO another within a
+#			dimension, multiply by the FROM coefficient and divide
+#			by the TO coefficient.  Then add the addition factor.
+#			In other words, the factors
+#			shown (X) can be represented as:
+#
+#				X BASE = 1 OTHR
+#
+#		(2)	This version of the DATAUNIT file should be the same as
+#			the official NWS version except that discharge base
+#			units are AF/D (ACFT/DAY), not CMS.  This allows the
+#			conversion from CFS to ACFT to be explicitly set to the
+#			conversion that the State uses.
+#		(3)	Similarly, make ACFT the base unit for volumes.
+#------------------------------------------------------------------------------
+#TYPE|XX |ABBR|SYS| LONGNAME                   |PRECISION|MULT | ADD |
+#------------------------------------------------------------------------------
+# DIRECTION
+DIR |BASE|DEG |   | DEGREE                              |0|1.       ||
+DIR |OTHR|RAD |   | RADIAN                              |2|57.2958  ||
+# DIMENSIONLESS
+DLES|BASE|REAL|   | RATIONAL NUMBER                     |2|1.       ||
+DLES|OTHR|PCT |   | PERCENT                             |0|.01      ||
+DLES|OTHR|PCTD|   | PERCENT/100                         |0|1.       ||
+DLES|OTHR|FRACTION|| FRACTION                           |4|1.       ||
+DLES|OTHR|INT |   | INTEGER NUMBER                      |1|1.       ||
+DLES|OTHR|KIND|   | KIND OF OCCURANCE                   |1|1.       ||
+DLES|OTHR|PPM |ENG| PARTS PER MILLION                   |3|1.       ||
+# Units we don't have a category for yet so put here.
+DLES|OTHR|MBTU|ENG| MILLIIONS OF BRITISH THERMAL UNITS  |3|1.       ||
+DLES|OTHR|LB  |ENG| POUNDS                              |2|1.       ||
+DLES|OTHR|LB/MBTU|ENG| POUNDS PER MILLIONS BTU          |3|1.       ||
+# ENERGY
+E   |BASE|KWH |   | KILOWATT HOURS                      |1|1.       ||
+E   |OTHR|KKWH|   | THOUSAND KILOWATT HOURS             |1|1000.    ||
+E   |OTHR|MKWH|   | MILLION  KILOWATT HOURS             |1|1000000. ||
+# ENERGY PER UNIT AREA
+E/L2|BASE|LY  |   | LANGLEY                             |0|1.       ||
+E/L2|OTHR|JCM2|   | JOULE PER SQUARE CENTIMETER         |3|.23892   ||
+E/L2|OTHR|MJM2|   | MEGAJOULE PER SQUARE METER          |3|23.892   ||
+E/L2|OTHR|MJ/M2|  | MEGAJOULE PER SQUARE METER          |3|23.892   ||
+E/L2|OTHR|KHM2|   | KILOWATT HOUR PER SQUARE METER      |2|86.028   ||
+E/L2|OTHR|BTF2|   | BTU PER SQUARE FOOT                 |2|.027133  ||
+# POWER
+E/T |BASE|KW  |   | KILOWATTS                           |1|1.       ||
+E/T |OTHR|KKW |   | THOUSAND KILOWATTS                  |1|1000.    ||
+E/T |OTHR|GMW |ENG| GROSS MEGAWATT                      |1|1000000. ||
+# LENGTH
+L   |BASE|MM  |SI | MILLIMETER                          |1|1.       ||
+L   |OTHR|CM  |SI | CENTIMETER                          |2|10.      ||
+L   |OTHR|M   |SI | METER                               |2|1000.    ||
+L   |OTHR|KM  |SI | KILOMETER                           |1|1000000. ||
+L   |OTHR|IN  |ENG| INCH                                |2|25.4     ||
+L   |OTHR|FT  |ENG| FOOT                                |2|304.8    ||
+L   |OTHR|MI  |ENG| MILE (STATUTE)                      |1|1609344. ||
+L   |OTHR|NM  |ENG| MILE (NAUTICAL)                     |1|1853248. ||
+# SPEED
+L/T |BASE|M/S |SI | METER PER SECOND                    |2|1.       ||
+L/T |OTHR|CM/S|SI | CENTIMETER PER SECOND               |0|.01      ||
+L/T |OTHR|KM/H|SI | KILOMETER PER HOUR                  |1|.27778   ||
+L/T |OTHR|FT/S|ENG| FOOT PER SECOND                     |1|.3048    ||
+L/T |OTHR|FT/M|ENG| FOOT PER MINUTE                     |2|.00508   ||
+L/T |OTHR|MI/H|ENG| MILE PER HOUR                       |1|.44704   ||
+L/T |OTHR|MI/D|ENG| MILE PER DAY                        |1|.000621  ||
+L/T |OTHR|KNOT|ENG| KNOT                                |1|.51579   ||
+# AREA
+L2  |BASE|M2  |SI | SQUARE METER                        |1|1.       ||
+L2  |OTHR|MM2 |SI | SQUARE MILLIMETER                   |1|.000001  ||
+L2  |OTHR|CM2 |SI | SQUARE CENTIMETER                   |1|.0001    ||
+L2  |OTHR|KM2 |SI | SQUARE KILOMETER                    |1|1000000. ||
+L2  |OTHR|IN2 |ENG| SQUARE INCH                         |2|.00065   ||
+L2  |OTHR|FT2 |ENG| SQUARE FOOT                         |1|.0929    ||
+L2  |OTHR|MI2 |ENG| SQUARE MILE (STATUTE)               |1|2588999. ||
+L2  |OTHR|NM2 |ENG| SQUARE MILE (NAUTICAL)              |1|3434528. ||
+L2  |OTHR|ACRE|ENG| ACRE                                |1|4046.86  ||
+L2  |OTHR|HECT|SI | HECTARE                             |1|1000.    ||
+# VOLUME
+L3  |BASE|ACFT|ENG| ACRE-FOOT                           |1|1.       ||
+L3  |OTHR|AF  |ENG| ACRE-FOOT                           |1|1.       ||
+L3  |BASE|AF/M|ENG| ACRE-FOOT                           |1|1.       ||
+L3  |OTHR|FT3 |ENG| CUBIC FOOT                          |1|.000022956||
+L3  |OTHR|CFSD|ENG| CUBIC FOOT PER SECOND-DAY           |1|1.9834973||
+L3  |OTHR|CMSD|SI | CUBIC METER PER SECOND-DAY          |1|70.04533976||
+L3  |OTHR|KAFT|ENG| 1000 ACRE-FEET                      |1|1000.0   ||
+# DISCHARGE
+L3/T|BASE|AF/D|ENG| ACRE-FOOT PER DAY                   |1|1.       ||
+L3/T|OTHR|CFS |ENG| CUBIC FOOT PER SECOND               |2|1.9835   ||
+L3/T|OTHR|CMS |SI | CUBIC METER PER SECOND              |2|70.04533976||
+L3/T|OTHR|KCFS|ENG| 1000 CUBIC FOOT PER SECOND          |1|1983.5   ||
+L3/T|OTHR|MCSFM|ENG| MILLIONS OF CUBIC FEET PER MINUTE  |3|1.       ||
+# PRESSURE
+#RES|BASE|MB  |   | MILLIBAR                            |2|1.       ||
+PRES|OTHR|MMHG|   | MILLIMETER OF MERCURY               |2|1.33322  ||
+PRES|OTHR|INHG|   | INCH OF MERCURY                     |3|33.864   ||
+PRES|OTHR|ATM |   | ATMOSPHERE                          |3|1013.25  ||
+# TEMPERATURE
+TEMP|BASE|DEGC|SI | DEGREE CENTIGRADE                   |1|1.       |0.000|
+TEMP|BASE|C   |SI | DEGREE CENTIGRADE                   |1|1.       |0.000|
+TEMP|OTHR|DEGK|   | DEGREE KELVIN                       |1|1.       |-273.|
+TEMP|OTHR|DEGF|ENG| DEGREE FAHRENHEIT                   |1|.555556  |-17.8|
+TEMP|OTHR|F   |ENG| DEGREE FAHRENHEIT                   |1|.555556  |-17.8|
+TEMP|OTHR|DEGR|   | DEGREE RANKINE                      |1|.555556  |-273.|
+# TIME
+TIME|BASE|SEC |   | SECOND                              |2|1.       ||
+TIME|OTHR|MIN |   | MINUTE                              |2|60.      ||
+TIME|OTHR|HR  |   | HOUR                                |2|3600.    ||
+TIME|OTHR|DAY |   | DAY                                 |2|86400.   ||
+# END DATAUNIT
