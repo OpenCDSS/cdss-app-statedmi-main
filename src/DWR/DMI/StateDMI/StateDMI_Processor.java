@@ -852,7 +852,7 @@ import java.lang.String;
 import java.lang.StringBuffer;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
@@ -7774,7 +7774,13 @@ throws Exception
 	// others are likely not a problem)...
 
 	int ml = 2;	// Message level for cleanup warnings
-	CommandStatusType max_severity = CommandStatusProviderUtil.getHighestSeverity ( commandList );
+	List<CommandStatusProvider> cspList = new ArrayList<CommandStatusProvider>();
+	for ( Command c : commandList ) {
+	    if ( c instanceof CommandStatusProvider ) {
+	        cspList.add((CommandStatusProvider)c);
+	    }
+	}
+	CommandStatusType max_severity = CommandStatusProviderUtil.getHighestSeverity ( cspList );
 	if ( (error_count > 0) || max_severity.greaterThan(CommandStatusType.WARNING)) {
 
 		if ( IOUtil.isBatch() ) {

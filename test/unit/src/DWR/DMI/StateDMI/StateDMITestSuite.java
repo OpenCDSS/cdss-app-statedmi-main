@@ -2,6 +2,7 @@ package DWR.DMI.StateDMI;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -10,7 +11,7 @@ import RTi.Util.Test.TestCollector;
 
 public class StateDMITestSuite extends TestCase {
 
-    private static ArrayList testList;
+    private static List<String> testList;
     
     public StateDMITestSuite(String testname)
     {
@@ -23,7 +24,7 @@ public class StateDMITestSuite extends TestCase {
     
     public static Test suite() throws ClassNotFoundException
     {
-        testList = new ArrayList();
+        testList = new ArrayList<String>();
         TestSuite suite = new TestSuite();
         TestCollector tests = new TestCollector();
         File path = new File("test\\unit\\src");
