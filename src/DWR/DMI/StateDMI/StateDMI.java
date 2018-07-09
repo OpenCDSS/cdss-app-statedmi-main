@@ -413,6 +413,7 @@ Instantiates the application instance from an applet.
 */
 public void init()
 {
+	StateDMISession session = StateDMISession.getInstance();
 	IOUtil.setApplet ( this );
 	IOUtil.setProgramData ( PROGRAM_NAME, PROGRAM_VERSION, null );
 	initialize1();
@@ -428,7 +429,7 @@ public void init()
 
 	initialize2();
 	setIcon();
-	__stateDMI_JFrame = new StateDMI_JFrame ( __app_type );
+	__stateDMI_JFrame = new StateDMI_JFrame (session, __app_type );
 }
 
 /**
@@ -516,7 +517,7 @@ public static void main ( String args[] )
 		// Main try...
 	
 		// Initial set...
-	
+		StateDMISession session = StateDMISession.getInstance();
 		IOUtil.setProgramData ( PROGRAM_NAME, PROGRAM_VERSION, args );
 		JGUIUtil.setAppNameForWindows("StateDMI");
 		
@@ -608,7 +609,7 @@ public static void main ( String args[] )
 	
 			Message.printStatus ( 2, routine, "Starting StateDMI GUI..." );
 			try {
-				__stateDMI_JFrame = new StateDMI_JFrame ( __app_type );
+				__stateDMI_JFrame = new StateDMI_JFrame (session, __app_type );
 			}
 			catch ( Exception e2 ) {
 				Message.printWarning ( 1, routine, "Error starting StateDMI." );
