@@ -32,6 +32,7 @@ public class StateDMI_JFrameTest extends TestCase {
     // Set up some properties and to test
     protected void setUp()
     {
+    	StateDMISession session = StateDMISession.getInstance();
        cmdFile = new File
        ("test\\regression\\commands\\CDSS_General\\readDiversionRightsFromHydroBase\\simpleRead.StateDMI");
        
@@ -44,8 +45,8 @@ public class StateDMI_JFrameTest extends TestCase {
        IOUtil.setApplicationHomeDir(home);
        JGUIUtil.setLastFileDialogDirectory(home);
        
-       statecu_jframe = new StateDMI_JFrame(0);
-       statemod_jframe = new StateDMI_JFrame(1);
+       statecu_jframe = new StateDMI_JFrame(session, 0);
+       statemod_jframe = new StateDMI_JFrame(session, 1);
     }
     /* FIXME SAM 2007-11-15 Test framework needs fixed.
     // runCommandsFromFile() will initialize the Vectors by calling

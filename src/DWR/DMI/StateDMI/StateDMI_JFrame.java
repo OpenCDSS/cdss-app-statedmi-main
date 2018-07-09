@@ -868,6 +868,11 @@ WindowListener
 {
 	
 /**
+StateDMI session information, used to track command file open history, etc.
+*/
+private StateDMISession session = null;
+	
+/**
 Path to resources, like graphics.
 */
 private final String __RESOURCE_PATH = "/DWR/DMI/StateDMI";
@@ -890,6 +895,11 @@ private boolean __datasetFeaturesEnabled = false;
 Map interface.
 */
 private GeoViewJFrame __geoview_JFrame = null;
+
+/**
+Maximum number of files in recent files, taken from TSToolSession history.
+*/
+private final int MAX_RECENT_FILES = 20;
 
 /**
 StateMod network frame.
@@ -1235,7 +1245,9 @@ private JMenuItem
 
 private JMenu
 	// Used with StateCU and StateMod...
-	__File_Open_JMenu;
+	__File_Open_JMenu = null;
+		private JMenuItem
+			__File_Open_CommandFileRecent_JMenuItem[] = null;
 private JMenuItem
 	__File_Open_CommandFile_JMenuItem,
 	__File_Open_DataSet_JMenuItem;
@@ -3153,7 +3165,7 @@ private SimpleJButton
 StateDMIMain GUI constructor.  Create the main graphical user interface.
 @param app_type the application type from the StateDMI class (APP_TYPE_XXX).
 */
-public StateDMI_JFrame ( int app_type )
+public StateDMI_JFrame ( StateDMISession session, int app_type )
 {
 	String rtn = "StateDMI_JFrame.constructor";
 	__appType = app_type;
@@ -3161,6 +3173,9 @@ public StateDMI_JFrame ( int app_type )
 	// Let the message package know that the application is the top level...
 
 	Message.setTopLevel (this);
+	
+	// Session to track command file history and other user session properties
+	this.session = session;
 
 	String directory = System.getProperty ("user.dir") + System.getProperty("file.separator");
 	IOUtil.setProgramWorkingDir(directory);
@@ -12083,6 +12098,7 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 		// Open...Command File...
 		__File_Open_JMenu.add( __File_Open_CommandFile_JMenuItem =
 			new SimpleJMenuItem( __File_Open_CommandFile_String,this));
+		__File_Open_JMenu.addSeparator();
 		// Open...DataSet
 		if ( __datasetFeaturesEnabled ) {
 			__File_Open_JMenu.addSeparator();
@@ -12105,6 +12121,13 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 				new SimpleJMenuItem(__File_Open_DataSetComponent_StateCU_ClimateStations_String,this));
 			}
 		}
+		__File_Open_CommandFileRecent_JMenuItem = new JMenuItem[this.MAX_RECENT_FILES];
+	    for ( int i = 0; i < this.MAX_RECENT_FILES; i++ ) {
+		    __File_Open_JMenu.add( __File_Open_CommandFileRecent_JMenuItem[i] =
+		    	new SimpleJMenuItem( "", this ) );
+	    }
+	    ui_InitGUIMenus_File_OpenRecentFiles();
+	    
 		__File_Open_JMenu.addSeparator ();
 		__File_Open_JMenu.add( __File_Open_ModelNetwork_JMenuItem =
 			new SimpleJMenuItem(__File_Open_ModelNetwork_String,this));
@@ -12389,6 +12412,27 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 		fileJMenu.add(__File_Test_JMenuItem = new SimpleJMenuItem( __File_Test_String, this));
 	}
 	menuBar.add(fileJMenu);
+}
+
+/**
+ * Reset the file... Open...Command Files (Recent) menu items to recent files.
+ */
+private void ui_InitGUIMenus_File_OpenRecentFiles(){
+	List<String> history = this.session.readHistory();
+	for(int i = 0; i < this.MAX_RECENT_FILES; i++){
+		String filename = "";
+		if(i >= history.size()){
+			filename = "";
+		}
+		else{
+			// Long filenames will make the menu unwieldy so show the front and the back
+			// TODO Find a way to replace parts of the path with "..." to shorten the menu
+			// Myabe add as an IOUtil method
+			filename = history.get(i);
+		}
+		__File_Open_CommandFileRecent_JMenuItem[i].setText(filename);
+		__File_Open_CommandFileRecent_JMenuItem[i].setToolTipText(filename);
+	}
 }
 
 /**
@@ -13274,6 +13318,8 @@ private void uiAction_OpenCommandFile ()
 		Message.printStatus(2, routine,
 			"Working directory (and initial working directory) from command file is \"" +
 			IOUtil.getProgramWorkingDir() );
+		this.session.pushHistory(path);
+		ui_InitGUIMenus_File_OpenRecentFiles();
 		// Load but do not automatically run.
 		ui_LoadCommandFile ( path, false );
 	}
@@ -14897,6 +14943,11 @@ private void uiAction_WriteCommandFile ( String file, boolean prompt_for_file )
 		out.close();
 		commandList_SetDirty(false);
 		commandList_SetCommandFileName ( file );
+		
+		// Save the file in the history
+		this.session.pushHistory(file);
+		// Do this here because the write may be in a sequence of steps.
+		ui_InitGUIMenus_File_OpenRecentFiles();
 
 		if ( directory != null ) {
 			// Set the "WorkingDir" property, which will NOT
