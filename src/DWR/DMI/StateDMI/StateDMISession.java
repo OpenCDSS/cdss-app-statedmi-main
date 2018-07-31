@@ -8,7 +8,7 @@ import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 
 /**
- * Class to maintain TSTool session information such as the history of command files opened.
+ * Class to maintain StateDMI session information such as the history of command files opened.
  * @author jurentie
  *
  */
@@ -22,7 +22,7 @@ public class StateDMISession {
 	
 	/**
 	 * Global value that indicates if the UI state file is being written.
-	 * Need to handle because if the file is being modified at the same time expceptions will be thrown.
+	 * Need to handle because if the file is being modified at the same time exceptions will be thrown.
 	 */
 	private boolean uiStateBeingWritten = false;
 	
@@ -103,7 +103,6 @@ public class StateDMISession {
 	
 	/**
 	Create a new system configuration file in user files.
-	This is used when transitioning from TSTool earlier than 11.09.00 to version later.
 	@return true if the file was created, false for all other cases.
 	*/
 	public boolean createConfigFile ( )
@@ -166,7 +165,7 @@ public class StateDMISession {
 		return true;
 	}
 	/**
-	Return the value of the requested property from the user's TSTool configuration file.
+	Return the value of the requested property from the user's StateDMI configuration file.
 	This reads the configuration file each time to ensure synchronization.
 	@param propName property name
 	@return the value of the property or null if file or property is not found
@@ -190,11 +189,11 @@ public class StateDMISession {
 	}
 	
 	/**
-	Return the name of the user's TSTool configuration file.
+	Return the name of the user's StateDMI configuration file.
 	*/
 	public String getConfigFile ()
 	{
-		String logFile = getSystemFolder() + File.separator + "StateDMI.cfg";
+		String logFile = System.getProperty("user.home") + File.separator + ".statedmi" + File.separator + "datastore" + File.separator + "StateDMI.cfg";
 		//Message.printStatus(1,"","Config file is \"" + logFolder + "\"");
 		return logFile;
 	}
@@ -228,7 +227,7 @@ public class StateDMISession {
 	}
 
 	/**
-	Return the name of the TSTool history file.
+	Return the name of the StateDMI history file.
 	*/
 	public String getHistoryFile ()
 	{
@@ -238,7 +237,7 @@ public class StateDMISession {
 	}
 	
 	/**
-	 * Return the singleton instance of the TSToolSession.
+	 * Return the singleton instance of the StateDMISession.
 	 */
 	public static StateDMISession getInstance() {
 		return instance;
@@ -293,10 +292,10 @@ public class StateDMISession {
 	}
 	
 	/**
-	Return the name of the TSTool user folder for the operating system, for example:
+	Return the name of the TSTool StateDMI folder for the operating system, for example:
 	<ul>
-	<li>	Windows:  C:\Users\UserName\.tstool</li>
-	<li>	Linux: /home/UserName/.tstool</li>
+	<li>	Windows:  C:\Users\UserName\.statedmi</li>
+	<li>	Linux: /home/UserName/.statedmi</li>
 	</ul>
 	*/
 	public String getUserFolder ()
@@ -308,7 +307,7 @@ public class StateDMISession {
 	
 	/**
 	Push a new command file onto the history.  This reads the history, updates it, and writes it.
-	This is done because if multiple TSTool sessions are running they, will share the history.
+	This is done because if multiple StateDMI sessions are running they, will share the history.
 	@param commandFile full path to command file that has been opened
 	*/
 	public void pushHistory ( String commandFile )
@@ -363,7 +362,7 @@ public class StateDMISession {
 	
 	/**
 	Read the UI state.  The UI state is saved as simple property=value text file in
-	the .tstool/ui-state.txt file.
+	the .statedmi/ui-state.txt file.
 	Properties are saved in the uiStateProps PropList internally.
 	*/
 	public void readUIState()
