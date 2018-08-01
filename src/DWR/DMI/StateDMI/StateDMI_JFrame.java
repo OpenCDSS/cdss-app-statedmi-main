@@ -652,6 +652,7 @@
 
 package DWR.DMI.StateDMI;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
@@ -682,7 +683,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import java.net.URL;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -697,6 +698,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -747,6 +749,7 @@ import RTi.Util.GUI.ResponseJDialog;
 import RTi.Util.GUI.ReportJFrame;
 import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
+import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.GUI.SimpleJMenuItem;
 import RTi.Util.GUI.SimpleJTree_Node;
 import RTi.Util.GUI.TextResponseJDialog;
@@ -779,7 +782,9 @@ import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageLogListener;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.TimeInterval;
-
+import riverside.datastore.DataStore;
+import riverside.datastore.DataStores_JFrame;
+import riverside.datastore.GenericDatabaseDataStore;
 import DWR.StateCU.StateCU_BlaneyCriddle_Data_JFrame;
 import DWR.StateCU.StateCU_ClimateStation_JFrame;
 import DWR.StateCU.StateCU_ClimateStation_Data_JFrame;
@@ -890,6 +895,22 @@ were implemented for development and are just taking up space.  The data set dis
 probably need to be in a separate tab or edge panel (tree?).
 */
 private boolean __datasetFeaturesEnabled = false;
+
+/**
+Label for datastores, necessary because label will be set not visible if no datastores.
+*/
+private JLabel __dataStore_JLabel = null;
+
+// TODO SAM phase in file datastore at some point
+/**
+Tabbed panel to keep datastores and input types separate.
+*/
+private JTabbedPane __dataStore_JTabbedPane = null;
+
+/**
+Available datastores.
+*/
+private SimpleJComboBox __dataStore_JComboBox = null;
 
 /**
 Map interface.
@@ -1205,6 +1226,16 @@ private SimpleJButton
 JMenuBar
 	__JMenuBar = null;
 
+/**
+Panel for input options.
+*/
+private JPanel __queryInput_JPanel;
+
+/**
+Text field indicating that datastores are initializing.
+*/
+private JLabel __dataStoreInitializing_JLabel;
+
 private final static int MENU_STYLE_TWO_LEVEL = 2;
 private final static int MENU_STYLE_THREE_LEVEL = 3;
 
@@ -1380,6 +1411,9 @@ JCheckBoxMenuItem
 	__View_Map_JCheckBoxMenuItem,
 	__View_ModelNetwork_JCheckBoxMenuItem,
 	__View_ThreeLevelCommandsMenu_JCheckBoxMenuItem;
+
+private JMenuItem
+	__View_DataStores_JMenuItem = null;
 
 	// The following are used by StateCU and StateMod...
 
@@ -2082,6 +2116,8 @@ private JMenuItem
 	__Help_ViewDocumentation_JMenuItem = null,
 	__Help_ViewTrainingMaterials_JMenuItem = null;
 
+
+
 /**
 Properties for the application, currently only containing "WorkingDir".
 */
@@ -2215,6 +2251,7 @@ private String
 
 	// View menu...
 
+	__View_DataStores_String = "Datastores",
 	__View_DataSetManager_String = "Data Set Manager",
 	__View_Map_String = "Map",
 	__View_ModelNetwork_String = "Model Network",
@@ -3189,10 +3226,26 @@ public StateDMI_JFrame ( StateDMISession session, int app_type )
 	// Get database connection information.  Force a login if the database connection cannot be made...
 
 	uiAction_OpenHydroBase();
+	
+	// Open remaining datastores, displaying dialog if SystemLogin or SystemPassword property is "prompt"
+	// TODO SAM 2010-09-03 migrate more input types to datastores
+	try {
+		Message.printStatus(2, rtn, "Opening datastores from TSTool GUI...");
+	    StateDMI.openDataStoresAtStartup(session,__statedmiProcessor,false);
+	}
+	catch ( Exception e ) {
+	    Message.printStatus ( 1, rtn, "Error opening datastores (" + e + ")." );
+	}
 
 	// Default the working directory to the directory where the application started...
 
 	Message.printStatus (1, rtn, "Ready");
+	
+	// Populate the datastore choices in the UI
+	
+	ui_DataStoreList_Populate ();
+	
+	ui_UpdateStatus(true);
 }
 
 /**
@@ -3423,6 +3476,10 @@ public void actionPerformed ( ActionEvent event )
 
 	// View menu...
 	
+	else if ( command.equals(__View_DataStores_String) ) {
+        // Show the datastores
+        uiAction_ShowDataStores();
+    }
     else if ( o == __View_ThreeLevelCommandsMenu_JCheckBoxMenuItem ) {
 		// This method will trigger a refresh of the menus...
     	// TODO SAM 2007-06-25 Need to rework to have a "redrawMenus" method
@@ -7236,6 +7293,10 @@ public void itemStateChanged ( ItemEvent evt )
 		return;
 	}
 
+	else if ( (o == __dataStore_JComboBox) && (evt.getStateChange() == ItemEvent.SELECTED) ) {
+        // New datastore selected...
+        uiAction_DataStoreChoiceClicked();
+    }
 	else if ( o == __View_DataSetManager_JCheckBoxMenuItem ) {
 		// TODO
 		if ( __statecuDatasetManager == null ) {
@@ -8263,6 +8324,11 @@ private void ui_CheckGUIState()
 		command_list_size = __commands_JListModel.size();
 		selected_commands_size = JGUIUtil.selectedSize ( ui_GetCommandJList() );
 	}
+	
+	int dataStoreListSize = 0;
+	if ( __statedmiProcessor != null ) {		
+	    dataStoreListSize = __statedmiProcessor.getDataStores().size();
+	}
 
 	// Check the menus in the order of the GUI.  Check the popup menus as appropriate with other menus...
 
@@ -8430,7 +8496,13 @@ private void ui_CheckGUIState()
 	}
 
 	// View menu...
-
+	
+	if ( dataStoreListSize > 0 ) {
+	    JGUIUtil.setEnabled ( __View_DataStores_JMenuItem, true );
+	}
+	else {
+	    JGUIUtil.setEnabled ( __View_DataStores_JMenuItem, false );
+	}
 	if ( __appType == StateDMI.APP_TYPE_STATECU ) {
 		if ( __statecuDataset == null ) {
 			JGUIUtil.setEnabled ( __View_DataSetManager_JCheckBoxMenuItem, false );
@@ -8936,6 +9008,45 @@ private void ui_CheckGUIState_RunMenu ( int command_list_size, int selected_comm
 	else {
 		JGUIUtil.setEnabled ( __ClearCommands_JButton, true );
 	}
+}
+
+/**
+Populate the datastore list from available processor datastores.
+*/
+private void ui_DataStoreList_Populate ()
+{
+    __dataStore_JComboBox.removeAll();
+    List<String> dataStoreNameList = new ArrayList<String>();
+    dataStoreNameList.add ( "" ); // Blank when picking input type and name separately
+    // Get all enabled datastores, even those not active - the View ... Datastores menu can be used to show errors
+    List<DataStore> dataStoreList = __statedmiProcessor.getDataStores();
+    for ( DataStore dataStore : dataStoreList ) {
+        if ( dataStore.getClass().getName().endsWith(".NrcsAwdbDataStore") ||
+            dataStore.getClass().getName().endsWith(".UsgsNwisDailyDataStore") ||
+            dataStore.getClass().getName().endsWith(".UsgsNwisGroundwaterDataStore") ||
+            dataStore.getClass().getName().endsWith(".UsgsNwisInstantaneousDataStore") ) {
+            // For now disable in the main browser since no interactive browsing ability has been implemented
+            // FIXME SAM 2012-10-26 For USGS enable when USGS site service is enabled.
+            // FIXME SAM 2012-12-18 Enable with filter panel is developed specific to web services.
+            continue;
+        }
+        else if ( dataStore.getClass().getName().endsWith(".GenericDatabaseDataStore") ) {
+            // Only populate if configured for time series
+            GenericDatabaseDataStore ds = (GenericDatabaseDataStore)dataStore;
+            if ( !ds.hasTimeSeriesInterface(true) ) {
+                continue;
+            }
+        }
+        String name = dataStore.getName();
+        if ( dataStore.getStatus() != 0 ) {
+        	// Show the user but make sure they know there is a problem so they avoid selecting
+        	name = name + " (ERROR)";
+        }
+        dataStoreNameList.add ( name );
+    }
+    __dataStore_JComboBox.setData(dataStoreNameList);
+    // Select the blank
+    __dataStore_JComboBox.select("");
 }
 
 /**
@@ -9456,6 +9567,7 @@ Initialize GUI components including menus and the main interfaces.
 private void ui_InitGUI ()
 {	String routine = "StateDMI_JFrame.initGUI";
 	int initial_height = 900, initial_width = 1000;
+	int y;
 
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
 
@@ -9466,8 +9578,59 @@ private void ui_InitGUI ()
 		Message.printStatus ( 2, routine, e.toString() );
 	}
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
+	
+	JPanel query_JPanel = new JPanel();
+    query_JPanel.setLayout(new BorderLayout());
+    getContentPane().add("North", query_JPanel);
 
+	// objects used throughout the GUI layout
+	int buffer = 3;
+	Insets insetsNLNR = new Insets(0,buffer,0,buffer);
+	Insets insetsNNNR = new Insets(0,0,0,buffer);
+	Insets insetsNLNN = new Insets(0,buffer,0,0);
+	Insets insetsNLBR = new Insets(0,buffer,buffer,buffer);
+	Insets insetsTLNR = new Insets(buffer,buffer,0,buffer);
+	Insets insetsNNNN = new Insets(0,0,0,0);
 	GridBagLayout gbl = new GridBagLayout();
+	
+	__queryInput_JPanel = new JPanel();
+	__queryInput_JPanel.setLayout(gbl);
+	ui_SetInputPanelTitle (null, Color.black );
+	
+    query_JPanel.add("West", __queryInput_JPanel);
+
+    y=-1;
+	
+	__dataStore_JTabbedPane = new JTabbedPane ();
+    __dataStore_JTabbedPane.setVisible(false); // Let the initializing panel show first
+    JGUIUtil.addComponent(__queryInput_JPanel, __dataStore_JTabbedPane, 
+        0, ++y, 2, 1, 0.0, 0.0, insetsNLNN, GridBagConstraints.HORIZONTAL, GridBagConstraints.EAST);
+    // The following will display during startup to wait for datastores to initialize, and will then
+    // be set not visible...
+    JPanel __dataStoreInitializing_JPanel = new JPanel();
+    __dataStoreInitializing_JPanel.setLayout(gbl);
+    __dataStoreInitializing_JLabel = new JLabel("<html><b>Wait...initializing data connections...</html>");
+    JGUIUtil.addComponent(__dataStoreInitializing_JPanel, __dataStoreInitializing_JLabel, 
+        0, 0, 1, 2, 1.0, 0.0, insetsNNNR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    // Add at same location and __dataStore_JTabbedPane, which is not visible at start
+    JGUIUtil.addComponent(__queryInput_JPanel, __dataStoreInitializing_JPanel, 
+        0, y, 2, 1, 0.0, 0.0, insetsNLNN, GridBagConstraints.HORIZONTAL, GridBagConstraints.EAST);
+
+    JPanel dataStore_JPanel = new JPanel();
+    dataStore_JPanel.setLayout(gbl);
+    int yDataStore = -1;
+    __dataStore_JLabel = new JLabel("Datastore:");
+    JGUIUtil.addComponent(dataStore_JPanel, __dataStore_JLabel, 
+        0, ++yDataStore, 1, 1, 0.0, 0.0, insetsNLNN, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    __dataStore_JComboBox = new SimpleJComboBox(false);
+    __dataStore_JComboBox.setMaximumRowCount ( 20 );
+    String tooltip = "<html>Configured database and web service datastores <b>with no errors</b> - select a datastore OR input type.  See View...Datastores for status.</html>";
+    __dataStore_JLabel.setToolTipText(tooltip);
+    __dataStore_JComboBox.setToolTipText ( tooltip );
+    __dataStore_JComboBox.addItemListener( this );
+    JGUIUtil.addComponent(dataStore_JPanel, __dataStore_JComboBox, 
+        1, yDataStore, 2, 1, 1.0, 0.0, insetsNNNR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    __dataStore_JTabbedPane.addTab ( "Datastore", dataStore_JPanel );
 
 	// Add the menus...
 
@@ -9511,10 +9674,7 @@ private void ui_InitGUI ()
 	// +=================================================================+
 	// | Results                                                         |
 	// +-----------------------------------------------------------------+
-	
-	int buffer = 3;
-	Insets insetsNNNN = new Insets(0,0,0,0);
-	Insets insetsNLNR = new Insets(0,buffer,0,buffer);
+
 
 	// CREATE THE TOOLBAR
 
@@ -12636,6 +12796,8 @@ Initialize the View menu.
 private void ui_InitGUIMenus_View ( JMenuBar menuBar )
 {	JMenu viewJMenu = new JMenu ("View", true);
 	menuBar.add (viewJMenu);
+	
+	viewJMenu.add ( __View_DataStores_JMenuItem=new SimpleJMenuItem( __View_DataStores_String, this));
 
 	viewJMenu.add ( __View_Map_JCheckBoxMenuItem = new JCheckBoxMenuItem(__View_Map_String) );
 	__View_Map_JCheckBoxMenuItem.setState ( false );
@@ -12825,6 +12987,22 @@ private void ui_SetInitialWorkingDir ( String initialWorkingDir )
 	__initialWorkingDir = initialWorkingDir;
 	// Also set in the processor...
 	commandProcessor_SetInitialWorkingDir ( initialWorkingDir );
+}
+
+/**
+Set the title of the input panel.
+@param title the title for the input/query panel.  If null, use the default of "Input/Query Options..." with
+a black border.
+@param color color of the line border.
+*/
+private void ui_SetInputPanelTitle ( String title, Color color )
+{
+    if ( title == null ) {
+        title = "Input/Query Options";
+        color = Color.black;
+    }
+    __queryInput_JPanel.setBorder( BorderFactory.createTitledBorder (
+        BorderFactory.createLineBorder(color),title ));
 }
 
 /**
@@ -13130,6 +13308,84 @@ private void uiAction_CopyFromCommandListToCutBuffer ( boolean remove_original )
 		// If removing, delete the selected commands from the list...
 		commandList_RemoveCommandsBasedOnUI();
 	}
+}
+
+/**
+The datastore choice has been clicked so process the event.
+The only entry point to this method is if the user actually clicks on the choice.
+In this case, the input type/name choices will be set to blank because the user has
+made a decision to work with a datastore.  If they subsequently choose to work with an input type, then
+they would select an input and the datastore choice would be blanked.
+*/
+private void uiAction_DataStoreChoiceClicked()
+{   String routine = getClass().getSimpleName() + ".uiAction_DataStoreChoiceClicked";
+    /*if ( __dataStore_JComboBox == null ) {
+        if ( Message.isDebugOn ) {
+            Message.printDebug ( 1, routine, "Datastore has been selected but GUI is not yet initialized - no action taken in response to datastore selection.");
+        }
+        return; // Not done initializing.
+    }
+    // TODO SAM 2015-02-15 Need a graceful way to hide the following but set text to blank as work-around.
+    // Otherwise, some of the text shows through behind the datastore panel.
+    __dataStoreInitializing_JLabel.setText("");
+    String selectedDataStoreName = __dataStore_JComboBox.getSelected();
+    Message.printStatus(2, routine, "Selected datastore \"" + selectedDataStoreName + "\"." );
+    if ( selectedDataStoreName.equals("") ) {
+        // Selected blank for some reason - do nothing
+        return;
+    }
+    DataStore selectedDataStore = ui_GetSelectedDataStore();
+    // This will select blank input type and name so that the focus is on the selected datastore...
+    uiAction_InputTypeChoiceClicked(selectedDataStore);
+    // Now fully initialize the input/query information based on the datastore
+    try {
+        if ( selectedDataStore instanceof ColoradoHydroBaseRestDataStore ) {
+            uiAction_SelectDataStore_ColoradoHydroBaseRest ( (ColoradoHydroBaseRestDataStore)selectedDataStore );
+        }
+        else if ( selectedDataStore instanceof ColoradoWaterHBGuestDataStore ) {
+            uiAction_SelectDataStore_ColoradoWaterHBGuest ( (ColoradoWaterHBGuestDataStore)selectedDataStore );
+        }
+        else if ( selectedDataStore instanceof ColoradoWaterSMSDataStore ) {
+            uiAction_SelectDataStore_ColoradoWaterSMS ( (ColoradoWaterSMSDataStore)selectedDataStore );
+        }
+        else if ( selectedDataStore instanceof GenericDatabaseDataStore ) {
+            uiAction_SelectDataStore_GenericDatabaseDataStore ( (GenericDatabaseDataStore)selectedDataStore );
+        }
+        else if ( selectedDataStore instanceof HydroBaseDataStore ) {
+            uiAction_SelectDataStore_HydroBase ( (HydroBaseDataStore)selectedDataStore );
+        }
+        else if ( selectedDataStore instanceof RccAcisDataStore ) {
+            uiAction_SelectDataStore_RccAcis ( (RccAcisDataStore)selectedDataStore );
+        }
+        else if ( selectedDataStore instanceof ReclamationHDBDataStore ) {
+            uiAction_SelectDataStore_ReclamationHDB ( (ReclamationHDBDataStore)selectedDataStore );
+        }
+        else if ( selectedDataStore instanceof ReclamationPiscesDataStore ) {
+            uiAction_SelectDataStore_ReclamationPisces ( (ReclamationPiscesDataStore)selectedDataStore );
+        }
+        else if ( selectedDataStore instanceof RiversideDBDataStore ) {
+            uiAction_SelectDataStore_RiversideDB ( (RiversideDBDataStore)selectedDataStore );
+        }
+        else if ( selectedDataStore instanceof UsgsNwisDailyDataStore ) {
+            uiAction_SelectDataStore_UsgsNwisDaily ( (UsgsNwisDailyDataStore)selectedDataStore );
+        }
+        else if ( selectedDataStore instanceof UsgsNwisGroundwaterDataStore ) {
+            uiAction_SelectDataStore_UsgsNwisGroundwater ( (UsgsNwisGroundwaterDataStore)selectedDataStore );
+        }
+        else if ( selectedDataStore instanceof UsgsNwisInstantaneousDataStore ) {
+            uiAction_SelectDataStore_UsgsNwisInstantaneous ( (UsgsNwisInstantaneousDataStore)selectedDataStore );
+        }
+        else if ( selectedDataStore instanceof PluginDataStore ) {
+        	// Handle plugin
+        	uiAction_SelectDataStore_Plugin ( selectedDataStore );
+         }
+        // The above does not select the input filter so do that next...
+        ui_SetInputFilterForSelections();
+    }
+    catch ( Exception e ) {
+        Message.printWarning( 2, routine, "Error selecting datastore \"" + selectedDataStore.getName() + "\"" );
+        Message.printWarning ( 3, routine, e );
+    }*/
 }
 
 /**
@@ -14673,6 +14929,19 @@ private void uiAction_ShowDataSetProperties ()
 	// Clean up...
 	v = null;
 	reportProp = null;
+}
+
+/**
+Show the datastores.
+*/
+private void uiAction_ShowDataStores ()
+{   String routine = getClass().getName() + "uiAction_ShowDataStores";
+    try {
+        new DataStores_JFrame ( "Datastores", this, __statedmiProcessor.getDataStores() );
+    }
+    catch ( Exception e ) {
+        Message.printWarning ( 1, routine, "Error displaying datastores (" + e + ")." );
+    }
 }
 
 /**
