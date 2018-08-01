@@ -859,8 +859,9 @@ import java.util.List;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import RTi.DMI.DMI;
 import RTi.DMI.DMIUtil;
-
+import RTi.DMI.DatabaseDataStore;
 import RTi.TS.DateValueTS;
 import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
@@ -913,7 +914,7 @@ import RTi.Util.Time.StopWatch;
 import RTi.Util.Time.TimeInterval;
 import RTi.Util.Time.TimeUtil;
 import RTi.Util.Time.YearType;
-
+import riverside.datastore.DataStore;
 import rti.tscommandprocessor.commands.check.CheckFileCommandProcessorEventListener;
 import rti.tscommandprocessor.commands.util.Comment_Command;
 import rti.tscommandprocessor.commands.util.CommentBlockStart_Command;
@@ -1195,6 +1196,12 @@ private List<MonthTS> __SMDiversionTSMonthly2List = new Vector();
 The internal list of monthly pattern time series used for data filling.
 */
 private List<StringMonthTS> __SMPatternTSMonthlyList = new Vector();
+
+/**
+Data store list, to generically manage database connections.  This list is guaranteed to be
+non-null, although the individual data stores may not be opened and need to be handled appropriately.
+*/
+private List<DataStore> __dataStoreList = new Vector<DataStore>();
 
 /**
 The internal list of StateMod daily historical TS being processed.
@@ -5940,6 +5947,103 @@ private boolean getCreateOutput ()
 }
 
 /**
+Return the data store for the requested name, or null if not found.
+@param name the data store name to match (case is ignored in the comparison)
+@param dataStoreClass the class of the data store to match, useful when ensuring that the data store
+is compatible with intended use - specify as null to not match class
+@return the data store for the requested name, or null if not found.
+*/
+public DataStore getDataStoreForName ( String name, Class dataStoreClass )
+{   for ( DataStore dataStore : getDataStores() ) {
+        if ( dataStore.getName().equalsIgnoreCase(name) ) {
+            if ( dataStoreClass != null ) {
+                if (dataStore.getClass() == dataStoreClass ) {
+                    ; // Match is OK
+                }
+                // Also check for common base classes
+                // TODO SAM 2012-01-31 Why not just use instanceof all the time?
+                else if ( (dataStoreClass == DatabaseDataStore.class) && dataStore instanceof DatabaseDataStore ) {
+                    ; // Match is OK
+                }
+                else {
+                    // Does not match class
+                    dataStore = null;
+                }
+            }
+            return dataStore;
+        }
+    }
+    return null;
+}
+
+/**
+Return the list of all DataStore instances known to the processor.  These are named database
+connections that correspond to input type/name for time series.  Active and inactive datastores are returned.
+*/
+public List<DataStore> getDataStores()
+{
+    return __dataStoreList;
+}
+
+/**
+Return the list of all DataStore instances known to the processor.  These are named database
+connections that correspond to input type/name for time series.
+*/
+public List<DataStore> getDataStores ( boolean activeOnly )
+{
+	// Get the list of all datastores...
+	List<DataStore> datastoreList = __dataStoreList;
+	if ( activeOnly ) {
+		// Loop through and remove datastores where status != 0
+		for ( int i = datastoreList.size() - 1; i >= 0; i-- ) {
+			DataStore ds = datastoreList.get(i);
+			if ( ds.getStatus() != 0 ) {
+				datastoreList.remove(i);
+			}
+		}
+	}
+	return datastoreList;
+}
+
+/**
+Return the list of data stores for the requested type (e.g., RiversideDBDataStore).  A non-null list
+is guaranteed, but the list may be empty.  Only active datastores are returned, those that are enabled
+and status is 0 (Ok).
+@param dataStoreClass the data store class to match (required).
+@return the list of data stores matching the requested type
+*/
+public List<DataStore> getDataStoresByType ( Class dataStoreClass )
+{
+	return getDataStoresByType ( dataStoreClass, true );
+}
+
+/**
+Return the list of data stores for the requested type (e.g., RiversideDBDataStore).  A non-null list
+is guaranteed, but the list may be empty.
+@param dataStoreClass the data store class to match (required).
+@return the list of data stores matching the requested type
+*/
+public List<DataStore> getDataStoresByType ( Class dataStoreClass, boolean activeOnly )
+{   List<DataStore> dataStoreList = new ArrayList<DataStore>();
+    for ( DataStore dataStore : getDataStores() ) {
+    	// If only active are requested, then status must be 0
+    	if ( activeOnly && (dataStore.getStatus() != 0) ) {
+    		continue;
+    	}
+        // Check for exact match on class
+        if ( dataStore.getClass() == dataStoreClass ) {
+            dataStoreList.add(dataStore);
+        }
+        // Also check for common base classes
+        // TODO SAM 2012-01-31 Why not just use instanceof all the time?
+        else if ( (dataStoreClass == DatabaseDataStore.class) && dataStore instanceof DatabaseDataStore ) {
+            dataStoreList.add(dataStore);
+        }
+    }
+    return dataStoreList;
+}
+
+/**
  * @param cmdStr - runCommand command string
  * @return runCmdFile - Input file specified by the command
  */
@@ -10568,6 +10672,66 @@ public void setCreateOutput ( boolean create_output )
 }
 
 /**
+Set a DataStore instance in the list that is being maintained for use.
+The DataStore identifier is used to lookup the instance.  If a match is found,
+the old instance is optionally closed and discarded before adding the new instance.
+The new instance is added at the end.
+@param dataStore DataStore to add to the list.  Null will be ignored.
+@param closeOld If an old data store is matched, close the data store (e.g., database connection) if
+true.  The main issue is that if something else is using a DMI instance (e.g.,
+the TSTool GUI) it may be necessary to leave the old instance open.
+*/
+protected void setDataStore ( DataStore dataStore, boolean closeOld )
+{   String routine = "TSEngine.setDataStore";
+    if ( dataStore == null ) {
+        return;
+    }
+    if ( Message.isDebugOn ) {
+    	Message.printDebug(1, routine, "Setting datastore \"" + dataStore.getName() + "\"" );
+    }
+    for ( DataStore ds : __dataStoreList ) {
+        if ( ds.getName().equalsIgnoreCase(dataStore.getName())){
+            // The input name of the current instance matches that of the instance in the list.
+            // Replace the instance in the list by the new instance...
+            if ( closeOld ) {
+                try {
+                    if ( ds instanceof DatabaseDataStore ) {
+                        DMI dmi = ((DatabaseDataStore)ds).getDMI();
+                        dmi.close();
+                    }
+                }
+                catch ( Exception e ) {
+                    // Probably can ignore.
+                    Message.printWarning (3,routine,"Error closing data store \"" + dataStore.getName() +
+                        "\" before reopening:");
+                    Message.printWarning (3,routine, e);
+                }
+            }
+        }
+    }
+
+    // Add a new instance to the list, alphabetized (ignore case)...
+    if ( __dataStoreList.size() == 0 ) {
+    	__dataStoreList.add ( dataStore );
+    }
+    else {
+        int insertPos = -1;
+        boolean added = false;
+	    for ( DataStore ds : __dataStoreList ) {
+	    	++insertPos;
+	    	if ( dataStore.getName().toUpperCase().compareTo(ds.getName().toUpperCase()) < 0 ) {
+	    		__dataStoreList.add(insertPos,dataStore);
+	    		added = true;
+	    		break;
+	    	}
+	    }
+	    if ( !added ) {
+	    	__dataStoreList.add ( dataStore );
+	    }
+	}
+}
+
+/**
 Set the initial working directory for the processor.  This is typically the location
 of the commands file, or a temporary directory if the commands have not been saved.
 Also set the current working directory by calling setWorkingDir() with the same information.
@@ -10649,6 +10813,9 @@ public void setPropContents ( String prop, Object contents ) throws Exception
 		// TODO SAM 2005-06-08 Currently only allow one connection...
 		List<HydroBaseDMI> v = (List<HydroBaseDMI>)contents;
 		__hdmi = v.get(0);
+	}
+	else if ( prop.equalsIgnoreCase("DataStore" ) ) {
+		setDataStore ( (DataStore)contents, true );
 	}
 	else if ( prop.equalsIgnoreCase("InitialWorkingDir" ) ) {
 		setInitialWorkingDir ( (String)contents );
