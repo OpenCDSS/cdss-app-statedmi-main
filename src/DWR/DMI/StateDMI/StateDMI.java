@@ -314,6 +314,8 @@
 package DWR.DMI.StateDMI;
 
 import java.io.File;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -325,9 +327,14 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.IO.DataUnits;
 import RTi.Util.IO.DataDimension;
 import RTi.Util.IO.IOUtil;
+import RTi.Util.IO.Prop;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
+import RTi.Util.Time.StopWatch;
+import riverside.datastore.DataStore;
+import riverside.datastore.DataStoreConnectionUIProvider;
+import riverside.datastore.DataStoreFactory; 
 
 /**
 The StateDMI class is the entry point into the StateDMI application.  The
@@ -354,9 +361,19 @@ Interface for StateGW commands (not yet implemented).
 public static final int APP_TYPE_STATEGW = 2;
 
 /**
+Path to the configuration file.  This cannot be defaulted until the -home command line parameter is processed.
+*/
+private static String __configFile = "";
+
+/**
 Main GUI instance.
 */
 private static StateDMI_JFrame __stateDMI_JFrame;
+
+/**
+List of properties to control the software from the configuration file and passed in on the command line.
+*/
+private static PropList __statedmi_props = null;
 
 /**
 Home directory for CDSS install (e.g., "\CDSS").
@@ -401,11 +418,48 @@ private static String getCommandFile ()
 }
 
 /**
+Return the name of the configuration file for the session.  This file will be determined
+from the -home command line parameter during command line parsing (default) and can be
+specified with -config File on the command line (typically used to test different configurations).
+@return the full path to the configuration file.
+*/
+public static String getConfigFile ()
+{
+    return __configFile;
+}
+
+/**
 Return the JFrame instance for the main application.
 @return the JFrame instance for use with low-level code that needs to pop up dialogs, etc.
 */
 public static StateDMI_JFrame getJFrame ()
 {	return __stateDMI_JFrame;
+}
+
+/**
+Return a StateDMI property.  The properties are defined in the StateDMI configuration file.
+@param propertyExp name of property to look up as a Java regular expression.
+@return the value(s) for a StateDMI configuration property, or null if a properties file does not exist.
+Return null if the property is not found (or if no configuration file exists for StateDMI).
+*/
+public static List<Prop> getProps ( String propertyExp )
+{   if ( __statedmi_props == null ) {
+        return null;
+    }
+    return __statedmi_props.getPropsMatchingRegExp(propertyExp);
+}
+
+/**
+Return the value of a StateDMI property.  The properties are defined in the StateDMI configuration file.
+@param property name of property to look up.
+@return the value for a StateDMI configuration property, or null if a properties file does not exist.
+Return null if the property is not found (or if no configuration file exists for StateDMI).
+*/
+public static String getPropValue ( String property )
+{	if ( __statedmi_props == null ) {
+		return null;
+	}
+	return __statedmi_props.getValue ( property );
 }
 
 /**
@@ -418,7 +472,7 @@ public void init()
 	IOUtil.setProgramData ( PROGRAM_NAME, PROGRAM_VERSION, null );
 	initialize1();
     try {
-      	parseArgs( this );
+      	parseArgs( session, this );
 	}
 	catch ( Exception e ) {
         Message.printWarning( 1, "StateDMI", "Error parsing command line arguments.  Using default behavior." );
@@ -534,7 +588,7 @@ public static void main ( String args[] )
 		initialize1();
 	
 		try {
-			parseArgs ( args );
+			parseArgs ( session, args );
 		}
 		catch ( Exception e ) {
 	        Message.printWarning ( 1, routine, "Error parsing command line arguments.  Using default behavior." );
@@ -626,6 +680,397 @@ public static void main ( String args[] )
 	}
 }
 
+/**
+Open a datastore given its configuration properties.  The datastore is also added to the processor
+(if the open fails then the datastore should set status=1).
+The TSTool configuration file properties are checked here to ensure that the datastore type is enabled.
+Otherwise, opening datastores takes time and impacts performance.
+@param session TSTool session, which provides user and environment information
+@param dataStoreProps datastore configuration properties recognized by the datastore factory "create" method.
+@param processor time series command processor that will use/manage the datastore
+@param pluginDataStoreClassList list of plugin datastore classes to be loaded dynamically
+@param isBatch indicate whether running in batch mode - if true, do not open datastores with login of "prompt"
+*/
+protected static DataStore openDataStore ( StateDMISession session, PropList dataStoreProps,
+	StateDMI_Processor processor, boolean isBatch )
+throws ClassNotFoundException, IllegalAccessException, InstantiationException, Exception
+{   String routine = "StateDMI.openDataStore";
+    // Open the datastore depending on the type
+    String dataStoreType = dataStoreProps.getValue("Type");
+    String dataStoreConfigFile = dataStoreProps.getValue("DataStoreConfigFile");
+    Message.printStatus(2,routine,"DataStoreConfigFile="+dataStoreConfigFile);
+    // For now hard-code this here
+    // TODO SAM 2010-09-01 Make this more elegant
+    String packagePath = ""; // Make sure to include trailing period below
+    // TODO SAM 2016-03-25 Need to figure out how software feature set can be generically disabled without coding name here
+    // Similar checks are done in the TSTool UI to enable/disable UI features
+    String propValue = null; // From software installation configuration
+    String userPropValue = null; // From user configuration
+    if ( dataStoreType.equalsIgnoreCase("ColoradoHydroBaseRestDataStore") ) {
+        propValue = getPropValue("StateDMI.ColoradoHydroBaseRestEnabled");
+    	userPropValue = session.getConfigPropValue ( "ColoradoHydroBaseRestEnabled" );
+    	if ( (userPropValue != null) && !userPropValue.isEmpty() ) {
+    		propValue = userPropValue;
+    	}
+        if ( (propValue != null) && propValue.equalsIgnoreCase("True") ) {
+            packagePath = "cdss.dmi.hydrobase.rest.";
+        }
+    }
+    else if ( dataStoreType.equalsIgnoreCase("ColoradoWaterHBGuestDataStore") ) {
+        propValue = getPropValue("StateDMI.ColoradoWaterHBGuestEnabled");
+    	userPropValue = session.getConfigPropValue ( "ColoradoWaterHBGuestEnabled" );
+    	if ( (userPropValue != null) && !userPropValue.isEmpty() ) {
+    		propValue = userPropValue;
+    	}
+        if ( (propValue != null) && propValue.equalsIgnoreCase("True") ) {
+            packagePath = "us.co.state.dwr.hbguest.datastore.";
+        }
+    }
+    // TODO @jurentie: this class is not implemented yet 08-01-2018
+    else if ( dataStoreType.equalsIgnoreCase("ColoradoWaterSMSDataStore") ) {
+        propValue = getPropValue("StateDMI.ColoradoWaterSMSEnabled");
+    	userPropValue = session.getConfigPropValue ( "ColoradoWaterSMSEnabled" );
+    	if ( (userPropValue != null) && !userPropValue.isEmpty() ) {
+    		propValue = userPropValue;
+    	}
+        if ( (propValue != null) && propValue.equalsIgnoreCase("True") ) {
+            packagePath = "us.co.state.dwr.sms.datastore.";
+        }
+    }
+    // TODO @jurentie: this class is not implemented yet 08-01-2018
+    else if ( dataStoreType.equalsIgnoreCase("GenericDatabaseDataStore") ) {
+        // No need to check whether enabled or not since a generic connection
+        // Specific configuration files will indicate if enabled
+    	// TODO SAM 2016-02-19 Need to move to more appropriate path - don't confuse with RiversideDBDataStore
+        packagePath = "riverside.datastore.";
+    }
+    else if ( dataStoreType.equalsIgnoreCase("HydroBaseDataStore") ) {
+        propValue = getPropValue("StateDMI.HydroBaseEnabled");
+    	userPropValue = session.getConfigPropValue ( "HydroBaseEnabled" );
+    	if ( (userPropValue != null) && !userPropValue.isEmpty() ) {
+    		propValue = userPropValue;
+    	}
+        if ( (propValue != null) && propValue.equalsIgnoreCase("True") ) {
+            packagePath = "DWR.DMI.HydroBaseDMI.";
+        }
+    }
+    // TODO @jurentie: this class is not implemented yet 08-01-2018
+    else if ( dataStoreType.equalsIgnoreCase("NrcsAwdbDataStore") ) {
+        propValue = getPropValue("StateDMI.NrcsAwdbEnabled");
+    	userPropValue = session.getConfigPropValue ( "NrcsAwdbEnabled" );
+    	if ( (userPropValue != null) && !userPropValue.isEmpty() ) {
+    		propValue = userPropValue;
+    	}
+        if ( (propValue != null) && propValue.equalsIgnoreCase("True") ) {
+            packagePath = "rti.tscommandprocessor.commands.nrcs.awdb.";
+        }
+    }
+    // TODO @jurentie: this class is not implemented yet 08-01-2018
+    else if ( dataStoreType.equalsIgnoreCase("RccAcisDataStore") ) {
+        propValue = getPropValue("StateDMI.RCCACISEnabled");
+    	userPropValue = session.getConfigPropValue ( "RCCACISEnabled" );
+    	if ( (userPropValue != null) && !userPropValue.isEmpty() ) {
+    		propValue = userPropValue;
+    	}
+        if ( (propValue != null) && propValue.equalsIgnoreCase("True") ) {
+            packagePath = "rti.tscommandprocessor.commands.rccacis.";
+        }
+    }
+    // TODO @jurentie: this class is not implemented yet 08-01-2018
+    else if ( dataStoreType.equalsIgnoreCase("ReclamationHDBDataStore") ) {
+        propValue = getPropValue("StateDMI.ReclamationHDBEnabled");
+    	userPropValue = session.getConfigPropValue ( "ReclamationHDBEnabled" );
+    	if ( (userPropValue != null) && !userPropValue.isEmpty() ) {
+    		propValue = userPropValue;
+    	}
+        if ( (propValue != null) && propValue.equalsIgnoreCase("True") ) {
+            packagePath = "rti.tscommandprocessor.commands.reclamationhdb.";
+        }
+    }
+    // TODO @jurentie: this class is not implemented yet 08-01-2018    
+    else if ( dataStoreType.equalsIgnoreCase("ReclamationPiscesDataStore") ) {
+        propValue = getPropValue("StateDMI.ReclamationPiscesEnabled");
+    	userPropValue = session.getConfigPropValue ( "ReclamationPiscesEnabled" );
+    	if ( (userPropValue != null) && !userPropValue.isEmpty() ) {
+    		propValue = userPropValue;
+    	}
+        if ( (propValue != null) && propValue.equalsIgnoreCase("True") ) {
+            packagePath = "rti.tscommandprocessor.commands.reclamationpisces.";
+        }
+    }
+    // TODO @jurentie: this class is not implemented yet 08-01-2018
+    else if ( dataStoreType.equalsIgnoreCase("RiversideDBDataStore") ) {
+        propValue = getPropValue("StateDMI.RiversideDBEnabled");
+    	userPropValue = session.getConfigPropValue ( "RiversideDBEnabled" );
+    	if ( (userPropValue != null) && !userPropValue.isEmpty() ) {
+    		propValue = userPropValue;
+    	}
+        if ( (propValue != null) && propValue.equalsIgnoreCase("True") ) {
+            packagePath = "RTi.DMI.RiversideDB_DMI.";
+        }
+    }
+    // TODO @jurentie: this class is not implemented yet 08-01-2018
+    else if ( dataStoreType.equalsIgnoreCase("UsgsNwisDailyDataStore") ) {
+        propValue = getPropValue("SteteDMI.UsgsNwisDailyEnabled");
+    	userPropValue = session.getConfigPropValue ( "UsgsNwisDailyDataStore" );
+    	if ( (userPropValue != null) && !userPropValue.isEmpty() ) {
+    		propValue = userPropValue;
+    	}
+        if ( (propValue != null) && propValue.equalsIgnoreCase("True") ) {
+            packagePath = "rti.tscommandprocessor.commands.usgs.nwis.daily.";
+        }
+    }
+    // TODO @jurentie: this class is not implemented yet 08-01-2018
+    else if ( dataStoreType.equalsIgnoreCase("UsgsNwisGroundwaterDataStore") ) {
+        propValue = getPropValue("StateDMI.UsgsNwisGroundwaterEnabled");
+    	userPropValue = session.getConfigPropValue ( "UsgsNwisGroundwaterEnabled" );
+    	if ( (userPropValue != null) && !userPropValue.isEmpty() ) {
+    		propValue = userPropValue;
+    	}
+        if ( (propValue != null) && propValue.equalsIgnoreCase("True") ) {
+            packagePath = "rti.tscommandprocessor.commands.usgs.nwis.groundwater.";
+        }
+    }
+    // TODO @jurentie: this class is not implemented yet 08-01-2018
+    else if ( dataStoreType.equalsIgnoreCase("UsgsNwisInstantaneousDataStore") ) {
+        propValue = getPropValue("StateDMI.UsgsNwisInstantaneousEnabled");
+    	userPropValue = session.getConfigPropValue ( "UsgsNwisInstantaneousEnabled" );
+    	if ( (userPropValue != null) && !userPropValue.isEmpty() ) {
+    		propValue = userPropValue;
+    	}
+        if ( (propValue != null) && propValue.equalsIgnoreCase("True") ) {
+            packagePath = "rti.tscommandprocessor.commands.usgs.nwis.instantaneous.";
+        }
+    }
+    // TODO @jurentie: this class is not implemented yet 08-01-2018
+    else if ( dataStoreType.equalsIgnoreCase("WaterOneFlowDataStore") ) {
+        propValue = getPropValue("StateDMI.WaterOneFlowEnabled");
+    	userPropValue = session.getConfigPropValue ( "WaterOneFlowEnabled" );
+    	if ( (userPropValue != null) && !userPropValue.isEmpty() ) {
+    		propValue = userPropValue;
+    	}
+        if ( (propValue != null) && propValue.equalsIgnoreCase("True") ) {
+            packagePath = "rti.tscommandprocessor.commands.wateroneflow.ws.";
+        }
+    }
+    if ( !packagePath.equals("") ) {
+        propValue = dataStoreProps.getValue("Enabled");
+        if ( (propValue != null) && propValue.equalsIgnoreCase("False") ) {
+            // Datastore is disabled.  Do not even attempt to load.  This will minimize in-memory resource use.
+            Message.printStatus(2, routine, "Created datastore \"" + dataStoreType + "\", name \"" +
+                dataStoreProps.getValue("Name") + "\" is disabled.  Not opening." );
+            return null;
+        }
+        else{
+        	// Datastore is enabled
+            StopWatch sw = new StopWatch();
+            sw.start();
+            String className = packagePath + dataStoreType + "Factory";
+            DataStoreFactory factory = null;
+            
+            Message.printStatus(2, routine, "Getting class for name \"" + className + "\"" );
+            Class clazz = Class.forName( className );
+            Message.printStatus(2, routine, "Creating instance of class \"" + className + "\"" );
+        	factory = (DataStoreFactory)clazz.newInstance();
+        	
+        	// Check for a login of "prompt"
+        	String systemLogin = dataStoreProps.getValue("SystemLogin");
+        	String systemPassword = dataStoreProps.getValue("SystemPassword");
+            if ( ((systemLogin != null) && systemLogin.equalsIgnoreCase("prompt")) ||
+            	((systemPassword != null) && systemPassword.equalsIgnoreCase("prompt"))	) {
+                // If in batch mode, skip
+            	if ( isBatch ) {
+                    Message.printStatus(2, routine, "Skipping datastore \"" + dataStoreType + "\", name \"" +
+                        dataStoreProps.getValue("Name") + "\" because in batch mode.  Will prompt for login when not in batch mode." );
+                    return null;
+            	}
+            	else {
+            		// Not in batch mode - open the datastore using a prompt initiated from the TSTool UI
+            		if ( factory instanceof DataStoreConnectionUIProvider ) {
+        	            // Create the datastore instance using the properties in the configuration file
+            			// supplemented by login/password from interactive input
+        	        	// Add to the processor even if it does not successfully open so that UI can show
+        	        	// TODO SAM 2015-02-15 Need to update each factory to handle partial opens
+            			Message.printStatus(2, routine, "Opening datastore \"" + dataStoreType + "\", name \"" +
+                            dataStoreProps.getValue("Name") + "\" via prompt from TSTool GUI." );
+            			DataStoreConnectionUIProvider uip = (DataStoreConnectionUIProvider)factory;
+        	            DataStore dataStore = uip.openDataStoreConnectionUI(dataStoreProps,getJFrame());
+        	            sw.stop();
+        	            if ( dataStore == null ) {
+        	            	Message.printStatus(2, routine, "Datastore \"" + dataStoreProps.getValue("Name") +
+        	            		"\" is null after opening from TSTool GUI - this is unexpected." );
+        	            }
+        	            else {
+	        	            // Add the datastore to the processor
+	        	            processor.setPropContents ( "DataStore", dataStore );
+	        	            Message.printStatus(2, routine, "Opening datastore type \"" + dataStoreType + "\", name \"" +
+	        	                dataStore.getName() + "\" took " + sw.getMilliseconds() + " ms" );
+        	            }
+        	            return dataStore;
+            		}
+                	else {
+        	            Message.printStatus(2, routine, "Not opening datastore type \"" + dataStoreType + "\", name \"" +
+        	            	dataStoreProps.getValue("Name") + "\" because prompt is requested but datastore does not offer interface." );
+                		return null;
+                	}
+            	}
+            }
+            else {
+	            // Create the datastore instance using the properties in the configuration file
+	        	// Add to the processor even if it does not successfully open so that UI can show
+	        	// TODO SAM 2015-02-15 Need to update each factory to handle partial opens
+	            DataStore dataStore = factory.create(dataStoreProps);
+	            // Add the datastore to the processor
+	            processor.setPropContents ( "DataStore", dataStore );
+	            Message.printStatus(2, routine, "DataStore properties are: " + dataStore.getProperties().toString(","));
+	            sw.stop();
+	            Message.printStatus(2, routine, "Opening datastore type \"" + dataStoreType + "\", name \"" +
+	                dataStore.getName() + "\" took " + sw.getMilliseconds() + " ms" );
+	            return dataStore;
+            }
+        }
+    }
+    else {
+        return null;
+    }
+}
+
+/**
+Open the datastores (e.g., database and web service connection(s)) using the TSTool configuration file information and set
+in the command processor.  The configuration file is used to determine the database server and
+name properties to use for the initial connection(s).  This method can be called from the UI code
+to automatically establish database startup database connections.SomeDataStore).
+@param session TSTool session, which provides user and environment information
+@param processor command processor that will have datastores opened
+@param pluginDataStoreClassList list of plugin datastore classes to be loaded dynamically
+@param isBatch is the software running in batch mode?  If in batch mode do not open up datastores
+that have a login of "prompt".
+*/
+protected static void openDataStoresAtStartup ( StateDMISession session, StateDMI_Processor processor,
+	boolean isBatch )
+{
+	String routine = "STateDMI.openDataStoresAtStartup";
+	String configFile = getConfigFile();
+	
+	 // Use the configuration file to get RiversideDB properties...
+    Message.printStatus(2, routine, "StateDMI configuration file \"" + configFile +
+    "\" is being used to open datastores at startup." );
+    
+    
+    //NOT DOING ANYTHNIG WITH RiversideDB
+    
+    // Also allow multiple database connections via the new convention using datastore configuration files
+    // The following code processes all datastores, although RiversideDB is the first implementation using
+    // this approach.
+    List<Prop> dataStoreMainProps = getProps ( "DataStore:*" );
+    List<String> dataStoreConfigFiles = new ArrayList<String>();
+    if ( dataStoreMainProps == null ) {
+        Message.printStatus(2, routine, "No configuration properties matching DataStore:*.ConfigFile" );
+    }
+    else {
+        Message.printStatus(2, routine, "Got " + dataStoreMainProps.size() + " DataStore:*.ConfigFile properties.");
+        for ( Prop prop: dataStoreMainProps ) {
+            // Only want .ConfigFile properties
+            if ( !StringUtil.endsWithIgnoreCase(prop.getKey(),".ConfigFile") ) {
+                continue;
+            }
+            // Get the filename that defines the datastore - absolute or relative to the system folder
+            String dataStoreFile = prop.getValue();
+            dataStoreConfigFiles.add(dataStoreFile);
+        }
+    }
+    // Also get names of datastore configuration files from configuration files in user's home folder .statedmi/datastore
+    if ( session.createDatastoreFolder() ) {
+	    String datastoreFolder = session.getDatastoreFolder();
+	    File f = new File(datastoreFolder);
+	    FilenameFilter ff = new FilenameFilter() {
+	    	public boolean accept(File dir, String name) {
+	    		if ( name.toLowerCase().endsWith(".cfg") ) {
+	    			return true;
+	    		}
+	    		else {
+	    			return false;
+	    		}
+	    	}
+	    };
+	    String [] dfs = f.list(ff); // Returns files without leading path
+	    if ( dfs != null ) {
+	    	for ( int i = 0; i < dfs.length; i++ ) {
+	    		dataStoreConfigFiles.add(datastoreFolder + File.separator + dfs[i]);
+	    	}
+	    }
+    }
+    // Now open the datastores for found configuration files
+    // - loop backwards since user files were added last
+    // - if a duplicate is found, use the user version first
+    int nDataStores = dataStoreConfigFiles.size();
+    List<String> openDataStoreNameList = new ArrayList<String>(); // Datastore names that have been opened
+    for ( int iDataStore = nDataStores - 1; iDataStore >= 0; iDataStore-- ) {
+    	String dataStoreFile = dataStoreConfigFiles.get(iDataStore);
+        Message.printStatus ( 2, routine, "Opening datastore using properties in \"" + dataStoreFile + "\".");
+        // Read the properties from the configuration file
+        PropList dataStoreProps = new PropList("");
+        String dataStoreFileFull = dataStoreFile;
+        if ( !IOUtil.isAbsolute(dataStoreFile)) {
+            dataStoreFileFull = __home + File.separator + "system" + File.separator + dataStoreFile;
+        }
+        if ( !IOUtil.fileExists(dataStoreFileFull) ) {
+            Message.printWarning(3, routine, "Datastore configuration file \"" + dataStoreFileFull +
+                "\" does not exist - not opening datastore." );
+        }
+        else {
+            dataStoreProps.setPersistentName(dataStoreFileFull);
+            String dataStoreClassName = "";
+            try {
+                // Get the properties from the file
+                dataStoreProps.readPersistent();
+                String dataStoreName = dataStoreProps.getValue("Name");
+                // See if the datastore name matches one that is already open, if so, ignore it
+                boolean dataStoreAlreadyOpened = false;
+                for ( String openDataStoreName : openDataStoreNameList ) {
+                	if ( openDataStoreName.equalsIgnoreCase(dataStoreName)) {
+                		// Found a matching datastore
+                		Message.printStatus(2,routine,"Datastore \"" + dataStoreName +
+                			"\" is already open (user datastores are used before system datastores).  Skipping.");
+                		dataStoreAlreadyOpened = true;
+                		break;
+                	}
+                }
+                if ( dataStoreAlreadyOpened ) {
+                	continue;
+                }
+                // Also assign the configuration file path property to facilitate file processing later
+                // (e.g., to locate related files referenced in the configuration file, such as lists of data
+                // that are not available from web services)
+                dataStoreProps.set("DataStoreConfigFile",dataStoreFileFull);
+                openDataStore ( session, dataStoreProps, processor, isBatch );
+                // Save the datastore name so duplicates are not opened
+                openDataStoreNameList.add(dataStoreName);
+            }
+            catch ( ClassNotFoundException e ) {
+                Message.printWarning (2,routine, "Datastore class \"" + dataStoreClassName +
+                    "\" is not in the class path - report to software support (" + e + ")." );
+                Message.printWarning(2, routine, e);
+            }
+            catch( InstantiationException e ) {
+                Message.printWarning (2,routine, "Error instantiating datastore for class \"" + dataStoreClassName +
+                    "\" - report to software support (" + e + ")." );
+                Message.printWarning(2, routine, e);
+            }
+            catch( IllegalAccessException e ) {
+                Message.printWarning (2,routine, "Datastore for class \"" + dataStoreClassName +
+                    "\" needs a no-argument constructor - report to software support (" + e + ")." );
+                Message.printWarning(2, routine, e);
+            }
+            catch ( Exception e ) {
+                Message.printWarning (2,routine,"Error reading datastore configuration file \"" +
+                    dataStoreFileFull + "\" - not opening datastore (" + e + ")." );
+                Message.printWarning(2, routine, e);
+            }
+        }
+    }
+}
+
 //TODO SAM 2010-02-03 Evaluate whether non-null HydroBaseDMI return is OK or whether
 //should rely on exceptions.
 /**
@@ -689,9 +1134,9 @@ public static HydroBaseDMI openHydroBase ( StateDMI_Processor processor )
 Parse command line arguments.
 @param args Command line arguments.
 */
-public static void parseArgs ( String[] args )
+public static void parseArgs ( StateDMISession session, String[] args )
 throws Exception
-{	String routine = "StateDMI.parseArgs";
+{	String routine = "StateDMI.parseArgs", message;
 
     // Allow setting of -home via system property "statedmi.home". This
     // can be supplied by passing the -Dstatedmi.home=HOME option to the java vm.
@@ -721,9 +1166,14 @@ throws Exception
 			__home = (new File(args[i])).getCanonicalPath().toString();
 			
 			Message.printStatus ( 1, routine, "Home directory for StateDMI is \"" + __home + "\"" );
+			// The default configuration file location is relative to the install home.  This works
+			// as long as the -home argument is first in the command line.
+			setConfigFile ( __home + File.separator + "system" + File.separator + "StateDMI.cfg" );
 			IOUtil.setProgramWorkingDir(__home);
 			IOUtil.setApplicationHomeDir(__home);
 			JGUIUtil.setLastFileDialogDirectory(__home);
+			
+			readConfigFile(getConfigFile());
 		}
 		else if (args[i].equalsIgnoreCase("-statecu")) {
 			Message.printStatus ( 1, routine, "Running StateDMI for StateCU files." );
@@ -791,7 +1241,7 @@ throws Exception
 Parse the command-line arguments for the applet, determined from the applet data.
 @param a JApplet for this application.
 */
-public static void parseArgs ( JApplet a )
+public static void parseArgs ( StateDMISession session, JApplet a )
 throws Exception
 {	String home = a.getParameter("-home");
 	String test = a.getParameter("-test");
@@ -875,6 +1325,42 @@ static void quitProgram ( int status )
 }
 
 /**
+Read the configuration file.  This should be done as soon as the application home is known.
+TODO SAM 2015-01-07 need to store configuration information in a generic "session" object to be developed.
+@param configFile Name of the configuration file.
+*/
+private static void readConfigFile ( String configFile )
+{	String routine = "TSToolMain.readConfigFile";
+    Message.printStatus ( 2, routine, "Reading TSTool configuration information from \"" + configFile + "\"." );
+	if ( IOUtil.fileReadable(configFile) ) {
+		__statedmi_props = new PropList ( configFile );
+		__statedmi_props.setPersistentName ( configFile );
+		try {
+            __statedmi_props.readPersistent ();
+            // Print out the configuration information since it is useful in troubleshooting.
+            int size = __statedmi_props.size();
+            for ( int i = 0; i < size; i++ ) {
+                Prop prop = __statedmi_props.elementAt(i);
+                Message.printStatus( 2, routine, prop.getKey() + "=" + prop.getValue() );
+                if ( prop.getKey().equalsIgnoreCase("TSTool.DiffProgram") ) {
+                	// Also set global properties that are used more generically
+                	IOUtil.setProp("DiffProgram", prop.getValue());
+                }
+            }
+		}
+		catch ( Exception e ) {
+			Message.printWarning ( 1, routine,
+			"Error reading TSTool configuration file \"" + configFile + "\".  TSTool may not start (" + e + ")." );
+			Message.printWarning ( 1, routine, e );
+		}
+	}
+	else {
+	    Message.printWarning ( 1, routine,
+	        "TSTool configuration file \"" + configFile + "\" is not readable.  TSTool may not start." );
+	}
+}
+
+/**
 Set the commands file that is being used with StateDMI.
 @param commandFile Commands file being processed, when started with
 -commands File parameter.  This indicates that a batch run should be done, with
@@ -883,6 +1369,18 @@ no main StateDMI GUI, although windows may display for graphical products.
 private static void setCommandFile ( String commandFile )
 {
 	__commandFile = commandFile;
+}
+
+/**
+Set the configuration file that is being used with StateDMI.  If a relative path is
+given, then the file is made into an absolute path by using the working directory.
+Typically an absolute path is provided when the -home command line parameter is parsed
+at startup, and a relative path may be provided if -config is specified on the command line.
+@param configFile Configuration file.
+*/
+private static void setConfigFile ( String configFile )
+{
+    __configFile = configFile;
 }
 
 /**
