@@ -9,5 +9,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/cdss-lib-dmi-hydrobase-java"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/cdss-lib-models-java"/>
 	<classpathentry kind="lib" path="/cdss-util-buildtools/lib/junit-3.8.1.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/cdss-lib-dmi-hydrobase-rest-java"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
