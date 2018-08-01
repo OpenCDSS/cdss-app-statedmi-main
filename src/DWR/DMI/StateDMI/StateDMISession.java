@@ -193,7 +193,7 @@ public class StateDMISession {
 	*/
 	public String getConfigFile ()
 	{
-		String logFile = System.getProperty("user.home") + File.separator + ".statedmi" + File.separator + "datastore" + File.separator + "StateDMI.cfg";
+		String logFile = getSystemFolder() + File.separator + "StateDMI.cfg";
 		//Message.printStatus(1,"","Config file is \"" + logFolder + "\"");
 		return logFile;
 	}
