@@ -3257,6 +3257,8 @@ public void actionPerformed ( ActionEvent event )
 	String command = action;	// To keep StateDMI and TSTool code the same
 	Object o = event.getSource ();
 	String routine = "StateDMI_JFrame.actionPerformed";
+	
+	System.out.println("StateDMI_JFrame.actionPerformed:2361: command: " + command);
 
 	if ( ui_GetIgnoreActionEvent() ) {
 		// Used when programatically modifying components and don't want an event to be handled...
@@ -3270,8 +3272,13 @@ public void actionPerformed ( ActionEvent event )
 	// File menu...
 
 	if ( (o == __File_Open_CommandFile_JMenuItem) || (o == __toolBarOpenButton) ) {
-		uiAction_OpenCommandFile ();
+		uiAction_OpenCommandFile ( null, true );
 	}
+	else if ( command.toUpperCase().endsWith(".STATEDMI")) {
+    	System.out.println("StateDMI.actionPerfomed:3278: open recent file");
+    	// TSTool command file in recent files, treat as open
+    	uiAction_OpenCommandFile ( command, false );
+    }
 	else if ( o == __File_Open_ModelNetwork_JMenuItem ) {
 		uiAction_OpenModelNetwork ();
 	}
@@ -12286,7 +12293,6 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 		    __File_Open_JMenu.add( __File_Open_CommandFileRecent_JMenuItem[i] =
 		    	new SimpleJMenuItem( "", this ) );
 	    }
-	    ui_InitGUIMenus_File_OpenRecentFiles();
 	    
 		__File_Open_JMenu.addSeparator ();
 		__File_Open_JMenu.add( __File_Open_ModelNetwork_JMenuItem =
@@ -12294,6 +12300,8 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 		__File_Open_JMenu.addSeparator ();
 		__File_Open_JMenu.add( __File_Open_HydroBase_JMenuItem =
 			new SimpleJMenuItem(__File_Open_HydroBase_String,this));
+		
+		ui_InitGUIMenus_File_OpenRecentFiles();
 
 		//
 		// DataSet menus...
@@ -13499,7 +13507,7 @@ Open a command file and read into the list of commands.  A check is made to
 see if the list contains anything and if it does the user is prompted as to
 whether need to save the previous commands.
 */
-private void uiAction_OpenCommandFile ()
+private void uiAction_OpenCommandFile ( String commandFile, boolean runDiscoveryOnLoad)
 {	String routine = getClass().getName() + ".uiAction_OpenCommandFile";
 	// See whether the old commands need to be cleared...
 	if ( __commandsDirty ) {
@@ -13552,32 +13560,50 @@ private void uiAction_OpenCommandFile ()
 	}
 
 	// Get the file.  Do not clear the list until the file has been chosen and is readable...
+	if( commandFile == null){
+		String initial_dir = ui_GetDir_LastCommandFileOpened();
+		Message.printStatus ( 2, routine, "Initial directory for browsing:  \"" + initial_dir + "\"" );
+		JFileChooser fc = JFileChooserFactory.createJFileChooser ( initial_dir );
+		fc.setDialogTitle("Open " + IOUtil.getProgramName() + " Command File");
+		SimpleFileFilter sff = new SimpleFileFilter("StateDMI", "StateDMI Command File");
+		fc.addChoosableFileFilter(sff);
+		fc.setFileFilter(sff);
+		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			// If the user approves a selection do the following...
+			String directory = fc.getSelectedFile().getParent();
+			String path = fc.getSelectedFile().getPath();
 
-	String initial_dir = ui_GetDir_LastCommandFileOpened();
-	Message.printStatus ( 2, routine, "Initial directory for browsing:  \"" + initial_dir + "\"" );
-	JFileChooser fc = JFileChooserFactory.createJFileChooser ( initial_dir );
-	fc.setDialogTitle("Open " + IOUtil.getProgramName() + " Command File");
-	SimpleFileFilter sff = new SimpleFileFilter("StateDMI", "StateDMI Command File");
-	fc.addChoosableFileFilter(sff);
-	fc.setFileFilter(sff);
-	if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-		// If the user approves a selection do the following...
-		String directory = fc.getSelectedFile().getParent();
-		String path = fc.getSelectedFile().getPath();
-
-		// TODO - is this necessary in Swing?
-		// Set the "WorkingDir" property, which will NOT contain a trailing separator...
+			// TODO - is this necessary in Swing?
+			// Set the "WorkingDir" property, which will NOT contain a trailing separator...
+			IOUtil.setProgramWorkingDir(directory);
+			ui_SetDir_LastCommandFileOpened(directory);
+			__props.set ("WorkingDir=" + IOUtil.getProgramWorkingDir());
+			ui_SetInitialWorkingDir ( __props.getValue ( "WorkingDir" ) );
+			Message.printStatus(2, routine,
+				"Working directory (and initial working directory) from command file is \"" +
+				IOUtil.getProgramWorkingDir() );
+			this.session.pushHistory(path);
+			// Update the recent files in the File...Open menu, for the next menu access
+			ui_InitGUIMenus_File_OpenRecentFiles();
+			// Load but do not automatically run.
+			ui_LoadCommandFile ( path, false );
+		}
+	}
+	else{
+		// Set some state information, similar to above, but no need to update menus since picking from visible choice
+    	// TODO SAM 2014-12-19 maybe this information should be saved in the TSToolSession instance
+    	File f = new File(commandFile);
+    	String directory = f.getParent();
 		IOUtil.setProgramWorkingDir(directory);
 		ui_SetDir_LastCommandFileOpened(directory);
 		__props.set ("WorkingDir=" + IOUtil.getProgramWorkingDir());
 		ui_SetInitialWorkingDir ( __props.getValue ( "WorkingDir" ) );
-		Message.printStatus(2, routine,
-			"Working directory (and initial working directory) from command file is \"" +
-			IOUtil.getProgramWorkingDir() );
-		this.session.pushHistory(path);
+		// Save in the session
+		this.session.pushHistory(commandFile);
+		// Update the recent files in the File...Open menu, for the next menu access
 		ui_InitGUIMenus_File_OpenRecentFiles();
-		// Load but do not automatically run.
-		ui_LoadCommandFile ( path, false );
+    	// Load but do not automatically run.
+    	ui_LoadCommandFile ( commandFile, false);
 	}
 	// New file has been opened or there was a cancel/error and the old list remains.
 	//Message.printStatus ( 2, routine, "Done reading commands.  Calling ui_UpdateStatus...");
