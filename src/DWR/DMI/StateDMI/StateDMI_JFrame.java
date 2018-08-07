@@ -3257,8 +3257,6 @@ public void actionPerformed ( ActionEvent event )
 	String command = action;	// To keep StateDMI and TSTool code the same
 	Object o = event.getSource ();
 	String routine = "StateDMI_JFrame.actionPerformed";
-	
-	System.out.println("StateDMI_JFrame.actionPerformed:2361: command: " + command);
 
 	if ( ui_GetIgnoreActionEvent() ) {
 		// Used when programatically modifying components and don't want an event to be handled...
@@ -3275,7 +3273,6 @@ public void actionPerformed ( ActionEvent event )
 		uiAction_OpenCommandFile ( null, true );
 	}
 	else if ( command.toUpperCase().endsWith(".STATEDMI")) {
-    	System.out.println("StateDMI.actionPerfomed:3278: open recent file");
     	// TSTool command file in recent files, treat as open
     	uiAction_OpenCommandFile ( command, false );
     }
