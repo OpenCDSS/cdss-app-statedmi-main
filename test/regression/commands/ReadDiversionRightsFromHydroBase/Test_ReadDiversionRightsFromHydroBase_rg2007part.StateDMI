@@ -26,4 +26,4 @@ ReadDiversionRightsFromHydroBase(ID="*")
 # Uncomment the following command to regenerate the expected results.
 # WriteDiversionRightsToList(OutputFile="ExpectedResults/Test_ReadDiversionRightsFromHydroBase_rg2007part_out.csv")
 WriteDiversionRightsToList(OutputFile="Results/Test_ReadDiversionRightsFromHydroBase_rg2007part_out.csv")
-CompareFiles(InputFile1="ExpectedResults/Test_ReadDiversionRightsFromHydroBase_rg2007part_out.csv",InputFile2="Results/Test_ReadDiversionRightsFromHydroBase_rg2007part_out.csv",WarnIfDifferent=True)
+CompareFiles(InputFile1="ExpectedResults/Test_ReadDiversionRightsFromHydroBase_rg2007part_out.csv",InputFile2="Results/Test_ReadDiversionRightsFromHydroBase_rg2007part_out.csv",IfDifferent=Warn)
