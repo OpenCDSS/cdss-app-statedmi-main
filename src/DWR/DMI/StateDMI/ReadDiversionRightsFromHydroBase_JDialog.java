@@ -33,6 +33,7 @@ import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
+import riverside.datastore.DataStore;
 
 /**
 Editor for ReadDiversionRightsFromHydroBase() command.
@@ -48,11 +49,13 @@ private JTextField __DecreeMin_JTextField=null;
 private JTextField __IgnoreUseType_JTextField=null;
 private JTextField __AdminNumClasses_JTextField=null;
 private SimpleJComboBox __OnOffDefault_JComboBox = null;
+private SimpleJComboBox __Datastore_JComboBox = null;
 private JTextArea __command_JTextArea=null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
 private ReadDiversionRightsFromHydroBase_Command __command = null;
 private boolean __ok = false; // Indicate whether OK has been pressed
+private StateDMI_Processor __statedmiProcessor = null;
 
 /**
 Command editor constructor
@@ -60,7 +63,7 @@ Command editor constructor
 @param command Command to edit.
 */
 public ReadDiversionRightsFromHydroBase_JDialog ( JFrame parent,
-		ReadDiversionRightsFromHydroBase_Command command )
+		ReadDiversionRightsFromHydroBase_Command command)
 {	super(parent, true);
 	initialize (parent, command);
 }
@@ -94,6 +97,7 @@ private void checkInput ()
 	String IgnoreUseType = __IgnoreUseType_JTextField.getText().trim();
 	String AdminNumClasses = __AdminNumClasses_JTextField.getText().trim();
 	String OnOffDefault = __OnOffDefault_JComboBox.getSelected();
+	String Datastore = __Datastore_JComboBox.getSelected();
 	
 	PropList props = new PropList ( "" );
 	if ( ID.length() > 0 ) {
@@ -110,6 +114,9 @@ private void checkInput ()
 	}
 	if ( OnOffDefault.length() > 0 ) {
 		props.set ( "OnOffDefault", OnOffDefault );
+	}
+	if ( Datastore.length() > 0 ){
+		props.set ( "Datastore", Datastore );
 	}
 	__error_wait = false;
 	try {
@@ -133,12 +140,14 @@ private void commitEdits ()
 	String IgnoreUseType = __IgnoreUseType_JTextField.getText().trim();
 	String AdminNumClasses = __AdminNumClasses_JTextField.getText().trim();
 	String OnOffDefault = __OnOffDefault_JComboBox.getSelected();
+	String Datastore = __Datastore_JComboBox.getSelected();
 
 	__command.setCommandParameter ( "ID", ID );
 	__command.setCommandParameter ( "DecreeMin", DecreeMin);
 	__command.setCommandParameter ( "IgnoreUseType", IgnoreUseType );
 	__command.setCommandParameter ( "AdminNumClasses", AdminNumClasses );
 	__command.setCommandParameter ( "OnOffDefault", OnOffDefault );
+	__command.setCommandParameter ( "Datastore" , Datastore );
 }
 
 public void stateChanged(ChangeEvent e) {
@@ -155,6 +164,7 @@ throws Throwable
 	__IgnoreUseType_JTextField = null;
 	__AdminNumClasses_JTextField = null;
 	__OnOffDefault_JComboBox = null;
+	__Datastore_JComboBox = null;
 	__cancel_JButton = null;
 	__command_JTextArea = null;
 	__command = null;
@@ -173,6 +183,7 @@ private void initialize (JFrame parent, ReadDiversionRightsFromHydroBase_Command
 	addWindowListener(this);
 
     Insets insetsTLBR = new Insets(1,2,1,2);
+    __statedmiProcessor = (StateDMI_Processor)__command.getCommandProcessor();
 
 	// Main panel...
 
@@ -262,6 +273,23 @@ private void initialize (JFrame parent, ReadDiversionRightsFromHydroBase_Command
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Optional - default OnOff switch (default=" + __command._AppropriationDate + ")."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    
+    // Datastore ID options
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Datastore ID:"), 0, ++y, 1, 1, 0, 0, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    List<DataStore> DataStores = __statedmiProcessor.getDataStores();
+    List datastoreList = new Vector();
+    datastoreList.add("");
+    for(int i = 0; i < DataStores.size(); i++){
+    	datastoreList.add(DataStores.get(i).getName());
+    }
+    __Datastore_JComboBox = new SimpleJComboBox(false);
+    __Datastore_JComboBox.setData(datastoreList);
+    __Datastore_JComboBox.addItemListener(this);
+    JGUIUtil.addComponent(main_JPanel, __Datastore_JComboBox,
+    		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel (
+    		"Optional - default uses HydroBase."),
+    		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -343,6 +371,7 @@ private void refresh ()
 	String IgnoreUseType = "";
 	String AdminNumClasses = "";
 	String OnOffDefault = "";
+	String Datastore = "";
 	PropList props = __command.getCommandParameters();
 	if (__first_time) {
 		__first_time = false;
@@ -351,6 +380,7 @@ private void refresh ()
 		AdminNumClasses = props.getValue ( "AdminNumClasses" );
 		OnOffDefault = props.getValue ( "OnOffDefault" );
 		IgnoreUseType = props.getValue ( "IgnoreUseType" );
+		Datastore = props.getValue ( "Datastore" );
 		if ( ID != null ) {
 			__ID_JTextField.setText(ID);
 		}
@@ -366,6 +396,9 @@ private void refresh ()
 		if ( OnOffDefault == null ) {
 			// Select default...
 			__OnOffDefault_JComboBox.select ( 0 );
+		}
+		if ( Datastore == null ) {
+			__Datastore_JComboBox.select ( 0 );
 		}
 		else {
 			if ( JGUIUtil.isSimpleJComboBoxItem(
@@ -388,12 +421,14 @@ private void refresh ()
 	IgnoreUseType = __IgnoreUseType_JTextField.getText().trim();
 	AdminNumClasses = __AdminNumClasses_JTextField.getText().trim();
 	OnOffDefault = __OnOffDefault_JComboBox.getSelected();
+	Datastore = __Datastore_JComboBox.getSelected();
 	props = new PropList ( "");
 	props.add ( "ID=" + ID );
 	props.add ( "DecreeMin=" + DecreeMin );
 	props.add ( "IgnoreUseType=" + IgnoreUseType );
 	props.add ( "OnOffDefault=" + OnOffDefault );
 	props.add ( "AdminNumClasses=" + AdminNumClasses );
+	props.add ( "Datastore=" + Datastore );
 	__command_JTextArea.setText( __command.toString(props) );
 }
 
