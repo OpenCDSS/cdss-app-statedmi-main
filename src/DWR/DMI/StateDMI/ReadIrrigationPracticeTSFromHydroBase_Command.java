@@ -2,6 +2,7 @@ package DWR.DMI.StateDMI;
 
 import javax.swing.JFrame;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -11,6 +12,7 @@ import DWR.DMI.HydroBaseDMI.HydroBase_ParcelUseTSStructureToParcel;
 import DWR.DMI.HydroBaseDMI.HydroBase_StructureView;
 import DWR.DMI.HydroBaseDMI.HydroBase_Util;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
+import DWR.DMI.StateDMI.dto.hydrobaserest.HydroBaseRestToolkit;
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Util;
@@ -32,6 +34,9 @@ import RTi.Util.IO.Prop;
 import RTi.Util.IO.PropList;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
+import cdss.dmi.hydrobase.rest.ColoradoHydroBaseRestDataStore;
+import cdss.dmi.hydrobase.rest.dao.ParcelUseTimeSeries;
+import riverside.datastore.DataStore;
 
 /**
 <p>
@@ -89,6 +94,7 @@ throws InvalidCommandParameterException
 	String Year = parameters.getValue( "Year" );
 	String Div = parameters.getValue( "Div" );
 	String Optimization = parameters.getValue( "Optimization" );
+	String Datastore = parameters.getValue("Datastore");
 	String message;
 	String warning = "";
 	
@@ -161,6 +167,7 @@ throws InvalidCommandParameterException
     valid_Vector.add ( "Year" );
     valid_Vector.add ( "Div" );
     valid_Vector.add ( "Optimization" );
+    valid_Vector.add ( "Datastore" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
 
 	if ( warning.length() > 0 ) {
@@ -304,6 +311,7 @@ performance (but take more memory).
 */
 private int readHydroBaseIrrigationPracticeTSForParcel (
 		HydroBaseDMI hdmi,
+		ColoradoHydroBaseRestDataStore datastore,
 		StateCU_Location culoc,
 		StateCU_IrrigationPracticeTS ipyts,
 		String id,
@@ -316,11 +324,20 @@ private int readHydroBaseIrrigationPracticeTSForParcel (
 {	String routine = getClass().getName() + ".readHydroBaseIrrigationPracticeTSForParcel";
 	String message;
 	List hbparcel_Vector = null;
+	List<ParcelUseTimeSeries> hbrparcel_Vector = null;
 	try {
-		hbparcel_Vector = hdmi.readParcelUseTSList (
-			parcel_year, Div_int,
-			parcel_id,
-			cacheHydroBase );
+		if( datastore != null ){
+			hbparcel_Vector = new ArrayList<HydroBase_ParcelUseTS>();
+			hbrparcel_Vector = datastore.getParcelUseTSList(part_id, parcel_id);
+			for(int i = 0; i < hbrparcel_Vector.size(); i++){
+				HydroBase_ParcelUseTS hbpTS = HydroBaseRestToolkit.getInstance().toHydroBaseParcelUseTS(hbrparcel_Vector.get(i));
+				hbparcel_Vector.add(hbpTS);
+			}
+		}else{
+			hbparcel_Vector = hdmi.readParcelUseTSList (
+					parcel_year, Div_int,
+					parcel_id,
+					cacheHydroBase );		}
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( 3, routine, e );
@@ -402,6 +419,7 @@ performance (but take more memory).
 */
 private int readHydroBaseIrrigationPracticeTSForParcelList (
 		HydroBaseDMI hdmi,
+		ColoradoHydroBaseRestDataStore datastore,
 		StateCU_Location culoc,
 		StateCU_IrrigationPracticeTS ipyts,
 		String id,
@@ -414,7 +432,7 @@ private int readHydroBaseIrrigationPracticeTSForParcelList (
 		int warningLevel, int warning_count, String command_tag, CommandStatus status, boolean cacheHydroBase )
 {	String routine = getClass().getName() + ".readHydroBaseIrrigationPracticeTSForParcelList";
 	// Loop through each parcel and append the HydroBase rights associated with each parcel
-	
+
 	int nparcel = 0;
 	if ( parcel_ids != null ) {
 		nparcel = parcel_ids.size();
@@ -426,6 +444,9 @@ private int readHydroBaseIrrigationPracticeTSForParcelList (
 	
 	int parcel_id;	// Specific parcel identifier to process
 	double percent_irrig2;	// Percent of parcel that is irrigated by ditch
+	if(datastore != null){
+		datastore.getParcelUseTSList(part_id);
+	}
 	for ( int iparcel = 0; iparcel < nparcel; iparcel++ ) {
 		parcel_id = Integer.parseInt((String)parcel_ids.get(iparcel) );
 		// Process the HydroBase parcel data (values will be added to the
@@ -438,6 +459,7 @@ private int readHydroBaseIrrigationPracticeTSForParcelList (
 		}
 		warning_count = readHydroBaseIrrigationPracticeTSForParcel (
 				hdmi,
+				datastore,
 				culoc,
 				ipyts,
 				id,
@@ -468,6 +490,7 @@ performance (but take more memory).
 */
 private int readHydroBaseIrrigationPracticeTSForLocationList (
 		HydroBaseDMI hdmi,
+		ColoradoHydroBaseRestDataStore datastore,
 		StateCU_Location culoc,
 		StateCU_IrrigationPracticeTS ipyts,
 		String id,
@@ -608,6 +631,7 @@ private int readHydroBaseIrrigationPracticeTSForLocationList (
 			// data associated with each parcel
 			warning_count = readHydroBaseIrrigationPracticeTSForParcelList (
 				hdmi,
+				datastore,
 				culoc,
 				ipyts,
 				id,
@@ -699,7 +723,7 @@ CommandWarningException, CommandException
 	// Get the input parameters...
 	
 	CommandPhaseType commandPhase = CommandPhaseType.RUN;
-	CommandProcessor processor = getCommandProcessor();
+	StateDMI_Processor processor = (StateDMI_Processor)getCommandProcessor();
 	CommandStatus status = getCommandStatus();
 	status.clearLog(CommandPhaseType.RUN);
 	
@@ -721,26 +745,45 @@ CommandWarningException, CommandException
 	if ( !Optimization.equalsIgnoreCase(_UseMoreMemory) ) {
 		cacheHydroBase = false;
 	}
+	
 
 	String locType = "CU location";	// Used with messages
 	
 	// Get the HydroBase DMI...
-	
+	//Check to see if datastore
+	String Datastore = parameters.getValue("Datastore");
+	System.out.println("[ReadIrrigationPracticeTSFromHydroBase_Command.runCommand:734] Datastore: " + Datastore);
 	HydroBaseDMI hbdmi = null;
-	try {
-		Object o = processor.getPropContents( "HydroBaseDMI");
-		hbdmi = (HydroBaseDMI)o;
+	ColoradoHydroBaseRestDataStore datastore = null;
+	if ( Datastore != null && !Datastore.equals("") ) {
+		switch ( Datastore ) {
+			case ( "ColoradoHydroBaseRest" ):
+				DataStore datastore0 = processor.getDataStoreForName(Datastore, ColoradoHydroBaseRestDataStore.class);
+				if ( datastore0 != null ) {
+					Message.printStatus(2, routine, "Selected data store is \"" + Datastore + "\"");
+					datastore = (ColoradoHydroBaseRestDataStore)datastore0;
+				}
+				break;
+			case ( "ColoradoWaterHBGuest " ):
+				break;
+		}
 	}
-	catch ( Exception e ) {
-		message = "Error requesting HydroBase connection from processor.";
-		Message.printWarning(warningLevel,
-			MessageUtil.formatMessageTag( command_tag, ++warning_count),
-			routine, message );
-		status.addToLog ( CommandPhaseType.RUN,
-			new CommandLogRecord(CommandStatusType.FAILURE,
-				message, "Report problem to software support." ) );
-	}
-	
+	//TODO @jurentie remove comments for else statement
+	//else{
+		try {
+			Object o = processor.getPropContents( "HydroBaseDMI");
+			hbdmi = (HydroBaseDMI)o;
+		}
+		catch ( Exception e ) {
+			message = "Error requesting HydroBase connection from processor.";
+			Message.printWarning(warningLevel,
+				MessageUtil.formatMessageTag( command_tag, ++warning_count),
+				routine, message );
+			status.addToLog ( CommandPhaseType.RUN,
+				new CommandLogRecord(CommandStatusType.FAILURE,
+					message, "Report problem to software support." ) );
+		}
+	//}
 	// Get the list of cu locations...
 	
 	List<StateCU_Location> culocList = null;
@@ -849,6 +892,7 @@ CommandWarningException, CommandException
 		int [] parcelYears = null;
 		if ( (__Year_int == null) || (__Year_int.length == 0)  ) {
 			try {
+				//TODO @jurentie add switch for datastore 
 				parcelYears = StateDMI_Util.readParcelYearListFromHydroBase ( hbdmi, Div_int );
 			}
 			catch ( Exception e ) {
@@ -1000,8 +1044,11 @@ CommandWarningException, CommandException
 					Message.printStatus ( 2, routine, locType + " \"" + culocId + "\" is associated with a collection of parcels..." );
 					// Aggregate or system, by parcel...
 					parts = culoc.getCollectionPartIDsForYear(parcelYear);
+					//TODO @jurentie add switch for datastore 
+					System.out.println("[ReadIrrigationPracticeTSFromHydroBase_Command.runCommand:1004] here we are.");
 					warning_count = readHydroBaseIrrigationPracticeTSForParcelList (
 							hbdmi,
+							datastore,
 							culoc,
 							ipyts,
 							culocId,
@@ -1048,8 +1095,11 @@ CommandWarningException, CommandException
 						Message.printStatus ( 2, routine, "Location \"" + culoc.getID() +
 							"\" is associated with a an explicit diversion...processing as one part...");
 					}
+					System.out.println("[ReadIrrigationPracticeTSFromHydroBase_Command.runCommand:1053] here we are 2.");
+					//TODO @jurentie add switch for datastore 
 					warning_count = readHydroBaseIrrigationPracticeTSForLocationList (
 						hbdmi,
+						datastore,
 						culoc,
 						ipyts,
 						culocId,
@@ -1098,6 +1148,7 @@ public String toString ( PropList parameters )
 	String Year = parameters.getValue( "Year" );
 	String Div = parameters.getValue( "Div" );
 	String Optimization = parameters.getValue( "Optimization" );
+	String Datastore = parameters.getValue( "Datastore" );
 	
 	StringBuffer b = new StringBuffer ();
 
@@ -1121,6 +1172,12 @@ public String toString ( PropList parameters )
 			b.append ( "," );
 		}
 		b.append ( "Optimization=" + Optimization );
+	}
+	if (Datastore != null && Datastore.length() > 0){
+		if ( b.length() > 0 ){
+			b.append( "," );
+		}
+		b.append( "Datastore=" + Datastore );
 	}
 	
 	return getCommandName() + "(" + b.toString() + ")";
