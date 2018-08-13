@@ -160,6 +160,14 @@ throws InvalidCommandParameterException
 				message, "Specify Optimization as " + _UseLessMemory + " or " + _UseMoreMemory +
 				" (default).") );
 	}
+	
+	if ( (Datastore == null) || Datastore.isEmpty() ) {
+        message = "The datastore must be specified.";
+		warning += "\n" + message;
+        status.addToLog ( CommandPhaseType.INITIALIZATION,
+            new CommandLogRecord(CommandStatusType.FAILURE,
+                message, "Specify the datastore." ) );
+	}
 
 	// Check for invalid parameters...
 	List valid_Vector = new Vector();
@@ -326,6 +334,9 @@ private int readHydroBaseIrrigationPracticeTSForParcel (
 	List hbparcel_Vector = null;
 	List<ParcelUseTimeSeries> hbrparcel_Vector = null;
 	try {
+		// if datastore get the parcel use ts list from web services
+		// then convert to HydroBase_ParcelUseTS objects and add to hbparcel_Vector list.
+		// otherwise get parcel us ts from hbdmi database
 		if( datastore != null ){
 			hbparcel_Vector = new ArrayList<HydroBase_ParcelUseTS>();
 			hbrparcel_Vector = datastore.getParcelUseTSList(part_id, parcel_id);
@@ -444,6 +455,7 @@ private int readHydroBaseIrrigationPracticeTSForParcelList (
 	
 	int parcel_id;	// Specific parcel identifier to process
 	double percent_irrig2;	// Percent of parcel that is irrigated by ditch
+	// if datastore read the parcel use ts list
 	if(datastore != null){
 		datastore.getParcelUseTSList(part_id);
 	}
@@ -749,11 +761,10 @@ CommandWarningException, CommandException
 
 	String locType = "CU location";	// Used with messages
 	
-	// Get the HydroBase DMI...
-	//Check to see if datastore
 	String Datastore = parameters.getValue("Datastore");
 	HydroBaseDMI hbdmi = null;
 	ColoradoHydroBaseRestDataStore datastore = null;
+	//If there is a datastore open it, otherwise open hydrobase dmi
 	if ( Datastore != null && !Datastore.equals("") ) {
 		switch ( Datastore ) {
 			case ( "ColoradoHydroBaseRest" ):
@@ -767,8 +778,9 @@ CommandWarningException, CommandException
 				break;
 		}
 	}
-	//TODO @jurentie remove comments for else statement
+	//TODO @jurentie remove comments for else statement once all methods contain code for datastore
 	//else{
+		// Get the HydroBase DMI...
 		try {
 			Object o = processor.getPropContents( "HydroBaseDMI");
 			hbdmi = (HydroBaseDMI)o;

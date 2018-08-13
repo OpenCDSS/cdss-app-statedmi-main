@@ -137,6 +137,14 @@ throws InvalidCommandParameterException
 			}
 		}
 	}
+	
+	if ( (Datastore == null) || Datastore.isEmpty() ) {
+        message = "The datastore must be specified.";
+		warning += "\n" + message;
+        status.addToLog ( CommandPhaseType.INITIALIZATION,
+            new CommandLogRecord(CommandStatusType.FAILURE,
+                message, "Specify the datastore." ) );
+	}
 
 	// Check for invalid parameters...
 	List valid_Vector = new Vector();
@@ -314,7 +322,7 @@ CommandWarningException, CommandException
 		List hbdivr_sorted_Vector = new Vector(100);
 						// List of rights from HydroBase, after manual sort on admin number
 		List hbdivr_part_Vector =null;// Vector of rights for an aggregate part.
-		List datastore_part_list = null;
+		List datastore_part_list = null; // List of objects returned from web services.
 		int nhbdivr = 0; // The number of rights read from HydroBase
 		int nhbdivr_part = 0; // The number of rights read from HydroBase, for a collection part
 		WaterRightsNetAmount dsdivr = null; // Used if using a datastore
