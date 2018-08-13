@@ -14,6 +14,7 @@ public class HydroBaseRestToolkit {
 	
 	private HydroBaseRestToolkit(){}
 	
+	//Lazy initialization of a singleton class instance
 	public static HydroBaseRestToolkit getInstance(){
 		if(instance == null){
 			instance = new HydroBaseRestToolkit();
@@ -194,6 +195,11 @@ public class HydroBaseRestToolkit {
 		return netAmountsHB;
 	}
 	
+	/*
+	 * Convert a ParcelUseTimeSeries POJO converted from web services using Jackson 
+	 * and further convert into a HydroBase_PacelUseTS POJO to match the rest of code.
+	 * @param {object} parcelUseTSRest - a ParcelUseTimeSeries Plain Old Java Object
+	 */
 	public HydroBase_ParcelUseTS toHydroBaseParcelUseTS( ParcelUseTimeSeries parcelUseTSRest ){
 		HydroBase_ParcelUseTS parcelUseTSHB = new HydroBase_ParcelUseTS();
 		
