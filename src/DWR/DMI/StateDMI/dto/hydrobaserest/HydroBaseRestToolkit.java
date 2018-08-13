@@ -4,6 +4,8 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 import DWR.DMI.HydroBaseDMI.HydroBase_NetAmts;
+import DWR.DMI.HydroBaseDMI.HydroBase_ParcelUseTS;
+import cdss.dmi.hydrobase.rest.dao.ParcelUseTimeSeries;
 import cdss.dmi.hydrobase.rest.dao.WaterRightsNetAmount;
 
 public class HydroBaseRestToolkit {
@@ -190,6 +192,35 @@ public class HydroBaseRestToolkit {
 		//x ditch fraction
 		
 		return netAmountsHB;
+	}
+	
+	public HydroBase_ParcelUseTS toHydroBaseParcelUseTS( ParcelUseTimeSeries parcelUseTSRest ){
+		HydroBase_ParcelUseTS parcelUseTSHB = new HydroBase_ParcelUseTS();
+		
+		//parcel num
+		//parcelUseTSHB.setParcel_num(parcelUseTSRest.getParcelId());
+		
+		//div
+		parcelUseTSHB.setDiv(parcelUseTSRest.getDiv());
+		
+		//cal year
+		parcelUseTSHB.setCal_year(parcelUseTSRest.getCalYear());
+		
+		//parcel id
+		parcelUseTSHB.setParcel_id(parcelUseTSRest.getParcelId());
+		
+		//perimeter
+		
+		//area
+		parcelUseTSHB.setArea(parcelUseTSRest.getAcresTotal());
+		
+		//land use
+		parcelUseTSHB.setLand_use(parcelUseTSRest.getLandUse());
+		
+		//irrig type
+		parcelUseTSHB.setIrrig_type(parcelUseTSRest.getIrrigType());
+		
+		return parcelUseTSHB;
 	}
 	
 }
