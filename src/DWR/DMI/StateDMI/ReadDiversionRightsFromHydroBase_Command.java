@@ -230,7 +230,7 @@ CommandWarningException, CommandException
 	if( Datastore != null && !Datastore.equals("")){ // Get the datastore
 		switch(Datastore){
 			case("ColoradoHydroBaseRest"):
-				DataStore datastore0 = ((StateDMI_Processor)this.getCommandProcessor()).getDataStoreForName(Datastore, ColoradoHydroBaseRestDataStore.class);
+				DataStore datastore0 = processor.getDataStoreForName(Datastore, ColoradoHydroBaseRestDataStore.class);
 				if ( datastore0 != null){
 					Message.printStatus(2, routine, "Selected data store is \"" + Datastore + "\"");
 					datastore = (ColoradoHydroBaseRestDataStore)datastore0;
@@ -639,8 +639,7 @@ CommandWarningException, CommandException
 					divr.setSwitch ( 1 );
 					if ( OnOffDefault_year ) {
 						// Convert the administration number to a year...
-						admin_data = new
-						HydroBase_AdministrationNumber (irtem );
+						admin_data = new HydroBase_AdministrationNumber (irtem );
 						appro_date = admin_data.getAppropriationDate();
 						divr.setSwitch ( admin_data.getAppropriationDate().getYear() );
 					}
