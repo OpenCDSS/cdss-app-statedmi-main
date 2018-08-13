@@ -1,0 +1,49 @@
+Objects and Web Services:
+Which are used, where they are used,
+which are not used
+---
+
+HydrobaseRest:       DWR Web Services:                     
+Where it is Used:
+----------------------------------------------------------------------------
+* DiversionByDay                      - /structures/divrec/divrecday        ColoradoHydroBaseRestDataStore.readTimeSeries()
+* DiversionByMonth                    - /structures/divrec/divrecmonth
+ColoradoHydroBaseRestDataStore.readTimeSeries()
+* DiversionByYear                     - /structures/divrec/divrecyear
+ColoradoHydroBaseRestDataStore.readTimeSeries()
+* DiversionComment                    - /structures/divrec/comments
+ColoradoHydroBaseRestDataStore.getDivComments()
+* DiversionStageVolume                - /structures/divrec/stagevolume
+Not Being Used
+* DiversionWaterClass                 - /structures/divrec/waterclasses
+ColoradoHydroBaseRestDataStore.getWaterClasses()
+ColoradoHydroBaseRestDataStore.getWaterClassesTimeSeriesCatalog()
+ColoradoHydroBaseRestDataStore.getWaterClassNumForWdid()
+
+* ParcelUseTimeSeries              - /parcelusets
+Being Used in read parcel use commands in StateDMI
+
+
+* ReferenceTablesCounty              - /referencetables/county
+ColoradoHydroBaseRestDataStore.getCounties()
+* ReferenceTablesDesignatedBasin     - /referencetables/designatedbasin
+ColoradoHydroBaseRestDataStore.getDesignatedBasin()
+Not Being Used
+* ReferenceTablesGroundwaterPublicationName - /referencetables/groundwaterpublication
+Not Being Used
+* ReferenceTablesManagementDistrict - /referencetables/managementdistrict
+Not Being Used
+* ReferenceTablesPermitActionName   - /referencetables/permitactionname
+Not Being Used
+* ReferenceTablesTelemetryParams    - /referencetables/telemetryparams
+ColoradoHydroBaseRestDataStore.getTelemetryDataTypesFromWebServices()
+* ReferenceTablesWaterDistrict      - /referencetables/waterdistrict
+ColoradoHydroBaseRestDataStore.getWaterDistricts()
+* ReferenceTablesWaterDivision      - /referencetables/waterdivision
+ColoradoHydroBaseRestDataStore.getWaterDivisions()
+
+No Objects for Given Web Services:
+- /referencetables/currentinusecodes
+- /referencetables/divrecobservationcodes
+- /referencetables/divrectypes
+- /referencetables/diversionnotusedcodes
