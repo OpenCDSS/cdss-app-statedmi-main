@@ -1,5 +1,5 @@
 # Test reading diversion rights data from HydroBase for a subset of structures
-StartLog(LogFile="Results/Test_ReadDiversionRightsFromHydroBase.StateDMI.log")
+StartLog(LogFile="Results/Test_ReadDiversionRightsFromColoradHydroBaseRest.StateDMI.log")
 RemoveFile(InputFile="Results\Test_ReadDiversionRightsFromColoradoHydroBaseRest_rg2007part_out.csv")
 ####################################################
 # Start defining test stations and aggregate information...
@@ -26,4 +26,4 @@ ReadDiversionRightsFromHydroBase(ID="*",Datastore=ColoradoHydroBaseRest)
 # Uncomment the following command to regenerate the expected results.
 # WriteDiversionRightsToList(OutputFile="ExpectedResults/Test_ReadDiversionRightsFromColoradoHydroBaseRest_rg2007part_out.csv")
 WriteDiversionRightsToList(OutputFile="Results/Test_ReadDiversionRightsFromColoradoHydroBaseRest_rg2007part_out.csv")
-CompareFiles(InputFile1="ExpectedResults/Test_ReadDiversionRightsFromHydroBase_rg2007part_out.csv",InputFile2="Results/Test_ReadDiversionRightsFromColoradoHydroBaseRest_rg2007part_out.csv",IfDifferent=Warn)
+CompareFiles(InputFile1="ExpectedResults/Test_ReadDiversionRightsFromColoradoHydroBaseRest_rg2007part_out.csv",InputFile2="Results/Test_ReadDiversionRightsFromColoradoHydroBaseRest_rg2007part_out.csv",IfDifferent=Warn)
