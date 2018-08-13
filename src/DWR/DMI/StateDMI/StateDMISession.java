@@ -292,7 +292,7 @@ public class StateDMISession {
 	}
 	
 	/**
-	Return the name of the TSTool StateDMI folder for the operating system, for example:
+	Return the name of the StateDMI folder for the operating system, for example:
 	<ul>
 	<li>	Windows:  C:\Users\UserName\.statedmi</li>
 	<li>	Linux: /home/UserName/.statedmi</li>
