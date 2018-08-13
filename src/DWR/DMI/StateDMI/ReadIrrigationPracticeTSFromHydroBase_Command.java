@@ -752,7 +752,6 @@ CommandWarningException, CommandException
 	// Get the HydroBase DMI...
 	//Check to see if datastore
 	String Datastore = parameters.getValue("Datastore");
-	System.out.println("[ReadIrrigationPracticeTSFromHydroBase_Command.runCommand:734] Datastore: " + Datastore);
 	HydroBaseDMI hbdmi = null;
 	ColoradoHydroBaseRestDataStore datastore = null;
 	if ( Datastore != null && !Datastore.equals("") ) {
@@ -1045,7 +1044,6 @@ CommandWarningException, CommandException
 					// Aggregate or system, by parcel...
 					parts = culoc.getCollectionPartIDsForYear(parcelYear);
 					//TODO @jurentie add switch for datastore 
-					System.out.println("[ReadIrrigationPracticeTSFromHydroBase_Command.runCommand:1004] here we are.");
 					warning_count = readHydroBaseIrrigationPracticeTSForParcelList (
 							hbdmi,
 							datastore,
@@ -1095,7 +1093,6 @@ CommandWarningException, CommandException
 						Message.printStatus ( 2, routine, "Location \"" + culoc.getID() +
 							"\" is associated with a an explicit diversion...processing as one part...");
 					}
-					System.out.println("[ReadIrrigationPracticeTSFromHydroBase_Command.runCommand:1053] here we are 2.");
 					//TODO @jurentie add switch for datastore 
 					warning_count = readHydroBaseIrrigationPracticeTSForLocationList (
 						hbdmi,
