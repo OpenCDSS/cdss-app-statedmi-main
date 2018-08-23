@@ -1,6 +1,8 @@
 package DWR.DMI.StateDMI.dto.hydrobaserest;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import DWR.DMI.HydroBaseDMI.HydroBase_NetAmts;
@@ -29,6 +31,8 @@ public class HydroBaseRestToolkit {
 	 */
 	public HydroBase_NetAmts toHydroBaseNetAmounts(WaterRightsNetAmount netAmountsRest){
 		HydroBase_NetAmts netAmountsHB = new HydroBase_NetAmts();
+		//TODO @jurentie this might need to be reconsidered. What if date is returned in different format
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		
 		//ab
 		
@@ -47,7 +51,12 @@ public class HydroBaseRestToolkit {
 		//TODO @jurentie 08-06-2018 difference between net apex
 		
 		//apro date
-		netAmountsHB.setApro_date(Timestamp.valueOf(netAmountsRest.getAppropriationDate()));
+		try {
+			netAmountsHB.setApro_date(format.parse(netAmountsRest.getAppropriationDate().toString()));
+		} catch (ParseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		//collection id part type
 		
@@ -101,7 +110,12 @@ public class HydroBaseRestToolkit {
 		netAmountsHB.setOrder_no(netAmountsRest.getOrderNumber());
 		
 		//padj date
-		netAmountsHB.setPadj_date(Timestamp.valueOf(netAmountsRest.getPriorAdjudicationDate()));
+		try {
+			netAmountsHB.setPadj_date(format.parse(netAmountsRest.getPriorAdjudicationDate().toString()));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		//parcel id
 		
