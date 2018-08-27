@@ -339,7 +339,7 @@ private int readHydroBaseIrrigationPracticeTSForParcel (
 		// otherwise get parcel us ts from hbdmi database
 		if( datastore != null ){
 			hbparcel_Vector = new ArrayList<HydroBase_ParcelUseTS>();
-			hbrparcel_Vector = datastore.getParcelUseTSList(part_id, parcel_id);
+			hbrparcel_Vector = datastore.getParcelUseTSListFromParcelId(part_id, parcel_id);
 			for(int i = 0; i < hbrparcel_Vector.size(); i++){
 				HydroBase_ParcelUseTS hbpTS = HydroBaseRestToolkit.getInstance().toHydroBaseParcelUseTS(hbrparcel_Vector.get(i));
 				hbparcel_Vector.add(hbpTS);
