@@ -1,0 +1,12 @@
+# Repositories that comprise StateDMI
+# - assumes that local folder name will match the repository name
+cdss-app-statedmi-doc-dev
+cdss-app-statedmi-doc-user
+cdss-app-statedmi-main
+cdss-app-statedmi-test
+cdss-lib-cdss-java
+cdss-lib-common-java
+cdss-lib-dmi-hydrobase-java
+cdss-lib-dmi-hydrobase-rest-java
+cdss-lib-models-java
+cdss-util-buildtools
