@@ -1,5 +1,4 @@
-# Don't ignore this file (Eclipse EGit issue?)
-!.gitignore
+# This file indicates which working files should be ignored from the repository.
 
 # Ignore compiled Java class and other binary files
 /bin
