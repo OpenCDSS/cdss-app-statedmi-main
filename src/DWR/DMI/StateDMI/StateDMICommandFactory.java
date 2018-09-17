@@ -20,7 +20,7 @@ import rti.tscommandprocessor.commands.util.Exit_Command;
 import rti.tscommandprocessor.commands.util.MergeListFileColumns_Command;
 import rti.tscommandprocessor.commands.util.RemoveFile_Command;
 import rti.tscommandprocessor.commands.util.SetWorkingDir_Command;
-
+import rti.tscommandprocessor.commands.util.WebGet_Command;
 import RTi.Util.String.StringUtil;
 
 /**
@@ -911,7 +911,9 @@ throws UnknownCommandException
 	}
 	
 	// "w" commands...
-	
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "WebGet") ) {
+        return new WebGet_Command ();
+    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteBlaneyCriddleToList")) {
 		return new WriteBlaneyCriddleToList_Command();
 	}
