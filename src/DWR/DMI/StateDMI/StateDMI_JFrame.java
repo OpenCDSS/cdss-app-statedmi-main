@@ -1584,7 +1584,8 @@ private JMenu
 private JMenuItem
 	__Commands_General_FileHandling_CompareFiles_JMenuItem,
 	__Commands_General_FileHandling_MergeListFileColumns_JMenuItem,
-    __Commands_General_FileHandling_RemoveFile_JMenuItem = null;
+    __Commands_General_FileHandling_RemoveFile_JMenuItem = null,
+    __Commands_General_FileHandling_WebGet_JMenuItem = null;
 
 private JMenu
 	__Commands_General_HydroBase_JMenu = null;
@@ -2444,6 +2445,7 @@ private String
 	__Commands_General_FileHandling_String = "General - File Handling",
 	__Commands_General_FileHandling_MergeListFileColumns_String = "MergeListFileColumns() ...",
     __Commands_General_FileHandling_RemoveFile_String = "RemoveFile()... <remove file(s)>",
+    __Commands_General_FileHandling_WebGet_String = "" + "WebGet()... <get file(s) from the web>",
 
 	__Commands_General_HydroBase_String = "General - HydroBase",
 	__Commands_General_HydroBase_OpenHydroBase_String = "OpenHydroBase() ...",
@@ -4136,6 +4138,9 @@ public void actionPerformed ( ActionEvent event )
 	}
     else if (command.equals( __Commands_General_FileHandling_RemoveFile_String)){
         commandList_EditCommand ( __Commands_General_FileHandling_RemoveFile_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_General_FileHandling_WebGet_String)){
+    	commandList_EditCommand( __Commands_General_FileHandling_WebGet_String, null, __INSERT_COMMAND);
     }
 	else if ( action.equals( __Commands_General_HydroBase_OpenHydroBase_String) ) {
 		commandList_EditCommand (__Commands_General_HydroBase_OpenHydroBase_String, null,__INSERT_COMMAND);
@@ -10168,6 +10173,8 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 		new SimpleJMenuItem( __Commands_General_FileHandling_RemoveFile_String, this));
 	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_MergeListFileColumns_JMenuItem =
 		new SimpleJMenuItem(__Commands_General_FileHandling_MergeListFileColumns_String, this));
+	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_WebGet_JMenuItem = 
+		new SimpleJMenuItem(__Commands_General_FileHandling_WebGet_String, this));
 	
 	JMenu Commands_General_HydroBase_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 		style, parent_JMenu, __Commands_General_HydroBase_String, false );
