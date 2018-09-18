@@ -457,7 +457,7 @@ private int readHydroBaseIrrigationPracticeTSForParcelList (
 	double percent_irrig2;	// Percent of parcel that is irrigated by ditch
 	// if datastore read the parcel use ts list
 	if(datastore != null){
-		datastore.getParcelUseTSList(part_id);
+		datastore.readParcelUseTSList(part_id);
 	}
 	for ( int iparcel = 0; iparcel < nparcel; iparcel++ ) {
 		parcel_id = Integer.parseInt((String)parcel_ids.get(iparcel) );
