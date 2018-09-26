@@ -1,0 +1,1 @@
+ReadTableFromDelimitedFile(TableID="KNN_Aspinall",InputFile="Data\flow_sequence_dataset_1.csv")

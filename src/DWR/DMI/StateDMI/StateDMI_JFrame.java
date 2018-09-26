@@ -684,6 +684,7 @@ import java.io.PrintWriter;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -763,6 +764,7 @@ import RTi.Util.IO.CommandLog_TableModel;
 import RTi.Util.IO.CommandPhaseType;
 import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.CommandProcessorListener;
+import RTi.Util.IO.CommandProcessorRequestResultsBean;
 import RTi.Util.IO.CommandProgressListener;
 import RTi.Util.IO.CommandStatusProvider;
 import RTi.Util.IO.CommandStatusType;
@@ -781,6 +783,8 @@ import RTi.Util.Message.DiagnosticsJFrame;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageLogListener;
 import RTi.Util.String.StringUtil;
+import RTi.Util.Table.DataTable;
+import RTi.Util.Table.DataTable_JFrame;
 import RTi.Util.Time.TimeInterval;
 import riverside.datastore.DataStore;
 import riverside.datastore.DataStores_JFrame;
@@ -1147,6 +1151,21 @@ JList data model for StateCU components (basically a Vector of
 component names associated with __resultsStateModComponents_JList).
 */
 private DefaultListModel __resultsStateModComponents_JListModel = null;
+
+/**
+List of results tables for viewing with an editor.
+*/
+private JList<String> __resultsTables_JList = null;
+
+/**
+Popup menu for table results.
+*/
+private JPopupMenu __resultsTables_JPopupMenu = null;
+
+/**
+JList data model for final time series (a list of table identifiers associated with __results_tables_JList).
+*/
+private DefaultListModel<String> __resultsTables_JListModel;
 
 /**
 List of time series selectors and associated component types, maintained
@@ -1620,6 +1639,15 @@ JMenuItem
     //-- separator ---
     __Commands_General_TestProcessing_CreateRegressionTestCommandFile_JMenuItem = null,
     __Commands_General_TestProcessing_StartRegressionTestResultsReport_JMenuItem = null;
+
+//Commands (Table)
+
+private JMenu
+	__Commands_Table_JMenu = null;
+private JMenu
+	__Commands_TableRead_JMenu = null;
+private JMenuItem
+	__Commands_TableRead_ReadTableFromDelimitedFile_JMenuItem;
 
 // Commands Menu for StateMod...
 
@@ -2472,6 +2500,14 @@ private String
 	__Commands_General_TestProcessing_CompareFiles_String = "CompareFiles()... <compare files, to test software>",
 	__Commands_General_TestProcessing_WriteProperty_String = "WriteProperty()... <write processor property, to test software>",
 	__Commands_General_TestProcessing_CreateRegressionTestCommandFile_String = "CreateRegressionTestCommandFile()... <to test software>";
+
+	// Table Commands...
+
+	private String
+	
+	__Commands_Table_String = "Commands (Table)",
+	__Commands_TableRead_String = "Read Table",
+	__Commands_TableRead_ReadTableFromDelimitedFile_String = "ReadTableFromDelimitedFile()... <read a table from a delimited file>";
 
 	// StateMod sub-menus (see the first item for the file being edited)...
 
@@ -4177,6 +4213,12 @@ public void actionPerformed ( ActionEvent event )
 	}
     else if (command.equals( __Commands_General_TestProcessing_StartRegressionTestResultsReport_String) ) {
         commandList_EditCommand ( __Commands_General_TestProcessing_StartRegressionTestResultsReport_String, null, __INSERT_COMMAND );
+    }
+	
+	// Table Commands
+	
+    else if (command.equals( __Commands_TableRead_ReadTableFromDelimitedFile_String) ) {
+        commandList_EditCommand ( __Commands_TableRead_ReadTableFromDelimitedFile_String, null, __INSERT_COMMAND );
     }
 
 	// StateMod Commands...
@@ -6715,6 +6757,66 @@ private void commandList_SetDirty ( boolean dirty )
 // beyond basic command list insert/delete/update.
 
 /**
+Get the command processor table results for a table identifier.
+Typically this corresponds to a user selecting the time series from the
+results list, for further display.
+@param tableId identifier for table to display
+@return The matching table or null if not available from the processor.
+*/
+private DataTable commandProcessor_GetTable ( String tableId )
+{   String message, routine = "TSTool_JFrame.commandProcessor_GetTable";
+    if ( __statedmiProcessor == null ) {
+        return null;
+    }
+    PropList request_params = new PropList ( "" );
+    request_params.set ( "TableID", tableId );
+    CommandProcessorRequestResultsBean bean = null;
+    try {
+        bean = __statedmiProcessor.processRequest( "GetTable", request_params);
+    }
+    catch ( Exception e ) {
+        message = "Error requesting GetTable(TableID=\"" + tableId + "\") from processor.";
+        Message.printWarning(2, routine, message );
+        Message.printWarning ( 3, routine, e );
+    }
+    PropList bean_PropList = bean.getResultsPropList();
+    Object o_table = bean_PropList.getContents ( "Table" );
+    DataTable table = null;
+    if ( o_table == null ) {
+        message = "Null table returned from processor for GetTable(TableID=\"" + tableId + "\").";
+        Message.printWarning ( 2, routine, message );
+    }
+    else {
+        table = (DataTable)o_table;
+    }
+    return table;
+}
+
+/**
+Get the command processor table results list.
+@return The table results list or null
+if the processor is not available.
+*/
+@SuppressWarnings("unchecked")
+private List<DataTable> commandProcessor_GetTableResultsList()
+{   String routine = "TSTool_JFrame.commandProcessorGetTableResultsList";
+    Object o = null;
+    try {
+        o = __statedmiProcessor.getPropContents ( "TableResultsList" );
+    }
+    catch ( Exception e ) {
+        String message = "Error requesting TableResultsList from processor.";
+        Message.printWarning(2, routine, message );
+    }
+    if ( o == null ) {
+        return null;
+    }
+    else {
+        return (List<DataTable>)o;
+    }
+}
+
+/**
 Get the working directory for a command (e.g., for editing).
 */
 private String commandProcessor_GetWorkingDirForCommand ( Command command )
@@ -8217,6 +8319,15 @@ private void results_StateModComponents_Clear()
 }
 
 /**
+Add the specified table to the list of tables that can be selected for viewing.
+@param tableid table identifier for table generated by the processor.
+*/
+private void results_Tables_AddTable ( String tableid )
+{
+    __resultsTables_JListModel.addElement( tableid );
+}
+
+/**
 Handle TS_ListSelector_JFrame events.
 @param selector TS_ListSelector_JFrame instance from which the time series were selected.
 @param tslist The Vector of TS that were selected.
@@ -9651,6 +9762,7 @@ private void ui_InitGUI ()
 	ui_InitGUIMenus_View ( __JMenuBar );
 	if ( __appType == StateDMI.APP_TYPE_STATECU ) {
 		ui_InitGUIMenus_Commands_StateCU ( __JMenuBar, menu_style );
+		ui_InitGUIMenus_Commands_TableRead( __JMenuBar, menu_style );
 		ui_InitGUIMenus_Run ( __JMenuBar );
 		ui_InitGUIMenus_Results_StateCU ( __JMenuBar );
 	}
@@ -9985,6 +10097,30 @@ private void ui_InitGUI ()
     JGUIUtil.addComponent(resultsStateModComponents_JPanel, new JScrollPane ( __resultsStateModComponents_JList ), 
         0, 0, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     __results_JTabbedPane.addTab ( "StateMod Components", resultsStateModComponents_JPanel );
+    
+    // Results: tables...
+    
+    JPanel results_tables_JPanel = new JPanel();
+    results_tables_JPanel.setLayout(gbl);
+    /*
+    results_tables_JPanel.setBorder(
+        BorderFactory.createTitledBorder (
+        BorderFactory.createLineBorder(Color.black),
+        "Results: Tables" ));
+        */
+    //JGUIUtil.addComponent(center_JPanel, results_tables_JPanel,
+    //    0, 2, 1, 1, 1.0, 0.0, insetsNNNN, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+    JGUIUtil.addComponent(results_tables_JPanel, new JLabel ("Tables:"),
+        0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    __resultsTables_JListModel = new DefaultListModel();
+    __resultsTables_JList = new JList ( __resultsTables_JListModel );
+    __resultsTables_JList.setSelectionMode ( ListSelectionModel.SINGLE_SELECTION );
+    __resultsTables_JList.addKeyListener ( this );
+    __resultsTables_JList.addListSelectionListener ( this );
+    __resultsTables_JList.addMouseListener ( this );
+    JGUIUtil.addComponent(results_tables_JPanel, new JScrollPane ( __resultsTables_JList ), 
+        0, 15, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    __results_JTabbedPane.addTab ( "Tables", results_tables_JPanel );
 
 	// Add the results JTree...
 
@@ -10220,6 +10356,8 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 		new SimpleJMenuItem ( __Commands_General_TestProcessing_CreateRegressionTestCommandFile_String, this));
 	Commands_General_TestProcessing_JMenu.add( __Commands_General_TestProcessing_StartRegressionTestResultsReport_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_TestProcessing_StartRegressionTestResultsReport_String, this));
+	
+	
 }
 
 /**
@@ -10760,6 +10898,7 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 	// General Commands Submenu
 	
 	ui_InitGUIMenus_Commands_General ( style, __Commands_JMenu );
+	
 }
 
 /**
@@ -12215,6 +12354,47 @@ private void ui_InitGUIMenus_Commands_StateMod_WellRights ( int style, JMenu par
 		new SimpleJMenuItem(__Commands_StateMod_WellRights_WriteWellRightsToStateMod_String,this));
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateMod_WellRights_JMenu,
 		__Commands_StateMod_WellRights_CheckWellRights_String);
+}
+
+/**
+ * Initialize the table command menus.  These can be used with StateMod or StateCU.
+ * @param style Menu style (see MENU_STYLE_*).
+ * @param parent_JMenu The JMenu to which submenus should be attached.
+ */
+private void ui_InitGUIMenus_Commands_TableRead ( JMenuBar menuBar, int style ) {
+	if ( menuBar != null ) {
+		// Initialization...
+		menuBar.add( __Commands_Table_JMenu = new JMenu( __Commands_Table_String, true));
+		__Commands_Table_JMenu.setToolTipText("Insert command into commands list (above first selected command, or at end).");
+	}
+
+	boolean show_all_commands = false; // True indicates that a command file has been opened directly.
+	if ( (__statecuDatasetType == StateCU_DataSet.TYPE_UNKNOWN) && (__statecuDataset == null) ) {
+		// Startup or user is editing commands directly without a data
+		// set.  If at initialization, all menus will be available but
+		// will be disabled.  If a command file is opened directly,
+		// then the GUI state will be checked and menus will be enabled.
+		show_all_commands = true;
+	}
+
+	// Response file submenu... (will there be commands?).
+
+	// Control file submenu... (will there be commands?).
+
+	// CU Locations Submenu
+
+	if ( __statecuDatasetType == StateCU_DataSet.TYPE_OTHER_USES ) {
+		// Only for other uses...
+		return;
+	}
+	
+	// Add group menu
+	JMenu Commands_TableRead_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
+			__Commands_Table_JMenu, __Commands_TableRead_String, false );
+	
+	// Add ReadTableFromDelimitedFile Option
+	Commands_TableRead_JMenu.add( __Commands_TableRead_ReadTableFromDelimitedFile_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromDelimitedFile_String, this));
 }
 
 /**
@@ -14412,6 +14592,7 @@ private void uiAction_RunCommands_ShowResults()
 			uiAction_RunCommands_ShowResultsProblems();
 			uiAction_RunCommands_ShowResultsStateCUComponents ();
 			uiAction_RunCommands_ShowResultsStateModComponents ();
+			uiAction_RunCommands_ShowResultsTables();
 			// TODO SAM 2005-01-18 need to enable JTree
 			//ui_displayResultsComponentTree();
             
@@ -14794,6 +14975,40 @@ private void uiAction_RunCommands_ShowResultsStateModComponents ()
 }
 
 /**
+Display the table results.
+*/
+private void uiAction_RunCommands_ShowResultsTables()
+{   // Get the list of tables from the processor.
+    List<DataTable> tableList = commandProcessor_GetTableResultsList();
+    int size = 0;
+    if ( tableList != null ) {
+        size = tableList.size();
+    }
+    ui_SetIgnoreActionEvent(true);
+    DataTable table;
+    // Use HTML only when needed to show a zero size table
+    String htmlStart = "<html><span style=\"color:red;font-weight:bold\">", htmlStart2;
+    String htmlEnd = "</span></html>", htmlEnd2;
+    int nRows, nCols;
+    for ( int i = 0; i < size; i++ ) {
+        table = tableList.get(i);
+        htmlStart2 = "";
+        htmlEnd2 = "";
+        nRows = table.getNumberOfRecords();
+        nCols = table.getNumberOfFields();
+        if ( (nRows == 0) || (nCols == 0) ) {
+            htmlStart2 = htmlStart;
+            htmlEnd2 = htmlEnd;
+        }
+        results_Tables_AddTable ( htmlStart2 + (i + 1) + ") " + table.getTableID() +
+            " - " + nRows + " rows, " + nCols +
+            " columns" + htmlEnd2 );
+        
+    }
+    ui_SetIgnoreActionEvent(false);
+}
+
+/**
 Select all commands in the commands list.  This occurs in response to a user selecting a menu choice.
 */
 private void uiAction_SelectAllCommands()
@@ -15026,6 +15241,49 @@ private void uiAction_ShowResultsOutputFile ( String selected )
             Message.printWarning ( 3, routine, e2 );
         }
     }
+}
+
+/**
+Show a table using the built in display component.
+@param selected table display string for the table to display "#) TableID - other information...".
+*/
+private void uiAction_ShowResultsTable ( String selected )
+{   String routine = getClass().getSimpleName() + ".uiAction_ShowResultsTable";
+    if ( selected == null ) {
+        // May be the result of some UI event...
+        return;
+    }
+    // Display the table...
+    String tableId = "";
+    try {
+        tableId = uiAction_ShowResultsTable_GetTableID ( selected );
+        DataTable table = commandProcessor_GetTable ( tableId );
+        if ( table == null ) {
+            Message.printWarning (1, routine,
+                "Unable to get table \"" + tableId + "\" from processor to view." );  
+        }
+        new DataTable_JFrame ( "Table \"" + tableId + "\"", table );
+    }
+    catch (Exception e2) {
+        Message.printWarning (1, routine, "Unable to view table \"" + tableId + "\"" );
+        Message.printWarning ( 3, routine, e2 );
+    }
+}
+
+/**
+Helper method to get the table identifier from the displayed table results list string.
+*/
+private String uiAction_ShowResultsTable_GetTableID ( String tableDisplayString )
+{
+    // Determine the table identifier from the displayed string, which will always have at least one
+    // dash, but table identifiers may also have a dash
+    if ( tableDisplayString == null ) {
+        return null;
+    }
+    int pos1 = tableDisplayString.indexOf( ")"); // Count at start of string
+    int pos2 = tableDisplayString.indexOf( " -"); // Break between ID
+    String tableId = tableDisplayString.substring(pos1+1,pos2).trim();
+    return tableId;
 }
 
 /**
@@ -15370,6 +15628,19 @@ public void valueChanged ( ListSelectionEvent e )
             for (int i = minIndex; i <= maxIndex; i++) {
                 if (lsm.isSelectedIndex(i)) {
                     ui_DisplayResultsStateModComponentTable ( (String)__resultsStateModComponents_JListModel.get(i) );
+                }
+            }
+        }
+    }
+    else if ( component == __resultsTables_JList ) {
+        if ( !e.getValueIsAdjusting() ) {
+            // User is done adjusting selection so do the display...
+            ListSelectionModel lsm = __resultsTables_JList.getSelectionModel();
+            int minIndex = lsm.getMinSelectionIndex();
+            int maxIndex = lsm.getMaxSelectionIndex();
+            for (int i = minIndex; i <= maxIndex; i++) {
+                if (lsm.isSelectedIndex(i)) {
+                    uiAction_ShowResultsTable( (String)__resultsTables_JListModel.elementAt(i) );
                 }
             }
         }

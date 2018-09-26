@@ -10,6 +10,7 @@ import rti.tscommandprocessor.commands.hydrobase.OpenHydroBase_Command;
 import rti.tscommandprocessor.commands.logging.SetDebugLevel_Command;
 import rti.tscommandprocessor.commands.logging.SetWarningLevel_Command;
 import rti.tscommandprocessor.commands.logging.StartLog_Command;
+import rti.tscommandprocessor.commands.table.ReadTableFromDelimitedFile_Command;
 import rti.tscommandprocessor.commands.time.SetOutputPeriod_Command;
 import rti.tscommandprocessor.commands.time.SetOutputYearType_Command;
 import rti.tscommandprocessor.commands.util.CommentBlockEnd_Command;
@@ -578,6 +579,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadStreamGageStationsFromStateMod")) {
 		return new ReadStreamGageStationsFromStateMod_Command();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadTableFromDelimitedFile")) {
+        return new ReadTableFromDelimitedFile_Command();
+    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadWellDemandTSMonthlyFromStateMod")) {
 		return new ReadWellDemandTSMonthlyFromStateMod_Command();
 	}
