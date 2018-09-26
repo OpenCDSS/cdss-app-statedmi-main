@@ -909,6 +909,7 @@ import RTi.Util.Message.MessageJDialog;
 import RTi.Util.Message.MessageJDialogListener;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.String.StringUtil;
+import RTi.Util.Table.DataTable;
 import RTi.Util.Time.DateTime;
 import RTi.Util.Time.StopWatch;
 import RTi.Util.Time.TimeInterval;
@@ -1045,6 +1046,11 @@ processing.  It is envisioned that cancel can always occur between commands and
 as time allows it will also be enabled within a command.
 */
 private volatile boolean __cancel_processing_requested = false;
+
+/**
+List of DataTable objects maintained by the processor.
+*/
+List<DataTable> __TableList = new Vector<DataTable>();
 
 /**
 Special flag to handle limitDiversionHistoricalTSMonthlyToRights() command,
@@ -6422,6 +6428,9 @@ public Object getPropContents ( String prop ) throws Exception
 	else if ( prop.equalsIgnoreCase("StateMod_WellDemandTSMonthly_List") ){
 		return getStateModWellDemandTSMonthlyList();
 	}
+	else if ( prop.equalsIgnoreCase("TableResultsList") ) {
+        return getPropContents_TableResultsList();
+    }
     else if ( prop.equalsIgnoreCase("WarningLevelLogFile") ) {
         return new Integer(Message.getWarningLevel(Message.LOG_OUTPUT));
     }
@@ -6485,6 +6494,15 @@ private Vector getPropContents_OutputComments()
 		}
 	}
 	return new Vector(comments);
+}
+
+/**
+Handle the TableResultsList property request.
+@return The table results list, as a List of DataTable.
+*/
+private List<DataTable> getPropContents_TableResultsList()
+{
+    return __TableList;
 }
 
 /**
@@ -9532,6 +9550,9 @@ throws Exception
     if ( request.equalsIgnoreCase("AddCommandProcessorEventListener") ) {
         return processRequest_AddCommandProcessorEventListener ( request, request_params );
     }
+    else if ( request.equalsIgnoreCase("GetTable") ) {
+        return processRequest_GetTable ( request, request_params );
+    }
     else if ( request.equalsIgnoreCase("GetWorkingDirForCommand") ) {
 		return processRequest_GetWorkingDirForCommand ( request, request_params );
 	}
@@ -9541,6 +9562,9 @@ throws Exception
 	else if ( request.equalsIgnoreCase("SetHydroBaseDMI") ) {
 		return processRequest_SetHydroBaseDMI ( request, request_params );
 	}
+	else if ( request.equalsIgnoreCase("SetTable") ) {
+        return processRequest_SetTable ( request, request_params );
+    }
 	else {
 		StateDMIProcessorRequestResultsBean bean = new StateDMIProcessorRequestResultsBean();
 		String warning = "Unknown StateDMIProcessor request \"" + request + "\"";
@@ -9570,6 +9594,44 @@ throws Exception
     CommandProcessorEventListener listener = (CommandProcessorEventListener)o;
     addCommandProcessorEventListener ( listener );
     // No data are returned in the bean.
+    return bean;
+}
+
+/**
+Process the GetTable request.
+*/
+private CommandProcessorRequestResultsBean processRequest_GetTable (
+        String request, PropList request_params )
+throws Exception
+{   StateDMIProcessorRequestResultsBean bean = new StateDMIProcessorRequestResultsBean();
+    // Get the necessary parameters...
+    Object o = request_params.getContents ( "TableID" );
+    if ( o == null ) {
+            String warning = "Request GetTable() does not provide a TableID parameter.";
+            bean.setWarningText ( warning );
+            bean.setWarningRecommendationText ( "This is likely a software code error.");
+            throw new RequestParameterNotFoundException ( warning );
+    }
+    String TableID = (String)o;
+    int size = 0;
+    if ( __TableList != null ) {
+        size = __TableList.size();
+    }
+    DataTable table = null;
+    boolean found = false;
+    for ( int i = 0; i < size; i++ ) {
+        table = (DataTable)__TableList.get(i);
+        if ( table.getTableID().equalsIgnoreCase(TableID) ) {
+            found = true;
+            break;
+        }
+    }
+    if ( !found ) {
+        table = null;
+    }
+    PropList results = bean.getResultsPropList();
+    // This will be set in the bean because the PropList is a reference...
+    results.setUsingObject("Table", table );
     return bean;
 }
 
@@ -9692,6 +9754,40 @@ throws Exception
 	__hdmi = dmi;
 	// No results need to be returned.
 	return bean;
+}
+
+/**
+Process the SetTable request.
+*/
+private CommandProcessorRequestResultsBean processRequest_SetTable (
+        String request, PropList request_params )
+throws Exception
+{   StateDMIProcessorRequestResultsBean bean = new StateDMIProcessorRequestResultsBean();
+    // Get the necessary parameters...
+    Object o = request_params.getContents ( "Table" );
+    if ( o == null ) {
+            String warning = "Request SetTable() does not provide a Table parameter.";
+            bean.setWarningText ( warning );
+            bean.setWarningRecommendationText ("This is likely a software code error.");
+            throw new RequestParameterNotFoundException ( warning );
+    }
+    DataTable o_DataTable = (DataTable)o;
+    // Loop through the tables.  If a matching table ID is found, reset.  Otherwise, add at the end.
+    int size = __TableList.size();
+    DataTable table;
+    boolean found = false;
+    for ( int i = 0; i < size; i++ ) {
+        table = (DataTable)__TableList.get(i);
+        if ( table.getTableID().equalsIgnoreCase(o_DataTable.getTableID())) {
+            __TableList.set(i,o_DataTable);
+            found = true;
+        }
+    }
+    if ( !found ) {
+        __TableList.add ( o_DataTable );
+    }
+    // No data are returned in the bean.
+    return bean;
 }
 
 /**
