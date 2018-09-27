@@ -1591,6 +1591,22 @@ private JMenuItem
 	__Commands_StateCU_DiversionRights_JMenuItem;
 
 private JMenu
+	__Commands_Spreadsheet_JMenu = null;
+private JMenuItem
+	__Commands_Spreadsheet_NewExcelWorkbook_JMenuItem,
+	__Commands_Spreadsheet_ReadExcelWorkbook_JMenuItem,
+	__Commands_Spreadsheet_ReadTableFromExcel_JMenuItem,
+	__Commands_Spreadsheet_ReadTableCellsFromExcel_JMenuItem,
+	__Commands_Spreadsheet_ReadPropertiesFromExcel_JMenuItem,
+	__Commands_Spreadsheet_SetExcelCell_JMenuItem,
+	__Commands_Spreadsheet_SetExcelWorksheetViewProperties_JMenuItem,
+	__Commands_Spreadsheet_WriteTableToExcel_JMenuItem,
+	__Commands_Spreadsheet_WriteTableCellsToExcel_JMenuItem,
+	__Commands_Spreadsheet_WriteTimeSeriesToExcel_JMenuItem,
+	__Commands_Spreadsheet_WriteTimeSeriesToExcelBlock_JMenuItem,
+	__Commands_Spreadsheet_CloseExcelWorkbook_JMenuItem;
+
+private JMenu
 	__Commands_General_Comments_JMenu;
 private JMenuItem
 	__Commands_General_Comments_Comment_JMenuItem,
@@ -1627,8 +1643,9 @@ private JMenuItem
 	__Commands_General_Running_RunCommands_JMenuItem = null,
 	__Commands_General_Running_RunProgram_JMenuItem = null,
 	__Commands_General_Running_RunPython_JMenuItem = null,
-	__Commands_General_Running_Exit_JMenuItem,
-	__Commands_General_Running_SetWorkingDir_JMenuItem;
+	__Commands_General_Running_Exit_JMenuItem = null,
+	__Commands_General_Running_SetWorkingDir_JMenuItem = null,
+	__Commands_General_Running_WritePropertiesToFile_JMenuItem = null;
 
 //Commands (General - Test Processing)...
 JMenu
@@ -2517,6 +2534,22 @@ private String
 	__Commands_StateCU_DelayTableAssignment_WriteCULocationDelayTableAssignmentsToList_String = "WriteCULocationDelayTableAssignmentsToList() ...",
 	__Commands_StateCU_DelayTableAssignment_WriteCULocationDelayTableAssignmentsToStateCU_String = "WriteCULocationDelayTableAssignmentsToStateCU() ...",
 	__Commands_StateCU_DelayTableAssignment_CheckCULocationDelayTableAssignments_String = "CheckCULocationDelayTableAssignments() ...",
+	
+	// Spreadsheet Commands...
+
+	__Commands_Spreadsheet_String = "Spreadsheet Processing",
+	__Commands_Spreadsheet_NewExcelWorkbook_String = "NewExcelWorkbook()... <create a new Excel workbook file>",
+	__Commands_Spreadsheet_ReadExcelWorkbook_String = "ReadExcelWorkbook()... <read an Excel workbook file>",
+	__Commands_Spreadsheet_ReadTableFromExcel_String = "ReadTableFromExcel()... <read a table from an Excel file>",
+	__Commands_Spreadsheet_ReadTableCellsFromExcel_String = "ReadTableCellsFromExcel()... <read a table's cells from an Excel file>",
+	__Commands_Spreadsheet_ReadPropertiesFromExcel_String = "ReadPropertiesFromExcel()... <read processor properties from an Excel file>",
+	__Commands_Spreadsheet_SetExcelCell_String = "SetExcelCell()... <set single Excel value and formatting>",
+	__Commands_Spreadsheet_SetExcelWorksheetViewProperties_String = "SetExcelWorksheetViewProperties()... <set Excel view properties>",
+	__Commands_Spreadsheet_WriteTableToExcel_String = "WriteTableToExcel()... <write a table to an Excel file>",
+	__Commands_Spreadsheet_WriteTableCellsToExcel_String = "WriteTableCellsToExcel()... <write a table's cells to an Excel file>",
+	__Commands_Spreadsheet_WriteTimeSeriesToExcel_String = "WriteTimeSeriesToExcel()... <write 1+ time series to an Excel file>",
+	__Commands_Spreadsheet_WriteTimeSeriesToExcelBlock_String = "WriteTimeSeriesToExcelBlock()... <write 1+ time series to an Excel file as data block(s)>",
+	__Commands_Spreadsheet_CloseExcelWorkbook_String = "CloseExcelWorkbook()... <close and optionally write an Excel file>",
 
 	// General commands...
     
@@ -2550,6 +2583,7 @@ private String
     __Commands_General_Running_RunPython_String = "RunPython()... <run a Python script>",
 	__Commands_General_Running_Exit_String = "Exit() ",
 	__Commands_General_Running_SetWorkingDir_String = "SetWorkingDir() ...",
+	__Commands_General_Running_WritePropertiesToFile_String = "WritePropertiesToFile()... <write processor properties to file>",
 
 	__Commands_General_TestProcessing_String = "General - Test Processing",
 	__Commands_General_TestProcessing_StartRegressionTestResultsReport_String = "StartRegressionTestResultsReport()... <for test results>",
@@ -4305,6 +4339,9 @@ public void actionPerformed ( ActionEvent event )
 	else if ( action.equals( __Commands_General_Running_SetOutputYearType_String) ) {
 		commandList_EditCommand (__Commands_General_Running_SetOutputYearType_String, null,__INSERT_COMMAND);
 	}
+	else if (command.equals( __Commands_General_Running_WritePropertiesToFile_String)){
+        commandList_EditCommand ( __Commands_General_Running_WritePropertiesToFile_String, null, __INSERT_COMMAND );
+    }
 	else if (command.equals( __Commands_General_TestProcessing_WriteProperty_String)){
 		commandList_EditCommand ( __Commands_General_TestProcessing_WriteProperty_String, null, __INSERT_COMMAND );
 	}
@@ -4316,6 +4353,45 @@ public void actionPerformed ( ActionEvent event )
 	}
     else if (command.equals( __Commands_General_TestProcessing_StartRegressionTestResultsReport_String) ) {
         commandList_EditCommand ( __Commands_General_TestProcessing_StartRegressionTestResultsReport_String, null, __INSERT_COMMAND );
+    }
+	
+	// Spreadsheet Commands...
+	
+    else if (command.equals( __Commands_Spreadsheet_NewExcelWorkbook_String) ) {
+        commandList_EditCommand ( __Commands_Spreadsheet_NewExcelWorkbook_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_Spreadsheet_ReadExcelWorkbook_String) ) {
+        commandList_EditCommand ( __Commands_Spreadsheet_ReadExcelWorkbook_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_Spreadsheet_ReadTableFromExcel_String) ) {
+        commandList_EditCommand ( __Commands_Spreadsheet_ReadTableFromExcel_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_Spreadsheet_ReadTableCellsFromExcel_String) ) {
+        commandList_EditCommand ( __Commands_Spreadsheet_ReadTableCellsFromExcel_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_Spreadsheet_ReadPropertiesFromExcel_String) ) {
+        commandList_EditCommand ( __Commands_Spreadsheet_ReadPropertiesFromExcel_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_Spreadsheet_SetExcelCell_String) ) {
+        commandList_EditCommand ( __Commands_Spreadsheet_SetExcelCell_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_Spreadsheet_SetExcelWorksheetViewProperties_String) ) {
+        commandList_EditCommand ( __Commands_Spreadsheet_SetExcelWorksheetViewProperties_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_Spreadsheet_WriteTableToExcel_String) ) {
+        commandList_EditCommand ( __Commands_Spreadsheet_WriteTableToExcel_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_Spreadsheet_WriteTableCellsToExcel_String) ) {
+        commandList_EditCommand ( __Commands_Spreadsheet_WriteTableCellsToExcel_String, null, __INSERT_COMMAND );
+    }
+    /*else if (command.equals( __Commands_Spreadsheet_WriteTimeSeriesToExcel_String) ) {
+        commandList_EditCommand ( __Commands_Spreadsheet_WriteTimeSeriesToExcel_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_Spreadsheet_WriteTimeSeriesToExcelBlock_String) ) {
+        commandList_EditCommand ( __Commands_Spreadsheet_WriteTimeSeriesToExcelBlock_String, null, __INSERT_COMMAND );
+    }*/
+    else if (command.equals( __Commands_Spreadsheet_CloseExcelWorkbook_String) ) {
+        commandList_EditCommand ( __Commands_Spreadsheet_CloseExcelWorkbook_String, null, __INSERT_COMMAND );
     }
 	
 	// Table Commands...
@@ -4389,10 +4465,10 @@ public void actionPerformed ( ActionEvent event )
     else if (command.equals( __Commands_TableManipulate_TableMath_String) ) {
         commandList_EditCommand ( __Commands_TableManipulate_TableMath_String, null, __INSERT_COMMAND );
     }
-    else if (command.equals( __Commands_TableManipulate_TableTimeSeriesMath_String) ) {
+    /*else if (command.equals( __Commands_TableManipulate_TableTimeSeriesMath_String) ) {
         commandList_EditCommand ( __Commands_TableManipulate_TableTimeSeriesMath_String, null, __INSERT_COMMAND );
     }
-    /*else if (command.equals( __Commands_TableAnalyze_CompareTables_String) ) {
+    else if (command.equals( __Commands_TableAnalyze_CompareTables_String) ) {
         commandList_EditCommand ( __Commands_TableAnalyze_CompareTables_String, null, __INSERT_COMMAND );
     }*/
     /*else if (command.equals( __Commands_TableOutput_WriteTableToDataStore_String) ){
@@ -10496,6 +10572,46 @@ Initialize the general command menus.  These can be used with StateMod or StateC
 */
 private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 {	parent_JMenu.addSeparator();
+
+	// Commands - Spreadsheet Processing 
+
+	JMenu Commands_Spreadsheet_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
+			style, parent_JMenu, __Commands_Spreadsheet_String, false);
+	Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_NewExcelWorkbook_JMenuItem = 
+			new SimpleJMenuItem(__Commands_Spreadsheet_NewExcelWorkbook_String, this));
+	Commands_Spreadsheet_JMenu.addSeparator();
+	Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_ReadExcelWorkbook_JMenuItem =
+	        new SimpleJMenuItem( __Commands_Spreadsheet_ReadExcelWorkbook_String, this ) );
+	Commands_Spreadsheet_JMenu.addSeparator();
+	Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_ReadTableFromExcel_JMenuItem =
+	        new SimpleJMenuItem( __Commands_Spreadsheet_ReadTableFromExcel_String, this ) );
+	Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_ReadTableCellsFromExcel_JMenuItem =
+	        new SimpleJMenuItem( __Commands_Spreadsheet_ReadTableCellsFromExcel_String, this ) );
+	Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_ReadPropertiesFromExcel_JMenuItem =
+	        new SimpleJMenuItem( __Commands_Spreadsheet_ReadPropertiesFromExcel_String, this ) );
+	Commands_Spreadsheet_JMenu.addSeparator();
+	Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_SetExcelCell_JMenuItem =
+	        new SimpleJMenuItem( __Commands_Spreadsheet_SetExcelCell_String, this ) );
+	Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_SetExcelWorksheetViewProperties_JMenuItem =
+	        new SimpleJMenuItem( __Commands_Spreadsheet_SetExcelWorksheetViewProperties_String, this ) );
+	Commands_Spreadsheet_JMenu.addSeparator();
+	Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_WriteTableToExcel_JMenuItem =
+	        new SimpleJMenuItem( __Commands_Spreadsheet_WriteTableToExcel_String, this ) );
+	Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_WriteTableCellsToExcel_JMenuItem =
+	        new SimpleJMenuItem( __Commands_Spreadsheet_WriteTableCellsToExcel_String, this ) );
+	/*Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_WriteTimeSeriesToExcel_JMenuItem =
+	        new SimpleJMenuItem( __Commands_Spreadsheet_WriteTimeSeriesToExcel_String, this ) );
+	Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_WriteTimeSeriesToExcelBlock_JMenuItem =
+	        new SimpleJMenuItem( __Commands_Spreadsheet_WriteTimeSeriesToExcelBlock_String, this ) );*/
+	Commands_Spreadsheet_JMenu.addSeparator();
+	Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_CloseExcelWorkbook_JMenuItem =
+	        new SimpleJMenuItem( __Commands_Spreadsheet_CloseExcelWorkbook_String, this ) );
+	    
+
+	parent_JMenu.addSeparator();	
+	
+	// General - Comments...
+
 	JMenu Commands_General_Comments_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 		style, parent_JMenu, __Commands_General_Comments_String, false );
 	Commands_General_Comments_JMenu.add( __Commands_General_Comments_Comment_JMenuItem =
@@ -10506,6 +10622,8 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 		new SimpleJMenuItem( __Commands_General_Comments_StartComment_String, this));
 	Commands_General_Comments_JMenu.add( __Commands_General_Comments_EndComment_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_Comments_EndComment_String, this));
+	
+	// General - File Handling...
 	
 	JMenu Commands_General_FileHandling_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 		style, parent_JMenu, __Commands_General_FileHandling_String, false );
@@ -10518,10 +10636,15 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_WebGet_JMenuItem = 
 		new SimpleJMenuItem(__Commands_General_FileHandling_WebGet_String, this));
 	
+	
+	// General - HydroBase
+	
 	JMenu Commands_General_HydroBase_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 		style, parent_JMenu, __Commands_General_HydroBase_String, false );
 	Commands_General_HydroBase_JMenu.add( __Commands_General_HydroBase_OpenHydroBase_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_HydroBase_OpenHydroBase_String, this));
+	
+	// General - Logging
 	
 	JMenu Commands_General_Logging_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 		style, parent_JMenu, __Commands_General_Logging_String, false );
@@ -10532,6 +10655,8 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 	Commands_General_Logging_JMenu.add( __Commands_General_Logging_SetWarningLevel_JMenuItem =
 		new SimpleJMenuItem ( __Commands_General_Logging_SetWarningLevel_String, this));
 	
+	// General - Running
+	
 	JMenu Commands_General_Running_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 		style, parent_JMenu, __Commands_General_Running_String, false );
 //	Commands_General_Running_JMenu.add( __Commands_General_Running_SetProperty_JMenuItem =
@@ -10540,6 +10665,9 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 		new SimpleJMenuItem( __Commands_General_Running_SetOutputPeriod_String, this));
 	Commands_General_Running_JMenu.add( __Commands_General_Running_SetOutputYearType_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_Running_SetOutputYearType_String, this));
+	Commands_General_Running_JMenu.addSeparator();
+	Commands_General_Running_JMenu.add ( __Commands_General_Running_WritePropertiesToFile_JMenuItem =
+	        new SimpleJMenuItem(__Commands_General_Running_WritePropertiesToFile_String, this ) );
 	Commands_General_Running_JMenu.addSeparator();
 	Commands_General_Running_JMenu.add( __Commands_General_Running_RunCommands_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_Running_RunCommands_String, this));
@@ -10552,6 +10680,8 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 		new SimpleJMenuItem( __Commands_General_Running_Exit_String, this));
 	Commands_General_Running_JMenu.add( __Commands_General_Running_SetWorkingDir_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_Running_SetWorkingDir_String, this));
+	
+	// General - Test Processing...
 
 	JMenu Commands_General_TestProcessing_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 		style, parent_JMenu, __Commands_General_TestProcessing_String, false );
@@ -12655,8 +12785,8 @@ private void ui_InitGUIMenus_Commands_Table ( JMenuBar menuBar, int style ) {
 			new SimpleJMenuItem(__Commands_TableManipulate_SplitTableColumn_String, this));
 	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_TableMath_JMenuItem = 
 			new SimpleJMenuItem(__Commands_TableManipulate_TableMath_String, this));
-	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_TableTimeSeriesMath_JMenuItem = 
-			new SimpleJMenuItem(__Commands_TableManipulate_TableTimeSeriesMath_String, this));
+	/*Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_TableTimeSeriesMath_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableManipulate_TableTimeSeriesMath_String, this));*/
 	Commands_TableManipulate_JMenu.addSeparator();
 	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_InsertTableRow_JMenuItem = 
 			new SimpleJMenuItem(__Commands_TableManipulate_InsertTableRow_String, this));
