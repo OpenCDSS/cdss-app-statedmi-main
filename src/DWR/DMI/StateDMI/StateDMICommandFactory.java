@@ -59,6 +59,7 @@ import rti.tscommandprocessor.commands.util.MergeListFileColumns_Command;
 import rti.tscommandprocessor.commands.util.RemoveFile_Command;
 import rti.tscommandprocessor.commands.util.SetWorkingDir_Command;
 import rti.tscommandprocessor.commands.util.WebGet_Command;
+import rti.tscommandprocessor.commands.util.WritePropertiesToFile_Command;
 import RTi.Util.String.StringUtil;
 
 /**
@@ -1191,6 +1192,9 @@ throws UnknownCommandException
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteProperty")) {
 		return new WriteProperty_Command();
+	}
+	else if (StringUtil.startsWithIgnoreCase( commandString , "WritePropertiesToFile") ){
+		return new WritePropertiesToFile_Command();
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteRiverNetworkToList")) {
 		return new WriteRiverNetworkToList_Command();
