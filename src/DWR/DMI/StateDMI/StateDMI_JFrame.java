@@ -1640,14 +1640,70 @@ JMenuItem
     __Commands_General_TestProcessing_CreateRegressionTestCommandFile_JMenuItem = null,
     __Commands_General_TestProcessing_StartRegressionTestResultsReport_JMenuItem = null;
 
-//Commands (Table)
+// Commands (Table)...
 
 private JMenu
 	__Commands_Table_JMenu = null;
+
+// Create, Copy, Free Table
+private JMenu
+	__Commands_TableCreate_JMenu = null;
+private JMenuItem
+	__Commands_TableCreate_NewTable_JMenuItem,
+	__Commands_TableCreate_CopyTable_JMenuItem,
+	__Commands_TableCreate_FreeTable_JMenuItem;
+
+// Read Table
 private JMenu
 	__Commands_TableRead_JMenu = null;
 private JMenuItem
-	__Commands_TableRead_ReadTableFromDelimitedFile_JMenuItem;
+	__Commands_TableRead_ReadTableFromDataStore_JMenuItem,
+	__Commands_TableRead_ReadTableFromDBF_JMenuItem,
+	__Commands_TableRead_ReadTableFromDelimitedFile_JMenuItem,
+	__Commands_TableRead_ReadTableFromExcel_JMenuItem,
+	__Commands_TableRead_ReadTableFromFixedFormatFile_JMenuItem,
+	__Commands_TableRead_ReadTableFromJSON_JMenuItem, // not being used
+	__Commands_TableRead_ReadTableFromXML_JMenuItem; // not being used
+
+// Append, Join Tables
+private JMenu
+	__Commands_TableJoin_JMenu = null;
+private JMenuItem
+	__Commands_TableJoin_AppendTable_JMenuItem,
+	__Commands_TableJoin_JoinTables_JMenuItem;
+
+// Manipulate Table Values
+private JMenu
+	__Commands_TableManipulate_JMenu = null;
+private JMenuItem
+	__Commands_TableManipulate_InsertTableColumn_JMenuItem,
+	__Commands_TableManipulate_DeleteTableColumns_JMenuItem,
+	__Commands_TableManipulate_DeleteTableRows_JMenuItem,
+	__Commands_TableManipulate_FormatTableString_JMenuItem,
+	__Commands_TableManipulate_ManipulateTableString_JMenuItem,
+	__Commands_TableManipulate_SetTableValues_JMenuItem,
+	__Commands_TableManipulate_SplitTableColumn_JMenuItem,
+	__Commands_TableManipulate_TableMath_JMenuItem,
+	__Commands_TableManipulate_TableTimeSeriesMath_JMenuItem,
+	__Commands_TableManipulate_InsertTableRow_JMenuItem,
+	__Commands_TableManipulate_SortTable_JMenuItem, 
+	__Commands_TableManipulate_SplitTableRow_JMenuItem;
+
+// Output Table
+private JMenu
+	__Commands_TableOutput_JMenu = null;
+private JMenuItem
+	__Commands_TableOutput_WriteTableToDataStore_JMenuItem,
+	__Commands_TableOutput_WriteTableToDelimitedFile_JMenuItem,
+	__Commands_TableOutput_WriteTableToExcel_JMenuItem,
+	__Commands_TableOutput_WriteTableToHTML_JMenuItem;
+
+// Running and Properties
+private JMenu
+	__Commands_TableRunning_JMenu = null;
+private JMenuItem
+	__Commands_TableRunning_SetPropertyFromTable_JMenuItem,
+	__Commands_TableRunning_CopyPropertiesToTable_JMenuItem;
 
 // Commands Menu for StateMod...
 
@@ -2506,9 +2562,56 @@ private String
 	private String
 	
 	__Commands_Table_String = "Commands (Table)",
+	
+	// Create, Copy, Free Table
+	__Commands_TableCreate_String = "Create, Copy, Free Table",
+	__Commands_TableCreate_NewTable_String = "NewTable()... <create a new empty table>",
+	__Commands_TableCreate_CopyTable_String = "CopyTable()... <create a new table as a full/partial copy of another>",
+	__Commands_TableCreate_FreeTable_String = "FreeTable()... <free a table (will not be available to later commands)>",
+	
+	// Read Table
 	__Commands_TableRead_String = "Read Table",
-	__Commands_TableRead_ReadTableFromDelimitedFile_String = "ReadTableFromDelimitedFile()... <read a table from a delimited file>";
-
+	__Commands_TableRead_ReadTableFromDataStore_String = "ReadTableFromDataStore()... <read a table from a database datastore>",
+	__Commands_TableRead_ReadTableFromDBF_String = "ReadTableFromDBF()... <read a table from a dBASE file>",
+	__Commands_TableRead_ReadTableFromDelimitedFile_String = "ReadTableFromDelimitedFile()... <read a table from a delimited file>",
+	__Commands_TableRead_ReadTableFromExcel_String = "ReadTableFromExcel()... <read a table from an Excel file>",
+	__Commands_TableRead_ReadTableFromFixedFormatFile_String = "ReadTableFromFixedFormatFile()... <read a table from a fixed format file>",
+	__Commands_TableRead_ReadTableFromJSON_String = "ReadTableFromJSON()... <read a table from a JSON file>", //not being used
+	__Commands_TableRead_ReadTableFromXML_String = "ReadTableFromXML()... <read a table from an XML file>", //not being used
+	
+	// Append, Join Tables
+	__Commands_TableJoin_String = "Append, Join Tables",
+	__Commands_TableJoin_AppendTable_String = "AppendTable()... <append a table's rows to another table>",
+	__Commands_TableJoin_JoinTables_String = "JoinTables()... <join a table's rows to another table by matching column value(s)>",
+	
+	// Manipulate Table Values
+	__Commands_TableManipulate_String = "Manipulate Table Values",
+	__Commands_TableManipulate_InsertTableColumn_String = "InsertTableColumn()... <insert table column>",
+	__Commands_TableManipulate_DeleteTableColumns_String = "DeleteTableColumns()... <delete table column(s)>",
+	__Commands_TableManipulate_DeleteTableRows_String = "DeleteTableRows()... <delete table row(s)>",
+	__Commands_TableManipulate_FormatTableDateTime_String = "FormatTableDateTime()... <format table date/time column into output column>",
+	__Commands_TableManipulate_FormatTableString_String = "FormatTableString()... <format table columns into a string column>",
+	__Commands_TableManipulate_ManipulateTableString_String = "ManipulateTableString()... <perform simple manipulation on table strings>",
+	__Commands_TableManipulate_SetTableValues_String = "SetTableValues()... <set table cell values>",
+	__Commands_TableManipulate_SplitTableColumn_String = "SplitTableColumn()... <split a column into multiple columns>",
+	__Commands_TableManipulate_TableMath_String = "TableMath()... <perform simple math on table columns>",
+	__Commands_TableManipulate_TableTimeSeriesMath_String = "TableTimeSeriesMath()... <perform simple math on table columns and time series>",
+	__Commands_TableManipulate_InsertTableRow_String = "InsertTableRow()... <insert table row(s)>",
+	__Commands_TableManipulate_SortTable_String = "SortTable()... <sort a table's rows>",
+	__Commands_TableManipulate_SplitTableRow_String = "SplitTableRow()... <split a row into multiple rows>",
+	
+	// Output Table
+	__Commands_TableOutput_String = "Output Table",
+	__Commands_TableOutput_WriteTableToDataStore_String = "WriteTableToDataStore()... <write a table to a database datastore>", // not being used
+	__Commands_TableOutput_WriteTableToDelimitedFile_String = "WriteTableToDelimitedFile()... <write a table to a delimited file>",
+	__Commands_TableOutput_WriteTableToExcel_String = "WriteTableToExcel()... <write a table to an Excel file>",
+	__Commands_TableOutput_WriteTableToHTML_String = "WriteTableToHTML()... <write a table to an HTML file>",
+	
+	// Running and Properties
+	__Commands_TableRunning_String = "Running and Properties",
+	__Commands_TableRunning_SetPropertyFromTable_String = "SetPropertyFromTable()... <set a processor property from a table>",
+	__Commands_TableRunning_CopyPropertiesToTable_String = "CopyPropertiesToTable()... <copy processor properties to a table>";
+	
 	// StateMod sub-menus (see the first item for the file being edited)...
 
 	private String
@@ -4215,10 +4318,103 @@ public void actionPerformed ( ActionEvent event )
         commandList_EditCommand ( __Commands_General_TestProcessing_StartRegressionTestResultsReport_String, null, __INSERT_COMMAND );
     }
 	
-	// Table Commands
+	// Table Commands...
 	
+    else if (command.equals( __Commands_TableCreate_NewTable_String) ) {
+        commandList_EditCommand ( __Commands_TableCreate_NewTable_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableCreate_CopyTable_String) ) {
+        commandList_EditCommand ( __Commands_TableCreate_CopyTable_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableJoin_AppendTable_String) ) {
+        commandList_EditCommand ( __Commands_TableJoin_AppendTable_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableJoin_JoinTables_String) ) {
+        commandList_EditCommand ( __Commands_TableJoin_JoinTables_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableManipulate_SortTable_String) ) {
+        commandList_EditCommand ( __Commands_TableManipulate_SortTable_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableRead_ReadTableFromDataStore_String) ) {
+    	commandList_EditCommand( __Commands_TableRead_ReadTableFromDataStore_String, null, __INSERT_COMMAND );
+    }
     else if (command.equals( __Commands_TableRead_ReadTableFromDelimitedFile_String) ) {
         commandList_EditCommand ( __Commands_TableRead_ReadTableFromDelimitedFile_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableRead_ReadTableFromDBF_String) ) {
+        commandList_EditCommand ( __Commands_TableRead_ReadTableFromDBF_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableRead_ReadTableFromExcel_String) ) {
+    	commandList_EditCommand( __Commands_TableRead_ReadTableFromExcel_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableRead_ReadTableFromFixedFormatFile_String) ) {
+        commandList_EditCommand ( __Commands_TableRead_ReadTableFromFixedFormatFile_String, null, __INSERT_COMMAND );
+    }
+    /*else if (command.equals( __Commands_TableRead_ReadTableFromJSON_String) ) {
+        commandList_EditCommand ( __Commands_TableRead_ReadTableFromJSON_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableRead_ReadTableFromXML_String) ) {
+        commandList_EditCommand ( __Commands_TableRead_ReadTableFromXML_String, null, __INSERT_COMMAND );
+    }*/
+    else if (command.equals( __Commands_TableManipulate_FormatTableDateTime_String) ) {
+        commandList_EditCommand ( __Commands_TableManipulate_FormatTableDateTime_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableManipulate_FormatTableString_String) ) {
+        commandList_EditCommand ( __Commands_TableManipulate_FormatTableString_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableManipulate_ManipulateTableString_String) ) {
+        commandList_EditCommand ( __Commands_TableManipulate_ManipulateTableString_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableManipulate_InsertTableColumn_String) ) {
+        commandList_EditCommand ( __Commands_TableManipulate_InsertTableColumn_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableManipulate_DeleteTableColumns_String) ) {
+        commandList_EditCommand ( __Commands_TableManipulate_DeleteTableColumns_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableManipulate_DeleteTableRows_String) ) {
+        commandList_EditCommand ( __Commands_TableManipulate_DeleteTableRows_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableManipulate_InsertTableRow_String) ) {
+        commandList_EditCommand ( __Commands_TableManipulate_InsertTableRow_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableManipulate_SetTableValues_String) ) {
+        commandList_EditCommand ( __Commands_TableManipulate_SetTableValues_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableManipulate_SplitTableColumn_String) ) {
+        commandList_EditCommand ( __Commands_TableManipulate_SplitTableColumn_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableManipulate_SplitTableRow_String) ) {
+        commandList_EditCommand ( __Commands_TableManipulate_SplitTableRow_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableManipulate_TableMath_String) ) {
+        commandList_EditCommand ( __Commands_TableManipulate_TableMath_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableManipulate_TableTimeSeriesMath_String) ) {
+        commandList_EditCommand ( __Commands_TableManipulate_TableTimeSeriesMath_String, null, __INSERT_COMMAND );
+    }
+    /*else if (command.equals( __Commands_TableAnalyze_CompareTables_String) ) {
+        commandList_EditCommand ( __Commands_TableAnalyze_CompareTables_String, null, __INSERT_COMMAND );
+    }*/
+    /*else if (command.equals( __Commands_TableOutput_WriteTableToDataStore_String) ){
+    	commandList_EditCommand ( __Commands_TableOutput_WriteTableToDataStore_String, null, __INSERT_COMMAND);
+    }*/
+    else if (command.equals( __Commands_TableOutput_WriteTableToDelimitedFile_String) ) {
+        commandList_EditCommand ( __Commands_TableOutput_WriteTableToDelimitedFile_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableOutput_WriteTableToExcel_String) ) {
+    	commandList_EditCommand( __Commands_TableOutput_WriteTableToExcel_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableOutput_WriteTableToHTML_String) ) {
+        commandList_EditCommand ( __Commands_TableOutput_WriteTableToHTML_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableCreate_FreeTable_String) ) {
+        commandList_EditCommand ( __Commands_TableCreate_FreeTable_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableRunning_SetPropertyFromTable_String) ) {
+        commandList_EditCommand ( __Commands_TableRunning_SetPropertyFromTable_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableRunning_CopyPropertiesToTable_String) ) {
+        commandList_EditCommand ( __Commands_TableRunning_CopyPropertiesToTable_String, null, __INSERT_COMMAND );
     }
 
 	// StateMod Commands...
@@ -7564,6 +7760,8 @@ private void results_Clear()
 {	ui_SetIgnoreActionEvent (true);
 	// Clear the list of output files...
 	results_OutputFiles_Clear();
+	// Clear tables
+	results_Tables_Clear();
 	// Clear the list of output components...
 	results_StateCUComponents_Clear();
 	results_StateModComponents_Clear();
@@ -8325,6 +8523,14 @@ Add the specified table to the list of tables that can be selected for viewing.
 private void results_Tables_AddTable ( String tableid )
 {
     __resultsTables_JListModel.addElement( tableid );
+}
+
+/**
+Clear the list of results tables.  This is normally called immediately before the commands are run.
+*/
+private void results_Tables_Clear()
+{
+    __resultsTables_JListModel.removeAllElements();
 }
 
 /**
@@ -9762,7 +9968,7 @@ private void ui_InitGUI ()
 	ui_InitGUIMenus_View ( __JMenuBar );
 	if ( __appType == StateDMI.APP_TYPE_STATECU ) {
 		ui_InitGUIMenus_Commands_StateCU ( __JMenuBar, menu_style );
-		ui_InitGUIMenus_Commands_TableRead( __JMenuBar, menu_style );
+		ui_InitGUIMenus_Commands_Table( __JMenuBar, menu_style );
 		ui_InitGUIMenus_Run ( __JMenuBar );
 		ui_InitGUIMenus_Results_StateCU ( __JMenuBar );
 	}
@@ -12361,7 +12567,7 @@ private void ui_InitGUIMenus_Commands_StateMod_WellRights ( int style, JMenu par
  * @param style Menu style (see MENU_STYLE_*).
  * @param parent_JMenu The JMenu to which submenus should be attached.
  */
-private void ui_InitGUIMenus_Commands_TableRead ( JMenuBar menuBar, int style ) {
+private void ui_InitGUIMenus_Commands_Table ( JMenuBar menuBar, int style ) {
 	if ( menuBar != null ) {
 		// Initialization...
 		menuBar.add( __Commands_Table_JMenu = new JMenu( __Commands_Table_String, true));
@@ -12388,13 +12594,99 @@ private void ui_InitGUIMenus_Commands_TableRead ( JMenuBar menuBar, int style ) 
 		return;
 	}
 	
-	// Add group menu
+	// Add group menu for Create, Copy, Free Table >
+	JMenu Commands_TableCreate_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style, 
+			__Commands_Table_JMenu, __Commands_TableCreate_String, false );
+	// Add Commands
+	Commands_TableCreate_JMenu.add( __Commands_TableCreate_NewTable_JMenuItem = 
+			new SimpleJMenuItem( __Commands_TableCreate_NewTable_String, this ));
+	Commands_TableCreate_JMenu.add( __Commands_TableCreate_CopyTable_JMenuItem = 
+			new SimpleJMenuItem( __Commands_TableCreate_CopyTable_String, this ));
+	// ---- 
+	Commands_TableCreate_JMenu.addSeparator();
+	Commands_TableCreate_JMenu.add( __Commands_TableCreate_FreeTable_JMenuItem = 
+			new SimpleJMenuItem( __Commands_TableCreate_FreeTable_String, this ));
+	 
+	// Add group menu for Read Table >
 	JMenu Commands_TableRead_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 			__Commands_Table_JMenu, __Commands_TableRead_String, false );
-	
-	// Add ReadTableFromDelimitedFile Option
+	// Add Commands
+	Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromDataStore_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromDataStore_String, this));
+	Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromDBF_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromDBF_String, this));
 	Commands_TableRead_JMenu.add( __Commands_TableRead_ReadTableFromDelimitedFile_JMenuItem = 
 			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromDelimitedFile_String, this));
+	Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromExcel_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromExcel_String, this));
+	Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromFixedFormatFile_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromFixedFormatFile_String, this));
+	/*Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromJSON_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromJSON_String, this));
+	Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromXML_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromXML_String, this));*/
+	
+	// Add group menu for Append, Join Tables >
+	JMenu Commands_TableJoin_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style, 
+			__Commands_Table_JMenu, __Commands_TableJoin_String, false);
+	// Add Commands
+	Commands_TableJoin_JMenu.add(__Commands_TableJoin_AppendTable_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableJoin_AppendTable_String, this));
+	Commands_TableJoin_JMenu.add(__Commands_TableJoin_JoinTables_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableJoin_JoinTables_String, this));
+	
+	// Add group menu for Manipulate Table Values >
+	JMenu Commands_TableManipulate_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style, 
+			__Commands_Table_JMenu, __Commands_TableManipulate_String, false);
+	// Add Commands
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_InsertTableColumn_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableManipulate_InsertTableColumn_String, this));
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_DeleteTableColumns_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableManipulate_DeleteTableColumns_String, this));
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_DeleteTableRows_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableManipulate_DeleteTableRows_String, this));
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_FormatTableString_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableManipulate_FormatTableString_String, this));
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_ManipulateTableString_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableManipulate_ManipulateTableString_String, this));
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_SetTableValues_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableManipulate_SetTableValues_String, this));
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_SplitTableColumn_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableManipulate_SplitTableColumn_String, this));
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_TableMath_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableManipulate_TableMath_String, this));
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_TableTimeSeriesMath_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableManipulate_TableTimeSeriesMath_String, this));
+	Commands_TableManipulate_JMenu.addSeparator();
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_InsertTableRow_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableManipulate_InsertTableRow_String, this));
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_SortTable_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableManipulate_SortTable_String, this));
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_SplitTableRow_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableManipulate_SplitTableRow_String, this));
+	
+	// Add group menu for Output Table >
+	JMenu Commands_TableOutput_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style, 
+			__Commands_Table_JMenu, __Commands_TableOutput_String, false);
+	// Add Commands
+	/*Commands_TableOutput_JMenu.add(__Commands_TableOutput_WriteTableToDataStore_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableOutput_WriteTableToDataStore_String, this));*/
+	Commands_TableOutput_JMenu.add(__Commands_TableOutput_WriteTableToDelimitedFile_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableOutput_WriteTableToDelimitedFile_String, this));
+	Commands_TableOutput_JMenu.add(__Commands_TableOutput_WriteTableToExcel_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableOutput_WriteTableToExcel_String, this));
+	Commands_TableOutput_JMenu.add(__Commands_TableOutput_WriteTableToHTML_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableOutput_WriteTableToHTML_String, this));
+	
+	// Add group menu for Running and Properties >
+	JMenu Commands_TableRunning_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style, 
+			__Commands_Table_JMenu, __Commands_TableRunning_String, false);
+	// Add Commands
+	Commands_TableRunning_JMenu.add(__Commands_TableRunning_SetPropertyFromTable_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableRunning_SetPropertyFromTable_String, this));
+	Commands_TableRunning_JMenu.add(__Commands_TableRunning_CopyPropertiesToTable_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableRunning_CopyPropertiesToTable_String, this));
+	
 }
 
 /**
@@ -13684,6 +13976,7 @@ private void uiAction_NewCommandFile ()
 					// since we are clearing the name, the
 					// commands re not dirty
 	commandList_SetCommandFileName ( null );
+	results_Clear();
 }
 
 /**
