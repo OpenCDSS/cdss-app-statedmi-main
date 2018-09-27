@@ -1,0 +1,9 @@
+# Test writing a delimited file using default parameters and always quote strings
+StartLog(LogFile="Results/Test_WriteTableToDelimitedFile_AlwaysQuoteStrings.TSTool.log")
+RemoveFile(InputFile="Results/Test_WriteTableToDelimitedFile_AlwaysQuoteStrings_out.csv",IfNotFound=Ignore)
+ReadTableFromDelimitedFile(TableID="table1",InputFile="Data\table_quoted_strings.csv")
+# Generate the results.
+WriteTableToDelimitedFile(TableID="table1",OutputFile="Results\Test_WriteTableToDelimitedFile_AlwaysQuoteStrings_out.csv",AlwaysQuoteStrings=True)
+# Do regression comparison with the original input (possible because strings
+# and integers with no formatting issues).
+CompareFiles(InputFile1="Data\table_quoted_strings.csv",InputFile2="Results\Test_WriteTableToDelimitedFile_AlwaysQuoteStrings_out.csv",IfDifferent=Warn)

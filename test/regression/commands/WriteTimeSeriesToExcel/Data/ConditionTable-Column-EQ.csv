@@ -1,0 +1,6 @@
+# Table to specify formatting for column heading cells based on values
+"TSID","Condition","StyleID"
+# Check for == 1
+"ts*","${ts:Integer1} == 1","MatchesCondition"
+"ts*","${ts:Double1} == 1","MatchesCondition"
+"ts*","${ts:StringOne} == StringOne","MatchesCondition"

@@ -1,0 +1,20 @@
+# Test copying a table read from a file.
+# - Specify the table ID with ${Property}
+# - Specify the new table ID with ${Property}
+# - Specify the column filters with ${Property}
+# - Specify the row count property with ${Property}
+# - Specify the IncludeColumns property with ${Property}
+StartLog(LogFile="Results/Test_CopyTable_IncludeColumns_Properties.TSTool.log")
+RemoveFile(InputFile="Results/Test_CopyTable_IncludeColumns_Properties_out.csv",IfNotFound=Ignore)
+SetProperty(PropertyName="TestTableID",PropertyType=String,PropertyValue="Table1")
+SetProperty(PropertyName="TestNewTableID",PropertyType=String,PropertyValue="Table1Copy")
+SetProperty(PropertyName="TestIncludeColumns",PropertyType=String,PropertyValue="DateTime,String,Double")
+SetProperty(PropertyName="TestIncludePattern",PropertyType=String,PropertyValue="f*")
+SetProperty(PropertyName="TestRowCountProperty",PropertyType=String,PropertyValue="RowCount")
+ReadTableFromDelimitedFile(TableID="${TestTableID}",InputFile="Data\testtable.csv")
+CopyTable(TableID="${TestTableID}",NewTableID="${TestNewTableID}",IncludeColumns="${TestIncludeColumns}",ColumnFilters="String:${TestIncludePattern}",RowCountProperty="${TestRowCountProperty}")
+# Uncomment the following to generate the expected results.
+# WriteTableToDelimitedFile(TableID="Table1Copy",OutputFile="ExpectedResults\Test_CopyTable_IncludeColumns_Properties_out.csv")
+WriteTableToDelimitedFile(TableID="Table1Copy",OutputFile="Results\Test_CopyTable_IncludeColumns_Properties_out.csv")
+# Do regression comparison with the original input
+CompareFiles(InputFile1="ExpectedResults\Test_CopyTable_IncludeColumns_Properties_out.csv",InputFile2="Results/Test_CopyTable_IncludeColumns_Properties_out.csv",IfDifferent=Warn)

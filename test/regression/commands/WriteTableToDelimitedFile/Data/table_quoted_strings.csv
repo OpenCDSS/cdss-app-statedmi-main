@@ -1,0 +1,6 @@
+# Simple table with quoted strings, illustrating issue of integers with leading zeros,
+# which may occur in location identifiers
+"integers","strings"
+123,"0123"
+234,"0234"
+345,"0345"

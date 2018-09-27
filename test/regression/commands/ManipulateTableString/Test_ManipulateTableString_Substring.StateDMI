@@ -1,0 +1,12 @@
+# Test creating a substring from a string column
+StartLog(LogFile="Results/Test_ManipulateTableString_Columns_Substring.TSTool.log")
+RemoveFile(InputFile="Results/Test_ManipulateTableString_Columns_Substring_out.dv",IfNotFound=Ignore)
+# Generate some table data but converting time series to table
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testdata.csv")
+# Manipulate strings in the table
+ManipulateTableString(TableID="Table1",InputColumn1="TSID",Operator="Substring",InputValue2="2",OutputColumn="String3")
+ManipulateTableString(TableID="Table1",InputColumn1="TSID",Operator="Substring",InputValue2="1",InputValue3="2",OutputColumn="String4")
+# Uncomment the following command to regenerate expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults/Test_ManipulateTableString_Columns_Substring_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results/Test_ManipulateTableString_Columns_Substring_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ManipulateTableString_Columns_Substring_out.csv",InputFile2="Results/Test_ManipulateTableString_Columns_Substring_out.csv",IfDifferent=Warn)

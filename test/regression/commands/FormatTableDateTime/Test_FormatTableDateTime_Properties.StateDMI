@@ -1,0 +1,24 @@
+# Test formatting a date/time to a column in a table
+# - output to a string
+# - set table ID using ${Property}
+# - set table input column using ${Property}
+# - set date/time format using ${Property}
+# - set output column using ${Property}
+# - set column to insert before using ${Property}
+StartLog(LogFile="Results/Test_FormatTableDateTime_Properties.TSTool.log")
+RemoveFile(InputFile="Results/Test_FormatTableDateTime_Properties_out.dv",IfNotFound=Ignore)
+# Generate table data by converting time series to table
+NewPatternTimeSeries(Alias="ts1",NewTSID="ts1.source1.type1.Day",Description="Test data",SetStart="2000-09-15",SetEnd="2001-03-15",Units="cfs",MissingValue=NaN,PatternValues="1,2,4,7,,10,6,.5,,.5")
+SetProperty(PropertyName="TestTableID",PropertyType=String,PropertyValue="table1")
+TimeSeriesToTable(TableID="${TestTableID}",DateTimeColumn="Date",ValueColumn="value",OutputPrecision=2,IfTableNotFound="Create")
+# Format the date/times in the table
+SetProperty(PropertyName="TestInputColumn",PropertyType=String,PropertyValue="Date")
+SetProperty(PropertyName="TestOutputColumn",PropertyType=String,PropertyValue="DateExcel")
+SetProperty(PropertyName="TestDateTimeFormat",PropertyType=String,PropertyValue="%m/%d/%Y")
+SetProperty(PropertyName="TestOutputColumn",PropertyType=String,PropertyValue="DateExcel")
+SetProperty(PropertyName="TestInsertBeforeColumn",PropertyType=String,PropertyValue="value")
+FormatTableDateTime(TableID="${TestTableID}",InputColumn="${TestInputColumn}",DateTimeFormat="${TestDateTimeFormat}",OutputColumn="${TestOutputColumn}",OutputType=String,InsertBeforeColumn="${TestInsertBeforeColumn}")
+# Uncomment the following command to regenerate expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults/Test_FormatTableDateTime_Properties_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results/Test_FormatTableDateTime_Properties_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_FormatTableDateTime_Properties_out.csv",InputFile2="Results/Test_FormatTableDateTime_Properties_out.csv",IfDifferent=Warn)

@@ -1,0 +1,7 @@
+# Simple test data - don't use 1 because multiply and divide results
+# won't visibly change from the original
+"TSID","String1","String2"
+ts1,"a1.1","a1.2"
+ts2,"a2.1","a2.2"
+ts3,,"a3.2"
+ts4,"a4.1",

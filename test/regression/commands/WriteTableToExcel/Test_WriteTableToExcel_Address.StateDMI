@@ -1,0 +1,14 @@
+# Test writing a table to Excel
+# - Use ReadTableFromExcel to read the original, write a copy, an then read and compare
+# - Specify address block
+StartLog(LogFile="Results/Test_WriteTableToExcel_Address.TSTool.log")
+RemoveFile(InputFile="Results/Test_WriteTableToExcel_Address_out.xlsx",IfNotFound=Ignore)
+# Read the table from the Excel data file
+ReadTableFromExcel(TableID="Table1",InputFile="Data\Definitions.xlsx",ExcelAddress="A5:D14",ExcelColumnNames=FirstRowInRange)
+# Write the table to a new Excel file.
+NewExcelWorkbook(OutputFile="Results/Test_WriteTableToExcel_Address_out.xlsx",Worksheets="Table1",KeepOpen=True)
+WriteTableToExcel(TableID="Table1",OutputFile="Results/Test_WriteTableToExcel_Address_out.xlsx",Worksheet="Table1",ExcelAddress="A1",ExcelColumnNames=FirstRowInRange,KeepOpen=False)
+# Now read the table from the new worksheet
+ReadTableFromExcel(TableID="Table2",InputFile="Results\Test_WriteTableToExcel_Address_out.xlsx",Worksheet="Table1",ExcelColumnNames=FirstRowInRange)
+# Do regression comparison with the original table
+CompareTables(Table1ID="Table1",Table2ID="Table2",IfDifferent=Warn)

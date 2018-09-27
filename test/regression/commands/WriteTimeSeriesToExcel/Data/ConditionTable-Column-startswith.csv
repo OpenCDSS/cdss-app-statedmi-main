@@ -1,0 +1,4 @@
+# Table to specify formatting for column heading cells based on values
+"TSID","Condition","StyleID"
+# Check for startswith
+"ts*","${ts:OneString} startswith One","MatchesCondition"

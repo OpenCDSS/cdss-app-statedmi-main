@@ -1,0 +1,11 @@
+# Test reading a table from a HydroBase data store
+# - read from county stored procedure
+StartLog(LogFile="Results/Test_ReadTableFromDataStore_HydroBase_Procedure_County.TSTool.log")
+RemoveFile(InputFile="Results/Test_ReadTableFromDataStore_HydroBase_Procedure_County_out.csv",IfNotFound=Ignore)
+ReadTableFromDataStore(DataStore="HydroBase",DataStoreProcedure="usp_CDSS_refCounty_Sel",TableID="County")
+# Uncomment to regenerate expected results
+# WriteTableToDelimitedFile(TableID="County",OutputFile="ExpectedResults/Test_ReadTableFromDataStore_HydroBase_Procedure_County_out.csv")
+# Generate the results.
+WriteTableToDelimitedFile(TableID="County",OutputFile="Results/Test_ReadTableFromDataStore_HydroBase_Procedure_County_out.csv")
+# Do regression comparison with the expected results
+CompareFiles(InputFile1="ExpectedResults/Test_ReadTableFromDataStore_HydroBase_Procedure_County_out.csv",InputFile2="Results/Test_ReadTableFromDataStore_HydroBase_Procedure_County_out.csv",MatchCase=False,IfDifferent=Warn)

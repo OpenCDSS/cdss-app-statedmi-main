@@ -1,0 +1,7 @@
+# Simple test data - don't use 1 because multiply and divide results
+# won't visibly change from the original
+"TSID","String1","String2","IntegerString","DoubleString","DateString","DateTimeString"
+ts1,"a1.1","a1.2","1","1.1","2001-01-01","2001-01-01 01:01"
+ts2,"a2.1","a2.2","2","2.2","2002-02-02","2002-02-02 02:02"
+ts3,,"a3.2","3","3.3","2003-03-03","2003-03-03 03:03"
+ts4,"a4.1",,"","","",""

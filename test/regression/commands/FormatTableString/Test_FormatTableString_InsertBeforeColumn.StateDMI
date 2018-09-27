@@ -1,0 +1,11 @@
+# Test formatting a string to a column in a table, specifying the insert before column
+StartLog(LogFile="Results/Test_ManipulateTableString_Columns_InsertBeforeColumn.TSTool.log")
+RemoveFile(InputFile="Results/Test_ManipulateTableString_Columns_InsertBeforeColumn_out.dv",IfNotFound=Ignore)
+# Generate some table data but converting time series to table
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testdata2.csv")
+# Format the strings in the table
+FormatTableString(TableID="Table1",InputColumns="String1",Format="%s-test",OutputColumn="Formatted",InsertBeforeColumn="String2")
+# Uncomment the following command to regenerate expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults/Test_ManipulateTableString_Columns_InsertBeforeColumn_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results/Test_ManipulateTableString_Columns_InsertBeforeColumn_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ManipulateTableString_Columns_InsertBeforeColumn_out.csv",InputFile2="Results/Test_ManipulateTableString_Columns_InsertBeforeColumn_out.csv",IfDifferent=Warn)

@@ -1,0 +1,11 @@
+# Test adding table column and a constant
+# - both are integers
+StartLog(LogFile="Results/Test_TableMath_IntegerColumn_IntegerConstant_Add.TSTool.log")
+RemoveFile(InputFile="Results/Test_TableMath_IntegerColumn_IntegerConstant_Add_out.dv",IfNotFound=Ignore)
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testdata-ints.csv")
+# Perform math on the table
+TableMath(TableID="Table1",Input1="Integer1",Operator="+",Input2="1",Output="result")
+# Uncomment the following command to regenerate expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults/Test_TableMath_IntegerColumn_IntegerConstant_Add_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results/Test_TableMath_IntegerColumn_IntegerConstant_Add_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_TableMath_IntegerColumn_IntegerConstant_Add_out.csv",InputFile2="Results/Test_TableMath_IntegerColumn_IntegerConstant_Add_out.csv",IfDifferent=Warn)

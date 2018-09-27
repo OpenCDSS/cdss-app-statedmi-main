@@ -1,0 +1,13 @@
+# Style table for formatting time series data
+"StyleID","FillForegroundColor"
+"Missing","Yellow"
+"NotMissing","Darkgray"
+"Negative","Orange"
+"Zero","Magenta"
+# Matches condition - general result
+"MatchesCondition","Yellow"
+# Manual override flags
+"ContainsMO","Pink"
+"EqualsMO","Green"
+"StartsWithMO","Blue"
+"EndsWithMO","Grey"

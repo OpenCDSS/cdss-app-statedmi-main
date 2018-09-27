@@ -1,0 +1,25 @@
+# Test setting values in a table
+# - Simple table is read from a file.
+# - Use ${Property} in all parameters
+StartLog(LogFile="Results/Test_SetTableValues_Properties.TSTool.log")
+RemoveFile(InputFile="Results/Test_SetTableValues_Properties_out.csv",IfNotFound=Ignore)
+SetProperty(PropertyName="TestTableID",PropertyType=String,PropertyValue="Table1")
+SetProperty(PropertyName="TestColumnFilter1",PropertyType=String,PropertyValue="First day")
+SetProperty(PropertyName="TestColumnValue1",PropertyType=String,PropertyValue="Value 1 that was set")
+ReadTableFromDelimitedFile(TableID="${TestTableID}",InputFile="Data\testtable.csv")
+# ---- Start tests matching 1 column in filter ----
+# Test setting a couple of new columns based on matching filters in one column
+SetTableValues(TableID="${TestTableID}",ColumnFilters="String1:${TestColumnFilter1}",ColumnValues="NewColumn1:${TestColumnValue1},NewColumn2:Value 2 that was set")
+SetTableValues(TableID="${TestTableID}",ColumnFilters="String1:Third day",ColumnValues="NewColumn1:Value 1 that was set,NewColumn2:Value 2 that was set")
+# Test resetting a couple of new columns based on matching filters in one column
+SetTableValues(TableID="${TestTableID}",ColumnFilters="String1:Third day",ColumnValues="NewColumn2:Value 2 that was set again")
+# ---- Start tests matching 2 columns in filter ----
+# Test setting a couple of new columns based on matching filters in one column
+SetTableValues(TableID="${TestTableID}",ColumnFilters="String1:Third day,String2:StringValue3",ColumnValues="NewColumn3:Value 3 that was set,NewColumn4:Value 4 that was set")
+# Test setting a couple of new columns based on matching filters in two columns
+SetTableValues(TableID="${TestTableID}",ColumnFilters="String1:Third day,String2:StringValue3",ColumnValues="NewColumn3:Value 3 that was set again")
+# Uncomment the following to generate the expected results.
+# WriteTableToDelimitedFile(TableID="${TestTableID}",OutputFile="ExpectedResults\Test_SetTableValues_Properties_out.csv")
+WriteTableToDelimitedFile(TableID="${TestTableID}",OutputFile="Results\Test_SetTableValues_Properties_out.csv")
+# Do regression comparison with the original input
+CompareFiles(InputFile1="ExpectedResults\Test_SetTableValues_Properties_out.csv",InputFile2="Results/Test_SetTableValues_Properties_out.csv",IfDifferent=Warn)

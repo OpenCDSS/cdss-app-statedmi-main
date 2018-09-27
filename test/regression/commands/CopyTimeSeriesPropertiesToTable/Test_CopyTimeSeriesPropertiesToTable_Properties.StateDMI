@@ -1,0 +1,28 @@
+# Test copying time series properties to a table
+# - TSID in an existing table is matched
+# - Specify the TS to process using ${Property}
+# - Specify the Table ID using ${Property}
+StartLog(LogFile="Results/Test_CopyTimeSeriesPropertiesToTable_Properties.TSTool.log")
+RemoveFile(InputFile="Results/Test_CopyTimeSeriesPropertiesToTable_Properties_out.csv",IfNotFound=Ignore)
+# Define time series with properties
+SetProperty(PropertyName="TestTSID1",PropertyType=String,PropertyValue="ts1")
+SetProperty(PropertyName="TestTSID2",PropertyType=String,PropertyValue="ts2")
+SetProperty(PropertyName="TestTSID3",PropertyType=String,PropertyValue="ts3")
+SetProperty(PropertyName="TestTableID",PropertyType=String,PropertyValue="Table1")
+NewTimeSeries(Alias="${TestTSID1}",NewTSID="ts1..Precip.Year",Description="Test data 1",SetStart="2000",SetEnd="2005",Units="IN")
+SetTimeSeriesProperty(TSList=AllMatchingTSID,TSID="ts1",PropertyName="Status",PropertyType=String,PropertyValue="ts1Status")
+NewTimeSeries(Alias="${TestTSID2}",NewTSID="ts2..Precip.Year",Description="Test data 2",SetStart="2000",SetEnd="2005",Units="IN")
+SetTimeSeriesProperty(TSList=AllMatchingTSID,TSID="ts2",PropertyName="Status",PropertyType=String,PropertyValue="ts2Status")
+NewTimeSeries(Alias="${TestTSID3}",NewTSID="ts3..Precip.Year",Description="Test data 3",SetStart="2000",SetEnd="2005",Units="IN")
+SetTimeSeriesProperty(TSList=AllMatchingTSID,TSID="ts3",PropertyName="Status",PropertyType=String,PropertyValue="ts3Status")
+# Define table to receive properties
+ReadTableFromDelimitedFile(TableID="${TestTableID}",InputFile="Data\testtable.csv")
+# Copy the properties
+CopyTimeSeriesPropertiesToTable(TSList=AllMatchingTSID,TSID="${TestTSID1}",TableID="${TestTableID}",TableTSIDColumn="loc",TableTSIDFormat="%L")
+CopyTimeSeriesPropertiesToTable(TSList=AllMatchingTSID,TSID="${TestTSID2}",TableID="${TestTableID}",TableTSIDColumn="loc",TableTSIDFormat="%L")
+CopyTimeSeriesPropertiesToTable(TSList=AllMatchingTSID,TSID="${TestTSID3}",TableID="${TestTableID}",TableTSIDColumn="loc",TableTSIDFormat="%L")
+# Uncomment the following to generate the expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults\Test_CopyTimeSeriesPropertiesToTable_Properties.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results\Test_CopyTimeSeriesPropertiesToTable_Properties.csv")
+# Do regression comparison with the original input
+CompareFiles(InputFile1="ExpectedResults\Test_CopyTimeSeriesPropertiesToTable_Properties.csv",InputFile2="Results\Test_CopyTimeSeriesPropertiesToTable_Properties.csv",IfDifferent=Warn)

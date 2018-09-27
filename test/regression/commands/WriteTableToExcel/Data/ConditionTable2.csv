@@ -1,0 +1,10 @@
+# Table to specify formatting for column cells based on values
+# - this version includes checks on flag (text) columns
+"Column","Condition","Display","StyleID"
+"ts*flag","${tablecell:value} == missing","Missing","Missing"
+"ts*flag","${tablecell:value} == z","Zero","Zero"
+"ts*flag","${tablecell:value} contains w","Contains w","Contains w"
+"ts*flag","${tablecell:value} contains w","w","w"
+"ts*flag","${tablecell:value} > r","> r","> r"
+"ts*flag","${tablecell:value} < c","< c","< c"
+"ts*flag","${tablecell:value} startswith e","StartsWith e","StartsWith e"

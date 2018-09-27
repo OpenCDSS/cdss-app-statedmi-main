@@ -1,0 +1,13 @@
+# Test setting a freeze pane in an Excel worksheet
+# - only specify the column for the freeze pane
+StartLog(LogFile="Results/Test_SetExcelWorksheetViewProperties_ColumnOnly.TSTool.log")
+RemoveFile(InputFile="Results/Test_SetExcelWorksheetViewProperties_ColumnOnly_out.xlsx",IfNotFound=Ignore)
+# Read the table from the Excel data file
+ReadTableFromExcel(TableID="Table1",InputFile="Data\Definitions.xlsx",ExcelAddress="A5:D14",ExcelColumnNames=FirstRowInRange)
+# Write the table to a new Excel file.
+NewExcelWorkbook(OutputFile="Results/Test_SetExcelWorksheetViewProperties_ColumnOnly_out.xlsx",Worksheets="Table1",KeepOpen=True)
+WriteTableToExcel(TableID="Table1",OutputFile="Results/Test_SetExcelWorksheetViewProperties_ColumnOnly_out.xlsx",Worksheet="Table1",ExcelAddress="A1",ExcelColumnNames=FirstRowInRange,KeepOpen=True)
+# Set the freeze pane for columns and rows
+SetExcelWorksheetViewProperties(OutputFile="Results/Test_SetExcelWorksheetViewProperties_ColumnOnly_out.xlsx",KeepOpen=True,FreezePaneColumnRightOfSplit=B)
+# Close the Excel file
+CloseExcelWorkbook(OutputFile="Results/Test_SetExcelWorksheetViewProperties_ColumnOnly_out.xlsx")

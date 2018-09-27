@@ -1,0 +1,6 @@
+# Table to specify formatting for column heading cells based on values
+"TSID","Condition","StyleID"
+# Check for missing
+"ts*","${ts:IntegerMissing} == missing","Missing"
+"ts*","${ts:DoubleMissing} == missing","Missing"
+"ts*","${ts:StringMissing} == missing","Missing"

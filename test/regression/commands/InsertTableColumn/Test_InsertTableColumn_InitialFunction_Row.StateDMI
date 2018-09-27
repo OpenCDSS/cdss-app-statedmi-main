@@ -1,0 +1,17 @@
+# Test inserting a column into a table for each of the supported data types, headers only
+# - Initialize to function Row
+# - Date and DateTime column types cannot be assigned to Row
+StartLog(LogFile="Results/Test_InsertTableColumn_InitialFunction_Row.TSTool.log")
+RemoveFile(InputFile="Results/Test_InsertTableColumn_InitialFunction_Row_out.csv",IfNotFound=Ignore)
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testtable.csv")
+InsertTableColumn(TableID="Table1",InsertColumn="double2",ColumnType=Double,InitialFunction="Row")
+InsertTableColumn(TableID="Table1",InsertColumn="float2",ColumnType=Float,InitialFunction="Row")
+InsertTableColumn(TableID="Table1",InsertColumn="integer2",ColumnType=Integer,InitialFunction="Row")
+InsertTableColumn(TableID="Table1",InsertColumn="short2",InsertBeforeColumn="string1",ColumnType=Short,InitialFunction="Row")
+InsertTableColumn(TableID="Table1",InsertColumn="long2",InsertBeforeColumn="string1",ColumnType=Long,InitialFunction="Row")
+InsertTableColumn(TableID="Table1",InsertColumn="string2",ColumnType=String,InitialFunction="Row",ColumnWidth=12)
+# Uncomment the following to generate the expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults\Test_InsertTableColumn_InitialFunction_Row_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results\Test_InsertTableColumn_InitialFunction_Row_out.csv")
+# Do regression comparison with the original input
+CompareFiles(InputFile1="ExpectedResults\Test_InsertTableColumn_InitialFunction_Row_out.csv",InputFile2="Results/Test_InsertTableColumn_InitialFunction_Row_out.csv",IfDifferent=Warn)

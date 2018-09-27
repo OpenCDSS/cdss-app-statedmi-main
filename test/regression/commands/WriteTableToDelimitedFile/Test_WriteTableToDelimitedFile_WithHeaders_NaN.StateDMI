@@ -1,0 +1,14 @@
+# Test writing a delimited file
+# - with column headers
+# - with NaN values
+StartLog(LogFile="Results/Test_WriteTableToDelimitedFile_WithHeaders_NaN.TSTool.log")
+RemoveFile(InputFile="Results/Test_WriteTableToDelimitedFile_WithHeaders_NaN_out.csv",IfNotFound=Ignore)
+ReadTableFromDelimitedFile(TableID="TestTable",InputFile="Data\testtable.csv")
+# Do some table math to generate NaN by dividing by zero
+TableMath(TableID="TestTable",Input1="Double",Operator="/",Input2="0",Output="MathResult",NonValue=NaN)
+# Uncomment the following to regenerate expected results.
+# WriteTableToDelimitedFile(TableID="TestTable",OutputFile="ExpectedResults\Test_WriteTableToDelimitedFile_WithHeaders_NaN_out.csv")
+WriteTableToDelimitedFile(TableID="TestTable",OutputFile="Results\Test_WriteTableToDelimitedFile_WithHeaders_NaN_out.csv")
+# Do regression comparison with the original input (possible because strings
+# and integers with no formatting issues).
+CompareFiles(InputFile1="ExpectedResults\Test_WriteTableToDelimitedFile_WithHeaders_NaN_out.csv",InputFile2="Results/Test_WriteTableToDelimitedFile_WithHeaders_NaN_out.csv",IfDifferent=Warn)

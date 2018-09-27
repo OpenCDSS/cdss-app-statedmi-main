@@ -1,0 +1,22 @@
+# Test copying time series properties to a table
+# * New table is created
+# * Duplicates are allowed and consequently new records will be added
+StartLog(LogFile="Results/Test_CopyTimeSeriesPropertiesToTable_AllowDuplicates=True.TSTool.log")
+RemoveFile(InputFile="Results/Test_CopyTimeSeriesPropertiesToTable_AllowDuplicates=True_out.csv",IfNotFound=Ignore)
+# Define time series with properties
+NewTimeSeries(Alias="ts1",NewTSID="ts1..Precip.Year",Description="Test data 1",SetStart="2000",SetEnd="2005",Units="IN")
+SetTimeSeriesProperty(TSList=AllMatchingTSID,TSID="ts1",PropertyName="Status",PropertyType=String,PropertyValue="ts1Status")
+NewTimeSeries(Alias="ts2",NewTSID="ts2..Precip.Year",Description="Test data 2",SetStart="2000",SetEnd="2005",Units="IN")
+SetTimeSeriesProperty(TSList=AllMatchingTSID,TSID="ts2",PropertyName="Status",PropertyType=String,PropertyValue="ts2Status")
+NewTimeSeries(Alias="ts3",NewTSID="ts3..Precip.Year",Description="Test data 3",SetStart="2000",SetEnd="2005",Units="IN")
+SetTimeSeriesProperty(TSList=AllMatchingTSID,TSID="ts3",PropertyName="Status",PropertyType=String,PropertyValue="ts3Status")
+# Duplicate time series
+NewTimeSeries(Alias="ts3",NewTSID="ts3..Precip.Year",Description="Test data 3",SetStart="2000",SetEnd="2005",Units="IN")
+SetTimeSeriesProperty(TSList=LastMatchingTSID,TSID="ts3",PropertyName="Status",PropertyType=String,PropertyValue="ts3StatusDuplicate")
+# Copy the properties
+CopyTimeSeriesPropertiesToTable(TableID="Table1",TableTSIDColumn="loc",TableTSIDFormat="%L",AllowDuplicates="True")
+# Uncomment the following to generate the expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults\Test_CopyTimeSeriesPropertiesToTable_AllowDuplicates=True.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results\Test_CopyTimeSeriesPropertiesToTable_AllowDuplicates=True.csv")
+# Do regression comparison with the original input
+CompareFiles(InputFile1="ExpectedResults\Test_CopyTimeSeriesPropertiesToTable_AllowDuplicates=True.csv",InputFile2="Results\Test_CopyTimeSeriesPropertiesToTable_AllowDuplicates=True.csv",IfDifferent=Warn)

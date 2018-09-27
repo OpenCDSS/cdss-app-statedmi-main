@@ -1,0 +1,13 @@
+# Test formatting a date/time to a column in a table
+# - output to a string
+# - increment from starting date/time using hour increment
+StartLog(LogFile="Results/Test_FormatTableDateTime_Increment_Hour.TSTool.log")
+RemoveFile(InputFile="Results/Test_FormatTableDateTime_Increment_Hour_out.dv",IfNotFound=Ignore)
+# Read table data from Excel worksheet
+ReadTableFromExcel(TableID="Table1",InputFile="Data\Example_IncrementData.xlsx",ExcelColumnNames=FirstRowInRange,ExcelIntegerColumns="Hour of Event")
+# Format the date/times in the table
+FormatTableDateTime(TableID="Table1",InputColumn="Hour of Event",IncrementStart="2015-01-01 00",IncrementBaseUnit="Hour",DateTimeFormat="%m/%d/%Y %H",OutputColumn="DateTime",OutputType=String)
+# Uncomment the following command to regenerate expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults/Test_FormatTableDateTime_Increment_Hour_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results/Test_FormatTableDateTime_Increment_Hour_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_FormatTableDateTime_Increment_Hour_out.csv",InputFile2="Results/Test_FormatTableDateTime_Increment_Hour_out.csv",IfDifferent=Warn)

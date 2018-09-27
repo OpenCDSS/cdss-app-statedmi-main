@@ -1,0 +1,10 @@
+# Test copying a table for each of the supported data types, headers only
+StartLog(LogFile="Results/Test_CopyTable_HeadersOnly.TSTool.log")
+RemoveFile(InputFile="Results/Test_CopyTable_HeadersOnly_out.csv",IfNotFound=Ignore)
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testtable.csv")
+CopyTable(TableID="Table1",NewTableID="Table1Copy")
+# Uncomment the following to generate the expected results.
+# WriteTableToDelimitedFile(TableID="Table1Copy",OutputFile="ExpectedResults\Test_CopyTable_HeadersOnly_out.csv")
+WriteTableToDelimitedFile(TableID="Table1Copy",OutputFile="Results\Test_CopyTable_HeadersOnly_out.csv")
+# Do regression comparison with the original input
+CompareFiles(InputFile1="ExpectedResults\Test_CopyTable_HeadersOnly_out.csv",InputFile2="Results/Test_CopyTable_HeadersOnly_out.csv",IfDifferent=Warn)

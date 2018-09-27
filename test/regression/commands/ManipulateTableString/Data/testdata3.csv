@@ -1,0 +1,10 @@
+# Simple test data
+# - use to test include and exclude filters
+"TSID","String1","String2"
+ats1,"a1.1","a1.2"
+ats2,"a2.1","a2.2"
+ats3,,"a3.2"
+ts4,"a4.1",
+ts5,"a5.1",
+zts6,"a6.1",
+zts7,"a7.1",

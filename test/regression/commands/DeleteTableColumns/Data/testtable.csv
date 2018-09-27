@@ -1,0 +1,5 @@
+# Simple table for testing
+"string1","double1","integer1"
+"String1",1.0,1
+"String2",2.0,2
+"String3",3.0,3
