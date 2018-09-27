@@ -1,0 +1,10 @@
+# Test reading a table from a fixed-format file using default parameters.
+StartLog(LogFile="Results/Test_ReadTableFromFixedFormatFile_cm2009.TSTool.log")
+RemoveFile(InputFile="Results/Test_ReadTableFromFixedFormatFile_cm2009_out.csv",IfNotFound=Ignore)
+ReadTableFromFixedFormatFile(TableID="cm2009_rin",InputFile="Data\cm2009.rin",DataFormat="s12s20x1s3s12x1s12x1f8",ColumnNames="ID,Name,NodeType,DownStream,Comment,GWMax")
+# Generate the results.
+WriteTableToDelimitedFile(TableID="cm2009_rin",OutputFile="Results\Test_ReadTableFromFixedFormatFile_cm2009_out.csv")
+# Uncomment the following line to regenerate expected results
+# WriteTableToDelimitedFile(TableID="cm2009_rin",OutputFile="ExpectedResults\Test_ReadTableFromFixedFormatFile_cm2009_out.csv",WriteHeaderComments=True)
+# Compare results with expected results.
+CompareFiles(InputFile1="ExpectedResults/Test_ReadTableFromFixedFormatFile_cm2009_out.csv",InputFile2="Results/Test_ReadTableFromFixedFormatFile_cm2009_out.csv",IfDifferent=Warn)

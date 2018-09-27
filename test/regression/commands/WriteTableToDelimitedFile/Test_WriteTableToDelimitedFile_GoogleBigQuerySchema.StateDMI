@@ -1,0 +1,12 @@
+# Test writing a delimited file
+# - output schema file to GoogleBigQuerySchema
+StartLog(LogFile="Results/Test_WriteTableToDelimitedFile_GoogleBigQuerySchema.TSTool.log")
+RemoveFile(InputFile="Results/Test_WriteTableToDelimitedFile_GoogleBigQuerySchema_out.csv",IfNotFound=Ignore)
+ReadTableFromDelimitedFile(TableID="TestTable",InputFile="Data\testtable2.csv",DateTimeColumns="Date,DateTime")
+# Uncomment the following to regenerate expected results.
+# WriteTableToDelimitedFile(TableID="TestTable",OutputFile="ExpectedResults\Test_WriteTableToDelimitedFile_GoogleBigQuerySchema_out.csv",OutputSchemaFile="ExpectedResults\Test_WriteTableToDelimitedFile_GoogleBigQuerySchema_out.json",OutputSchemaFormat="GoogleBigQuery")
+WriteTableToDelimitedFile(TableID="TestTable",OutputFile="Results\Test_WriteTableToDelimitedFile_GoogleBigQuerySchema_out.csv",OutputSchemaFile="Results\Test_WriteTableToDelimitedFile_GoogleBigQuerySchema_out.json",OutputSchemaFormat="GoogleBigQuery")
+# Do regression comparison with the original input (possible because strings
+# and integers with no formatting issues).
+CompareFiles(InputFile1="ExpectedResults\Test_WriteTableToDelimitedFile_GoogleBigQuerySchema_out.csv",InputFile2="Results/Test_WriteTableToDelimitedFile_GoogleBigQuerySchema_out.csv",IfDifferent=Warn)
+CompareFiles(InputFile1="ExpectedResults\Test_WriteTableToDelimitedFile_GoogleBigQuerySchema_out.json",InputFile2="Results/Test_WriteTableToDelimitedFile_GoogleBigQuerySchema_out.json",IfDifferent=Warn)

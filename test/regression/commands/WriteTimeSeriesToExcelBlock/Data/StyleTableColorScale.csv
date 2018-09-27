@@ -1,0 +1,9 @@
+# Style table for formatting time series data
+# - color scale is simple colors
+"StyleID","FillForegroundColor"
+"Color1","Red"
+"Color2","Orange"
+"Color3","Yellow"
+"Color4","Green"
+"Color5","Cyan"
+"Color6","Blue"

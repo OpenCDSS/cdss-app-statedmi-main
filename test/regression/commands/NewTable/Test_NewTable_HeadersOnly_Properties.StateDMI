@@ -1,0 +1,11 @@
+# Test creating a table for each of the supported data types, headers only
+# - specify the table ID with ${Property}
+StartLog(LogFile="Results/Test_NewTable_HeadersOnly_Properties.TSTool.log")
+RemoveFile(InputFile="Results/Test_NewTable_HeadersOnly_Properties_out.csv",IfNotFound=Ignore)
+SetProperty(PropertyName="TestTableID",PropertyType=String,PropertyValue="Table1")
+NewTable(TableID="${TestTableID}",Columns="datetime1,datetime;double1,double;float1,float;integer1,integer;short1,short;string 1,string")
+# Uncomment the following to generate the expected results.
+# WriteTableToDelimitedFile(TableID="${TestTableID}",OutputFile="ExpectedResults\Test_NewTable_HeadersOnly_Properties_out.csv")
+WriteTableToDelimitedFile(TableID="${TestTableID}",OutputFile="Results\Test_NewTable_HeadersOnly_Properties_out.csv")
+# Do regression comparison with the original input
+CompareFiles(InputFile1="ExpectedResults\Test_NewTable_HeadersOnly_Properties_out.csv",InputFile2="Results/Test_NewTable_HeadersOnly_Properties_out.csv",IfDifferent=Warn)

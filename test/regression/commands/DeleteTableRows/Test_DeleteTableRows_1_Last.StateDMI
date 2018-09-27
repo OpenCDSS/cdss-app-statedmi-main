@@ -1,0 +1,13 @@
+# Test deleting table rows from a table
+# - delete first row usin 1 and last row using "last"
+# - original table has 3 data rows so after delete only row with 2 will remain 
+StartLog(LogFile="Results/Test_DeleteTableRows_1_Last.TSTool.log")
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testtable.csv")
+RemoveFile(InputFile="Results/Test_DeleteTableRows_1_Last_out.csv",IfNotFound=Ignore)
+DeleteTableRows(TableID="Table1",DeleteRowNumbers="1")
+DeleteTableRows(TableID="Table1",DeleteRowNumbers="last")
+# Uncomment the following to generate the expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults\Test_DeleteTableRows_1_Last_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results\Test_DeleteTableRows_1_Last_out.csv")
+# Do regression comparison with the original input
+CompareFiles(InputFile1="ExpectedResults\Test_DeleteTableRows_1_Last_out.csv",InputFile2="Results/Test_DeleteTableRows_1_Last_out.csv",IfDifferent=Warn)

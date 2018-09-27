@@ -1,0 +1,12 @@
+# Test reading DivTotal data from a HydroBase data store using a SQL file
+# The period is specified to try to freeze the queery so that future database updates
+# don't break the test
+StartLog(LogFile="Results/Test_ReadTableFromDataStore_HydroBase_SqlFile_DivTotal.TSTool.log")
+RemoveFile(InputFile="Results/Test_ReadTableFromDataStore_HydroBase_SqlFile_DivTotal_out.csv",IfNotFound=Ignore)
+ReadTableFromDataStore(DataStore="HydroBase",SqlFile="Data\SqlFile_DivTotal.sql",TableID="DivTotal")
+# Uncomment to regenerate expected results
+# WriteTableToDelimitedFile(TableID="DivTotal",OutputFile="ExpectedResults/Test_ReadTableFromDataStore_HydroBase_SqlFile_DivTotal_out.csv")
+# Generate the results.
+WriteTableToDelimitedFile(TableID="DivTotal",OutputFile="Results/Test_ReadTableFromDataStore_HydroBase_SqlFile_DivTotal_out.csv")
+# Do regression comparison with the expected results
+CompareFiles(InputFile1="ExpectedResults/Test_ReadTableFromDataStore_HydroBase_SqlFile_DivTotal_out.csv",InputFile2="Results/Test_ReadTableFromDataStore_HydroBase_SqlFile_DivTotal_out.csv",IfDifferent=Warn)

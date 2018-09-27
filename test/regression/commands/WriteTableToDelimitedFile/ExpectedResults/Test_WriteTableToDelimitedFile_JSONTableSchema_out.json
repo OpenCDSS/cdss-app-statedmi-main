@@ -1,0 +1,40 @@
+{
+  "fields": [
+    {
+      "name": "Date",
+      "type": "date"
+    },
+    {
+      "name": "DateTime",
+      "type": "datetime"
+    },
+    {
+      "name": "String",
+      "type": "string"
+    },
+    {
+      "name": "Double",
+      "type": "number"
+    },
+    {
+      "name": "Float",
+      "type": "number"
+    },
+    {
+      "name": "Integer",
+      "type": "integer"
+    },
+    {
+      "name": "Short",
+      "type": "integer"
+    },
+    {
+      "name": "Long",
+      "type": "integer"
+    },
+    {
+      "name": "Boolean",
+      "type": "string"
+    }
+  ]
+}

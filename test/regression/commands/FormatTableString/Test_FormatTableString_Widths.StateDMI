@@ -1,0 +1,11 @@
+# Test formatting a string using specified widths
+StartLog(LogFile="Results/Test_ManipulateTableString_Columns_Widths.TSTool.log")
+RemoveFile(InputFile="Results/Test_ManipulateTableString_Columns_Widths_out.dv",IfNotFound=Ignore)
+# Generate some table data but converting time series to table
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testdata2.csv")
+# Format the strings in the table
+FormatTableString(TableID="Table1",InputColumns="String1,Integer,Double",Format="%20.20s-%4d-%8.2f",OutputColumn="Formatted")
+# Uncomment the following command to regenerate expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults/Test_ManipulateTableString_Columns_Widths_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results/Test_ManipulateTableString_Columns_Widths_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ManipulateTableString_Columns_Widths_out.csv",InputFile2="Results/Test_ManipulateTableString_Columns_Widths_out.csv",IfDifferent=Warn)

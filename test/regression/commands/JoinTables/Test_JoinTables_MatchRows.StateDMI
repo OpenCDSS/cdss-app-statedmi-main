@@ -1,0 +1,14 @@
+# Test joining one table to another
+# * All default parameters
+# * Specify one join column
+# * Rename output columns
+StartLog(LogFile="Results/Test_JoinTable_MatchRows.TSTool.log")
+RemoveFile(InputFile="Results/Test_JoinTable_MatchRows_out.csv",IfNotFound=Ignore)
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testtable1.csv")
+ReadTableFromDelimitedFile(TableID="Table2",InputFile="Data\testtable2.csv")
+JoinTables(TableID="Table1",TableToJoinID="Table2",JoinColumns="String1:String1",IncludeColumns="String2,Double2,Integer2",ColumnMap="String2:NewString2,Double2:NewDouble2,Integer2:NewInteger2")
+# Uncomment the following to generate the expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults\Test_JoinTable_MatchRows_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results\Test_JoinTable_MatchRows_out.csv")
+# Do regression comparison with the original input
+CompareFiles(InputFile1="ExpectedResults\Test_JoinTable_MatchRows_out.csv",InputFile2="Results/Test_JoinTable_MatchRows_out.csv",IfDifferent=Warn)

@@ -1,0 +1,11 @@
+# Test splitting a table column into other columns
+# - main test is to output columns each with unique sorted values
+StartLog(LogFile="Results/Test_SplitTableColumn_ColumnOrderUniqueSorted.TSTool.log")
+RemoveFile(InputFile="Results/Test_SplitTableColumn_ColumnOrderUniqueSorted_out.csv",IfNotFound=Ignore)
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data/testtable.csv")
+SplitTableColumn(TableID="Table1",ColumnToSplit="ColumnToSplit",Delimiter=",",OutputColumns="Split[1:]",OutputColumnOrder=UniqueValuesSorted)
+# Uncomment the following to generate the expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults\Test_SplitTableColumn_ColumnOrderUniqueSorted_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results/Test_SplitTableColumn_ColumnOrderUniqueSorted_out.csv")
+# Do regression comparison with the original input
+CompareFiles(InputFile1="ExpectedResults/Test_SplitTableColumn_ColumnOrderUniqueSorted_out.csv",InputFile2="Results/Test_SplitTableColumn_ColumnOrderUniqueSorted_out.csv",IfDifferent=Warn)

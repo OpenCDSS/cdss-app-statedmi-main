@@ -854,10 +854,14 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
+
+import org.apache.poi.util.SystemOutLogger;
 
 import RTi.DMI.DMI;
 import RTi.DMI.DMIUtil;
@@ -1033,6 +1037,12 @@ private String __WorkingDir_String;
 Hashtable of properties used by the processor.
 */
 Hashtable __property_Hashtable = new Hashtable();
+
+/**
+HashMap of properties used by the processor.
+HashMap allows null keys and values, although here keys should be non-null.
+*/
+private HashMap<String,Object> __propertyHashmap = new HashMap<String,Object>();
 
 /**
 Indicates whether the processCommands() is currently running.
@@ -2051,6 +2061,10 @@ public void clearResults()
 	__SMWellRightList.clear();
 	__SMWellHistoricalPumpingTSMonthlyList.clear();
 	__SMWellDemandTSMonthlyList.clear();
+	
+	if ( __TableList != null ) {
+        __TableList.clear();
+    }
 }
 
 /**
@@ -7155,6 +7169,57 @@ public List getStateModWellStationMatchList ()
 }
 
 /**
+Return the list of property names available from the processor.
+These properties can be requested using getPropContents().
+@param includeBuiltinProperties if true, include the list of built-in property names.
+@param includeDynamicPoperties if true, include the list of dynamically-defined property names.
+*/
+public Collection<String> getPropertyNameList ( boolean includeBuiltInProperties, boolean includeDynamicProperties )
+{
+    // Create a set that includes the above.
+    TreeSet<String> set = new TreeSet<String>();
+	// FIXME SAM 2008-02-15 Evaluate whether these should be in the
+	// property hashmap - should properties be available before ever
+	// being defined (in case they are used later) or should only defined
+	// properties be available (and rely on discovery to pass to other commands)?
+    // For now important properties are represented as data members in this class.
+    //
+	// Add properties that are accessible with getPropContents_XXXX methods.
+	if ( includeBuiltInProperties ) {
+	    List<String> v = new ArrayList<String>();
+        v.add ( "AutoExtendPeriod" );
+        v.add ( "AverageStart" );
+        v.add ( "AverageEnd" );
+        v.add ( "CreateOutput" ); // Useful?
+        v.add ( "DebugLevelLogFile" );
+        v.add ( "DebugLevelScreen" );
+        v.add ( "HaveOutputPeriod" ); // Useful?
+        v.add ( "HydroBaseDMIListSize" );
+        v.add ( "IgnoreLEZero" );
+        v.add ( "IncludeMissingTS" );
+        v.add ( "InitialWorkingDir" );
+    	v.add ( "InputStart" );
+    	v.add ( "InputEnd" );
+    	//v.add ( "OutputComments" ); // Not sure this needs to be visible
+    	v.add ( "OutputStart" );
+    	v.add ( "OutputEnd" );
+        v.add ( "OutputYearType" );
+        v.add ( "StartLogEnabled" );
+        v.add ( "TSEnsembleResultsListSize" );   // Useful for testing when zero time series are expected
+        v.add ( "TSResultsListSize" );   // Useful for testing when zero time series are expected
+        v.add ( "WarningLevelLogFile" );
+        v.add ( "WarningLevelScreen" );
+        v.add ( "WorkingDir" );
+        set.addAll ( v );
+	}
+    if ( includeDynamicProperties ) {
+        // Add the hashtable keys and make a unique list
+        set.addAll ( __propertyHashmap.keySet() );
+    }
+	return set;
+}
+
+/**
 Return the TSSupplier name.
 @return the TSSupplier name ("StateDMI_Processor").
 */
@@ -9553,17 +9618,32 @@ throws Exception
     else if ( request.equalsIgnoreCase("GetTable") ) {
         return processRequest_GetTable ( request, request_params );
     }
+    else if ( request.equalsIgnoreCase("GetPropertyHashtable") ) {
+        return processRequest_GetPropertyHashtable ( request, request_params );
+    }
+    else if ( request.equalsIgnoreCase("GetProperty") ) {
+        return processRequest_GetProperty ( request, request_params );
+    }
     else if ( request.equalsIgnoreCase("GetWorkingDirForCommand") ) {
 		return processRequest_GetWorkingDirForCommand ( request, request_params );
 	}
+    else if ( request.equalsIgnoreCase("RemoveProperty") ) {
+        return processRequest_RemoveProperty ( request, request_params );
+    }
 	else if ( request.equalsIgnoreCase("RunCommands") ) {
 		return processRequest_RunCommands ( request, request_params );
 	}
 	else if ( request.equalsIgnoreCase("SetHydroBaseDMI") ) {
 		return processRequest_SetHydroBaseDMI ( request, request_params );
 	}
+	else if ( request.equalsIgnoreCase("SetProperty") ) {
+        return processRequest_SetProperty ( request, request_params );
+    }
 	else if ( request.equalsIgnoreCase("SetTable") ) {
         return processRequest_SetTable ( request, request_params );
+    }
+	else if ( request.equalsIgnoreCase("RemoveTableFromResultsList") ) {
+        return processRequest_RemoveTableFromResultsList ( request, request_params );
     }
 	else {
 		StateDMIProcessorRequestResultsBean bean = new StateDMIProcessorRequestResultsBean();
@@ -9636,6 +9716,66 @@ throws Exception
 }
 
 /**
+Process the GetProperty request.  User-specified properties are checked first and
+if not found the built-in properties are requested.
+*/
+private CommandProcessorRequestResultsBean processRequest_GetProperty (
+        String request, PropList request_params )
+throws Exception
+{   StateDMIProcessorRequestResultsBean bean = new StateDMIProcessorRequestResultsBean();
+    // Get the necessary parameters...
+    Object o = request_params.getContents ( "PropertyName" );
+    if ( o == null ) {
+        String warning = "Request GetProperty() does not provide a PropertyName parameter.";
+        bean.setWarningText ( warning );
+        bean.setWarningRecommendationText ( "This is likely a software code error.");
+        throw new RequestParameterNotFoundException ( warning );
+    }
+    String PropertyName = (String)o;
+    Object PropertyValue = __propertyHashmap.get ( PropertyName );
+    if ( PropertyValue == null ) {
+        // Try the built-in properties
+        PropertyValue = getPropContents(PropertyName);
+    }
+    // Return the property value in the bean.
+    PropList results = bean.getResultsPropList();
+    // This will be set in the bean because the PropList is a reference...
+    results.setUsingObject("PropertyValue", PropertyValue );
+    return bean;
+}
+
+/**
+Process the GetPropertyHashtable request.  Currently only user-specified properties are returned and only if the request parameter "UserProperties=True".
+@return Hashtable of properties, not in sorted order.  This is a new Hashtable instance whose contents generally should not be modified.
+*/
+private CommandProcessorRequestResultsBean processRequest_GetPropertyHashtable (
+        String request, PropList request_params )
+throws Exception
+{  	StateDMIProcessorRequestResultsBean bean = new StateDMIProcessorRequestResultsBean();
+	// New Hashtable to return
+	Hashtable<String,Object> ph = new Hashtable<String,Object>();
+	// Get the necessary parameters...
+	Object o = request_params.getContents ( "GetUserProperties" );
+	if ( o != null ) {
+		String propval = (String)o;
+		if ( (propval != null) && propval.equalsIgnoreCase("true") ) {
+			// Transfer the user-specified properties
+			Set<String> keys = __propertyHashmap.keySet();
+			for ( String key : keys ) {
+				o = __propertyHashmap.get ( key );
+				ph.put(key,o);
+			}			
+		}
+	}
+	// TODO SAM 2015-04-26 Transfer the internal properties
+    // Return the property value in the bean.
+    PropList results = bean.getResultsPropList();
+    // This will be set in the bean because the PropList is a reference...
+    results.setUsingObject("PropertyHashtable", ph );
+    return bean;
+}
+
+/**
 Process the GetWorkingDirForCommand request.  This runs a processor on only the SetWorkingDir() commands
 in a command list.  The initial working directory is set to that of the processor.
 If no SetWorkingDir() commands are found, then the current initial working directory will be returned.
@@ -9699,6 +9839,62 @@ throws Exception
 }
 
 /**
+Process the SetProperty request.  Null property values are NOT allowed.
+*/
+private CommandProcessorRequestResultsBean processRequest_RemoveProperty (
+        String request, PropList request_params )
+throws Exception
+{   StateDMIProcessorRequestResultsBean bean = new StateDMIProcessorRequestResultsBean();
+    // Get the necessary parameters...
+    Object o = request_params.getContents ( "PropertyName" );
+    if ( o == null ) {
+            String warning = "Request SetProperty() does not provide a PropertyName parameter.";
+            bean.setWarningText ( warning );
+            bean.setWarningRecommendationText ( "This is likely a software code error.");
+            throw new RequestParameterNotFoundException ( warning );
+    }
+    String PropertyName = (String)o;
+    // Do not allow removing official property like InputStart as this would likely cause problems.
+    // First see if it is a known user-defined property
+    Object o2 = __propertyHashmap.get ( PropertyName );
+    if ( o2 != null ) {
+    	// Found it so remove (for some reason can't pass in o2 and have it work)
+    	__propertyHashmap.remove(PropertyName);
+    }
+    // No data are returned in the bean.
+    return bean;
+}
+
+/**
+Process the RemoveTableFromResultsList request.
+*/
+private CommandProcessorRequestResultsBean processRequest_RemoveTableFromResultsList (
+    String request, PropList request_params )
+throws Exception
+{   //String routine = "TSCommandProcessor.processRequest_RemoveTableFromResultsList";
+    StateDMIProcessorRequestResultsBean bean = new StateDMIProcessorRequestResultsBean();
+    // Get the necessary parameters...
+    Object o = request_params.getContents ( "TableID" );
+    if ( o == null ) {
+        String warning = "Request RemoveTableFromResultsList() does not provide a TableID parameter.";
+        bean.setWarningText ( warning );
+        bean.setWarningRecommendationText ( "This is likely a software code error.");
+        throw new RequestParameterNotFoundException ( warning );
+    }
+    String TableID = (String)o;
+    // Remove all tables having the same identifier.
+    DataTable table;
+    for ( int i = 0; i < __TableList.size(); i++ ) {
+        table = __TableList.get(i);
+        // Remove and decrement the counter so that the next table is checked
+        if ( table.getTableID().equalsIgnoreCase(TableID) ) {
+            __TableList.remove(i--);
+        }
+    }
+    return bean;
+}
+
+/**
 Process the RunCommands request.
 */
 private CommandProcessorRequestResultsBean processRequest_RunCommands (
@@ -9754,6 +9950,55 @@ throws Exception
 	__hdmi = dmi;
 	// No results need to be returned.
 	return bean;
+}
+
+/**
+Process the SetProperty request.
+Nulls are allowed, but typically only with a special request.
+Otherwise, it is difficult to check input for errors.
+*/
+private CommandProcessorRequestResultsBean processRequest_SetProperty (
+        String request, PropList request_params )
+throws Exception
+{   
+	StateDMIProcessorRequestResultsBean bean = new StateDMIProcessorRequestResultsBean();
+    // Get the necessary parameters...
+    Object o = request_params.getContents ( "PropertyName" );
+    if ( o == null ) {
+            String warning = "Request SetProperty() does not provide a PropertyName parameter.";
+            bean.setWarningText ( warning );
+            bean.setWarningRecommendationText ( "This is likely a software code error.");
+            throw new RequestParameterNotFoundException ( warning );
+    }
+    String PropertyName = (String)o;
+    Object o2 = request_params.getContents ( "PropertyValue" );
+    if ( o2 == null ) {
+    	Object o3 = request_params.getValue ( "SetNull" );
+    	if ( (o3 != null) && o3.toString().equalsIgnoreCase("true") ) { 
+	        String warning = "Request SetProperty() does not provide a PropertyValue parameter.";
+	        bean.setWarningText ( warning );
+	        bean.setWarningRecommendationText ( "This is likely a software code error.");
+	        throw new RequestParameterNotFoundException ( warning );
+    	}
+    	// Else OK to set a null property
+    }
+    // Try to set official property...
+    Collection<String> internalProperties = getPropertyNameList(true,false);
+    if ( internalProperties.contains(PropertyName) ) {
+	    try {
+	    	// Null is OK here for o2
+	        setPropContents(PropertyName, o2);
+	    }
+	    catch ( UnrecognizedRequestException e ) {
+	        // Not recognized as a core internal so will set below as a user property
+	    }
+    }
+    else {
+	    // Otherwise it is a user-defined property...
+	    __propertyHashmap.put ( PropertyName, o2 );
+    }
+    // No data are returned in the bean.
+    return bean;
 }
 
 /**

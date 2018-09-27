@@ -1,0 +1,17 @@
+# Test data table,
+# - only integers
+"Integer1","Integer2"
+1,11
+2,22
+3,33
+2,22
+1,11
+,
+5,55
+1,11
+0,
+,
+,0,
+1,11
+3,33
+5,55

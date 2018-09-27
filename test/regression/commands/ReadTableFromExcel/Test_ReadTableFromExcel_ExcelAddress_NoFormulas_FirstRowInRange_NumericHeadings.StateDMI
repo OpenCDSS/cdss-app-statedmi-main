@@ -1,0 +1,13 @@
+# Test reading a table from an Excel file:
+#  - Specify the block with an address
+#  - Data have no formulas
+#  - Name columns FirstRowInRange
+#  - Numeric headings (should be handled as text when used as column names)
+StartLog(LogFile="Results/Test_ReadTableFromExcel_ExcelAddress_NoFormulas_FirstRowInRange_NumericHeadings.TSTool.log")
+RemoveFile(InputFile="Results/Test_ReadTableFromExcel_ExcelAddress_NoFormulas_FirstRowInRange_NumericHeadings_out.csv",IfNotFound=Ignore)
+ReadTableFromExcel(TableID="Table_NoFormulas",InputFile="Data\TestWorkbook.xlsx",Worksheet="NumericHeadings",ExcelAddress="A1:G11",ExcelColumnNames=FirstRowInRange)
+# Uncomment the following command to regenerate expected results
+# WriteTableToDelimitedFile(TableID="Table_NoFormulas",OutputFile="ExpectedResults\Test_ReadTableFromExcel_ExcelAddress_NoFormulas_FirstRowInRange_NumericHeadings_out.csv")
+WriteTableToDelimitedFile(TableID="Table_NoFormulas",OutputFile="Results\Test_ReadTableFromExcel_ExcelAddress_NoFormulas_FirstRowInRange_NumericHeadings_out.csv")
+# Do regression comparison with the expected results
+CompareFiles(InputFile1="ExpectedResults\Test_ReadTableFromExcel_ExcelAddress_NoFormulas_FirstRowInRange_NumericHeadings_out.csv",InputFile2="Results/Test_ReadTableFromExcel_ExcelAddress_NoFormulas_FirstRowInRange_NumericHeadings_out.csv",IfDifferent=Warn)

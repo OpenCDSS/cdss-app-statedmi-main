@@ -1,0 +1,11 @@
+# Test splitting out a token from a string column based on a delimiter
+StartLog(LogFile="Results/Test_ManipulateTableString_Columns_Split.TSTool.log")
+RemoveFile(InputFile="Results/Test_ManipulateTableString_Columns_Split_out.dv",IfNotFound=Ignore)
+# Generate some table data but converting time series to table
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testdata.csv")
+# Manipulate strings in the table
+ManipulateTableString(TableID="Table1",InputColumn1="String1",Operator="Split",InputValue2=".",InputValue3="1",OutputColumn="String3")
+# Uncomment the following command to regenerate expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults/Test_ManipulateTableString_Columns_Split_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results/Test_ManipulateTableString_Columns_Split_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ManipulateTableString_Columns_Split_out.csv",InputFile2="Results/Test_ManipulateTableString_Columns_Split_out.csv",IfDifferent=Warn)

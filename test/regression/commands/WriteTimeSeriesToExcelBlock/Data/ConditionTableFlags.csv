@@ -1,0 +1,5 @@
+# Table to specify formatting for column cells based on values
+"TSID","Condition","Display","StyleID"
+"*","${tsdata:flag} == m","Missing","Missing"
+"*","${tsdata:flag} == n","Negative","Negative"
+"*","${tsdata:flag} == z","Zero","Zero"

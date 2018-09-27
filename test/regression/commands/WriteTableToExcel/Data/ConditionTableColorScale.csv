@@ -1,0 +1,8 @@
+# Table to specify formatting for column cells based on values
+"Column","Condition","Display","StyleID"
+"ts*","${tablecell:value} < 0","Value < 0","Color1"
+"ts*","${tablecell:value} >= 0.0 AND ${tablecell:value} < 2","0 >= Value < 2","Color2"
+"ts*","${tablecell:value} >= 2.0 AND ${tablecell:value} < 4","2 >= Value < 4","Color3"
+"ts*","${tablecell:value} >= 4.0 AND ${tablecell:value} < 6","4 >= Value < 6","Color4"
+"ts*","${tablecell:value} >= 6.0 AND ${tablecell:value} < 8","6 >= Value < 8","Color5"
+"ts*","${tablecell:value} > 8.0","Value > 8","Color6"

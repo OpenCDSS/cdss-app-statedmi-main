@@ -1,0 +1,5 @@
+# Simple table for testing
+"string1","double1","endstring"
+"String1",1,"a"
+"String2",2,"b"
+"String3",3,"c"

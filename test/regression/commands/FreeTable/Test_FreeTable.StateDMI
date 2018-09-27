@@ -1,0 +1,13 @@
+# Test freeing a table
+StartLog(LogFile="Results/Test_FreeTable.TSTool.log")
+RemoveFile(InputFile="Results/Test_FreeTable_out.csv",IfNotFound=Ignore)
+NewTable(TableID="Table1",Columns="datetime1,datetime;double1,double;float1,float;integer1,integer;short1,short;string 1,string")
+NewTable(TableID="Table2",Columns="datetime1,datetime;double1,double;float1,float;integer1,integer;short1,short;string 1,string")
+NewTable(TableID="Table3",Columns="datetime1,datetime;double1,double;float1,float;integer1,integer;short1,short;string 1,string")
+# Free the middle table
+FreeTable(TableID="Table2")
+# Uncomment the following to generate the expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults\Test_FreeTable_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results\Test_FreeTable_out.csv")
+# Do regression comparison with the original input
+CompareFiles(InputFile1="ExpectedResults\Test_FreeTable_out.csv",InputFile2="Results/Test_FreeTable_out.csv",IfDifferent=Warn)

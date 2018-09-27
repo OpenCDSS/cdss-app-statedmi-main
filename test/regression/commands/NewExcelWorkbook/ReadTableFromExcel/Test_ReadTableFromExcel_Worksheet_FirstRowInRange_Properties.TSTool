@@ -1,0 +1,18 @@
+# Test reading a table from an Excel file:
+# - Specify the block with the worksheet name
+# - Data have no formulas
+# - Name columns from the first row in the range
+# - Specify the input file using ${Property}
+# - Specify the worksheet using ${Property}
+# - Specify the table ID using ${Property}
+StartLog(LogFile="Results/Test_ReadTableFromExcel_Worksheet_FirstRowInRange_Properties.TSTool.log")
+RemoveFile(InputFile="Results/Test_ReadTableFromExcel_Worksheet_FirstRowInRange_Properties_out.csv",IfNotFound=Ignore)
+SetProperty(PropertyName="TestTableID",PropertyType=String,PropertyValue="Table_NoFormulas")
+SetProperty(PropertyName="TestInputFile",PropertyType=String,PropertyValue="Data\TestWorkbook.xlsx")
+SetProperty(PropertyName="TestWorksheet",PropertyType=String,PropertyValue="Worksheet_Headers")
+ReadTableFromExcel(TableID="${TestTableID}",InputFile="${TestInputFile}",Worksheet="${TestWorksheet}",ExcelColumnNames=FirstRowInRange)
+# Uncomment the following command to regenerate expected results
+# WriteTableToDelimitedFile(TableID="${TestTableID}",OutputFile="ExpectedResults\Test_ReadTableFromExcel_Worksheet_FirstRowInRange_Properties_out.csv")
+WriteTableToDelimitedFile(TableID="${TestTableID}",OutputFile="Results\Test_ReadTableFromExcel_Worksheet_FirstRowInRange_Properties_out.csv")
+# Do regression comparison with the expected results
+CompareFiles(InputFile1="ExpectedResults\Test_ReadTableFromExcel_Worksheet_FirstRowInRange_Properties_out.csv",InputFile2="Results/Test_ReadTableFromExcel_Worksheet_FirstRowInRange_Properties_out.csv",IfDifferent=Warn)

@@ -1,0 +1,8 @@
+# Test table data with some string and some numerical columns
+"DateTime","String1","String2","Double2","Integer2"
+2000-01-01,"First day","StringValue11",11.0,11
+2000-01-02,"Second day","StringValue22",22.0,22
+2000-01-03,"Third day","StringValue33",33.0,33
+2000-01-04,"Fourth day","StringValue44",44.0,44
+2000-01-05,"Fifth day","StringValue55",55.0,55
+2000-01-06,"Sixth day","StringValue66",66.0,66

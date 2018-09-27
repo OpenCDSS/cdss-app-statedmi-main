@@ -1,0 +1,11 @@
+# Test formatting a string using zero-padded integers
+StartLog(LogFile="Results/Test_ManipulateTableString_Columns_ZeroPad.TSTool.log")
+RemoveFile(InputFile="Results/Test_ManipulateTableString_Columns_ZeroPad_out.dv",IfNotFound=Ignore)
+# Generate some table data but converting time series to table
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testdata3.csv")
+# Format the strings in the table
+FormatTableString(TableID="Table1",InputColumns="Integer,Integer",Format="%02d%05d",OutputColumn="Formatted")
+# Uncomment the following command to regenerate expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults/Test_ManipulateTableString_Columns_ZeroPad_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results/Test_ManipulateTableString_Columns_ZeroPad_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ManipulateTableString_Columns_ZeroPad_out.csv",InputFile2="Results/Test_ManipulateTableString_Columns_ZeroPad_out.csv",IfDifferent=Warn)

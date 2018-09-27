@@ -1,0 +1,5 @@
+# Test table data with some example time series properties
+"loc","Scenario","Status"
+ts1,Scenario1,Good
+ts2,Scenario2,Bad
+ts3,Scenario3,Ugly

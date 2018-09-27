@@ -1,0 +1,15 @@
+# TODO SAM 2015-03-14 Need to read from Excel after writing to verify
+# Test writing time series to an Excel file
+# - Day interval
+# - Use "Blank" for missing
+# - Write to B2 rather than A1
+StartLog(LogFile="Results/Test_WriteTimeSeriesToExcel_Day_Blank_B2.TSTool.log")
+RemoveFile(InputFile="Results/Test_WriteTimeSeriesToExcel_Day_Blank_B2_out.xlsx",IfNotFound=Ignore)
+NewPatternTimeSeries(Alias="ts1",NewTSID="ts1..MyData.Day",Description="Test data 1",SetStart="1950-01-01",SetEnd="1951-03-12",Units="CFS",PatternValues="5,10,12,,,13,75")
+NewPatternTimeSeries(Alias="ts2",NewTSID="ts2..MyData.Day",Description="Test data 2",SetStart="1950-01-01",SetEnd="1952-05-12",Units="CFS",PatternValues="1,2,30,44,75,90")
+# Uncomment the following command to regenerate the expected results file.
+# WriteTimeSeriesToExcel(OutputFile="ExpectedResults\Test_WriteTimeSeriesToExcel_Day_Blank_B2_out.dv")
+# Generate new output...
+WriteTimeSeriesToExcel(MissingValue=Blank,OutputFile="Results/Test_WriteTimeSeriesToExcel_Day_Blank_B2_out.xlsx",Worksheet="DayInterval",ExcelAddress="B2")
+# Do regression comparison...
+# CompareFiles(InputFile1="ExpectedResults/Test_WriteTimeSeriesToExcel_Day_Blank_B2_out.dv",InputFile2="Results/Test_WriteTimeSeriesToExcel_Day_Blank_B2_out.dv",IfDifferent=Warn)

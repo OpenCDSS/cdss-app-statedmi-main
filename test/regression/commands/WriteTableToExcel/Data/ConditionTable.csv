@@ -1,0 +1,5 @@
+# Table to specify formatting for column cells based on values
+"Column","Condition","Display","StyleID"
+"ts*","${tablecell:value} == missing","Missing","Missing"
+"ts*","${tablecell:value} < 0.0","Negative","Negative"
+"ts*","${tablecell:value} == 0","Zero","Zero"

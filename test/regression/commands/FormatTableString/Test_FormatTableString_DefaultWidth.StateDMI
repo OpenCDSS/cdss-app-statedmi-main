@@ -1,0 +1,12 @@
+#@enabled False  (TODO sam 2013-05-14 Need to figure out why double is not showing decimals)
+# Test formatting a string to a column in a table, using default widths
+StartLog(LogFile="Results/Test_ManipulateTableString_Columns_DefaultWidth.TSTool.log")
+RemoveFile(InputFile="Results/Test_ManipulateTableString_Columns_DefaultWidth_out.dv",IfNotFound=Ignore)
+# Generate some table data but converting time series to table
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testdata2.csv")
+# Format the strings in the table
+FormatTableString(TableID="Table1",InputColumns="String1,Integer,Double",Format="%s-%d-%f",OutputColumn="Formatted")
+# Uncomment the following command to regenerate expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults/Test_ManipulateTableString_Columns_DefaultWidth_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results/Test_ManipulateTableString_Columns_DefaultWidth_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ManipulateTableString_Columns_DefaultWidth_out.csv",InputFile2="Results/Test_ManipulateTableString_Columns_DefaultWidth_out.csv",IfDifferent=Warn)

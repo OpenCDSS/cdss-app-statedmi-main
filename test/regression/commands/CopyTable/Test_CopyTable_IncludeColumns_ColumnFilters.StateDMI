@@ -1,0 +1,12 @@
+# Test copying a table read from a file
+# * Specify columns to include in copy
+# * Specify column filter
+StartLog(LogFile="Results/Test_CopyTable_IncludeColumns_ColumnFilters.TSTool.log")
+RemoveFile(InputFile="Results/Test_CopyTable_IncludeColumns_ColumnFilters_out.csv",IfNotFound=Ignore)
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testtable2.csv")
+CopyTable(TableID="Table1",NewTableID="Table1Copy",IncludeColumns="DateTime,String",ColumnFilters="String:first day")
+# Uncomment the following to generate the expected results.
+# WriteTableToDelimitedFile(TableID="Table1Copy",OutputFile="ExpectedResults\Test_CopyTable_IncludeColumns_ColumnFilters_out.csv")
+WriteTableToDelimitedFile(TableID="Table1Copy",OutputFile="Results\Test_CopyTable_IncludeColumns_ColumnFilters_out.csv")
+# Do regression comparison with the original input
+CompareFiles(InputFile1="ExpectedResults\Test_CopyTable_IncludeColumns_ColumnFilters_out.csv",InputFile2="Results/Test_CopyTable_IncludeColumns_ColumnFilters_out.csv",IfDifferent=Warn)

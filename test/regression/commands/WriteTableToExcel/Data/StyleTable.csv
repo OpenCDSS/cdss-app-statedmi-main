@@ -1,0 +1,12 @@
+# Style table for formatting time series data
+"StyleID","FillForegroundColor"
+"Missing","Yellow"
+"Negative","Orange"
+"Zero","Magenta"
+"Contains w","Green"
+"> r","LightGray"
+">=","DarkGray"
+"< c","Blue"
+"<=","Cyan"
+"StartsWith e","Red"
+"!=","Pink"

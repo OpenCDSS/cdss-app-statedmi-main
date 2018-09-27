@@ -1,0 +1,21 @@
+# Test writing a table to Excel
+# - Use ReadTableFromExcel to read the original, write a copy, an then read and compare
+# - Specify address block
+# - Specify the table ID using ${Property}
+# - Specify the Excel file using ${Property}
+# - Specify the Excel worksheet using ${Property}
+StartLog(LogFile="Results/Test_WriteTableToExcel_Address_Properties.TSTool.log")
+RemoveFile(InputFile="Results/Test_WriteTableToExcel_Address_Properties_out.xlsx",IfNotFound=Ignore)
+SetProperty(PropertyName="TestTableID1",PropertyType=String,PropertyValue="Table1")
+SetProperty(PropertyName="TestTableID2",PropertyType=String,PropertyValue="Table2")
+SetProperty(PropertyName="TestOutputFile",PropertyType=String,PropertyValue="Results/Test_WriteTableToExcel_Address_Properties_out.xlsx")
+SetProperty(PropertyName="TestWorksheet",PropertyType=String,PropertyValue="Table1")
+# Read the table from the Excel data file
+ReadTableFromExcel(TableID="${TestTableID1}",InputFile="Data\Definitions.xlsx",ExcelAddress="A5:D14",ExcelColumnNames=FirstRowInRange)
+# Write the table to a new Excel file.
+NewExcelWorkbook(OutputFile="${TestOutputFile}",Worksheets="${TestWorksheet}",KeepOpen=True)
+WriteTableToExcel(TableID="${TestTableID1}",OutputFile="${TestOutputFile}",Worksheet="${TestWorksheet}",ExcelAddress="A1",ExcelColumnNames=FirstRowInRange,KeepOpen=False)
+# Now read the table from the new worksheet
+ReadTableFromExcel(TableID="Table2",InputFile="Results\Test_WriteTableToExcel_Address_Properties_out.xlsx",Worksheet="Table1",ExcelColumnNames=FirstRowInRange)
+# Do regression comparison with the original table
+CompareTables(Table1ID="Table1",Table2ID="Table2",IfDifferent=Warn)

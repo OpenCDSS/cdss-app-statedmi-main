@@ -1,0 +1,7 @@
+# Table to specify formatting for column cells based on values
+"TSID","Condition","StyleID"
+"ts*","${tsdata:flag} == m","Missing"
+"ts*","${tsdata:flag} == n","Negative"
+"ts*","${tsdata:flag} == z","Zero"
+# Use contains but do not use ==, startswith, or endswith in same condition table because they conflict
+"ts*","${tsdata:flag} contains MO","ContainsMO"

@@ -1,0 +1,13 @@
+# Test reading a table from an Excel file:
+#  * Specify the block with an address
+#  * Data have no formulas
+#  * Name columns FirstRowInRange
+#  * Specify the numnber precision as 8
+StartLog(LogFile="Results/Test_ReadTableFromExcel_ExcelAddress_NoFormulas_FirstRowInRange_NumberPrecision.TSTool.log")
+RemoveFile(InputFile="Results/Test_ReadTableFromExcel_ExcelAddress_NoFormulas_FirstRowInRange_NumberPrecision_out.csv",IfNotFound=Ignore)
+ReadTableFromExcel(TableID="Table_NoFormulas",InputFile="Data\TestWorkbook.xlsx",Worksheet="Address_NoFormulas",ExcelAddress="A1:G11",ExcelColumnNames=FirstRowInRange,NumberPrecision=8)
+# Uncomment the following command to regenerate expected results
+# WriteTableToDelimitedFile(TableID="Table_NoFormulas",OutputFile="ExpectedResults\Test_ReadTableFromExcel_ExcelAddress_NoFormulas_FirstRowInRange_NumberPrecision_out.csv")
+WriteTableToDelimitedFile(TableID="Table_NoFormulas",OutputFile="Results\Test_ReadTableFromExcel_ExcelAddress_NoFormulas_FirstRowInRange_NumberPrecision_out.csv")
+# Do regression comparison with the expected results
+CompareFiles(InputFile1="ExpectedResults\Test_ReadTableFromExcel_ExcelAddress_NoFormulas_FirstRowInRange_NumberPrecision_out.csv",InputFile2="Results/Test_ReadTableFromExcel_ExcelAddress_NoFormulas_FirstRowInRange_NumberPrecision_out.csv",IfDifferent=Warn)

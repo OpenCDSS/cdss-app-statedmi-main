@@ -1,0 +1,19 @@
+# Test writing time series to an Excel file as a block of data
+# - Day interval
+# - Color based on flag values
+StartLog(LogFile="Results/Test_WriteTimeSeriesToExcelBlock_Day_Flags.TSTool.log")
+RemoveFile(InputFile="Results/Test_WriteTimeSeriesToExcelBlock_Day_Flags_out.xlsx",IfNotFound=Ignore)
+# 06752260 - CACHE LA POUDRE RIVER AT FORT COLLINS, CO
+ReadDateValue(InputFile="Data\06752260-Day.dv")
+ReadTableFromDelimitedFile(TableID="StyleTable",InputFile="Data\StyleTableFlags.csv")
+ReadTableFromDelimitedFile(TableID="ConditionTable",InputFile="Data\ConditionTableFlags.csv")
+# Uncomment the following command to regenerate the expected results file.
+# WriteTimeSeriesToExcelBlock(OutputFile="ExpectedResults\Test_WriteTimeSeriesToExcelBlock_Day_Flags_out.dv")
+# Generate new output...
+# SetDebugLevel(LogFileLevel=1)
+SetDebugLevel(LogFileLevel=1)
+WriteTimeSeriesToExcelBlock(MissingValue=Blank,OutputFile="Results/Test_WriteTimeSeriesToExcelBlock_Day_Flags_out.xlsx",Worksheet="DayInterval",ExcelAddress="A1",LayoutBlock=Period,LayoutColumns=DAY,LayoutRows=YearDescending,OutputYearType=Water,BlockMinColumnProperty="BlockMinColumn",BlockMinRowProperty="BlockMinRow",BlockMaxColumnProperty="BlockMaxColumn",BlockMaxRowProperty="BlockMaxRow",ConditionTableID="ConditionTable",StyleTableID="StyleTable",LegendWorksheet="Legend",LegendAddress="A1")
+SetDebugLevel(LogFileLevel=0)
+# SetDebugLevel(LogFileLevel=0)
+# Do regression comparison...
+# CompareFiles(InputFile1="ExpectedResults/Test_WriteTimeSeriesToExcelBlock_Day_Flags_out.dv",InputFile2="Results/Test_WriteTimeSeriesToExcelBlock_Day_Flags_out.dv",IfDifferent=Warn)

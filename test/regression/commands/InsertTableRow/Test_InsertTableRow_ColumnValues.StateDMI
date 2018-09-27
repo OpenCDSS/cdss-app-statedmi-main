@@ -1,0 +1,12 @@
+# Test inserting a row into a table for each of the supported data types
+# - default insert position at end
+# - specify values to insert
+StartLog(LogFile="Results/Test_InsertTableRow_ColumnValues.TSTool.log")
+RemoveFile(InputFile="Results/Test_InsertTableRow_ColumnValues_out.csv",IfNotFound=Ignore)
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testtable.csv")
+InsertTableRow(TableID="Table1",ColumnValues="string1:NewString,double1:8.8888,integer1:8")
+# Uncomment the following to generate the expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults\Test_InsertTableRow_ColumnValues_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results\Test_InsertTableRow_ColumnValues_out.csv")
+# Do regression comparison with the original input
+CompareFiles(InputFile1="ExpectedResults\Test_InsertTableRow_ColumnValues_out.csv",InputFile2="Results/Test_InsertTableRow_ColumnValues_out.csv",IfDifferent=Warn)

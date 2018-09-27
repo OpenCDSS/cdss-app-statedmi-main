@@ -1,0 +1,12 @@
+# Test copying a table read from a file
+# * Specify the distinct columns
+# * Distinct column is of type Integer
+StartLog(LogFile="Results/Test_CopyTable_DistinctColumns_Integer.TSTool.log")
+RemoveFile(InputFile="Results/Test_CopyTable_DistinctColumns_Integer_out.csv",IfNotFound=Ignore)
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testtable2.csv")
+CopyTable(TableID="Table1",NewTableID="Table1Copy",IncludeColumns="Integer",DistinctColumns="Integer")
+# Uncomment the following to generate the expected results.
+# WriteTableToDelimitedFile(TableID="Table1Copy",OutputFile="ExpectedResults\Test_CopyTable_DistinctColumns_Integer_out.csv")
+WriteTableToDelimitedFile(TableID="Table1Copy",OutputFile="Results\Test_CopyTable_DistinctColumns_Integer_out.csv")
+# Do regression comparison with the original input
+CompareFiles(InputFile1="ExpectedResults\Test_CopyTable_DistinctColumns_Integer_out.csv",InputFile2="Results/Test_CopyTable_DistinctColumns_Integer_out.csv",IfDifferent=Warn)

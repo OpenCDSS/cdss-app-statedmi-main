@@ -1,0 +1,4 @@
+# Table to specify formatting for column heading cells based on values
+"TSID","Condition","StyleID"
+# Check for contains
+"ts*","${ts:StringOne} contains One","MatchesCondition"

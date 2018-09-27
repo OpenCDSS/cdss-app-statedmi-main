@@ -1,0 +1,11 @@
+# Test converting a string to an integer column in a table
+StartLog(LogFile="Results/Test_ManipulateTableString_Columns_ToInteger.TSTool.log")
+RemoveFile(InputFile="Results/Test_ManipulateTableString_Columns_ToInteger_out.dv",IfNotFound=Ignore)
+# Generate some table data but converting time series to table
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testdata2.csv")
+# Manipulate strings in the table
+ManipulateTableString(TableID="Table1",InputColumn1="IntegerString",Operator="ToInteger",OutputColumn="Integer")
+# Uncomment the following command to regenerate expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults/Test_ManipulateTableString_Columns_ToInteger_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results/Test_ManipulateTableString_Columns_ToInteger_out.csv")
+CompareFiles(InputFile1="ExpectedResults/Test_ManipulateTableString_Columns_ToInteger_out.csv",InputFile2="Results/Test_ManipulateTableString_Columns_ToInteger_out.csv",IfDifferent=Warn)

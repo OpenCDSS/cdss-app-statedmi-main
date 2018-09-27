@@ -1,0 +1,15 @@
+# Test writing a table to HTML using default parameters
+# - Specify table ID using ${Property}
+# - Specify output file using ${Property}
+StartLog(LogFile="Results/Test_WriteTableToHTML_Properties.TSTool.log")
+RemoveFile(InputFile="Results/Test_WriteTableToHTML_Properties_out.html",IfNotFound=Ignore)
+SetProperty(PropertyName="TestTSID",PropertyType=String,PropertyValue="KNN_Aspinall")
+SetProperty(PropertyName="TestOutputFile0",PropertyType=String,PropertyValue="ExpectedResults\Test_WriteTableToHTML_Properties_out.html")
+SetProperty(PropertyName="TestOutputFile",PropertyType=String,PropertyValue="Results\Test_WriteTableToHTML_Properties_out.html")
+ReadTableFromDelimitedFile(TableID="${TestTSID}",InputFile="Data\flow_sequence_dataset.csv")
+# Uncomment to regenerate the expected results...
+# WriteTableToHTML(TableID="${TestTSID}",OutputFile="${TestOutputFile0}")
+# Generate the results.
+WriteTableToHTML(TableID="${TestTSID}",OutputFile="${TestOutputFile}")
+# Do regression comparison on the results
+CompareFiles(InputFile1="${TestOutputFile0}",InputFile2="${TestOutputFile}",IfDifferent=Warn)

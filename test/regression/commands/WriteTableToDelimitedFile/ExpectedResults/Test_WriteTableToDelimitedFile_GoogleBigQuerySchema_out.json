@@ -1,0 +1,42 @@
+{
+  "schema": {
+    "fields": [
+      {
+        "name": "Date",
+        "type": "DATETIME"
+      },
+      {
+        "name": "DateTime",
+        "type": "DATETIME"
+      },
+      {
+        "name": "String",
+        "type": "STRING"
+      },
+      {
+        "name": "Double",
+        "type": "FLOAT"
+      },
+      {
+        "name": "Float",
+        "type": "FLOAT"
+      },
+      {
+        "name": "Integer",
+        "type": "INTEGER"
+      },
+      {
+        "name": "Short",
+        "type": "INTEGER"
+      },
+      {
+        "name": "Long",
+        "type": "INTEGER"
+      },
+      {
+        "name": "Boolean",
+        "type": "STRING"
+      }
+    ]
+  }
+}

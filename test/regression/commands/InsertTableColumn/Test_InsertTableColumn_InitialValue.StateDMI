@@ -1,0 +1,16 @@
+# Test inserting a column into a table for each of the supported data types, headers only
+StartLog(LogFile="Results/Test_InsertTableColumn_InitialValue.TSTool.log")
+RemoveFile(InputFile="Results/Test_InsertTableColumn_InitialValue_out.csv",IfNotFound=Ignore)
+ReadTableFromDelimitedFile(TableID="Table1",InputFile="Data\testtable.csv")
+InsertTableColumn(TableID="Table1",InsertColumn="datetime2",InsertBeforeColumn="double1",ColumnType=DateTime,InitialValue="2011-01-01 12")
+InsertTableColumn(TableID="Table1",InsertColumn="double2",ColumnType=Double,InitialValue="22")
+InsertTableColumn(TableID="Table1",InsertColumn="float2",ColumnType=Float,InitialValue="25")
+InsertTableColumn(TableID="Table1",InsertColumn="integer2",ColumnType=Integer,InitialValue="33")
+InsertTableColumn(TableID="Table1",InsertColumn="short2",InsertBeforeColumn="string1",ColumnType=Short,InitialValue="44")
+InsertTableColumn(TableID="Table1",InsertColumn="long2",InsertBeforeColumn="string1",ColumnType=Long,InitialValue="55")
+InsertTableColumn(TableID="Table1",InsertColumn="string2",ColumnType=String,InitialValue="66666",ColumnWidth=12)
+# Uncomment the following to generate the expected results.
+# WriteTableToDelimitedFile(TableID="Table1",OutputFile="ExpectedResults\Test_InsertTableColumn_InitialValue_out.csv")
+WriteTableToDelimitedFile(TableID="Table1",OutputFile="Results\Test_InsertTableColumn_InitialValue_out.csv")
+# Do regression comparison with the original input
+CompareFiles(InputFile1="ExpectedResults\Test_InsertTableColumn_InitialValue_out.csv",InputFile2="Results/Test_InsertTableColumn_InitialValue_out.csv",IfDifferent=Warn)
