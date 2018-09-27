@@ -10,7 +10,44 @@ import rti.tscommandprocessor.commands.hydrobase.OpenHydroBase_Command;
 import rti.tscommandprocessor.commands.logging.SetDebugLevel_Command;
 import rti.tscommandprocessor.commands.logging.SetWarningLevel_Command;
 import rti.tscommandprocessor.commands.logging.StartLog_Command;
+import rti.tscommandprocessor.commands.table.AppendTable_Command;
+import rti.tscommandprocessor.commands.table.CopyPropertiesToTable_Command;
+import rti.tscommandprocessor.commands.table.CopyTable_Command;
+import rti.tscommandprocessor.commands.table.DeleteTableColumns_Command;
+import rti.tscommandprocessor.commands.table.DeleteTableRows_Command;
+import rti.tscommandprocessor.commands.table.FormatTableDateTime_Command;
+import rti.tscommandprocessor.commands.table.FormatTableString_Command;
+import rti.tscommandprocessor.commands.table.FreeTable_Command;
+import rti.tscommandprocessor.commands.table.InsertTableColumn_Command;
+import rti.tscommandprocessor.commands.table.InsertTableRow_Command;
+import rti.tscommandprocessor.commands.table.JoinTables_Command;
+import rti.tscommandprocessor.commands.table.ManipulateTableString_Command;
+import rti.tscommandprocessor.commands.table.NewTable_Command;
+import rti.tscommandprocessor.commands.table.ReadTableFromDBF_Command;
+import rti.tscommandprocessor.commands.table.ReadTableFromDataStore_Command;
 import rti.tscommandprocessor.commands.table.ReadTableFromDelimitedFile_Command;
+import rti.tscommandprocessor.commands.spreadsheet.CloseExcelWorkbook_Command;
+import rti.tscommandprocessor.commands.spreadsheet.NewExcelWorkbook_Command;
+import rti.tscommandprocessor.commands.spreadsheet.ReadExcelWorkbook_Command;
+import rti.tscommandprocessor.commands.spreadsheet.ReadPropertiesFromExcel_Command;
+import rti.tscommandprocessor.commands.spreadsheet.ReadTableCellsFromExcel_Command;
+import rti.tscommandprocessor.commands.spreadsheet.ReadTableFromExcel_Command;
+import rti.tscommandprocessor.commands.spreadsheet.SetExcelCell_Command;
+import rti.tscommandprocessor.commands.spreadsheet.SetExcelWorksheetViewProperties_Command;
+import rti.tscommandprocessor.commands.spreadsheet.WriteTableCellsToExcel_Command;
+import rti.tscommandprocessor.commands.table.ReadTableFromFixedFormatFile_Command;
+import rti.tscommandprocessor.commands.table.SetPropertyFromTable_Command;
+import rti.tscommandprocessor.commands.table.SetTableValues_Command;
+import rti.tscommandprocessor.commands.table.SortTable_Command;
+import rti.tscommandprocessor.commands.table.SplitTableColumn_Command;
+import rti.tscommandprocessor.commands.table.SplitTableRow_Command;
+import rti.tscommandprocessor.commands.table.TableMath_Command;
+import rti.tscommandprocessor.commands.table.TableTimeSeriesMath_Command;
+import rti.tscommandprocessor.commands.table.WriteTableToDelimitedFile_Command;
+import rti.tscommandprocessor.commands.spreadsheet.WriteTableToExcel_Command;
+import rti.tscommandprocessor.commands.spreadsheet.WriteTimeSeriesToExcelBlock_Command;
+import rti.tscommandprocessor.commands.spreadsheet.WriteTimeSeriesToExcel_Command;
+import rti.tscommandprocessor.commands.table.WriteTableToHTML_Command;
 import rti.tscommandprocessor.commands.time.SetOutputPeriod_Command;
 import rti.tscommandprocessor.commands.time.SetOutputYearType_Command;
 import rti.tscommandprocessor.commands.util.CommentBlockEnd_Command;
@@ -80,6 +117,10 @@ throws UnknownCommandException
 	if ( StringUtil.startsWithIgnoreCase( commandString, "AppendNetwork") ){
 		return new AppendNetwork_Command ();
 	}
+	
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "AppendTable") ) {
+        return new AppendTable_Command ();
+    }
 
 	// "c" commands ...
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"CalculateDiversionDemandTSMonthlyAsMax") ) {
@@ -175,9 +216,18 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"CheckWellStations") ) {
 		return new CheckWellStations_Command ();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "CloseExcelWorkbook") ) {
+		return new CloseExcelWorkbook_Command ();
+	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"CompareFiles") ) {
 		return new CompareFiles_Command ();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "CopyPropertiesToTable") ) {
+        return new CopyPropertiesToTable_Command ();
+    }
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "CopyTable") ) {
+        return new CopyTable_Command ();
+    }
 	else if ( StringUtil.startsWithIgnoreCase(commandString,"CreateCropPatternTSForCULocations") ) {
 		return new CreateCropPatternTSForCULocations_Command ();
 	}
@@ -193,6 +243,15 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase(commandString,"CreateRiverNetworkFromNetwork") ) {
 		return new CreateRiverNetworkFromNetwork_Command ();
 	}
+	
+	// "d" commands...
+	
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "DeleteTableColumns") ) {
+        return new DeleteTableColumns_Command ();
+    }
+    else if ( StringUtil.startsWithIgnoreCase( commandString, "DeleteTableRows") ) {
+        return new DeleteTableRows_Command ();
+    }
 	
 	// "e" commands ...
 	else if ( StringUtil.startsWithIgnoreCase(commandString,"Exit") ||
@@ -361,6 +420,29 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"FillIrrigationPracticeTSAcreageUsingWellRights") ) {
 		return new FillIrrigationPracticeTSAcreageUsingWellRights_Command ();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "FormatTableDateTime") ) {
+        return new FormatTableDateTime_Command ();
+    }
+    else if ( StringUtil.startsWithIgnoreCase( commandString, "FormatTableString") ) {
+        return new FormatTableString_Command ();
+    }
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "FreeTable") ) {
+        return new FreeTable_Command ();
+    }
+	
+	// "i" commands...
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "InsertTableColumn") ) {
+        return new InsertTableColumn_Command ();
+    }
+    else if ( StringUtil.startsWithIgnoreCase( commandString, "InsertTableRow") ) {
+        return new InsertTableRow_Command ();
+    }
+	
+	// "j" commands...
+
+    else if ( StringUtil.startsWithIgnoreCase( commandString, "JoinTables") ) {
+        return new JoinTables_Command ();
+    }
 	
 	// "l" commands...
 	
@@ -382,12 +464,24 @@ throws UnknownCommandException
 
 	// "m" commands...
 	
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "ManipulateTableString") ) {
+        return new ManipulateTableString_Command ();
+    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"MergeListFileColumns") ){
 		return new MergeListFileColumns_Command ();
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"MergeWellRights") ){
 		return new MergeWellRights_Command ();
 	}
+	
+	// "n" commands...
+	
+	else if ( StringUtil.startsWithIgnoreCase(commandString,"NewTable") ) {
+        return new NewTable_Command ();
+    }
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "NewExcelWorkbook") ) {
+        return new NewExcelWorkbook_Command ();
+    }
 
 	// "o" commands...
 	
@@ -480,6 +574,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadDiversionStationsFromStateMod")) {
 		return new ReadDiversionStationsFromStateMod_Command();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadExcelWorkbook") ) {
+        return new ReadExcelWorkbook_Command ();
+    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadInstreamFlowDemandTSAverageMonthlyFromStateMod")) {
 		return new ReadInstreamFlowDemandTSAverageMonthlyFromStateMod_Command();
 	}
@@ -534,6 +631,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadPlanWellAugmentationFromStateMod")) {
 		return new ReadPlanWellAugmentationFromStateMod_Command();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadPropertiesFromExcel") ) {
+        return new ReadPropertiesFromExcel_Command ();
+    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadReservoirReturnFromStateMod")) {
 		return new ReadReservoirReturnFromStateMod_Command();
 	}
@@ -579,9 +679,30 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadStreamGageStationsFromStateMod")) {
 		return new ReadStreamGageStationsFromStateMod_Command();
 	}
-	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadTableFromDelimitedFile")) {
-        return new ReadTableFromDelimitedFile_Command();
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadTableCellsFromExcel") ) {
+        return new ReadTableCellsFromExcel_Command ();
     }
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadTableFromDataStore") ) {
+        return new ReadTableFromDataStore_Command ();
+    }
+    else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadTableFromDBF") ) {
+        return new ReadTableFromDBF_Command ();
+    }
+    else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadTableFromDelimitedFile") ) {
+        return new ReadTableFromDelimitedFile_Command ();
+    }
+    else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadTableFromExcel") ) {
+        return new ReadTableFromExcel_Command ();
+    }
+    else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadTableFromFixedFormatFile") ) {
+        return new ReadTableFromFixedFormatFile_Command ();
+    }
+    /*else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadTableFromJSON") ) {
+        return new ReadTableFromJSON_Command ();
+    }
+    else if ( commandName.equalsIgnoreCase("ReadTableFromXML") ) {
+        return new ReadTableFromXML_Command ();
+    }*/
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadWellDemandTSMonthlyFromStateMod")) {
 		return new ReadWellDemandTSMonthlyFromStateMod_Command();
 	}
@@ -704,6 +825,12 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"SetDiversionSystem") ) {
 		return new SetDiversionSystem_Command ();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetExcelCell") ) {
+        return new SetExcelCell_Command ();
+    }
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetExcelWorksheetViewProperties") ) {
+        return new SetExcelWorksheetViewProperties_Command ();
+    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"SetInstreamFlowDemandTSAverageMonthlyConstant") ) {
 		return new SetInstreamFlowDemandTSAverageMonthlyConstant_Command ();
 	}
@@ -732,6 +859,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetIrrigationPracticeTS")) {
 		return new SetIrrigationPracticeTS_Command();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetTableValues") ) {
+        return new SetTableValues_Command ();
+    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"SetOutputPeriod") ) {
 		return new SetOutputPeriod_Command ();
 	}
@@ -744,6 +874,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetPlanStation")) {
 		return new SetPlanStation_Command();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetPropertyFromTable") ) {
+        return new SetPropertyFromTable_Command ();
+    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"SetReservoirAggregateFromList") ) {
 		return new SetReservoirAggregateFromList_Command ();
 	}
@@ -880,6 +1013,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"SortStreamGageStations") ) {
 		return new SortStreamGageStations_Command ();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "SortTable") ) {
+        return new SortTable_Command ();
+    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"SortWellDemandTSMonthly") ) {
 		return new SortWellDemandTSMonthly_Command ();
 	}
@@ -892,6 +1028,12 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"SortWellStations") ) {
 		return new SortWellStations_Command ();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "SplitTableColumn") ) {
+        return new SplitTableColumn_Command ();
+    }
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "SplitTableRow") ) {
+        return new SplitTableRow_Command ();
+    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"StartLog") ) {
 		return new StartLog_Command ();
 	}
@@ -901,6 +1043,12 @@ throws UnknownCommandException
 	
 	// "t" commands...
 	
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "TableMath") ) {
+        return new TableMath_Command ();
+    }
+    /*else if ( StringUtil.startsWithIgnoreCase( commandString, "TableTimeSeriesMath") ) {
+        return new TableTimeSeriesMath_Command ();
+    }*/
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"TranslateBlaneyCriddle") ) {
 		return new TranslateBlaneyCriddle_Command ();
 	}
@@ -1086,6 +1234,27 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"WriteStreamGageStationsToStateMod") ) {
 		return new WriteStreamGageStationsToStateMod_Command ();
 	}
+	/*else if ( StringUtil.startsWithIgnoreCase("WriteTableToDataStore") ) {
+        return new WriteTableToDataStore_Command ();
+    }*/
+    else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteTableToDelimitedFile") ) {
+        return new WriteTableToDelimitedFile_Command ();
+    }
+    else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteTableToExcel") ) {
+        return new WriteTableToExcel_Command ();
+    }
+    else if ( StringUtil.startsWithIgnoreCase( commandString,  "WriteTableCellsToExcel") ) {
+        return new WriteTableCellsToExcel_Command ();
+    }
+    else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteTableToHTML") ) {
+        return new WriteTableToHTML_Command ();
+    }
+    /*else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteTimeSeriesToExcel") ) {
+        return new WriteTimeSeriesToExcel_Command ();
+    }
+    else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteTimeSeriesToExcelBlock") ) {
+        return new WriteTimeSeriesToExcelBlock_Command ();
+    }*/
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteWellDemandTSMonthlyToStateMod")) {
 		return new WriteWellDemandTSMonthlyToStateMod_Command();
 	}
