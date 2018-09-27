@@ -11,7 +11,7 @@ import java.util.List;
 
 import javax.swing.JFrame;
 
-import rti.tscommandprocessor.core.TSCommandProcessor;
+import DWR.DMI.StateDMI.StateDMI_Processor;
 import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 import RTi.Util.IO.AbstractCommand;
 import RTi.Util.Message.Message;
@@ -533,7 +533,7 @@ private List<String> writePropertyFile ( CommandProcessor processor, String outp
         }
         fout = new PrintWriter ( new FileOutputStream ( outputFileFull, doAppend ) );
         // Get the list of all processor properties
-        TSCommandProcessor tsprocessor = (TSCommandProcessor)processor;
+        StateDMI_Processor tsprocessor = (StateDMI_Processor)processor;
         Collection<String> list = tsprocessor.getPropertyNameList(true, true);
         List<String> propNameList = new ArrayList<String>(list);
         if ( sortOrder == 0 ) {
