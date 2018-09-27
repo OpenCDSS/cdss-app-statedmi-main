@@ -10,8 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import DWR.DMI.StateDMI.StateDMI_Processor;
 import RTi.TS.TS;
 import RTi.TS.TSEnsemble;
+import RTi.TS.TSIdent;
 import RTi.TS.TSUtil_SortTimeSeries;
 import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandLogRecord;
@@ -33,6 +35,7 @@ import RTi.Util.String.StringUtil;
 import RTi.Util.Table.DataTable;
 import RTi.Util.Table.TableRecord;
 import RTi.Util.Time.DateTime;
+import rti.tscommandprocessor.commands.table.TableTimeSeriesMath_Command;
 
 /**
 This class contains static utility methods to support TSCommandProcessor.  These methods
@@ -722,6 +725,24 @@ public static String expandTimeSeriesMetadataString ( CommandProcessor processor
 	
 
 /**
+Get the commands above an index position.
+@param processor The processor that is managing commands.
+@param pos Index (0+) before which to get commands.  The command at the indicated
+position is NOT included in the search.
+*/
+private static List<Command> getCommandsBeforeIndex ( StateDMI_Processor processor, int pos )
+{	List<Command> commands = new ArrayList<Command>();
+	int size = ( processor.size());
+	if ( pos > size ) {
+		pos = size;
+	}
+	for ( int i = 0; i < pos; i++ ) {
+		commands.add ( processor.get(i));
+	}
+	return commands;
+}
+
+/**
 Determine whether commands should create output by checking the CreateOutput parameter.
 This is a processor level property.  If there is a problem, return true (create output).
 @param processor the CommandProcessor to use to get data.
@@ -868,6 +889,17 @@ protected static List<TSEnsemble> getDiscoveryEnsembleFromCommands ( List<Comman
 }
 
 /**
+Get a list of ensemble identifiers from a list of commands.  See documentation for
+fully loaded method.  The output list is not sorted..
+@param commands Commands to search.
+@return list of table identifiers or an empty non-null list if nothing found.
+*/
+private static List<String> getEnsembleIdentifiersFromCommands ( List<Command> commands )
+{   // Default behavior...
+    return getEnsembleIdentifiersFromCommands ( commands, false );
+}
+
+/**
 Get a list of ensemble identifiers from a list of commands.  The returned strings are suitable for
 drop-down lists, etc.  Ensemble identifiers are determined as follows:
 Commands that implement ObjectListProvider have their getObjectList(TSEnsemble) method called.
@@ -920,6 +952,30 @@ protected static List<String> getEnsembleIdentifiersFromCommands ( List<Command>
         }
     }
     return v;
+}
+
+/**
+Return the ensemble identifiers for commands before a specific command
+in the TSCommandProcessor.  This is used, for example, to provide a list of identifiers to editor dialogs.
+@param processor a TSCommandProcessor that is managing commands.
+@param command the command above which time series identifiers are needed.
+@return a list of String containing the ensemble identifiers, or an empty Vector.
+*/
+public static List<String> getEnsembleIdentifiersFromCommandsBeforeCommand( StateDMI_Processor processor, Command command )
+{   String routine = "TSCommandProcessorUtil.getEnsembleIdentifiersFromCommandsBeforeCommand";
+    // Get the position of the command in the list...
+    int pos = processor.indexOf(command);
+    if ( Message.isDebugOn ) {
+        Message.printDebug ( 1, routine, "Position in list is " + pos + " for command:" + command );
+    }
+    if ( pos < 0 ) {
+        // Just return a blank list...
+        return new ArrayList<String>();
+    }
+    // Find the commands above the position...
+    List<Command> commands = getCommandsBeforeIndex ( processor, pos );
+    // Get the time series identifiers from the commands...
+    return getEnsembleIdentifiersFromCommands ( commands );
 }
 
 /**
@@ -1018,6 +1074,16 @@ public static long getRunTimeTotal ( List<Command> commands )
 }
 
 /**
+Get a list of table identifiers from a list of commands.  See documentation for fully loaded method.
+@param commands Time series commands to search.
+@return list of table identifiers or an empty non-null Vector if nothing found.
+*/
+private static List<String> getTableIdentifiersFromCommands ( List<Command> commands )
+{   // Default behavior...
+    return getTableIdentifiersFromCommands ( commands, false );
+}
+
+/**
 Get a list of table identifiers from a list of commands.  The returned strings are suitable for
 drop-down lists, etc.  Table identifiers are determined as follows:
 Commands that implement ObjectListProvider have their getObjectList(DataTable) method called.
@@ -1101,6 +1167,587 @@ protected static List<String> getTableIdentifiersFromCommands ( List<Command> co
         java.util.Collections.sort(tableIDList);
     }
     return tableIDList;
+}
+
+/**
+Return the table identifiers for commands before a specific command
+in the TSCommandProcessor.  This is used, for example, to provide a list of identifiers to editor dialogs.
+@param processor a TSCommandProcessor that is managing commands.
+@param command the command above which time series identifiers are needed.
+@return a list of String containing the table identifiers, or an empty list.
+*/
+public static List<String> getTableIdentifiersFromCommandsBeforeCommand( StateDMI_Processor processor, Command command )
+{   String routine = "TSCommandProcessorUtil.getTableIdentifiersFromCommandsBeforeCommand";
+    // Get the position of the command in the list...
+    int pos = processor.indexOf(command);
+    if ( Message.isDebugOn ) {
+        Message.printDebug ( 1, routine, "Position in list is " + pos + " for command:" + command );
+    }
+    if ( pos < 0 ) {
+        // Just return a blank list...
+        return new ArrayList<String>();
+    }
+    // Find the commands above the position...
+    List<Command> commands = getCommandsBeforeIndex ( processor, pos );
+    // Get the time series identifiers from the commands...
+    return getTableIdentifiersFromCommands ( commands );
+}
+
+/**
+Get a list of time series identifiers from a list of commands.  See documentation for
+fully loaded method.  The output list is not sorted and does NOT contain the input type or name.
+@param commands Time series commands to search.
+@return list of time series identifiers or an empty non-null list if nothing found.
+*/
+private static List<String> getTSIdentifiersFromCommands ( List<Command> commands )
+{	// Default behavior...
+	return getTSIdentifiersFromCommands ( commands, false, false );
+}
+
+/**
+Get a list of identifiers from a list of commands.  See documentation for
+fully loaded method.  The output list does NOT contain the input type or name.
+@param commands Time series commands to search.
+@param sort Should output be sorted by identifier.
+@return list of time series identifiers or an empty non-null list if nothing found.
+*/
+protected static List<String> getTSIdentifiersFromCommands ( List<Command> commands, boolean sort )
+{	// Return the identifiers without the input type and name.
+	return getTSIdentifiersFromCommands ( commands, false, sort );
+}
+
+/**
+Get a list of time series identifiers from a list of commands.
+These strings are suitable for drop-down lists, etc.
+Time series identifiers are determined as follows:
+<ol>
+<li>    Commands that implement ObjectListProvider have their getObjectList(TS) method called.
+        The time series identifiers from the time series list are examined and those with alias
+        will have the alias returned.  Otherwise, the full time series identifier is returned with or
+        with input path as requested.</li>
+<li>    Command strings that start with "TS ? = " have the alias (?) returned.</li>
+<li>    Lines that are time series identifiers are returned, including the full path as requested.</li>
+</ol>
+@param commands commands to search, in order of first command to process to last.
+@param include_input If true, include the input type and name in the returned
+values.  If false, only include the 5-part TSID information.  If an alias is returned, it is not
+impacted by this parameter.
+@param sort Should output be sorted by identifier (currently ignored)
+@return list of time series identifiers or an empty non-null list if nothing found.
+*/
+protected static List<String> getTSIdentifiersFromCommands ( List<Command> commands, boolean include_input, boolean sort )
+{	if ( commands == null ) {
+		return new ArrayList<String>();
+	}
+	List<String> tsidsFromCommands = new ArrayList<String>(); // The String TSID or alias
+	List<TS> tsFromCommands = new ArrayList<TS>(); // The ts for available TS, used to store each TSIdent
+	int size = commands.size();
+	String commandString = null;
+	List<String> tokens = null;
+	boolean in_comment = false;
+	Object command_o = null; // Command as object
+	String commandName; // Command name
+	Command command; // Command as Command instance
+	for ( int i = 0; i < size; i++ ) {
+		command_o = commands.get(i);
+		command = null;
+		commandName = ""; // Only care about instances of Free() commands below
+		if ( command_o instanceof Command ) {
+			commandString = command_o.toString().trim();
+			command = (Command)command_o;
+			commandName = command.getCommandName();
+		}
+		// TODO SAM 2017-03-17 seems like the following can be removed because
+		// code update to generics does not indicate any use of string version
+		else if ( command_o instanceof String ) {
+			commandString = ((String)command_o).trim();
+		}
+		if ( (commandString == null) || commandString.startsWith("#") || (commandString.length() == 0) ) {
+			// Make sure comments are ignored...
+			continue;
+		}
+		if ( commandString.startsWith("/*") ) {
+			in_comment = true;
+			continue;
+		}
+		else if ( commandString.startsWith("*/") ) {
+			in_comment = false;
+			continue;
+		}
+		if ( in_comment ) {
+			continue;
+		}
+        if ( (command_o != null) && (command_o instanceof ObjectListProvider) ) {
+            // Try to get the list of identifiers using the interface method.
+            // TODO SAM 2007-12-07 Evaluate the automatic use of the alias (takes priority over TSID) - probably good.
+        	Object o = ((ObjectListProvider)command_o).getObjectList ( new TS().getClass() );
+            List<TS> list = null;
+            if ( o != null ) {
+            	@SuppressWarnings("unchecked")
+				List<TS> list0 = (List<TS>)o;
+            	list = list0;
+            }
+            if ( list != null ) {
+                int tssize = list.size();
+                TS ts;
+                for ( int its = 0; its < tssize; its++ ) {
+                    ts = list.get(its);
+                    if ( ts == null ) {
+                    	// This should not happen and is symptomatic of a command not fully handling a
+                    	// time series in discovery mode, more of an issue with ${property} use in parameters.
+                    	// Log a message so the issue can be tracked down
+                    	String routine = "TSCommandProcessorUtil.getTSIdentifiersFromCommands";
+                    	Message.printWarning(3, routine, "Null time series in discovery mode - need to check code for command to improve handling: " + commandString);
+                    	continue;
+                    }
+                    if ( !ts.getAlias().equals("") ) {
+                        // Use the alias if it is available.
+                        tsidsFromCommands.add( ts.getAlias() );
+                    }
+                    else {
+                        // Use the identifier.
+                        tsidsFromCommands.add ( ts.getIdentifier().toString(include_input) );
+                    }
+                    tsFromCommands.add( ts );
+                }
+            }
+        }
+		else if ( StringUtil.startsWithIgnoreCase(commandString,"TS ") ) {
+		    // TODO SAM 2011-04-04 Remove this code after some period - TSTool version 10.00.00 removed the
+		    // TS Alias syntax, which should be migrated as commands are parsed.
+			// Use the alias...
+			tokens = StringUtil.breakStringList( commandString.substring(3)," =", StringUtil.DELIM_SKIP_BLANKS);
+			if ( (tokens != null) && (tokens.size() > 0) ) {
+			    String alias = tokens.get(0);
+				tsidsFromCommands.add ( alias );
+				//+ " (alias)" );
+				// Treat as an alias
+				TS ts = new TS();
+				TSIdent tsident = new TSIdent();
+				tsident.setAlias(alias);
+				try {
+				    ts.setIdentifier(tsident);
+				}
+				catch ( Exception e ) {
+				    // This code should be phased out so don't worry about this issue
+				}
+                tsFromCommands.add( ts );
+			}
+		}
+		else if ( isTSID(commandString) ) {
+			// Reasonably sure it is an identifier.  Only add the
+			// 5-part TSID and not the trailing input type and name.
+			int pos = commandString.indexOf("~");
+			String tsid;
+			if ( (pos < 0) || include_input ) {
+				// Add the whole thing...
+				tsid = commandString;
+			}
+			else {
+			    // Add the part before the input fields...
+				tsid = commandString.substring(0,pos);
+			}
+			tsidsFromCommands.add ( tsid );
+			// For the purpose of handling TSIdents for Free(), treat as an alias
+            TS ts = new TS();
+			TSIdent tsident = null;
+			try {
+			    tsident = new TSIdent(tsid);
+			}
+			catch ( Exception e ) {
+			    // Should not happen because isTSID() called at start of code block
+			}
+			// Also set the identifier as the alias...
+            tsident.setAlias(tsid);
+            try {
+                ts.setIdentifier(tsident);
+            }
+            catch ( Exception e ) {
+                // Should not happen because isTSID() called at start of code block
+            }
+            tsFromCommands.add( ts );
+		}
+		else if ( commandName.equalsIgnoreCase("Free") ) {
+		    // Need to remove matching time series identifiers that are in the list
+		    // (otherwise editing commands will show extra time series as of that point in the workflow, which will
+		    // be confusing and may lead to errors, e.g., if consistent units are expected but the units are
+		    // not consistent).
+		    // First get the matching time series for the Free() command parameters
+		    Command commandInst = (Command)command_o;
+		    PropList parameters = commandInst.getCommandParameters();
+		    // TODO SAM 2011-04-04 Need to get ensembles above command
+		    List<TSEnsemble> ensemblesFromCommands = new ArrayList<TSEnsemble>();
+		    TimeSeriesToProcess tsToProcess = getTSMatchingTSListParameters(tsFromCommands, ensemblesFromCommands,
+	            parameters.getValue("TSList"), parameters.getValue("TSID"),
+	            parameters.getValue("TSPosition"), parameters.getValue("EnsembleID") );
+		    // Loop through the list of matching time series and remove identifiers at the matching positions
+		    // (the time series list and identifier lists should match in position).
+		    int [] pos = tsToProcess.getTimeSeriesPositions();
+		    //Message.printStatus(2,"", "Detected Free() command, have " + pos.length + " time series to check." ); 
+		    // Loop backwards so that position values don't need to be adjusted.
+		    for ( int ipos = pos.length - 1; ipos >= 0; ipos--  ) {
+	            //Message.printStatus(2,"", "Removing time series " + pos[ipos] + ": " + tsidsFromCommands.get(pos[ipos]));
+		        tsFromCommands.remove(pos[ipos]);
+		        tsidsFromCommands.remove(pos[ipos]);
+		    }
+		}
+	}
+	return tsidsFromCommands;
+}
+
+/**
+Return the time series identifiers for commands before a specific command
+in the TSCommandProcessor.  This is used, for example, to provide a list of identifiers to editor dialogs.
+@param processor a TSCommandProcessor that is managing commands.
+@param command the command above which time series identifiers are needed.
+@return a list of String containing the time series identifiers, or an empty list.
+*/
+public static List<String> getTSIdentifiersNoInputFromCommandsBeforeCommand( StateDMI_Processor processor, Command command )
+{	String routine = "TSCommandProcessorUtil.getTSIdentifiersNoInputFromCommandsBeforeCommand";
+	// Get the position of the command in the list...
+	int pos = processor.indexOf(command);
+	if ( Message.isDebugOn ) {
+	    Message.printDebug ( 1, routine, "Position in list is " + pos + " for command:" + command );
+	}
+	if ( pos < 0 ) {
+		// Just return a blank list...
+		return new ArrayList<String>();
+	}
+    // Find the commands above the position...
+	List<Command> commands = getCommandsBeforeIndex ( processor, pos );
+	// Get the time series identifiers from the commands...
+	return getTSIdentifiersFromCommands ( commands );
+}
+
+/**
+Get time series that match the TSList and related input.  This method is used to evaluate the list of
+time series from the time series processor, and the list of discovery time series extracted from commands
+(that maintain their own discovery information).
+@param tsCandidateList list of time series to check for matching time series identifier
+@param ensembleCandidateList list of ensembles to check for matching ensemble identifier
+@param TSList string value for TSList (should match TSListType enumeration) - if null or a blank string,
+TSListType.ALL_TS will be used by default
+@param TSPosition string value of TSPosition range notation
+@param EnsembleID ensemble identifier to match
+*/
+public static TimeSeriesToProcess getTSMatchingTSListParameters ( List<TS> tsCandidateList,
+    List<TSEnsemble> ensembleCandidateList, String TSList, String TSID, String TSPosition, String EnsembleID )
+{   String routine = "TSCommandProcessorUtil.getTimeSeriesToProcess";
+    if ( (TSList == null) || TSList.equals("") ) {
+        // Default is to match all
+        TSList = "" + TSListType.ALL_TS;
+    }
+    List<TS> tslist = new ArrayList<TS>(); // List of time series to process
+    List<String> errorList = new ArrayList<String>(); // List of error messages finding time series
+    if ( (tsCandidateList == null) || (tsCandidateList.size() == 0) ) {
+        // Return an empty list
+        return new TimeSeriesToProcess(tslist, new int[0], errorList);
+    }
+    int nts = tsCandidateList.size();
+    // Positions of time series to process.
+    // Size to match the full list but may not be filled initially - trim before returning.
+    int [] tspos = new int[nts];
+    // Loop through the time series in memory...
+    int count = 0;
+    TS ts = null;
+    if ( Message.isDebugOn ) {
+        Message.printDebug( 1, routine, "Getting list of time series to process using TSList=\"" + TSList +
+            "\" TSID=\"" + TSID + "\", EnsembleID=\"" + EnsembleID + "\", TSPosition=\"" + TSPosition + "\"" );
+    }
+    if ( TSList.equalsIgnoreCase(TSListType.FIRST_MATCHING_TSID.toString()) ) {
+        // Search forward for the first single matching time series...
+        for ( int its = 0; its < nts; its++ ) {
+            try {
+                ts = tsCandidateList.get ( its );
+                if ( ts == null ) {
+                    continue;
+                }
+            }
+            catch ( Exception e ) {
+                // Don't add...
+                continue;
+            }
+            if ( TSID.indexOf("~") > 0 ) {
+                // Include the input type...
+                if (ts.getIdentifier().matches(TSID,true,true)){
+                    tslist.add ( ts );
+                    tspos[count++] = its;
+                    // Only return the single index...
+                    int [] tspos2 = new int[1];
+                    tspos2[0] = tspos[0];
+                    // Only want one match...
+                    return new TimeSeriesToProcess(tslist, tspos2, errorList);
+                }
+            }
+            else {
+                // Just check the main information...
+                if(ts.getIdentifier().matches(TSID,true,false)){
+                    tslist.add ( ts );
+                    tspos[count++] = its;
+                    // Only return the single index...
+                    int [] tspos2 = new int[1];
+                    tspos2[0] = tspos[0];
+                    // Only want one match...
+                    return new TimeSeriesToProcess(tslist, tspos2, errorList);
+                }
+            }
+        }
+        // Return empty list since no match
+        errorList.add("Unable to find first matched TSID \"" + TSID + "\"" );
+        return new TimeSeriesToProcess(tslist, new int[0], errorList);
+    }
+    else if ( TSList.equalsIgnoreCase(TSListType.LAST_MATCHING_TSID.toString()) ) {
+        // Search backwards for the last single matching time series...
+        for ( int its = (nts - 1); its >= 0; its-- ) {
+            try {
+                ts = tsCandidateList.get ( its );
+            }
+            catch ( Exception e ) {
+                // Don't add...
+                continue;
+            }
+            if ( TSID.indexOf("~") > 0 ) {
+                // Include the input type...
+                if (ts.getIdentifier().matches(TSID,true,true)){
+                    tslist.add ( ts );
+                    tspos[count++] = its;
+                    // Only return the single index...
+                    int [] tspos2 = new int[1];
+                    tspos2[0] = tspos[0];
+                    // Only want one match...
+                    return new TimeSeriesToProcess(tslist, tspos2, errorList);
+                }
+            }
+            else {
+                // Just check the main information...
+                if(ts.getIdentifier().matches(TSID,true,false)){
+                    tslist.add ( ts );
+                    tspos[count++] = its;
+                    // Only return the single index...
+                    int [] tspos2 = new int[1];
+                    tspos2[0] = tspos[0];
+                    // Only want one match...
+                    return new TimeSeriesToProcess(tslist, tspos2, errorList);
+                }
+            }
+        }
+        // Return empty list since no match
+        errorList.add("Unable to find last matched TSID \"" + TSID + "\"" );
+        return new TimeSeriesToProcess(tslist, new int[0], errorList);
+    }
+    else if ( TSList.equalsIgnoreCase(TSListType.ENSEMBLE_ID.toString()) ) {
+        // Return a list of all time series in an ensemble
+        // FIXME SAM 2009-10-10 Need to fix issue of index positions being found in ensemble but
+        // then not matching the main TS list (in case where time series were copied to ensemble).
+        // For now, do not allow time series to be copied to ensemble (e.g., in NewEnsemble() command).
+        TSEnsemble ensemble = null;
+        if ( ensembleCandidateList != null ) {
+            for ( TSEnsemble tsensemble : ensembleCandidateList ) {
+                if ( tsensemble.getEnsembleID().equalsIgnoreCase(EnsembleID) ) {
+                    ensemble = tsensemble;
+                    break;
+                }
+            }
+        }
+        if ( ensemble == null ) {
+            errorList.add ("Unable to find ensemble \"" + EnsembleID + "\" to get time series.");
+            return new TimeSeriesToProcess(tslist, new int[0], errorList);
+        }
+        else {
+            int esize = ensemble.size();
+            for ( int ie = 0; ie < esize; ie++ ) {
+                // Set the time series instance (always what is included in the ensemble)...
+                ts = ensemble.get (ie);
+                tslist.add ( ts );
+                // Figure out the index in the processor time series list by comparing the instance...
+                TS ts2; // Time series in main list to compare against.
+                boolean found = false;
+                // Loop through the main list...
+                for ( int its = 0; its < nts; its++ ) {
+                    try {
+                        ts2 = tsCandidateList.get ( its );
+                    }
+                    catch ( Exception e ) {
+                        continue;
+                    }
+                    if ( ts == ts2 ) {
+                        found = true;
+                        tspos[count++] = its;
+                        break;
+                    }
+                }
+                if ( !found ) {
+                    // This will happen when time series are copied to ensembles in order to protect the
+                    // data from further modification.  Time series will then always need to be accessed via
+                    // the ensemble.
+                    Message.printStatus( 3, routine, "Unable to find ensemble \"" + EnsembleID +
+                        "\" time series \"" + ts.getIdentifier() + "\" - setting index to -1.");
+                    tspos[count++] = -1; // TODO SAM 2009-10-08 - will this impact other code?
+                }
+            }
+        }
+        // Trim down the "tspos" array to only include matches so that other
+        // code does not mistakenly iterate through a longer array...
+        int [] tspos2 = new int[count];
+        for ( int i = 0; i < count; i++ ) {
+            tspos2[i] = tspos[i];
+        }
+        return new TimeSeriesToProcess(tslist, tspos2, errorList);
+    }
+    else if ( TSList.equalsIgnoreCase(TSListType.SPECIFIED_TSID.toString()) ) {
+        // Return a list of time series that match the provided identifiers.
+        List<String> tsid_Vector = StringUtil.breakStringList ( TSID, ",", StringUtil.DELIM_SKIP_BLANKS );
+        int size_tsid = 0;
+        if ( tsid_Vector != null ) {
+            size_tsid = tsid_Vector.size();
+        }
+        for ( int itsid = 0; itsid < size_tsid; itsid++ ) {
+            String tsid = tsid_Vector.get(itsid);
+            Message.printStatus( 2, routine, "Trying to match \"" + tsid + "\"" );
+            // Loop through the available time series and see if any match..
+            boolean found = false;
+            for ( int its = 0; its < nts; its++ ) {
+                try {
+                    ts = tsCandidateList.get ( its );
+                }
+                catch ( Exception e ) {
+                    // Don't add...
+                    continue;
+                }
+                // Compare the requested TSID with that in the time series list...
+                if ( tsid.indexOf("~") > 0 ) {
+                    // Include the input type...
+                    if (ts.getIdentifier().matches(tsid,true,true)){
+                        //Message.printStatus( 2, routine,
+                        //        "Matched using input with TSID=\"" + ts.getIdentifier() + "\"" +
+                        //        " Alias=\"" + ts.getAlias() + "\"");
+                        found = true;
+                    }
+                }
+                else {
+                    // Just check the main information...
+                    if(ts.getIdentifier().matches(tsid,true,false)){
+                        //Message.printStatus( 2, routine,
+                        //        "Matched not using input with TSID=\"" + ts.getIdentifier() + "\"" +
+                        //        " Alias=\"" + ts.getAlias() + "\"");
+                        found = true;
+                    }
+                }
+                if ( found ) {
+                    // Add the time series and increment the count...
+                    tslist.add ( ts );
+                    tspos[count++] = its;
+                    // Found the specific time series so break out of the list.
+                    // FIXME SAM 2008-02-05 What if user has the same ID more than once?
+                    break;
+                }
+            }
+            if ( !found ) {
+                // Did not find a specific time series, which is a problem
+                errorList.add ( "Did not match requested (specified) time series \"" + tsid + "\"" );
+            }
+        }
+        // Trim down the "tspos" array to only include matches so that other
+        // code does not mistakenly iterate through a longer array...
+        Message.printStatus( 2, routine, "Matched " + count + " time series." );
+        int [] tspos2 = new int[count];
+        for ( int i = 0; i < count; i++ ) {
+            tspos2[i] = tspos[i];
+        }
+        return new TimeSeriesToProcess(tslist, tspos2, errorList);
+    }
+    else if ( TSList.equalsIgnoreCase(TSListType.TSPOSITION.toString()) ) {
+        // Process the position string
+        List<String> tokens = StringUtil.breakStringList ( TSPosition,",", StringUtil.DELIM_SKIP_BLANKS );
+        int npos = 0;
+        if ( tokens != null ) {
+            npos = tokens.size();
+        }
+        int tsposStart, tsposEnd;
+        for ( int i = 0; i < npos; i++ ) {
+            String token = tokens.get(i);
+            if ( token.indexOf("-") >= 0 ) {
+                // Range...
+                String posString = StringUtil.getToken(token, "-",0,0).trim();
+                tsposStart = Integer.parseInt( posString ) - 1;
+                posString = StringUtil.getToken(token, "-",0,1).trim();
+                tsposEnd = Integer.parseInt( posString ) - 1;
+            }
+            else {
+                // Single value.  Treat as a range of 1.
+                tsposStart = Integer.parseInt(token) - 1;
+                tsposEnd = tsposStart;
+            }
+            for ( int itspos = tsposStart; itspos <= tsposEnd; itspos++ ) {
+                try {
+                    tslist.add ( tsCandidateList.get(itspos) );
+                }
+                catch ( Exception e ) {
+                    // Don't add
+                    // FIXME SAM 2008-07-07 Evaluate whether exception needs to be thrown
+                    // for out of range index.
+                }
+                tspos[count++] = itspos;
+            }
+        }
+        // Trim down the "tspos" array to only include matches so that other
+        // code does not mistakenly iterate through a longer array...
+        int [] tspos2 = new int[count];
+        for ( int i = 0; i < count; i++ ) {
+            tspos2[i] = tspos[i];
+        }
+        return new TimeSeriesToProcess(tslist, tspos2, errorList);
+    }
+    else {
+        // Else loop through all the time series from first to last and find matches.  This is for:
+        // TSList = AllTS
+        // TSList = SELECTED_TS
+        // TSList = ALL_MATCHING_TSID
+        boolean found = false;
+        for ( int its = 0; its < nts; its++ ) {
+            found = false;
+            try {
+                ts = tsCandidateList.get ( its );
+            }
+            catch ( Exception e ) {
+                // Don't add...
+                continue;
+            }
+            if ( TSList.equalsIgnoreCase(TSListType.ALL_TS.toString()) ) {
+                found = true;
+            }
+            else if( TSList.equalsIgnoreCase(TSListType.SELECTED_TS.toString()) && ts.isSelected() ) {
+                found = true;
+            }
+            else if ( TSList.equalsIgnoreCase(TSListType.ALL_MATCHING_TSID.toString()) ) {
+                if ( TSID.indexOf("~") > 0 ) {
+                    // Include the input type...
+                    if (ts.getIdentifier().matches(TSID,true,true)){
+                        found = true;
+                    }
+                }
+                else {
+                    // Just check the main information...
+                    if(ts.getIdentifier().matches(TSID,true,false)){
+                        found = true;
+                    }
+                }
+            }
+            if ( found ) {
+                // Add the time series and increment the count...
+                tslist.add ( ts );
+                tspos[count++] = its;
+            }
+        }
+        // Trim down the "tspos" array to only include matches so that other
+        // code does not mistakenly iterate through a longer array...
+        int [] tspos2 = new int[count];
+        for ( int i = 0; i < count; i++ ) {
+            tspos2[i] = tspos[i];
+        }
+        //Message.printStatus( 2, routine, tslist.toString() );
+        return new TimeSeriesToProcess(tslist, tspos2, errorList);
+    }
 }
 
 /**
