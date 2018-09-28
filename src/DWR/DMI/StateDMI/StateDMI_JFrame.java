@@ -685,6 +685,7 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
 
@@ -775,7 +776,10 @@ import RTi.Util.IO.HTMLViewer;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.ProcessManager;
 import RTi.Util.IO.ProcessManagerJDialog;
+import RTi.Util.IO.Prop;
 import RTi.Util.IO.PropList;
+import RTi.Util.IO.PropList_CellRenderer;
+import RTi.Util.IO.PropList_TableModel;
 import RTi.Util.IO.TextPrinterJob;
 import RTi.Util.IO.UnknownCommand;
 import RTi.Util.IO.UnknownCommandException;
@@ -1174,6 +1178,11 @@ to look up graph properties.
 List TS_ListSelector_JFrame_Vector = new Vector();
 List TS_ListSelector_JFrame_app_type_Vector = new Vector();
 List TS_ListSelector_JFrame_comp_type_Vector = new Vector();
+
+/**
+Worksheet that contains a list of processor properties.
+*/
+private JWorksheet __resultsProperties_JWorksheet = null;
 
 /**
 The command processor, which maintains a list of command objects, process
@@ -7029,6 +7038,16 @@ private void commandList_SetDirty ( boolean dirty )
 // beyond basic command list insert/delete/update.
 
 /**
+Return the command processor instance that is being used.  This method should be
+called to avoid direct interaction with the processor data member.
+@return the TSCommandProcessor instance that is being used.
+*/
+private StateDMI_Processor commandProcessor_GetCommandProcessor ()
+{
+    return __statedmiProcessor;
+}
+
+/**
 Get the command processor table results for a table identifier.
 Typically this corresponds to a user selecting the time series from the
 results list, for further display.
@@ -10353,6 +10372,9 @@ private void ui_InitGUI ()
     JGUIUtil.addComponent(results_problems_JPanel, sjw, 
         0, 0, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     __results_JTabbedPane.addTab ( "Problems", results_problems_JPanel );
+    
+    // Results - properties...
+
 
 	// Results StateCU output components ...
 
@@ -10379,6 +10401,40 @@ private void ui_InitGUI ()
     JGUIUtil.addComponent(resultsStateModComponents_JPanel, new JScrollPane ( __resultsStateModComponents_JList ), 
         0, 0, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     __results_JTabbedPane.addTab ( "StateMod Components", resultsStateModComponents_JPanel );
+    
+    // Results: properties...
+    JPanel resultsProperties_JPanel = new JPanel();
+    resultsProperties_JPanel.setLayout(gbl);
+    PropList_TableModel<PropList> propsTableModel = null;
+    try {
+        propsTableModel = new PropList_TableModel<PropList>(new PropList("processor"),false,false);
+        propsTableModel.setKeyColumnName("Property Name");
+        propsTableModel.setValueColumnName("Property Value");
+    }
+    catch ( Exception e ) {
+        // Should not happen but log
+        Message.printWarning ( 3, routine, e );
+        Message.printWarning(3, routine, "Error creating table model for problem display.");
+        throw new RuntimeException ( e );
+    }
+    PropList_CellRenderer propsCellRenderer = new PropList_CellRenderer(propsTableModel);
+    PropList propsWsProps = new PropList ( "PropertiesWS" );
+    propsWsProps.add("JWorksheet.ShowRowHeader=true");
+    propsWsProps.add("JWorksheet.AllowCopy=true");
+    // Initialize with null table model since no initial data
+    JScrollWorksheet psjw = new JScrollWorksheet ( propsCellRenderer, propsTableModel, propsWsProps );
+    __resultsProperties_JWorksheet = psjw.getJWorksheet ();
+    __resultsProperties_JWorksheet.setColumnWidths (cellRenderer.getColumnWidths(), getGraphics() );
+    __resultsProperties_JWorksheet.setPreferredScrollableViewportSize(null);
+    // Listen for mouse events to ??...
+    //__problems_JWorksheet.addMouseListener ( this );
+    //__problems_JWorksheet.addJWorksheetListener ( this );
+    JGUIUtil.addComponent(resultsProperties_JPanel, new JLabel("Processor properties control processing and can be used in " +
+        "some command parameters using ${Property} notation (see command documentation)."), 
+        0, 0, 8, 1, 0.0, 0.0, insetsNLNR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(resultsProperties_JPanel, psjw, 
+        0, 1, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    __results_JTabbedPane.addTab ( "Properties", resultsProperties_JPanel );
     
     // Results: tables...
     
@@ -15013,6 +15069,7 @@ private void uiAction_RunCommands_ShowResults()
 			// Display the results in the results area for user selection...
 			uiAction_RunCommands_ShowResultsOutputFiles();
 			uiAction_RunCommands_ShowResultsProblems();
+			uiAction_RunCommands_ShowResultsProperties();
 			uiAction_RunCommands_ShowResultsStateCUComponents ();
 			uiAction_RunCommands_ShowResultsStateModComponents ();
 			uiAction_RunCommands_ShowResultsTables();
@@ -15086,6 +15143,47 @@ private void uiAction_RunCommands_ShowResultsProblems()
 			") - contact support.");
 	}
 	//Message.printStatus ( 2, "uiAction_RunCommands_ShowProblems", "Leaving method.");
+}
+
+/**
+Display the list of properties from the command processor.
+*/
+private void uiAction_RunCommands_ShowResultsProperties()
+{   String routine = getClass().getSimpleName() + ".uiAction_RunCommands_ShowResultsProperties";
+    try {
+        // Create a new table model for the command processor properties.
+        // TODO SAM 2009-03-01 Evaluate whether should just update data in existing table model (performance?)
+        StateDMI_Processor processor = commandProcessor_GetCommandProcessor();
+        Collection<String> propertyNames = processor.getPropertyNameList(true, true);
+        PropList props = new PropList("processor");
+        Object propVal = null;
+        for ( String propertyName : propertyNames ) {
+        	try {
+        		propVal = processor.getPropContents(propertyName);
+        	}
+        	catch ( Exception e ) {
+        		Message.printWarning(2,routine,e);
+        	}
+            if ( propVal == null) {
+                props.set(new Prop(propertyName, propVal, ""));
+            }
+            else {
+                props.set(new Prop(propertyName, propVal, "" + processor.getPropContents(propertyName) ) );
+            }
+        }
+        PropList_TableModel tableModel = new PropList_TableModel ( props, false, false );
+        tableModel.setKeyColumnName("Property Name");
+        tableModel.setValueColumnName("Property Value");
+        PropList_CellRenderer cellRenderer = new PropList_CellRenderer( tableModel );
+        __resultsProperties_JWorksheet.setCellRenderer ( cellRenderer );
+        __resultsProperties_JWorksheet.setModel ( tableModel );
+        __resultsProperties_JWorksheet.setColumnWidths ( cellRenderer.getColumnWidths() );
+        ui_SetIgnoreActionEvent(false);
+    }
+    catch ( Exception e ) {
+        Message.printWarning( 3 , routine, e);
+        Message.printWarning ( 1, routine, "Unexpected error displaying processor properties (" + e + ") - contact support.");
+    }
 }
 
 /**

@@ -678,7 +678,7 @@ public static Collection getPropertyNameList( CommandProcessor processor )
 {
 	// This could use reflection.
 	if ( processor instanceof StateDMI_Processor ) {
-		return ((StateDMI_Processor)processor).getPropertyNameList();
+		return ((StateDMI_Processor)processor).getPropertyNameList(true, true);
 	}
 	return new Vector();
 }
