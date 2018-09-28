@@ -1,0 +1,13 @@
+# Test writing the OutputPeriod (OutputStart, OutputEnd) properties to a file
+#    WriteMode=Append
+StartLog(LogFile="Results/Test_WritePropertiesToFile_OutputPeriod_Append.TSTool.log")
+RemoveFile(InputFile="Results/Test_WritePropertiesToFile_OutputPeriod_Append_out.txt",IfNotFound=Ignore)
+SetOutputPeriod(OutputStart="1900-01-01",OutputEnd="2007-12-31")
+# Uncomment the following two commands to regenerate the expected results file.
+# WritePropertiesToFile(OutputFile="ExpectedResults/Test_WritePropertiesToFile_OutputPeriod_Append_out.txt",IncludeProperty="OutputStart,OutputEnd")
+# WritePropertiesToFile(OutputFile="ExpectedResults/Test_WritePropertiesToFile_OutputPeriod_Append_out.txt",IncludeProperty="OutputStart,OutputEnd",WriteMode=Append)
+# Generate new output (write file once and then append same properties)...
+WritePropertiesToFile(OutputFile="Results/Test_WritePropertiesToFile_OutputPeriod_Append_out.txt",IncludeProperty="OutputStart,OutputEnd")
+WritePropertiesToFile(OutputFile="Results/Test_WritePropertiesToFile_OutputPeriod_Append_out.txt",IncludeProperty="OutputStart,OutputEnd",WriteMode=Append)
+# Do regression comparison...
+CompareFiles(InputFile1="ExpectedResults\Test_WritePropertiesToFile_OutputPeriod_Append_out.txt",InputFile2="Results/Test_WritePropertiesToFile_OutputPeriod_Append_out.txt",IfDifferent=Warn)
