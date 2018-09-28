@@ -1,0 +1,13 @@
+# Test closing an Excel workbook:
+#  1) Copy the Excel file to results
+#  2) Read the Excel file and keep open
+#  3) Close the open Excel file
+StartLog(LogFile="Results/Test_CloseExcelWorkbook.TSTool.log")
+RemoveFile(InputFile="Results/Test_CloseExcelWorkbook_out.xlsx",IfNotFound=Ignore)
+CopyFile(InputFile="Data\TestWorkbook.xlsx",OutputFile="Results/Test_CloseExcelWorkbook_out.xlsx",IfInputNotFound=Fail)
+ReadTableFromExcel(TableID="Table",InputFile="Results/Test_CloseExcelWorkbook_out.xlsx",Worksheet="Worksheet_Headers",ExcelColumnNames=FirstRowInRange,KeepOpen=True)
+CloseExcelWorkbook(OutputFile="Results/Test_CloseExcelWorkbook_out.xlsx")
+# Now try to remove the file.  If it is still open, an error should be generated.
+# However, it does not seem to generate an error.
+# TODO SAM 2015-02-01 Need to come up with a robust test
+# RemoveFile(InputFile="Results/Test_CloseExcelWorkbook_out.xlsx",IfNotFound=Ignore)
