@@ -852,6 +852,7 @@ import java.lang.String;
 import java.lang.StringBuffer;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -1411,6 +1412,14 @@ Construct a command processor with no commands.
 */
 public StateDMI_Processor ()
 {	super();
+
+	__propertyHashmap.put ( "InstallDir", IOUtil.getApplicationHomeDir() );
+	// This is used to locate the HTML documentation for command editor dialogs, etc.
+	__propertyHashmap.put ( "InstallDirURL", "file:///" + IOUtil.getApplicationHomeDir().replace("\\", "/") );
+	// FIXME SAM 2016-04-03 This is hard-coded for TSTool - need to make more generic to work outside of TSTool?
+	String homeDir = System.getProperty("user.home") + File.separator + ".tstool";
+	__propertyHashmap.put ( "UserHomeDir", homeDir );
+	__propertyHashmap.put ( "UserHomeDirURL", "file:///" + homeDir.replace("\\", "/") );
 }
 
 /**
@@ -6455,7 +6464,22 @@ public Object getPropContents ( String prop ) throws Exception
 		return getWorkingDir();
 	}
 	else {
-		throw new Exception ( "Requested property \"" + prop + "\" is not recognized by the StateDMI processor." );
+	    // Property is not one of the individual objects that have been historically
+	    // maintained, but it may be a user-supplied property in the hashtable.
+	    Object o = __propertyHashmap.get ( prop );
+	    if ( o == null ) {
+	    	// Changed on 2016-09-18 to allow null to be returned,
+	    	// generally indicating that user-supplied property is being processed
+    	    //String warning = "Unknown GetPropContents request \"" + propName + "\"";
+    		// TODO SAM 2007-02-07 Need to figure out a way to indicate
+    		// an error and pass back useful information.
+    		//throw new UnrecognizedRequestException ( warning );
+	    	return null;
+	    }
+	    else {
+	        // Return the object from the hashtable
+	        return o;
+	    }
 	}
 }
 
@@ -6524,27 +6548,46 @@ Return the list of property names available from the processor.
 These properties can be requested using getPropContents().
 @return the list of property names available from the processor.
 */
-public Collection getPropertyNameList()
+public Collection getPropertyNameList( boolean includeBuiltInProperties, boolean includeDynamicProperties )
 {
-	List v = new Vector();
+	// Create a set that includes the above.
+    TreeSet<String> set = new TreeSet<String>();
 	// FIXME SAM 2008-02-15 Evaluate whether these should be in the
 	// property hashtable - should properties be available before ever
 	// being defined (in case they are used later) or should only defined
 	// properties be available (and rely on discovery to pass to other commands)?
 	// Add properties that are hard-coded.
-    v.add ( "DebugLevelLogFile" );
-    v.add ( "DebugLevelScreen" );
-    //v.add ( "HydroBaseDMI" );
- 	v.add ( "OutputStart" );
-	v.add ( "OutputEnd" );
-    v.add ( "OutputYearType" );
-    v.add ( "WarningLevelLogFile" );
-    v.add ( "WarningLevelScreen" );
-    v.add ( "WorkingDir" );
-    // Create a set that includes the above.
-    TreeSet set = new TreeSet(v);
-    // Add the hashtable keys and make a unique list
-    set.addAll ( __property_Hashtable.keySet() );
+	if ( includeBuiltInProperties ) {
+	    List<String> v = new ArrayList<String>();
+        v.add ( "AutoExtendPeriod" );
+        v.add ( "AverageStart" );
+        v.add ( "AverageEnd" );
+        v.add ( "CreateOutput" ); // Useful?
+        v.add ( "DebugLevelLogFile" );
+        v.add ( "DebugLevelScreen" );
+        v.add ( "HaveOutputPeriod" ); // Useful?
+        v.add ( "HydroBaseDMIListSize" );
+        v.add ( "IgnoreLEZero" );
+        v.add ( "IncludeMissingTS" );
+        v.add ( "InitialWorkingDir" );
+    	v.add ( "InputStart" );
+    	v.add ( "InputEnd" );
+    	//v.add ( "OutputComments" ); // Not sure this needs to be visible
+    	v.add ( "OutputStart" );
+    	v.add ( "OutputEnd" );
+        v.add ( "OutputYearType" );
+        v.add ( "StartLogEnabled" );
+        v.add ( "TSEnsembleResultsListSize" );   // Useful for testing when zero time series are expected
+        v.add ( "TSResultsListSize" );   // Useful for testing when zero time series are expected
+        v.add ( "WarningLevelLogFile" );
+        v.add ( "WarningLevelScreen" );
+        v.add ( "WorkingDir" );
+        set.addAll ( v );
+	}
+    if ( includeDynamicProperties ) {
+        // Add the hashtable keys and make a unique list
+        set.addAll ( __propertyHashmap.keySet() );
+    }
 	return set;
 }
 
@@ -7166,57 +7209,6 @@ Return the list of StateMod_Well matches being maintained by this StateDMI_Proce
 */
 public List getStateModWellStationMatchList ()
 {	return __SMWell_match_Vector;
-}
-
-/**
-Return the list of property names available from the processor.
-These properties can be requested using getPropContents().
-@param includeBuiltinProperties if true, include the list of built-in property names.
-@param includeDynamicPoperties if true, include the list of dynamically-defined property names.
-*/
-public Collection<String> getPropertyNameList ( boolean includeBuiltInProperties, boolean includeDynamicProperties )
-{
-    // Create a set that includes the above.
-    TreeSet<String> set = new TreeSet<String>();
-	// FIXME SAM 2008-02-15 Evaluate whether these should be in the
-	// property hashmap - should properties be available before ever
-	// being defined (in case they are used later) or should only defined
-	// properties be available (and rely on discovery to pass to other commands)?
-    // For now important properties are represented as data members in this class.
-    //
-	// Add properties that are accessible with getPropContents_XXXX methods.
-	if ( includeBuiltInProperties ) {
-	    List<String> v = new ArrayList<String>();
-        v.add ( "AutoExtendPeriod" );
-        v.add ( "AverageStart" );
-        v.add ( "AverageEnd" );
-        v.add ( "CreateOutput" ); // Useful?
-        v.add ( "DebugLevelLogFile" );
-        v.add ( "DebugLevelScreen" );
-        v.add ( "HaveOutputPeriod" ); // Useful?
-        v.add ( "HydroBaseDMIListSize" );
-        v.add ( "IgnoreLEZero" );
-        v.add ( "IncludeMissingTS" );
-        v.add ( "InitialWorkingDir" );
-    	v.add ( "InputStart" );
-    	v.add ( "InputEnd" );
-    	//v.add ( "OutputComments" ); // Not sure this needs to be visible
-    	v.add ( "OutputStart" );
-    	v.add ( "OutputEnd" );
-        v.add ( "OutputYearType" );
-        v.add ( "StartLogEnabled" );
-        v.add ( "TSEnsembleResultsListSize" );   // Useful for testing when zero time series are expected
-        v.add ( "TSResultsListSize" );   // Useful for testing when zero time series are expected
-        v.add ( "WarningLevelLogFile" );
-        v.add ( "WarningLevelScreen" );
-        v.add ( "WorkingDir" );
-        set.addAll ( v );
-	}
-    if ( includeDynamicProperties ) {
-        // Add the hashtable keys and make a unique list
-        set.addAll ( __propertyHashmap.keySet() );
-    }
-	return set;
 }
 
 /**
@@ -10837,6 +10829,72 @@ private void resetWorkflowProperties ()
 throws Exception
 {   String routine = getClass().getName() + ".resetWorkflowProperties";
     Message.printStatus(2, routine, "Resetting workflow properties." );
+    
+ // First clear user-defined properties.
+    __propertyHashmap.clear();
+    // Define some standard properties
+    __propertyHashmap.put ( "ComputerName", InetAddress.getLocalHost().getHostName() ); // Useful for messages
+    boolean newTZ = true;
+    if ( newTZ ) {
+        // Use new time zone class
+    	ZonedDateTime now = ZonedDateTime.now();
+    	__propertyHashmap.put ( "ComputerTimezone", now.getZone().getId() ); // America/Denver, etc.
+    }
+    else {
+    	// Use old time zone approach
+    	__propertyHashmap.put ( "ComputerTimezone", TimeUtil.getLocalTimeZoneAbbr(TimeUtil.LOOKUP_TIME_ZONE_ALWAYS) ); // America/Denver, etc.
+    }
+    __propertyHashmap.put ( "InstallDir", IOUtil.getApplicationHomeDir() );
+    __propertyHashmap.put ( "InstallDirURL", "file:///" + IOUtil.getApplicationHomeDir().replace("\\", "/") );
+    // Temporary directory useful in some cases
+    __propertyHashmap.put ( "TempDir", System.getProperty("java.io.tmpdir") );
+    // FIXME SAM 2016-04-03 This is hard-coded for TSTool - need to make more generic to work outside of TSTool?
+    String homeDir = System.getProperty("user.home") + File.separator + ".tstool";
+    __propertyHashmap.put ( "UserHomeDir", homeDir );
+    __propertyHashmap.put ( "UserHomeDirURL", "file:///" + homeDir.replace("\\", "/") );
+    __propertyHashmap.put ( "UserName", System.getProperty("user.name") );
+    // Set the program version as a property, useful for version-dependent command logic
+    // Assume the version is xxx.xxx.xxx beta (date), with at least one period
+    // Save the program version as a string
+    String programVersion = IOUtil.getProgramVersion();
+    int pos = programVersion.indexOf(" ");
+    if ( pos > 0 ) {
+    	programVersion = programVersion.substring(0,pos);
+    }
+    __propertyHashmap.put ( "ProgramVersionString", programVersion );
+    // Also save the numerical version.
+    double programVersionNumber = -1.0;
+    pos = programVersion.indexOf(".");
+    StringBuilder b = new StringBuilder();
+    if ( pos < 0 ) {
+    	// Just a number
+    	b.append(programVersion);
+    }
+    else {
+    	// Transfer the characters including the first period but no other periods
+    	b.append(programVersion.substring(0,pos) + ".");
+    	for ( int i = pos + 1; i < programVersion.length(); i++ ) {
+    		if ( programVersion.charAt(i) == '.' ) {
+    			continue;
+    		}
+    		else {
+    			b.append ( programVersion.charAt(i) );
+    		}
+    	}
+    }
+    // Also remove any non-digits like would occur in "beta", etc.
+    for ( int i = pos + 1; i < b.length(); i++ ) {
+    	if ( !Character.isDigit(b.charAt(i)) ) {
+    		b.deleteCharAt(i--);
+    	}
+    }
+    try {
+    	programVersionNumber = Double.parseDouble(b.toString());
+    }
+    catch ( NumberFormatException e ) {
+    	programVersionNumber = -1.0;
+    }
+    __propertyHashmap.put ( "ProgramVersionNumber", new Double(programVersionNumber) );
     
     // First clear user-defined properties.
     // FIXME SAM 2008-10-14 Evaluate whether needed like TSTool
