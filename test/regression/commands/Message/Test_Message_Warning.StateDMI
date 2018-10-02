@@ -1,0 +1,5 @@
+# Test printing a message for command status WARNING
+# - use the expectedStatus to ensure things are working
+#@expectedStatus Warning
+StartLog(LogFile="Results/Test_Message_Warning.TSTool.log")
+Message(Message="This command generated a warning.",CommandStatus=WARNING)

@@ -1,0 +1,5 @@
+# Test printing a message for command status FAILURE
+# - use the expectedStatus to ensure things are working
+#@expectedStatus Failure
+StartLog(LogFile="Results/Test_Message_Failure.TSTool.log")
+Message(Message="This command generated a failure.",CommandStatus=FAILURE)

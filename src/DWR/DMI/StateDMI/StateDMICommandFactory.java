@@ -7,6 +7,7 @@ import RTi.Util.IO.UnknownCommandException;
 import RTi.Util.Message.Message;
 import rti.tscommandprocessor.commands.check.WriteCheckFile_Command;
 import rti.tscommandprocessor.commands.hydrobase.OpenHydroBase_Command;
+import rti.tscommandprocessor.commands.logging.Message_Command;
 import rti.tscommandprocessor.commands.logging.SetDebugLevel_Command;
 import rti.tscommandprocessor.commands.logging.SetWarningLevel_Command;
 import rti.tscommandprocessor.commands.logging.StartLog_Command;
@@ -491,6 +492,9 @@ throws UnknownCommandException
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"MergeWellRights") ){
 		return new MergeWellRights_Command ();
+	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "Message") ) {
+		return new Message_Command ();
 	}
 	
 	// "n" commands...
