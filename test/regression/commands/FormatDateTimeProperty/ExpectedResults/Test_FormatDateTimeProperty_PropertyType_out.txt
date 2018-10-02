@@ -1,0 +1,4 @@
+DatePropDateTime="2011-01-23"
+DatePropDouble=2.0110123E7
+DatePropInteger="20110123"
+DatePropString="20110123"

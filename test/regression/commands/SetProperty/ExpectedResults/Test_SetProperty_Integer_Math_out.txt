@@ -1,0 +1,4 @@
+IntegerProp1=900923
+IntegerProp2=900903
+IntegerProp3=200
+IntegerProp4=50

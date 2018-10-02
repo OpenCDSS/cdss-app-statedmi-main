@@ -1,0 +1,17 @@
+# Test setting a processor property to an integer using math parameters
+StartLog(LogFile="Results/Test_SetProperty_Integer_Math.TSTool.log")
+RemoveFile(InputFile="Results/Test_SetProperty_Integer_Math_out.txt",IfNotFound=Ignore)
+SetProperty(PropertyName="IntegerProp1",PropertyType=Integer,PropertyValue="900913")
+SetProperty(PropertyName="IntegerProp1",PropertyType=Integer,PropertyValue="${IntegerProp1}",Add=10)
+SetProperty(PropertyName="IntegerProp2",PropertyType=Integer,PropertyValue="900913")
+SetProperty(PropertyName="IntegerProp2",PropertyType=Integer,PropertyValue="${IntegerProp2}",Subtract=10)
+SetProperty(PropertyName="IntegerProp3",PropertyType=Integer,PropertyValue="100")
+SetProperty(PropertyName="IntegerProp3",PropertyType=Integer,PropertyValue="${IntegerProp3}",Multiply=2)
+SetProperty(PropertyName="IntegerProp4",PropertyType=Integer,PropertyValue="100")
+SetProperty(PropertyName="IntegerProp4",PropertyType=Integer,PropertyValue="${IntegerProp4}",Divide=2)
+# Uncomment the following two commands to regenerate the expected results file.
+# WritePropertiesToFile(OutputFile="ExpectedResults/Test_SetProperty_Integer_Math_out.txt",IncludeProperties="IntegerProp1,IntegerProp2,IntegerProp3,IntegerProp4",FileFormat=NameValue)
+# Generate new output...
+WritePropertiesToFile(OutputFile="Results/Test_SetProperty_Integer_Math_out.txt",IncludeProperties="IntegerProp1,IntegerProp2,IntegerProp3,IntegerProp4",FileFormat=NameValue)
+# Do regression comparison...
+CompareFiles(InputFile1="ExpectedResults\Test_SetProperty_Integer_Math_out.txt",InputFile2="Results/Test_SetProperty_Integer_Math_out.txt",IfDifferent=Warn)
