@@ -10485,36 +10485,7 @@ private void ui_InitGUI ()
         0, 0, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     __results_JTabbedPane.addTab ( "Problems", results_problems_JPanel );
     
-    // Results - properties...
-
-
-	// Results StateCU output components ...
-
-    JPanel resultsStateCUComponents_JPanel = new JPanel();
-    resultsStateCUComponents_JPanel.setLayout(gbl);
-    __resultsStateCUComponents_JListModel = new DefaultListModel();
-    __resultsStateCUComponents_JList = new JList ( __resultsStateCUComponents_JListModel );
-    __resultsStateCUComponents_JList.setSelectionMode ( ListSelectionModel.SINGLE_SELECTION );
-    __resultsStateCUComponents_JList.addKeyListener ( this );
-    __resultsStateCUComponents_JList.addListSelectionListener ( this );
-    __resultsStateCUComponents_JList.addMouseListener ( this );
-    JGUIUtil.addComponent(resultsStateCUComponents_JPanel, new JScrollPane ( __resultsStateCUComponents_JList ), 
-        0, 0, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-    __results_JTabbedPane.addTab ( "StateCU Components", resultsStateCUComponents_JPanel );
-
-    JPanel resultsStateModComponents_JPanel = new JPanel();
-    resultsStateModComponents_JPanel.setLayout(gbl);
-    __resultsStateModComponents_JListModel = new DefaultListModel();
-    __resultsStateModComponents_JList = new JList ( __resultsStateModComponents_JListModel );
-    __resultsStateModComponents_JList.setSelectionMode ( ListSelectionModel.SINGLE_SELECTION );
-    __resultsStateModComponents_JList.addKeyListener ( this );
-    __resultsStateModComponents_JList.addListSelectionListener ( this );
-    __resultsStateModComponents_JList.addMouseListener ( this );
-    JGUIUtil.addComponent(resultsStateModComponents_JPanel, new JScrollPane ( __resultsStateModComponents_JList ), 
-        0, 0, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-    __results_JTabbedPane.addTab ( "StateMod Components", resultsStateModComponents_JPanel );
-    
-    // Results: properties...
+ // Results: properties...
     JPanel resultsProperties_JPanel = new JPanel();
     resultsProperties_JPanel.setLayout(gbl);
     PropList_TableModel<PropList> propsTableModel = null;
@@ -10547,6 +10518,33 @@ private void ui_InitGUI ()
     JGUIUtil.addComponent(resultsProperties_JPanel, psjw, 
         0, 1, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     __results_JTabbedPane.addTab ( "Properties", resultsProperties_JPanel );
+
+
+	// Results StateCU output components ...
+
+    JPanel resultsStateCUComponents_JPanel = new JPanel();
+    resultsStateCUComponents_JPanel.setLayout(gbl);
+    __resultsStateCUComponents_JListModel = new DefaultListModel();
+    __resultsStateCUComponents_JList = new JList ( __resultsStateCUComponents_JListModel );
+    __resultsStateCUComponents_JList.setSelectionMode ( ListSelectionModel.SINGLE_SELECTION );
+    __resultsStateCUComponents_JList.addKeyListener ( this );
+    __resultsStateCUComponents_JList.addListSelectionListener ( this );
+    __resultsStateCUComponents_JList.addMouseListener ( this );
+    JGUIUtil.addComponent(resultsStateCUComponents_JPanel, new JScrollPane ( __resultsStateCUComponents_JList ), 
+        0, 0, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    __results_JTabbedPane.addTab ( "StateCU Components", resultsStateCUComponents_JPanel );
+
+    JPanel resultsStateModComponents_JPanel = new JPanel();
+    resultsStateModComponents_JPanel.setLayout(gbl);
+    __resultsStateModComponents_JListModel = new DefaultListModel();
+    __resultsStateModComponents_JList = new JList ( __resultsStateModComponents_JListModel );
+    __resultsStateModComponents_JList.setSelectionMode ( ListSelectionModel.SINGLE_SELECTION );
+    __resultsStateModComponents_JList.addKeyListener ( this );
+    __resultsStateModComponents_JList.addListSelectionListener ( this );
+    __resultsStateModComponents_JList.addMouseListener ( this );
+    JGUIUtil.addComponent(resultsStateModComponents_JPanel, new JScrollPane ( __resultsStateModComponents_JList ), 
+        0, 0, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    __results_JTabbedPane.addTab ( "StateMod Components", resultsStateModComponents_JPanel );
     
     // Results: tables...
     
