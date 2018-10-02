@@ -1648,7 +1648,8 @@ private JMenu
 private JMenuItem
 	__Commands_General_Logging_StartLog_JMenuItem,
 	__Commands_General_Logging_SetDebugLevel_JMenuItem,
-	__Commands_General_Logging_SetWarningLevel_JMenuItem;
+	__Commands_General_Logging_SetWarningLevel_JMenuItem,
+	__Commands_General_Logging_Message_JMenuItem;
 
 JMenu
 	__Commands_General_Running_JMenu = null;
@@ -2588,10 +2589,11 @@ private String
 	__Commands_General_HydroBase_String = "General - HydroBase",
 	__Commands_General_HydroBase_OpenHydroBase_String = "OpenHydroBase() ...",
 	
-	__Commands_General_Logging_String = "General - Logging",
+	__Commands_General_Logging_String = "General - Logging and Messaging",
 	__Commands_General_Logging_StartLog_String = "StartLog() ...",
 	__Commands_General_Logging_SetDebugLevel_String = "SetDebugLevel() ...",
 	__Commands_General_Logging_SetWarningLevel_String = "SetWarningLevel() ...",
+	__Commands_General_Logging_Message_String = "Message()... <print a message>",
 	
 	__Commands_General_Running_String = "General - Running and Properties",
 	__Commands_General_Running_SetProperty_String = "SetProperty()... <set processor property>",
@@ -4321,6 +4323,9 @@ public void actionPerformed ( ActionEvent event )
 	}
 	else if (command.equals( __Commands_General_Logging_SetWarningLevel_String) ) {
 		commandList_EditCommand ( __Commands_General_Logging_SetWarningLevel_String, null, __INSERT_COMMAND );
+	}
+	else if (command.equals(__Commands_General_Logging_Message_String) ) {
+		commandList_EditCommand(__Commands_General_Logging_Message_String, null, __INSERT_COMMAND);
 	}
 	else if (command.equals( __Commands_General_Running_SetWorkingDir_String) ) {
 		commandList_EditCommand ( __Commands_General_Running_SetWorkingDir_String, null, __INSERT_COMMAND );
@@ -10853,6 +10858,9 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 		new SimpleJMenuItem( __Commands_General_Logging_SetDebugLevel_String, this));
 	Commands_General_Logging_JMenu.add( __Commands_General_Logging_SetWarningLevel_JMenuItem =
 		new SimpleJMenuItem ( __Commands_General_Logging_SetWarningLevel_String, this));
+	Commands_General_Logging_JMenu.addSeparator();
+	Commands_General_Logging_JMenu.add(__Commands_General_Logging_Message_JMenuItem = 
+			new SimpleJMenuItem(__Commands_General_Logging_Message_String, this));
 	
 	// General - Running
 	
