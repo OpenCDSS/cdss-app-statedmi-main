@@ -19,5 +19,6 @@
 	<classpathentry kind="lib" path="lib/apache-poi/poi-ooxml-schemas-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="lib/apache-poi/stax-api-1.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/apache-poi/xmlbeans-2.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/apache-commons-net/commons-net-3.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -55,12 +55,15 @@ import rti.tscommandprocessor.commands.util.CommentBlockStart_Command;
 import rti.tscommandprocessor.commands.util.Comment_Command;
 import rti.tscommandprocessor.commands.util.CompareFiles_Command;
 import rti.tscommandprocessor.commands.util.Exit_Command;
+import rti.tscommandprocessor.commands.util.FTPGet_Command;
 import rti.tscommandprocessor.commands.util.FormatDateTimeProperty_Command;
 import rti.tscommandprocessor.commands.util.FormatStringProperty_Command;
+import rti.tscommandprocessor.commands.util.ListFiles_Command;
 import rti.tscommandprocessor.commands.util.MergeListFileColumns_Command;
 import rti.tscommandprocessor.commands.util.RemoveFile_Command;
 import rti.tscommandprocessor.commands.util.SetProperty_Command;
 import rti.tscommandprocessor.commands.util.SetWorkingDir_Command;
+import rti.tscommandprocessor.commands.util.UnzipFile_Command;
 import rti.tscommandprocessor.commands.util.WebGet_Command;
 import rti.tscommandprocessor.commands.util.WritePropertiesToFile_Command;
 import RTi.Util.String.StringUtil;
@@ -439,6 +442,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "FreeTable") ) {
         return new FreeTable_Command ();
     }
+	else if (StringUtil.startsWithIgnoreCase( commandString, "FTPGet") ) {
+		return new FTPGet_Command ();
+	}
 	
 	// "i" commands...
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "InsertTableColumn") ) {
@@ -470,6 +476,9 @@ throws UnknownCommandException
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"LimitWellHistoricalPumpingTSMonthlyToRights") ){
 		return new LimitWellHistoricalPumpingTSMonthlyToRights_Command ();
+	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "ListFiles" ) ) {
+		return new ListFiles_Command ();
 	}
 
 	// "m" commands...
@@ -1073,6 +1082,12 @@ throws UnknownCommandException
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"TranslatePenmanMonteith") ) {
 		return new TranslatePenmanMonteith_Command ();
+	}
+	
+	// "u" commands...
+	
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "UnzipFile" ) ) {
+		return new UnzipFile_Command ();
 	}
 	
 	// "w" commands...

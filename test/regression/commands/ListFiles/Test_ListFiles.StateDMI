@@ -1,0 +1,14 @@
+# Test listing files
+# - list all the files in the folder
+StartLog(LogFile="Results/Test_ListFiles.TSTool.log")
+# Remove the output file before the test
+RemoveFile(InputFile="Results/Test_ListFiles_out.csv",IfNotFound=Ignore)
+ListFiles(Folder="Data",TableID="FileList")
+# Copy only the filename and relative path because the absolute path
+CopyTable(TableID="FileList",NewTableID="FileList2",IncludeColumns="FileName,RelativePath")
+# will vary between computers.
+# Uncomment the following line to regenerate the expected results.
+# WriteTableToDelimitedFile(TableID="FileList2",OutputFile="ExpectedResults/Test_ListFiles_out.csv")
+WriteTableToDelimitedFile(TableID="FileList2",OutputFile="Results/Test_ListFiles_out.csv")
+# Compare the results
+CompareFiles(InputFile1="ExpectedResults/Test_ListFiles_out.csv",InputFile2="Results/Test_ListFiles_out.csv",IfDifferent=Warn)
