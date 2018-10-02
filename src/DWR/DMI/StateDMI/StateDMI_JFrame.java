@@ -6052,7 +6052,7 @@ public void actionPerformed ( ActionEvent event )
 		"Colorado Water Conservation Board\n" +
 		"\n" +
 		"Send comments to\n" +
-		"cdss@state.co.us\n" +
+		"DNR_OpenCDSS@state.co.us\n" +
 		"steve.malers@openwaterfoundation.org";
 		new HelpAboutJDialog (this, "About StateDMI", helpString, true );
 	}
@@ -10107,7 +10107,6 @@ private void ui_InitGUI ()
 		Message.printStatus ( 2, routine, e.toString() );
 	}
 	
-	System.out.println(this);
 	// Set the help viewer handler
 	HelpViewer.getInstance().setUrlFormatter(this);
 	
