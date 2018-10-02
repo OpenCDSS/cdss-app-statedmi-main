@@ -1,0 +1,7 @@
+# Test unzipping a file
+# -input file contains a single file
+# -output is a folder
+StartLog(LogFile="Results/Test_UnzipFile_File_to_Folder.TSTool.log")
+RemoveFile(InputFile="Results\Test_UnzipFile_File_to_Folder\Data\test1.txt",IfNotFound=Ignore)
+UnzipFile(InputFile="Data\test1.zip",OutputFolder="Results\Test_UnzipFile_File_to_Folder")
+CompareFiles(InputFile1="Data\test1.txt",InputFile2="Results\Test_UnzipFile_File_to_Folder\test1.txt",IfDifferent=Fail)

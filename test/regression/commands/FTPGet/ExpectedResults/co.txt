@@ -1,0 +1,217 @@
+
+United States           Natural Resources             Water and Climate Center
+Department of           Conservation                          Portland, Oregon
+Agriculture             Service                                               
+ 
+          S N O W  -  P R E C I P I T A T I O N    U P D A T E
+ 
+              Based on Mountain Data from NRCS SNOTEL Sites
+                    As of THURSDAY: JUNE 26 , 2008 
+-----------------------------------------------------------------------------
+BASIN                    ELEV.  SNOW WATER EQUIVALENT   TOTAL PRECIPITATION
+ Data Site Name          (Ft)                      %                      %  
+                                Current  Average  Avg  Current  Average  Avg
+-----------------------------------------------------------------------------
+
+COLORADO
+
+
+GUNNISON RIVER BASIN
+
+ BUTTE                   10160      .1      .0           26.0    22.1   118 
+ COCHETOPA PASS          10020      .2      -M      *    10.3      -M      *
+ COLUMBINE PASS           9400      -M      .0      *    32.1    28.4   113 
+ IDARADO                  9800      .2      .0           29.9    24.9   120 
+ MC CLURE PASS            9500      -M      .0      *    30.1    28.5   106 
+ MESA LAKES              10000      .5      .2   250     35.1    30.1   117 
+ OVERLAND RES.            9840      .1      .0           24.9    22.2   112 
+ PARK CONE                9600      .0      .0   100     20.7    17.7   117 
+ PARK RESERVOIR           9960      .0     1.7     0     41.4    35.2   118 
+ PORPHYRY CREEK          10760      .2      .3    67     22.3    21.4   104 
+ RED MOUNTAIN PASS       11200      .0      .7     0     40.4    33.5   121 
+ SCHOFIELD PASS          10700      .8     3.6    22     53.5    42.5   126 
+ SLUMGULLION             11440      .0      .0   100     20.9    18.3   114 
+                                                -----                  -----
+                Basin wide percent of average     23                    116 
+
+
+UPPER COLORADO RIVER BASIN
+
+ ARAPAHO RIDGE           10960      .0      .8     0     33.8    35.5    95 
+ ARROW                    9680      .0      .0   100     23.5    22.1   106 
+ BEAVER CK VILLAGE        8500      .1      .0           22.9    20.8   110 
+ BERTHOUD SUMMIT         11300      .0     1.4     0     37.4    33.4   112 
+ BISON LAKE              10880    14.2     5.4   263     39.5    39.5   100 
+ BUFFALO PARK             9240      .1      .0           24.0    24.5    98 
+ CHAPMAN TUNNEL          10110      .0      -M      *    31.4      -M      *
+ COPPER MOUNTAIN         10550      .0      .0   100     26.3    23.4   112 
+ FREMONT PASS            11400      .4     3.0    13     25.7    22.3   115 
+ GRIZZLY PEAK            11100      .0      .8     0     27.2    26.6   102 
+ HOOSIER PASS            11400      .0      .2     0     24.5    23.5   104 
+ INDEPENDENCE PASS       10600      .2      .0           30.8    26.2   118 
+ IVANHOE                 10400      .0      .0   100     37.4    27.7   135 
+ JONES PASS              10400      .2      .0           31.2    24.2   129 
+ KILN                     9600      .0      .0   100     26.9    20.8   129 
+ LAKE IRENE              10700      .0     1.5     0     31.3    29.9   105 
+ LYNX PASS                8880      .0      .0   100     21.3    19.1   112 
+ MC CLURE PASS            9500      -M      .0      *    30.1    28.5   106 
+ MCCOY PARK               9480      .2      .0           25.0    24.1   104 
+ MESA LAKES              10000      .5      .2   250     35.1    30.1   117 
+ MIDDLE FORK CAMP         8940      .0      .0   100     24.9    16.6   150 
+ NAST LAKE                8700      -M      .0      *    22.8    17.6   130 
+ NORTH LOST TRAIL         9200      -M      .0      *      -M    29.3      *
+ PHANTOM VALLEY           9030      .1      .0           19.4    20.3    96 
+ SCHOFIELD PASS          10700      .8     3.6    22     53.5    42.5   126 
+ STILLWATER CREEK         8720      .1      .0           17.2    15.7   110 
+ SUMMIT RANCH             9400      -M      .0      *      -M    19.5      *
+ VAIL MOUNTAIN           10300      .1      .0           35.4    30.5   116 
+ WILLOW CREEK PASS        9540      .4      .0           24.4    20.8   117 
+                                                -----                  -----
+                Basin wide percent of average     94                    113 
+
+
+SOUTH PLATTE RIVER BASIN
+
+ BEAR LAKE                9500      .0      .0   100     24.4    29.4    83 
+ BUCKSKIN JOE            11150      .0      .0   100     20.3    24.0    85 
+ COPELAND LAKE            8600      -M      .0      *    18.6    22.4    83 
+ DEADMAN HILL            10220      .1      .9    11     28.8    26.3   110 
+ ECHO LAKE               10600      .0      .0   100     18.7    20.1    93 
+ HOOSIER PASS            11400      .0      .2     0     24.5    23.5   104 
+ JACKWHACKER GULCH       10960      .2      .0           23.0    24.1    95 
+ JOE WRIGHT              10120      .3     2.5    12     40.2    37.0   109 
+ LAKE ELDORA              9700      .1      .0           24.4    23.5   104 
+ LOVELAND BASIN          11400      .2     1.7    12     28.6    27.0   106 
+ MICHIGAN CREEK          10600      .0      .0   100     21.3    20.5   104 
+ NIWOT                   11300      .1      .0             -M    26.2      *
+ ROUGH AND TUMBLE        10360      .0      .0   100     14.3    16.0    89 
+ UNIVERSITY CAMP         10300      .1     1.0    10     30.3    31.4    96 
+ WILLOW PARK             10700      .1      .0           33.5    32.0   105 
+                                                -----                  -----
+                Basin wide percent of average     11                     98 
+
+
+LARAMIE AND NORTH PLATTE RIVER BASINS
+
+ ARAPAHO RIDGE           10960      .0      .8     0     33.8    35.5    95 
+ COLUMBINE                9160      -M      .0      *    36.4    33.5   109 
+ DEADMAN HILL            10220      .1      .9    11     28.8    26.3   110 
+ JOE WRIGHT              10120      .3     2.5    12     40.2    37.0   109 
+ LAKE IRENE              10700      .0     1.5     0     31.3    29.9   105 
+ NEVER SUMMER            10280     1.8     2.4    75     28.5    35.2    81 
+ RABBIT EARS              9400      -M      .9      *    49.0    42.2   116 
+ RAWAH                    9020      .0      .2     0     25.3    24.8   102 
+ ROACH                    9700      .0      .2     0     31.7    28.2   112 
+ TOWER                   10500    14.6    13.6   107     53.9    52.1   103 
+ WHISKEY PARK             8950      .0      .3     0     46.6    39.6   118 
+ WILLOW CREEK PASS        9540      .4      .0           24.4    20.8   117 
+ ZIRKEL                   9340      .0      .0   100     41.5    34.5   120 
+                                                -----                  -----
+                Basin wide percent of average     75                    107 
+
+
+YAMPA AND WHITE RIVER BASINS
+
+ BATTLE MOUNTAIN          7440      .0      .0   100     23.0    22.1   104 
+ BEAR RIVER               9080      .0      -M      *    20.9      -M      *
+ BISON LAKE              10880    14.2     5.4   263     39.5    39.5   100 
+ BUFFALO PARK             9240      .1      .0           24.0    24.5    98 
+ BURRO MOUNTAIN           9400      .1      .0           32.5    29.6   110 
+ COLUMBINE                9160      -M      .0      *    36.4    33.5   109 
+ CROSHO                   9100      .2      .0           28.0    23.2   121 
+ DIVIDE PEAK              8880      .0      .0   100     32.1    28.9   111 
+ DRY LAKE                 8400      -M      .0      *    37.3    33.7   111 
+ ELK RIVER                8700      -M      .0      *    30.3    27.4   111 
+ LITTLE SNAKE RIVER       8915      .0      -M      *    44.4      -M      *
+ LOST DOG                 9320      .0     9.1     0     34.6    35.6    97 
+ LYNX PASS                8880      .0      .0   100     21.3    19.1   112 
+ RABBIT EARS              9400      -M      .9      *    49.0    42.2   116 
+ RIPPLE CREEK            10340      -M     2.0      *    38.6    40.7    95 
+ SANDSTONE RS             8150      -M      .0      *    28.4    26.1   109 
+ TOWER                   10500    14.6    13.6   107     53.9    52.1   103 
+ TRAPPER LAKE             9700      .0      .0   100     30.4    30.6    99 
+ WHISKEY PARK             8950      .0      .3     0     46.6    39.6   118 
+                                                -----                  -----
+                Basin wide percent of average    101*                   107 
+
+
+ARKANSAS RIVER BASIN
+
+ APISHAPA                10000      .2      .0           19.4    18.8   103 
+ BRUMLEY                 10600      .0      .0   100     24.0    20.3   118 
+ FREMONT PASS            11400      .4     3.0    13     25.7    22.3   115 
+ GLEN COVE               11460      .1      -M      *    18.3      -M      *
+ HAYDEN PASS             10720      .0      -M      *    19.7      -M      *
+ PORPHYRY CREEK          10760      .2      .3    67     22.3    21.4   104 
+ SAINT ELMO              10540      .1      -M      *    18.7      -M      *
+ SOUTH COLONY            10800      .0      .0   100     37.0    30.8   120 
+ WHISKEY CK              10220      .2      .0           20.6    23.6    87 
+                                                -----                  -----
+                Basin wide percent of average     18*                   109 
+
+
+UPPER RIO GRANDE BASIN
+
+ BEARTOWN                11600      .0      .4     0     35.2    31.6   111 
+ COCHETOPA PASS          10020      .2      -M      *    10.3      -M      *
+ CULEBRA #2              10500      .0      .0   100     15.8    20.3    78 
+ CUMBRES TRESTLE         10040      -M      .0      *    43.9    31.8   138 
+ GRAYBACK                11620      .0      -M      *    24.5      -M      *
+ HAYDEN PASS             10720      .0      -M      *    19.7      -M      *
+ LILY POND               11000      .0      .0   100     30.3    26.5   114 
+ MEDANO PASS              9649      .3      .0           20.8    14.7   141 
+ MIDDLE CREEK            11250      -M      .0      *    32.9    31.6   104 
+ TRINCHERA               10860      .1      .0           17.4    16.6   105 
+ UPPER RIO GRANDE         9400      .1      .0           15.0    15.9    94 
+ UTE CREEK               10650      .0      .0   100     26.8    23.2   116 
+ WOLF CREEK SUMMIT       11000     6.0     8.1    74     51.1    42.9   119 
+                                                -----                  -----
+                Basin wide percent of average     71*                   113 
+
+
+SAN MIGUEL, DOLORES, ANIMAS AND SAN JUAN RIVER BASINS
+
+ CASCADE                  8880      .2      .0           27.9    26.2   106 
+ COLUMBUS BASIN          10785      .0     2.1     0     39.0    42.4    92 
+ EL DIENTE PEAK          10000      -M      .0      *    30.2    28.0   108 
+ LIZARD HEAD PASS        10200      .0      .0   100     22.5    24.0    94 
+ LONE CONE                9600      .1      .0           28.4    27.8   102 
+ MANCOS                  10000      .0      .0   100     24.6    25.5    96 
+ MINERAL CREEK           10040      .0      .0   100     27.8    24.3   114 
+ MOLAS LAKE              10500      .0      .0   100     30.9    27.3   113 
+ RED MOUNTAIN PASS       11200      .0      .7     0     40.4    33.5   121 
+ SCOTCH CREEK             9100      .1      .0           22.8    24.6    93 
+ SHARKSTOOTH             10720      .0      -M      *    32.5      -M      *
+ SPUD MOUNTAIN           10660      .3     1.7    18     42.9    40.7   105 
+ STUMP LAKES             11200      .2     2.0    10     27.9    29.3    95 
+ UPPER SAN JUAN          10200      -M      .0      *    50.4    41.4   122 
+ VALLECITO               10880      .0      .0   100     26.6    26.9    99 
+ WOLF CREEK SUMMIT       11000     6.0     8.1    74     51.1    42.9   119 
+                                                -----                  -----
+                Basin wide percent of average     45                    106 
+
+-----------------------------------------------------------------------------
+
+
+ -M   = Missing data
+  *   = Data may not provide a valid measure of conditions.
+Units = inches for the Current and Average Snow Water Equivalent and 
+	Total Precipitation values
+ 
+If the Basin wide percent of average value is flagged as potentially
+invalid, care should be taken to evaluate if the value is representative
+of conditions in the basin.
+
+The SNOW WATER EQUIVALENT Percent of Average represents the snow water
+equivalent found at selected SNOTEL sites in or near the basin compared to
+the average value for those sites on this day.
+
+The TOTAL PRECIPITATION Percent of Average represents the total precipitation
+(beginning October 1st) found at selected SNOTEL sites in or near the basin
+compared to the average value for those sites on this day.
+
+Contact your state water supply staff for assistance.
+
+Reference period for average conditions is 1961-90.
+
+Provisional data, subject to revision.
