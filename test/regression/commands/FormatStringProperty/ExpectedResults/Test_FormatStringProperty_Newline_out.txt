@@ -1,0 +1,2 @@
+TestStringProp="Line1:Another string,          One string
+Line2:   222.2,00111"

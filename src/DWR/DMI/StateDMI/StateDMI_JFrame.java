@@ -1650,9 +1650,11 @@ private JMenuItem
 JMenu
 	__Commands_General_Running_JMenu = null;
 private JMenuItem
-	__Commands_General_Running_SetProperty_JMenuItem = null,
 	__Commands_General_Running_SetOutputPeriod_JMenuItem = null,
 	__Commands_General_Running_SetOutputYearType_JMenuItem = null,
+	__Commands_General_Running_SetProperty_JMenuItem = null,
+	__Commands_General_Running_FormatDateTimeProperty_JMenuItem = null,
+	__Commands_General_Running_FormatStringProperty_JMenuItem = null,
 	__Commands_General_Running_RunCommands_JMenuItem = null,
 	__Commands_General_Running_RunProgram_JMenuItem = null,
 	__Commands_General_Running_RunPython_JMenuItem = null,
@@ -2585,8 +2587,10 @@ private String
 	__Commands_General_Logging_SetDebugLevel_String = "SetDebugLevel() ...",
 	__Commands_General_Logging_SetWarningLevel_String = "SetWarningLevel() ...",
 	
-	__Commands_General_Running_String = "General - Running",
+	__Commands_General_Running_String = "General - Running and Properties",
 	__Commands_General_Running_SetProperty_String = "SetProperty()... <set processor property>",
+	__Commands_General_Running_FormatDateTimeProperty_String = "FormatDateTimeProperty()... <format date/time property as string property>",
+	__Commands_General_Running_FormatStringProperty_String = "FormatStringProperty()... <format a string property>",
 	// This menu is reused in different menus...
 	__Commands_General_Running_SetOutputPeriod_String = "SetOutputPeriod() ...",
 	// This menu is reused in different menus...
@@ -4331,6 +4335,12 @@ public void actionPerformed ( ActionEvent event )
     }
     else if (command.equals( __Commands_General_FileHandling_WebGet_String)){
     	commandList_EditCommand( __Commands_General_FileHandling_WebGet_String, null, __INSERT_COMMAND);
+    }
+    else if (command.equals( __Commands_General_Running_FormatDateTimeProperty_String)){
+    	commandList_EditCommand(__Commands_General_Running_FormatDateTimeProperty_String, null, __INSERT_COMMAND);
+    }
+    else if (command.equals( __Commands_General_Running_FormatStringProperty_String)){
+    	commandList_EditCommand(__Commands_General_Running_FormatStringProperty_String, null, __INSERT_COMMAND);
     }
 	else if ( action.equals( __Commands_General_HydroBase_OpenHydroBase_String) ) {
 		commandList_EditCommand (__Commands_General_HydroBase_OpenHydroBase_String, null,__INSERT_COMMAND);
@@ -10831,6 +10841,12 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 		new SimpleJMenuItem( __Commands_General_Running_SetOutputPeriod_String, this));
 	Commands_General_Running_JMenu.add( __Commands_General_Running_SetOutputYearType_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_Running_SetOutputYearType_String, this));
+	Commands_General_Running_JMenu.add(__Commands_General_Running_SetProperty_JMenuItem = 
+			new SimpleJMenuItem(__Commands_General_Running_SetProperty_String, this));
+	Commands_General_Running_JMenu.add(__Commands_General_Running_FormatDateTimeProperty_JMenuItem = 
+			new SimpleJMenuItem(__Commands_General_Running_FormatDateTimeProperty_String, this));
+	Commands_General_Running_JMenu.add(__Commands_General_Running_FormatStringProperty_JMenuItem = 
+			new SimpleJMenuItem(__Commands_General_Running_FormatStringProperty_String, this));
 	Commands_General_Running_JMenu.addSeparator();
 	Commands_General_Running_JMenu.add ( __Commands_General_Running_WritePropertiesToFile_JMenuItem =
 	        new SimpleJMenuItem(__Commands_General_Running_WritePropertiesToFile_String, this ) );

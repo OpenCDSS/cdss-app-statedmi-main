@@ -1,0 +1,11 @@
+# Test setting a processor property to a date/time for current time to the minute.
+StartLog(LogFile="Results/Test_SetProperty_DateTime_CurrentToMinute.TSTool.log")
+RemoveFile(InputFile="Results/Test_SetProperty_DateTime_CurrentToMinute_out.txt",IfNotFound=Ignore)
+SetProperty(PropertyName="DateTimeProp",PropertyType=DateTime,PropertyValue="CurrentToMinute")
+# Uncomment the following two commands to regenerate the expected results file.
+# WritePropertiesToFile(OutputFile="ExpectedResults/Test_SetProperty_DateTime_CurrentToMinute_out.txt",IncludeProperties="DateTimeProp",FileFormat=NameValue)
+# Generate new output...
+WritePropertiesToFile(OutputFile="Results/Test_SetProperty_DateTime_CurrentToMinute_out.txt",IncludeProperties="DateTimeProp",FileFormat=NameValue)
+# Do regression comparison (allow results to be different because current time
+# will be different from when test was originally run)...
+CompareFiles(InputFile1="ExpectedResults\Test_SetProperty_DateTime_CurrentToMinute_out.txt",InputFile2="Results/Test_SetProperty_DateTime_CurrentToMinute_out.txt",AllowedDiff="1",IfDifferent=Warn)

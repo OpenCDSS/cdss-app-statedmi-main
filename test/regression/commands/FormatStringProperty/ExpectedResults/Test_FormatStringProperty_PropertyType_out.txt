@@ -1,0 +1,4 @@
+TestDateTimeProp=DateTime("2017-03-01")
+TestDoubleProp=2.0170301E7
+TestIntegerProp=20170301
+TestStringProp="20170301"

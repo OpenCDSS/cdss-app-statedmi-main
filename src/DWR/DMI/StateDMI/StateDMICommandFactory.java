@@ -55,8 +55,11 @@ import rti.tscommandprocessor.commands.util.CommentBlockStart_Command;
 import rti.tscommandprocessor.commands.util.Comment_Command;
 import rti.tscommandprocessor.commands.util.CompareFiles_Command;
 import rti.tscommandprocessor.commands.util.Exit_Command;
+import rti.tscommandprocessor.commands.util.FormatDateTimeProperty_Command;
+import rti.tscommandprocessor.commands.util.FormatStringProperty_Command;
 import rti.tscommandprocessor.commands.util.MergeListFileColumns_Command;
 import rti.tscommandprocessor.commands.util.RemoveFile_Command;
+import rti.tscommandprocessor.commands.util.SetProperty_Command;
 import rti.tscommandprocessor.commands.util.SetWorkingDir_Command;
 import rti.tscommandprocessor.commands.util.WebGet_Command;
 import rti.tscommandprocessor.commands.util.WritePropertiesToFile_Command;
@@ -420,6 +423,12 @@ throws UnknownCommandException
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"FillIrrigationPracticeTSAcreageUsingWellRights") ) {
 		return new FillIrrigationPracticeTSAcreageUsingWellRights_Command ();
+	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "FormatDateTimeProperty" ) ){
+		return new FormatDateTimeProperty_Command ();
+	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "FormatStringProperty" ) ){
+		return new FormatStringProperty_Command ();
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "FormatTableDateTime") ) {
         return new FormatTableDateTime_Command ();
@@ -874,6 +883,9 @@ throws UnknownCommandException
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetPlanStation")) {
 		return new SetPlanStation_Command();
+	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetProperty" )) {
+		return new SetProperty_Command ();
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetPropertyFromTable") ) {
         return new SetPropertyFromTable_Command ();

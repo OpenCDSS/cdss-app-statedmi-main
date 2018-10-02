@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.lang.StringBuffer;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
@@ -886,6 +887,73 @@ protected static List<TSEnsemble> getDiscoveryEnsembleFromCommands ( List<Comman
     }
     */
     return tsEnsembleList;
+}
+
+/**
+Get a list of Prop (properties) from a list of commands.  These properties are suitable for passing to code
+run in discovery mode.  Commands that implement ObjectListProvider have their getObjectList(Prop) method
+called and the returned time series are added to the list.
+@param commands commands to search.
+@param sort Should properties be sorted by property name - currently not enabled
+@return list of properties an empty non-null list if nothing found.
+*/
+protected static List<Prop> getDiscoveryPropFromCommands ( List<Command> commands, boolean sort )
+{   if ( commands == null ) {
+        return new ArrayList<Prop>();
+    }
+    List<Prop> proplist = new ArrayList<Prop>();
+    for ( Command command: commands ) {
+        if ( (command != null) && (command instanceof ObjectListProvider) ) {
+        	//TODO sam 2017-03-17 figure out how to do generics but for now the old way works
+			ObjectListProvider objectListProvider = (ObjectListProvider)command;
+        	Object o = objectListProvider.getObjectList ( Prop.class );
+            List<Prop> list = null;
+            if ( o != null ) {
+            	@SuppressWarnings("unchecked")
+				List<Prop> list0 = (List<Prop>)o;
+            	list = list0;
+            }
+            if ( list != null ) {
+                int listsize = list.size();
+                Prop prop;
+                for ( int iprop = 0; iprop < listsize; iprop++ ) {
+                    prop = list.get(iprop);
+                    if ( prop != null ) {
+                        proplist.add( prop );
+                    }
+                }
+            }
+        }
+    }
+    if ( sort ) {
+    	Collections.sort(proplist);
+    }
+    return proplist;
+}
+
+/**
+Return the properties for commands before a specific command
+in the TSCommandProcessor.  This is used, for example, to provide a list of property names to editor dialogs.
+@param processor a TSCommandProcessor that is managing commands.
+@param command the command above which properties are needed.
+@return a list of time series (containing only information populated during discovery), or an empty list.
+*/
+public static List<Prop> getDiscoveryPropFromCommandsBeforeCommand( StateDMI_Processor processor, Command command )
+{   String routine = "getDiscoveryPropFromCommandsBeforeCommand";
+    // Get the position of the command in the list...
+    int pos = processor.indexOf(command);
+    if ( Message.isDebugOn ) {
+        Message.printDebug ( 1, routine, "Position in list is " + pos + " for command:" + command );
+    }
+    if ( pos < 0 ) {
+        // Just return a blank list...
+        return new Vector<Prop>();
+    }
+    // Find the commands above the position...
+    List<Command> commands = getCommandsBeforeIndex ( processor, pos );
+    // Get the time series from the commands (sort on the property names)...
+    List<Prop> availableProp = getDiscoveryPropFromCommands ( commands, true );
+    return availableProp;
 }
 
 /**

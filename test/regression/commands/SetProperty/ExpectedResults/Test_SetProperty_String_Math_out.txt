@@ -1,0 +1,3 @@
+StringProp1="90091310"
+StringProp2="9009"
+StringProp3="100100"

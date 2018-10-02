@@ -1,0 +1,7 @@
+DoubleProp_NaN=NaN
+StringProp_Empty=""
+BooleanProp_Null=null
+DateTimeProp_Null=null
+DoubleProp_Null=null
+IntegerProp_Null=null
+StringProp_Null=null
