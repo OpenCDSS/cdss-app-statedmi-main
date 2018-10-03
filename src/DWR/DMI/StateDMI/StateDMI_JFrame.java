@@ -1604,9 +1604,15 @@ private JMenuItem
 	__Commands_StateCU_DiversionRights_JMenuItem;
 
 //Commands...Datastore Processing...
-
-JMenu
+private JMenu
  	__Commands_Datastore_JMenu = null;
+
+// Commands... Spatial Processing...
+private JMenu
+	__Commands_Spatial_JMenu = null;
+private JMenuItem
+	__Commands_Spatial_WriteTableToGeoJSON_JMenuItem,
+	__Commands_Spatial_WriteTableToShapefile_JMenuItem;
 
 // Commands... Spreadsheet Processing...
 
@@ -2563,6 +2569,12 @@ private String
 	
 	// Datastore Commands...
 	__Commands_Datastore_String = "Datastore Processing",
+	
+	// Spatial Commands...
+
+	__Commands_Spatial_String = "Spatial Processing",
+	__Commands_Spatial_WriteTableToGeoJSON_String = "WriteTableToGeoJSON()... <write table to a GeoJSON file>",
+	__Commands_Spatial_WriteTableToShapefile_String = "WriteTableToShapefile()... <write table to a Shapefile>",
 	
 	// Spreadsheet Commands...
 
@@ -4410,6 +4422,15 @@ public void actionPerformed ( ActionEvent event )
 	}
     else if (command.equals( __Commands_General_TestProcessing_StartRegressionTestResultsReport_String) ) {
         commandList_EditCommand ( __Commands_General_TestProcessing_StartRegressionTestResultsReport_String, null, __INSERT_COMMAND );
+    }
+	
+	// Spatial Commands...
+	
+    else if (command.equals(__Commands_Spatial_WriteTableToGeoJSON_String ) ) {
+    	commandList_EditCommand(__Commands_Spatial_WriteTableToGeoJSON_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals(__Commands_Spatial_WriteTableToShapefile_String ) ) {
+    	commandList_EditCommand(__Commands_Spatial_WriteTableToShapefile_String, null, __INSERT_COMMAND );
     }
 	
 	// Spreadsheet Commands...
@@ -10778,6 +10799,7 @@ Initialize the general command menus.  These can be used with StateMod or StateC
 */
 private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 {	parent_JMenu.addSeparator();
+	parent_JMenu.addSeparator();
 
 	// Commands - Datastore Processing
 	JMenu Commands_Datastore_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( 
@@ -10785,6 +10807,17 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 	Commands_Datastore_JMenu.add(__Commands_TableRead_ReadTableFromDataStore_JMenuItem = 
 			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromDataStore_String, this));
 	
+	parent_JMenu.addSeparator();
+	
+	// Commands - Spatial Processing
+	JMenu Commands_Spatial_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( 
+			style, parent_JMenu, __Commands_Spatial_String, false);
+	Commands_Spatial_JMenu.add(__Commands_Spatial_WriteTableToGeoJSON_JMenuItem = 
+			new SimpleJMenuItem(__Commands_Spatial_WriteTableToGeoJSON_String, this));
+	Commands_Spatial_JMenu.add(__Commands_Spatial_WriteTableToShapefile_JMenuItem = 
+			new SimpleJMenuItem(__Commands_Spatial_WriteTableToShapefile_String, this));
+	
+	parent_JMenu.addSeparator();
 
 	// Commands - Spreadsheet Processing 
 
@@ -10821,6 +10854,7 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 	        new SimpleJMenuItem( __Commands_Spreadsheet_CloseExcelWorkbook_String, this ) );
 	    
 
+	parent_JMenu.addSeparator();
 	parent_JMenu.addSeparator();	
 	
 	// General - Comments...

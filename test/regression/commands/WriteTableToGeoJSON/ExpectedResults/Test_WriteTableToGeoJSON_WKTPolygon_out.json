@@ -1,0 +1,42 @@
+{
+  "type": "FeatureCollection",
+  "bbox": [-106.0, 37.5, -103.0, 39.40472],
+  "features": [
+      {
+      "type": "Feature",
+      "bbox": [-106.0, 37.5, -105.89194, 39.0],
+      "properties": {
+        "ID": 50263,
+        "ID_text": "050263",
+        "Lon": -105.89194,
+        "Lat": 38.99333,
+        "Name": "ANTERO RSVR",
+        "Description": "Description:  ANTERO RSVR"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [ [-105.89194, 38.99333], [-106.0, 39.0], [-106.0, 37.5] ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "bbox": [-105.47667, 37.5, -103.0, 39.40472],
+      "properties": {
+        "ID": 50454,
+        "ID_text": "050454",
+        "Lon": -105.47667,
+        "Lat": 39.40472,
+        "Name": "BAILEY",
+        "Description": "Description:  BAILEY"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [ [-105.47667, 39.40472], [-104.0, 39.0], [-103.0, 37.5] ]
+        ]
+      }
+    }
+  ]
+}
