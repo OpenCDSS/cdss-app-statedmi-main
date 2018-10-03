@@ -1603,6 +1603,13 @@ private JMenuItem
 	__Commands_StateCU_WellPumpingTS_JMenuItem,
 	__Commands_StateCU_DiversionRights_JMenuItem;
 
+//Commands...Datastore Processing...
+
+JMenu
+ 	__Commands_Datastore_JMenu = null;
+
+// Commands... Spreadsheet Processing...
+
 private JMenu
 	__Commands_Spreadsheet_JMenu = null;
 private JMenuItem
@@ -2553,6 +2560,9 @@ private String
 	__Commands_StateCU_DelayTableAssignment_WriteCULocationDelayTableAssignmentsToList_String = "WriteCULocationDelayTableAssignmentsToList() ...",
 	__Commands_StateCU_DelayTableAssignment_WriteCULocationDelayTableAssignmentsToStateCU_String = "WriteCULocationDelayTableAssignmentsToStateCU() ...",
 	__Commands_StateCU_DelayTableAssignment_CheckCULocationDelayTableAssignments_String = "CheckCULocationDelayTableAssignments() ...",
+	
+	// Datastore Commands...
+	__Commands_Datastore_String = "Datastore Processing",
 	
 	// Spreadsheet Commands...
 
@@ -10768,6 +10778,13 @@ Initialize the general command menus.  These can be used with StateMod or StateC
 */
 private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 {	parent_JMenu.addSeparator();
+
+	// Commands - Datastore Processing
+	JMenu Commands_Datastore_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( 
+			style, parent_JMenu, __Commands_Datastore_String, false);
+	Commands_Datastore_JMenu.add(__Commands_TableRead_ReadTableFromDataStore_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromDataStore_String, this));
+	
 
 	// Commands - Spreadsheet Processing 
 
