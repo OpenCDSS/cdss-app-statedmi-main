@@ -1,0 +1,3 @@
+# Want this empty folder to exist in the repository for test results generated at run-time
+/**
+!.gitignore

@@ -1,0 +1,14 @@
+# Test writing a table to a GeoJSON file
+# - point coordinates in lon and lat columns
+# - also define a JavaScript variable
+StartLog(LogFile="Results/Test_WriteTableToGeoJSON_LonLat_JavaScriptVar.TSTool.log")
+RemoveFile(InputFile="Results/Test_WriteTableToGeoJSON_LonLat_JavaScriptVar_out.csv",IfNotFound=Ignore)
+ReadTableFromDelimitedFile(TableID="StationMeta",InputFile="Data\StationMeta.csv",TextColumns="ID_text")
+# Generate the results.
+FormatTableString(TableID="StationMeta",InputColumns="Name",Format="Description:  %s",OutputColumn="Description")
+# Uncomment the following to regenerate the expected results
+# WriteTableToGeoJSON(TableID="StationMeta",OutputFile="ExpectedResults/Test_WriteTableToGeoJSON_LonLat_JavaScriptVar_out.js",LongitudeColumn="Lon",LatitudeColumn="Lat",ExcludeColumns="WKTGeometry",JavaScriptVar="stationData")
+WriteTableToGeoJSON(TableID="StationMeta",OutputFile="Results/Test_WriteTableToGeoJSON_LonLat_JavaScriptVar_out.js",LongitudeColumn="Lon",LatitudeColumn="Lat",ExcludeColumns="WKTGeometry",JavaScriptVar="stationData")
+# Do regression comparison with the original input (possible because strings
+# and integers with no formatting issues).
+CompareFiles(InputFile1="ExpectedResults/Test_WriteTableToGeoJSON_LonLat_JavaScriptVar_out.js",InputFile2="Results/Test_WriteTableToGeoJSON_LonLat_JavaScriptVar_out.js",IfDifferent=Warn)
