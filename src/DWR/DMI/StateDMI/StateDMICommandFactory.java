@@ -11,6 +11,8 @@ import rti.tscommandprocessor.commands.logging.Message_Command;
 import rti.tscommandprocessor.commands.logging.SetDebugLevel_Command;
 import rti.tscommandprocessor.commands.logging.SetWarningLevel_Command;
 import rti.tscommandprocessor.commands.logging.StartLog_Command;
+import rti.tscommandprocessor.commands.spatial.WriteTableToGeoJSON_Command;
+import rti.tscommandprocessor.commands.spatial.WriteTableToShapefile_Command;
 import rti.tscommandprocessor.commands.table.AppendTable_Command;
 import rti.tscommandprocessor.commands.table.CopyPropertiesToTable_Command;
 import rti.tscommandprocessor.commands.table.CopyTable_Command;
@@ -1272,8 +1274,14 @@ throws UnknownCommandException
 	/*else if ( StringUtil.startsWithIgnoreCase("WriteTableToDataStore") ) {
         return new WriteTableToDataStore_Command ();
     }*/
+	else if (StringUtil.startsWithIgnoreCase( commandString, "WriteTableToGeoJSON") ) {
+		return new WriteTableToGeoJSON_Command ();
+	}
     else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteTableToDelimitedFile") ) {
         return new WriteTableToDelimitedFile_Command ();
+    }
+    else if (StringUtil.startsWithIgnoreCase( commandString, "WriteTableToShapefile" ) ) {
+    	return new WriteTableToShapefile_Command ();
     }
     else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteTableToExcel") ) {
         return new WriteTableToExcel_Command ();
