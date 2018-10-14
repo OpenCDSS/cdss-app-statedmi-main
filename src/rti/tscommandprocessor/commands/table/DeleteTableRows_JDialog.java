@@ -10,9 +10,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import rti.tscommandprocessor.core.TSCommandProcessorUtil;
-
-import java.awt.Desktop;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -35,6 +32,7 @@ import java.util.List;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 
@@ -75,11 +73,11 @@ Responds to ActionEvents.
 public void actionPerformed(ActionEvent event)
 {	Object o = event.getSource();
 
-	if ( o == __help_JButton ) {
-		TSCommandProcessorUtil.displayCommandDocumentation(__command);
-	}
-	else if ( o == __cancel_JButton ) {
+	if ( o == __cancel_JButton ) {
 		response ( false );
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", "DeleteTableRows");
 	}
 	else if ( o == __ok_JButton ) {
 		refresh ();
@@ -224,24 +222,20 @@ private void initialize ( JFrame parent, DeleteTableRows_Command command, List<S
         JGUIUtil.addComponent(main_JPanel, button_JPanel, 
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
-    __help_JButton = new SimpleJButton("Help", "Help", this);
-    __help_JButton.setToolTipText("Show command documentation in web browser" );
-	button_JPanel.add ( __help_JButton );
-	if ( !Desktop.isDesktopSupported() ) {
-		__help_JButton.setEnabled(false);
-	}
-	__cancel_JButton = new SimpleJButton("Cancel", this);
-	button_JPanel.add (__cancel_JButton);
-	__cancel_JButton.setToolTipText ( "Close window without saving changes." );
 	__ok_JButton = new SimpleJButton("OK", this);
 	button_JPanel.add (__ok_JButton);
 	__ok_JButton.setToolTipText ( "Close window and save changes to command." );
+	__cancel_JButton = new SimpleJButton("Cancel", this);
+	button_JPanel.add (__cancel_JButton);
+	__cancel_JButton.setToolTipText ( "Close window without saving changes." );
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
-	setTitle ( "Edit " + __command.getCommandName() + "() Command");
-	setResizable (false);
+	setTitle ( "Edit " + __command.getCommandName() + " Command");
     pack();
     JGUIUtil.center(this);
 	refresh();	// Sets the __path_JButton status
+	setResizable (false);
     super.setVisible(true);
 }
 
