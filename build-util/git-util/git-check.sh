@@ -25,7 +25,7 @@
 # - warn if any repositories use Cygwin because mixing with Git for Windows can cause confusion in tools
 #
 
-version="1.0.0 2018-10-13"
+version="1.1.0 2018-10-14"
 
 # Parse the command parameters
 while getopts :hm:p:v opt; do
@@ -48,7 +48,7 @@ while getopts :hm:p:v opt; do
 			mainRepo=$OPTARG
 			;;
 		p) # product home
-			productHome=$OPTARG
+			productHomeFolder=$OPTARG
 			;;
 		v) # version
 			echo ""
@@ -235,7 +235,7 @@ echo ""
 # Check the operating system
 checkOperatingSystem
 
-if [ -z "${productHome}" ]
+if [ -z "${productHomeFolder}" ]
 then
 	echo ""
 	echo "The product home is not specified - exiting."
@@ -252,22 +252,26 @@ if [ "${operatingSystem}" = "cygwin" ]
 	home2="/cygdrive/C/Users/$USER"
 fi
 # Product home is relative to the users files in a standard CDSS development files location
-productHomeAbs="$home2/${productHome}"
+productHomeFolderAbs="$home2/${productHomeFolder}"
+# Location of git repositories
+# - currently assume that there is a "git-repos" folder under the product home folder
+# - may allow this to be dynamic with a passed in scrip parameter
+gitReposFolder="${productHomeFolderAbs}/git-repos"
 # Main repository in a group of repositories for a product
 # - this is where the product repository list file will live
-mainRepoAbs="${productHomeAbs}/git-repos/${mainRepo}"
+mainRepoAbs="${gitReposFolder}/${mainRepo}"
 # The following is a list of repositories including the main repository
 # - one repo per line, no URL, just the repo name
 # - repositories must have previously been cloned to local files
-repoList="${mainRepoAbs}/build-util/product-repo-list.txt"
+repoListFile="${mainRepoAbs}/build-util/product-repo-list.txt"
 
 # Check for local folder existence and exit if not as expected
 # - ensures that other logic will work as expected in folder structure
 
-if [ ! -d "${productHomeAbs}" ]
+if [ ! -d "${productHomeFolderAbs}" ]
 	then
 	echo ""
-	echo "Product home folder does not exist:  ${productHomeAbs}"
+	echo "Product home folder does not exist:  ${productHomeFolderAbs}"
 	echo "Exiting."
 	echo ""
 	exit 1
@@ -280,10 +284,10 @@ if [ ! -d "${mainRepoAbs}" ]
 	echo ""
 	exit 1
 fi
-if [ ! -f "${repoList}" ]
+if [ ! -f "${repoListFile}" ]
 	then
 	echo ""
-	echo "Product repo list file does not exist:  ${repoList}"
+	echo "Product repo list file does not exist:  ${repoListFile}"
 	echo "Exiting."
 	echo ""
 	exit 1
@@ -321,7 +325,7 @@ do
 		continue
 	fi
 	# Check the status on the specific repository
-	productRepoFolder="${productHomeAbs}/git-repos/${repoName}"
+	productRepoFolder="${gitReposFolder}/${repoName}"
 	echo "================================================================================"
 	echo "Checking status of repo:  $repoName"
 	if [ ! -d "${productRepoFolder}" ]
@@ -339,18 +343,23 @@ do
 		checkCommandLineGitCompatibility
 	fi
 #done 
-done < ${repoList}
+done < ${repoListFile}
 
 echo ""
 echo "================================================================================"
 echo "Summary of all repositories - see above for details"
-echo "================================================================================"
 # Print a message to encourage not using Cygwin to clone repositories
 if [ "${cygwinRepoCount}" -ne "0" ]
 then
 	echo "Number of Cygwin-cloned repos is ${cygwinRepoCount}.  See above for recommendations."
 fi
 # Print message to alert about attention needed on any repository
+# Don't need to color the number of repositories
+echo "Product home folder: ${productHomeFolderAbs}"
+echo "Product Git repositories folder: ${gitReposFolder}"
+echo "Repository list file: ${repoListFile}"
+echo "================================================================================"
+echo "Number of repositories:                                                   ${repoCount}"
 if [ "${upToDateRepoCount}" -eq "${repoCount}" ]
 then
 	echo -e "Number of up-to-date repositories:                                        ${okColor}${upToDateRepoCount}${colorEnd}"
