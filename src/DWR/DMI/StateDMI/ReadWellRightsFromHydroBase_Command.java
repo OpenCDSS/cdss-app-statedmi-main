@@ -992,7 +992,7 @@ private List<StateMod_WellRight> readHydroBaseWellRightsForDWStationsSimple (
 			if ( !foundMatch ) {
 				// The well/parcel/structure list has a new combination so add to all the lists
 				// - all lists have the same length
-				// - unqueReceiptList contains only receipts and empty strings
+				// - uniqueReceiptList contains only receipts and empty strings
 				// - uniqueWDIDList contains only WDIDs and empty strings
 				// - hbDivWellParcelUniqueList is the original data but and may have WDID OR receipt OR WDID/receipt
 				// This ensures that the supply don't get added more than once
@@ -2035,7 +2035,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			Message.printStatus(2,routine,"Reading well rights using Simple approach (direct read of well rights and parcels and not parcel fractions");
 			readWellRights = true; // TODO SAM 2016-09-29 need to remove from code below but for now keep since shared with legacy
 			int parcelYear = -1; // Parcel year is irrelevant
-			List<StateMod_WellRight> smWellRightList = null; // The well rights for the well station
+			List<StateMod_WellRight> smWellRightList = new ArrayList<StateMod_WellRight>(); // The well rights for the well station
 			for ( int i = 0; i < stationListSize; i++ ) {
 				// Notify command progress listeners which station is being processed...
 				notifyCommandProgressListeners ( i, stationListSize, (float)(((float)(i + 1)/(float)stationListSize)*100.0),

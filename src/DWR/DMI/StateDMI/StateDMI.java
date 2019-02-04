@@ -949,7 +949,7 @@ that have a login of "prompt".
 protected static void openDataStoresAtStartup ( StateDMISession session, StateDMI_Processor processor,
 	boolean isBatch )
 {
-	String routine = "STateDMI.openDataStoresAtStartup";
+	String routine = "StateDMI.openDataStoresAtStartup";
 	String configFile = getConfigFile();
 	
 	 // Use the configuration file to get RiversideDB properties...
