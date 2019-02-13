@@ -1,3 +1,26 @@
+// StateDMI_JFrame - main GUI to control StateDMI functions
+
+/* NoticeStart
+
+StateDMI
+StateDMI is a part of Colorado's Decision Support Systems (CDSS)
+Copyright (C) 1997-2019 Colorado Department of Natural Resources
+
+StateDMI is free software:  you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+StateDMI is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+    along with StateDMI.  If not, see <https://www.gnu.org/licenses/>.
+
+NoticeEnd */
+
 //-----------------------------------------------------------------------------
 // StateDMI_JFrame - main GUI to control StateDMI functions
 //-----------------------------------------------------------------------------
@@ -6099,10 +6122,25 @@ public void actionPerformed ( ActionEvent event )
 	// Help menu...
 
 	else if ( o == __Help_AboutStateDMI_JMenuItem ) {
-		String helpString = IOUtil.getProgramName() + "\n" +
-		"Creates data set files for StateCU and StateMod by\n" +
-		"processing data in files and the HydroBase database.\n" +
-		"Version " + IOUtil.getProgramVersion() + "\n" +
+		String helpString =
+		IOUtil.getProgramName() + " " + IOUtil.getProgramVersion() + "\n\n" +
+		"Creates dataset files for StateCU and StateMod.\n\n" +
+	    "StateDMI is a part of Colorado's Decision Support Systems (CDSS)\n" +
+	    "Copyright (C) 1997-2019 Colorado Department of Natural Resources\n" +
+	    " \n" +
+	    "StateDMI is free software:  you can redistribute it and/or modify\n" +
+	    "    it under the terms of the GNU General Public License as published by\n" +
+	    "    the Free Software Foundation, either version 3 of the License, or\n" +
+	    "    (at your option) any later version.\n" +
+	    " \n" +
+	    "StateDMI is distributed in the hope that it will be useful,\n" +
+	    "    but WITHOUT ANY WARRANTY; without even the implied warranty of\n" +
+	    "    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n" +
+	    "    GNU General Public License for more details.\n" +
+	    " \n" +
+	    "You should have received a copy of the GNU General Public License\n" +
+	    "    along with StateDMI.  If not, see <https://www.gnu.org/licenses/>.\n" +
+	    " \n" +
 		"Developed with StateMod Version 12.29 (2009-08-12)\n" +
 		"Developed with StateCU Version 12\n" +
 		"\n" +

@@ -1,3 +1,26 @@
+// StateDMI -  Main program class which is responsible for batch or UI.
+
+/* NoticeStart
+
+StateDMI
+StateDMI is a part of Colorado's Decision Support Systems (CDSS)
+Copyright (C) 1997-2019 Colorado Department of Natural Resources
+
+StateDMI is free software:  you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+StateDMI is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+    along with StateDMI.  If not, see <https://www.gnu.org/licenses/>.
+
+NoticeEnd */
+
 //------------------------------------------------------------------------------
 // StateDMI -  Main program class which is responsible for starting either an
 //		applet or stand alone GUIs.
@@ -345,7 +368,7 @@ public class StateDMI extends JApplet
 {
 
 public static final String PROGRAM_NAME = "StateDMI";
-public static final String PROGRAM_VERSION = "4.06.00dev (2018-07-04)";
+public static final String PROGRAM_VERSION = "5.00.00dev (2019-02-13)";
 
 /**
 Interface for StateCU commands.
@@ -1186,7 +1209,7 @@ throws Exception
 		else if (args[i].equalsIgnoreCase("-test")) {
 			IOUtil.testing(true);
 		}
-		else if (args[i].equalsIgnoreCase("-v")) {
+		else if (args[i].equalsIgnoreCase("-v") || args[i].equalsIgnoreCase("--version")) {
 			printVersion ();
 		}
 		else if ( args[i].regionMatches(true,0,"-d",0,2)) {
@@ -1229,6 +1252,7 @@ throws Exception
 			i++;
 			setupUsingCommandFile ( args[i], true );
 		}
+
 		// User specified or specified by a script/system call to the normal StateDMI script/launcher.
 		else {
 		    // Assume that a command file has been specified on the command line
@@ -1307,7 +1331,23 @@ Print the program version and exit the program.
 */
 public static void printVersion ( )
 {	String nl = System.getProperty ( "line.separator" );
-	System.out.println (  nl + PROGRAM_NAME + " version: " + PROGRAM_VERSION + nl + nl );
+	System.out.println (  nl + PROGRAM_NAME + " version: " + PROGRAM_VERSION + nl + nl +
+	"StateDMI is a part of Colorado's Decision Support Systems (CDSS)\n" +
+	"Copyright (C) 1997-2019 Colorado Department of Natural Resources\n" +
+	"\n" +
+	"StateDMI is free software:  you can redistribute it and/or modify\n" +
+	"    it under the terms of the GNU General Public License as published by\n" +
+	"    the Free Software Foundation, either version 3 of the License, or\n" +
+	"    (at your option) any later version.\n" +
+	"\n" +
+	"StateDMI is distributed in the hope that it will be useful,\n" +
+	"    but WITHOUT ANY WARRANTY; without even the implied warranty of\n" +
+	"    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n" +
+	"    GNU General Public License for more details.\n" +
+	"\n" +
+	"You should have received a copy of the GNU General Public License\n" +
+	"    along with StateDMI.  If not, see <https://www.gnu.org/licenses/>.\n" );
+
 	quitProgram (0);
 }
 
