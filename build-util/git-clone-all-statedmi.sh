@@ -15,6 +15,9 @@ repoFolder=`dirname ${scriptFolder}`
 # Want the parent folder to the specific Git repository folder
 gitReposFolder=`dirname ${repoFolder}`
 
+# StateDMI GitHub repo URL root
+githubRootUrl="https://github.com/OpenCDSS"
+
 # Main StateDMI repository
 mainRepo="cdss-app-statedmi-main"
 
