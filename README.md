@@ -44,7 +44,6 @@ cdss-app-statedmi-main/       StateDMI source code and development working files
   bin/                        Eclipse folder for compiled files (dynamic so ignored from repo).
   build-util/                 Utility scripts used in development environment.
   conf/                       Configuration files for installer build tools.
-  doc/                        Word/PDF legacy documentation for StateDMI.
   externals/                  Third-party libraries and tools (may remove/move in future).
   graphics/                   Images (may remove/move in future).
   installer/                  StateDMI-specific files used to create installer.
@@ -76,9 +75,10 @@ such as documentation managed with command line Git or other Git tools.
 
 |**Repository**|**Eclipse project?**|**Description**|
 |-------------------------------------------------------------------------------------------------------------|--|----------------------------------------------------|
+|[`cdss-app-statedmi-doc`](https://github.com/OpenCDSS/cdss-app-statedmi-doc)                      |N |StateDMI legacy Word/PDF documentation, being phased out in favor of Markdown/MkDocs.|
 |[`cdss-app-statedmi-doc-dev`](https://github.com/OpenCDSS/cdss-app-statedmi-doc-dev)              |N |StateDMI developer documentation (Markdown/MkDocs).|
 |[`cdss-app-statedmi-doc-user`](https://github.com/OpenCDSS/cdss-app-statedmi-doc-user)            |N |StateDMI user documentation (Markdown/MkDocs).|
-|`cdss-app-statedmi-main`                                                                                     |Y |StateDMI main application code (this repo).|
+|`cdss-app-statedmi-main`                                                                          |Y |StateDMI main application code (this repo).|
 |[`cdss-app-statedmi-test`](https://github.com/OpenCDSS/cdss-app-statedmi-test)                    |y |StateDMI functional tests using StateDMI testing framework.|
 |[`cdss-archive-nsis-2.46`](https://github.com/OpenCDSS/cdss-archive-nsis-2.46)                    |N |Archive of NSIS 2.46, to set up development environment.|
 |[`cdss-lib-cdss-java`](https://github.com/OpenCDSS/cdss-lib-cdss-java)                            |Y |Library that is shared between CDSS components.|
@@ -108,7 +108,8 @@ C:\Users\user\                               Windows user home folder (typical d
       eclipse-workspace/                     Folder for Eclipse workspace, which references Git repository folders.
                                              The workspace folder is not maintained in Git.
       git-repos/                             Git repositories for StateDMI.
-        cdss-app-statedmi-doc-dev/           See repository list above.
+        cdss-app-statedmi-doc/               See repository list above.
+        cdss-app-statedmi-doc-dev/
         cdss-app-statedmi-doc-user/
         cdss-app-statedmi-main/
         cdss-app-statedmi-test/
@@ -119,7 +120,6 @@ C:\Users\user\                               Windows user home folder (typical d
         cdss-lib-models-java/
         cdss-util-buildtools/
         ...others may be added...
-
 ```
 
 ## Contributing ##

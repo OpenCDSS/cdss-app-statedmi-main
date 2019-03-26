@@ -1,7 +1,0 @@
-setOutputPeriod(10/1908,9/2005)
-setOutputYearType(Water)
-setPatternFile("fill2005.pat")
-954699...MONTH~StateMod~954699_baseline.stm
-fillPattern(TSList=AllTS,PatternID="09085000")
-fillHistMonthAverage(TSList=AllTS)
-writeStateMod(TSList=AllTS,OutputFile="test",Precision=0)

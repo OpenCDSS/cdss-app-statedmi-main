@@ -1,5 +1,0 @@
-# Example of CU locations specified in a list file
-# If first non-comment line contains quotes, they are column headings
-"ID","Name"
-2000505,
-2000812,"Better than HydroBase"

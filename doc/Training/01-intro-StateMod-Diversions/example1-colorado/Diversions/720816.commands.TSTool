@@ -1,7 +1,0 @@
-setOutputPeriod(10/1950,9/2005)
-setOutputYearType(Water)
-720816.DWR.DivTotal.Month~HydroBase
-720815.DWR.DivTotal.Month~HydroBase
-add(TSID="720816.DWR.DivTotal.Month",TSList="SpecifiedTS",AddTSID="720815.DWR.DivTotal.Month",HandleMissingHow=IgnoreMissing)
-free(TSID="720815.DWR.DivTotal.Month")
-writeStateMod(TSList=AllTS,OutputFile="test",Precision=0)

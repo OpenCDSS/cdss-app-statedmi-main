@@ -1,8 +1,0 @@
-setOutputPeriod(10/1950,9/2005)
-setOutputYearType(Water)
-514603.DWR.DivTotal.Month~HydroBase
-APGTUNCO.DWR.Streamflow.Month~HydroBase
-fillFromTS(APGTUNCO.DWR.Streamflow.Month,514603.DWR.DivTotal.Month,*,*)
-free(TSID="514603.DWR.DivTotal.Month")
-TS 514603 = copy(TSID="APGTUNCO.DWR.Streamflow.Month",NewTSID="514603")
-writeStateMod(TSList=AllMatchingTSID,TSID="514603",OutputFile="test",Precision=0)
