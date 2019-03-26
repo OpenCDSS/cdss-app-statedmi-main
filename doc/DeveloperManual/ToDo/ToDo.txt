@@ -1,6 +1,0 @@
-ToDo items for StateDMI
-
-[2010-02-18, Rick Parsons, minor bug, has workaround]
-Fix bug in FillRiverNetworkFromHydroBase() where an ID matches a station (e.g., 3500 when
-it is actually not a station - in this case a climate station).  The RIN object needs
-a "hint" indicating the node type, so the proper HydroBase data can be usd.

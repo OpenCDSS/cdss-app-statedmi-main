@@ -1,4 +1,0 @@
-setOutputPeriod(10/1973,9/2005)
-setOutputYearType(Water)
-720746.DWR.DivTotal.Month~HydroBase
-writeStateMod(TSList=AllTS,OutputFile="test",Precision=0)

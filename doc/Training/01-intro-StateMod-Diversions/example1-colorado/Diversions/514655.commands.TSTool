@@ -1,9 +1,0 @@
-setOutputPeriod(10/1908,9/2005)
-setOutputYearType(Water)
-setPatternFile("fill2005.pat")
-09022500.DWR.Streamflow.Month~HydroBase
-setConstant(TSID="09022500.DWR.Streamflow.Month",ConstantValue=0,SetEnd="05/1936")
-fillPattern(TSList=AllMatchingTSID,TSID="09022500.DWR.Streamflow.Month",PatternID="09034500")
-fillHistMonthAverage(TSList=AllMatchingTSID,TSID="09022500.DWR.Streamflow.Month")
-TS 514655 = copy(TSID="09022500.DWR.Streamflow.Month",NewTSID="514655")
-writeStateMod(TSList=AllMatchingTSID,TSID="514655",OutputFile="test",Precision=0)
