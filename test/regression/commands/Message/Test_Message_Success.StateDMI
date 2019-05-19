@@ -1,5 +1,0 @@
-# Test printing a message for command status SUCCESS
-# - just use the expectedStatus to ensure things are working
-#@expectedStatus Success
-StartLog(LogFile="Results/Test_Message_Success.TSTool.log")
-Message(Message="This command was successful.",CommandStatus=SUCCESS)

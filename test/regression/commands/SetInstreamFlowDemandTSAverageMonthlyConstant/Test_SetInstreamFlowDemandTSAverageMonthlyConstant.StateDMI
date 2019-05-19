@@ -1,9 +1,0 @@
-# Test setting instream flow demand TS average monthly data with a couple of generated stations
-StartLog(LogFile="Results/Test_SetInstreamFlowDemandTSAverageMonthlyConstant.StateDMI.log")
-RemoveFile(InputFile="Results\Test_SetInstreamFlowDemandTSAverageMonthlyConstant_out.ifa")
-SetInstreamFlowDemandTSAverageMonthlyConstant(ID="362000",MonthValues="1,2,3,4,5,6,7,8,9,10,11,12",IfNotFound=Add)
-SetInstreamFlowDemandTSAverageMonthlyConstant(ID="362002",MonthValues="1,2,3,4,5,6,7,8,9,10,11,12",IfNotFound=Add)
-# Uncomment the following command to regenerate the expected results.
-# WriteInstreamFlowDemandTSAverageMonthlyToStateMod(OutputFile="ExpectedResults/Test_SetInstreamFlowDemandTSAverageMonthlyConstant_out.ifa")
-WriteInstreamFlowDemandTSAverageMonthlyToStateMod(OutputFile="Results/Test_SetInstreamFlowDemandTSAverageMonthlyConstant_out.ifa")
-CompareFiles(InputFile1="ExpectedResults/Test_SetInstreamFlowDemandTSAverageMonthlyConstant_out.ifa",InputFile2="Results/Test_SetInstreamFlowDemandTSAverageMonthlyConstant_out.ifa",WarnIfDifferent=True)

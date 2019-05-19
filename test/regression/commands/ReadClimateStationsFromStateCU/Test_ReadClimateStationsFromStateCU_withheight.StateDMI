@@ -1,7 +1,0 @@
-# Test reading climate stations from StateCU file - input file has measurement height
-StartLog(LogFile="Results/Test_ReadClimateStationsFromStateCU_withheight.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadClimateStationsFromStateCU_withheight_out.cli",IfNotFound=Ignore)
-ReadClimateStationsFromStateCU(InputFile="Data\calib.cli")
-# Compare with the original data file
-WriteClimateStationsToStateCU(OutputFile="Results/Test_ReadClimateStationsFromStateCU_withheight_out.cli")
-CompareFiles(InputFile1="Data/calib.cli",InputFile2="Results/Test_ReadClimateStationsFromStateCU_withheight_out.cli",IfDifferent=Warn)

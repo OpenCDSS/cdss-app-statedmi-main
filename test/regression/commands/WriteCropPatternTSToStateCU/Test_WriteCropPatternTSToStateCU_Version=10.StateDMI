@@ -1,9 +1,0 @@
-# Test writing crop pattern TS to StateCU file version 10 file
-# Expect a warning because of round-off in numbers because fraction is used.
-#@expectedStatus Warning
-StartLog(LogFile="Results/Test_WriteCropPatternTSToStateCU_Version=10.StateDMI.log")
-RemoveFile(InputFile="Results\Test_WriteCropPatternTSToStateCU_Version=10_out.cds")
-ReadCropPatternTSFromStateCU(InputFile="Data\simple_v10.cds",Version=10)
-# Compare with the original data file
-WriteCropPatternTSToStateCU(OutputFile="Results/Test_WriteCropPatternTSToStateCU_Version=10_out.cds",Version=10)
-CompareFiles(InputFile1="Data\simple_v10.cds",InputFile2="Results/Test_WriteCropPatternTSToStateCU_Version=10_out.cds",WarnIfDifferent=True)

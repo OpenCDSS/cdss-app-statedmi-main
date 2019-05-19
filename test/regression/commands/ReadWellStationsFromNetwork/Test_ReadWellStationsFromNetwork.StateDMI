@@ -1,8 +1,0 @@
-# Test reading well stations from a network file
-StartLog(LogFile="Results/Test_ReadWellStationsFromNetwork.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadWellStationsFromNetwork_out.csv",IfNotFound=Ignore)
-ReadWellStationsFromNetwork(InputFile="Data\rg2007.net")
-# Uncomment the following command to regenerate the original output
-# WriteWellStationsToList(OutputFile="ExpectedResults/Test_ReadWellStationsFromNetwork_out.csv")
-WriteWellStationsToList(OutputFile="Results/Test_ReadWellStationsFromNetwork_out.csv")
-CompareFiles(InputFile1="ExpectedResults/Test_ReadWellStationsFromNetwork_out.csv",InputFile2="Results/Test_ReadWellStationsFromNetwork_out.csv",WarnIfDifferent=True)

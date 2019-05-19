@@ -1,8 +1,0 @@
-# Test writing climate stations to list with a couple of generated stations
-StartLog(LogFile="Results/Test_WriteClimateStationsToList.StateDMI.log")
-RemoveFile(InputFile="Results\Test_WriteClimateStationsToList_out.csv")
-SetClimateStation(ID="Station1",Name="Station 1",Latitude=44,Elevation=4001,Region1="ADAMS",IfNotFound=Add)
-# Uncomment the following command to regenerate the expected results.
-# WriteClimateStationsToList(OutputFile="ExpectedResults/Test_WriteClimateStationsToList_out.csv")
-WriteClimateStationsToList(OutputFile="Results/Test_WriteClimateStationsToList_out.csv")
-CompareFiles(InputFile1="ExpectedResults/Test_WriteClimateStationsToList_out.csv",InputFile2="Results/Test_WriteClimateStationsToList_out.csv",IfDifferent=Warn)

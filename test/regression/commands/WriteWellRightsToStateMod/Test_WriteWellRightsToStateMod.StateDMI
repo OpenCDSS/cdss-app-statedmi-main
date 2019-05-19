@@ -1,9 +1,0 @@
-# Test writing well rights to StateMod with a couple of generated rights
-StartLog(LogFile="Results/Test_WriteWellRightsToStateMod.StateDMI.log")
-RemoveFile(InputFile="Results\Test_WriteWellRightsToStateMod_out.wer")
-SetWellRight(ID="2000505",Name="Well 1",StationID="ID",AdministrationNumber=11111.11111,Decree=1,OnOff=1,IfNotFound=Add)
-SetWellRight(ID="2000631",Name="Well 2",StationID="Station2",AdministrationNumber=22222.22222,Decree=2,OnOff=1,IfNotFound=Add)
-# Uncomment the following command to regenerate the expected results.
-# WriteWellRightsToStateMod(OutputFile="ExpectedResults/Test_WriteWellRightsToStateMod_out.wer")
-WriteWellRightsToStateMod(OutputFile="Results/Test_WriteWellRightsToStateMod_out.wer")
-CompareFiles(InputFile1="ExpectedResults/Test_WriteWellRightsToStateMod_out.wer",InputFile2="Results/Test_WriteWellRightsToStateMod_out.wer",WarnIfDifferent=True)

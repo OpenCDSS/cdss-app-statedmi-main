@@ -1,5 +1,0 @@
-# Style table for formatting time series data
-"StyleID","FillForegroundColor"
-"Missing","Yellow"
-"Negative","Orange"
-"Zero","Magenta"

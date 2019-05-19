@@ -1,5 +1,0 @@
-StartLog(LogFile="Results/Test_FTPGet_RTi.TSTool.log")
-RemoveFile(InputFile="Results/co.txt",WarnIfMissing=False)
-FTPGet(RemoteSite="ftp.riverside.com",Login="anonymous",Password="ok2ftp2",RemoteFolder="/outgoing/sam",FilePattern="co.txt",DestinationFolder="Results",TransferMode=ASCII)
-# Uncomment the following command to regenerate the expected results file.
-CompareFiles(InputFile1="ExpectedResults\co.txt",InputFile2="Results\co.txt",WarnIfDifferent=True)

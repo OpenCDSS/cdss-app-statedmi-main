@@ -1,5 +1,0 @@
-# Simple test data - don't use 1 because multiply and divide results
-# won't visibly change from the original
-"TSID","DataValue"
-ts1,2
-ts2,3

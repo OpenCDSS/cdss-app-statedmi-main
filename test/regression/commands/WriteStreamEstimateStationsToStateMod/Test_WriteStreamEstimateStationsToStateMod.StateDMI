@@ -1,9 +1,0 @@
-# Test writing stream estimate stations to StateMod file
-StartLog(LogFile="Results/Test_WriteStreamEstimateStationsToStateMod.StateDMI.log")
-RemoveFile(InputFile="Results\Test_WriteStreamEstimateStationsToStateMod_out.ses",IfNotFound=Ignore)
-SetStreamEstimateStation(ID="203554",Name="StreamEstimate 1",RiverNodeID="RiverNodeID1",DailyID="DailyID1",IfNotFound=Add)
-SetStreamEstimateStation(ID="203536",Name="StreamEstimate 2",RiverNodeID="RiverNodeID2",DailyID="DailyID2",IfNotFound=Add)
-# Uncomment the following command to regenerate the expected results.
-# WriteStreamEstimateStationsToStateMod(OutputFile="ExpectedResults/Test_WriteStreamEstimateStationsToStateMod_out.ses")
-WriteStreamEstimateStationsToStateMod(OutputFile="Results/Test_WriteStreamEstimateStationsToStateMod_out.ses")
-CompareFiles(InputFile1="ExpectedResults/Test_WriteStreamEstimateStationsToStateMod_out.ses",InputFile2="Results/Test_WriteStreamEstimateStationsToStateMod_out.ses",WarnIfDifferent=True)

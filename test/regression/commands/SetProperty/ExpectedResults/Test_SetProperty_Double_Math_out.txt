@@ -1,4 +1,0 @@
-DoubleProp1=900923.0
-DoubleProp2=900903.0
-DoubleProp3=200.0
-DoubleProp4=50.0

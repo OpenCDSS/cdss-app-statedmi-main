@@ -41,7 +41,7 @@ rem If here, run Eclipse using the executable that is known to exist from above 
 rem - also set the title of the window
 echo Starting Eclipse using %eclipseExe%
 title Eclipse configured for StateDMI development
-%eclipseExe% -vm %javawExe% -vmargs -Xmx1024M
+%eclipseExe% -vm %javawExe% -vmargs -Xmx1200M
 goto end
 
 :noeclipse

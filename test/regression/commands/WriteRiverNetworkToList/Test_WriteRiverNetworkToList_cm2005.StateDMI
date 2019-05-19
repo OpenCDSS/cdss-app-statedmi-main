@@ -1,8 +1,0 @@
-# Test writing the river network nodes to a list file - use full Colorado file for input
-StartLog(LogFile="Results/Test_WriteRiverNetworkToList_cm2005.StateDMI.log")
-RemoveFile(InputFile="Results\Test_WriteRiverNetworkToList_cm2005_out.csv",IfNotFound=Ignore)
-ReadRiverNetworkFromStateMod(InputFile="Data\cm2005.rin")
-# Uncomment the following command to generate the expected results
-# WriteRiverNetworkToList(OutputFile="ExpectedResults/Test_WriteRiverNetworkToList_cm2005_out.csv")
-WriteRiverNetworkToList(OutputFile="Results/Test_WriteRiverNetworkToList_cm2005_out.csv")
-CompareFiles(InputFile1="ExpectedResults/Test_WriteRiverNetworkToList_cm2005_out.csv",InputFile2="Results/Test_WriteRiverNetworkToList_cm2005_out.csv",WarnIfDifferent=True)

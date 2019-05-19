@@ -1,8 +1,0 @@
-# Test reading reservoir stations from list
-StartLog(LogFile="Results/Test_ReadReservoirStationsFromList.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadReservoirStationsFromList_out.csv")
-ReadReservoirStationsFromList(ListFile="Data\stations.csv",IDCol=1,NameCol=2)
-# Uncomment the following command to regenerate the expected results.
-# WriteReservoirStationsToList(OutputFile="ExpectedResults/Test_ReadReservoirStationsFromList_out.csv")
-WriteReservoirStationsToList(OutputFile="Results/Test_ReadReservoirStationsFromList_out.csv")
-CompareFiles(InputFile1="ExpectedResults/Test_ReadReservoirStationsFromList_out.csv",InputFile2="Results/Test_ReadReservoirStationsFromList_out.csv",WarnIfDifferent=True)

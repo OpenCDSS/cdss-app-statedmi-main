@@ -1,7 +1,0 @@
-# Test writing control file to StateMod file - use full SP2008L file for input
-StartLog(LogFile="Results/Test_WriteControlToStateMod_Sp2008L.StateDMI.log")
-RemoveFile(InputFile="Results\Test_WriteControlToStateMod_Sp2008L_out.ctl",IfNotFound=Ignore)
-ReadControlFromStateMod(InputFile="Data\Sp2008L.ctl")
-# Write the file again and compare with the original file.
-WriteControlToStateMod(OutputFile="Results/Test_WriteControlToStateMod_Sp2008L_out.ctl")
-CompareFiles(InputFile1="Data/Sp2008L.ctl",InputFile2="Results/Test_WriteControlToStateMod_Sp2008L_out.ctl",IgnoreWhitespace=True,IfDifferent=Warn)

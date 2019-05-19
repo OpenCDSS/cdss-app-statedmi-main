@@ -1,2 +1,0 @@
-ReadCropCharacteristicsFromHydroBase(CUMethod="BLANEY-CRIDDLE_TR-21")
-WriteCropCharacteristicsToList(OutputFile="test.csv")

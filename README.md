@@ -53,7 +53,8 @@ cdss-app-statedmi-main/       StateDMI source code and development working files
   resources/                  Additional resources, such as runtime files for installer.
   scripts/                    Eclipse run and external tools configurations.
   src/                        StateDMI main application source code.
-  test/                       Unit tests using JUnit, and functional tests.
+  test/                       Unit tests using JUnit, and operational configuration to
+                              run StateDMI in develoer environment.
 ```
 
 ## Repository Dependencies ##

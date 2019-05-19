@@ -1,2 +1,0 @@
-ReadBlaneyCriddleFromHydroBase(BlaneyCriddleMethod="BLANEY-CRIDDLE_TR-21")
-WriteBlaneyCriddleToList(OutputFile="test.csv")

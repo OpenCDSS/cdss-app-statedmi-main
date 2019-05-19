@@ -1,7 +1,0 @@
-# Test reading stream estimate stations from a StateMod file
-StartLog(LogFile="Results/Test_ReadStreamEstimateStationsFromStateMod.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadStreamEstimateStationsFromStateMod_out.ses",IfNotFound=Ignore)
-ReadStreamEstimateStationsFromStateMod(InputFile="Data\stations.ses")
-# Compare with the original data file
-WriteStreamEstimateStationsToStateMod(OutputFile="Results/Test_ReadStreamEstimateStationsFromStateMod_out.ses")
-CompareFiles(InputFile1="Data\stations.ses",InputFile2="Results/Test_ReadStreamEstimateStationsFromStateMod_out.ses",WarnIfDifferent=True)

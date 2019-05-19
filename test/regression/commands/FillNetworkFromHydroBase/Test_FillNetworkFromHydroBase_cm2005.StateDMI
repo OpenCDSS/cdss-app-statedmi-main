@@ -1,9 +1,0 @@
-# Test filling the generalized network from HydroBase
-StartLog(LogFile="Results/Test_FillNetworkFromHydroBase_cm2005.StateDMI.log")
-RemoveFile(InputFile="Results\Test_FillNetworkFromHydroBase_cm2005_out.net",IfNotFound=Ignore)
-ReadNetworkFromStateMod(InputFile="Data\cm2005.net")
-FillNetworkFromHydroBase()
-# Uncomment the following command to regenerate the expected results.
-# WriteNetworkToStateMod(OutputFile="ExpectedResults/Test_FillNetworkFromHydroBase_cm2005_out.net")
-WriteNetworkToStateMod(OutputFile="Results/Test_FillNetworkFromHydroBase_cm2005_out.net")
-CompareFiles(InputFile1="ExpectedResults\Test_FillNetworkFromHydroBase_cm2005_out.net",InputFile2="Results\Test_FillNetworkFromHydroBase_cm2005_out.net",IfDifferent=Warn)

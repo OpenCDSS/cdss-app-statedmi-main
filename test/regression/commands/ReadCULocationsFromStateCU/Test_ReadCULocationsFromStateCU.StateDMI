@@ -1,7 +1,0 @@
-# Test reading CU locations from StateCU file
-StartLog(LogFile="Results/Test_ReadCULocationsFromStateCU.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadCULocationsFromStateCU_out.str",IfNotFound=Warn)
-ReadCULocationsFromStateCU(InputFile="Data\locations.str")
-# Compare with the original data file
-WriteCULocationsToStateCU(OutputFile="Results/Test_ReadCULocationsFromStateCU_out.str")
-CompareFiles(InputFile1="Data/locations.str",InputFile2="Results/Test_ReadCULocationsFromStateCU_out.str",WarnIfDifferent=True)

@@ -1,7 +1,0 @@
-# Test printing generalized network file, full network, E-size paper to an XPS file
-StartLog(LogFile="Results/Test_PrintNetwork_cm2005_all_E_XPS.StateDMI.log")
-# SetDebugLevel(LogFileLevel=20)
-RemoveFile(InputFile="Results\Test_ReadNetworkFromStateMod_cm2005_all_E_XPS.xps",IfNotFound=Ignore)
-PrintNetwork(InputFile="Data\cm2005.net",PageLayout="Page Layout E",PrinterName="Microsoft XPS Document Writer",OutputFile="Results/Test_PrintNetwork_cm2005_all_E_XPS.xps")
-# PrintNetwork(InputFile="Data\cm2005.net",PageLayout="Page Layout B",PrinterName="Microsoft XPS Document Writer",OutputFile="Results/Test_PrintNetwork_cm2005_all_B_XPS.xps")
-# PrintNetwork(InputFile="Data\cm2005.net",PageLayout="Page Layout B",PrinterName="\\WATER\INDIAN")

@@ -1,7 +1,0 @@
-ReadClimateStationsFromList(ListFile="climsta.lst",IDCol=1)
-FillClimateStationsFromHydroBase(ID="*")
-SetClimateStation(ID="3016",Region2="14080106",IfNotFound=Warn)
-SetClimateStation(ID="1018",Region2="14040106",IfNotFound=Warn)
-SetClimateStation(ID="1928",Elevation=6440,IfNotFound=Warn)
-SetClimateStation(ID="0484",Region1="MOFFAT",IfNotFound=Add)
-WriteClimateStationsToStateCU(OutputFile="COclim2006.cli")

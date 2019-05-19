@@ -1,8 +1,0 @@
-# Test reading Penman-Monteith crop coefficients from HydroBase
-StartLog(LogFile="Results/Test_ReadPenmanMonteithFromHydroBase.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadPenmanMonteithFromHydroBase_out.csv")
-ReadPenmanMonteithFromHydroBase(PenmanMonteithMethod="PENMAN-MONTEITH_ALFALFA")
-# Uncomment the following command to regenerate the expected results.
-# WritePenmanMonteithToList(OutputFile="ExpectedResults/Test_ReadPenmanMonteithFromHydroBase_out.csv")
-WritePenmanMonteithToList(OutputFile="Results/Test_ReadPenmanMonteithFromHydroBase_out.csv")
-CompareFiles(InputFile1="ExpectedResults/Test_ReadPenmanMonteithFromHydroBase_out.csv",InputFile2="Results/Test_ReadPenmanMonteithFromHydroBase_out.csv",IfDifferent=Warn)

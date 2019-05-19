@@ -1,7 +1,0 @@
-# Test reading response file from StateMod file - use full SP2008L file for input
-StartLog(LogFile="Results/Test_ReadResponseFromStateMod_Sp2008L.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadResponseFromStateMod_Sp2008L_out.rsp",IfNotFound=Ignore)
-ReadResponseFromStateMod(InputFile="Data\Sp2008L.rsp")
-# Write the file again and compare with the original file.
-WriteResponseToStateMod(OutputFile="Results/Test_ReadResponseFromStateMod_Sp2008L_out.rsp",WriteHow=UpdateFile)
-CompareFiles(InputFile1="Data/Sp2008L.rsp",InputFile2="Results/Test_ReadResponseFromStateMod_Sp2008L_out.rsp",IgnoreWhitespace=True,IfDifferent=Warn)

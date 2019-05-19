@@ -1,9 +1,0 @@
-# Test reading irrigation practice TS from StateCU file version 10 file
-# This test may fail because version 10 is not totally supported anymore
-# @expectedStatus Fail
-StartLog(LogFile="Results/Test_ReadIrrigationPracticeTSFromStateCU.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadIrrigationPracticeTSFromStateCU_Version=10_out.ipy")
-ReadIrrigationPracticeTSFromStateCU(InputFile="Data\simple_v10.ipy",Version=10)
-# Compare with the original data file
-WriteIrrigationPracticeTSToStateCU(OutputFile="Results/Test_ReadIrrigationPracticeTSFromStateCU_Version=10_out.ipy",Version="10")
-CompareFiles(InputFile1="Data\simple_v10.ipy",InputFile2="Results/Test_ReadIrrigationPracticeTSFromStateCU_Version=10_out.ipy",IfDifferent=Warn)

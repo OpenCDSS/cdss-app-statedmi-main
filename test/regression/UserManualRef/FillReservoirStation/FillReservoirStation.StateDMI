@@ -1,1 +1,0 @@
-FillReservoirStation(ID="*",RiverNodeID="ID",OnOff=1,OneFillRule=1,ContentMin=0,ReleaseMax=999999)

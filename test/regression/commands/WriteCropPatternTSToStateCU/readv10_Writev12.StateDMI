@@ -1,4 +1,0 @@
-startLog(LogFile="readv10_Writev12.log")
-readCropPatternTSFromStateCU("../data/v10_dataSets/simple.cds")
-writeCropPatternTSToStateCU(OutputFile="../output/old_to_new.cds",WriteHow=OverwriteFile)
-compareFiles(InputFile1="old_to_new.cds.expected",InputFile2="../output/old_to_new.cds",WarnIfDifferent=True)

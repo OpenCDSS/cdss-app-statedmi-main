@@ -1,7 +1,0 @@
-# Test reading stream gage stations from a StateMod file
-StartLog(LogFile="Results/Test_ReadStreamGageStationsFromStateMod.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadStreamGageStationsFromStateMod_out.ris",IfNotFound=Ignore)
-ReadStreamGageStationsFromStateMod(InputFile="Data\gages.ris")
-# Compare with the original data file
-WriteStreamGageStationsToStateMod(OutputFile="Results/Test_ReadStreamGageStationsFromStateMod_out.ris")
-CompareFiles(InputFile1="Data/gages.ris",InputFile2="Results/Test_ReadStreamGageStationsFromStateMod_out.ris",WarnIfDifferent=True)

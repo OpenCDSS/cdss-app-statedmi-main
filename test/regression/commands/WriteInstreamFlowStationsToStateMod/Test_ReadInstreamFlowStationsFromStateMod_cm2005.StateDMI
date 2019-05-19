@@ -1,7 +1,0 @@
-# Test writing instream flow stations to StateMod file - use full Colorado file for input
-StartLog(LogFile="Results/Test_WriteInstreamFlowStationsToStateMod_cm2005.StateDMI.log")
-RemoveFile(InputFile="Results\Test_WriteInstreamFlowStationsToStateMod_cm2005_out.ifs",IfNotFound=Ignore)
-ReadInstreamFlowStationsFromStateMod(InputFile="Data\cm2005.ifs")
-# Write the file again and compare with the original file.
-WriteInstreamFlowStationsToStateMod(OutputFile="Results/Test_WriteInstreamFlowStationsToStateMod_cm2005_out.ifs")
-CompareFiles(InputFile1="Data/cm2005.ifs",InputFile2="Results/Test_WriteInstreamFlowStationsToStateMod_cm2005_out.ifs",WarnIfDifferent=True)

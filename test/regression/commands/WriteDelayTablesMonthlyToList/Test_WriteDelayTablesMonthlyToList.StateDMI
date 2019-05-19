@@ -1,8 +1,0 @@
-# Test writing delay tables (monthly) to a list file
-StartLog(LogFile="Results/Test_WriteDelayTablesMonthlyToList.StateDMI.log")
-RemoveFile(InputFile="Results\Test_WriteDelayTablesMonthlyToList_out.csv",IfNotFound=Ignore)
-ReadDelayTablesMonthlyFromStateMod(InputFile="Data\cm2005.dly")
-# Uncomment the following to regenerate expected results
-# WriteDelayTablesMonthlyToList(OutputFile="ExpectedResults/Test_WriteDelayTablesMonthlyToList_out.csv")
-WriteDelayTablesMonthlyToList(OutputFile="Results/Test_WriteDelayTablesMonthlyToList_out.csv")
-CompareFiles(InputFile1="ExpectedResults/Test_WriteDelayTablesMonthlyToList_out.csv",InputFile2="Results/Test_WriteDelayTablesMonthlyToList_out.csv",WarnIfDifferent=True)

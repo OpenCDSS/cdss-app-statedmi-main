@@ -1,4 +1,0 @@
-# Test comparing the same files and generate a warning when the files are the same
-#@expectedStatus Warning
-StartLog(LogFile="Results/Test_CompareFiles_SameFiles_WarnIfSame=True.StateDMI.log")
-CompareFiles(InputFile1="Data/A1.txt",InputFile2="Data/A1.txt",WarnIfSame=True)
