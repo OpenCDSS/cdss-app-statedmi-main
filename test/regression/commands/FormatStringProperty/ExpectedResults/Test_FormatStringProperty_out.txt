@@ -1,1 +1,0 @@
-TestStringProp="Value:Another string,          One string,   222.2,00111"

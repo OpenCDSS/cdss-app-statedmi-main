@@ -1,2 +1,0 @@
-StringProp1="Abba"
-StringProp4="Doh"

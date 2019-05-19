@@ -1,3 +1,0 @@
-DatePropString="2011-01-23"
-DateTimePropString="2011-01-23T01:23:45"
-DateTimePropAllString="a=Sun A=Sunday b=Jan B=January d=23 H=01 I=01 j=023 m=01 M=23 p=AM S=45 y=11 Y=2011 Z=MST"

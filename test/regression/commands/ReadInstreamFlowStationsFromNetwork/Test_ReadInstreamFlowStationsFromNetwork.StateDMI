@@ -1,8 +1,0 @@
-# Test reading instream flow stations from a network file
-StartLog(LogFile="Results/Test_ReadInstreamFlowStationsFromNetwork.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadInstreamFlowStationsFromNetwork_out.csv",IfNotFound=Ignore)
-ReadInstreamFlowStationsFromNetwork(InputFile="Data\rg2007.net")
-# Uncomment the following command to regenerate the original output
-# WriteInstreamFlowStationsToList(OutputFile="ExpectedResults/Test_ReadInstreamFlowStationsFromNetwork_out.csv")
-WriteInstreamFlowStationsToList(OutputFile="Results/Test_ReadInstreamFlowStationsFromNetwork_out.csv")
-CompareFiles(InputFile1="ExpectedResults/Test_ReadInstreamFlowStationsFromNetwork_out.csv",InputFile2="Results/Test_ReadInstreamFlowStationsFromNetwork_out.csv",WarnIfDifferent=True)

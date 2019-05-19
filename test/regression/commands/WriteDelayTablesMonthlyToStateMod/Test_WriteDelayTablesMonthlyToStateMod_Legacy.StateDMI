@@ -1,9 +1,0 @@
-#@readOnly
-# Test writing delay tables (monthly) to a StateMod file, using the legacy command
-StartLog(LogFile="Results/Test_WriteDelayTablesMonthlyToStateMod_Legacy.StateDMI.log")
-RemoveFile(InputFile="Results\Test_WriteDelayTablesMonthlyToStateMod_Legacy_out.dld",IfNotFound=Ignore)
-# Legacy command does not have "Monthly" in command name
-ReadDelayTablesFromStateMod(InputFile="Data\cm2005.dly")
-# Compare with the original data file
-WriteDelayTablesMonthlyToStateMod(OutputFile="Results/Test_WriteDelayTablesMonthlyToStateMod_Legacy_out.dly",Precision=1)
-CompareFiles(InputFile1="Data/cm2005.dly",InputFile2="Results/Test_WriteDelayTablesMonthlyToStateMod_Legacy_out.dly",WarnIfDifferent=True)

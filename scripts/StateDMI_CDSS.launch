@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/cdss-app-statedmi/src/DWR/DMI/StateDMI/StateDMI.java"/>
+<listEntry value="/cdss-app-statedmi-main/src/DWR/DMI/StateDMI/StateDMI.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
@@ -19,6 +19,6 @@
 <stringAttribute key="org.eclipse.hyades.trace.ui.ATTR_PROFILING_SET" value="tptp-dummy-profiling-set-StateDMI_CDSS"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="DWR.DMI.StateDMI.StateDMI"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-home test\operational\CDSS"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="cdss-app-statedmi"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="cdss-app-statedmi-main"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx1028m -Dsun.java2d.noddraw=true"/>
 </launchConfiguration>

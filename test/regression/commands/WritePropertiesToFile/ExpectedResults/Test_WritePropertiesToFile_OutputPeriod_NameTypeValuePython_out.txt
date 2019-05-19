@@ -1,2 +1,0 @@
-OutputStart=DateTime(1900,1,1)
-OutputEnd=DateTime(2007,12,31)

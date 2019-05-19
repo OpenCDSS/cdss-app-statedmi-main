@@ -1,9 +1,0 @@
-# Test writing a delimited file using default parameters and with column headers
-StartLog(LogFile="Results/Test_WriteTableToDelimitedFile_WithHeaders.TSTool.log")
-RemoveFile(InputFile="Results/Test_WriteTableToDelimitedFile_WithHeaders_out.csv",IfNotFound=Ignore)
-ReadTableFromDelimitedFile(TableID="KNN_Aspinall",InputFile="Data\flow_sequence_dataset_WithHeaders.csv")
-# Generate the results.
-WriteTableToDelimitedFile(TableID="KNN_Aspinall",OutputFile="Results\Test_WriteTableToDelimitedFile_WithHeaders_out.csv")
-# Do regression comparison with the original input (possible because strings
-# and integers with no formatting issues).
-CompareFiles(InputFile1="Data\flow_sequence_dataset_WithHeaders.csv",InputFile2="Results/Test_WriteTableToDelimitedFile_WithHeaders_out.csv",IfDifferent=Warn)

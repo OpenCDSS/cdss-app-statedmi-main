@@ -1,7 +1,0 @@
-# Test writing crop characteristics to StateCU file
-StartLog(LogFile="Results/Test_WriteCropCharacteristicsToStateCU_rg2007.StateDMI.log")
-RemoveFile(InputFile="Results\Test_WriteCropCharacteristicsToStateCU_rg2007_out.cch",IfNotFound=Ignore)
-ReadCropCharacteristicsFromStateCU(InputFile="Data\rg2007.cch")
-# Compare with the original data file
-WriteCropCharacteristicsToStateCU(OutputFile="Results/Test_WriteCropCharacteristicsToStateCU_rg2007_out.cch")
-CompareFiles(InputFile1="Data\rg2007.cch",InputFile2="Results/Test_WriteCropCharacteristicsToStateCU_rg2007_out.cch",WarnIfDifferent=True)

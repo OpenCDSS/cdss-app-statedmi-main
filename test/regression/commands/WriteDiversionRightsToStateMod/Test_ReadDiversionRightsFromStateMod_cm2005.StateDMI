@@ -1,7 +1,0 @@
-# Test writing diversion rights to StateMod file - use full Colorado file for input
-StartLog(LogFile="Results/Test_WriteDiversionRightsToStateMod_cm2005.StateDMI.log")
-RemoveFile(InputFile="Results\Test_WriteDiversionRightsToStateMod_cm2005_out.ddr")
-ReadDiversionRightsFromStateMod(InputFile="Data\cm2005.ddr")
-# Write the file again and compare with the original file.
-WriteDiversionRightsToStateMod(OutputFile="Results/Test_WriteDiversionRightsToStateMod_cm2005_out.ddr")
-CompareFiles(InputFile1="Data/cm2005.ddr",InputFile2="Results/Test_WriteDiversionRightsToStateMod_cm2005_out.ddr",WarnIfDifferent=True)

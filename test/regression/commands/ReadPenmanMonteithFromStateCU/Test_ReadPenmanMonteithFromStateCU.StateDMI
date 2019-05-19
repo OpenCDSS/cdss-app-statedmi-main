@@ -1,7 +1,0 @@
-# Test reading Penman-Monteith data from StateCU file
-StartLog(LogFile="Results/Test_ReadPenmanMonteithFromStateCU.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadPenmanMonteithFromStateCU_out.kpm",IfNotFound=Ignore)
-ReadPenmanMonteithFromStateCU(InputFile="Data\StateWidePM.kpm")
-# Compare with the original data file
-WritePenmanMonteithToStateCU(OutputFile="Results/Test_ReadPenmanMonteithFromStateCU_out.kpm")
-CompareFiles(InputFile1="Data\StateWidePM.kpm",InputFile2="Results/Test_ReadPenmanMonteithFromStateCU_out.kpm",IfDifferent=Warn)

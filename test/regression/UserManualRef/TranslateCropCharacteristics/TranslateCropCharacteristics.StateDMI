@@ -1,2 +1,0 @@
-ReadCropCharacteristicsFromHydroBase(CUMethod="BLANEY-CRIDDLE_TR-21")
-TranslateCropCharacteristics(OldCropType="ALFALFA.TR21",NewCropType="ALFALFA")

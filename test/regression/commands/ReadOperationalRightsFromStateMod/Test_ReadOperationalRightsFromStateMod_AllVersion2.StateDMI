@@ -1,9 +1,0 @@
-# Test reading operational rights from StateMod file - use version 2 format that has
-# an example of each operational right
-StartLog(LogFile="Results/Test_ReadOperationalRightsFromStateMod_AllVersion2.StateDMI.log")
-# SetDebugLevel(LogFileLevel=1)
-RemoveFile(InputFile="Results\Test_ReadOperationalRightsFromStateMod_AllVersion2_out.opr")
-ReadOperationalRightsFromStateMod(InputFile="Data\Chapter4_example.opr")
-# Write the file again and compare with the original file.
-WriteOperationalRightsToStateMod(OutputFile="Results/Test_ReadOperationalRightsFromStateMod_AllVersion2_out.opr")
-CompareFiles(InputFile1="Data/Chapter4_example.opr",InputFile2="Results/Test_ReadOperationalRightsFromStateMod_AllVersion2_out.opr",IgnoreWhitespace=True,IfDifferent=Warn)

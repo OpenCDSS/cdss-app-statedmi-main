@@ -1,5 +1,0 @@
-#
-# This is test file B1.  It is NOT the same as file A1 except for comments.
-Some data
-Some more data
-Yet some more data.

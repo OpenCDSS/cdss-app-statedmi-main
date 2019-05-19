@@ -1,9 +1,0 @@
-# Test writing instream flow right data to a StateMod file
-StartLog(LogFile="Results/Test_WriteInstreamFlowRightsToStateMod.StateDMI.log")
-RemoveFile(InputFile="Results\Test_WriteInstreamFlowRightsToStateMod_out.ifr")
-SetInstreamFlowRight(ID="362000",Name="InstreamFlow 1",StationID="Station1",AdministrationNumber=11111.11111,Decree=10,OnOff=1,IfNotFound=Add)
-SetInstreamFlowRight(ID="362002",Name="InstreamFlow 2",StationID="ID",AdministrationNumber=22222.2222,Decree=20,OnOff=1,IfNotFound=Add)
-# Uncomment the following command to regenerate the expected results.
-# WriteInstreamFlowRightsToStateMod(OutputFile="ExpectedResults/Test_WriteInstreamFlowRightsToStateMod_out.ifr")
-WriteInstreamFlowRightsToStateMod(OutputFile="Results/Test_WriteInstreamFlowRightsToStateMod_out.ifr")
-CompareFiles(InputFile1="ExpectedResults/Test_WriteInstreamFlowRightsToStateMod_out.ifr",InputFile2="Results/Test_WriteInstreamFlowRightsToStateMod_out.ifr",WarnIfDifferent=True)

@@ -1,9 +1,0 @@
-# Table to specify formatting for column cells based on values
-"TSID","Condition","StyleID"
-"ts*","${tsdata:flag} == m","Missing"
-"ts*","${tsdata:flag} == n","Negative"
-"ts*","${tsdata:flag} == z","Zero"
-# Do not include contains MO because it would match ==, startswith, and endswith (can't test each)
-"ts*","${tsdata:flag} == MO","EqualsMO"
-"ts*","${tsdata:flag} startswith MO","StartsWithMO"
-"ts*","${tsdata:flag} endswith MO","EndsWithMO"

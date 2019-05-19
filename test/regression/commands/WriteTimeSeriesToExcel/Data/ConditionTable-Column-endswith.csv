@@ -1,4 +1,0 @@
-# Table to specify formatting for column heading cells based on values
-"TSID","Condition","StyleID"
-# Check for endswith
-"ts*","${ts:StringOne} endswith One","MatchesCondition"

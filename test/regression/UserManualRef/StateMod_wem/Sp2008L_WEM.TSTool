@@ -1,9 +1,0 @@
-#
-# Wells_Wem.TsTool; command used to create a historic well demand file
-# from a historic pumpinng file
-SetOutputPeriod(OutputStart="1950-01",OutputEnd="2006-12")
-ReadStateMod(InputFile="Sp2008L.weh")
-#
-SortTimeSeries()
-WriteStateMod(TSList=AllTS,OutputFile="Sp2008L.wem")
-WriteStateMod(TSList=AllTS,OutputFile="..\StateMod\Historic\Sp2008L.wem")

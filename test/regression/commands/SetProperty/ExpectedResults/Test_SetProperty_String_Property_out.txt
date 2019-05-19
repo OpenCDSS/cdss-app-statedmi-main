@@ -1,1 +1,0 @@
-StringProp="Property is PropertyValue1"

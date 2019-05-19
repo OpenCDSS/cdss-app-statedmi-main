@@ -1,8 +1,0 @@
-# Test reading the generalized network file.
-#@expectedStatus Warning
-StartLog(LogFile="Results/Test_ReadNetworkFromStateMod_cm2005.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadNetworkFromStateMod_cm2005_out.net",IfNotFound=Ignore)
-ReadNetworkFromStateMod(InputFile="Data\cm2005.net")
-# Compare with the original file
-WriteNetworkToStateMod(OutputFile="Results/Test_ReadNetworkFromStateMod_cm2005_out.net")
-CompareFiles(InputFile1="Data/cm2005.net",InputFile2="Results/Test_ReadNetworkFromStateMod_cm2005_out.net",IfDifferent=Warn)

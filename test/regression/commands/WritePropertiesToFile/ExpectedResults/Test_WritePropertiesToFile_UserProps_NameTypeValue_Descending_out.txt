@@ -1,6 +1,0 @@
-StringProp3="A third string"
-StringProp2="A second string"
-StringProp="A string"
-IntegerProp=12345
-DoubleProp=1.2345
-DateTimeProp=DateTime("2012-01-01")

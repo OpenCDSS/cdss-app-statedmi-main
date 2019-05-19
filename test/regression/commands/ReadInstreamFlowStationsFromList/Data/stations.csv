@@ -1,6 +1,0 @@
-# StateMod stream gage stations as a delimited list file.
-#------------------------------------------------
-"ID","NAME"
-362000,Station 1
-# Test embedded comment
-362002,Station 2

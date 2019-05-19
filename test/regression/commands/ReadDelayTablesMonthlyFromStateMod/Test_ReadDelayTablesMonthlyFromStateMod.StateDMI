@@ -1,7 +1,0 @@
-# Test reading delay tables (monthly) from a StateMod file
-StartLog(LogFile="Results/Test_ReadDelayTablesMonthlyFromStateMod.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadDelayTablesMonthlyFromStateMod_out.dly",IfNotFound=Ignore)
-ReadDelayTablesMonthlyFromStateMod(InputFile="Data\cm2005.dly")
-# Compare with the original data file
-WriteDelayTablesMonthlyToStateMod(OutputFile="Results/Test_ReadDelayTablesMonthlyFromStateMod_out.dly",Precision=1)
-CompareFiles(InputFile1="Data/cm2005.dly",InputFile2="Results/Test_ReadDelayTablesMonthlyFromStateMod_out.dly",WarnIfDifferent=True)

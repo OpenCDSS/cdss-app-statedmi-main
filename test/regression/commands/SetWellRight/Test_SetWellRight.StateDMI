@@ -1,9 +1,0 @@
-# Test setting well rightss with a couple of generated rights
-StartLog(LogFile="Results/Test_SetWellRight.StateDMI.log")
-RemoveFile(InputFile="Results\Test_SetWellRight_out.csv")
-SetWellRight(ID="2000505",Name="Well 1",StationID="ID",AdministrationNumber=11111.11111,Decree=1,OnOff=1,IfNotFound=Add)
-SetWellRight(ID="2000631",Name="Well 2",StationID="Station2",AdministrationNumber=22222.22222,Decree=2,OnOff=1,IfNotFound=Add)
-# Uncomment the following command to regenerate the expected results.
-# WriteWellRightsToList(OutputFile="ExpectedResults/Test_SetWellRight_out.csv")
-WriteWellRightsToList(OutputFile="Results/Test_SetWellRight_out.csv")
-CompareFiles(InputFile1="ExpectedResults/Test_SetWellRight_out.csv",InputFile2="Results/Test_SetWellRight_out.csv",WarnIfDifferent=True)

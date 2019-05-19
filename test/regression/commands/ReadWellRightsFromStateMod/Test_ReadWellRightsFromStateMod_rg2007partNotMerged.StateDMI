@@ -1,9 +1,0 @@
-# Test reading well rights from a StateMod file
-# File contains time series that are not merged so have additional fields on the right
-StartLog(LogFile="Results/Test_ReadWellRightsFromStateMod_rg2007partNotMerged.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadWellRightsFromStateMod_rg2007partNotMerged_out.wer",IfNotFound=Ignore)
-ReadWellRightsFromStateMod(InputFile="Data\rg2007partNotMerged.wer")
-# Compare with the original data file
-SortWellRights(Order=LocationIDAscending,Order2=IDAscending)
-WriteWellRightsToStateMod(OutputFile="Results/Test_ReadWellRightsFromStateMod_rg2007partNotMerged_out.wer",WriteDataComments=True)
-CompareFiles(InputFile1="Data/rg2007partNotMerged.wer",InputFile2="Results/Test_ReadWellRightsFromStateMod_rg2007partNotMerged_out.wer",WarnIfDifferent=True)

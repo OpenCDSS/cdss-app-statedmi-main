@@ -1,9 +1,0 @@
-# Test setting stream gage stations to list files with a couple of generated stations
-StartLog(LogFile="Results/Test_SetStreamGageStation.StateDMI.log")
-RemoveFile(InputFile="Results\Test_SetStreamGageStation_out.csv")
-SetStreamGageStation(ID="08217000",Name="Station 1",RiverNodeID="RiverNode1",DailyID="DailyNode1",IfNotFound=Add)
-SetStreamGageStation(ID="08217500",Name="Station 2",RiverNodeID="RiverNode2",DailyID="DailyNode2",IfNotFound=Add)
-# Uncomment the following command to regenerate the expected results.
-# WriteStreamGageStationsToList(OutputFile="ExpectedResults/Test_SetStreamGageStation_out.csv")
-WriteStreamGageStationsToList(OutputFile="Results/Test_SetStreamGageStation_out.csv")
-CompareFiles(InputFile1="ExpectedResults/Test_SetStreamGageStation_out.csv",InputFile2="Results/Test_SetStreamGageStation_out.csv",WarnIfDifferent=True)

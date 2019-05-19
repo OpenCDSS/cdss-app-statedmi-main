@@ -1,7 +1,0 @@
-# Test reading crop pattern TS from StateCU file version 12+ (current) file
-StartLog(LogFile="Results/Test_ReadCropPatternTSFromStateCU.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadCropPatternTSFromStateCU_out.cds")
-ReadCropPatternTSFromStateCU(InputFile="Data\simple2.cds")
-# Compare with the original data file
-WriteCropPatternTSToStateCU(OutputFile="Results/Test_ReadCropPatternTSFromStateCU_out.cds")
-CompareFiles(InputFile1="Data\simple2.cds",InputFile2="Results/Test_ReadCropPatternTSFromStateCU_out.cds",WarnIfDifferent=True)

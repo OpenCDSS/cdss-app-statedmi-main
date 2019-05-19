@@ -1,7 +1,0 @@
-# Test reading climate stations from list with all but Region2 specified.
-StartLog(LogFile="Results/Test_ReadClimateStationsFromList.StateDMI.log")
-RemoveFile(InputFile="Results\Test_ReadClimateStationsFromList_out.csv")
-ReadClimateStationsFromList(ListFile="Data\stations.csv",IDCol=1,NameCol=2,LatitudeCol=3,ElevationCol=4,Region1Col="5")
-# Uncomment the following command to regenerate the expected results.
-# WriteClimateStationsToList(OutputFile="ExpectedResults/Test_ReadClimateStationsFromList_out.csv")
-WriteClimateStationsToList(OutputFile="Results/Test_ReadClimateStationsFromList_out.csv")

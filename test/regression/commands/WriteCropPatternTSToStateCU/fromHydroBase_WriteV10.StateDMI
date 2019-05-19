@@ -1,8 +1,0 @@
-startLog(LogFile="fromHydroBase_Writev10.log")
-setOutputPeriod(1950,2002)
-setCULocation(ID="200812",IfNotFound=Add)
-fillCULocationsFromHydroBase(ID="*",CULocType="Structure",Region1Type="County",Region2Type="HUC")
-createCropPatternTSForCULocations(ID="*",Units="ACRE")
-readCropPatternTSFromHydroBase(ID="*")
-writeCropPatternTSToStateCU(OutputFile="../output/fromHydroToV10.cds",Version="10",WriteHow=OverwriteFile)
-compareFiles(InputFile1="fromHydroToV10.cds.expected",InputFile2="../output/fromHydroToV10.cds",WarnIfDifferent=True)

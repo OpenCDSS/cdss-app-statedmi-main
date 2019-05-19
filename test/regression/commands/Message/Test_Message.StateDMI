@@ -1,4 +1,0 @@
-# Test printing a message for command status SUCCESS
-# - don't specify the command status, so should be successful
-StartLog(LogFile="Results/Test_Message.TSTool.log")
-Message(Message="This command was successful.")

@@ -1,7 +1,0 @@
-# Test writing diversion demand TS monthly to StateMod file - use part of Colorado file for input
-StartLog(LogFile="Results/Test_WriteDiversionDemandTSMonthlyToStateMod_cm2005.StateDMI.log")
-RemoveFile(InputFile="Results\Test_WriteDiversionDemandTSMonthlyToStateMod_cm2005_out.ddm",IfNotFound=Ignore)
-ReadDiversionDemandTSMonthlyFromStateMod(InputFile="Data\cm2005B.ddm")
-# Write the file again and compare with the original file.
-WriteDiversionDemandTSMonthlyToStateMod(OutputFile="Results/Test_WriteDiversionDemandTSMonthlyToStateMod_cm2005_out.ddm",OutputYearType=Water)
-CompareFiles(InputFile1="Data/cm2005B.ddm",InputFile2="Results/Test_WriteDiversionDemandTSMonthlyToStateMod_cm2005_out.ddm",IfDifferent=Warn)

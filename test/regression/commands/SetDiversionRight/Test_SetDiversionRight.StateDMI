@@ -1,9 +1,0 @@
-# Test setting diversion rights with a couple of generated rights
-StartLog(LogFile="Results/Test_SetDiversionRight.StateDMI.log")
-RemoveFile(InputFile="Results\Test_SetDiversionRight_out.csv")
-SetDiversionRight(ID="2000505",Name="Diversion 1",StationID="ID",AdministrationNumber=11111.11111,Decree=1,OnOff=1,IfNotFound=Add)
-SetDiversionRight(ID="2000631",Name="Diversion 2",StationID="Station2",AdministrationNumber=22222.22222,Decree=2,OnOff=1,IfNotFound=Add)
-# Uncomment the following command to regenerate the expected results.
-# WriteDiversionRightsToList(OutputFile="ExpectedResults/Test_SetDiversionRight_out.csv")
-WriteDiversionRightsToList(OutputFile="Results/Test_SetDiversionRight_out.csv")
-CompareFiles(InputFile1="ExpectedResults/Test_SetDiversionRight_out.csv",InputFile2="Results/Test_SetDiversionRight_out.csv",WarnIfDifferent=True)
