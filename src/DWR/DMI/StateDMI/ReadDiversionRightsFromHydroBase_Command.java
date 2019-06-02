@@ -26,7 +26,6 @@ package DWR.DMI.StateDMI;
 import javax.swing.JFrame;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -136,7 +135,7 @@ throws InvalidCommandParameterException
 	}
 	
 	if ( (AdminNumClasses != null) && !AdminNumClasses.equals("") ) {
-		List v = StringUtil.breakStringList ( AdminNumClasses, " ,", StringUtil.DELIM_SKIP_BLANKS );
+		List<String> v = StringUtil.breakStringList ( AdminNumClasses, " ,", StringUtil.DELIM_SKIP_BLANKS );
 		if ( (v == null) || (v.size() == 0) ) {
 			message = "AdminNumClasses has zero values.";
 			warning += "\n" + message;
@@ -147,7 +146,7 @@ throws InvalidCommandParameterException
 		int nAdminNumClasses = v.size();
 		__AdminNumClasses_double = new double[nAdminNumClasses];
 		for ( int i = 0; i < nAdminNumClasses; i++ ) {
-			String val = (String)v.get(i);
+			String val = v.get(i);
 			if ( !StringUtil.isDouble(val) ) {
 				message = "AdminNumClass value " + val + " is not a number.";
 				warning += "\n" + message;
@@ -170,7 +169,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "DecreeMin" );
     valid_Vector.add ( "IgnoreUseType" );
@@ -238,10 +237,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of diversion stations...
 	
-	List stationList = null;
+	List<StateMod_Diversion> stationList = null;
 	int stationListSize = 0;
 	try {
-		stationList = (List)processor.getPropContents ( "StateMod_DiversionStation_List");
+		@SuppressWarnings("unchecked")
+		List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List");
+		stationList = dataList;
 		stationListSize = stationList.size();
 	}
 	catch ( Exception e ) {
@@ -290,7 +291,7 @@ CommandWarningException, CommandException
 	
 	// Process the IgnoreUseType parameter
 	
-	List IgnoreUseType_Vector = null;
+	List<String> IgnoreUseType_Vector = null;
 	String [] IgnoreUseType_pattern_Array = null;	// With Java wildcards
 	int iignore; // Index for looping through use types to ignore.
 	int IgnoreUseType_size = -1;
@@ -302,7 +303,7 @@ CommandWarningException, CommandException
 		if ( IgnoreUseType_size > 0 ) {
 			IgnoreUseType_pattern_Array = new String[IgnoreUseType_size];
 			for ( int i = 0; i < IgnoreUseType_size; i++ ) {
-				IgnoreUseType_pattern_Array[i] = (String)IgnoreUseType_Vector.get(i);
+				IgnoreUseType_pattern_Array[i] = IgnoreUseType_Vector.get(i);
 			}
 		}
 	}
@@ -341,19 +342,19 @@ CommandWarningException, CommandException
 		int [] sum_count = new int[nAdminNumClasses]; // Count for sum.
 
 		StateMod_Diversion div = null;	// StateMod diversion station to process
-		List hbdivr_Vector = null;	// List of rights from HydroBase
-		List hbdivr_sorted_Vector = new Vector(100);
+		List<HydroBase_NetAmts> hbdivr_Vector = null;	// List of rights from HydroBase
+		List<HydroBase_NetAmts> hbdivr_sorted_Vector = new Vector<HydroBase_NetAmts>(100);
 						// List of rights from HydroBase, after manual sort on admin number
-		List hbdivr_part_Vector =null;// Vector of rights for an aggregate part.
-		List datastore_part_list = null; // List of objects returned from web services.
+		List<HydroBase_NetAmts> hbdivr_part_Vector =null;// Vector of rights for an aggregate part.
+		List<WaterRightsNetAmount> datastore_part_list = null; // List of objects returned from web services.
 		int nhbdivr = 0; // The number of rights read from HydroBase
 		int nhbdivr_part = 0; // The number of rights read from HydroBase, for a collection part
-		WaterRightsNetAmount dsdivr = null; // Used if using a datastore
+		//WaterRightsNetAmount dsdivr = null; // Used if using a datastore
 		HydroBase_NetAmts hbdivr = null;// Single right from HydroBase
 		StateMod_DiversionRight divr = null; // Single StateMod diversion right
 		int divr_count = 0; // Count of diversion rights to add (accounts for some being ignored).
 		int ir = 0; // Counter for rights in loop.
-		List parts = null;
+		List<String> parts = null;
 		int psize = 0; // Number of parts in a collection
 		int iparts = 0; // Index for iterating through parts
 		String part_id = ""; // Identifier for a part in a collection
@@ -367,7 +368,7 @@ CommandWarningException, CommandException
 		boolean is_system = false; // aggregate or system
 		int ic = 0; // Loop counter for water right classes.
 		double irtem = 0.0; // StateMod water right admin number.
-		List divr_agg_Vector = new Vector(100); // References to the water rights for classes.
+		List<StateMod_DiversionRight> divr_agg_Vector = new Vector<StateMod_DiversionRight>(100); // References to the water rights for classes.
 		HydroBase_AdministrationNumber admin_data;
 						// Used to convert between administration number and appropriation date
 		DateTime appro_date = null;	// Appropriation date for an administration number.
@@ -379,7 +380,7 @@ CommandWarningException, CommandException
 		int iuse; // Iterator counter for water right uses
 		boolean ignore_right; // Indicate that right should be ignored
 		for ( int i = 0; i < stationListSize; i++ ) {
-			div = (StateMod_Diversion)stationList.get(i);
+			div = stationList.get(i);
 			id = div.getID();
 			if ( !id.matches(idpattern_Java) ) {
 				// Identifier does not match...
@@ -414,7 +415,7 @@ CommandWarningException, CommandException
 					psize = parts.size();
 				}
 				for ( iparts = 0; iparts < psize; iparts++ ) {
-					part_id = (String)parts.get(iparts);
+					part_id = parts.get(iparts);
 					try {
 						// Parse out the WDID...
 						HydroBase_WaterDistrict.parseWDID(part_id,wdid_parts);
@@ -448,7 +449,7 @@ CommandWarningException, CommandException
 						}
 						// Add to the main vector...
 						if ( hbdivr_Vector == null ) {
-							hbdivr_Vector = new Vector(50);
+							hbdivr_Vector = new Vector<HydroBase_NetAmts>(50);
 						}
 						nhbdivr_part = 0;
 						if ( hbdivr_part_Vector != null ) {

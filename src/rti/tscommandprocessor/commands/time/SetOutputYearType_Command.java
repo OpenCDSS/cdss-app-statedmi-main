@@ -104,7 +104,7 @@ throws InvalidCommandParameterException
         }
 	}
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(1);
 	valid_Vector.add ( "OutputYearType" );
 	warning = TSCommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
 

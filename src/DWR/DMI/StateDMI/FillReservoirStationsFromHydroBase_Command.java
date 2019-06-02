@@ -113,7 +113,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(2);
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "IfNotFound" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
@@ -171,10 +171,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of reservoir stations...
 	
-	List stationList = null;
+	List<StateMod_Reservoir> stationList = null;
 	int stationListSize = 0;
 	try {
-		stationList = (List)processor.getPropContents ( "StateMod_ReservoirStation_List");
+		@SuppressWarnings("unchecked")
+		List<StateMod_Reservoir> dataList = (List<StateMod_Reservoir>)processor.getPropContents ( "StateMod_ReservoirStation_List");
+		stationList = dataList;
 		stationListSize = stationList.size();
 	}
 	catch ( Exception e ) {
@@ -221,13 +223,13 @@ CommandWarningException, CommandException
 		HydroBase_StructureReservoir hbres = null;
 
 		StateMod_ReservoirAreaCap smareacap = null, smareacap2; // Area cap data for StateMod.
-		List smareacapList; // List of StateMod_ReservoirAreaCap to set in a reservoir.
+		List<StateMod_ReservoirAreaCap> smareacapList; // List of StateMod_ReservoirAreaCap to set in a reservoir.
 		int nsmareacap = 0; // Number of StateMod area capacities.
 		HydroBase_AreaCap hbareacap; // Area cap data from HydroBase.
-		List hbareacapList = null; // Vector of HydroBase_AreaCap.
+		List<HydroBase_AreaCap> hbareacapList = null; // Vector of HydroBase_AreaCap.
 		int nhbareacap = 0; // Number of HydroBase area capacities.
 
-		List parts = null;
+		List<String> parts = null;
 		int psize = 0; // Number of parts in a collection
 		int iparts = 0; // Index for iterating through parts
 		String part_id = ""; // Identifier for a part in a collection
@@ -238,7 +240,7 @@ CommandWarningException, CommandException
 		String id; // Reservoir ID.
 		int matchCount = 0;
 		for ( int i = 0; i < stationListSize; i++ ) {
-			res = (StateMod_Reservoir)stationList.get(i);
+			res = stationList.get(i);
 			id = res.getID();
 			if ( !id.matches(idpattern_Java) ) {
 				// Identifier does not match...
@@ -415,9 +417,9 @@ CommandWarningException, CommandException
 				// No data so fill from HydroBase...
 				Message.printStatus ( 2, routine,
 				"Filling " + id + " ContentAreaSeepage -> " + nhbareacap + " values found in HydroBase." );
-				smareacapList = new Vector(nhbareacap);
+				smareacapList = new Vector<StateMod_ReservoirAreaCap>(nhbareacap);
 				for ( int iac = 0; iac < nhbareacap; iac++ ) {
-					hbareacap = (HydroBase_AreaCap)hbareacapList.get(iac);
+					hbareacap = hbareacapList.get(iac);
 					smareacap = new StateMod_ReservoirAreaCap();
 					smareacap.setConten ( hbareacap.getVolume() );
 					smareacap.setSurarea ( hbareacap.getSurface_area() );

@@ -69,6 +69,7 @@ import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
+@SuppressWarnings("serial")
 public class SynchronizeIrrigationPracticeAndCropPatternTS_JDialog
 extends JDialog
 implements ActionListener, KeyListener, WindowListener
@@ -101,7 +102,7 @@ private SimpleJComboBox	__SprinklerAcreage_JComboBox = null;
 private JTextArea	__command_JTextArea=null;
 private SimpleJButton	__cancel_JButton = null;
 private SimpleJButton	__ok_JButton = null;	
-private List		__command_Vector = null;
+private List<String>		__command_Vector = null;
 
 /**
 Command editor constructor
@@ -110,7 +111,7 @@ Command editor constructor
 @param command Command to parse.
 */
 public SynchronizeIrrigationPracticeAndCropPatternTS_JDialog (JFrame parent,
-					PropList props, List command)
+					PropList props, List<String> command)
 {	super(parent, true);
 	initialize (parent,
 		"Edit SynchronizeIrrigationPracticeAndCropPatternTS() Command", 
@@ -180,9 +181,9 @@ Return the text for the command.
 @return the text for the command or null if there is a problem with the 
 command.
 */
-public List getText () {
+public List<String> getText () {
 	if ((__command_Vector != null) && ((__command_Vector.size() == 0) ||
-		((String)__command_Vector.get(0)).equals(""))) {
+		__command_Vector.get(0).equals(""))) {
 		return null;
 	}
 	return __command_Vector;
@@ -196,7 +197,7 @@ Instantiates the GUI components.
 @param command Vector of String containing the command.
 */
 private void initialize (	JFrame parent, String title, PropList props, 
-		List command )
+		List<String> command )
 {	__command_Vector = command;
 
 	addWindowListener(this);
@@ -266,7 +267,7 @@ private void initialize (	JFrame parent, String title, PropList props,
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Synchronize method:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List SynchronizeMethod_Vector = new Vector(5);
+    List<String> SynchronizeMethod_Vector = new Vector<String>(3);
         SynchronizeMethod_Vector.add ( "" );
         SynchronizeMethod_Vector.add (__ProratePartsToCropPatternTotal);
         SynchronizeMethod_Vector.add (__SpecificChecks);
@@ -282,7 +283,7 @@ private void initialize (	JFrame parent, String title, PropList props,
         JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Adjust groundwater-only GW acreage how?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List GWOnlyGWAcreage_Vector = new Vector(5);
+        List<String> GWOnlyGWAcreage_Vector = new Vector<String>(5);
 	GWOnlyGWAcreage_Vector.add ( "" );
 	GWOnlyGWAcreage_Vector.add (__AdjustCropPatternTotalToGWAcreage);
 	GWOnlyGWAcreage_Vector.add (__AdjustGWAcreageDownToCropPatternTotal);
@@ -300,10 +301,9 @@ private void initialize (	JFrame parent, String title, PropList props,
         JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Adjust diversion+well GW acreage how?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List DivAndWellGWAcreage_Vector = new Vector();
+        List<String> DivAndWellGWAcreage_Vector = new Vector<String>(3);
 	DivAndWellGWAcreage_Vector.add ( "" );
-	DivAndWellGWAcreage_Vector.add (
-		__AdjustGWAcreageDownToCropPatternTotal);
+	DivAndWellGWAcreage_Vector.add ( __AdjustGWAcreageDownToCropPatternTotal);
 	DivAndWellGWAcreage_Vector.add (__AdjustNone );
 	__DivAndWellGWAcreage_JComboBox = new SimpleJComboBox(false);
 	__DivAndWellGWAcreage_JComboBox.setData ( DivAndWellGWAcreage_Vector );
@@ -317,10 +317,9 @@ private void initialize (	JFrame parent, String title, PropList props,
         JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Adjust sprinkler acreage how?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List SprinklerAcreage_Vector = new Vector();
+        List<String> SprinklerAcreage_Vector = new Vector<String>(3);
 	SprinklerAcreage_Vector.add ( "" );
-	SprinklerAcreage_Vector.add (
-		__AdjustSprinklerAcreageDownToCropPatternTotal );
+	SprinklerAcreage_Vector.add ( __AdjustSprinklerAcreageDownToCropPatternTotal );
 	SprinklerAcreage_Vector.add (__AdjustNone );
 	__SprinklerAcreage_JComboBox = new SimpleJComboBox(false);
 	__SprinklerAcreage_JComboBox.setData ( SprinklerAcreage_Vector );
@@ -405,8 +404,8 @@ private void refresh ()
 	if (__first_time) {
 		__first_time = false;
 		// Parse the incoming string and fill the fields...
-		List v = StringUtil.breakStringList (
-			((String)__command_Vector.get(0)).trim(),"()",
+		List<String> v = StringUtil.breakStringList (
+			__command_Vector.get(0).trim(),"()",
 			StringUtil.DELIM_SKIP_BLANKS );
 		PropList props = null;
 		if ( (v != null) && (v.size() > 1) ) {
@@ -545,7 +544,7 @@ private void refresh ()
 Return the time series command as a Vector of String.
 @return returns the command text or null if no command.
 */
-public List response (int status) {
+public List<String> response (int status) {
 	setVisible(false);
 	dispose();
 	if (status == 0) {
@@ -555,7 +554,7 @@ public List response (int status) {
 	}
 	else {	refresh();
 		if (	(__command_Vector.size() == 0) ||
-			((String)__command_Vector.get(0)).equals("")) {
+			__command_Vector.get(0).equals("")) {
 			return null;
 		}
 		return __command_Vector;

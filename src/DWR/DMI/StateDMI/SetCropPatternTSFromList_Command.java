@@ -248,7 +248,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(11);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "ListFile" );
 	valid_Vector.add ( "SetStart" );
@@ -353,10 +353,11 @@ CommandWarningException, CommandException
 	
 	// Get the time series to fill...
 
-	List CUCropPatternTS_Vector = null;
+	List<StateCU_CropPatternTS> CUCropPatternTS_Vector = null;
 	try {
-		Object o = processor.getPropContents( "StateCU_CropPatternTS_List");
-		CUCropPatternTS_Vector = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_CropPatternTS> dataList = (List<StateCU_CropPatternTS>)processor.getPropContents( "StateCU_CropPatternTS_List");
+		CUCropPatternTS_Vector = dataList;
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( log_level, routine, e );
@@ -370,10 +371,11 @@ CommandWarningException, CommandException
 	
 	// Get the supplemental ParcelUseTS...
 	
-	List Supplemental_ParcelUseTS_Vector = null;
+	List<StateDMI_HydroBase_ParcelUseTS> Supplemental_ParcelUseTS_Vector = null;
 	try {
-		Object o = processor.getPropContents( "HydroBase_SupplementalParcelUseTS_List");
-		Supplemental_ParcelUseTS_Vector = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateDMI_HydroBase_ParcelUseTS> dataList = (List<StateDMI_HydroBase_ParcelUseTS>)processor.getPropContents( "HydroBase_SupplementalParcelUseTS_List");
+		Supplemental_ParcelUseTS_Vector = dataList;
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( log_level, routine, e );
@@ -527,7 +529,8 @@ CommandWarningException, CommandException
 		boolean fill_IrrigationMethod = false;
 		boolean fill_SupplyType = false;
 		TableRecord rec = null;
-		int matchCount = 0;
+		// TODO smalers 2019-05-28 enable matchCount
+		//int matchCount = 0;
 		int year, year1, year2; // Year for iterator, and bounds on iteration
 		int cdsPos = 0; // Location of ID in CropPatternTS object
 		int Year_int; // Integer value of year from column in file
@@ -568,7 +571,7 @@ CommandWarningException, CommandException
 			}
 			// OK to set the data...
 			// Get the data values from the table one time...
-			++matchCount;
+			//++matchCount;
 			cds_id = id;
 			Year_int = -1;	// Indicate not to set for a specific year
 			if ( YearCol != null ) {

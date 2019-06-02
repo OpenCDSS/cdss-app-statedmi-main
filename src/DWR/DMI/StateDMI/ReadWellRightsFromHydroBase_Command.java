@@ -149,7 +149,7 @@ private void addHydroBaseRightsToStateModWellRights (
 		String collectionPartType,
 		int onOffDefault,
 		List<StateMod_WellRight> SMWellRightList,
-		List SMWellRightMatchList,
+		List<String> SMWellRightMatchList,
 		int warningLevel, int warningCount, String commandTag, CommandStatus status )
 {	String routine = getClass().getSimpleName() + ".addHydroBaseRightsToStateModWellRights";
 	String message;	// For messages
@@ -335,10 +335,10 @@ private void addStateModRightsToProcessorRightList ( List<StateMod_WellRight> sm
 	String routine = getClass().getSimpleName() + ".addStateModRightsToProcessorRightList";
 	// TODO SAM 2016-06-12 Need to deal with formatting, etc.
 	// Post-process the rights to set some additional information
-	boolean doPermitIDPreFormat = false;
-	if ( (permitIDPreFormat != null) && !permitIDPreFormat.isEmpty() ) {
-		doPermitIDPreFormat = true;
-	}
+	//boolean doPermitIDPreFormat = false;
+	//if ( (permitIDPreFormat != null) && !permitIDPreFormat.isEmpty() ) {
+		//doPermitIDPreFormat = true;
+	//}
 	boolean doPermitIDPostFormat = false;
 	if ( (permitIDPostFormat != null) && !permitIDPostFormat.isEmpty() ) {
 		doPermitIDPostFormat = true;
@@ -473,7 +473,7 @@ public void checkCommandParameters ( PropList parameters, String command_tag, in
 throws InvalidCommandParameterException
 {	String routine = getClass().getSimpleName() + ".checkCommandParameters";
 	String Approach = parameters.getValue ( "Approach" );
-	String ID = parameters.getValue ( "ID" );
+	//String ID = parameters.getValue ( "ID" );
 	//String IDFormat = parameters.getValue ( "IDFormat" );
 	String Year = parameters.getValue( "Year" );
 	String Div = parameters.getValue( "Div" );
@@ -511,7 +511,7 @@ throws InvalidCommandParameterException
 	}*/
 	
 	if ( (Year != null) && (Year.length() > 0) ) {
-		List v = StringUtil.breakStringList ( Year, ",", StringUtil.DELIM_SKIP_BLANKS );
+		List<String> v = StringUtil.breakStringList ( Year, ",", StringUtil.DELIM_SKIP_BLANKS );
 		int size = 0;
 		if ( v != null ) {
 			size = v.size();
@@ -524,7 +524,7 @@ throws InvalidCommandParameterException
 			__Year_int = new int[size];
 		}
 		for ( int i = 0; i < size; i++ ) {
-			String token = (String)v.get(i);
+			String token = v.get(i);
 			if ( !StringUtil.isInteger(token) ) {
 				error_found = true;
 			}
@@ -693,7 +693,7 @@ private HydroBase_ParcelUseTS readHydroBaseParcel (
 		int warningLevel, int warningCount, String commandTag, CommandStatus status,
 		boolean cacheHydroBase )
 {	String routine = "readWellRightsFromHydroBase_Command.readHydroBaseParcel";
-	List hbparcel_Vector = null;
+	List <HydroBase_ParcelUseTS> hbparcel_Vector = null;
 	String message;
 	try {
 		// Call the version that caches results
@@ -767,7 +767,7 @@ private List<HydroBase_NetAmts> readHydroBaseWellRightsForDiversionWDIDList (
 		String id,
 		String Loctype,
 		String collectionType,
-		List wdids,
+		List<String> wdids,
 		int parcelYear, String yearString,
 		int div,
 		DefineWellRightHowType defineWellRightHow,
@@ -792,10 +792,10 @@ private List<HydroBase_NetAmts> readHydroBaseWellRightsForDiversionWDIDList (
 	String partId;	// single WDID
 	int [] wdid_parts = new int[2];
 	HydroBase_StructureView hbdiv = null;	// Individual ditch
-	List hbparcel_structure_Vector = null;//Structure/parcel join data
-	List hbwellrList = new Vector();	// List of well rights for all parcels related to location
+	List<HydroBase_ParcelUseTSStructureToParcel> hbparcel_structure_Vector = null;//Structure/parcel join data
+	List<HydroBase_NetAmts> hbwellrList = new Vector<HydroBase_NetAmts>();	// List of well rights for all parcels related to location
 	for ( int iparts = 0; iparts < nwdids; iparts++ ) {
-		partId = (String)wdids.get(iparts);
+		partId = wdids.get(iparts);
 		Message.printStatus ( 2, routine, yearString +
 			"Processing well \"" + id + "\" ditch part \"" + partId + "\" (" + collectionType + ")." );
 		try {
@@ -893,12 +893,12 @@ private List<HydroBase_NetAmts> readHydroBaseWellRightsForDiversionWDIDList (
 
 		// Put together a list of parcel identifiers...
 		
-		List parcelIds = new Vector(nparcel);
+		List<String> parcelIds = new Vector<String>(nparcel);
 		double [] fractionIrrig = new double[nparcel];
 		
 		HydroBase_ParcelUseTSStructureToParcel hbparcel_structure;
 		for ( int iparcel = 0; iparcel < nparcel; iparcel++ ) {
-			hbparcel_structure = (HydroBase_ParcelUseTSStructureToParcel)hbparcel_structure_Vector.get(iparcel);
+			hbparcel_structure = hbparcel_structure_Vector.get(iparcel);
 			parcelIds.add ( "" + hbparcel_structure.getParcel_id() );
 			fractionIrrig[iparcel] = hbparcel_structure.getPercent_irrig();
 		}
@@ -1730,12 +1730,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		ID = "*"; // Default
 	}
 	String idPatternJava = StringUtil.replaceString(ID,"*",".*");
-	String PermitIDPattern = parameters.getValue ( "PermitIDPattern" );
-	String permitIdPattern = null;
-	if ( PermitIDPattern == null ) {
-		PermitIDPattern = ""; // Default - don't use parameter
-		permitIdPattern = StringUtil.replaceString(PermitIDPattern,"*",".*"); // Java regex
-	}
+	//String PermitIDPattern = parameters.getValue ( "PermitIDPattern" );
+	//String permitIdPattern = null;
+	//if ( PermitIDPattern == null ) {
+		//PermitIDPattern = ""; // Default - don't use parameter
+		//permitIdPattern = StringUtil.replaceString(PermitIDPattern,"*",".*"); // Java regex
+	//}
 	String PermitIDPreFormat = parameters.getValue ( "PermitIDPreFormat" );
 	if ( (PermitIDPreFormat == null) || PermitIDPreFormat.isEmpty() ) {
 		PermitIDPreFormat = "%s:P";
@@ -1826,14 +1826,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	// conflict with previous data set.
 	// TODO SAM 2007-05-23 Old code did not track conflicts between
 	// this command and others that set well rights.
-	List SMWellRight_match_Vector = processor.getStateModWellRightMatchList();
+	List<String> SMWellRight_match_Vector = processor.getStateModWellRightMatchList();
 
 	// Get the list of well stations...
 	
 	List<StateMod_Well> stationList = null;
 	int stationListSize = 0;
 	try {
-		stationList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List");
+		@SuppressWarnings("unchecked")
+		List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List");
+		stationList = dataList;
 		stationListSize = stationList.size();
 	}
 	catch ( Exception e ) {
@@ -1850,7 +1852,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	
 	List<StateMod_WellRight> processorRightList = null;
 	try {
-		processorRightList = (List<StateMod_WellRight>)processor.getPropContents ( "StateMod_WellRight_List");
+		@SuppressWarnings("unchecked")
+		List<StateMod_WellRight> dataList = (List<StateMod_WellRight>)processor.getPropContents ( "StateMod_WellRight_List");
+		processorRightList = dataList;
 	}
 	catch ( Exception e ) {
 		message = "Error requesting well right data from processor.";
@@ -2049,7 +2053,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		boolean isSystem = false; // Is well station a system (each of which boolean will also be a collection).
 		boolean isAggregate = false; // Is well station an aggregate (each of which will also be a collection).
 		StateMod_Well well = null; // StateMod well station to process
-		int matchCount = 0; // FIXME SAM 2009-01-19 add more checks later when no matches
+		//int matchCount = 0; // FIXME SAM 2009-01-19 add more checks later when no matches
 		List<HydroBase_NetAmts> hbwellrList = null; // List of rights from HydroBase for a single station (explicit or collection)
 		if ( doSimpleApproach ) {
 			// Simple approach where basically the full decree/yield for involved wells is used
@@ -2070,7 +2074,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					// Identifier does not match...
 					continue;
 				}
-				++matchCount;
+				//++matchCount;
 				// Clear out the parcels saved with the well...
 				isCollection = false;
 				isAggregate = false;
@@ -2379,7 +2383,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				// Identifier does not match...
 				continue;
 			}
-			++matchCount;
+			//++matchCount;
 			// Clear out the parcels saved with the well...
 			//well.getParcels().removeAllElements();
 			isCollection = false;
@@ -2533,7 +2537,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						// TODO SAM 2006-01-31
 						//name = div.getName();
 						//name = well.getName();
-						partIdList = new Vector();
+						partIdList = new Vector<String>();
 						partIdList.add ( well.getID() );
 						Message.printStatus ( 2, routine, yearString + "Well \"" + well.getID() +
 							"\" is associated with a an explicit diversion (no aggregate/system specified)..." +

@@ -165,7 +165,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(8);
     valid_Vector.add ( "ID" );
 	valid_Vector.add ( "FillStart" );
 	valid_Vector.add ( "FillEnd" );
@@ -246,11 +246,12 @@ CommandWarningException, CommandException
 	
 	// Get the list of CU locations, needed to check whether surface or ground water...
 	
-	List culocList = null;
+	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
 	try {
-		Object o = processor.getPropContents( "StateCU_Location_List");
-		culocList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
 		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {
@@ -274,10 +275,11 @@ CommandWarningException, CommandException
 		
 	// Get the list of crop pattern time series...
 	
-	List ipyList = null;
+	List<StateCU_IrrigationPracticeTS> ipyList = null;
 	try {
-		Object o = processor.getPropContents( "StateCU_IrrigationPracticeTS_List");
-		ipyList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_IrrigationPracticeTS> dataList = (List<StateCU_IrrigationPracticeTS>)processor.getPropContents( "StateCU_IrrigationPracticeTS_List");
+		ipyList = dataList;
 	}
 	catch ( Exception e ) {
 		message = "Error requesting StateCU_IrrigationPracticeTS_List from processor.";
@@ -356,7 +358,7 @@ CommandWarningException, CommandException
 		StateCU_Location culoc = null; // Needed to get is_gwonly_supply info.
 		String id;
 		int pos; // Position of item within list for lookups
-		List data_types = StateCU_IrrigationPracticeTS.getTimeSeriesDataTypes ( false, false );
+		List<String> data_types = StateCU_IrrigationPracticeTS.getTimeSeriesDataTypes ( false, false );
 		String data_type = null;
 		int ndata_types = data_types.size();
 		int idata_type = 0;

@@ -64,6 +64,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for Write*ToDateValue() commands
 */
+@SuppressWarnings("serial")
 public class WriteToDateValue_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener {
 
@@ -279,7 +280,7 @@ private void initialize (JFrame parent, WriteToDateValue_Command command) {
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Write how:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List write_how_Vector = new Vector();
+    List<String> write_how_Vector = new Vector<String>(3);
 	write_how_Vector.add ( "" );
 	write_how_Vector.add ( __command._OverwriteFile );
 	write_how_Vector.add ( __command._UpdateFile );

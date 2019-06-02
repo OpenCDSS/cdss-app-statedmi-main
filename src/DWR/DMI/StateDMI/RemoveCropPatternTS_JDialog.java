@@ -56,6 +56,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for RemoveCropPatternTS() command.
 */
+@SuppressWarnings("serial")
 public class RemoveCropPatternTS_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -219,7 +220,7 @@ private void initialize (JFrame parent, RemoveCropPatternTS_Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>(4);
     IfNotFound_List.add("");
 	IfNotFound_List.add ( __command._Ignore );
 	IfNotFound_List.add ( __command._Warn );

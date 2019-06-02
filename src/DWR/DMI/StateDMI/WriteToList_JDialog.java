@@ -64,6 +64,7 @@ import RTi.Util.Message.Message;
 /**
 Command editor dialog for simple Write*ToList() commands, which share the same parameters.
 */
+@SuppressWarnings("serial")
 public class WriteToList_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -386,7 +387,8 @@ private void initialize (JFrame parent, Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Write how:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	Vector write_how_Vector = new Vector();
+	Vector<String> write_how_Vector = new Vector<String>(3);
+	
 	write_how_Vector.addElement ( "" );
 	write_how_Vector.addElement ( __command._OverwriteFile );
 	write_how_Vector.addElement ( __command._UpdateFile );
@@ -401,7 +403,7 @@ private void initialize (JFrame parent, Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Field delimiter:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	Vector delimiter_Vector = new Vector();
+	Vector<String> delimiter_Vector = new Vector<String>(3);
 	delimiter_Vector.addElement("");
 	delimiter_Vector.addElement(",");
 	delimiter_Vector.addElement("|");

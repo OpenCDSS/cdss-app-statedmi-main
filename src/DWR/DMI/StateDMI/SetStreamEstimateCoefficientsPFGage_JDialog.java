@@ -49,13 +49,13 @@ import java.awt.event.WindowListener;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
-import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 
 /**
 Editor for SetStreamEstimateCoefficientsPFGage() command.
 */
+@SuppressWarnings("serial")
 public class SetStreamEstimateCoefficientsPFGage_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -65,8 +65,8 @@ private boolean __first_time = true;
 private JTextArea __command_JTextArea=null;
 private JTextField __ID_JTextField = null;
 private JTextField __GageID_JTextField = null;
-private SimpleJComboBox __IfFound_JComboBox = null;
-private SimpleJComboBox __IfNotFound_JComboBox = null;
+//private SimpleJComboBox __IfFound_JComboBox = null;
+//private SimpleJComboBox __IfNotFound_JComboBox = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
 private SetStreamEstimateCoefficientsPFGage_Command __command = null;
@@ -346,10 +346,10 @@ public boolean ok() {
 Refresh the command from the other text field contents.
 */
 private void refresh ()
-{	String routine = __command + "_JDialog.refresh";
+{	//String routine = __command + "_JDialog.refresh";
 	String ID = "*";
 	String GageID = "";
-	String IfNotFound = "";
+	//String IfNotFound = "";
 	PropList props = null;
 	
 	if (__first_time) {
@@ -358,7 +358,7 @@ private void refresh ()
 		props = __command.getCommandParameters();
 		ID = props.getValue ( "ID" );
 		GageID = props.getValue ( "GageID" );
-		IfNotFound = props.getValue ( "IfNotFound" );
+		//IfNotFound = props.getValue ( "IfNotFound" );
 		// Display existing content...
 		if ( ID != null ) {
 			__ID_JTextField.setText(ID);

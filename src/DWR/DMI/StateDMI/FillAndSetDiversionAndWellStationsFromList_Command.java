@@ -328,7 +328,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "ListFile" );
 	valid_Vector.add ( "IDCol" );
 	valid_Vector.add ( "NameCol" );
@@ -517,13 +517,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     boolean do_diversions = false;
     boolean do_wells = false;
-    List divList = null;
+    List<StateMod_Diversion> divList = null;
     int listSize = 0;
-    List wellList = null;
+    List<StateMod_Well> wellList = null;
     try {
     	if ( (this instanceof FillDiversionStationsFromList_Command) ||
     		(this instanceof SetDiversionStationsFromList_Command)	) {
-    		divList = (List)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		divList = dataList;
     		if ( divList != null ) {
     			listSize = divList.size();
     		}
@@ -531,7 +533,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	}
     	else if ( (this instanceof FillWellStationsFromList_Command) ||
     		(this instanceof SetWellStationsFromList_Command) ) {
-    		wellList = (List)processor.getPropContents ( "StateMod_WellStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List" );
+    		wellList = dataList;
     		if ( wellList != null ) {
     			listSize = wellList.size();
     		}

@@ -337,6 +337,7 @@ Write a table to an HTML file.
 @param OutputFile name of file to write.
 @exception IOException if there is an error writing the file.
 */
+@SuppressWarnings("unchecked")
 private int writeTable ( DataTable table, String OutputFile, int warning_level, String command_tag, int warning_count )
 throws IOException
 {	String routine = getClass().getSimpleName() + ".writeTable";

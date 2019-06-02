@@ -119,7 +119,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(2);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "IfNotFound" );
     warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
@@ -180,7 +180,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     // Get the data needed for the command
     
-    List stationList = null;
+    List<StateMod_Diversion> smdivList = null;
+    List<StateMod_Well> smwellList = null;
     int stationListSize = 0;
     String stationType = null;
     String dataType = null;
@@ -189,16 +190,22 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	if ( this instanceof SetDiversionStationCapacitiesFromTS_Command ) {
     		stationType = "diversion";
     		dataType = "historical";
-    		stationList = (List)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		smdivList = dataList;
     		compType = StateMod_DataSet.COMP_DIVERSION_STATIONS;
+    		stationListSize = smdivList.size();
     	}
     	else if ( this instanceof SetWellStationCapacitiesFromTS_Command ) {
     		stationType = "well";
     		dataType = "historical pumping";
-    		stationList = (List)processor.getPropContents ( "StateMod_WellStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List" );
+    		smwellList = dataList;
     		compType = StateMod_DataSet.COMP_WELL_STATIONS;
+    		stationListSize = smwellList.size();
     	}
-    	stationListSize = stationList.size();
+    	stationListSize = smwellList.size();
     	Message.printStatus ( 2, routine, "Have " + stationListSize + " " + stationType + " stations.");
     }
     catch ( Exception e ) {
@@ -224,16 +231,25 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     // Get the time series
     
-    List tsList = null;
+    List<MonthTS> divtsList = null;
+    List<MonthTS> welltsList = null;
+   	List<MonthTS> tsList = null;
     int tsListSize = 0;
     try {
     	if ( this instanceof SetDiversionStationCapacitiesFromTS_Command ) {
-    		tsList = (List)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
+    		@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
+    		divtsList = dataList;
+    		tsListSize = divtsList.size();
+    		tsList = divtsList;
     	}
     	else if ( this instanceof SetWellStationCapacitiesFromTS_Command ) {
-    		tsList = (List)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
+    		@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
+    		welltsList = dataList;
+    		tsListSize = welltsList.size();
+    		tsList = welltsList;
     	}
-    	tsListSize = tsList.size();
     	Message.printStatus ( 2, routine, "Have " + tsListSize + " " + dataType + " time series.");
     }
     catch ( Exception e ) {
@@ -280,11 +296,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	int matchCount = 0;
     	for ( int i = 0; i < stationListSize; i++ ) {
     		if ( compType == StateMod_DataSet.COMP_DIVERSION_STATIONS ) {
-    			div = (StateMod_Diversion)stationList.get(i);
+    			div = smdivList.get(i);
     			id = div.getID();
     		}
     		else if ( compType == StateMod_DataSet.COMP_WELL_STATIONS ) {
-    			well = (StateMod_Well)stationList.get(i);
+    			well = smwellList.get(i);
     			id = well.getID();
     		}
     		if ( !id.matches(idpattern_Java) ) {

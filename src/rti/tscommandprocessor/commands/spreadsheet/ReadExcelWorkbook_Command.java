@@ -83,24 +83,7 @@ throws InvalidCommandParameterException
 
 	// If the input file does not exist, warn the user...
 
-	String working_dir = null;
-	
-	CommandProcessor processor = getCommandProcessor();
-	
-	try {
-	    Object o = processor.getPropContents ( "WorkingDir" );
-		// Working directory is available so use it...
-		if ( o != null ) {
-			working_dir = (String)o;
-		}
-	}
-	catch ( Exception e ) {
-        message = "Error requesting WorkingDir from processor.";
-        warning += "\n" + message;
-        status.addToLog ( CommandPhaseType.INITIALIZATION,
-                new CommandLogRecord(CommandStatusType.FAILURE,
-                        message, "Report the problem to software support." ) );
-	}
+	//CommandProcessor processor = getCommandProcessor();
 	
 	if ( (InputFile == null) || InputFile.isEmpty() ) {
         message = "The input file must be specified.";

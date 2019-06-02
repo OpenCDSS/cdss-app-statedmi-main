@@ -194,7 +194,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "ListFile" );
 	valid_Vector.add ( "IDCol" );
 	valid_Vector.add ( "NameCol" );
@@ -320,10 +320,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     String ListFile_full = ListFile;
     try {
-        boolean readData = true;
-        if ( command_phase == CommandPhaseType.DISCOVERY ){
-            readData = false;
-        }
         ListFile_full = IOUtil.verifyPathForOS(
                 IOUtil.toAbsolutePath(StateDMICommandProcessorUtil.getWorkingDir(processor),ListFile) );
         Message.printStatus ( 2, routine, "Reading climate stations list file \"" + ListFile_full + "\"" );

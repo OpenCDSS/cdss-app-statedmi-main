@@ -78,7 +78,6 @@ import RTi.Util.IO.PropList;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Table.DataTable;
-import RTi.Util.Table.TableRecord;
 import RTi.Util.Time.DateTime;
 import RTi.Util.Time.DateTimeFormatterType;
 import RTi.Util.Time.DateTimeRange;
@@ -1227,7 +1226,7 @@ throws FileNotFoundException, IOException
         int rowOutStart = 0, colOutStart = 0; // Position of upper-left start of output
         if ( area == null ) {
             problems.add ( "Unable to get worksheet area reference from address information (empty worksheet?)." );
-            colOutStart = area.getFirstCell().getCol();
+            //colOutStart = area.getFirstCell().getCol();
             rowOutStart = area.getFirstCell().getRow();
         }
         else {
@@ -1264,7 +1263,7 @@ throws FileNotFoundException, IOException
             	}
             }
         }
-        String missingValueString = "";
+        //String missingValueString = "";
         // Create a DateTimeFormatter to format the data values
         if ( dateTimeFormatterType == null ) {
             dateTimeFormatterType = DateTimeFormatterType.C;
@@ -1294,9 +1293,9 @@ throws FileNotFoundException, IOException
         }
         int its = -1;
         int blockMinColumn = Integer.MAX_VALUE;
-        int blockMinRow = Integer.MAX_VALUE;
+        //int blockMinRow = Integer.MAX_VALUE;
         int blockMaxColumn = Integer.MIN_VALUE;
-        int blockMaxRow = Integer.MIN_VALUE;
+        //int blockMaxRow = Integer.MIN_VALUE;
         for ( TS ts : tslist ) {
             ++its;
             if ( its == 1 ) {
@@ -1365,9 +1364,9 @@ throws FileNotFoundException, IOException
         // Set the cell formats for output (will be used for the data rows).
         // All formats for the column headings are text.
         DataFormat [] cellFormats = new DataFormat[cols];
-        DataFormat cellFormatHeader = wb.createDataFormat();
+        //DataFormat cellFormatHeader = wb.createDataFormat();
         CellStyle [] cellStyles = new CellStyle[cols];
-        CellStyle cellStyleHeader = wb.createCellStyle();
+        //CellStyle cellStyleHeader = wb.createCellStyle();
         // Initialize styles corresponding to styleTable, newer approach to styling.
         // The styles in this table will be used by default with the above setting style information to the below.
         TimeSeriesConditionAndStyleManager styleManager = null;
@@ -1375,7 +1374,7 @@ throws FileNotFoundException, IOException
         	styleManager = new TimeSeriesConditionAndStyleManager(tslist,conditionTable,styleTable,wb);
         }
         int [] cellTypes = new int[cols];
-        int cellTypeHeader = Cell.CELL_TYPE_STRING;
+        //int cellTypeHeader = Cell.CELL_TYPE_STRING;
         int col = 0;
         // TODO SAM 2015-02-17 Need to figure out how to store date/time in numeric - for now format a string
         List<String> columnNames = new ArrayList<String>();
@@ -1441,10 +1440,11 @@ throws FileNotFoundException, IOException
         		styleManager, legendWorksheet, legendAddress,
         		problems );
         }
-        if ( 1 == 2 ) {
+        if ( "1".equals("2") ) {
         // Loop through date/time corresponding to each row in the output file
         double value;
-        String valueString, dateTimeString = "", dateString = "", timeString = "";
+        //String valueString;
+        String dateTimeString = "", dateString = "", timeString = "";
         int row = rowOutStart;
         for ( DateTime date = new DateTime(outputStart); date.lessThanOrEqualTo(outputEnd); date.addInterval(intervalBase, intervalMult)) {
         	++row;

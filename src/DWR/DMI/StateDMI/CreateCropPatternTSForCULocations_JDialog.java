@@ -61,6 +61,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for CreateCropPatternTSForCULocations() command.
 */
+@SuppressWarnings("serial")
 public class CreateCropPatternTSForCULocations_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener
 {
@@ -240,7 +241,7 @@ private void initialize (JFrame parent, Command command)
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>();
     IfNotFound_List.add("");
 	IfNotFound_List.add ( __command._Ignore );
 	IfNotFound_List.add ( __command._Warn );
@@ -339,6 +340,7 @@ private void refresh ()
 		props = __command.getCommandParameters();
 		ID = props.getValue ( "ID" );
 		Units = props.getValue ( "Units" );
+		IfNotFound = props.getValue ( "IfNotFound" );
 		if ( ID != null ) {
 			__ID_JTextField.setText(ID);
 		}

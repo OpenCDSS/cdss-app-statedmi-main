@@ -95,7 +95,7 @@ throws InvalidCommandParameterException
 	*/
 
     // Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
 	//valid_Vector.add ( "ID" );
     warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
 
@@ -148,10 +148,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     // Get the data needed for the command
 	
-    List prfGageDataList = null;
+    List<StateMod_PrfGageData> prfGageDataList = null;
     int prfGageDataListSize = 0;
     try {
-    	prfGageDataList = (List)processor.getPropContents ( "StateMod_PrfGageData_List" );
+    	@SuppressWarnings("unchecked")
+		List<StateMod_PrfGageData> dataList = (List<StateMod_PrfGageData>)processor.getPropContents ( "StateMod_PrfGageData_List" );
+    	prfGageDataList = dataList;
     	prfGageDataListSize = prfGageDataList.size();
     }
     catch ( Exception e ) {
@@ -165,10 +167,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
                 message, "Report to software support.  See log file for details." ) );
     }
     
-    List streamEstimateStationList = null;
+    List<StateMod_StreamEstimate> streamEstimateStationList = null;
     int streamEstimateStationListSize = 0;
     try {
-    	streamEstimateStationList = (List)processor.getPropContents ( "StateMod_StreamEstimateStation_List" );
+    	@SuppressWarnings("unchecked")
+		List<StateMod_StreamEstimate> dataList = (List<StateMod_StreamEstimate>)processor.getPropContents ( "StateMod_StreamEstimateStation_List" );
+    	streamEstimateStationList = dataList;
     	streamEstimateStationListSize = streamEstimateStationList.size();
     }
     catch ( Exception e ) {
@@ -191,10 +195,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
                 message, "Read or define (set) the stream estimate stations prior to this command." ) );
     }
     
-    List streamEstimateCoefficientsList = null;
+    List<StateMod_StreamEstimate_Coefficients> streamEstimateCoefficientsList = null;
     try {
-    	streamEstimateCoefficientsList =
-    		(List)processor.getPropContents ( "StateMod_StreamEstimateCoefficients_List" );
+    	@SuppressWarnings("unchecked")
+		List<StateMod_StreamEstimate_Coefficients> dataList = (List<StateMod_StreamEstimate_Coefficients>)processor.getPropContents ( "StateMod_StreamEstimateCoefficients_List" );
+    	streamEstimateCoefficientsList = dataList;
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
@@ -248,7 +253,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	String id;
 		Message.printStatus ( 2, routine, "PFGage substitution data:");
     	for ( int i = 0; i < prfGageDataListSize; i++ ) {
-    		prf = (StateMod_PrfGageData)prfGageDataList.get(i);
+    		prf = prfGageDataList.get(i);
     		Message.printStatus ( 2, routine, "Station ID=\"" + prf.getID() + "\" Gage ID=\"" +
     			prf.getGageID() + "\"");
     	}
@@ -286,7 +291,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	int dl = 12;
     	int iprfGageData;
     	int nupstreamFlowNodes;
-    	List upstreamFlowNodes = null;
+    	List<HydrologyNode> upstreamFlowNodes = null;
     	
     	// Create an adaptor to handle the StateMod prfGageList integration with the more generic CDSS
     	// HydrologyNodeNetwork.  This will be reused for lookups.
@@ -294,7 +299,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	UpstreamFlowNodeA upstreamFlowNodeA = new UpstreamFlowNodeA ( prfGageDataList );
 
     	for ( int i = 0; i < streamEstimateStationListSize; i++) {
-    		ses = (StateMod_StreamEstimate)streamEstimateStationList.get(i);
+    		ses = streamEstimateStationList.get(i);
     		id = ses.getID();
     		// Define stream estimate coefficients...
     		Message.printStatus ( 2, routine, "Creating empty stream estimate coefficients for " + id );
@@ -349,7 +354,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		nupstreamFlowNodes = 0;
 
     		// Need because of a check in the code...
-    		upstreamFlowNodes = new Vector(1,1);
+    		upstreamFlowNodes = new Vector<HydrologyNode>(1,1);
     		upstreamFlowNodes = net.findUpstreamFlowNodes ( upstreamFlowNodes, nodePt, upstreamFlowNodeA, false);
 
     		if (upstreamFlowNodes != null) {
@@ -454,7 +459,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			nupstreamFlowNodes = 0;
 
     			// Need because of a check in the code...
-    			upstreamFlowNodes = new Vector(1,1);
+    			upstreamFlowNodes = new Vector<HydrologyNode>(1,1);
     			upstreamFlowNodes = net.findUpstreamFlowNodes(
     				upstreamFlowNodes, nodeDownstreamFlow, upstreamFlowNodeA, false);
 
@@ -541,7 +546,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     	int streamEstimateCoefficientsListSize = streamEstimateCoefficientsList.size();
     	for ( int irib = 0; irib < streamEstimateCoefficientsListSize; irib++) {
-    		rib = (StateMod_StreamEstimate_Coefficients)streamEstimateCoefficientsList.get(irib);
+    		rib = streamEstimateCoefficientsList.get(irib);
 
     		Message.printStatus(2, routine, "Processing stream estimate station " + rib.getFlowX());
 

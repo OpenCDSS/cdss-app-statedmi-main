@@ -28,11 +28,17 @@ import javax.swing.JFrame;
 import java.util.List;
 import java.util.Vector;
 
+import DWR.StateCU.StateCU_BlaneyCriddle;
+import DWR.StateCU.StateCU_ClimateStation;
 import DWR.StateCU.StateCU_ComponentValidation;
 import DWR.StateCU.StateCU_ComponentValidator;
+import DWR.StateCU.StateCU_CropCharacteristics;
+import DWR.StateCU.StateCU_CropPatternTS;
 import DWR.StateCU.StateCU_Data;
 import DWR.StateCU.StateCU_DataSet;
-
+import DWR.StateCU.StateCU_IrrigationPracticeTS;
+import DWR.StateCU.StateCU_Location;
+import DWR.StateCU.StateCU_PenmanMonteith;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.IO.AbstractCommand;
@@ -110,7 +116,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "IfNotFound" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
@@ -171,7 +177,9 @@ CommandWarningException, CommandException
 	
 	if ( this instanceof CheckBlaneyCriddle_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateCU_BlaneyCriddle_List");
+			@SuppressWarnings("unchecked")
+			List<StateCU_BlaneyCriddle> objectList = (List<StateCU_BlaneyCriddle>)processor.getPropContents("StateCU_BlaneyCriddle_List");
+			dataList = objectList;
 		}
 		catch ( Exception e ) {
 			message = "Error requesting Blaney-Criddle crop coefficients from processor.";
@@ -184,7 +192,9 @@ CommandWarningException, CommandException
 
 	if ( this instanceof CheckPenmanMonteith_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateCU_PenmanMonteith_List");
+			@SuppressWarnings("unchecked")
+			List<StateCU_PenmanMonteith> objectList = (List<StateCU_PenmanMonteith>)processor.getPropContents("StateCU_PenmanMonteith_List");
+			dataList = objectList;
 		}
 		catch ( Exception e ) {
 			message = "Error requesting Penman-Monteith crop coefficients from processor.";
@@ -197,7 +207,9 @@ CommandWarningException, CommandException
 	
 	if ( this instanceof CheckClimateStations_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateCU_ClimateStation_List");
+			@SuppressWarnings("unchecked")
+			List<StateCU_ClimateStation> objectList = (List<StateCU_ClimateStation>)processor.getPropContents("StateCU_ClimateStation_List");
+			dataList = objectList;
 		}
 		catch ( Exception e ) {
 			message = "Error requesting climate stations from processor.";
@@ -210,7 +222,9 @@ CommandWarningException, CommandException
 	
 	if ( this instanceof CheckCropCharacteristics_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateCU_CropCharacteristics_List");
+			@SuppressWarnings("unchecked")
+			List<StateCU_CropCharacteristics> objectList = (List<StateCU_CropCharacteristics>)processor.getPropContents("StateCU_CropCharacteristics_List");
+			dataList = objectList;
 		}
 		catch ( Exception e ) {
 			message = "Error requesting crop characteristics from processor.";
@@ -223,7 +237,9 @@ CommandWarningException, CommandException
 	
 	if ( this instanceof CheckCropPatternTS_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateCU_CropPatternTS_List");
+			@SuppressWarnings("unchecked")
+			List<StateCU_CropPatternTS> objectList = (List<StateCU_CropPatternTS>)processor.getPropContents("StateCU_CropPatternTS_List");
+			dataList = objectList;
 		}
 		catch ( Exception e ) {
 			message = "Error requesting crop pattern time series from processor.";
@@ -236,7 +252,9 @@ CommandWarningException, CommandException
 	
 	if ( this instanceof CheckCULocations_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateCU_Location_List");
+			@SuppressWarnings("unchecked")
+			List<StateCU_Location> objectList = (List<StateCU_Location>)processor.getPropContents("StateCU_Location_List");
+			dataList = objectList;
 		}
 		catch ( Exception e ) {
 			message = "Error requesting CU location list from processor.";
@@ -249,7 +267,9 @@ CommandWarningException, CommandException
 	
 	if ( this instanceof CheckIrrigationPracticeTS_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List");
+			@SuppressWarnings("unchecked")
+			List<StateCU_IrrigationPracticeTS> objectList = (List<StateCU_IrrigationPracticeTS>)processor.getPropContents("StateCU_IrrigationPracticeTS_List");
+			dataList = objectList;
 		}
 		catch ( Exception e ) {
 			message = "Error requesting irrigation practice time series from processor.";
@@ -264,7 +284,7 @@ CommandWarningException, CommandException
 	
 	StateCU_DataSet dataset = null;
 	try {
-		dataset = (StateCU_DataSet)processor.getPropContents ( "StateCU_DataSet");
+		dataset = (StateCU_DataSet)processor.getPropContents("StateCU_DataSet");
 	}
 	catch ( Exception e ) {
 		message = "Error requesting StateCU data set from processor for cross checks.";

@@ -60,6 +60,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for the ReadInstreamFlowRightsFromHydroBase() command.
 */
+@SuppressWarnings("serial")
 public class ReadInstreamFlowRightsFromHydroBase_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener
 {
@@ -212,7 +213,7 @@ private void initialize (JFrame parent, ReadInstreamFlowRightsFromHydroBase_Comm
 
 	JGUIUtil.addComponent(main_JPanel, new JLabel ( "OnOff default:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	List onoff_Vector = new Vector(3);
+	List<String> onoff_Vector = new Vector<String>(3);
 	onoff_Vector.add ( "" );
 	onoff_Vector.add ( __command._1 );
 	onoff_Vector.add ( __command._AppropriationDate );

@@ -62,6 +62,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for SetWellStationCapacityToWellRightsCommand().
 */
+@SuppressWarnings("serial")
 public class SetWellStationCapacityToWellRights_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener,
 ChangeListener {
@@ -261,7 +262,7 @@ private void initialize ( JFrame parent, SetWellStationCapacityToWellRights_Comm
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, 
 		GridBagConstraints.EAST);
-    List if_not_found_Vector = new Vector();
+    List<String> if_not_found_Vector = new Vector<String>(4);
     if_not_found_Vector.add ( "" );
     if_not_found_Vector.add ( __command._Ignore );
 	if_not_found_Vector.add ( __command._Warn );

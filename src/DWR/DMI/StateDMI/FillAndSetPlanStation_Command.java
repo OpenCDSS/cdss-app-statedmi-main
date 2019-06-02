@@ -263,7 +263,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List<String> valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(13);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "Name" );
 	valid_Vector.add ( "RiverNodeID" );
@@ -576,7 +576,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     List<StateMod_Plan> planList = null;
     try {
-    	planList = (List)processor.getPropContents ( "StateMod_PlanStation_List" );
+    	@SuppressWarnings("unchecked")
+		List<StateMod_Plan> dataList = (List<StateMod_Plan>)processor.getPropContents ( "StateMod_PlanStation_List" );
+    	planList = dataList;
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );

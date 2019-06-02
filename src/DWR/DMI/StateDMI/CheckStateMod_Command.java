@@ -32,9 +32,22 @@ import DWR.StateMod.StateMod_ComponentValidation;
 import DWR.StateMod.StateMod_ComponentValidator;
 import DWR.StateMod.StateMod_Data;
 import DWR.StateMod.StateMod_DataSet;
+import DWR.StateMod.StateMod_Diversion;
+import DWR.StateMod.StateMod_DiversionRight;
+import DWR.StateMod.StateMod_InstreamFlow;
+import DWR.StateMod.StateMod_InstreamFlowRight;
+import DWR.StateMod.StateMod_Reservoir;
+import DWR.StateMod.StateMod_ReservoirRight;
+import DWR.StateMod.StateMod_RiverNetworkNode;
+import DWR.StateMod.StateMod_StreamEstimate;
+import DWR.StateMod.StateMod_StreamEstimate_Coefficients;
+import DWR.StateMod.StateMod_StreamGage;
 import DWR.StateMod.StateMod_Util;
+import DWR.StateMod.StateMod_Well;
+import DWR.StateMod.StateMod_WellRight;
 
 import RTi.TS.TS;
+import RTi.TS.MonthTS;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.IO.AbstractCommand;
@@ -112,7 +125,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(2);
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "IfNotFound" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
@@ -142,6 +155,7 @@ Method to execute the setIrrigationPracticeTSPumpingMaxUsingWellRights() command
 @param command_number Number of command in sequence.
 @exception Exception if there is an error processing the command.
 */
+@SuppressWarnings("unchecked")
 public void runCommand ( int command_number )
 throws InvalidCommandParameterException,
 CommandWarningException, CommandException
@@ -170,11 +184,11 @@ CommandWarningException, CommandException
 	// Get the list of data to check (can be either a list of StateMod data or a list of time series)...
 	// DON'T USE ELSE BELOW because multiple blocks of code need to be executed.
 	
-	List<StateMod_Data> dataList = null;
-	List<TS> tsList = null;
+	List<? extends StateMod_Data> dataList = null;
+	List<MonthTS> tsList = null;
 	if ( this instanceof CheckStreamGageStations_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateMod_StreamGageStation_List");
+			dataList = (List<StateMod_StreamGage>)processor.getPropContents ( "StateMod_StreamGageStation_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting stream gage stations from processor.";
@@ -189,7 +203,7 @@ CommandWarningException, CommandException
 			this instanceof CheckDiversionHistoricalTSMonthly_Command ||
 			this instanceof CheckDiversionDemandTSMonthly_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateMod_DiversionStation_List");
+			dataList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting diversion stations from processor.";
@@ -202,7 +216,7 @@ CommandWarningException, CommandException
 	}
 	if ( this instanceof CheckDiversionRights_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateMod_DiversionRight_List");
+			dataList = (List<StateMod_DiversionRight>)processor.getPropContents ( "StateMod_DiversionRight_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting diversion rights from processor.";
@@ -215,7 +229,7 @@ CommandWarningException, CommandException
 	}
 	if ( this instanceof CheckDiversionHistoricalTSMonthly_Command ) {
 		try {
-			tsList = (List)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List");
+			tsList = (List<MonthTS>)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting diversion historical time series (monthly) from processor.";
@@ -228,7 +242,7 @@ CommandWarningException, CommandException
 	}
 	if ( this instanceof CheckDiversionDemandTSMonthly_Command ) {
 		try {
-			tsList = (List)processor.getPropContents ( "StateMod_DiversionDemandTSMonthly_List");
+			tsList = (List<MonthTS>)processor.getPropContents ( "StateMod_DiversionDemandTSMonthly_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting diversion demand time series (monthly) from processor.";
@@ -242,7 +256,7 @@ CommandWarningException, CommandException
 	if ( this instanceof CheckInstreamFlowStations_Command ||
 			this instanceof CheckInstreamFlowDemandTSAverageMonthly_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateMod_InstreamFlowStation_List");
+			dataList = (List<StateMod_InstreamFlow>)processor.getPropContents ( "StateMod_InstreamFlowStation_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting instream flow stations from processor.";
@@ -255,7 +269,7 @@ CommandWarningException, CommandException
 	}
 	if ( this instanceof CheckInstreamFlowRights_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateMod_InstreamFlowRight_List");
+			dataList = (List<StateMod_InstreamFlowRight>)processor.getPropContents ( "StateMod_InstreamFlowRight_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting instream flow rights from processor.";
@@ -268,7 +282,7 @@ CommandWarningException, CommandException
 	}
 	if ( this instanceof CheckInstreamFlowDemandTSAverageMonthly_Command ) {
 		try {
-			tsList = (List)processor.getPropContents ( "StateMod_InstreamFlowDemandTSAverageMonthly_List");
+			tsList = (List<MonthTS>)processor.getPropContents ( "StateMod_InstreamFlowDemandTSAverageMonthly_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting instream flow demand time series (averge monthly) from processor.";
@@ -281,7 +295,7 @@ CommandWarningException, CommandException
 	}
 	if ( this instanceof CheckReservoirStations_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateMod_ReservoirStation_List");
+			dataList = (List<StateMod_Reservoir>)processor.getPropContents ( "StateMod_ReservoirStation_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting reservoir stations from processor.";
@@ -294,7 +308,7 @@ CommandWarningException, CommandException
 	}
 	if ( this instanceof CheckReservoirRights_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateMod_ReservoirRight_List");
+			dataList = (List<StateMod_ReservoirRight>)processor.getPropContents ( "StateMod_ReservoirRight_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting reservoir rights from processor.";
@@ -309,7 +323,7 @@ CommandWarningException, CommandException
 			this instanceof CheckWellHistoricalPumpingTSMonthly_Command ||
 			this instanceof CheckWellDemandTSMonthly_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateMod_WellStation_List");
+			dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting well stations from processor.";
@@ -322,7 +336,7 @@ CommandWarningException, CommandException
 	}
 	if ( this instanceof CheckWellRights_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateMod_WellRight_List");
+			dataList = (List<StateMod_WellRight>)processor.getPropContents ( "StateMod_WellRight_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting well rights from processor.";
@@ -335,7 +349,7 @@ CommandWarningException, CommandException
 	}
 	if ( this instanceof CheckWellHistoricalPumpingTSMonthly_Command ) {
 		try {
-			tsList = (List)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List");
+			tsList = (List<MonthTS>)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting well historical pumping time series (monthly) from processor.";
@@ -348,7 +362,7 @@ CommandWarningException, CommandException
 	}
 	if ( this instanceof CheckWellDemandTSMonthly_Command ) {
 		try {
-			tsList = (List)processor.getPropContents ( "StateMod_WellDemandTSMonthly_List");
+			tsList = (List<MonthTS>)processor.getPropContents ( "StateMod_WellDemandTSMonthly_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting well demand time series (monthly) from processor.";
@@ -361,7 +375,7 @@ CommandWarningException, CommandException
 	}
 	if ( this instanceof CheckStreamEstimateStations_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateMod_StreamEstimateStation_List");
+			dataList = (List<StateMod_StreamEstimate>)processor.getPropContents ( "StateMod_StreamEstimateStation_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting stream estimate stations from processor.";
@@ -374,7 +388,7 @@ CommandWarningException, CommandException
 	}
 	if ( this instanceof CheckStreamEstimateCoefficients_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateMod_StreamEstimateCoefficients_List");
+			dataList = (List<StateMod_StreamEstimate_Coefficients>)processor.getPropContents ( "StateMod_StreamEstimateCoefficients_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting stream estimate coefficients from processor.";
@@ -387,7 +401,7 @@ CommandWarningException, CommandException
 	}
 	if ( this instanceof CheckRiverNetwork_Command ) {
 		try {
-			dataList = (List)processor.getPropContents ( "StateMod_RiverNetworkNode_List");
+			dataList = (List<StateMod_RiverNetworkNode>)processor.getPropContents ( "StateMod_RiverNetworkNode_List");
 		}
 		catch ( Exception e ) {
 			message = "Error requesting river network nodes from processor.";

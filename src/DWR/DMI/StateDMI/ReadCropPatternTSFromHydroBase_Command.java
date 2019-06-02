@@ -185,7 +185,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "InputStart" );
     valid_Vector.add ( "InputEnd" );
@@ -219,7 +219,7 @@ readCropPatternTSFromHydroBase() commands are used.
 @param cal_year_start The first calendar year to reset.
 @param cal_year_end The last calendar year to reset.
 */
-private void resetCropPatternTS ( StateDMI_Processor processor, List cdsList,
+private void resetCropPatternTS ( StateDMI_Processor processor, List<StateCU_CropPatternTS> cdsList,
 	DateTime OutputStart_DateTime, DateTime OutputEnd_DateTime,
 	String culoc_id, int cal_year_start, int cal_year_end )
 {
@@ -235,7 +235,7 @@ private void resetCropPatternTS ( StateDMI_Processor processor, List cdsList,
 		// No need to reset...
 		return;
 	}
-	List crop_names = cds.getCropNames();
+	List<String> crop_names = cds.getCropNames();
 	int ncrop_names = 0;
 	if ( crop_names != null ) {
 		ncrop_names = crop_names.size();
@@ -305,7 +305,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
 	try {
-		culocList = (List<StateCU_Location>)processor.getPropContents ( "StateCU_Location_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents ( "StateCU_Location_List");
+		culocList = dataList;
 		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {
@@ -319,10 +321,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	
 	// Get the list of crop pattern time series...
 	
-	List cdsList = null;
+	List<StateCU_CropPatternTS> cdsList = null;
 	int cdsListSize = 0;
 	try {
-		cdsList = (List)processor.getPropContents ( "StateCU_CropPatternTS_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_CropPatternTS> dataList = (List<StateCU_CropPatternTS>)processor.getPropContents ( "StateCU_CropPatternTS_List");
+		cdsList = dataList;
 		cdsListSize = cdsList.size();
 	}
 	catch ( Exception e ) {
@@ -347,10 +351,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	// Get the supplemental crop pattern data specified with SetCropPatternTS() and
 	// SetCropPatternTSFromList() commands...
 	
-	List hydroBaseSupplementalParcelUseTSList = null;
+	List<StateDMI_HydroBase_StructureView> hydroBaseSupplementalParcelUseTSList = null;
 	try {
-		hydroBaseSupplementalParcelUseTSList =
-			(List)processor.getPropContents ( "HydroBase_SupplementalParcelUseTS_List");
+		@SuppressWarnings("unchecked")
+		List<StateDMI_HydroBase_StructureView> dataList =
+			(List<StateDMI_HydroBase_StructureView>)processor.getPropContents ( "HydroBase_SupplementalParcelUseTS_List");
+		hydroBaseSupplementalParcelUseTSList = dataList;
 	}
 	catch ( Exception e ) {
 		message = "Error requesting supplemental parcel use data from processor.";
@@ -471,8 +477,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		String irrig_type; // Irrigation type
 		List<String> culoc_wdids = new ArrayList<String>(100);
 		String culoc_id = null;
-		List crop_patterns = null; // Crop pattern records from HydroBase for parcels
-		List crop_patterns2 = null; // Crop pattern records for individual parts of aggregates.
+		List<HydroBase_StructureView> crop_patterns_sv = null; // Crop pattern records from HydroBase for parcels
+		List<HydroBase_ParcelUseTS> crop_patterns = null; // Crop pattern records from HydroBase for parcels
+		List<HydroBase_StructureView> crop_patterns2 = null; // Crop pattern records for individual parts of aggregates.
 		int ih, hsize; // Counter and size for HydroBase records.
 		String units = "ACRE"; // Units for area
 		int replace_flag = 0; // 0 to replace data in time series or 1 to add
@@ -491,9 +498,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		}
 		
 		// Convert supplemental ParcelUseTS to StructureIrrigSummaryTS
-		List hydroBaseSupplementalStructureIrrigSummaryTSList =
+		/* smalers 2019-06-01 NEED TO ENABLE
+		List<StateDMI_HydroBase_StructureView> hydroBaseSupplementalStructureIrrigSummaryTSList =
 			processor.convertSupplementalParcelUseTSToStructureIrrigSummaryTS(
 				hydroBaseSupplementalParcelUseTSList);
+			*/
 
 		// Year used when processing groundwater only...
 		DateTime year_DateTime = new DateTime(DateTime.PRECISION_YEAR);
@@ -502,7 +511,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		int matchCount = 0;
 		List<String> partIdList = null; // List of aggregate/system parts
 		List<String> partIdTypeList = null; // List of aggregate/system parts ID types (will contain "WDID" or "Receipt")
-		String collectionType = null;
+		//String collectionType = null;
 		String collectionPartType = null; // Parts used for collection.  Mainly need to key on StateMod_WellStation.
 		boolean isCollection = false;
 		for ( int i = 0; i < culocListSize; i++ ) {
@@ -548,7 +557,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							// Should not happen because isWDID was checked above.
 						}
 						// The following returns HydroBase_StructureView
-						crop_patterns = hbdmi.readStructureIrrigSummaryTSList (
+						crop_patterns_sv = hbdmi.readStructureIrrigSummaryTSList (
 							null, // InputFilter
 							null, // Order by clauses
 							DMIUtil.MISSING_INT, // Structure num
@@ -562,10 +571,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					}
 					// Add supplemental records (works with WDID or not)...
 					culoc_wdids.add ( culoc_id );
+					/* smalers 2019-06-01 NEED TO ENABLE
 					crop_patterns = processor.readSupplementalStructureIrrigSummaryTSListForWDIDList (
 						crop_patterns, culoc_wdids, InputStart_DateTime, InputEnd_DateTime,
 						hydroBaseSupplementalStructureIrrigSummaryTSList,
 						status, command_tag, warningLevel, warning_count);
+					*/
 					// The results are processed below...
 					replace_flag = 0;
 				}
@@ -585,7 +596,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					}
 					culoc_wdids.clear();
 					// This will contain the records for all the collection parts...
-					crop_patterns = new Vector();
+					crop_patterns = new Vector<HydroBase_ParcelUseTS>();
 					for ( int j = 0; j < collection_size; j++ ) {
 						part_id = collection_ids.get(j);
 						try {
@@ -618,15 +629,19 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
 						// Add to the list...
 						if ( crop_patterns2 != null ) {
+							/* TODO smalers 2019-06-01 NEED TO ENABLE
 							crop_patterns.addAll ( crop_patterns2 );
+							*/
 						}
 						culoc_wdids.add ( part_id );
 					}
 					// Add supplemental records...
+					/* TODO smalers 2019-06-01 NEED TO ENABLE
 					crop_patterns = processor.readSupplementalStructureIrrigSummaryTSListForWDIDList (
 						crop_patterns, culoc_wdids, InputStart_DateTime,
 						InputEnd_DateTime, hydroBaseSupplementalStructureIrrigSummaryTSList,
 						status, command_tag, warningLevel, warning_count );
+					*/
 	
 					// First find the matching CropPatternTS and clear out the existing contents.
 					/*
@@ -941,7 +956,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	
 				if ( processing_ditches ) {
 					for ( ih = 0; ih < hsize; ih++) {
-						h_cds = (HydroBase_StructureView)crop_patterns.get(ih);
+						h_cds = crop_patterns_sv.get(ih);
 						// Need the following when one read command, then filling, then another read.
 						if ( crop_set_count == 0 ) {
 							// Reset all crops to missing for the year to prevent double-counting...

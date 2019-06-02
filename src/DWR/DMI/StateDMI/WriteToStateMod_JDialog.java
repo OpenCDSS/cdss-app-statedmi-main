@@ -64,6 +64,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for Write*ToStateMod() commands.  See WriteTSToStateMod() for time series output.
 */
+@SuppressWarnings("serial")
 public class WriteToStateMod_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -496,7 +497,7 @@ private void initialize ( JFrame parent, WriteToStateMod_Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Write how:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List write_how_Vector = new Vector();
+        List<String> write_how_Vector = new Vector<String>(3);
 	write_how_Vector.add ( "" );
 	write_how_Vector.add ( __command._OverwriteFile );
 	write_how_Vector.add ( __command._UpdateFile );
@@ -512,7 +513,7 @@ private void initialize ( JFrame parent, WriteToStateMod_Command command )
 	if ( __command instanceof WriteWellRightsToStateMod_Command ) {
         JGUIUtil.addComponent(main_JPanel, new JLabel ("Write data comments?:"),
         		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List WriteDataComments_Vector = new Vector();
+        List<String> WriteDataComments_Vector = new Vector<String>(3);
        	WriteDataComments_Vector.add ( "" );
        	WriteDataComments_Vector.add ( __command._False );
        	WriteDataComments_Vector.add ( __command._True );

@@ -65,6 +65,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for WriteCheckFile() command.
 */
+@SuppressWarnings("serial")
 public class WriteCheckFile_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -276,7 +277,7 @@ private void initialize ( JFrame parent, WriteCheckFile_Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Write header comments?:"), 
         0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     __WriteHeaderComments_JComboBox = new SimpleJComboBox ( false );
-    List<String> writeHeaderCommentsList = new Vector();
+    List<String> writeHeaderCommentsList = new Vector<String>(3);
     writeHeaderCommentsList.add("");
     writeHeaderCommentsList.add(__command._False);
     writeHeaderCommentsList.add(__command._True);

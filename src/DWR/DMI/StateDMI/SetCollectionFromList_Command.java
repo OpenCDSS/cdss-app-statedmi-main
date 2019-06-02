@@ -514,7 +514,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		if ( nodeTypeFromCommand.equals(_Diversion) || nodeTypeFromCommand.equals(_Well) ) {
 			Object o = processor.getPropContents ( "StateCU_Location_List" );
 			if ( o != null ) {
-				culocList = (List)o;
+				@SuppressWarnings("unchecked")
+				List<StateCU_Location> dataList = (List<StateCU_Location>)o;
+				culocList = dataList;
 			}
 	    }
     }
@@ -532,7 +534,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		if ( nodeTypeFromCommand.equals(_Diversion) ) {
 			Object o = processor.getPropContents ( "StateMod_DiversionStation_List" );
 			if ( o != null ) {
-				divList = (List)o;
+				@SuppressWarnings("unchecked")
+				List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)o;
+				divList = dataList;
 			}
 	    }
     }
@@ -550,7 +554,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		if ( nodeTypeFromCommand.equals(_Reservoir) ) {
 			Object o = processor.getPropContents ( "StateMod_ReservoirStation_List" );
 			if ( o != null ) {
-				resList = (List)o;
+				@SuppressWarnings("unchecked")
+				List<StateMod_Reservoir> dataList = (List<StateMod_Reservoir>)o;
+				resList = dataList;
 			}
 	    }
     }
@@ -568,7 +574,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		if ( nodeTypeFromCommand.equals(_Well) ) {
 			Object o = processor.getPropContents ( "StateMod_WellStation_List" );
 			if ( o != null ) {
-				wellList = (List)o;
+				@SuppressWarnings("unchecked")
+				List<StateMod_Well> dataList = (List<StateMod_Well>)o;
+				wellList = dataList;
 			}
 	    }
     }
@@ -775,6 +783,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	String partId;
     	String partIdType;
     	int matchCount = 0; // TODO SAM 2016-05-17 not sure how this is supposed to be used
+    	if ( matchCount < 0 ) {
+    		// TODO put in to prevent compiler warning about not being used
+    	}
     	List<String> partIds = new ArrayList<String>();
     	List<String> partIdTypes = new ArrayList<String>();
     	boolean foundMatch = false;

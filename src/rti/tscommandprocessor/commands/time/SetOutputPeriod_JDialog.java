@@ -48,6 +48,7 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.IO.PropList;
 
+@SuppressWarnings("serial")
 public class SetOutputPeriod_JDialog extends JDialog
 implements ActionListener, KeyListener, WindowListener
 {

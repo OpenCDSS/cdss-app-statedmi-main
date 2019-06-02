@@ -35,6 +35,7 @@ import DWR.DMI.HydroBaseDMI.HydroBase_ParcelUseTSStructureToParcel;
 import DWR.DMI.HydroBaseDMI.HydroBase_StructureView;
 import DWR.DMI.HydroBaseDMI.HydroBase_Util;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
+import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
 import DWR.DMI.StateDMI.dto.hydrobaserest.HydroBaseRestToolkit;
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import DWR.StateCU.StateCU_Location;
@@ -47,7 +48,6 @@ import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandException;
 import RTi.Util.IO.CommandLogRecord;
 import RTi.Util.IO.CommandPhaseType;
-import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.CommandStatus;
 import RTi.Util.IO.CommandStatusType;
 import RTi.Util.IO.CommandWarningException;
@@ -133,7 +133,7 @@ throws InvalidCommandParameterException
 	}
 	
 	if ( (Year != null) && (Year.length() > 0) ) {
-		List v = StringUtil.breakStringList ( Year, ",", StringUtil.DELIM_SKIP_BLANKS );
+		List<String> v = StringUtil.breakStringList ( Year, ",", StringUtil.DELIM_SKIP_BLANKS );
 		int size = 0;
 		if ( v != null ) {
 			size = v.size();
@@ -145,7 +145,7 @@ throws InvalidCommandParameterException
 			__Year_int = new int[size];
 		}
 		for ( int i = 0; i < size; i++ ) {
-			String token = (String)v.get(i);
+			String token = v.get(i);
 			if ( !StringUtil.isInteger(token) ) {
 				message = "Year (" + token + ") is not a valid integer.";
 				warning += "\n" + message;
@@ -193,7 +193,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "Year" );
     valid_Vector.add ( "Div" );
@@ -231,7 +231,7 @@ private boolean doesHydroBaseParcelHaveGroundWaterSupply (
 		int warningLevel, int warning_count, String command_tag, CommandStatus status, boolean cacheHydroBase )
 {	String routine = "ReadIrrigationPracticeTSFromHydroBase.doesParcelHaveGroundwaterSupply";
 	String message;
-	List hbwell_parcel_Vector = null;
+	List<HydroBase_Wells> hbwell_parcel_Vector = null;
 	try {
 		// Get the well/welltoparcels associated with the parcel...
 		hbwell_parcel_Vector = hdmi.readWellsWellToParcelList(parcel_id, parcel_year, Div_int, cacheHydroBase );
@@ -301,7 +301,7 @@ throws InvalidCommandSyntaxException, InvalidCommandParameterException
 		getCommandName() + "_Command.parseCommand",
 		message;
 
-	List tokens = StringUtil.breakStringList ( command,
+	List<String> tokens = StringUtil.breakStringList ( command,
 			"()", StringUtil.DELIM_SKIP_BLANKS );
 	if ( (tokens == null) || tokens.size() < 2 ) {
 		// Must have at least the command name, diversion ID
@@ -311,8 +311,9 @@ throws InvalidCommandSyntaxException, InvalidCommandParameterException
 		throw new InvalidCommandSyntaxException ( message );
 	}
 	// Get the input needed to process the file...
-	try {	setCommandParameters ( PropList.parse ( Prop.SET_FROM_PERSISTENT,
-			(String)tokens.get(1), routine, "," ) );
+	try {
+		setCommandParameters ( PropList.parse ( Prop.SET_FROM_PERSISTENT,
+			tokens.get(1), routine, "," ) );
 	}
 	catch ( Exception e ) {
 		message = "Syntax error in \"" + command +
@@ -354,7 +355,7 @@ private int readHydroBaseIrrigationPracticeTSForParcel (
 		int warningLevel, int warning_count, String command_tag, CommandStatus status, boolean cacheHydroBase )
 {	String routine = getClass().getName() + ".readHydroBaseIrrigationPracticeTSForParcel";
 	String message;
-	List hbparcel_Vector = null;
+	List<HydroBase_ParcelUseTS> hbparcel_Vector = null;
 	List<ParcelUseTimeSeries> hbrparcel_Vector = null;
 	try {
 		// if datastore get the parcel use ts list from web services
@@ -458,7 +459,7 @@ private int readHydroBaseIrrigationPracticeTSForParcelList (
 		StateCU_IrrigationPracticeTS ipyts,
 		String id,
 		String Loctype,
-		List parcel_ids,
+		List<String> parcel_ids,
 		double [] percent_irrig,
 		String part_id,
 		int parcel_year,
@@ -483,7 +484,7 @@ private int readHydroBaseIrrigationPracticeTSForParcelList (
 		datastore.readParcelUseTSList(part_id);
 	}
 	for ( int iparcel = 0; iparcel < nparcel; iparcel++ ) {
-		parcel_id = Integer.parseInt((String)parcel_ids.get(iparcel) );
+		parcel_id = Integer.parseInt(parcel_ids.get(iparcel) );
 		// Process the HydroBase parcel data (values will be added to the
 		// irrigation practice time series)...
 		if ( percent_irrig == null ) {
@@ -530,10 +531,10 @@ private int readHydroBaseIrrigationPracticeTSForLocationList (
 		StateCU_IrrigationPracticeTS ipyts,
 		String id,
 		String Loctype,
-		List wdids,
+		List<String> wdids,
 		int parcel_year,
 		int Div_int,
-		List HydroBase_Supplemental_ParcelUseTS_Vector,
+		List<StateDMI_HydroBase_ParcelUseTS> HydroBase_Supplemental_ParcelUseTS_Vector,
 		int warningLevel, int warning_count, String command_tag, CommandStatus status, boolean cacheHydroBase )
 {	String routine = "readIrrigationPracticeTSFromHydroBase_Command.readHydroBaseIrrigationPracticeTSForWDIDList";
 	String message;
@@ -549,11 +550,11 @@ private int readHydroBaseIrrigationPracticeTSForLocationList (
 	String part_id;	// single WDID
 	int [] wdid_parts = new int[2];
 	HydroBase_StructureView hbdiv = null;	// Individual ditch
-	List hbparcel_structure_Vector = null;//Structure/parcel join data
+	List<HydroBase_ParcelUseTSStructureToParcel> hbparcel_structure_Vector = null;//Structure/parcel join data
 	boolean have_structure_num = false;
 	boolean is_wdid = false;	// Whether a WDID
 	for ( int iparts = 0; iparts < nwdids; iparts++ ) {
-		part_id = (String)wdids.get(iparts);
+		part_id = wdids.get(iparts);
 		is_wdid = HydroBase_WaterDistrict.isWDID(part_id);
 		if ( is_wdid ) {
 			try {
@@ -652,7 +653,7 @@ private int readHydroBaseIrrigationPracticeTSForLocationList (
 
 			// Put together a list of parcel identifiers...
 		
-			List parcel_ids = new Vector(nparcel);
+			List<String> parcel_ids = new Vector<String>(nparcel);
 			double [] percent_irrig = new double[nparcel];
 		
 			HydroBase_ParcelUseTSStructureToParcel hbparcel_structure;
@@ -823,7 +824,9 @@ CommandWarningException, CommandException
 	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
 	try {
-		culocList = (List<StateCU_Location>)processor.getPropContents ( "StateCU_Location_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents ( "StateCU_Location_List");
+		culocList = dataList;
 		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {
@@ -840,7 +843,9 @@ CommandWarningException, CommandException
 	List<StateCU_IrrigationPracticeTS> ipyList = null;
 	int ipyListSize = 0;
 	try {
-		ipyList = (List<StateCU_IrrigationPracticeTS>)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_IrrigationPracticeTS> dataList = (List<StateCU_IrrigationPracticeTS>)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List");
+		ipyList = dataList;
 		ipyListSize = ipyList.size();
 	}
 	catch ( Exception e ) {
@@ -867,8 +872,10 @@ CommandWarningException, CommandException
 	
 	List<StateDMI_HydroBase_ParcelUseTS> hydroBaseSupplementalParcelUseTSList = null;
 	try {
-		hydroBaseSupplementalParcelUseTSList =
+		@SuppressWarnings("unchecked")
+		List<StateDMI_HydroBase_ParcelUseTS> dataList =
 			(List<StateDMI_HydroBase_ParcelUseTS>)processor.getPropContents ( "HydroBase_SupplementalParcelUseTS_List");
+		hydroBaseSupplementalParcelUseTSList = dataList;
 	}
 	catch ( Exception e ) {
 		message = "Error requesting supplemental parcel use data from processor.";
@@ -1123,7 +1130,7 @@ CommandWarningException, CommandException
 						// TODO SAM 2006-01-31
 						//name = div.getName();
 						//name = well.getName();
-						parts = new Vector();
+						parts = new Vector<String>();
 						parts.add ( culoc.getID() );
 						Message.printStatus ( 2, routine, "Location \"" + culoc.getID() +
 							"\" is associated with a an explicit diversion...processing as one part...");

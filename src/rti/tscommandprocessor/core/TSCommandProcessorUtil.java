@@ -59,7 +59,6 @@ import RTi.Util.String.StringUtil;
 import RTi.Util.Table.DataTable;
 import RTi.Util.Table.TableRecord;
 import RTi.Util.Time.DateTime;
-import rti.tscommandprocessor.commands.table.TableTimeSeriesMath_Command;
 
 /**
 This class contains static utility methods to support TSCommandProcessor.  These methods
@@ -885,15 +884,17 @@ getObjectList(TS) method called and the returned time series are added to the li
 */
 protected static List<TSEnsemble> getDiscoveryEnsembleFromCommands ( List<Command> commands, boolean sort )
 {   if ( commands == null ) {
-        return new Vector();
+        return new Vector<TSEnsemble>();
     }
-    List<TSEnsemble> tsEnsembleList = new Vector ();
+    List<TSEnsemble> tsEnsembleList = new Vector<TSEnsemble>();
     for ( Command command: commands ) {
         if ( (command != null) && (command instanceof ObjectListProvider) ) {
         	Object o = ((ObjectListProvider)command).getObjectList ( TSEnsemble.class );
         	List<TSEnsemble> list = null;
         	if ( o != null ) {
-        		list = (List<TSEnsemble>)o;
+        		@SuppressWarnings("unchecked")
+				List<TSEnsemble> dataList = (List<TSEnsemble>)o;
+        		list = dataList;
         	}
             if ( list != null ) {
                 for ( TSEnsemble tsEnsemble : list ) {
@@ -1001,9 +1002,9 @@ The getEnsembleID() method on the TSEnsemble is then returned.
 */
 protected static List<String> getEnsembleIdentifiersFromCommands ( List<Command> commands, boolean sort )
 {   if ( commands == null ) {
-        return new Vector();
+        return new Vector<String>();
     }
-    List<String> v = new Vector ( 10, 10 );
+    List<String> v = new Vector<String>( 10, 10 );
     int size = commands.size();
     boolean in_comment = false;
     Command command = null;
@@ -1026,7 +1027,9 @@ protected static List<String> getEnsembleIdentifiersFromCommands ( List<Command>
         	Object o = ((ObjectListProvider)command).getObjectList ( new TSEnsemble().getClass() );
             List<TSEnsemble> list = null;
             if ( o != null ) { 
-            	list = (List<TSEnsemble>)o;
+            	@SuppressWarnings("unchecked")
+				List<TSEnsemble> dataList = (List<TSEnsemble>)o;
+            	list = dataList;
             }
             String id;
             if ( list != null ) {
@@ -1082,23 +1085,17 @@ Time series are determined as follows:
 @param commands Commands to search.
 @param List of pattern time series provided by commands.
 */
-protected static List<TS> getPatternTSListFromCommands ( List commands )
+protected static List<TS> getPatternTSListFromCommands ( List<Command> commands )
 {   if ( commands == null ) {
-        return new Vector();
+        return new Vector<TS>();
     }
-    List<TS> v = new Vector ( 10, 10 );
-    int size = commands.size();
-    Object command_o = null;    // Command as object
-    for ( int i = 0; i < size; i++ ) {
-        command_o = commands.get(i);
-        if ( (command_o != null) && (command_o instanceof ObjectListProvider) ) {
+    List<TS> v = new Vector<TS>( 10, 10 );
+    for ( Command command: commands ) {
+        if ( (command != null) && (command instanceof ObjectListProvider) ) {
             // Try to get the list of identifiers using the interface method.
             // TODO SAM 2007-12-07 Evaluate the automatic use of the alias.
-        	Object o = ((ObjectListProvider)command_o).getObjectList ( new TS().getClass() );
-            List<TS> list = null;
-            if ( o != null ) {
-            	list = (List<TS>)o;
-            }
+        	ObjectListProvider olp = (ObjectListProvider)command;
+        	List<? extends TS> list = olp.getObjectList ( TS.class );
             if ( list != null ) {
                 int tssize = list.size();
                 TS ts;
@@ -1110,7 +1107,7 @@ protected static List<TS> getPatternTSListFromCommands ( List commands )
         }
     }
     // Sort the time series by identifier...
-    TSUtil_SortTimeSeries tsu = new TSUtil_SortTimeSeries(v, null, null, null, 1 );
+    TSUtil_SortTimeSeries<TS> tsu = new TSUtil_SortTimeSeries<TS>(v, null, null, null, 1 );
     try {
         return tsu.sortTimeSeries();
     }
@@ -1213,7 +1210,9 @@ protected static List<String> getTableIdentifiersFromCommands ( List<Command> co
         	Object o = ((ObjectListProvider)command).getObjectList ( new DataTable().getClass() );
             List<DataTable> list = null;
             if ( o != null ) {
-            	list = (List<DataTable>)o;
+            	@SuppressWarnings("unchecked")
+				List<DataTable> dataList = (List<DataTable>)o;
+            	list = dataList;
             }
             String id;
             if ( list != null ) {
@@ -2017,7 +2016,7 @@ Command status messages will be added if problems arise but exceptions are not t
 */
 public static int processTimeSeriesAfterRead( CommandProcessor processor, Command command, TS ts )
 {
-    List<TS> tslist = new Vector();
+    List<TS> tslist = new Vector<TS>();
     tslist.add ( ts );
     return processTimeSeriesListAfterRead ( processor, command, tslist );
 }

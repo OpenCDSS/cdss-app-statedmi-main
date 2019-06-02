@@ -60,6 +60,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for Fill*StationsFromNetwork() commands.
 */
+@SuppressWarnings("serial")
 public class FillStationsFromNetwork_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener {
 
@@ -304,7 +305,7 @@ private void initialize ( JFrame parent, FillStationsFromNetwork_Command command
     	(__command instanceof FillRiverNetworkFromNetwork_Command)){
         JGUIUtil.addComponent(main_JPanel, new JLabel ("Name format:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List formats = new Vector(3);
+        List<String> formats = new Vector<String>(3);
         formats.add("");
         formats.add(__command._StationName);
         formats.add(__command._StationName_NodeType);
@@ -321,7 +322,7 @@ private void initialize ( JFrame parent, FillStationsFromNetwork_Command command
 	if ( __command instanceof FillRiverNetworkFromNetwork_Command ) {
         JGUIUtil.addComponent(main_JPanel, new JLabel ("Comment format:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List comments = new Vector(1);
+        List<String> comments = new Vector<String>(2);
         comments.add("");
         comments.add(__command._StationID);
         __CommentFormat_JComboBox = new SimpleJComboBox (false);
@@ -337,7 +338,7 @@ private void initialize ( JFrame parent, FillStationsFromNetwork_Command command
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>(4);
     IfNotFound_List.add("");
 	IfNotFound_List.add ( __command._Ignore );
 	IfNotFound_List.add ( __command._Warn );

@@ -161,7 +161,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(3);
     valid_Vector.add ( "ID" );
     if ( (this instanceof FillStreamGageStationsFromHydroBase_Command) ||
 		(this instanceof FillStreamEstimateStationsFromHydroBase_Command)||
@@ -240,23 +240,33 @@ CommandWarningException, CommandException
 		
 	// Get the list of climate stations...
 	
-	List stationList = null;
+	List<StateMod_StreamGage> risList = null;
+	List<StateMod_StreamEstimate> sesList = null;
+	List<StateMod_RiverNetworkNode> rinList = null;
 	int stationListSize = 0;
 	int compType = StateMod_DataSet.COMP_UNKNOWN; // Use integers to increase performance below
 	try {
 		if ( this instanceof FillStreamGageStationsFromHydroBase_Command ) {
-			stationList = (List)processor.getPropContents ( "StateMod_StreamGageStation_List");
+			@SuppressWarnings("unchecked")
+			List<StateMod_StreamGage> dataList = (List<StateMod_StreamGage>)processor.getPropContents ( "StateMod_StreamGageStation_List");
+			risList = dataList;
 			compType = StateMod_DataSet.COMP_STREAMGAGE_STATIONS;
+			stationListSize = risList.size();
 		}
 		else if ( this instanceof FillStreamEstimateStationsFromHydroBase_Command ) {
-			stationList = (List)processor.getPropContents ( "StateMod_StreamEstimateStation_List");
+			@SuppressWarnings("unchecked")
+			List<StateMod_StreamEstimate> dataList = (List<StateMod_StreamEstimate>)processor.getPropContents ( "StateMod_StreamEstimateStation_List");
+			sesList = dataList;
 			compType = StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS;
+			stationListSize = sesList.size();
 		}
 		else if ( this instanceof FillRiverNetworkFromHydroBase_Command ) {
-			stationList = (List)processor.getPropContents ( "StateMod_RiverNetworkNode_List");
+			@SuppressWarnings("unchecked")
+			List<StateMod_RiverNetworkNode> dataList = (List<StateMod_RiverNetworkNode>)processor.getPropContents ( "StateMod_RiverNetworkNode_List");
+			rinList = dataList;
 			compType = StateMod_DataSet.COMP_RIVER_NETWORK;
+			stationListSize = rinList.size();
 		}
-		stationListSize = stationList.size();
 	}
 	catch ( Exception e ) {
 		message = "Error requesting data from processor (" + e + ").";
@@ -315,15 +325,15 @@ CommandWarningException, CommandException
 		boolean isWDID = false; // Indicates if an ID is for a structure with a WDID
 		for ( int i = 0; i < stationListSize; i++ ) {
 			if ( compType == StateMod_DataSet.COMP_STREAMGAGE_STATIONS ) {
-				gage = (StateMod_StreamGage)stationList.get(i);
+				gage = risList.get(i);
 				smdata = gage;
 			}
 			else if ( compType == StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS ) {
-				estimate = (StateMod_StreamEstimate)stationList.get(i);
+				estimate = sesList.get(i);
 				smdata = estimate;
 			}
 			else if ( compType == StateMod_DataSet.COMP_RIVER_NETWORK ) {
-				rin = (StateMod_RiverNetworkNode)stationList.get(i);
+				rin = rinList.get(i);
 				smdata = rin;
 			}
 			id = smdata.getID();

@@ -57,6 +57,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for the SetStreamEstimateCoefficients() command.
 */
+@SuppressWarnings("serial")
 public class SetStreamEstimateCoefficients_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -261,7 +262,7 @@ private void initialize (JFrame parent, SetStreamEstimateCoefficients_Command co
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List if_not_found_Vector = new Vector();
+    List<String> if_not_found_Vector = new Vector<String>(5);
     if_not_found_Vector.add ( "" );
     if_not_found_Vector.add ( __command._Ignore );
     if_not_found_Vector.add ( __command._Add );

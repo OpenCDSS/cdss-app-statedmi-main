@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 
 public class CoverageTest extends TestCase 
 {
-	ArrayList tests;
+	ArrayList<String> tests;
 
 	protected void setUp() throws Exception 
 	{

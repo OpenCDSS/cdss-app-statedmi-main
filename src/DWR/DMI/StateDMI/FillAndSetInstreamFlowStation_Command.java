@@ -157,7 +157,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(8);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "Name" );
 	valid_Vector.add ( "UpstreamRiverNodeID" );
@@ -253,10 +253,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     // Get the data needed for the command
     
-    List instreamFlowStationList = null;
+    List<StateMod_InstreamFlow> instreamFlowStationList = null;
     int instreamFlowStationListSize = 0;
     try {
-    	instreamFlowStationList = (List)processor.getPropContents ( "StateMod_InstreamFlowStation_List" );
+    	@SuppressWarnings("unchecked")
+		List<StateMod_InstreamFlow> dataList = (List<StateMod_InstreamFlow>)processor.getPropContents ( "StateMod_InstreamFlowStation_List" );
+    	instreamFlowStationList = dataList;
     	instreamFlowStationListSize = instreamFlowStationList.size();
     }
     catch ( Exception e ) {

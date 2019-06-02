@@ -56,6 +56,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for ReadCropPatternFromHydroBase() command.
 */
+@SuppressWarnings("serial")
 public class ReadCropPatternTSFromHydroBase_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {

@@ -64,6 +64,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for ReadCULocationsFromList() command.
 */
+@SuppressWarnings("serial")
 public class ReadCULocationsFromList_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -302,7 +303,7 @@ private void initialize (JFrame parent, ReadCULocationsFromList_Command command)
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("ID column:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List column_Vector = new Vector(100);
+    List<String> column_Vector = new Vector<String>(100);
 	column_Vector.add ( "" );	// Not available
 	for ( int i = 1; i <= 100; i++ ) {
 		column_Vector.add ( "" + i );

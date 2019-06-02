@@ -124,7 +124,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(3);
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "UserNameFrom" );
     valid_Vector.add ( "IfNotFound" );
@@ -155,6 +155,7 @@ Method to execute the setIrrigationPracticeTSPumpingMaxUsingWellRights() command
 @param command_number Number of command in sequence.
 @exception Exception if there is an error processing the command.
 */
+@SuppressWarnings("unchecked")
 public void runCommand ( int command_number )
 throws InvalidCommandParameterException,
 CommandWarningException, CommandException
@@ -187,10 +188,10 @@ CommandWarningException, CommandException
 		
 	// Get the list of diversion stations...
 	
-	List stationList = null;
+	List<StateMod_Diversion> stationList = null;
 	int stationListSize = 0;
 	try {
-		stationList = (List)processor.getPropContents ( "StateMod_DiversionStation_List");
+		stationList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List");
 		stationListSize = stationList.size();
 	}
 	catch ( Exception e ) {
@@ -235,7 +236,7 @@ CommandWarningException, CommandException
 	try {
 		StateMod_Diversion div = null;
 		HydroBase_StructureView hbdiv = null;
-		List parts = null;
+		List<String> parts = null;
 		int psize = 0; // Number of parts in a collection
 		int iparts = 0; // Index for iterating through parts
 		String part_id = ""; // Identifier for a part in a collection
@@ -281,7 +282,7 @@ CommandWarningException, CommandException
 					capacity = 0.0;
 					area = 0.0;
 					for ( iparts = 0; iparts < psize; iparts++ ) {
-						part_id = (String)parts.get(iparts);
+						part_id = parts.get(iparts);
 						try {
 							// Parse out the WDID...
 							HydroBase_WaterDistrict.parseWDID(part_id,wdid_parts);

@@ -130,8 +130,8 @@ data was attempted to be reset for an ID that already had data.
 @param ifMatch If IF_MATCH_REPLACE, an existing instance is replaced if found.
 If IF_MATCH_USE_OLD, the original instance is used.  If IF_MATCH_APPEND, append the duplicate record.
 */
-protected static void findAndAddSMWellRight ( List SMWellRight_Vector,
-		List SMWellRight_match_Vector, StateMod_WellRight wellr, int ifMatch )
+protected static void findAndAddSMWellRight ( List<StateMod_WellRight> SMWellRight_Vector,
+		List<String> SMWellRight_match_Vector, StateMod_WellRight wellr, int ifMatch )
 {	String id = wellr.getID(), routine = "StateDMI_Processor.findAndAddSMWellRight";
 
 	int pos = StateMod_Util.indexOf( SMWellRight_Vector, id );
@@ -155,8 +155,7 @@ protected static void findAndAddSMWellRight ( List SMWellRight_Vector,
 			int size = SMWellRight_Vector.size();
 			int pos2 = -1;
 			for ( int i = pos; i < size; i++ ) {
-				wer = (StateMod_WellRight)
-				SMWellRight_Vector.get(i);
+				wer = SMWellRight_Vector.get(i);
 				if ( wellr.getID().equalsIgnoreCase( wer.getID())
 					&& wellr.getCgoto().equalsIgnoreCase( wer.getCgoto())
 					&& wellr.getIrtem().equalsIgnoreCase( wer.getIrtem())
@@ -166,7 +165,7 @@ protected static void findAndAddSMWellRight ( List SMWellRight_Vector,
 				}
 			}
 			if ( pos2 >= 0 ) {
-				wer = (StateMod_WellRight)SMWellRight_Vector.get(pos2);
+				wer = SMWellRight_Vector.get(pos2);
 				wer.setDcrdivw ( wer.getDcrdivw() + wellr.getDcrdivw() );
 				Message.printStatus ( 2, routine,
 				"Incrementing decree for matched well right \"" + wellr.getID() + "\" to " +
@@ -1184,7 +1183,7 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 					"\" - WDID is requested so reading from HydroBase NetAmts table";
 			boolean positiveNetRateAbs = false;
 			boolean oldList = false;
-			List orderByList = null;
+			List<String> orderByList = null;
 			List<HydroBase_NetAmts> hbNetAmtsList = hdmi.readNetAmtsList(-1, wdidParts[0], wdidParts[1],
 				positiveNetRateAbs, orderByList, oldList );
 			// Further filter rights
@@ -1323,7 +1322,7 @@ StateCU_Location were processed.
 @param match_Vector list of strings containing the key id/name values that have matches.
 @param data_type String to use in messages to identify the data object type (e.g., "CU Locations").
 */
-protected static void warnAboutDataMatches ( String command, boolean replace, List match_Vector,
+protected static void warnAboutDataMatches ( String command, boolean replace, List<String> match_Vector,
 	String data_type )
 {	int size = match_Vector.size();
 
@@ -1338,7 +1337,7 @@ protected static void warnAboutDataMatches ( String command, boolean replace, Li
 	for (int i = 1; i < size; i++) {
 		matches.append ( ", " );
 		// Limit to "maxwidth" characters per line...
-		id = (String)match_Vector.get(i);
+		id = match_Vector.get(i);
 		// 2 is for the ", "
 		if ( (matches.length()%maxwidth + (id.length() + 2)) >= maxwidth) {
 			matches.append ( nl );

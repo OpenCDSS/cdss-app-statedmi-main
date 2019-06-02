@@ -220,7 +220,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "ListFile" );
 	valid_Vector.add ( "IDCol" );
 	valid_Vector.add ( "NameCol" );
@@ -325,9 +325,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     // Get the data needed for the command
     
-    List culocList = null;
+    List<StateCU_Location> culocList = null;
     try {
-		culocList = (List)processor.getPropContents ( "StateCU_Location_List" );
+    	@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents ( "StateCU_Location_List" );
+		culocList = dataList;
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );

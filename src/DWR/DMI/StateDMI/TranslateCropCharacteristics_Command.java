@@ -115,7 +115,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "OldCropType" );
 	valid_Vector.add ( "NewCropType" );
 	valid_Vector.add ( "IfNotFound" );
@@ -172,10 +172,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
 	// Get the list of crop characteristics...
 	
-	List cchList = null;
+	List<StateCU_CropCharacteristics> cchList = null;
 	int cchListSize = 0;
 	try {
-		cchList = (List)processor.getPropContents( "StateCU_CropCharacteristics_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_CropCharacteristics> dataList = (List<StateCU_CropCharacteristics>)processor.getPropContents( "StateCU_CropCharacteristics_List");
+		cchList = dataList;
 		cchListSize = cchList.size();
 	}
 	catch ( Exception e ) {

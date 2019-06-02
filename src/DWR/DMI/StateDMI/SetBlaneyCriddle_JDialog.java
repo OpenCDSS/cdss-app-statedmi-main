@@ -61,6 +61,7 @@ import RTi.Util.String.StringUtil;
 /**
 Editor for SetBlaneyCriddle() command.
 */
+@SuppressWarnings("serial")
 public class SetBlaneyCriddle_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener
 {
@@ -259,7 +260,7 @@ private void initialize (JFrame parent, SetBlaneyCriddle_Command command) {
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Curve Type:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List CurveType_Vector = new Vector();
+    List<String> CurveType_Vector = new Vector<String>(2);
 	CurveType_Vector.add ( __command._CurveType_DAY );
 	CurveType_Vector.add ( __command._CurveType_PERCENT );
 	__CurveType_JComboBox = new SimpleJComboBox(false);
@@ -273,7 +274,7 @@ private void initialize (JFrame parent, SetBlaneyCriddle_Command command) {
 	
    JGUIUtil.addComponent(main_JPanel, new JLabel ("Blaney-Criddle Method:"),
         0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-   List BlaneyCriddleMethod_Vector = new Vector();
+   List<String> BlaneyCriddleMethod_Vector = new Vector<String>(6);
    BlaneyCriddleMethod_Vector.add ( "" );
    BlaneyCriddleMethod_Vector.add ( __command._BLANEY_CRIDDLE_METHOD_0 );
    BlaneyCriddleMethod_Vector.add ( __command._BLANEY_CRIDDLE_METHOD_1 );
@@ -302,7 +303,7 @@ private void initialize (JFrame parent, SetBlaneyCriddle_Command command) {
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List IfNotFound_Vector = new Vector();
+    List<String> IfNotFound_Vector = new Vector<String>(5);
     IfNotFound_Vector.add ( "" );
 	IfNotFound_Vector.add ( __command._Add );
 	IfNotFound_Vector.add ( __command._Ignore );

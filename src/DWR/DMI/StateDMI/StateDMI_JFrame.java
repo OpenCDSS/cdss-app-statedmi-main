@@ -21,658 +21,6 @@ You should have received a copy of the GNU General Public License
 
 NoticeEnd */
 
-//-----------------------------------------------------------------------------
-// StateDMI_JFrame - main GUI to control StateDMI functions
-//-----------------------------------------------------------------------------
-// Copyright:  See the COPYRIGHT file.
-//-----------------------------------------------------------------------------
-// History:
-//
-// 10 Sep 2002	J. Thomas Sapienza, RTi	Initial version from older classes.
-// 11 Sep 2002	JTS, RTi		AWT -> Swing, slowly.
-// 12 Sep 2002	JTS, RTi		Commands list added, got image
-//					display to work.
-// 18 Sep 2002	JTS, RTi		Overhaul following recommendations from
-//					SAM.
-// 19 Sep 2002	JTS, RTi		Look and feel changed to Windows.
-//					PropList __props started for use with
-//					various JDialogs.  Lots of work getting
-//					the first query (DDS) to work.
-// 20 Sep 2002	JTS, RTi		JFileChooser used instead of
-//					FileDialogs.
-// 24 Sep 2002	JTS, RTi		GUI stuff related to TSP file added.
-// 25 Sep 2002	JTS, RTi		Javadoc'd.
-// 27 Sep 2002	JTS, RTi		CDS file stuff added.
-// 30 Sep 2002	JTS, RTi		WTS file stuff added.
-// 01 Sep 2002	JTS, RTi		KBC file stuff added.  Commands under
-//					the File menu were implemented.
-// 03 Oct 2002	JTS, RTi		Following several pages of comments
-//					from SAM, the following changes were
-//					made:
-//					"State DMI" changed to "StateDMI."
-//					"Commands:" label added above list.
-//					"Run Commands List" changed to
-//					"Run Commands" in Popup.  Diagnostics
-//					menu item added.  Help JDialog added.
-//					GeoViewPanel used instead of
-//					GeoViewJPanel.  Added a fileFilter
-//					for the open dialogs.  WES code added.
-// 2002-10-04	JTS, RTi		Blaney Criddle dialog gets queried
-//					for available methods.  Geoview panel
-//					open file implemented.
-// 2002-10-07	JTS, RTi		Changed the code to make the dialog
-//					independent of whatever frame it is
-//					placed in.  Also stores the db login
-//					information entered by the user for
-//					retrieval from the parent frame.
-//					Other costmetic changes to the layout,
-//					added a couple new menu items and
-//					improved the working directory code.
-// 2002-10-09	JTS, RTi		Added fillCULocation()
-// 2002-10-12	Steven A. Malers, RTi	Review and cleanup code before release.
-//					In particular:
-//					* alphabetize methods.
-//					* change DBLoginJDialog to
-//					  SelectHydroBaseJDialog and don't keep
-//					  around as a data member.
-//					* HydroBaseDMI is intantiated in the
-//					  dialog
-//					* Update the Help About dialog info. and
-//					  use a local copy of the dialog.
-//					* Add "StateMod -version" and
-//					  "StateCU -version" to the Run menu to
-//					  help users check their systems and
-//					  test the new ProcessManagerJDialog.
-//					* Don't use deprecated methods in Swing
-//					  components.
-//					* For actions that require browsing for
-//					  a directory, set up the JFileChooser
-//					  to only select directories.
-//					* Add a File...Session Properties item.
-//					* Don't use MutableJList - the design of
-//					  the Swing data models are intended to
-//					  eliminate the need for this.  Just use
-//					  the DefaultListModel which is
-//					  essentially a Vector.
-//					* getCommandsAboveSelected() was not
-//					  ported from TSTool correctly - the
-//					  behavior was not the same.
-//					* remove unneeded member data or make
-//					  local
-//					* let the SelectHydroBaseJDialog show
-//					  the remote host rather than being
-//					  passed in on the command line
-//					* Add a split pane for the GeoView and
-//					  the commands - later will add another
-//					  split pane for the tree.
-//					* Rename the Popup menu strings somewhat
-//					  to be more clear.
-//					* Make the StateDMIProcessor run on a
-//					  thread and add a Run...Cancel option.
-//					* Add all the general functionality from
-//					  TSTool, including cut/copy/paste,
-//					  select/desect all, etc.
-//					* Pass global HydroBase data (e.g.,
-//					  counties) to command editor dialogs
-//					  to facilitate use.
-//					* Reuse the fillCULocation_JDialog for
-//					  fillCULocation() and setCULocation().
-// 2002-11-12	JTS, RTi		SimpleFileFilter now imported from
-//					RTi.Util.GUI;
-// 2002-11-14	SAM, RTi		Change version to 01.01.00:
-//					* Add support for StateCU .cch file.
-// 2003-02-11	SAM, RTi		Finalize features for first official
-//					release.
-//					* Show the output period in the session
-//					  properties.
-//					* Finish .cch commands.
-//					* Finish .wts commands.
-//					* Finish .kbc commands.
-// 2003-03-06	SAM, RTi		* Finish initial cut of .cds commands.
-//					* Add basic .tsp commands.
-//					* Remove unused code - the features are
-//					  relatively complete pending a StateCU
-//					  review.
-//					* Add dummy StateMod menus to aid in the
-//					  overall evaluation of standards and
-//					  functionality.
-// 2003-04-22	SAM, RTi		Update to version 01.03.00.
-//					* Rework File menu to reflect that
-//					  StateDMI understands full data set,
-//					  including response/control files.
-//					* Pass in an argument to the constructor
-//					  indicating whether StateCU is running
-//					  for the StateCU or StateMod
-//					  application.
-//					* Change to use File...Save, Get Data,
-//					  Data, and Commands menus, sensitive
-//					  to the data set type and available
-//					  data.
-//					* Add an instance of CUDataSet to manage
-//					  the response file.
-//					* Change Climate Station Weights
-//					  throughout to Climate Stations - only
-//					  the new StateCU data set format will
-//					  be supported.
-//					* Change the TSP to IPY - more
-//					  appropriate.
-// 2003-05-21	SAM, RTi		* Use new Swing GeoView.
-// 2003-06-05	SAM, RTi		* Change name of class to
-//					  StateDMI_JFrame.
-//					* Update to use new StateCU_xxxx
-//					  classes.
-//					* Update to use new TS package.
-//					* Begin using new StateMod_xxxx
-//					  classes.
-//					* Put some attention into setting the
-//					  map properties correctly for the
-//					  StateCU spatial data layers.
-// 2003-06-16	SAM, RTi		* Change names on some data members to
-//					  be consistent with TSTool.
-//					* Phase out GUIUtil - replace with
-//					  JGUIUtil.
-//					* Access the map as part of a
-//					  GeoViewJFrame rather than embedding
-//					  in the main window.  This is
-//					  consistent with TSTool and enforces
-//					  the map/network as a power user tool.
-//					* Remove the Get Data menus and
-//					  related.  The new interface makes them
-//					  obsolete.  Change Data to Results.
-//					* Remove PAR file related code.
-// 2003-07-13	SAM, RTi		* Update to reflect RTi.Util.IO now
-//					  having DataSetComponent and DataSet
-//					  classes.
-// 2003-07-21	SAM, RTi		* From the Results menu, only keep the
-//					  main group menus since specific items
-//					  can be accessed from the results tree.
-// 2003-08-10	SAM, RTi		* Enable StateMod data sets to test
-//					  read-only displays developed for
-//					  StateMod and to allow for overall
-//					  development to continue.
-//					* Remove the StateMod HIST and CALC
-//					  menus in favor of the data set
-//					  components and groups.
-//					* Remove results info panel.
-// 2003-09-09	SAM, RTi		* Updated based on changes to the
-//					  StateMod package classes.
-// 2004-01-13	SAM, RTi		* Start developing with Java 1.4.2.
-//					* Add application icon.
-// 2004-02-19	SAM, RTi		* Remove the network display and
-//					  condense the data set tree into one
-//					  panel.
-//					* Change so when opening a data set,
-//					  the choice of response file or data
-//					  set file is in the file chooser - one
-//					  less level of menus.
-//					* Remove the __last_directory_selected
-//					  data member and use
-//					  JGUIUtil.setLastFileDialogDirectory()
-//					  and corresponding get method instead.
-//					* Add File...Properties and move the
-//					  HydroBase and data set submenus to
-//					  here.
-// 2004-02-24	SAM, RTi		* Add menus File...Switch to StateCU and
-//					  File...Switch to StateMod in
-//					  preparation of letting the user change
-//					  the application look without
-//					  restarting the software, having
-//					  separate batch files, or requiring
-//					  command line options.
-//					* Make run and clear buttons consistent
-//					  with TSTool.
-//					* Enable/disable the commands popup
-//					  menu in checkGUIState().
-//					* Allow commands files to be opened
-//					  without a data set.  This is an
-//					  interim fix until better understanding
-//					  about data set management can be
-//					  reached with the State.
-// 2004-02-25	SAM, RTi		* Enable readCULocationsFromList().
-// 					* Add setCULocationAggregate().
-//					* Add setCULocationClimate
-//					  StationWeightsFromList()
-// 2004-02-26	SAM, RTi		* Disable/enable menus better based on
-//					  whether command file only or a data
-//					  set is opened.
-//					* Add setCULocationClimate
-//					  StationWeightsFromList()
-//					* Change setCULocationAggregate() to
-//					  setWellAggregate(), setWellSystem(),
-//					  setDiversionAggregate(),
-//					  setDiversionSystem(), all of which use
-//					  setAggregate_JDialog.
-//					* Add readClimateStationsFromList().
-// 2004-02-28	SAM, RTi		* Add fillClimateStation().
-//					* Add setClimateStation().
-//					* Add fillClimateStationsFromHydroBase()
-//					* Add setCULocationClimate
-//					  StationWeightsFromHydroBase().
-// 2004-02-29	SAM, RTi		* Add disabled
-//					  setCULocationClimateStationWeights() -
-//					  might enable later.
-//					* Add aggregate/system commands under
-//					  the CropPatternTS menu.
-// 2004-03-01	SAM, RTi		* Add fillCropPatternTSProrateAgStats().
-//					* Add readAgStatsTSFromDateValue().
-// 2004-03-02	SAM, RTi		* Add readCropPatternTSFromDBF().
-//					* Enable setCropPattern().
-//					* Fix bug where
-//					  writeCULocationsToStateCU() command
-//					  editor was not coming up from the GUI.
-//					* Add translateCropPatternTS() command.
-// 2004-03-03	SAM, RTi		* Start enabling the irrigation practice
-//					  features.
-//					* Add removeCropPatternTS() command -
-//					  useful for removing USER-MEADOW.
-//					* Enable
-//					  readIrrigationPracticeTSFromStateCU().
-//					* Enable
-//					  writeIrrigationPracticeTSToStateCU().
-//					* Change setCropPattern() to
-//					  setCropPatternTS().
-//					* Add readSprinklerParcelsFromList().
-// 2004-03-08	SAM, RTi		* Add setDiversionAggregateFromList().
-// 					* Add setDiversionSystemFromList().
-// 					* Add setWellAggregateFromList().
-// 					* Add setWellSystemFromList().
-//					* Change setAggregate_JDialog to
-//					  setCollection_JDialog.
-// 2004-03-12	SAM, RTi		* Add readIrrigationPracticeWellData
-//					  FromList().
-// 2004-03-13	SAM, RTi		* Change the File...Open...Data Set menu
-//					  to indicate under development.
-//					* When opening a new commands file,
-//					  position the commands list scroll at
-//					  command 0.
-// 2004-03-14	SAM, RTi		* Add readCropPatternTSFromDBF() in the
-//					  StateCU IPY menu to get data to
-//					  associate with wells.
-//					* Start enabling the crop
-//					  characteristics menus and updating
-//					  the related command dialogs.
-// 2004-03-16	SAM, RTi		* Finish enabling crop characteristics
-//					  menus.
-//					* Enable Blaney-Criddle menus.
-// 2004-03-17	SAM, RTi		* Add stub menus for StateCU data files
-//					  created TSTool or taken directly from
-//					  a StateMod data set - this includes
-//					  the temperature, frost dates, and
-//					  precipitation climate time series,
-//					  diversion and well pumping time
-//					  series, and diversion rights.
-//					* Enable commands to process delay
-//					  tables and delay assignments.
-// 2004-03-22	SAM, RTi		* Enable commands to fill StateCU
-//					  irrigation practice time series.
-// 2004-03-23	SAM, RTi		* Update StateMod menus for current
-//					  data set organization.
-// 2004-03-24	SAM, RTi		* Add the StateMod network display.
-//					  This is a starting point to read
-//					  station/structure lists from the
-//					  network.
-//					* Enable switching between StateCU and
-//					  StateMod menus.
-// 2004-04-02	SAM, RTi		* Add fillCULocationsFromList() and
-//					  setCULocationFromList(), mainly
-//					  to allow AWC to be read from an old
-//					  PAR file.
-// 2004-04-05	SAM, RTi		* Add
-//					  setIrrigationPracticeTSFromStateCU()
-//					  for total acres.
-// 2004-04-08	SAM, RTi		Update to version 01.09.00 for official
-//					release to the State.
-//					* Add readCropPatternTSFromList().
-// 					* Move the
-//					  setIrrigationPracticeTSFromStateCU()
-//					  menu from before the write commands
-//					  to the location of other set commands.
-// 2004-04-10	SAM, RTi		Update to version 01.10.00.
-//					* Fix problems switching menus between
-//					  StateCU and StateMod.
-//					* The flag indicating whether output
-//					  was to be created was not being passed
-//					  to the processor - fix it.
-//					* Enable the data set properties in all
-//					  cases.  If only commands are being
-//					  processed, indicate that the items in
-//					  memory are not being managed as a data
-//					  set.
-// 2004-04-12	SAM, RTi		* Add StateMod menus for diversions to
-//					  illustrate processing.
-// 2004-05-17	SAM, RTi		* Remove readCropPatternTSFromList() -
-//					  it was never implemented.
-// 2004-05-25	SAM, RTi		* Add
-//					  fillCULocationClimateStationWeights()
-//					  at the request of Erin Wilson.
-//					* Update translateCropPatternTS() to
-//					  take optional list file.
-// 2004-05-28	SAM, RTi		* Add fillCropPatternTSConstant().
-// 2004-06-01	SAM, RTi		* Fill out StateMod file commands.
-// 2004-06-13	SAM, RTi		Continue filling out StateMod file:
-//					* Split the commands menu into two so
-//					  that menus fit better on the screen.
-//					  Put in instream flow and later into
-//					  the second menu.
-//					* Add General Commands to StateMod,
-//					  similar to StateCU commands menu.
-//					* Add commands to read StateMod delay
-//					  table files.
-//					* Share the dialog for writing delay
-//					  tables since the StateCU and StateMod
-//					  functionality is similar.
-//					* Add sortDiversionStations() to help
-//					  data order match previous work more
-//					  closely - will implement similar
-//					  commands for other data components.
-// 2004-06-17	SAM, RTi		Continue filling out StateMod file:
-//					* Enable diversion rights commands.
-//					* Enable diversion historical TS
-//					  commands.
-// 2004-06-23	SAM, RTi		Continue filling out StateMod file:
-//					* Enable river network commands.
-// 2004-06-30	SAM, RTi		Continue filling out StateMod files.
-//					* Enable stream estimate station
-//					  commands.
-//					* Use generic readFromStateMod(),
-//					  readFromList(), readFromNetwork()
-//					  dialogs where possible.
-// 2004-07-06	SAM, RTi		Continue filling out StateMod file:
-//					* Add sort*() for all StateMod station
-//					  files.
-// 2004-07-08	SAM, RTi		Continue filling out StateMod files:
-//					* Enable all major commands and dialogs.
-//					  A few time series remain.
-//					* Combine diversion and well fill/set
-//					  dialog.
-// 2004-07-09	SAM, RTi		Continue filling out StateMod files:
-//					* Add command to set instream flow
-//					  demand TS (average monthly) to 12
-//					  monthly values.
-//					* Combine the fill*StationsFromHydroBase
-//					  dialogs into
-//					  fillStationsFromHydroBase.
-// 2004-07-11	SAM, RTi		Continue filling out StateMod files:
-//					* Finalize RIS commands.
-//					* Finalize SES commands.
-//					* Finalize RIN commands.
-//					* Start RIB commands.
-// 2004-08-12	SAM, RTi		Continue filling out StateMod files:
-//					* Enable RIB commands.
-// 2004-08-15	SAM, RTi		Continue filling out StateMod files:
-//					* Finalize RIB commands.
-// 2004-08-16	SAM, RTi		Continue filling out StateMod files:
-//					* Finalize diversion files, in
-//					  particular to list the component menus
-//					  in the same order as the data set.
-//					* Finalize the diversion station
-//					  commands.
-// 2004-08-30	SAM, RTi		Continue filling out StateMod files:
-//					* Add
-//					  setDiversionStationCapacitiesFromTS.
-//					* Enable limitDiversionHistoricalTS
-//					  MonthlyToRights.
-// 2004-08-30	SAM, RTi		Continue filling out StateMod files:
-//					* When getting dynamic properties, run
-//					  commands in "partial" mode.
-//					* Finalize diversion demand commands.
-//					* Move some demand menus around to
-//					  reflect the order of processing.
-//					* Add setDiversionStation() under the
-//					  historical TS commands.
-// 2004-09-06	SAM, RTi		Continue filling out StateMod files:
-//					* For diversions, add MultiStruct
-//					  collection commands.
-//					* Add fill commands for monthly demands.
-// 2004-09-10	SAM, RTi		Continue filling out StateMod files:
-//					* Finalize reservoir commands.
-// 2004-09-16	SAM, RTi		Continue filling out StateMod files:
-//					* Finalize well station commands.
-// 2004-09-28	SAM, RTi		Continue filling out StateMod files:
-//					* Implement well rights commands.
-// 2004-10-04	SAM, RTi		* Enable the results menu and panel to
-//					  display output files.
-// 2004-11-01	SAM, RTi		* Add readIrrigationPracticeWellData
-//					  FromHydroBase() for IPY file.
-//					* Add readCropPatternTSFromHydroBase()
-//					  for IPY.
-//					* Change command popup menu
-//					  "Find Command(s)" to
-//					  "Find command(s) using substring" and
-//					  add "Find command using line number".
-// 2005-01-13	SAM, RTi		Update to version 1.16.03.
-//					* Add setDiversionHistorical
-//					  TSMonthlyConstant() to facilitate
-//					  NOT using replacement files.
-// 2005-01-18	SAM, RTi		Update to version 1.17.00.
-//					* Add displays for output components.
-//					* Resize some of the window areas to
-//					  reflect that the primary layout is for
-//					  commands processing.
-// 2005-01-24	SAM, RTi		* Add sortDiversionHistoricalTSMonthly()
-//					  command to the diversion historical
-//					  TS monthly component.
-//					* Fix some problems with select/deselect
-//					  all commands menus.
-// 2005-01-31	SAM, RTi		Update to version 1.17.03.
-//					* Change so instream flow demand TS
-//					  (average monthly) needs the output
-//					  year type, not the output period.
-// 2005-02-09	SAM, RTi		Update to version 1.17.07.
-//					* Add limitDiversionDemandTSMonthly
-//					  ToRights() command.
-// 2005-02-09	SAM, RTi		Update to version 1.17.08.
-//					* Move the above command to immediately
-//					  before the right.
-// 2005-02-14	SAM, RTi		Update to version 1.17.09.
-//					* Move the setDiversionDemandTSMonthly()
-//					  menu item after the
-//					  limitDiversionDemandTSMonthly
-//					  ToRights() menu item.
-// 2005-02-24	SAM, RTi		Update to version 1.17.10.
-//					* For IPY add synchronizeIrrigation
-//					  PracticeAndCropPatternTS() command.
-//					* Under the IPY add a
-//					  writeCropPatternTSToStateCU() command
-//					  to write after the synchronization.
-// 2005-02-27	SAM, RTi		* Rename readSprinklerParcelsFromList to
-//					  readIrrigationPracticeTSSprinkler
-//					  ParcelsFromList.
-//					* Reorder the irrigation practice TS
-//					  menu items to match the columns of the
-//					  file.
-//					* Rename readIrrigationPracticeWellData
-//					  FromList to
-//					  readIrrigationPracticeTSWellData
-//					  FromList.
-// 2005-02-28	SAM, RTi		* Add setIrrigationPracticeMaxPumping
-//					  ToRights and remove
-//					  readIrrigationPracticeWellData*.
-//					* Add a Tools menu to Compare Files to
-//					  simplify comparing well water rights.
-//					  Later evaluate if this needs expanded.
-// 2005-03-07	SAM, RTi		* Add readIrrigationPracticeTS
-//					  GroundwaterAcresFromHydroBase().
-//					* Add readIrrigationPracticeTS
-//					  SprinklerAcresFromHydroBase().
-//					* Add sortCULocations().
-// 2005-03-13	SAM, RTi		* Add sort*Right() for StateMod
-//					  diversion, reservoir, instream flow,
-//					  and well rights.
-//					* Change the position of existing sort
-//					  commands to be after sets.
-// 2005-03-21	SAM, RTi		Update to version 1.17.11.
-//					* Simplify the list of IPY commands
-//					  because the commands do more.
-//					* Remove readIrrigationPracticeTS
-//					  SprinklerAreaFromHydroBase().
-//					* Remove readIrrigationPracticeTS
-//					  GroundwaterAreaFromHydroBase().
-//					* Comment out setIrrigationPracticeTS
-//					  MaxPumpingToRights().
-//					* Change readIrrigationPracticeTS
-//					  SprinklerParcelsFromList() to
-//					  setIrrigationPracticeTSSPrinklerArea
-//					  FromList().
-// 2005-03-22	SAM, RTi		* Re-enable setIrrigationPracticeTS
-//					  MaxPumpingToRights().
-// 2005-03-23	SAM, RTi		* Implement MessageLogListener.
-//					* For output display components, list
-//					  StateCU and StateMod components in
-//					  separate lists so that the application
-//					  type does not need to be known.  Clean
-//					  up the displays to be functional.
-//					* Fix the results comboboxes to use
-//					  action listeners to make event
-//					  handling more intuitive.
-// 2005-03-28	SAM, RTi		Update to version 1.17.12.
-//					* Enable and review the results
-//					  displays - instream flow and later
-//					  need a few corrections.
-//					* Update the message viewer event
-//					  handling to work better.
-// 2005-04-05	SAM, RTi		Update to version 1.17.12.
-//					* Final cleanup on some ISF, Reservoir,
-//					  Well, and network displays.
-//					* Update to reflect changes to the
-//					  timeSeriesSelected() method.
-// 2005-04-08	JTS, RTi		New model networks can now be created.
-// 2005-04-11	JTS, RTi		"New Model Network" moved under the
-//					"New" menu.
-// 2005-04-13	JTS, RTi		* Added menu items for writing objects
-//					  to list files.
-// 2005-05-02	SAM, RTi		* Reexecute Rio Grande file creation
-//					  verification.  During that process,
-//					  evaluate and clean up warning messages
-//					  for commands to be consistent with the
-//					  current standards for message
-//					  handling.
-// 2005-05-20	SAM, RTi		* Add startLog() command.
-//					* Use new CommandProcessor logic for
-//					  editing new commands.
-//					* Add sortBlaneyCriddle() to facilitate
-//					  comparing old and new files.
-//					* Change the font for commands to be
-//					  Courier to make comments line up.
-//					  This was also done to TSTool.
-// 2005-05-24	JTS, RTi		Corrected bug in writeCommandsFile()
-//					that was not setting the current dialog
-//					directory properly when files were
-//					saved without prompting.
-// 2005-06-08	SAM, RTi		Updated to version 01.17.14.
-//					* Add openHydroBase() to facilitate
-//					  testing.
-// 2005-06-15	SAM, RTi		* Check the message length for the
-//					  status bar and shorten if necessary to
-//					  prevent conflict with the progress
-//					  bar.
-// 2005-06-28	SAM, RTi		Updated to version 01.17.15.
-// 2005-07-16	SAM, RTi		Updated to version 01.17.16.
-//					* Add a tool to print surface-only
-//					  structure list to the log file.
-// 2005-08-11	SAM, RTi		Updated to version 01.17.19.
-// 2005-08-11	SAM, RTi		* Add ability to jump to a command tag
-//					  of "EndChecks", used when performing
-//					  final checks on the data set.
-// 2005-09-09	SAM, RTi		Update to version 01.17.20.
-//					* Put separator in front of StateMod
-//					  diversion demand set commands.
-//					* Add
-//					  setDiversionDemandTSMonthlyConstant.
-// 2005-10-03	SAM, RTi		Update to version 01.18.00.
-//					* Finalize list commands and do an
-//					  official release.
-//					* Reverse the "Run All Commands" and
-//					  "Run Selected Commands" buttons.
-// 2005-10-04	JTS, RTI		* Added a toolbar at the top of the main
-//					  JFrame.  This toolbar contains buttons
-//					  for creating a commands file, opening
-//					  a commands file, and saving a commands
-//					  file.  The buttons have associated
-//					  icons and alternate text, should the
-//					  icons not be found in the Jar file on
-//					  on the local drive.
-// 2005-10-05	SAM, RTi		* Add a complete menu for the Well
-//					  Historical Time Series (Monthly) data.
-// 2005-10-10	SAM, RTi		Update to version 01.18.01.
-//					* Change so double-click on command
-//					  edits the command.
-// 2005-10-13	SAM, RTi		Update to version 01.18.03.
-//					* Fix where one well menu had
-//					  "Well Historical TS Monthly" (Pumping)
-//					  was omitted.
-// 2005-11-03	SAM, RTi		Update to version 01.18.05.
-//					* Add setDiversionStationsFromList(),
-//					  and setWellStationsFromList().
-//					* Add readDiversionHistoricalTSMonthly
-//					  FromStateMod() under diversion
-//					  historical TS Monthly - previously it
-//					  was only listed under demands.
-//					* Rearrange general commands slightly
-//					  to put startLog() in the same group
-//					  as setDebugLevel(), etc.
-//					* Add a general command
-//					  mergeListFileColumns().
-// 2005-11-21	SAM, RTi		Update to version 01.18.06.
-//					* Add readDiversionDemandTSMonthly
-//					  FromStateMod() under the demand menu.
-// 2005-11-23	SAM, RTi		Update to version 01.18.07.
-//					* Move mergeListFileColumns() to a
-//					  command class and add as a tool.
-// 2005-12-06	SAM, RTi		Update to version 1.18.08:
-//					* Add
-//					  fillDiversionStationsFromNetwork(),
-//					  fillInstreamFlowStationsFromNetwork(),
-//					  fillReservoirStationsFromNetwork(),
-//					  fillWellStationsFromNetwork().
-// 2006-01-01	SAM, RTi		* Change "New Model Network" to just
-//					  "Model Network" since "New" is
-//					  redundant with the parent menu.
-// 2006-01-11	SAM, RTi		* Fix bug where space in setWorkingDir()
-//					  caused an exception.  The diretory
-//					  with a space was not being quoted in
-//					  the StateDMI_JFrame class.
-// 2006-03-10	SAM, RTi		* Add exit command.
-// 2006-04-10	SAM, RTi		Update to version 01.20.00.
-//					* Add tooltips to main GUI buttons.
-//					* Set the commands file name in the
-//					  processor so that the check file can
-//					  be written.
-// 2006-04-30	SAM, RTi		Update to version 01.20.02.
-//					* If no messages are available for the
-//					  check file, still create the file but
-//					  with a general OK message.
-//					* Add translateCropCharacteristics().
-//					* Add translateBlaneyCriddle().
-// 2006-06-12				Update to version 01.20.03.
-//					* Add read*FromList() commands to menus
-//					  that through oversight did not have
-//					  the menus.
-//					* Change so that StateDMI_Processor to
-//					  setup the working directory does not
-//					  result in log file messages or a
-//					  popup saying that the run was
-//					  successful.
-// 2006-06-12				Update to version 01.20.04.
-//					* Add read*FromList() menus for stream
-//					  estimate coefficients.
-// 2006-06-27				Update to version 01.20.05.
-//					* Fix problem where sort commands were
-//					  not properly handling a recent change
-//					  in the command dialog.
-// 2007-01-10	KAT, RTi	Added menu items and support for new
-//						command "sortCropCharacteristics".
-//						Add compareFiles() to menus.
-// 2007-03-05	SAM, RTi	Kurt previous took out the hidden insert of
-//						setWorkingDir().  This threw off the command indexing
-//						in the log viewer.  Fixed by romoving the -1 offset
-//						when calculating the line in goToMessageTag().
-// 2007-04-07	KAT, RTi 	Converting the old way of viewing check files with
-//						Notepad to viewing the new HTML check file with a JEditor
-//						Pane.
-//-----------------------------------------------------------------------------
-// EndHeader
-
 package DWR.DMI.StateDMI;
 
 import java.awt.BorderLayout;
@@ -708,7 +56,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
@@ -890,6 +237,7 @@ import DWR.DMI.HydroBaseDMI.HydroBase_Util;
 Main graphical user interface (GUI) class for StateDMI.  The interface provides
 menus and tools to help create files for StateCU and StateMod.
 */
+@SuppressWarnings("serial")
 public class StateDMI_JFrame extends JFrame
 implements
 ActionListener,
@@ -1055,6 +403,7 @@ private JWorksheet __list_JWorksheet = null;
 /**
 Table model for the list
 */
+@SuppressWarnings("rawtypes")
 private JWorksheet_AbstractRowTableModel __list_TableModel = null;
 
 // Commands-related....
@@ -1106,7 +455,7 @@ private AnnotatedCommandJList __commands_AnnotatedCommandJList;
 Commands JList, to support interaction such as selecting and popup menus.
 This is a reference to the JList managed by AnnotatedList (and also the legacy string list).
 */
-private JList __commands_JList;
+private JList<String> __commands_JList;
 
 /**
 Fixed-width font - courier for report output
@@ -1126,7 +475,7 @@ private StateDMI_Processor_ListModel __commands_JListModel;
 Buffer to hold commands manipulated by cut/copy/paste - note that this is
 maintained internally and is not the same as the operating system cut/copy/paste buffer.
 */
-private List __commandsCutBuffer = new Vector (100,100);
+private List<Command> __commandsCutBuffer = new Vector<Command>(100,100);
 
 // Results-related...
 
@@ -1151,12 +500,12 @@ private JTabbedPane __results_JTabbedPane;
 List of results output files for viewing with an editor.  This includes StateCU AND
 StateMod files (unlike data components, which are listed by model).
 */
-private JList __resultsOutputFiles_JList = null;
+private JList<String> __resultsOutputFiles_JList = null;
 /**
 JList data model for final time series (basically a Vector of
 filenames associated with __resultsOutputFiles_JList).
 */
-private DefaultListModel __resultsOutputFiles_JListModel = null;
+private DefaultListModel<String> __resultsOutputFiles_JListModel = null;
 
 /**
 Worksheet that contains a list of problems from processing.
@@ -1166,22 +515,22 @@ private JWorksheet __resultsProblems_JWorksheet = null;
 /**
 List of results components for viewing with JWorksheets, for StateCU components.
 */
-private JList __resultsStateCUComponents_JList = null;
+private JList<String> __resultsStateCUComponents_JList = null;
 /**
 JList data model for StateCU components (basically a Vector of
 component names associated with __resultsStateCUComponents_JList).
 */
-private DefaultListModel __resultsStateCUComponents_JListModel = null;
+private DefaultListModel<String> __resultsStateCUComponents_JListModel = null;
 
 /**
 List of results components for viewing with JWorksheets, for StateMod components.
 */
-private JList __resultsStateModComponents_JList = null;
+private JList<String> __resultsStateModComponents_JList = null;
 /**
 JList data model for StateCU components (basically a Vector of
 component names associated with __resultsStateModComponents_JList).
 */
-private DefaultListModel __resultsStateModComponents_JListModel = null;
+private DefaultListModel<String> __resultsStateModComponents_JListModel = null;
 
 /**
 List of results tables for viewing with an editor.
@@ -1191,7 +540,7 @@ private JList<String> __resultsTables_JList = null;
 /**
 Popup menu for table results.
 */
-private JPopupMenu __resultsTables_JPopupMenu = null;
+//private JPopupMenu __resultsTables_JPopupMenu = null;
 
 /**
 JList data model for final time series (a list of table identifiers associated with __results_tables_JList).
@@ -1202,9 +551,9 @@ private DefaultListModel<String> __resultsTables_JListModel;
 List of time series selectors and associated component types, maintained
 to look up graph properties.
 */
-List TS_ListSelector_JFrame_Vector = new Vector();
-List TS_ListSelector_JFrame_app_type_Vector = new Vector();
-List TS_ListSelector_JFrame_comp_type_Vector = new Vector();
+List<TS_ListSelector_JFrame>  TS_ListSelector_JFrame_Vector = new Vector<TS_ListSelector_JFrame>();
+List<Integer> TS_ListSelector_JFrame_app_type_Vector = new Vector<Integer>();
+List<Integer> TS_ListSelector_JFrame_comp_type_Vector = new Vector<Integer>();
 
 /**
 Worksheet that contains a list of processor properties.
@@ -1780,7 +1129,7 @@ private JMenuItem
 // Commands Menu for StateMod...
 
 private JMenu
-__Commands_StateMod_ControlData_JMenu,
+//__Commands_StateMod_ControlData_JMenu,
 __Commands_StateMod_Response_JMenu;
 private JMenuItem
 __Commands_StateMod_Response_ReadResponseFromStateMod_JMenuItem,
@@ -1790,9 +1139,9 @@ __Commands_StateMod_Control_JMenu;
 private JMenuItem
 __Commands_StateMod_Control_ReadControlFromStateMod_JMenuItem,
 __Commands_StateMod_Control_WriteControlToStateMod_JMenuItem;
-private JMenuItem
-__Commands_StateMod_OutputRequest_JMenuItem,
-__Commands_StateMod_ReachData_JMenuItem;
+//private JMenuItem
+//__Commands_StateMod_OutputRequest_JMenuItem,
+//__Commands_StateMod_ReachData_JMenuItem;
 
 // Stream Gage Data
 // Stream Gage Stations
@@ -2291,25 +1640,25 @@ Region1 strings for use with StateCU.  These are initialized in editCommand()
 and are therefore only used when editing - later need to possibly initialize based on
 a command.  For now default region1 to County and region2 to HUC from HydroBase.
 */
-private List __region1_Vector = null;
-private List __region2_Vector = null;		
+private List<String> __region1_Vector = null;
+private List<Integer> __region2_Vector = null;		
 						
 /**
 Valid Cropchar CU methods from HydroBase.  These are used when selecting data for the StateCU CCH file.
 */		
-private List __cropcharCuMethod_Vector = null;
+private List<String> __cropcharCuMethod_Vector = null;
 
 /**
 Valid BlaneyCriddle CU methods from HydroBase.  These are used when selecting
 data for the StateCU KBC files.
 */
-private List __blaneyCriddleCuMethod_Vector = null;
+private List<String> __blaneyCriddleCuMethod_Vector = null;
 
 /**
 Valid PenManMontieth CU methods from HydroBase.  These are used when selecting
 data for the StateCU KPM files.
 */
-private List __penmanMonteithCuMethod_Vector = null;
+private List<String> __penmanMonteithCuMethod_Vector = null;
 
 // Strings representing commands and options in the various menus and buttons,
 // listed from left to right and top to bottom as they appear in the interface.
@@ -7530,23 +6879,6 @@ private void dataSet_UpdateList()
 	}
 }
 
-/**
-Finalize before garbage collection.
-@exception Throwable if there is an error.
-*/
-protected void finalize ()
-throws Throwable
-{	__cropcharCuMethod_Vector = null;
-	__blaneyCriddleCuMethod_Vector = null;
-	__region1_Vector = null;
-	__region2_Vector = null;
-	__toolBar = null;
-	__toolBarNewButton = null;
-	__toolBarOpenButton = null;
-	__toolBarSaveButton = null;
-	super.finalize();
-}
-
 //TODO smalers 2018-08-28 in the future may need a lookup file to ensure portability
 //of documentation across software versions but for now assume the organization.
 /**
@@ -8073,7 +7405,7 @@ private void results_Clear()
 /**
 Copy a time series list and add a total, for displays.  Only the list is
 copied, but not the data in the time series.
-@param tslist a list of time series to process.
+@param tslist a list of time series to process, of consistent interval.
 @param app_type Application type.
 @param comp_type Component type, used to determine the units and other
 information for the total time series.
@@ -8082,11 +7414,11 @@ information for the total time series.
 @param dataset_location the description to use for the total time series.
 @exception Exception if an error occurs creating the total time series.
 */
-private List results_CopyTSVectorAndAddTotal ( List<TS> tslist, int app_type, int comp_type,
+private <T extends TS> List<T> results_CopyTSVectorAndAddTotal ( List<T> tslist, int app_type, int comp_type,
 	String dataset_location, String dataset_datasource, String dataset_description )
 throws Exception
 {	int vsize = tslist.size();
-	List<TS> v = new Vector ( vsize );
+	List<T> v = new Vector<T> ( vsize );
 	for ( int i = 0; i < vsize; i++ ) {
 		v.add ( tslist.get(i) );
 	}
@@ -8106,7 +7438,7 @@ throws Exception
 
 /**
 Display time series results.
-@param tslist lsit of TS to display.
+@param tslist list of TS to display.
 @param initial_view "Graph", "Table", or "Summary", for the initial view of the time series.
 @param app_type Application type for the component.
 @param comp_type Component type for the time series.
@@ -9922,6 +9254,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_RESERVOIR_STATION_ACCOUNTS))){
 		new StateMod_ReservoirAccount_Data_JFrame(
+			// TODO smalers 2019-06-01 need to evaluate whether stations or accounts should be passed.
 			__statedmiProcessor.getStateModReservoirStationList(), titleString, editable );
 	}
 
@@ -10220,8 +9553,8 @@ private void ui_InitGUI ()
 	Insets insetsNLNR = new Insets(0,buffer,0,buffer);
 	Insets insetsNNNR = new Insets(0,0,0,buffer);
 	Insets insetsNLNN = new Insets(0,buffer,0,0);
-	Insets insetsNLBR = new Insets(0,buffer,buffer,buffer);
-	Insets insetsTLNR = new Insets(buffer,buffer,0,buffer);
+	//Insets insetsNLBR = new Insets(0,buffer,buffer,buffer);
+	//Insets insetsTLNR = new Insets(buffer,buffer,0,buffer);
 	Insets insetsNNNN = new Insets(0,0,0,0);
 	GridBagLayout gbl = new GridBagLayout();
 	
@@ -10587,9 +9920,9 @@ private void ui_InitGUI ()
  // Results: properties...
     JPanel resultsProperties_JPanel = new JPanel();
     resultsProperties_JPanel.setLayout(gbl);
-    PropList_TableModel<PropList> propsTableModel = null;
+    PropList_TableModel propsTableModel = null;
     try {
-        propsTableModel = new PropList_TableModel<PropList>(new PropList("processor"),false,false);
+        propsTableModel = new PropList_TableModel(new PropList("processor"),false,false);
         propsTableModel.setKeyColumnName("Property Name");
         propsTableModel.setValueColumnName("Property Value");
     }
@@ -13006,13 +12339,14 @@ private void ui_InitGUIMenus_Commands_Table ( JMenuBar menuBar, int style ) {
 		__Commands_Table_JMenu.setToolTipText("Insert command into commands list (above first selected command, or at end).");
 	}
 
-	boolean show_all_commands = false; // True indicates that a command file has been opened directly.
+	// TODO evaluate whether needed
+	//boolean show_all_commands = false; // True indicates that a command file has been opened directly.
 	if ( (__statecuDatasetType == StateCU_DataSet.TYPE_UNKNOWN) && (__statecuDataset == null) ) {
 		// Startup or user is editing commands directly without a data
 		// set.  If at initialization, all menus will be available but
 		// will be disabled.  If a command file is opened directly,
 		// then the GUI state will be checked and menus will be enabled.
-		show_all_commands = true;
+		//show_all_commands = true;
 	}
 
 	// Response file submenu... (will there be commands?).
@@ -14234,7 +13568,7 @@ made a decision to work with a datastore.  If they subsequently choose to work w
 they would select an input and the datastore choice would be blanked.
 */
 private void uiAction_DataStoreChoiceClicked()
-{   String routine = getClass().getSimpleName() + ".uiAction_DataStoreChoiceClicked";
+{   //String routine = getClass().getSimpleName() + ".uiAction_DataStoreChoiceClicked";
     /*if ( __dataStore_JComboBox == null ) {
         if ( Message.isDebugOn ) {
             Message.printDebug ( 1, routine, "Datastore has been selected but GUI is not yet initialized - no action taken in response to datastore selection.");
@@ -14973,7 +14307,7 @@ private void uiAction_PasteFromCutBufferToCommandList ()
 
 	Command command = null;
 	for ( int i = 0; i < buffersize; i++ ) {
-		command = (Command)__commandsCutBuffer.get(i);
+		command = __commandsCutBuffer.get(i);
 		commandList_InsertCommandAt ( command, (last_selected + 1 + i) );
 	}
 
@@ -15368,11 +14702,19 @@ private void uiAction_RunCommands_ShowResultsOutputFiles()
 Display the list of problems from the commands.
 */
 private void uiAction_RunCommands_ShowResultsProblems()
-{	String routine = getClass().getName() + ".uiAction_RunCommands_ShowResultsProblems";
+{	String routine = getClass().getSimpleName() + ".uiAction_RunCommands_ShowResultsProblems";
 	//Message.printStatus ( 2, routine, "Entering method.");
 	try {
 		// Get all of the command log messages from all commands for all run phases...
-		List logRecordList = CommandStatusUtil.getLogRecordList ( __statedmiProcessor.getCommands(), null, null );
+        List commands = __statedmiProcessor.getCommands();
+        // For normal commands, the log records will be for the specific command.
+        // For RunCommand() commands, the log records will include commands in the command file that was run.
+        CommandPhaseType [] commandPhases = { CommandPhaseType.RUN }; // If show discovery it can be confusing with ${Property}, etc.
+        CommandStatusType [] statusTypes = new CommandStatusType[2];
+        // List failures first
+        statusTypes[0] = CommandStatusType.FAILURE;
+        statusTypes[1] = CommandStatusType.WARNING;
+		List logRecordList = CommandStatusUtil.getLogRecordList ( commands, commandPhases, statusTypes );
 		Message.printStatus( 2, routine, "There were " + logRecordList.size() + " problems processing the commands.");
 		// Create a new table model for the problem list.
 		// TODO SAM 2009-03-01 Evaluate whether should just update data in existing table model (performance?)

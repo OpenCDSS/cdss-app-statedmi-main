@@ -88,7 +88,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(2);
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "IfNotFound" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
@@ -146,11 +146,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of climate stations...
 	
-	List stationList = null;
+	List<StateCU_ClimateStation> stationList = null;
 	int stationListSize = 0;
 	try {
-		Object o = processor.getPropContents( "StateCU_ClimateStation_List");
-		stationList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_ClimateStation> dataList = (List<StateCU_ClimateStation>)processor.getPropContents( "StateCU_ClimateStation_List");
+		stationList = dataList;
 		stationListSize = stationList.size();
 	}
 	catch ( Exception e ) {

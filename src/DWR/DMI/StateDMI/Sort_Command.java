@@ -29,10 +29,27 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
+import DWR.StateCU.StateCU_BlaneyCriddle;
+import DWR.StateCU.StateCU_ClimateStation;
+import DWR.StateCU.StateCU_CropCharacteristics;
+import DWR.StateCU.StateCU_CropPatternTS;
+import DWR.StateCU.StateCU_IrrigationPracticeTS;
+import DWR.StateCU.StateCU_Location;
+import DWR.StateCU.StateCU_PenmanMonteith;
 import DWR.StateCU.StateCU_Util;
+import DWR.StateMod.StateMod_Diversion;
+import DWR.StateMod.StateMod_DiversionRight;
+import DWR.StateMod.StateMod_InstreamFlow;
+import DWR.StateMod.StateMod_InstreamFlowRight;
+import DWR.StateMod.StateMod_Reservoir;
+import DWR.StateMod.StateMod_ReservoirRight;
 import DWR.StateMod.StateMod_Right_Comparator;
+import DWR.StateMod.StateMod_StreamEstimate;
+import DWR.StateMod.StateMod_StreamGage;
 import DWR.StateMod.StateMod_Util;
-import RTi.TS.TSUtil;
+import DWR.StateMod.StateMod_Well;
+import DWR.StateMod.StateMod_WellRight;
+import RTi.TS.MonthTS;
 import RTi.TS.TSUtil_SortTimeSeries;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
@@ -129,7 +146,7 @@ throws InvalidCommandParameterException
     }
     
 	// Check for invalid parameters...
-	Vector valid_Vector = new Vector();
+	Vector<String> valid_Vector = new Vector<String>(2);
 	valid_Vector.add ( "Order" );
 	if ( this instanceof SortWellRights_Command ) {
 		valid_Vector.add ( "Order2" );
@@ -218,170 +235,127 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     // Get the data needed for the command
     
-    List dataList = null;
+    // List<? extends StateMod_Data> dataList = null;
     try {
-    	Object o = null;
+    	//Object o = null;
     	if ( this instanceof SortBlaneyCriddle_Command ) {
-			o = processor.getPropContents ( "StateCU_BlaneyCriddle_List" );
-		}
-    	else if ( this instanceof SortPenmanMonteith_Command ) {
-			o = processor.getPropContents ( "StateCU_PenmanMonteith_List" );
-		}
-    	else if ( this instanceof SortClimateStations_Command ) {
-			o = processor.getPropContents ( "StateCU_ClimateStation_List" );
-		}
-		else if( this instanceof SortCropCharacteristics_Command ) {
-			o = processor.getPropContents ( "StateCU_CropCharacteristics_List" );
-	    }
-		else if( this instanceof SortCropPatternTS_Command ) {
-			o = processor.getPropContents ( "StateCU_CropPatternTS_List" );
-	    }
-		else if( this instanceof SortIrrigationPracticeTS_Command ) {
-			o = processor.getPropContents ( "StateCU_IrrigationPracticeTS_List" );
-	    }
-		else if ( this instanceof SortCULocations_Command ) {
-			o = processor.getPropContents ( "StateCU_Location_List" );
-		}
-	    else if ( this instanceof SortDiversionStations_Command) {
-	    	o = processor.getPropContents ( "StateMod_DiversionStation_List" );
-	    }
-	    else if ( this instanceof SortDiversionRights_Command ) {
-    		o = processor.getPropContents ( "StateMod_DiversionRight_List" );
-    	}
-    	else if ( this instanceof SortDiversionHistoricalTSMonthly_Command ) {
-    		o = processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
-    	}
-    	else if ( this instanceof SortDiversionDemandTSMonthly_Command ) {
-    		o = processor.getPropContents ( "StateMod_DiversionDemandTSMonthly_List" );
-    	}
-    	else if ( this instanceof SortReservoirStations_Command ) {
-    		o = processor.getPropContents ( "StateMod_ReservoirStation_List" );
-    	}
-    	else if ( this instanceof SortReservoirRights_Command ) {
-    		o = processor.getPropContents ( "StateMod_ReservoirRight_List" );
-    	}
-    	else if ( this instanceof SortInstreamFlowStations_Command ) {
-    		o = processor.getPropContents ( "StateMod_InstreamFlowStation_List" );
-    	}
-    	else if ( this instanceof SortInstreamFlowRights_Command ) {
-    		o = processor.getPropContents ( "StateMod_InstreamFlowRight_List" );
-    	}
-    	else if ( this instanceof SortStreamEstimateStations_Command ) {
-    		o = processor.getPropContents ( "StateMod_StreamEstimateStation_List" );
-    	}
-    	else if ( this instanceof SortStreamGageStations_Command ) {
-    		o = processor.getPropContents ( "StateMod_StreamGageStation_List" );
-    	}
-    	else if ( this instanceof SortWellStations_Command ) {
-    		o = processor.getPropContents ( "StateMod_WellStation_List" );
-    	}
-    	else if ( this instanceof SortWellRights_Command ) {
-    		o = processor.getPropContents ( "StateMod_WellRight_List" );
-    	}
-    	else if ( this instanceof SortWellHistoricalPumpingTSMonthly_Command ) {
-    		o = processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
-    	}
-    	else if ( this instanceof SortWellDemandTSMonthly_Command ) {
-    		o = processor.getPropContents ( "StateMod_WellDemandTSMonthly_List" );
-	    }
-		if ( o != null ) {
-			dataList = (List)o;
-		}
-    }
-    catch ( Exception e ) {
-        Message.printWarning ( log_level, routine, e );
-        message = "Error requesting data to sort (" + e + ").";
-        Message.printWarning ( warning_level, 
-        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-        status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.FAILURE,
-            message, "Report to software support.  See log file for details." ) );
-    }
-    
-    if ( warning_count > 0 ) {
-        message = "There were " + warning_count + " warnings about command input.";
-        Message.printWarning ( warning_level, 
-        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-        throw new InvalidCommandParameterException ( message );
-    }
-
-    try {
-    	List sortedDataList = null;
-    	if ( this instanceof SortBlaneyCriddle_Command ) {
-			sortedDataList = StateCU_Util.sortStateCUDataList( dataList, false );
+			@SuppressWarnings("unchecked")
+			List<StateCU_BlaneyCriddle> dataList = (List<StateCU_BlaneyCriddle>)processor.getPropContents ( "StateCU_BlaneyCriddle_List" );
+			List<StateCU_BlaneyCriddle> sortedDataList = StateCU_Util.sortStateCUDataList( dataList, false );
 			processor.setPropContents( "StateCU_BlaneyCriddle_List", sortedDataList);
 		}
     	else if ( this instanceof SortPenmanMonteith_Command ) {
-			sortedDataList = StateCU_Util.sortStateCUDataList( dataList, false );
+			@SuppressWarnings("unchecked")
+			List<StateCU_PenmanMonteith> dataList = (List<StateCU_PenmanMonteith>)processor.getPropContents ( "StateCU_PenmanMonteith_List" );
+			List<StateCU_PenmanMonteith> sortedDataList = StateCU_Util.sortStateCUDataList( dataList, false );
 			processor.setPropContents( "StateCU_PenmanMonteith_List", sortedDataList);
 		}
     	else if ( this instanceof SortClimateStations_Command ) {
-			sortedDataList = StateCU_Util.sortStateCUDataList( dataList, false );
+			@SuppressWarnings("unchecked")
+			List<StateCU_ClimateStation> dataList = (List<StateCU_ClimateStation>)processor.getPropContents ( "StateCU_ClimateStation_List" );
+			List<StateCU_ClimateStation> sortedDataList = StateCU_Util.sortStateCUDataList( dataList, false );
 			processor.setPropContents( "StateCU_ClimateStation_List", sortedDataList);
 		}
-		else if ( this instanceof SortCropCharacteristics_Command ) {
-			sortedDataList = StateCU_Util.sortStateCUDataList( dataList, false );
+		else if( this instanceof SortCropCharacteristics_Command ) {
+			@SuppressWarnings("unchecked")
+			List<StateCU_CropCharacteristics> dataList = (List<StateCU_CropCharacteristics>)processor.getPropContents ( "StateCU_CropCharacteristics_List" );
+			List<StateCU_CropCharacteristics> sortedDataList = StateCU_Util.sortStateCUDataList( dataList, false );
   			processor.setPropContents( "StateCU_CropCharacteristics_List", sortedDataList);
-		}
-		else if ( this instanceof SortCropPatternTS_Command ) {
-			sortedDataList = StateCU_Util.sortStateCUDataList( dataList, false );
+	    }
+		else if( this instanceof SortCropPatternTS_Command ) {
+			@SuppressWarnings("unchecked")
+			List<StateCU_CropPatternTS> dataList = (List<StateCU_CropPatternTS>)processor.getPropContents ( "StateCU_CropPatternTS_List" );
+			List<StateCU_CropPatternTS> sortedDataList = StateCU_Util.sortStateCUDataList( dataList, false );
   			processor.setPropContents( "StateCU_CropPatternTS_List", sortedDataList);
-		}
-		else if ( this instanceof SortIrrigationPracticeTS_Command ) {
-			sortedDataList = StateCU_Util.sortStateCUDataList( dataList, false );
+	    }
+		else if( this instanceof SortIrrigationPracticeTS_Command ) {
+			@SuppressWarnings("unchecked")
+			List<StateCU_IrrigationPracticeTS> dataList = (List<StateCU_IrrigationPracticeTS>)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List" );
+			List<StateCU_IrrigationPracticeTS> sortedDataList = StateCU_Util.sortStateCUDataList( dataList, false );
   			processor.setPropContents( "StateCU_IrrigationPracticeTS_List", sortedDataList);
-		}
+	    }
 		else if ( this instanceof SortCULocations_Command ) {
-			sortedDataList = StateCU_Util.sortStateCUDataList( dataList, false );
+			@SuppressWarnings("unchecked")
+			List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents ( "StateCU_Location_List" );
+			List<StateCU_Location>sortedDataList = StateCU_Util.sortStateCUDataList( dataList, false );
 			processor.setPropContents( "StateCU_Location_List", sortedDataList);
 		}
-    	else if ( this instanceof SortStreamGageStations_Command ) {
-			sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
-			processor.setPropContents( "StateMod_StreamGageStation_List", sortedDataList);
-		}
-		else if ( this instanceof SortDiversionStations_Command ) {
-			sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
+	    else if ( this instanceof SortDiversionStations_Command) {
+	    	@SuppressWarnings("unchecked")
+			List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List" );
+			List<StateMod_Diversion> sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
 			processor.setPropContents( "StateMod_DiversionStation_List", sortedDataList);
-		}
-		else if ( this instanceof SortDiversionRights_Command ) {
-			sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
+	    }
+	    else if ( this instanceof SortDiversionRights_Command ) {
+    		@SuppressWarnings("unchecked")
+			List<StateMod_DiversionRight> dataList = (List<StateMod_DiversionRight>)processor.getPropContents ( "StateMod_DiversionRight_List" );
+			List<StateMod_DiversionRight> sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
 			processor.setPropContents( "StateMod_DiversionRight_List", sortedDataList);
-		}
-		else if ( this instanceof SortDiversionHistoricalTSMonthly_Command ) {
+    	}
+    	else if ( this instanceof SortDiversionHistoricalTSMonthly_Command ) {
+    		@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
 			// Sort by time series identifier.
 			Message.printStatus ( 2, routine, "Sorting time series using the time series identifier..." );
-		    TSUtil_SortTimeSeries tsu = new TSUtil_SortTimeSeries(dataList,"TSID",null,null,1);
-		    sortedDataList = tsu.sortTimeSeries();
+			TSUtil_SortTimeSeries<MonthTS> tsu = new TSUtil_SortTimeSeries<MonthTS>(dataList,"TSID",null,null,1);
+		    List<MonthTS> sortedDataList = tsu.sortTimeSeries();
 			processor.setPropContents( "StateMod_DiversionHistoricalTSMonthly_List", sortedDataList);
-		}
-		else if ( this instanceof SortDiversionDemandTSMonthly_Command) {
+    	}
+    	else if ( this instanceof SortDiversionDemandTSMonthly_Command ) {
+    		@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_DiversionDemandTSMonthly_List" );
 			// Sort by time series identifier.
 			Message.printStatus ( 2, routine, "Sorting time series using the time series identifier..." );
-		    TSUtil_SortTimeSeries tsu = new TSUtil_SortTimeSeries(dataList,"TSID",null,null,1);
-		    sortedDataList = tsu.sortTimeSeries();
+			TSUtil_SortTimeSeries<MonthTS> tsu = new TSUtil_SortTimeSeries<MonthTS>(dataList,"TSID",null,null,1);
+		    List<MonthTS> sortedDataList = tsu.sortTimeSeries();
 			processor.setPropContents( "StateMod_DiversionDemandTSMonthly_List", sortedDataList);
-		}
-		else if ( this instanceof SortReservoirStations_Command ) {
-			sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
+    	}
+    	else if ( this instanceof SortReservoirStations_Command ) {
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Reservoir> dataList = (List<StateMod_Reservoir>)processor.getPropContents ( "StateMod_ReservoirStation_List" );
+			List<StateMod_Reservoir> sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
 			processor.setPropContents( "StateMod_ReservoirStation_List", sortedDataList);
-		}
-		else if ( this instanceof SortReservoirRights_Command ) {
-			sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
+    	}
+    	else if ( this instanceof SortReservoirRights_Command ) {
+    		@SuppressWarnings("unchecked")
+			List<StateMod_ReservoirRight> dataList = (List<StateMod_ReservoirRight>)processor.getPropContents ( "StateMod_ReservoirRight_List" );
+			List<StateMod_ReservoirRight> sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
 			processor.setPropContents( "StateMod_ReservoirRight_List", sortedDataList);
-		}
-		else if ( this instanceof SortInstreamFlowStations_Command ) {
-			sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
+    	}
+    	else if ( this instanceof SortInstreamFlowStations_Command ) {
+    		@SuppressWarnings("unchecked")
+			List<StateMod_InstreamFlow> dataList = (List<StateMod_InstreamFlow>)processor.getPropContents ( "StateMod_InstreamFlowStation_List" );
+			List<StateMod_InstreamFlow> sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
 			processor.setPropContents( "StateMod_InstreamFlowStation_List", sortedDataList);
-		}
-		else if ( this instanceof SortInstreamFlowRights_Command ) {
-			sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
+    	}
+    	else if ( this instanceof SortInstreamFlowRights_Command ) {
+    		@SuppressWarnings("unchecked")
+			List<StateMod_InstreamFlowRight> dataList = (List<StateMod_InstreamFlowRight>)processor.getPropContents ( "StateMod_InstreamFlowRight_List" );
+			List<StateMod_InstreamFlowRight> sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
 			processor.setPropContents( "StateMod_InstreamFlowRight_List", sortedDataList);
-		}
-		else if ( this instanceof SortWellStations_Command ) {
-			sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
+    	}
+    	else if ( this instanceof SortStreamEstimateStations_Command ) {
+    		@SuppressWarnings("unchecked")
+			List<StateMod_StreamEstimate> dataList = (List<StateMod_StreamEstimate>)processor.getPropContents ( "StateMod_StreamEstimateStation_List" );
+			List<StateMod_StreamEstimate> sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
 			processor.setPropContents( "StateMod_WellStation_List", sortedDataList);
-		}
-		else if ( this instanceof SortWellRights_Command ) {
-			StateMod_Right_Comparator comparator = new StateMod_Right_Comparator();
+    	}
+    	else if ( this instanceof SortStreamGageStations_Command ) {
+    		@SuppressWarnings("unchecked")
+			List<StateMod_StreamGage> dataList = (List<StateMod_StreamGage>)processor.getPropContents ( "StateMod_StreamGageStation_List" );
+			List<StateMod_StreamGage> sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
+			processor.setPropContents( "StateMod_StreamGageStation_List", sortedDataList);
+    	}
+    	else if ( this instanceof SortWellStations_Command ) {
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List" );
+			List<StateMod_Well> sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
+			processor.setPropContents( "StateMod_WellStation_List", sortedDataList);
+    	}
+    	else if ( this instanceof SortWellRights_Command ) {
+    		@SuppressWarnings("unchecked")
+			List<StateMod_WellRight> dataList = (List<StateMod_WellRight>)processor.getPropContents ( "StateMod_WellRight_List" );
+			StateMod_Right_Comparator<StateMod_WellRight> comparator = new StateMod_Right_Comparator<StateMod_WellRight>();
 			if ( Order.equalsIgnoreCase(_IDAscending) ) {
 				comparator.setOrder ( StateMod_Right_Comparator.IDAscending );
 			}
@@ -394,37 +368,43 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			else if ( (Order2 != null) && Order2.equalsIgnoreCase(_LocationIDAscending) ) {
 				comparator.setOrder2 ( StateMod_Right_Comparator.LocationIDAscending );
 			}
-			sortedDataList = dataList;
+			List<StateMod_WellRight> sortedDataList = dataList;
 			Collections.sort ( dataList, comparator );
 			processor.setPropContents( "StateMod_WellRight_List", sortedDataList);
-		}
-		else if ( this instanceof SortWellHistoricalPumpingTSMonthly_Command ) {
+    	}
+    	else if ( this instanceof SortWellHistoricalPumpingTSMonthly_Command ) {
+    		@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
 			// Sort by time series identifier.
 			Message.printStatus ( 2, routine, "Sorting time series using the time series identifier..." );
-		    TSUtil_SortTimeSeries tsu = new TSUtil_SortTimeSeries(dataList,"TSID",null,null,1);
-		    sortedDataList = tsu.sortTimeSeries();
+		    TSUtil_SortTimeSeries<MonthTS> tsu = new TSUtil_SortTimeSeries<MonthTS>(dataList,"TSID",null,null,1);
+		    List<MonthTS>sortedDataList = tsu.sortTimeSeries();
 			processor.setPropContents( "StateMod_WellHistoricalPumpingTSMonthly_List", sortedDataList);
-		}
-		else if ( this instanceof SortWellDemandTSMonthly_Command ) {
+    	}
+    	else if ( this instanceof SortWellDemandTSMonthly_Command ) {
+    		@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_WellDemandTSMonthly_List" );
 			// Sort by time series identifier.
 			Message.printStatus ( 2, routine, "Sorting time series using the time series identifier..." );
-		    TSUtil_SortTimeSeries tsu = new TSUtil_SortTimeSeries(dataList,"TSID",null,null,1);
-		    sortedDataList = tsu.sortTimeSeries();
+		    TSUtil_SortTimeSeries<MonthTS> tsu = new TSUtil_SortTimeSeries<MonthTS>(dataList,"TSID",null,null,1);
+		    List<MonthTS>sortedDataList = tsu.sortTimeSeries();
 			processor.setPropContents( "StateMod_WellDemandTSMonthly_List", sortedDataList);
-		}
-		else if ( this instanceof SortStreamEstimateStations_Command ) {
-			sortedDataList = StateMod_Util.sortStateMod_DataVector( dataList, false );
-			processor.setPropContents( "StateMod_StreamGageStation_List", sortedDataList);
-		}
+	    }
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
-        message = "Unexpected error sorting data (" + e + ").";
+        message = "Error requesting sorting data (" + e + ").";
         Message.printWarning ( warning_level, 
         MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
         status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.FAILURE,
-            message, "See log file for details." ) );
-        throw new CommandException ( message );
+            message, "Report to software support.  See log file for details." ) );
+    }
+    
+    if ( warning_count > 0 ) {
+        message = "There were " + warning_count + " warnings about command input.";
+        Message.printWarning ( warning_level, 
+        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+        throw new InvalidCommandParameterException ( message );
     }
     
     status.refreshPhaseSeverity(command_phase,CommandStatusType.SUCCESS);

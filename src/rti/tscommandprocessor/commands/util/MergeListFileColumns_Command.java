@@ -231,7 +231,7 @@ throws InvalidCommandParameterException
 		}
 	}
 	else {
-		List v = StringUtil.breakStringList (	SimpleMergeFormat, ",", 0 );
+		List<String> v = StringUtil.breakStringList (	SimpleMergeFormat, ",", 0 );
 		int size = v.size();
 		if ( size != __Columns_intArray.length ) {
 			message = "The number of specifiers in the merge format (" + SimpleMergeFormat +
@@ -243,7 +243,7 @@ throws InvalidCommandParameterException
 		}
 		else {
 			for ( int i = 0; i < size; i++ ) {
-				token = (String)v.get(i);
+				token = v.get(i);
 				if ( !StringUtil.isInteger(token) ) {
 					message = "The format specifier \"" + token + "\" is not an integer";
 					warning += "\n" + message;
@@ -265,7 +265,7 @@ throws InvalidCommandParameterException
 	}
     
 	//  Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(5);
     valid_Vector.add ( "ListFile" );
     valid_Vector.add ( "OutputFile" );
     valid_Vector.add ( "Columns" );
@@ -313,9 +313,9 @@ public boolean editRunnableCommand ( JFrame parent )
 /**
 Return the list of files that were created by this command.
 */
-public List getGeneratedFileList ()
+public List<File> getGeneratedFileList ()
 {
-	List list = new Vector();
+	List<File> list = new Vector<File>();
 	if ( getOutputFile() != null ) {
 		list.add ( getOutputFile() );
 	}
@@ -435,7 +435,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	int size = table.getNumberOfRecords();
 	String merged;	// Merged column string
 	int mergedcol = table.getNumberOfFields() - 1;	// New at end
-	List v = new Vector ( __Columns_intArray.length );
+	List<String> v = new Vector<String>( __Columns_intArray.length );
 	TableRecord rec = null;
 	String s;
 	int j;

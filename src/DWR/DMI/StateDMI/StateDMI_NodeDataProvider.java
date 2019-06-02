@@ -35,7 +35,6 @@ import DWR.DMI.HydroBaseDMI.HydroBase_Station;
 import DWR.DMI.HydroBaseDMI.HydroBase_StationView;
 import DWR.DMI.HydroBaseDMI.HydroBase_Structure;
 import DWR.DMI.HydroBaseDMI.HydroBase_StructureView;
-import DWR.DMI.HydroBaseDMI.HydroBase_StructureWDWater;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.DMI.HydroBaseDMI.HydroBase_WellApplicationView;
 
@@ -299,7 +298,7 @@ public void setNodeDescriptions ( StateMod_NodeNetwork network, boolean createFa
 	HydroBase_Station station;
 	HydroBase_StationView view;
 	HydroBase_Structure structure;
-	HydroBase_StructureWDWater wdwater;
+	//HydroBase_StructureWDWater wdwater;
 	HydroBase_WellApplicationView well_applicationView;		
 	int	dl = 15, 
 		geoloc_num = 0,
@@ -313,12 +312,12 @@ public void setNodeDescriptions ( StateMod_NodeNetwork network, boolean createFa
 		streamName,
 		userDesc,
 		wdid;
-	List	idList = null,
-		permitList = new Vector(),
-		statList = null,
-		structList = null,
-		waterList = null,
-		wellApplications = null;
+	List<String> idList = null;
+	List<String> permitList = new Vector<String>();
+	List<HydroBase_StationView>	statList = null;
+	List<HydroBase_StructureView> structList = null;
+	List<HydroBase_StructureView> waterList = null;
+	List<HydroBase_WellApplicationView>	wellApplications = null;
 
 	Message.printStatus(2, routine, "Setting node names from HydroBase...");
 
@@ -347,7 +346,7 @@ public void setNodeDescriptions ( StateMod_NodeNetwork network, boolean createFa
 				+ " stations took " + (int)timer.getSeconds() + " seconds.");
 		}
 		else {
-			statList = new Vector();
+			statList = new Vector<HydroBase_StationView>();
 		}
 	}
 	catch (Exception e) {
@@ -385,7 +384,7 @@ public void setNodeDescriptions ( StateMod_NodeNetwork network, boolean createFa
 				+ " structures took " + (int)timer.getSeconds() + " seconds.");
 		}
 		else {
-			structList = new Vector();
+			structList = new Vector<HydroBase_StructureView>();
 		}
 	}
 	catch (Exception e) {
@@ -413,7 +412,7 @@ public void setNodeDescriptions ( StateMod_NodeNetwork network, boolean createFa
 					+ (int)timer.getSeconds() + " seconds.");
 			}
 			else {
-				waterList = new Vector();
+				waterList = new Vector<HydroBase_StructureView>();
 			}
 		}
 		catch (Exception e) {
@@ -423,11 +422,11 @@ public void setNodeDescriptions ( StateMod_NodeNetwork network, boolean createFa
 			throw new RuntimeException(message);
 		}
 	
-		if (waterList == null) {
-			message = "Could not find HydroBase_WDWater objects for node network.";
-			Message.printWarning(2, routine, message);
-			throw new RuntimeException(message);
-		}
+		//if (waterList == null) {
+		//	message = "Could not find HydroBase_WDWater objects for node network.";
+		//	Message.printWarning(2, routine, message);
+		//	throw new RuntimeException(message);
+		//}
 		if (waterList.size() == 0) {
 			message = "Could not find HydroBase_WDWater objects in node network.";
 			Message.printWarning(2, routine, message);
@@ -481,8 +480,11 @@ public void setNodeDescriptions ( StateMod_NodeNetwork network, boolean createFa
 		i_waterList = -1,
 		i_stationList = -1,
 		nstationList = 0,
-		nstructList = 0,
-		nwaterList = 0;
+		nstructList = 0;
+	int	nwaterList = 0;
+	if ( nwaterList < 0 ) {
+		// TODO put in so compiler does not complain about unused variable
+	}
 	String desc = "";
 
 	boolean done = false;
@@ -609,9 +611,12 @@ public void setNodeDescriptions ( StateMod_NodeNetwork network, boolean createFa
 				streamName = "";
 				i_waterList = -1;
 				nwaterList = waterList.size();
+				// TODO smalers 2019-05-28 the type of wdwater and waterList are incompatible
+				// - comment out - may never have been used
+				/*
 				for (i = 0; i < nwaterList; i++) {
-					wdwater = (HydroBase_StructureWDWater)
-					waterList.get(i);
+					wdwater = (HydroBase_StructureWDWater)waterList.get(i);
+					wdwater = (HydroBase_StructureWDWater)waterList.get(i);
 					if ((wdwater.getWD() == wd) && (wdwater.getID() == id)) {
 						// Found the stream...
 						i_waterList = i;
@@ -623,6 +628,7 @@ public void setNodeDescriptions ( StateMod_NodeNetwork network, boolean createFa
 						break;
 					}
 				}
+				*/
 				if (i_waterList < 0) {
 					if (Message.isDebugOn) {
 						Message.printDebug(1, routine, "Did not find wdwater for " + nodePt.getCommonID());

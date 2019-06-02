@@ -32,8 +32,9 @@ import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Util;
 import DWR.StateMod.StateMod_Util;
-
+import DWR.StateMod.StateMod_WellRight;
 import RTi.TS.MonthTS;
+import RTi.TS.TS;
 import RTi.TS.TSUtil;
 import RTi.TS.YearTS;
 import RTi.Util.Math.MathUtil;
@@ -215,7 +216,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(10);
     valid_Vector.add ( "ID" );
 	valid_Vector.add ( "IncludeSurfaceWaterSupply" );
 	valid_Vector.add ( "IncludeGroundwaterOnlySupply" );
@@ -335,10 +336,12 @@ CommandWarningException, CommandException
 	
 	// Get the irrigation practice time series to process.
 	
-	List ipyList = null;
+	List<StateCU_IrrigationPracticeTS> ipyList = null;
 	int ipyListSize = 0;
 	try {
-		ipyList = (List)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_IrrigationPracticeTS> dataList = (List<StateCU_IrrigationPracticeTS>)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List");
+		ipyList = dataList;
 		ipyListSize = ipyList.size();
 	}
 	catch ( Exception e ) {
@@ -363,9 +366,11 @@ CommandWarningException, CommandException
 	// Get the CU locations, which is where collection information is stored,
 	// necessary to determine if groundwater only location...
 	
-	List culocList = null;
+	List<StateCU_Location> culocList = null;
 	try {
-		culocList = (List)processor.getPropContents( "StateCU_Location_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
 	}
 	catch ( Exception e ) {
 		message = "Error requesting StateCU_Location_List from processor.";
@@ -378,10 +383,12 @@ CommandWarningException, CommandException
 	
 	// Get the well rights, which are needed to create the time series by parcel...
 	
-	List werList = null;
+	List<StateMod_WellRight> werList = null;
 	int werListSize = 0;
 	try {
-		werList = (List)processor.getPropContents( "StateMod_WellRight_List");
+		@SuppressWarnings("unchecked")
+		List<StateMod_WellRight> dataList = (List<StateMod_WellRight>)processor.getPropContents( "StateMod_WellRight_List");
+		werList = dataList;
 		werListSize = werList.size();
 	}
 	catch ( Exception e ) {
@@ -477,7 +484,7 @@ CommandWarningException, CommandException
 	try {
 		// Convert the well rights to monthly time series (because the value
 		// in the IPY file is the maximum monthly pumping)...
-		List smrights_MonthTS_Vector = null;
+		List<TS> smrights_MonthTS_Vector = null;
 		try {
 			smrights_MonthTS_Vector = StateMod_Util.createWaterRightTimeSeriesList (
 				werList,
@@ -634,7 +641,7 @@ CFS to AF/M.  If negative, use actual days per month
 @param ParcelYear_int the parcel year to use for parcel data.
 */
 private void setIrrigationPracticeTSUsingRights (
-		List smrights_MonthTS_Vector,
+		List<TS> smrights_MonthTS_Vector,
 		StateCU_IrrigationPracticeTS ipyts,
 		DateTime SetStart_DateTime,
 		DateTime SetEnd_DateTime,

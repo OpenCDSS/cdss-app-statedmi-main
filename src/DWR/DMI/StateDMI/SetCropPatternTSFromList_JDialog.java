@@ -64,6 +64,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for the SetCropPatternTSFromList() command.
 */
+@SuppressWarnings("serial")
 public class SetCropPatternTSFromList_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -373,8 +374,8 @@ private void initialize (JFrame parent, SetCropPatternTSFromList_Command command
 		"Optional - ending year to set data (default=output period)."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
-    List column_Vector = new Vector(100);
-    List column2_Vector = new Vector(101);
+    List<String> column_Vector = new Vector<String>(100);
+    List<String> column2_Vector = new Vector<String>(101);
 	column2_Vector.add ( "" );
 	for ( int i = 1; i <= 100; i++ ) {
 		column_Vector.add ( "" + i );
@@ -450,7 +451,7 @@ private void initialize (JFrame parent, SetCropPatternTSFromList_Command command
 	
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Process when?:"),
 	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List ProcessWhen_Vector = new Vector(3);
+    List<String> ProcessWhen_Vector = new Vector<String>(3);
     ProcessWhen_Vector.add("");
     ProcessWhen_Vector.add(__command._Now);
 	ProcessWhen_Vector.add(__command._WithParcels);

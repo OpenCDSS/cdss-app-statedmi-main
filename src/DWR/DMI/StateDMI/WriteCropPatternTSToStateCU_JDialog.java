@@ -65,6 +65,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for WriteCropPatternTSToStateCU() command.
 */
+@SuppressWarnings("serial")
 public class WriteCropPatternTSToStateCU_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener {
 
@@ -333,7 +334,7 @@ private void initialize (JFrame parent, Command command)
         
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Write crop area:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List write_area_Vector = new Vector();
+    List<String> write_area_Vector = new Vector<String>(3);
 	write_area_Vector.add ( "" );
 	write_area_Vector.add ( __command._False );
 	write_area_Vector.add ( __command._True );
@@ -348,7 +349,7 @@ private void initialize (JFrame parent, Command command)
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Write only total:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List write_total_Vector = new Vector();
+    List<String> write_total_Vector = new Vector<String>(3);
 	write_total_Vector.add ( "" );
 	write_total_Vector.add ( __command._False );
 	write_total_Vector.add ( __command._True );
@@ -363,7 +364,7 @@ private void initialize (JFrame parent, Command command)
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Version:"),
        	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List version_Vector = new Vector();
+    List<String> version_Vector = new Vector<String>(2);
     version_Vector.add ( "" );
     version_Vector.add ( __command._10 );
     __Version_JComboBox = new SimpleJComboBox(false);
@@ -377,7 +378,7 @@ private void initialize (JFrame parent, Command command)
        	
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Write how:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List write_how_Vector = new Vector();
+    List<String> write_how_Vector = new Vector<String>(3);
 	write_how_Vector.add ( "" );
 	write_how_Vector.add ( __command._OverwriteFile );
 	write_how_Vector.add ( __command._UpdateFile );

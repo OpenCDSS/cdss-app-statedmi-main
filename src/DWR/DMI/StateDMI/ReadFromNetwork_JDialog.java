@@ -65,6 +65,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for Read*FromNetwork() commands.
 */
+@SuppressWarnings("serial")
 public class ReadFromNetwork_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener {
 
@@ -380,7 +381,7 @@ private void initialize ( JFrame parent, Command command )
 	if ( __command instanceof ReadStreamGageStationsFromNetwork_Command ) {
         JGUIUtil.addComponent(main_JPanel, new JLabel ( "Include stream estimate stations?:"),
 			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-       	List include_Vector = new Vector(3);
+       	List<String> include_Vector = new Vector<String>(3);
 		include_Vector.add ( "" );
 		include_Vector.add ( __False );
 		include_Vector.add ( __True );

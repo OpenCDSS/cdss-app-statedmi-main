@@ -44,8 +44,6 @@ import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
-import RTi.Util.String.StringUtil;
-import RTi.Util.Time.DateTime;
 
 /**
 <p>
@@ -158,7 +156,7 @@ throws InvalidCommandParameterException
     */
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(1);
 	valid_Vector.add ( "Outputfile" );
 	//valid_Vector.add ( "Suffix" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
@@ -187,9 +185,9 @@ public boolean editCommand ( JFrame parent )
 /**
 Return the list of files that were created by this command.
 */
-public List getGeneratedFileList ()
+public List<File> getGeneratedFileList ()
 {
-	List list = new Vector();
+	List<File> list = new Vector<File>();
 	if ( getOutputFile() != null ) {
 		list.add ( getOutputFile() );
 	}
@@ -235,6 +233,7 @@ throws CommandWarningException, CommandException
 			// Make sure to do nothing below...
 			Suffix = "";
 		}
+		/*
 		else if ( Suffix.equalsIgnoreCase(_Date) ) {
 			DateTime d = new DateTime (	DateTime.DATE_CURRENT );
 			Suffix = "." +
@@ -255,6 +254,7 @@ throws CommandWarningException, CommandException
 				StringUtil.formatString(d.getMinute(),"%02d") +
 				StringUtil.formatString(d.getSecond(),"%02d");
 		}
+		*/
 		if ( Suffix.length() > 0 ) {
 			String ext = IOUtil.getFileExtension (OutputFile );
 			if ( ext == null ) {

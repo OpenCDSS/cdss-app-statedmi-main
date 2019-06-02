@@ -127,7 +127,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(6);
 	valid_Vector.add ( "SearchFolder" );
 	valid_Vector.add ( "FilenamePattern" );
 	valid_Vector.add ( "OutputFile" );
@@ -195,9 +195,9 @@ public boolean editCommand ( JFrame parent )
 /**
 Return the list of files that were created by this command.
 */
-public List getGeneratedFileList ()
+public List<File> getGeneratedFileList ()
 {
-	List list = new Vector();
+	List<File> list = new Vector<File>();
     if ( getOutputFile() != null ) {
         list.add ( getOutputFile() );
     }
@@ -219,7 +219,7 @@ should be included, indicated by "@os Windows" and "@os UNIX" tags in the
 comments of command files.
 @throws IOException 
  */
-private void getMatchingFilenamesInTree ( List commandFileVector, File path, String pattern,
+private void getMatchingFilenamesInTree ( List<String> commandFileVector, File path, String pattern,
         String[] includedTestSuites, String[] includedOS ) 
 throws IOException
 {   String routine = getClass().getName() + ".getMatchingFilenamesInTree";
@@ -261,7 +261,7 @@ throws IOException
         	// Exclude the command file if tag in the file indicates that it is not compatible with
         	// this command's parameters.
         	boolean doAddForOS = false;
-        	List tagValues = StateDMICommandProcessorUtil.getTagValues ( path.toString(), "os" );
+        	List<String> tagValues = StateDMICommandProcessorUtil.getTagValues ( path.toString(), "os", null );
         	if ( !needToCheckForUnixOS && !needToCheckForWindowsOS ) {
         	    // Not checking for OS so go ahead and add
         	    doAddForOS = true;
@@ -270,13 +270,10 @@ throws IOException
                 boolean tagHasUNIX = false;
         	    // os tag needs to be blank or include "UNIX"
         	    for ( int ivalue = 0; ivalue < tagValues.size(); ivalue++ ) {
-        	        Object o = tagValues.get(ivalue);
-        	        if ( o instanceof String ) {
-        	            String s = (String)o;
-        	            if ( s.toUpperCase().matches("UNIX") ) {
-        	                tagHasUNIX = true;
-        	            }
-        	        }
+        	    	String s = tagValues.get(ivalue);
+        	        if ( (s != null) && s.toUpperCase().matches("UNIX") ) {
+        	            tagHasUNIX = true;
+        	    	}
         	    }
                 if ( (tagValues.size() == 0) || tagHasUNIX ) {
                     // Test is not OS-specific or test is for UNIX so include for UNIX
@@ -287,12 +284,9 @@ throws IOException
                 boolean tagHasWindows = false;
                 // os tag needs to be blank or include "Windows"
                 for ( int ivalue = 0; ivalue < tagValues.size(); ivalue++ ) {
-                    Object o = tagValues.get(ivalue);
-                    if ( o instanceof String ) {
-                        String s = (String)o;
-                        if ( s.toUpperCase().matches("WINDOWS") ) {
-                            tagHasWindows = true;
-                        }
+                    String s = tagValues.get(ivalue);
+                    if ( (s != null) && s.toUpperCase().matches("WINDOWS") ) {
+                        tagHasWindows = true;
                     }
                 }
                 if ( (tagValues.size() == 0) || tagHasWindows ) {
@@ -307,7 +301,7 @@ throws IOException
         	}
         	else {
         	    // Check to see if the test suites in the test match the requested test suites
-        	    List tagValues2 = StateDMICommandProcessorUtil.getTagValues ( path.toString(), "testSuite" );
+        	    List<String> tagValues2 = StateDMICommandProcessorUtil.getTagValues ( path.toString(), "testSuite", null );
         	    if ( tagValues2.size() == 0 ) {
         	        // Test case is not specified to belong to a specific suite so it is always included
         	        doAddForTestSuite = true;
@@ -315,11 +309,12 @@ throws IOException
         	    else {
         	        // Check each value in the file against requested test suites
         	        for ( int i = 0; i < tagValues2.size(); i++ ) {
-        	            if ( !(tagValues2.get(i) instanceof String) ) {
+        	        	String tagValue = tagValues2.get(i);
+        	            if ( tagValue == null ) {
         	                continue;
         	            }
         	            for ( int j = 0; j < includedTestSuites.length; j++ ) {
-        	                if ( ((String)tagValues2.get(i)).toUpperCase().matches(includedTestSuites[j]) ) {
+        	                if ( tagValues2.get(i).toUpperCase().matches(includedTestSuites[j]) ) {
         	                    doAddForTestSuite = true;
         	                    break;
         	                }
@@ -434,7 +429,7 @@ CommandWarningException, CommandException
 
 	try {
 	    // Get the list of files to run as test cases...
-		List files = new Vector();
+		List<String> files = new Vector<String>();
         String [] includedTestSuitePatterns = new String[0];
         includedTestSuitePatterns = StringUtil.toArray(StringUtil.breakStringList(IncludeTestSuitePattern,",",0));
         String [] includedOSPatterns = new String[0];

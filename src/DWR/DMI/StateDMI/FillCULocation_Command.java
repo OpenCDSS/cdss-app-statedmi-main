@@ -135,7 +135,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(8);
     valid_Vector.add ( "ID" );
 	valid_Vector.add ( "Name" );
     valid_Vector.add ( "Latitude" );
@@ -163,21 +163,29 @@ not (e.g., "Cancel" was pressed.
 public boolean editCommand ( JFrame parent )
 {	String routine = "FillCULocation_Command.editCommand";
 	CommandProcessor processor = getCommandProcessor();
-	List Region1_List = new Vector();
-	List Region2_List = new Vector();
+	List<String> Region1_List = new Vector<String>();
+	List<Integer> Region2_List = new Vector<Integer>();
+	List<String> Region2_StringList = new Vector<String>();
 	try {
-		Region1_List = (List)processor.getPropContents("CountyList");
+		@SuppressWarnings("unchecked")
+		List<String> dataList = (List<String>)processor.getPropContents("CountyList");
+		Region1_List = dataList;
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( 3, routine, "Error getting county list - will not be listed in Region1." );
 	}
 	try {
-		Region2_List = (List)processor.getPropContents("HUCList");
+		@SuppressWarnings("unchecked")
+		List<Integer> dataList = (List<Integer>)processor.getPropContents("HUCList");
+		Region2_List = dataList;
+		for ( Integer i : Region2_List ) {
+			Region2_StringList.add("" + i);
+		}
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( 3, routine, "Error getting HUC list - will not be listed in Region2." );
 	}
-	return (new FillAndSetCULocation_JDialog ( parent, this, Region1_List, Region2_List )).ok();
+	return (new FillAndSetCULocation_JDialog ( parent, this, Region1_List, Region2_StringList )).ok();
 }
 
 // Parse command is in the base class
@@ -221,11 +229,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of CU locations...
 	
-	List culocList = null;
+	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
 	try {
-		Object o = processor.getPropContents( "StateCU_Location_List");
-		culocList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
 		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {

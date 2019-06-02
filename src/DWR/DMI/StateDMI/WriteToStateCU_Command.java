@@ -204,7 +204,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	Vector valid_Vector = new Vector();
+	Vector<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "OutputFile" );
 	if ( this instanceof WriteCULocationsToStateCU_Command ||
 		this instanceof WriteCropCharacteristicsToStateCU_Command ||
@@ -247,9 +247,9 @@ public boolean editCommand ( JFrame parent )
 /**
 Return the list of files that were created by this command.
 */
-public List getGeneratedFileList ()
+public List<File> getGeneratedFileList ()
 {
-	List list = new Vector();
+	List<File> list = new Vector<File>();
 	if ( getOutputFile() != null ) {
 		list.add ( getOutputFile() );
 	}
@@ -313,12 +313,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     try {
         // Get the comments to add to the top of the file.
 
-        List OutputComments_List = null;
+        List<String> OutputComments_List = null;
         try {
         	Object o = processor.getPropContents ( "OutputComments" );
             // Comments are available so use them...
             if ( o != null ) {
-                OutputComments_List = (List)o;
+            	@SuppressWarnings("unchecked")
+				List<String> outputCommentsList = (List<String>)o;
+                OutputComments_List = outputCommentsList;
             }
         }
         catch ( Exception e ) {
@@ -375,7 +377,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				processor.getStateCUBlaneyCriddleList(), OutputComments_List, writeProps );
 		}
 		else if ( this instanceof WritePenmanMonteithToStateCU_Command ) {
-			PropList writeProps = new PropList ( "writePenmanMonteithToStateCU" );
+			//PropList writeProps = new PropList ( "writePenmanMonteithToStateCU" );
 			StateCU_PenmanMonteith.writeStateCUFile(OutputFile_prevFull, OutputFile_full,
 				processor.getStateCUPenmanMonteithList(), OutputComments_List, Precision_Integer );
 		}

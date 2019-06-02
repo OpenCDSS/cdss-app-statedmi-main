@@ -1,21 +1,18 @@
  package DWR.DMI.StateDMI;
 
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import junit.framework.Test;
-import DWR.DMI.StateDMI.StateDMI_JFrame;
-import java.io.File;
-import java.io.IOException;
+//import DWR.DMI.StateDMI.StateDMI_JFrame;
+//import java.io.File;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.IO.IOUtil;
 
 public class StateDMI_JFrameTest extends TestCase {
 
-	private File cmdFile;
-	private File bogusFile;
-	private StateDMI_JFrame statecu_jframe;
-	private StateDMI_JFrame statemod_jframe;
+	//private File cmdFile;
+	//private File bogusFile;
+	//private StateDMI_JFrame statecu_jframe;
+	//private StateDMI_JFrame statemod_jframe;
 	private String home = "test\\operational\\CDSS";
 	
 	
@@ -32,12 +29,10 @@ public class StateDMI_JFrameTest extends TestCase {
     // Set up some properties and to test
     protected void setUp()
     {
-    	StateDMISession session = StateDMISession.getInstance();
-       cmdFile = new File
-       ("test\\regression\\commands\\CDSS_General\\readDiversionRightsFromHydroBase\\simpleRead.StateDMI");
+    	//StateDMISession session = StateDMISession.getInstance();
+       //cmdFile = new File ("test\\regression\\commands\\CDSS_General\\readDiversionRightsFromHydroBase\\simpleRead.StateDMI");
        
-       bogusFile = new File
-       ("test\\regression\\commands\\CDSS_General\\BogusFile");
+       //bogusFile = new File ("test\\regression\\commands\\CDSS_General\\BogusFile");
        
        // make sure to run in batch mode
        IOUtil.isBatch(true);
@@ -45,8 +40,8 @@ public class StateDMI_JFrameTest extends TestCase {
        IOUtil.setApplicationHomeDir(home);
        JGUIUtil.setLastFileDialogDirectory(home);
        
-       statecu_jframe = new StateDMI_JFrame(session, 0);
-       statemod_jframe = new StateDMI_JFrame(session, 1);
+       //statecu_jframe = new StateDMI_JFrame(session, 0);
+       //statemod_jframe = new StateDMI_JFrame(session, 1);
     }
     /* FIXME SAM 2007-11-15 Test framework needs fixed.
     // runCommandsFromFile() will initialize the Vectors by calling
@@ -126,4 +121,3 @@ public class StateDMI_JFrameTest extends TestCase {
     */
     
 }
-

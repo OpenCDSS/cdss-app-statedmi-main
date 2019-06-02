@@ -103,6 +103,7 @@ import RTi.Util.String.StringUtil;
 import RTi.Util.Table.DataTable;
 import RTi.Util.Table.DbaseDataTable;
 
+@SuppressWarnings("serial")
 public class ReadCropPatternTSFromDBF_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -138,7 +139,7 @@ private SimpleJButton	__ok_JButton = null;
 private SimpleJButton	__browse_JButton = null;
 private SimpleJButton	__path_JButton = null;
 private String		__working_dir = null;	
-private List		__command_Vector = null;
+private List<String>		__command_Vector = null;
 private String		__filetype = null;	// "SprinklerList" or
 						// "CropPatternDBF"
 /**
@@ -150,7 +151,7 @@ Command editor constructor
 "SprinklerList" if a text file associated with sprinkler acreage.
 */
 public ReadCropPatternTSFromDBF_JDialog (JFrame parent, PropList props,
-		List command, String filetype) {
+		List<String> command, String filetype) {
 	super(parent, true);
 	initialize (parent, props, command, filetype );
 }
@@ -314,7 +315,7 @@ Return the text for the command.
 @return the text for the command or null if there is a problem with the 
 command.
 */
-public List getText () {
+public List<String> getText () {
 	if ((__command_Vector != null) && ((__command_Vector.size() == 0) ||
 		((String)__command_Vector.get(0)).equals(""))) {
 		return null;
@@ -331,8 +332,7 @@ Instantiates the GUI components.
 @param filetype "CropPatternDBF" if a DBF file associated with a shapefile.
 "SprinklerList" if a text file associated with sprinkler acreage.
 */
-private void initialize (JFrame parent, PropList props, List command,
-				String filetype )
+private void initialize (JFrame parent, PropList props, List<String> command, String filetype )
 {	__command_Vector = command;
 	__working_dir = props.getValue ("WorkingDir");
 	__filetype = filetype;
@@ -466,7 +466,7 @@ private void initialize (JFrame parent, PropList props, List command,
 	}
 
 	// Data will be reset after selecting a file
-	List column_Vector = new Vector();
+	List<String> column_Vector = new Vector<String>();
 	column_Vector.add ( "" );	// Not available
 
 	// Don't trust getting the year out of the parcels file...
@@ -689,7 +689,7 @@ file.
 private void populateJComboBoxes ( String file )
 {	// Open the DBase table and only read the header, closing the file after
 	// the read...
-	List choices = new Vector();
+	List<String> choices = new Vector<String>();
 	choices.add ( "" );
 	DataTable table;
 	try {	if ( __filetype.equals(__SprinklerList) ) {
@@ -760,8 +760,8 @@ private void refresh ()
 	__error_wait = false;
 	if (__first_time) {
 		__first_time = false;
-		List v = StringUtil.breakStringList (
-			((String)__command_Vector.get(0)).trim(),"()",
+		List<String> v = StringUtil.breakStringList (
+			__command_Vector.get(0).trim(),"()",
 			StringUtil.DELIM_SKIP_BLANKS );
 		PropList props = null;
 		if ( (v != null) && (v.size() > 1) ) {
@@ -1116,10 +1116,10 @@ private void refresh ()
 }
 
 /**
-Return the command as a Vector of String.
+Return the command as a list of String.
 @return returns the command text or null if no command.
 */
-public List response (int status) {
+public List<String> response (int status) {
 	setVisible(false);
 	dispose();
 	if (status == 0) {
@@ -1129,7 +1129,7 @@ public List response (int status) {
 	}
 	else {	refresh();
 		if (	(__command_Vector.size() == 0) ||
-			((String)__command_Vector.get(0)).equals("")) {
+			__command_Vector.get(0).equals("")) {
 			return null;
 		}
 		return __command_Vector;

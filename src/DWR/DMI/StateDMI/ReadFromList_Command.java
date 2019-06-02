@@ -27,7 +27,6 @@ import javax.swing.JFrame;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.StateMod.StateMod_Diversion;
@@ -671,11 +670,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     String ListFile_full = ListFile;
     try {
-    	boolean foundWdidLength = false;	// Used to determine a default WDID length for processing
-        boolean readData = true;
-        if ( command_phase == CommandPhaseType.DISCOVERY ){
-            readData = false;
-        }
+    	//boolean foundWdidLength = false;	// Used to determine a default WDID length for processing
+        //boolean readData = true;
+        //if ( command_phase == CommandPhaseType.DISCOVERY ){
+        //    readData = false;
+        //}
         ListFile_full = IOUtil.verifyPathForOS(
                 IOUtil.toAbsolutePath(StateDMICommandProcessorUtil.getWorkingDir(processor),ListFile) );
         Message.printStatus ( 2, routine, "Reading list file \"" + ListFile_full + "\"" );

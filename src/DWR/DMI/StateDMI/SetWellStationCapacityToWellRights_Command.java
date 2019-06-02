@@ -129,7 +129,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(2);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "IfNotFound" );
     warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
@@ -164,18 +164,18 @@ matching the ID will be found.
 @param id The location identifier.
 @return the capacity as the sum of the rights, in CFS.
 */
-private double getCapacityFromRights ( List wellRightList, String id )
+private double getCapacityFromRights ( List<StateMod_WellRight> wellRightList, String id )
 {			
 	// Get the water rights for the location...
 
-	List idWellRightList = StateMod_Util.getWaterRightsForLocation ( wellRightList, id, -1 );
+	List<StateMod_WellRight> idWellRightList = StateMod_Util.getWaterRightsForLocation ( wellRightList, id, -1 );
 	int size = idWellRightList.size();
 	double capacity = 0.0;
 	StateMod_WellRight wer;
 	double wer_decree;
-	int wer_count = 0;
+	//int wer_count = 0;
 	for ( int i = 0; i < size; i++ ) {
-		wer = (StateMod_WellRight)idWellRightList.get(i);
+		wer = idWellRightList.get(i);
 		if ( !wer.getCgoto().equalsIgnoreCase(id)) {
 			continue;
 		}
@@ -183,7 +183,7 @@ private double getCapacityFromRights ( List wellRightList, String id )
 		if ( !StateMod_Util.isMissing(wer_decree) && (wer_decree > 0.0) ) {
 			// Add to the total.
 			capacity += wer_decree;
-			++wer_count;
+			//++wer_count;
 		}
 	}
 	// TODO SAM 2007-07-09 Evaluate whether no rights should use a non-zero default capacity (parameter?)
@@ -248,11 +248,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of well stations...
 	
-	List wellList = null;
+	List<StateMod_Well> wellList = null;
 	int wellListSize = 0;
 	try {
-		Object o = processor.getPropContents( "StateMod_WellStation_List");
-		wellList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents( "StateMod_WellStation_List");
+		wellList = dataList;
 		wellListSize = wellList.size();
 	}
 	catch ( Exception e ) {
@@ -268,10 +269,11 @@ CommandWarningException, CommandException
 	
 	// Get the well rights, which are needed to set the data...
 	
-	List wellRightList = null;
+	List<StateMod_WellRight> wellRightList = null;
 	try {
-		Object o = processor.getPropContents( "StateMod_WellRight_List");
-		wellRightList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateMod_WellRight> dataList = (List<StateMod_WellRight>)processor.getPropContents( "StateMod_WellRight_List");
+		wellRightList = dataList;
 	}
 	catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );

@@ -48,6 +48,7 @@ import RTi.Util.IO.FileGenerator;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.InvalidCommandParameterException;
 import RTi.Util.IO.PropList;
+import RTi.TS.MonthTS;
 import RTi.Util.IO.AbstractCommand;
 
 /**
@@ -227,7 +228,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	Vector valid_Vector = new Vector();
+	Vector<String> valid_Vector = new Vector<String>(7);
 	valid_Vector.add ( "OutputFile" );
 	valid_Vector.add ( "OutputStart" );
 	valid_Vector.add ( "OutputEnd" );
@@ -263,9 +264,9 @@ public boolean editCommand ( JFrame parent )
 /**
 Return the list of files that were created by this command.
 */
-public List getGeneratedFileList ()
+public List<File> getGeneratedFileList ()
 {
-	List list = new Vector();
+	List<File> list = new Vector<File>();
 	if ( getOutputFile() != null ) {
 		list.add ( getOutputFile() );
 	}
@@ -407,12 +408,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     try {
         // Get the comments to add to the top of the file.
 
-        List OutputComments_List = null;
+        List<String> OutputComments_List = null;
         try {
         	Object o = processor.getPropContents ( "OutputComments" );
             // Comments are available so use them...
             if ( o != null ) {
-                OutputComments_List = (List)o;
+                @SuppressWarnings("unchecked")
+				List<String> commentList = (List<String>)o;
+                OutputComments_List = commentList;
             }
         }
         catch ( Exception e ) {
@@ -446,9 +449,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	        if ( Precision == null ) {
 	        	Precision_int = 0; // Default for diversions
 	        }
+			@SuppressWarnings("unchecked")
+			List<MonthTS> monthtsList = (List<MonthTS>)processor.getPropContents("StateMod_DiversionHistoricalTSMonthly_List");
 			StateMod_TS.writeTimeSeriesList ( OutputFile_prevFull, OutputFile_full,
 				OutputComments_List, // Comments
-				(List)processor.getPropContents("StateMod_DiversionHistoricalTSMonthly_List"),
+				monthtsList,
 				OutputStart_DateTime, OutputEnd_DateTime,
 				outputYearType, MissingValue_double, Precision_int );
 		}
@@ -464,9 +469,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	        if ( Precision == null ) {
 	        	Precision_int = 0; // Default for demands
 	        }
+			@SuppressWarnings("unchecked")
+			List<MonthTS> monthtsList = (List<MonthTS>)processor.getPropContents("StateMod_DiversionDemandTSMonthly_List");
 			StateMod_TS.writeTimeSeriesList ( OutputFile_prevFull, OutputFile_full,
 				OutputComments_List, // Comments
-				(List)processor.getPropContents("StateMod_DiversionDemandTSMonthly_List"),
+				monthtsList,
 				OutputStart_DateTime, OutputEnd_DateTime,
 				outputYearType, MissingValue_double, Precision_int );
 		}
@@ -479,9 +486,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			OutputComments_List.add( 2, "" );
 	        Message.printStatus ( 2, routine, "Writing StateMod flow instream demand time series (average monthly) file \"" +
 	        	OutputFile_full + "\"" );
+			@SuppressWarnings("unchecked")
+			List<MonthTS> monthtsList = (List<MonthTS>)processor.getPropContents("StateMod_InstreamFlowDemandTSAverageMonthly_List");
 			StateMod_TS.writeTimeSeriesList ( OutputFile_prevFull, OutputFile_full,
 				OutputComments_List, // Comments
-				(List)processor.getPropContents("StateMod_InstreamFlowDemandTSAverageMonthly_List"),
+				monthtsList,
 				OutputStart_DateTime, OutputEnd_DateTime,
 				outputYearType, MissingValue_double, Precision_int );
 		}
@@ -497,9 +506,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	        if ( Precision == null ) {
 	        	Precision_int = 0; // Default for demands
 	        }
+			@SuppressWarnings("unchecked")
+			List<MonthTS> monthtsList = (List<MonthTS>)processor.getPropContents("StateMod_WellDemandTSMonthly_List");
 			StateMod_TS.writeTimeSeriesList ( OutputFile_prevFull, OutputFile_full,
 				OutputComments_List, // Comments
-				(List)processor.getPropContents("StateMod_WellDemandTSMonthly_List"),
+				monthtsList,
 				OutputStart_DateTime, OutputEnd_DateTime,
 				outputYearType, MissingValue_double, Precision_int );
 		}
@@ -515,9 +526,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	        if ( Precision == null ) {
 	        	Precision_int = 0; // Default for pumping
 	        }
+			@SuppressWarnings("unchecked")
+			List<MonthTS> monthtsList = (List<MonthTS>)processor.getPropContents("StateMod_WellHistoricalPumpingTSMonthly_List");
 			StateMod_TS.writeTimeSeriesList ( OutputFile_prevFull, OutputFile_full,
 				OutputComments_List, // Comments
-				(List)processor.getPropContents("StateMod_WellHistoricalPumpingTSMonthly_List"),
+				monthtsList,
 				OutputStart_DateTime, OutputEnd_DateTime,
 				outputYearType, MissingValue_double, Precision_int );
 		}

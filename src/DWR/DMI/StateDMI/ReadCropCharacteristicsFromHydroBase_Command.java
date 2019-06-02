@@ -97,7 +97,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
     valid_Vector.add ( "CUMethod" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
 
@@ -118,9 +118,11 @@ not (e.g., "Cancel" was pressed.
 public boolean editCommand ( JFrame parent )
 {	String routine = getClass().getName() + ".editCommand";
 	CommandProcessor processor = getCommandProcessor();
-	List CUMethod_List = new Vector();
+	List<String> CUMethod_List = new Vector<String>();
 	try {
-		CUMethod_List = (List)processor.getPropContents("CUMethod_List");
+		@SuppressWarnings("unchecked")
+		List<String> dataList = (List<String>)processor.getPropContents("CUMethod_List");
+		CUMethod_List = dataList;
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( 3, routine, "Error getting CU method list - will not be listed in editor." );
@@ -189,7 +191,7 @@ CommandWarningException, CommandException
 
 		// Read from HydroBase...
 
-		List cropchars = hbdmi.readCropcharListForMethodDesc(CUMethod,false);
+		List<HydroBase_Cropchar> cropchars = hbdmi.readCropcharListForMethodDesc(CUMethod,false);
 
 		int size = 0;
 		if ( cropchars != null ) {
@@ -204,7 +206,7 @@ CommandWarningException, CommandException
 		HydroBase_Cropchar cropchar;
 		String s = null;
 		for (int i = 0; i < size; i++) {
-			cropchar = (HydroBase_Cropchar)cropchars.get(i);
+			cropchar = cropchars.get(i);
 			cch = new StateCU_CropCharacteristics();
 			cch.setName ( cropchar.getCropname() );
 			cch.setID ( "" + cropchar.getIrrig_cropnum() );

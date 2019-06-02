@@ -127,6 +127,7 @@ throws InvalidCommandParameterException
 
 	// If the input file does not exist, warn the user...
 
+    /*
 	String working_dir = null;
 	
 	CommandProcessor processor = getCommandProcessor();
@@ -145,6 +146,7 @@ throws InvalidCommandParameterException
                 new CommandLogRecord(CommandStatusType.FAILURE,
                         message, "Report the problem to software support." ) );
 	}
+	*/
 
 	if ( (OutputFile == null) || (OutputFile.length() == 0) ) {
         message = "The Excel output file must be specified.";

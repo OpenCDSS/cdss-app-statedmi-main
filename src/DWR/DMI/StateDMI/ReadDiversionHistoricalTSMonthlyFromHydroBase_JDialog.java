@@ -70,6 +70,7 @@ import RTi.Util.IO.Command;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 
+@SuppressWarnings("serial")
 public class ReadDiversionHistoricalTSMonthlyFromHydroBase_JDialog
 extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener
@@ -326,7 +327,7 @@ private void initialize (	JFrame parent, Command command )
 
    	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Include explicit:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-   	List include_Vector = new Vector(2);
+   	List<String> include_Vector = new Vector<String>(3);
    	include_Vector.add ( "" );
    	include_Vector.add ( __command._False );
    	include_Vector.add ( __command._True );
@@ -342,7 +343,7 @@ private void initialize (	JFrame parent, Command command )
 
    	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Include collections:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	include_Vector = new Vector(2);
+	include_Vector = new Vector<String>(3);
 	include_Vector.add ( "" );
 	include_Vector.add ( __command._False );
 	include_Vector.add ( __command._True );
@@ -357,7 +358,7 @@ private void initialize (	JFrame parent, Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("<= zero values in average?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List le_Vector = new Vector(2);
+    List<String> le_Vector = new Vector<String>(3);
 	le_Vector.add ( "" );
 	le_Vector.add ( __command._False );
 	le_Vector.add ( __command._True );
@@ -372,7 +373,7 @@ private void initialize (	JFrame parent, Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Use diversion comments:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List dc_Vector = new Vector(2);
+    List<String> dc_Vector = new Vector<String>(3);
     dc_Vector.add ( "" );
 	dc_Vector.add ( __command._False );
 	dc_Vector.add ( __command._True );
@@ -435,7 +436,7 @@ private void initialize (	JFrame parent, Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Fill pattern order:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List order_Vector = new Vector(3);
+    List<String> order_Vector = new Vector<String>(3);
 	order_Vector.add ( "" );
 	order_Vector.add ( "1" );
 	order_Vector.add ( "2" );
@@ -460,7 +461,7 @@ private void initialize (	JFrame parent, Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Fill average order:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	order_Vector = new Vector(3);
+	order_Vector = new Vector<String>(3);
 	order_Vector.add ( "" );
 	order_Vector.add ( "1" );
 	order_Vector.add ( "2" );

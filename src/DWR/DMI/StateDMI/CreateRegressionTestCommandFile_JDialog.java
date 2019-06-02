@@ -57,6 +57,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for CreateRegressionTestCommandFile command.
 */
+@SuppressWarnings("serial")
 public class CreateRegressionTestCommandFile_JDialog extends JDialog
 implements ActionListener, KeyListener, WindowListener
 {

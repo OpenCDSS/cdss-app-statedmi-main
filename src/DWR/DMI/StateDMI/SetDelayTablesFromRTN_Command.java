@@ -174,7 +174,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(3);
 	valid_Vector.add ( "InputFile" );
 	valid_Vector.add ( "SetEfficiency" );
 	valid_Vector.add ( "IfNotFound" );
@@ -241,7 +241,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     // Get the data needed for the command
 	
-    List stationList = null;
+    List<StateMod_Diversion> smdivList = null;
+    List<StateMod_Well> smwellList = null;
     int stationListSize = 0;
     boolean doDiv = false;
     boolean doWell = false;
@@ -249,19 +250,24 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     String datatype = "returns";
     try {
     	if ( this instanceof SetDiversionStationDelayTablesFromRTN_Command ) {
-    		stationList = (List)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		smdivList = dataList;
     		doDiv = true;
+    		stationListSize = smdivList.size();
     	}
     	else if ( (this instanceof SetWellStationDelayTablesFromRTN_Command) ||
     		(this instanceof SetWellStationDepletionTablesFromRTN_Command)) {
-    		stationList = (List)processor.getPropContents ( "StateMod_WellStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List" );
+    		smwellList = dataList;
     		doWell = true;
+    		stationListSize = smwellList.size();
     		if ( this instanceof SetWellStationDepletionTablesFromRTN_Command ) {
     			datatype = "depletions";
     			isReturns = false;
     		}
     	}
-		stationListSize = stationList.size();
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
@@ -295,7 +301,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     try {
     	int matchCount = 0;
-    	List returnList = null;
+    	List<LegacyReturnFlow> returnList = null;
 
     	try {
     		returnList = LegacyReturnFlow.readReturnFile ( InputFile_full );
@@ -317,18 +323,18 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	StateMod_Well well = null;
     	StateMod_ReturnFlow smret = null;
     	LegacyReturnFlow ret = null; // Legacy return flow object read from input file.
-    	List smret_Vector = null; // List of smret.
+    	List<StateMod_ReturnFlow> smret_Vector = null; // List of smret.
     	String id = null;// Diversion ID.
     	int iret, ieff;	// Loop counters for returns and efficiencies.
     	int nret; // Number of returns.
     	int pos; // Position within data from file, matching diversion.
     	for ( int i = 0; i < stationListSize; i++ ) {
     		if ( doDiv ) {
-    			div = (StateMod_Diversion)stationList.get(i);
+    			div = smdivList.get(i);
     			id = div.getID();
     		}
     		else if ( doWell ) {
-    			well = (StateMod_Well)stationList.get(i);
+    			well = smwellList.get(i);
     			id = well.getID();
     		}
     		if ( !id.matches(idpattern_Java) ) {
@@ -351,7 +357,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		Message.printStatus ( 2, routine, "Setting " + id + " " + datatype + " -> from return file" );
 
     		nret = ret.getNumReturns();
-    		smret_Vector = new Vector();	// Do not reuse!
+    		smret_Vector = new Vector<StateMod_ReturnFlow>();	// Do not reuse!
     		for ( iret = 0; iret < nret; iret++ ) {
     			if ( doDiv ) {
     				smret = new StateMod_ReturnFlow ( StateMod_DataSet.COMP_DIVERSION_STATIONS );

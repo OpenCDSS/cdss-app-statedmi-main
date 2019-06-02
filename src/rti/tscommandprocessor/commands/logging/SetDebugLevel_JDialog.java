@@ -51,6 +51,7 @@ import RTi.Util.IO.PropList;
 /**
 Editor dialog for the SetDebugLevel() command.
 */
+@SuppressWarnings("serial")
 public class SetDebugLevel_JDialog extends JDialog
 implements ActionListener, KeyListener, WindowListener
 {

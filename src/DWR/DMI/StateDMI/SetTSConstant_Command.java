@@ -137,7 +137,7 @@ throws InvalidCommandParameterException
 	                        message, "Specify 12 monthly (Jan-Dec) values for setting the time series." ) );
 		}
 		else {
-			List v = StringUtil.breakStringList ( MonthValues,", ", StringUtil.DELIM_SKIP_BLANKS );
+			List<String> v = StringUtil.breakStringList ( MonthValues,", ", StringUtil.DELIM_SKIP_BLANKS );
 			if ( (v == null) || (v.size() != 12) ) {
 				message = "12 monthly values must be specified.";
 				warning += "\n" + message;
@@ -149,7 +149,7 @@ throws InvalidCommandParameterException
 				String val;
 				__MonthValues_double = new Double[12];
 				for ( int i = 0; i < 12; i++ ) {
-					val = (String)v.get(i);
+					val = v.get(i);
 					if ( !StringUtil.isDouble(val) ) {
 						message = "Monthly value \"" + val + " is not a number.";
 						warning += "\n" + message;
@@ -229,7 +229,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(7);
 	valid_Vector.add ( "ID" );
 	if ( this instanceof SetInstreamFlowDemandTSAverageMonthlyConstant_Command ) {
 		valid_Vector.add ( "MonthValues" );
@@ -312,28 +312,38 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     // Get the data needed for the command
     
-    List tsList = null;
+    List<MonthTS> tsList = null;
     int tsListSize = 0;
     int compType = StateMod_DataSet.COMP_UNKNOWN;
     try {
     	if ( this instanceof SetDiversionHistoricalTSMonthlyConstant_Command ) {
-    		tsList = (List)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
+    		@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
+    		tsList = dataList;
     		compType = StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY;
     	}
 		else if ( this instanceof SetDiversionDemandTSMonthlyConstant_Command ){
-			tsList = (List)processor.getPropContents ( "StateMod_DiversionDemandTSMonthly_List" );
+			@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_DiversionDemandTSMonthly_List" );
+			tsList = dataList;
 			compType = StateMod_DataSet.COMP_DEMAND_TS_MONTHLY;
 		}
 		else if ( this instanceof SetInstreamFlowDemandTSAverageMonthlyConstant_Command ) {
-			tsList = (List)processor.getPropContents ( "StateMod_InstreamFlowDemandTSAverageMonthly_List" );
+			@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_InstreamFlowDemandTSAverageMonthly_List" );
+			tsList = dataList;
 			compType = StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY;
 		}
 		else if ( this instanceof SetWellHistoricalPumpingTSMonthlyConstant_Command ) {
-			tsList = (List)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
+			@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
+			tsList = dataList;
 			compType = StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY;
 		}
 		else if ( this instanceof SetWellDemandTSMonthlyConstant_Command ){
-			tsList = (List)processor.getPropContents ( "StateMod_WellDemandTSMonthly_List" );
+			@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_WellDemandTSMonthly_List" );
+			tsList = dataList;
 			compType = StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY;
 		}
     	tsListSize = tsList.size();

@@ -35,7 +35,7 @@ import DWR.StateMod.StateMod_DataSet;
 import DWR.StateMod.StateMod_TS;
 
 import RTi.TS.DateValueTS;
-import RTi.TS.DayTS;
+//import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.TS.MonthTSLimits;
 import RTi.TS.TS;
@@ -149,7 +149,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(4);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "TSID" );
 	valid_Vector.add ( "LEZeroInAverage" );
@@ -221,24 +221,32 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	
     // Get the data needed for the command
     
-    List tsList = null;
+    List<MonthTS> tsList = null;
     int tsListSize = 0;
     int compType = StateMod_DataSet.COMP_UNKNOWN; // Check this instead of instanceof to increase performance
     try {
        	if ( this instanceof SetDiversionHistoricalTSMonthly_Command ) {
-    		tsList = (List)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
+    		@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
+    		tsList = dataList;
     		compType = StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY;
     	}
 		else if ( this instanceof SetDiversionDemandTSMonthly_Command ){
-			tsList = (List)processor.getPropContents ( "StateMod_DiversionDemandTSMonthly_List" );
+			@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_DiversionDemandTSMonthly_List" );
+			tsList = dataList;
 			compType = StateMod_DataSet.COMP_DEMAND_TS_MONTHLY;
 		}
 		else if ( this instanceof SetWellHistoricalPumpingTSMonthly_Command ) {
-			tsList = (List)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
+			@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
+			tsList = dataList;
 			compType = StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY;
 		}
 		else if ( this instanceof SetWellDemandTSMonthly_Command ){
-			tsList = (List)processor.getPropContents ( "StateMod_WellDemandTSMonthly_List" );
+			@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_WellDemandTSMonthly_List" );
+			tsList = dataList;
 			compType = StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY;
 		}
        	tsListSize = tsList.size();
@@ -401,12 +409,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		}
     	}
 
-    	TS ts = null;
+    	MonthTS ts = null;
     	String id;
     	// Loop through available objects and see if any need to be filled...
     	int matchCount = 0;
     	for ( int i = 0; i < tsListSize; i++ ) {
-    		ts = (TS)tsList.get(i);
+    		ts = tsList.get(i);
     		id = ts.getLocation();
     		// Check if the requested location ID matches the ID in the time series.  If so, have
     		// found an existing time series to set.
@@ -442,7 +450,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			}
     		}
     		else if (compType == StateMod_DataSet.COMP_DIVERSION_TS_DAILY){
-    			tsList.set(i,ts = (DayTS)filets.clone());
+    			//tsList.set(i,ts = (DayTS)filets.clone());
+    			// TODO smalers 2019-05-28 daily is not processed above so comment out here
     		}
     		else if ( compType == StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY ) {
     			tsList.set(i,ts = (MonthTS)filets.clone());
@@ -474,7 +483,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			}
     		}
     		else if (compType == StateMod_DataSet.COMP_DIVERSION_TS_DAILY){
-    			tsList.add( ts = (DayTS)filets.clone() );
+    			//tsList.add( ts = (DayTS)filets.clone() );
+    			// TODO smalers 2019-05-28 daily is not processed above so comment out here
     		}
     		else if ( compType == StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY ) {
     			tsList.add( ts = (MonthTS)filets.clone() );

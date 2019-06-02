@@ -21,848 +21,6 @@ You should have received a copy of the GNU General Public License
 
 NoticeEnd */
 
-//---------------------------------------------------------------------------
-// StateDMI_Processor - class to process StateDMI commands
-//---------------------------------------------------------------------------
-// Copyright:  See the COPYRIGHT file.
-//---------------------------------------------------------------------------
-// History:
-//
-// 2002-09-18	J. Thomas Sapienza, RTi	Initial version from TSTool and
-//					PreCU code.
-// 2002-09-19	JTS, RTi		Code to handle first query (do_read
-//					CULocationsFromDDS)
-// 2002-09-20	JTS, RTi		Removed getOutputFile methods.
-// 2002-09-23	JTS, RTi		Added do_writeCULocations method.
-// 2002-09-24	JTS, RTi		do_setCULocation finalized.
-// 2002-09-25	JTS, RTi		Javadoc'd.
-// 2002-09-30	JTS, RTi		Climate Weight code added.
-// 2002-10-03	JTS, RTi		WES code added.
-// 2002-10-04	JTS, RTi		Code for doing a query of the available
-//					Blaney Criddle methods from HydroBase
-//					was added.
-// 2002-10-08	JTS, RTi		"AddIfNotFound" -> "AppendIfNotFound"
-// 2002-10-09	JTS, RTi		fillCULocationFromHydroBase added, and
-//					the readCULocationFrom* commands
-//					changed to use it.
-// 2002-10-10	JTS, RTi		CULocation objects being added to
-//					__CULocations that match the ID of an
-//					existing one in there are flagged
-//					and a warning message displayed to the
-//					user.
-// 2002-10-22	Steven A. Malers, RTi	Review and update code for official
-//					release.
-//					* Make the object runnable and implement
-//					  a run() method so that processing can
-//					  be threaded in the GUI.
-//					* To do so, simplify the processCommands
-//					  logic to one version.
-//					* Remove support for old command support
-//					  (e.g., remove -d support with the
-//					  debut level.  This decreases the size
-//					  of the code tremendously.
-//					* Start convention of printing to status
-//					  level 2 from do_* methods to reiterate
-//					  that a command has done what it is
-//					  supposed to do.
-//					* Start transition to DateTime from
-//					  TSDate - use DateTime as much as
-//					  possible, short of using in TS
-//					  classes - hopefully will update TS to
-//					  use DateTime soon.
-//					* The working directory procedure was
-//					  not quite right - update to be more
-//					  robust.
-//					* Remove formWDID and parseWDID that are
-//					  in the HydroBase_WaterDistrct class.
-//					* Alphabetize methods.
-//					* Add finalize.
-//					* Change names of main Vectors to have
-//					  "Vector" in name.
-//					* Change so when writing files, indicate
-//					  the type of the file so that multiple
-//					  write commands can be implemented
-//					  (e.g., use writeCULocationsToSTR).
-// 2002-11-23	Steven A. Malers, RTi	Add features for 01.01.00:
-//					* Add support for StateCU .cch file.
-// 2002-02-17	SAM, RTi		Finalize for first official release:
-//					* Add getOutputPeriodStart() and
-//					  getOutputPeriodEnd() for use in the
-//					  main GUI.
-//					* Finish .cch support.
-//					* Finish .wts support.
-//					* Finish .kbc support.
-//					* Finish "initial" .cds support.
-// 2003-03-06	SAM, RTi		* Add a flag indicating how wide WDIDs
-//					  should be to allow default to be 7 but
-//					  default to what appears to be in the
-//					  data.
-//					* When processing wildcards in this
-//					  code, replace GUI "*" with
-//					  Java-required ".*" before calling
-//					  String.matches().
-//					* Remove all unused code from old
-//					  StateDMI - things have evolved to
-//					  where that code will likely not be
-//					  used.
-// 2003-05-11	SAM, RTi		* Update to to new StateCU file
-//					  conventions.
-//					* Change all commands to not use file
-//					  extensions in read/write commands but
-//					  instead just use the model name.
-// 2003-06-04	SAM, RTi		* Change name of class from
-//					  StateDMIProcessor to
-//					  StateDMI_Processor.
-//					* Update to new StateCU_XXX class names.
-//					* Remove station weights file.
-//					* Use new TS package (DateTime, etc.).
-// 2003-10-15	SAM, RTi		* Comment out StateCU_ParameterTS - need
-//					  to change to
-//					  StateCU_IrrigationPracticeTS.
-//					* Start re-enabling all the StateCU
-//					  commands.
-// 2004-02-25	SAM, RTi		* Enable fillCULocation() and
-//					  setCULocation().
-//					* Enable readCULocationsFromList().
-//					* Enable readCULocationsFromStateCU().
-// 2004-02-26	SAM, RTi		* Change setCULocationAggregate() to
-//					  setDiversionAggregate().
-//					* Add setDiversionSystem().
-//					* Add setWellAggregate().
-//					* Add setWellSystem().
-// 2004-02-28	SAM, RTi		* Enable readClimateStationsFromList().
-// 					* Enable writeClimateStationsToStateCU()
-//					* Add fillClimateStation().
-//					* Add setClimateStation().
-//					* Add fillClimateStationsFromHydroBase()
-//					* Updated because some utility code
-//					  moved from StateCU_data to
-//					  StateCU_Util.
-// 2004-02-29	SAM, RTi		* Add
-//					  createCropPatternTSForCULocations().
-//					* Update
-//					  writeCropPatternTSToDateValue().
-//					* Update writeCropPatternTSToStateCU().
-//					* Enable readCropPatternTSFromStateCU().
-// 2004-03-01	SAM, RTi		* Enable
-//					  readCropPatternTSFromHydroBase().
-//					* Enable fillCropPatternTSInterpolate().
-//					* Enable fillCropPatternTSRepeat().
-//					* Add fillCropPatternTSProrateAgStats().
-//					* Change StateCU_Location "aggregate"
-//					  notation to "collection so as to not
-//					  confuse with the true aggregate type.
-//					* For well aggregate/system, require a
-//					  division to be set because it is
-//					  needed to uniquely identify parcels.
-//					* Add AgStats time series to the data
-//					  that are internally maintained, as
-//					  needed to fill time series data.
-// 2004-03-02	SAM, RTi		* Add setCropPattern().
-//					* Add translateCropPatternTS().
-// 2004-03-03	SAM, RTi		* Add readCropPatternTSFromDBF().
-// 					* Add removeCropPatternTS().
-// 					* Add createIrrigationPracticeTSFor
-//					  CULocations().
-// 					* Add
-//					  writeIrrigationPracticeTSToStateCU().
-// 					* Add writeIrrigationPracticeTS
-//					  ToDateValue().
-//					* Enable
-//					  readIrrigationPracticeTSFromStateCU().
-//					* Change setCropPattern() to
-//					  setCropPatternTS().
-// 2004-03-07	SAM, RTi		* Update do_readCropPatternTSFromDBF()
-//					  to support reading sprinkler parcels.
-// 2004-03-09	SAM, RTi		* Combine set*Aggregate(), etc, into
-//					  setCollection().
-//					* Add setCollectionFromList() to handle
-//					  set*FromList() aggregate/system
-//					  commands.
-// 2004-03-12	SAM, RTi		* Add
-//					  do_readIrrigationPracticeWellData() to
-//					  handle readIrrigationPracticeWellData
-//				 	  FromList() and later fromHydroBase().
-//					* Change do_readCropPatternTSFromDBF()
-//					  to do_readCropParcels() to more
-//					  accurately reflect its multiple use.
-// 2004-03-13	SAM, RTi		* Enable the Cancel button to in the
-//					  warning dialog when processing
-//					  commands - it is inconvenient to
-//					  cancel using the other menus.
-//					* Change __cancel to __cancel_processing
-//					  to be clearer and consistent with
-//					  TSTool.
-//					* When there is not a parcel ID in the
-//					  sprinkler file - print a status
-//					  message but don't treat as a warning.
-// 2004-03-14	SAM, RTi		* When processing well data for IPY,
-//					  check for parcel data and print a
-//					  warning if it is not found.
-//					* Enable all crop characteristics
-//					  commands using current standards.
-// 2004-03-17	SAM, RTi		* Enable all Blaney-Criddle commands
-//					  using current standards.
-//					* Enable delay table processing commands
-//					  for StateCU.
-// 2004-03-18	SAM, RTi		* Enable delay table assignment
-//					  commands.
-// 2004-03-22	SAM, RTi		* Enable irrigation practice time series
-//					  fill commands.
-// 2004-04-02	SAM, RTi		* Add fillCULocationsFromList() and
-//					  setCULocationsFromList().
-// 2004-04-04	SAM, RTi		* Finalize previous item.
-//					  Enable
-//					  setCULocationClimateStationWeights().
-//					* Fix bug in setCropPatternTS() where
-//					  pattern tokens are not being handled
-//					  properly.
-// 2004-04-05	SAM, RTi		* Add
-//					  setIrrigationPracticeTSFromStateCU().
-//					* Add ID parameter to
-//					  setIrrigationPracticeTSFromList().
-// 2004-04-10	SAM, RTi		Update to version 01.10.00.
-//					* For write*() commans, skip of no
-//					  output is desired.
-//					* Add __create_output data member and
-//					  set method and update
-//					  processCommands() to check it.
-// 2004-04-12	SAM, RTi		* Add
-//					  readDiversionStationsFromNetwork().
-//					* Add
-//					  writeDiversionsStatinosToStateMod().
-// 2004-05-11	SAM, RTi		* Fix so that setCropPatternTS() sets
-//					  to zero any crops not specifically
-//					  referenced in the command - this
-//					  prevents unforseen filling problems
-//					  with values set to missing.
-// 2004-05-17	SAM, RTi		* Similar to above for
-//					  readCropPatternTSFromHydroBase(),
-//					  readCropParcels().
-//					* Change so that only the "NA"
-//					  irrig_type is filtered out when
-//					  processing parcels.  An irrig_type of
-//					  "UNKNOWN" indicates that a parcel is
-//					  irrigated but the irrigation type is
-//					  unknown.  A type of "NA" indicates
-//					  that the parcel is not irrigated.
-//					* Update setCropPatternTS() to use the
-//					  ProcessWhen flag, which sets aside
-//					  supplemental crop pattern data to be
-//					  processed with other commands.
-//					* Update
-//					  readCropPatternTSFromHydroBase() to
-//					  consider the supplemental crop pattern
-//					  data.
-// 2004-05-25	SAM, RTi		* Add
-//					  fillCULocationClimateStationWeights().
-//					* Update translateCropPatternTS() to
-//					  accept an optional list file.
-//					* Fix bug in
-//					  setIrrigationPracticeTSFromList() - it
-//					  did not seem to be doing anything.
-//					* Comment out calls to removeAllTS(),
-//					  which were in place for crop pattern
-//					  time series.  These apparently were
-//					  in place when reading from HydroBase
-//					  and got propagated to the DBF
-//					  processor.  The problem is that if
-//					  data are superimposed from different
-//					  sources, the logic would clear out
-//					  some data.  Comment out for now.
-// 2004-05-28	SAM, RTi		* Add fillCropPatternTSConstant().
-// 2004-06-01	SAM, RTi		* Start cranking out StateMod commands.
-// 2004-06-13	SAM, RTi		Continue with StateMod file support.
-//					* Distinguish between monthly and daily
-//					  delay tables.
-// 2004-06-17	SAM, RTi		Continue with StateMod file support.
-//					* Add diversion rights commands.
-// 2004-06-24	SAM, RTi		Continue with StateMod file support.
-//					* Add network commands.
-//					* Fix bug in do_setCollectionFromList -
-//					  if the maximum column was specified,
-//					  it was getting reset to zero.
-// 2004-06-30	SAM, RTi		* Add HydroBase version comments to all
-//					  write commands.
-// 2004-07-06	SAM, RTi		Continue with StateMod file support.
-//					* Add instream flow stations commands.
-//					* Add instream flow demand commands.
-// 2004-07-08	SAM, RTi		Continue with StateMod file support.
-//					* Add instream flow rights commands.
-// 2004-07-09	SAM, RTi		Continue with StateMod file support.
-//					* Finish instream flow demand commands.
-// 2004-07-10	SAM, RTi		Continue with StateMod file support.
-//					* For read*FromStateMod(), allow only
-//					  a filename (old syntax) or new
-//					  InputFile="X" parameter.
-//					* Similar for StateCU - will need to
-//					  update dialogs as time allows.
-// 2004-07-11	SAM, RTi		Continue with StateMod file support.
-//					* Finalize RIS commands.
-//					* Finalize SES commands.
-//					* Finalize RIN commands.
-// 2004-08-12	SAM, RTi		Continue with StateMod file support.
-//					* Enable RIB commands.
-//					* Fix bug where diversion station
-//					  default return was not ignoring
-//					  confluences.
-//					* For diversion stations, check the
-//					  output year type so that the
-//					  efficiencies can be properly assigned.
-//					* Add setOutputYearType() command.
-// 2004-08-22	SAM, RTi		Continue with StateMod file support.
-//					* Finalize DDH commands except for
-//					  limit*toRights() command.
-// 2004-08-23	SAM, RTi		Continue with StateMod file support.
-//					* Finalize DDM commands.
-// 2004-08-29	SAM, RTi		Continue with StateMod file support.
-//					* Finalize DDM commands (still).
-// 2004-08-30	SAM, RTi		Continue with StateMod file support.
-//					* Add
-//					  setDiversionStationCapacitiesFromTS()
-//					  for diversion historical TS.
-// 2004-09-01	SAM, RTi		Continue with StateMod file support.
-//					* Enable setDiversionDemandTSMonthly.
-//					* Add the efficiency detail report to
-//					  calculateDiversionStation
-//					  Efficiencies().
-//					* Add fill commands for diversion
-//					  demand time series (monthly).
-//					* Fix limitation that fill start and end
-//					  were only handled as years.
-// 2004-09-09	SAM, RTi		Continue with StateMod file support.
-//					* Finalize reservoir station commands.
-// 2004-09-14	SAM, RTi		Continue with StateMod file support.
-//					* Finalize reservoir rights commands.
-// 2004-09-16	SAM, RTi		Continue with StateMod file support.
-//					* Finalize well station commands.
-// 2004-09-20	SAM, RTi		Continue with StateMod file support.
-//					* More finalize well station commands.
-// 2004-09-29	SAM, RTi		Continue with StateMod file support.
-//					* Finalize well rights commands.
-//					* Finalize well demands commands.
-// 2004-09-30	SAM, RTi		Continue with StateMod file support.
-//					* Continue finalizing well demands
-//					  commands.
-// 2004-10-04	SAM, RTi		* Keep track of output files so that
-//					  they can be listed in the Results
-//					  section of the GUI.
-// 2004-10-20	SAM, RTi		* Fix bug in readSupplementalStructure
-//					  IrrigSummaryTSList - a loop was using
-//					  the wrong max and this was throwing
-//					  exceptions.
-// 2004-11-01	SAM, RTi		Work with Erin Wilson to recreate the
-//					Rio Grande files.
-//					* Add the readIrrigationPracticeWellData
-//					  FromHydroBase() command.
-//					* StateMod_ReservoirStation.setN2owns()
-//					  has been removed - use setN2own().
-// 2004-12-15	SAM, RTi		* Filling diversions from HydroBase was
-//					  crashing for the San Juan.  Add
-//					  another try/catch to allow processing
-//					  to continue.
-// 2005-01-12	SAM, RTi		* The name in a collection list file was
-//					  not being set in the station.
-// 2005-01-13	SAM, RTi		Update to 1.16.03:
-//					* Change the default value for WriteHow
-//					  to "OverwriteFile".  This seems to
-//					  make more sense for must cases.
-//					* The output year type was not getting
-//					  saved to the global variable - fix.
-//					* Add setDiversionHistoricalTS
-//					  MonthlyConstant().
-// 2005-01-18	JTS, RTi		* Added getSMInstreamFlows().
-//					* Added getSMInstreamFlowRights().
-//					* Added getSMReservoirRights().
-//					* Added getSMStreamEstimates().
-//					* Added
-//					  getSMStreamEstimateCoefficients().
-//					* Added getSMWellRights().
-//		SAM, RTi		* Rename the getSM*() methods to more
-//					  verbose names that match the StateMod
-//					  and StateCU class names.
-// 2005-01-20	SAM, RTi		* Combine setTSConstantMonthly() and
-//					  setTSConstant() - the code is used by
-//					  a limited number of commands so
-//					  combine now to allow for future
-//					  growth.
-//					* Fix so that set*TimeSeries() will
-//					  read from HydroBase.
-// 2005-01-25	SAM, RTi		* Add sortDiversionHistoricalTSMonthly()
-//					  command.
-// 2005-01-25	SAM, RTi		Update to version 01.17.01.
-//					* Fix bug where when adding a blank
-//					  diversion historical time series from
-//					  HydroBase the allocateDataSpace()
-//					  method was not getting called.
-//					* Null time series limits was causing
-//					  an error filling with monthly average.
-// 2005-01-27	SAM, RTi		Update to version 01.17.02.
-//					* Simplify
-//					  readSprinklerParcelsFromList() to rely
-//					  on HydroBase data for parcel data.
-//					  The list file only provides a list of
-//					  parcels that have sprinklers.
-// 2005-01-31	SAM, RTi		Update to version 01.17.03.
-//					* Continue the above.
-//					* Fix bug where processCommands() had
-//					  two main if statements - this was
-//					  leading to some spurious warnings.
-//					* Instream flow demand (average monthly)
-//					  was checking output period - instead
-//					  change to use output year type.
-//					* Change so when reading stations from
-//					  the network the river node is
-//					  automatically defaulted to the node
-//					  ID.
-// 2005-02-01	SAM, RTi		Update to version 01.17.04.
-//					* Writing reservoir rights was mangling
-//					  some of the dead storage and acw
-//					  information, when dead storage is > 0.
-//					  Fix to write out simple values with
-//					  no adjustments for dead storage.
-//					* Fix bug where fill/set of rights data
-//					  using a StationID of "ID" was using
-//					  the literal "ID" instead of the first
-//					  part of the identifier.
-// 2005-02-03	SAM, RTi		Update to version 01.17.05.
-//					* Fix limitDiversionHistoricalTS
-//					  MonthlyToRights(). A backup copy of
-//					  data was not being saved and
-//					  appropriation dates were not being
-//					  reinitialized for each station.
-//					* Fix
-//					  calculateDiversionDemandTSMonthly() to
-//					  set the demand to zero if the
-//					  efficiency is zero and IWR is zero.
-//					  Previously demand would be missing.
-//					* Update fillDiversionHistoricalTS
-//					  MonthlyAverage() and fillDiversion
-//					  HistoricalTSMonthlyPatter() to have
-//					  the IncludeCollections parameter.
-//					* Update readDiversionHistoricalTS
-//					  MonthlyFromHydroBase() to do filling
-//					  of aggregate parts during the read.
-// 2005-02-03	SAM, RTi		Update to version 01.17.06.
-//					* Add the efficiency report to the list
-//					  of output files.
-//					* The list if station IDs to ignore was
-//					  not being handled properly.
-// 2005-02-09	SAM, RTi		Update to version 01.17.07.
-//					* Add limitDiversionDemandTSMonthly
-//					  ToRights().
-// 2005-02-10	SAM, RTi		Update to version 01.17.08.
-//					* Handle the water right switch when
-//					  limiting diversions and demands to
-//					  rights.
-// 2005-02-14	SAM, RTi		Update to version 01.17.09.
-//					* Resolve sort order for streamflow
-//					  stations.  Was getting stream gages
-//					  first and then other nodes.  Make the
-//					  default the same order as the network.
-// 2005-02-25	SAM, RTi		Update to version 01.17.10.
-//					* Add synchronizeIrrigationPracticeAnd
-//					  CropPatternTS.
-//					* Update readCropPatternTSFromHydroBase
-//					  to have a ProcessData parameter so
-//					  that data can be used when processing
-//					  the irrigation practice time series.
-// 2005-02-27	SAM, RTi		* Copy the read readCropParcels()
-//					  command to readIrrigationPracticeTS()
-//					  and update to handle logic for the
-//					  sprinkler acres, groundwater acres,
-//					  and maximum pupmping.
-//					* Change readIrrigationPracticeWellData
-//					  FromList to.
-//					  readIrrigationPracticeTSWellData
-//					  FromList to be more consistent.
-//					* Update the readWellRightsFromHydroBase
-//					  to have DefaultAppropriationDate and
-//					  DefineRightHow parameters.
-//					* Update the readWellRightsFromHydroBase
-//					  command to process the groundwater and
-//					  sprinkler are a and maximum pumping.
-//					* Add the sortCULocations() command.
-// 2005-03-10	SAM			* Add OnOffDefault for the commands that
-//					  read water rights from HydroBase.
-//					* When aggregating rights, make sure
-//					  that the aggregate result is a whole
-//					  number to accurately reflect the
-//					  appropriation dates that go into the
-//					  averaging.  This was not being handled
-//					  properly in the well rights processing
-//					  code.  Remove code that would allow a
-//					  simple numeric weighting.
-//					* Modify findAndAddSMInstreamFlowRight()
-//					  command to insert new rights
-//					  alphabetically.  The other rights were
-//					  being handled this way.
-//					* Add sort*Right() commands so that the
-//					  user has full flexibility to make the
-//					  rights agree after set commands.
-//					* When processing diversion and well
-//					  rights, change to allow units of "C"
-//					  and "CFS" - is the latter being phased
-//					  into HydroBase?
-//					* Begin phasing in the new message tags
-//					  to facilitate user review of the log
-//					  file.
-// 2005-03-21	SAM, RTi		Update to version 1.17.11.
-//					* Focus on getting the IPY code working.
-//					* Enable the setIrrigationPracticeTS
-//					  FromHydroBase() command.
-// 2005-03-23	SAM, RTi		* Start being more conscious about using
-//					  "warning_count" instead of
-//					  "error_count" and expand the message
-//					  tag for some commands to include the
-//					  warning count.
-//					* Enable setIrrigationPracticeTS
-//					  SprinklerAreaFromList().
-// 2005-03-25	SAM, RTi		Update to version 1.17.12.
-//					* Add warnings for obsolete commands
-//					  to facilitate transition to StateDMI.
-// 2005-03-30	SAM, RTi		* Change "there were # errors processing
-//					  the command" to "there...warnings...".
-// 2005-04-14	JTS, RTi		Added code to process write*ToList()
-//					commands.
-// 2005-04-18	JTS, RTi		* Added the code to run the
-//					  readReservoirRightsFromStateMod()
-//					  command.
-//					* Added the code to run the
-//					  readWellRightsFromStateMod() command.
-//					* Added the code to run the
-//				    	  readStreamEstimateCoefficients
-//					  FromStateMod()
-//					  command.
-// 2005-04-19	JTS, RTi	 	* Added the code to run the
-//					  readDelayTablesFromStateCU() command.
-//					* Added the code to run the
-//					  readCULocationDelayTableAssignments
-//					  FromStateCU() command.
-// 2005-05-02	SAM, RTi		* Review commands as the Rio Grande
-//					  data set creation verification is
-//					  performed.  Adhere to new guidelines
-//					  for the message levels.
-//					* Introduce __FYI_warning_level to
-//					  facilitate handling of non-fatal
-//					  warnings.
-//					* Review and Javadoc writeToList() code.
-//					* Test usiing stored procedures to
-//					  regenerate the Rio Grande data set:
-//					  Update
-//					  fillClimateStationsFromHydroBase to
-//					  query each station separately.
-// 2005-05-20	SAM, RTi		* Phase in new Command classes
-//					  consistent with TSTool.
-//					* Restore some code from the previous
-//					  version - mystery as to why it was
-//					  deleted!?
-//					* Add sorting of Blaney-Criddle data.
-//					* Add Precision property to
-//					  writeBlaneyCriddleToStateCU.
-//					* Convert from using
-//					  readStructureGeolocForWDID() to
-//					  readStructureViewForWDID().
-//					* Convert from using
-//					  readStructureForWDID() to
-//					  readStructureViewForWDID().
-//					* Convert
-//					  readStructureReservoirListForWDID() to
-//					  readStructureReservoirForWDID().
-//					* Convert readNetAmtsList() to the new
-//					  calling sequence.
-//					* Convert readStructureIrrigSummaryTS
-//					  ListForWDIDListLand_usePeriod() to
-//					  readStructureIrrigSummaryTSList().
-//					* Update
-//					  readParcelUseTSListForParcelList()
-//					  and readParcelUseTSList()
-//					  calls to not pass the where and order
-//					  by clauses - null were being passed
-//					  before anyhow.
-// 2005-05-24	SAM, RTi		* Add Version parameter to
-//					  writeCULocationsToStateCU().
-//					* Convert all commands to use new
-//					  command tag features - this should
-//					  allow the log viewer to have full
-//					  capabilities.  Fine-tuning the
-//					  messages must still occur.
-//					* Remove HydroBase_StationGeoloc and
-//					  instead use HydroBase_StationView.
-//					* Remove
-//					  HydroBase_StructureIrrigSummaryTS and
-//					  use HydroBase_StructureView.
-// 2005-05-30	SAM, RTi		* Update setIrrigationPracticeTS
-//					  SprinklerAreaFromList() to include
-//					  the ParcelAreaCol parameter.
-//					* Fix bug where sortReservoirStations()
-//					  was not being recognized.
-//					* Update remaining readNetAmtsList() to
-//					  use new calling convention.
-// 2005-06-03	SAM, RTi		Update to version 01.17.14.
-//					* Add WriteOnlyTotal to
-//					  writeCropPatternTSToStateCU().
-//					* Update writeCropPatternTSToStateCU to
-//					  use the output period.
-// 2005-06-08	SAM, RTi		* Add Version parameter to
-//					  readCropPatternTSFromStateCU().
-//					* Add openHydroBase() command.
-//					* Add Version parameter to
-//					  readIrrigationPracticeTSFromStateCU().
-//					* Add ReadStart, ReadEnd to
-//					  readDiversionHistoricalTS*
-//					  FromHydroBase().
-// 2005-06-09	SAM, RTi		* Fix bug where reading diversion
-//					  historical time series was
-//					  initializing to the first part and
-//					  adding the first part again.
-//					* Enable flags for filling diversions
-//					  with historical average, pattern,
-//					  constant, and limiting to rights.
-// 2005-06-29	SAM, RTi		* Add DefineRightHow=LatestDate when
-//					  processing well rights.
-// 2005-07-06	SAM, RTi		* Fix problem in setCropPatternTS()
-//					  where the results were not getting
-//					  refreshed after the initial
-//					  processing, resulting in zeros in the
-//					  output.
-//					* Clarify message when pattern file is
-//					  not found.
-// 2005-07-13	SAM, RTi		Update to version 01.17.17.
-//					* Update readCropPatternTS
-//					  FromHydroBase() to truncate the
-//					  parcel acreage to .2, to compare with
-//					  work done by Leonard Rice.
-// 2005-07-16	SAM, RTi		* Update
-//					  setIrrigationPracticeTSFromList() so
-//					  that other than the efficiencies can
-//					  be set.
-// 2005-07-27	SAM, RTi		Update to version 01.17.18.
-//					* Fix bug in
-//					  writeCropPatternTSToStateCU(), where
-//					  the WriteCropArea parameter was not
-//					  defaulting properly.
-//					* Implement new parameters to allow the
-//					  user to control how synchronize
-//					  IrrigationPracticeAndCropPatternTS()
-//					  executes.
-// 2005-07-28	SAM, RTi		* Add check for sprinkler > groundwater
-//					  area in synchronize.
-// 2005-07-30	SAM, RTi		* Update setIrrigationPracticeTS
-//					  MaxPumpingToRights() to have
-//					  NumberOfDaysInMonth parameter.
-// 2005-07-31	SAM, RTi		* Update
-//					  fillCropPatternTSProrateAgStats() to
-//					  have the NormalizeTotals parameter.
-// 2005-08-11	SAM, RTi		Update to version 01.17.19.
-//					* Fix bug in reading the AgStats
-//					  DateValue file - was going into an
-//					  infinite loop of warnings if no file
-//					  was found.
-//					* Add IgnoreUseType in
-//					  readDiversionRightsFromHydroBase.
-//					* Fix so that if an aggregate/system
-//					  diversion part has missing capacity,
-//					  the total capacity is not incremented
-//					  for the part.
-//					* Fix so that the total diversion time
-//					  series from HydroBase is properly
-//					  initialized even if the first
-//					  diversion in the collection does not
-//					  have a time series in HydroBase.
-//					* Add a checkDataSet() method that is
-//					  called after processing commands, to
-//					  verify the integrity of the data set
-//					  components.  Implement checks that
-//					  were in place in watright and demandts
-//					  (e.g., make sure that a location ID
-//					  is only one type).
-// 2005-08-18	SAM, RTi		Update to version 01.17.20.
-//					* For well-only aggregates, do not put a
-//					  "W" in the water right ID.  D&W still
-//					  has the "W", as per Watright.
-//					* Add a check for the existance of the
-//					  delay table file.
-//					* Fix bug where last year filling crop
-//					  pattern time series by proration was
-//					  not getting normalized to basin
-//					  statistics.
-// 2005-09-08	SAM, RTi		* Fix bug in setCropPatternTS() where
-//					  overriding an existing pattern causes
-//					  problems.  Clearing the crops was
-//					  using the crop types in the set, not
-//					  in the original time series.
-//					* When using a time series from an
-//					  external file, reset the period to
-//					  the output period so that filling
-//					  works.
-//					* When setting a time series to a
-//					  constant, the set end date was not
-//					  being parsed properly (start was being
-//					  used again).  Also, the year was being
-//					  set to zero in call cases, when it
-//					  should have been set to zero only for
-//					  instream flow average monthly demand.
-//					* When filling diversion time series
-//					  with diversion comments, read the
-//					  comments after setting the period of
-//					  record.
-// 2005-09-27	SAM, RTi		Update to version 01.17.21.
-//					* Update to include the "writeToList"
-//					  output files in the list of files that
-//					  can be viewed.
-//					* Fix so efficiency report is added to
-//					  the output list using a relative path.
-// 2005-10-03	SAM, RTi		Update to version 01.18.00.
-//					* Begin finalizing list commands and do
-//					  an official release.
-//					* Enable well historical pumping time
-//					  series commands, very similar to
-//					  diversion historical time series.
-// 2005-10-18	SAM, RTi		Update to version 1.18.04.
-//					* Use "NA" instead of "N/A" to indicate
-//					  that a well station is not tied to a
-//					  diversion station.
-//					* When processing well demand time
-//					  series either to calculate average
-//					  efficiencies or to calculate demand
-//					  time series (using the average
-//					  efficiencies), only process well
-//					  stations where idivcomw=1.
-// 2005-11-14	SAM, RTi		Update to version 1.18.05.
-//					* Update fillCULocation() and
-//					  setCULocation() to include elevation
-//					  and AWC.
-//					* Add setDiversionStationsFromList().
-//					* Add __OutputYearStartMonth to
-//					  facilitate conversions between year
-//					  types.
-//					* Update the StateCU CDS code to include
-//					  the start/end months and year type in
-//					  the file header.
-//					* Update the StateCU IPY code to include
-//					  the start/end months, units, and year
-//					  type in the file header.
-//					* Add the mergeListFileColumns()
-//					  command.
-// 2005-11-14	SAM, RTi		Update to version 1.18.06.
-//					* Add readDiversionDemandTSMonthlyFrom
-//					  StateMod.
-// 2005-11-22	SAM, RTi		Update to version 1.18.07.
-//					* Add AWC and elevation to
-//					  readCULocationsFromList().
-//					* Convert mergeListFileColumns() to a
-//					  command class.
-// 2005-12-01	SAM, RTi		Fix fillCropPatternTSProrateAgStats() so
-//					that all county crops are used even if
-//					a structure does not have a crop type.
-// 2005-12-06	SAM, RTi		Update to version 1.18.08:
-//					* Add
-//					  fillDiversionStationsFromNetwork(),
-//					  fillInstreamFlowStationsFromNetwork(),
-//					  fillReservoirStationsFromNetwork(),
-//					  fillWellStationsFromNetwork().
-// 2006-01-11	SAM, RTi		Update to version 1.18.09:
-//					* Fix bug where space in setWorkingDir()
-//					  caused an exception.  The diretory
-//					  with a space was not being quoted in
-//					  the StateDMI_JFrame class.
-// 2006-01-30	SAM, RTi		Update to version 1.18.10:
-//					* Add IgnoreWells and IgnoreDWs to the
-//					  readWellDemandTSMonthlyFromStateMod()
-//					  command.
-//					* Apparently the above were not enabled
-//					  for readWellStationsFromStateMod(),
-//					  even though documented.  Enable.
-// 2006-01-31	SAM, RTi		Update to version 1.19.00:
-//					* Change so that well station types are
-//					  used for D&W aggregate lists when
-//					  processing wells.  This impacts:
-//					  setWellAggregate()
-//					  setWellAggregateFromList()
-//					  setWellSystem()
-//					  setWellSystemFromList()
-// 2006-03-10	SAM, RTi		* Continue to work on the above changes,
-//					  testing also with South Platte data.
-// 2006-04-10	SAM, RTi		Update to version 1.20.00:
-//					* Fix bug where reading collection list
-//					  file did not warn when specified
-//					  column numbers were greater than the
-//					  number of columns in the file.
-//					* When processing commands, first create
-//					  StateMod and StateCU data sets, so
-//					  that information can be recorded about
-//					  components that are output, and store
-//					  data check information for the
-//					  components.
-// 2006-04-17	SAM, RTi		* Add IDFormat to
-//					  readWellRightsFromHydroBase, to allow
-//					  some control over well right
-//					  identifiers.
-//					* For sort*(), change the default from
-//					  "Alphabetical" to "Ascending".
-//					* In readWellRightsFromHydroBase(),
-//					  save the parcel counts so that data
-//					  checks can be done.
-// 2006-04-30	SAM, RTi		Update to version 01.20.02.
-//					* Write the check file even if no check
-//					  messages were generated.
-//					* Add translateCropCharacteristics().
-//					* Add translateBlaneyCriddle().
-//					* Set well right identifiers to the
-//					  receipt number when processing
-//					  permits.
-// 2006-07-07	SAM, RTi		Update to version 01.20.05.
-//					* In synchronizeIrrigationPracticeAnd
-//					  CropPatternTS(), remove the code that
-//					  resets groundwater acreage to
-//					  sprinkler acreage if groundwater is
-//					  less - it is unneeded.
-// 2006-10-09	SAM, RTi		Update to version 1.21.00:
-//					* Adjust reading well rights to reread
-//					  from the database rather than relying
-//					  on the "wells" table and add the APEX
-//					  amounts to the absolute decrees.
-// 2006-10-24	SAM, RTi		Update to version 1.22.00:
-//					* Fix problem with well right IDs not
-//					  always being set for cases from
-//					  the previous update.
-// 2006-11-03	SAM, RTi		Update to version 2.00.00:
-//					* Fix problem with
-//					  setStreamGageStation() not setting the
-//					  name.
-// 2006-12-18	SAM, RTi		* Fix problem with
-//					  readDiversionRightsFromHydroBase()
-//					  IgnoreUseType not working properly.
-// 2007-01-03	Kurt Tometich, RTi
-//						Added the processing capability
-//					  	for a new command setRiverNetworkNode.
-//					  	There is a new method do_setRiverNetworkNode
-//					  	Which handles the processing.  This is a
-//					  	StateMod specific command.
-// 2007-01-07	KAT, RTi	Added validation for numerical fields
-// 						for setRiverNetworkNode processing.
-// 2007-01-10 	KAT, RTi 	Added support for new command
-//						"sortCropCharacteristics."  Added support
-//						for new field "Blaney-Criddle Method" in
-//						the do_setBlaneyCriddle() method.
-// 2007-02-05	KAT, RTi	Moved the
-//						do_readDiversionHistoricalTSMonthlyFromHydroBase
-//						method to a separate command class and dialog.
-//						Removed old functionality from processCommands.
-// 2007-02-06	KAT, RTi 	Changed all protected vectors to private
-//						and added some getMethods().
-// 2007-02-18	SAM, RTi	Update to new CommandProcessor interface.
-//					Clean up code based on Eclipse feedback.
-//					Update translateCropPatternTS() to include ID.
-// 2007-03-04	SAM, RTi	Add ktsw defaults for Blaney-Criddle processing.
-// 2007-03-22	SAM, RTi	Change setIrrigationPracticeTSFromHydroBase() to
-//					only process crop years in the output period.
-// 2007-05-11	SAM, RTi	Update CDS filling methods to filter by GW-only
-//					and surface supply locations.
-//------------------------------------------------------------------------------
-// EndHeader
-
 package DWR.DMI.StateDMI;
 
 import java.io.BufferedReader;
@@ -885,10 +43,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import org.apache.poi.util.SystemOutLogger;
-
 import RTi.DMI.DMI;
-import RTi.DMI.DMIUtil;
 import RTi.DMI.DatabaseDataStore;
 import RTi.TS.DateValueTS;
 import RTi.TS.DayTS;
@@ -956,7 +111,6 @@ import DWR.DMI.HydroBaseDMI.HydroBase_CUPenmanMonteith;
 import DWR.DMI.HydroBaseDMI.HydroBase_CountyRef;
 import DWR.DMI.HydroBaseDMI.HydroBase_ParcelUseTS;
 import DWR.DMI.HydroBaseDMI.HydroBase_Structure;
-import DWR.DMI.HydroBaseDMI.HydroBase_StructureToParcel;
 import DWR.DMI.HydroBaseDMI.HydroBase_StructureView;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
@@ -996,6 +150,7 @@ import DWR.StateCU.StateCU_Util;
 
 /**
 Class for processing StateDMI commands.
+Lists of data are maintained for all StateCU and StateMod components.
 */
 public class StateDMI_Processor
 implements CommandProcessor, CommandProcessorEventListener, MessageJDialogListener, TSSupplier
@@ -1012,7 +167,7 @@ private StateDMI_JFrame __gui;
 /**
 The list of commands managed by this command processor, guaranteed to be non-null.
 */
-private List __commandList = new Vector();
+private List<Command> __commandList = new Vector<Command>();
 
 /**
 The name of the file to read for commands.
@@ -1060,7 +215,7 @@ private String __WorkingDir_String;
 /**
 Hashtable of properties used by the processor.
 */
-Hashtable __property_Hashtable = new Hashtable();
+Hashtable<String,Object> __property_Hashtable = new Hashtable<String,Object>();
 
 /**
 HashMap of properties used by the processor.
@@ -1112,7 +267,7 @@ private YearType __OutputYearType = YearType.CALENDAR; // Default
 List of integers containing the command numbers (zero index) where warnings
 occurred - filled in processCommands().
 */
-private List __command_warning_Vector = new Vector ();
+private List<String> __command_warning_Vector = new Vector<String>();
 
 /**
 The number of commands that are at the beginning of the __commands, which have
@@ -1123,17 +278,17 @@ private int __num_prepended_commands = 0;
 /**
 The internal list of StateCU_BlaneyCriddle being processed.
 */
-private List<StateCU_BlaneyCriddle> __CUBlaneyCriddle_Vector = new Vector();
+private List<StateCU_BlaneyCriddle> __CUBlaneyCriddle_Vector = new Vector<StateCU_BlaneyCriddle>();
 
 /**
 The internal list of StateCU_ClimateStation being processed.
 */
-private List<StateCU_ClimateStation> __CUClimateStation_Vector = new Vector();
+private List<StateCU_ClimateStation> __CUClimateStation_Vector = new Vector<StateCU_ClimateStation>();
 
 /**
 The internal list of StateCU_CropCharacteristics being processed.
 */
-private List<StateCU_CropCharacteristics> __CUCropCharacteristics_Vector = new Vector();
+private List<StateCU_CropCharacteristics> __CUCropCharacteristics_Vector = new Vector<StateCU_CropCharacteristics>();
 
 /**
 The internal list of StateCU_CropPatternTS being processed.
@@ -1141,31 +296,31 @@ The supplemental data are filled by the setCropPatternTS() commands.
 The supplemental data are now stored as raw parcel data and are summed
 at a ditch level when requested for use.
 */
-private List<StateCU_CropPatternTS> __CUCropPatternTS_Vector = new Vector();
+private List<StateCU_CropPatternTS> __CUCropPatternTS_Vector = new Vector<StateCU_CropPatternTS>();
 //private List __HydroBase_Supplemental_StructureIrrigSummaryTS_Vector = new Vector();
 
 /**
 The internal list of StateCU_Location being processed.
 */
-private List<StateCU_Location> __CULocation_Vector = new Vector();
+private List<StateCU_Location> __CULocation_Vector = new Vector<StateCU_Location>();
 
 /**
 The internal list of StateCU_Location being processed.
 */
-private List<StateCU_PenmanMonteith> __CUPenmanMonteith_Vector = new Vector();
+private List<StateCU_PenmanMonteith> __CUPenmanMonteith_Vector = new Vector<StateCU_PenmanMonteith>();
 
 /**
 The internal list of StateCU_IrrigationPracticeTS being processed.
 The supplemental data are supplied with readIrrigationPracticeTSFromList and
 are used by readIrrigationPracticeTSFromHyroBase().
 */
-private List<StateCU_IrrigationPracticeTS> __CUIrrigationPracticeTS_Vector = new Vector();
-private List __HydroBase_Supplemental_ParcelUseTS_Vector = new Vector();
+private List<StateCU_IrrigationPracticeTS> __CUIrrigationPracticeTS_Vector = new Vector<StateCU_IrrigationPracticeTS>();
+private List<StateDMI_HydroBase_StructureView> __HydroBase_Supplemental_ParcelUseTS_Vector = new Vector<StateDMI_HydroBase_StructureView>();
 
 /**
 The internal list of TS contain Agricultural Statistics (AgStats)...
 */
-private List __CUAgStatsTS_Vector = new Vector();
+private List<TS> __CUAgStatsTS_Vector = new Vector<TS>();
 
 /**
 The internal list of HydroBase_ParcelUseTS records that can be examined.  These
@@ -1198,44 +353,44 @@ private StateCU_DataSet __StateCU_DataSet = null;
 /**
 The internal list of StateMod_StreamGage being processed.
 */
-private List<StateMod_StreamGage> __SMStreamGageStationList = new Vector();
+private List<StateMod_StreamGage> __SMStreamGageStationList = new Vector<StateMod_StreamGage>();
 
 /**
 The internal list of StateMod_DelayTable (monthly) being processed.
 */
-private List<StateMod_DelayTable> __SMDelayTableMonthlyList = new Vector();
+private List<StateMod_DelayTable> __SMDelayTableMonthlyList = new Vector<StateMod_DelayTable>();
 
 /**
 The internal list of StateMod_DelayTable (daily) being processed.
 */
-private List<StateMod_DelayTable> __SMDelayTableDailyList = new Vector();
+private List<StateMod_DelayTable> __SMDelayTableDailyList = new Vector<StateMod_DelayTable>();
 
 /**
 The internal list of StateMod_Diversion being processed.
 */
-private List<StateMod_Diversion> __SMDiversionStationList = new Vector();
+private List<StateMod_Diversion> __SMDiversionStationList = new Vector<StateMod_Diversion>();
 
 /**
 The internal list of StateMod_DiversionRight being processed.
 */
-private List<StateMod_DiversionRight> __SMDiversionRightList = new Vector();
+private List<StateMod_DiversionRight> __SMDiversionRightList = new Vector<StateMod_DiversionRight>();
 
 /**
 The internal list of StateMod diversion time series (monthly) being processed.
 */
-private List<MonthTS> __SMDiversionTSMonthlyList = new Vector();
+private List<MonthTS> __SMDiversionTSMonthlyList = new Vector<MonthTS>();
 
 /**
 The internal list of StateMod diversion time series (monthly) being processed.
 This is a saved version to be used to check for observations when using the
 LimitDiversionHistoricalTSMonthlyToRights() command.
 */
-private List<MonthTS> __SMDiversionTSMonthly2List = new Vector();
+private List<MonthTS> __SMDiversionTSMonthly2List = new Vector<MonthTS>();
 
 /**
 The internal list of monthly pattern time series used for data filling.
 */
-private List<StringMonthTS> __SMPatternTSMonthlyList = new Vector();
+private List<StringMonthTS> __SMPatternTSMonthlyList = new Vector<StringMonthTS>();
 
 /**
 Data store list, to generically manage database connections.  This list is guaranteed to be
@@ -1246,112 +401,112 @@ private List<DataStore> __dataStoreList = new Vector<DataStore>();
 /**
 The internal list of StateMod daily historical TS being processed.
 */
-private List<DayTS> __SMDiversionTSDailyList = new Vector();
+private List<DayTS> __SMDiversionTSDailyList = new Vector<DayTS>();
 
 /**
 The internal list of StateMod demand time series (monthly) being processed.
 */
-private List<MonthTS> __SMDemandTSMonthlyList = new Vector();
+private List<MonthTS> __SMDemandTSMonthlyList = new Vector<MonthTS>();
 
 /**
 The internal list of StateMod demand time series (daily) being processed.
 */
-private List<DayTS> __SMDemandTSDailyList = new Vector();
+private List<DayTS> __SMDemandTSDailyList = new Vector<DayTS>();
 
 /**
 The internal list of StateMod consumptive water requirement time series (monthly) being processed.
 */
-private List<MonthTS> __SMConsumptiveWaterRequirementTSMonthlyList = new Vector();
+private List<MonthTS> __SMConsumptiveWaterRequirementTSMonthlyList = new Vector<MonthTS>();
 
 /**
 The internal list of StateMod_Reservoir being processed.
 */
-private List<StateMod_Reservoir> __SMReservoirStationList = new Vector();
+private List<StateMod_Reservoir> __SMReservoirStationList = new Vector<StateMod_Reservoir>();
 
 /**
 The internal list of StateMod_ReservoirRight being processed.
 */
-private List<StateMod_ReservoirRight> __SMReservoirRightList = new Vector();
+private List<StateMod_ReservoirRight> __SMReservoirRightList = new Vector<StateMod_ReservoirRight>();
 
 /**
 The internal list of reservoir StateMod_ReturnFlow being processed.
 */
-private List<StateMod_ReturnFlow> __SMReservoirReturnList = new Vector();
+private List<StateMod_ReturnFlow> __SMReservoirReturnList = new Vector<StateMod_ReturnFlow>();
 
 /**
 The internal list of StateMod_InstreamFlow being processed.
 */
-private List<StateMod_InstreamFlow> __SMInstreamFlowStationList = new Vector();
+private List<StateMod_InstreamFlow> __SMInstreamFlowStationList = new Vector<StateMod_InstreamFlow>();
 
 /**
 The internal list of StateMod_InstreamFlowRight being processed.
 */
-private List<StateMod_InstreamFlowRight> __SMInstreamFlowRightList = new Vector();
+private List<StateMod_InstreamFlowRight> __SMInstreamFlowRightList = new Vector<StateMod_InstreamFlowRight>();
 
 /**
 The internal list of StateMod instream flow demand TS (average monthly) being processed.
 */
-private List<MonthTS> __SMInstreamFlowDemandTSAverageMonthlyList = new Vector();
+private List<MonthTS> __SMInstreamFlowDemandTSAverageMonthlyList = new Vector<MonthTS>();
 
 /**
 The internal list of StateMod_Well being processed.
 */
-private List<StateMod_Well> __SMWellList = new Vector();
+private List<StateMod_Well> __SMWellList = new Vector<StateMod_Well>();
 
 /**
 The internal list of StateMod_WellRight being processed.
 */
-private List<StateMod_WellRight> __SMWellRightList = new Vector();
+private List<StateMod_WellRight> __SMWellRightList = new Vector<StateMod_WellRight>();
 
 /**
 The internal list of StateMod well historical pumping time series (monthly) being processed.
 */
-private List<MonthTS> __SMWellHistoricalPumpingTSMonthlyList = new Vector();
+private List<MonthTS> __SMWellHistoricalPumpingTSMonthlyList = new Vector<MonthTS>();
 
 /**
 The internal list of StateMod well demand time series (monthly) being processed.
 */
-private List<MonthTS> __SMWellDemandTSMonthlyList = new Vector();
+private List<MonthTS> __SMWellDemandTSMonthlyList = new Vector<MonthTS>();
 
 /**
 The internal list of StateMod_Plan being processed.
 */
-private List<StateMod_Plan> __SMPlanList = new Vector();
+private List<StateMod_Plan> __SMPlanList = new Vector<StateMod_Plan>();
 
 /**
 The internal list of StateMod_Plan_WellAugmentation being processed.
 */
-private List<StateMod_Plan_WellAugmentation> __SMPlanWellAugmentationList = new Vector();
+private List<StateMod_Plan_WellAugmentation> __SMPlanWellAugmentationList = new Vector<StateMod_Plan_WellAugmentation>();
 
 /**
 The internal list of StateMod_ReturnFlow being processed.
 */
-private List<StateMod_ReturnFlow> __SMPlanReturnList = new Vector();
+private List<StateMod_ReturnFlow> __SMPlanReturnList = new Vector<StateMod_ReturnFlow>();
 
 /**
 The internal list of StateMod_StreamEstimate being processed.
 */
-private List<StateMod_StreamEstimate> __SMStreamEstimateStationList = new Vector();
+private List<StateMod_StreamEstimate> __SMStreamEstimateStationList = new Vector<StateMod_StreamEstimate>();
 
 /**
 The internal list of StateMod_StreamEstimate_Coefficients being processed.
 */
-private List<StateMod_StreamEstimate_Coefficients> __SMStreamEstimateCoefficients_Vector = new Vector();
+private List<StateMod_StreamEstimate_Coefficients> __SMStreamEstimateCoefficients_Vector = new Vector<StateMod_StreamEstimate_Coefficients>();
 
 /**
 The internal list of StateMod_PrfGageData used when processing stream estimate coefficients.
 */
-private List<StateMod_PrfGageData> __SMPrfGageData_Vector = new Vector();
+private List<StateMod_PrfGageData> __SMPrfGageData_Vector = new Vector<StateMod_PrfGageData>();
 
 /**
 The internal list of StateMod_RiverNetworkNode being processed.
 */
-private List<StateMod_RiverNetworkNode> __SMRiverNetworkNode_Vector = new Vector();
+private List<StateMod_RiverNetworkNode> __SMRiverNetworkNode_Vector = new Vector<StateMod_RiverNetworkNode>();
 
 /**
 The internal list of StateMod_OperationalRight being processed.
 */
-private List<StateMod_OperationalRight> __SMOperationalRightList = new Vector();
+private List<StateMod_OperationalRight> __SMOperationalRightList = new Vector<StateMod_OperationalRight>();
 
 /**
 The internal StateMod_Network that defines the StateMod model network (not
@@ -1362,45 +517,45 @@ private StateMod_NodeNetwork __SM_network = null;
 // Dynamic memory to keep track of data objects that are matched during
 // processing, resulting in updates...
 
-private List<String> __CUBlaneyCriddle_match_Vector = new Vector();
-private List<String> __CUClimateStation_match_Vector = new Vector();
-private List<String> __CUCropCharacteristics_match_Vector = new Vector();
-private List<String> __CUCropPatternTS_match_Vector = new Vector();
-private List<String> __CUDelayTableAssignment_match_Vector = new Vector();
-private List<String> __CULocation_match_Vector = new Vector();
-private List<String> __CUIrrigationPracticeTS_match_Vector = new Vector();
-private List<String> __CUDelayTableDaily_match_Vector = new Vector();
-private List<String> __CUDelayTableMonthly_match_Vector = new Vector();
-private List<String> __CUPenmanMonteith_match_Vector = new Vector();
+private List<String> __CUBlaneyCriddle_match_Vector = new Vector<String>();
+private List<String> __CUClimateStation_match_Vector = new Vector<String>();
+private List<String> __CUCropCharacteristics_match_Vector = new Vector<String>();
+private List<String> __CUCropPatternTS_match_Vector = new Vector<String>();
+//private List<String> __CUDelayTableAssignment_match_Vector = new Vector<String>();
+private List<String> __CULocation_match_Vector = new Vector<String>();
+private List<String> __CUIrrigationPracticeTS_match_Vector = new Vector<String>();
+//private List<String> __CUDelayTableDaily_match_Vector = new Vector<String>();
+//private List<String> __CUDelayTableMonthly_match_Vector = new Vector<String>();
+private List<String> __CUPenmanMonteith_match_Vector = new Vector<String>();
 
-private List<String> __SMStreamGage_match_Vector = new Vector();
-private List<String> __SMDelayTableMonthly_match_Vector = new Vector();
-private List<String> __SMDelayTableDaily_match_Vector = new Vector();
-private List<String> __SMDiversion_match_Vector = new Vector();
-private List<String> __SMDiversionRight_match_Vector = new Vector();
-private List<String> __SMDiversionTSMonthly_match_Vector = new Vector();
+private List<String> __SMStreamGage_match_Vector = new Vector<String>();
+private List<String> __SMDelayTableMonthly_match_Vector = new Vector<String>();
+private List<String> __SMDelayTableDaily_match_Vector = new Vector<String>();
+private List<String> __SMDiversion_match_Vector = new Vector<String>();
+private List<String> __SMDiversionRight_match_Vector = new Vector<String>();
+private List<String> __SMDiversionTSMonthly_match_Vector = new Vector<String>();
 // TODO SAM 2007-02-18 Enable if needed
 //private List __SMDiversionTSDaily_match_Vector = new Vector();
-private List<String> __SMConsumptiveWaterRequirementTSMonthly_match_Vector = new Vector();
-private List<String> __SMDemandTSMonthly_match_Vector = new Vector();
-private List<String> __SMReservoir_match_Vector = new Vector();
-private List<String> __SMReservoirRight_match_Vector = new Vector();
-private List<String> __SMReservoirReturn_match_Vector = new Vector();
-private List<String> __SMInstreamFlow_match_Vector = new Vector();
-private List<String> __SMInstreamFlowRight_match_Vector = new Vector();
-private List<String> __SMInstreamFlowDemandTSAverageMonthly_match_Vector = new Vector();
-private List<String> __SMWell_match_Vector = new Vector();
-private List<String> __SMWellRight_match_Vector = new Vector();
-private List<String> __SMWellHistoricalPumpingTSMonthly_match_Vector = new Vector();
-private List<String> __SMWellDemandTSMonthly_match_Vector = new Vector();
-private List<String> __SMPlan_match_Vector = new Vector();
-private List<String> __SMPlanReturn_match_Vector = new Vector();
-private List<String> __SMPlanWellAugmentation_match_Vector = new Vector();
-private List<String> __SMStreamEstimate_match_Vector = new Vector();
-private List<String> __SMStreamEstimateCoefficients_match_Vector = new Vector();
-private List<String> __SMPrfGageData_match_Vector = new Vector();
-private List<String> __SMRiverNetworkNode_match_Vector = new Vector();
-private List<String> __SMOperationalRight_match_Vector = new Vector();
+private List<String> __SMConsumptiveWaterRequirementTSMonthly_match_Vector = new Vector<String>();
+private List<String> __SMDemandTSMonthly_match_Vector = new Vector<String>();
+private List<String> __SMReservoir_match_Vector = new Vector<String>();
+private List<String> __SMReservoirRight_match_Vector = new Vector<String>();
+private List<String> __SMReservoirReturn_match_Vector = new Vector<String>();
+private List<String> __SMInstreamFlow_match_Vector = new Vector<String>();
+private List<String> __SMInstreamFlowRight_match_Vector = new Vector<String>();
+private List<String> __SMInstreamFlowDemandTSAverageMonthly_match_Vector = new Vector<String>();
+private List<String> __SMWell_match_Vector = new Vector<String>();
+private List<String> __SMWellRight_match_Vector = new Vector<String>();
+private List<String> __SMWellHistoricalPumpingTSMonthly_match_Vector = new Vector<String>();
+private List<String> __SMWellDemandTSMonthly_match_Vector = new Vector<String>();
+private List<String> __SMPlan_match_Vector = new Vector<String>();
+private List<String> __SMPlanReturn_match_Vector = new Vector<String>();
+private List<String> __SMPlanWellAugmentation_match_Vector = new Vector<String>();
+private List<String> __SMStreamEstimate_match_Vector = new Vector<String>();
+private List<String> __SMStreamEstimateCoefficients_match_Vector = new Vector<String>();
+private List<String> __SMPrfGageData_match_Vector = new Vector<String>();
+private List<String> __SMRiverNetworkNode_match_Vector = new Vector<String>();
+private List<String> __SMOperationalRight_match_Vector = new Vector<String>();
 
 /**
 The HydroBase DMI instance that is used for database queries.
@@ -1672,6 +827,7 @@ public void addProcessListener ( ProcessListener listener )
 	}
 }
 
+// TODO smalers 2019-05-29 need to evaluate whether to use or delete method
 /**
 Calculate a structure's capacity, for assignment from HydroBase.
 The order of assignment is as follows:
@@ -1697,6 +853,7 @@ collection (used for messages).
 or StateMod_DataSet.COMP_WELL_STATIONS.
 @param add If true, then add to the capacity.  If false, reset.
 */
+@SuppressWarnings("unused")
 private double calculateStructureCapacity (	double capacity0,
 						String id,
 						HydroBase_Structure hbdiv,
@@ -2106,17 +1263,18 @@ This method is called from a couple of commands.  Data records are set with SetC
 SetCropPatternTSFromList() commands and are later used to create crop patterns when
 ReadCropPatternTSFromHydroBase() is called.
 */
-protected List convertSupplementalParcelUseTSToStructureIrrigSummaryTS (
-	List supplementalParcelUseTSList )
+protected List<StateDMI_HydroBase_StructureView> convertSupplementalParcelUseTSToStructureIrrigSummaryTS (
+	List<StateDMI_HydroBase_ParcelUseTS> supplementalParcelUseTSList )
 {	String routine = "StateDMI_Processor.convertSupplementalParcelUseTSToStructureIrrigSummaryTS";
-	List HydroBase_Supplemental_StructureIrrigSummaryTS_Vector = new Vector();
+	List<StateDMI_HydroBase_StructureView> HydroBase_Supplemental_StructureIrrigSummaryTS_Vector =
+		new Vector<StateDMI_HydroBase_StructureView>();
 	int size_parcels = supplementalParcelUseTSList.size();
 	StateDMI_HydroBase_ParcelUseTS parcel = null;
 	StateDMI_HydroBase_StructureView sits = null;
 	boolean found = false; // Whether a matching summary is found
 	// Loop through the raw parcel data...
 	for ( int iparcel = 0; iparcel < size_parcels; iparcel++ ){
-		parcel = (StateDMI_HydroBase_ParcelUseTS)supplementalParcelUseTSList.get(iparcel);
+		parcel = supplementalParcelUseTSList.get(iparcel);
 		// Find a matching location in irrig summary data and add to it...
 		found = false;
 		/* TODO SAM 2007-06-17 Evaluate whether needed - old code does
@@ -2166,219 +1324,6 @@ protected List convertSupplementalParcelUseTSToStructureIrrigSummaryTS (
 }
 
 /**
-Create a list of HydroBase_StructureIrrigSummaryTS (new is HydroBase_StructureView) from lists of
-HydroBase_ParcelUseTS and HydroBase_StructureToParcel data.  This is used when
-processing a DBF file into CropPatternTS.
-@return a list of HydroBase_StructureIrrigSummaryTS.
-@param command_tag Command tag used for messaging.
-@parma warning_count Warning count used for messaging.
-@param parcelusets_Vector A list of HydroBase_ParcelUseTS.
-@param struct2parcel_Vector A list of HydroBase_StructureToParcel.
-*/
-private List createIrrigSummaryTS (	String command_tag, int warning_count,
-		List parcelusets_Vector,
-		List struct2parcel_Vector )
-{	String routine = "StateDMI_Processor.createIrrigSummaryTS";
-	List irrigsummaryts_Vector = new Vector();
-
-	// Loop through the HydroBase_StructureToParcel (new is
-	// HydroBase_StructurView) records...
-
-	int size = 0;
-	if ( struct2parcel_Vector != null ) {
-		size = struct2parcel_Vector.size();
-	}
-	HydroBase_StructureView sits = null;
-	HydroBase_StructureToParcel stp;
-	HydroBase_ParcelUseTS pts = null;
-	int pts_size = 0;	// Size of ParcelUseTS
-	if ( parcelusets_Vector != null ) {
-		pts_size = parcelusets_Vector.size();
-	}
-	int sits_size = 0;
-	boolean found;	// Used for searches.
-	String stp_id="";// Structure ID in ParcelUseTS
-	int ipts;	// To iterate on ParcelUseTS
-	int isits;	// To iterate on StructureIrrigSummaryTS (new is
-			// HydroBase_StructureView)
-	int stp_parcelid = 0;	// Parcel ID referenced by StructureToParcel,
-				// assumed to be in one division.
-	String land_use = "";	// for parcel
-	String irrig_type = "";	// for parcel
-	int cal_year = 0;	// for parcel
-	double area = 0.0;	// for parcel
-	double stp_percent_irrig;	// for structure_to_parcel
-	// Loop through structure_to_parcel records, retrieving parcel data as
-	// necessary to create a irrig_summary_ts object...
-	for ( int i = 0; i < size; i++ ) {
-		stp = (HydroBase_StructureToParcel)
-			struct2parcel_Vector.get(i);
-		stp_id = stp.getStructure_id();
-		stp_parcelid = stp.getParcel_id();
-		stp_percent_irrig = stp.getPercent_irrig();
-		// Get the parcel information for the relationship
-		found = false;
-		for ( ipts = 0; ipts < pts_size; ipts++ ) {
-			pts = (HydroBase_ParcelUseTS)
-				parcelusets_Vector.get(ipts);
-			if ( pts.getParcel_id() == stp_parcelid ) {
-				found = true;
-				break;
-			}
-		}
-		if ( !found ) {
-			// Did not find the parcel for the structure...
-			Message.printWarning ( 2,
-			formatMessageTag(command_tag,++warning_count), routine,
-			"Could not find parcel " + stp_parcelid +
-			" to compute irrig_summary_ts for structure " +
-			stp_id );
-			continue;
-		}
-		// Data from the parcel...
-		area = pts.getArea();
-		cal_year = pts.getCal_year();
-		irrig_type = pts.getIrrig_type();
-		land_use = pts.getLand_use();
-		// For debugging...
-		//Message.printStatus ( 2, routine,
-		//"structure to parcel " + stp_id + "," + stp_parcelid +
-		//" matches parcel_use_ts " + pts.getParcel_id() + "," +
-		//area );
-		// See if the structure exists in the list already.  It must
-		// match the structure_id, crop type, and year.
-		found = false;
-		sits_size = irrigsummaryts_Vector.size();
-		for ( isits = 0; isits < sits_size; isits++ ) {
-			sits = (HydroBase_StructureView)
-				irrigsummaryts_Vector.get(isits);
-			if (	sits.getStructure_id().equalsIgnoreCase(stp_id)
-				&& sits.getLand_use().equalsIgnoreCase(land_use)
-				&& (sits.getCal_year() == cal_year) ){
-				found = true;
-				break;
-			}
-		}
-		// StructureIrrigSummaryTS did not exist, so add one...
-		if ( !found ) {
-			sits = new HydroBase_StructureView();
-			sits.setStructure_id(stp_id);
-			sits.setStructure_id(stp_id);
-			sits.setCal_year ( cal_year );
-			sits.setLand_use ( land_use );
-			if ( irrig_type.equalsIgnoreCase("DRIP") ) {
-				sits.setAcres_by_drip (area*stp_percent_irrig );
-			}
-			else if ( irrig_type.equalsIgnoreCase("FLOOD") ) {
-				sits.setAcres_by_flood (area*stp_percent_irrig);
-			}
-			else if ( irrig_type.equalsIgnoreCase("FURROW") ) {
-				sits.setAcres_by_furrow(area*stp_percent_irrig);
-			}
-			else if ( irrig_type.equalsIgnoreCase("SPRINKLER") ) {
-				sits.setAcres_by_sprinkler (
-					area*stp_percent_irrig);
-			}
-			irrigsummaryts_Vector.add ( sits );
-		}
-		else {	// Structure record exists, so add to its acreage...
-			double old_value;
-			if ( irrig_type.equalsIgnoreCase("DRIP") ) {
-				old_value = sits.getAcres_by_drip();
-				if ( old_value < 0.0 ) {
-					sits.setAcres_by_drip ( area*
-					stp_percent_irrig );
-				}
-				else {	sits.setAcres_by_drip ( old_value +
-					area*stp_percent_irrig );
-				}
-			}
-			else if ( irrig_type.equalsIgnoreCase("FLOOD") ) {
-				old_value = sits.getAcres_by_flood();
-				if ( old_value < 0.0 ) {
-					sits.setAcres_by_flood ( area*
-					stp_percent_irrig );
-				}
-				else {	sits.setAcres_by_flood ( old_value +
-					area*
-					stp_percent_irrig );
-				}
-			}
-			else if ( irrig_type.equalsIgnoreCase("FURROW") ) {
-				old_value = sits.getAcres_by_furrow();
-				if ( old_value < 0.0 ) {
-					sits.setAcres_by_furrow ( area*
-					stp_percent_irrig );
-				}
-				else {	sits.setAcres_by_furrow ( old_value +
-					area*stp_percent_irrig );
-				}
-			}
-			else if ( irrig_type.equalsIgnoreCase("SPRINKLER") ) {
-				old_value = sits.getAcres_by_sprinkler();
-				if ( old_value < 0.0 ) {
-					sits.setAcres_by_sprinkler (
-					area* stp_percent_irrig );
-				}
-				else {	sits.setAcres_by_sprinkler ( old_value+
-					area*stp_percent_irrig );
-				}
-			}
-		}
-		if ( Message.isDebugOn ) {
-			Message.printDebug ( 10, routine,
-			"Setting irrig_summary_ts for id=" + stp_id +
-			" year=" + cal_year +
-			"crop type=" + land_use +
-			" flood=" + sits.getAcres_by_flood() +
-			" sprinkler=" + sits.getAcres_by_sprinkler() +
-			" total=" + sits.getAcres_total() );
-		}
-	}
-	// Now loop through and sum up the acres by various irrigation methods
-	// into a total acreage...
-	size = irrigsummaryts_Vector.size();
-	double total;
-	double value;
-	for ( int i = 0; i < size; i++ ) {
-		sits = (HydroBase_StructureView)
-			irrigsummaryts_Vector.get(i);
-		total = 0.0;
-		found = false;	// Indicate if some data found.
-		value = sits.getAcres_by_drip();
-		if ( !DMIUtil.isMissing(value) ) {
-			total += value;
-			found = true;
-		}
-		value = sits.getAcres_by_flood();
-		if ( !DMIUtil.isMissing(value) ) {
-			total += value;
-			found = true;
-		}
-		value = sits.getAcres_by_furrow();
-		if ( !DMIUtil.isMissing(value) ) {
-			total += value;
-			found = true;
-		}
-		value = sits.getAcres_by_sprinkler();
-		if ( !DMIUtil.isMissing(value) ) {
-			total += value;
-			found = true;
-		}
-		if ( found ) {
-			sits.setAcres_total ( total );
-		}
-	}
-	// Notify of errors...
-	if ( warning_count > 0 ) {
-		Message.printWarning ( 2,
-		formatMessageTag(command_tag,++warning_count), routine,
-		"There were errors calculating ditch crop patterns." );
-	}
-	return irrigsummaryts_Vector;
-}
-
-/**
 Read agricultural statistics time series from a DateValue file.
 @param command the command being executed:
 <pre>
@@ -2392,7 +1337,7 @@ throws Exception
 		message;
 	int warning_count = 0;
 
-	List tokens = StringUtil.breakStringList ( command, "()", StringUtil.DELIM_SKIP_BLANKS );
+	List<String> tokens = StringUtil.breakStringList ( command, "()", StringUtil.DELIM_SKIP_BLANKS );
 	if ( (tokens == null) || tokens.size() < 2 ) {
 		// Must have at least the command name and file...
 		message = "Bad command \"" + command +
@@ -2404,7 +1349,7 @@ throws Exception
 	}
 
 	// Get the input needed to process the file...
-	PropList props = PropList.parse ( (String)tokens.get(1), routine, "," );
+	PropList props = PropList.parse ( tokens.get(1), routine, "," );
 	String InputFile = props.getValue ( "InputFile" );
 
 	String full_filename = IOUtil.getPathUsingWorkingDir ( InputFile );
@@ -4327,7 +3272,7 @@ throws Exception
 				" diversion TS with monthly averages:" + nl + average_limits.toString() );
 		}
 		String FillFlag = props.getValue("FillFlag");
-		int nFilled = TSUtil.fillConstantByMonth ( ts, FillStart_DateTime,
+		TSUtil.fillConstantByMonth ( ts, FillStart_DateTime,
 			FillEnd_DateTime, average_limits.getMeanArray(), ", fill w/ hist mon ave", FillFlag, null );
 	}
 	return warning_count;
@@ -4409,7 +3354,7 @@ throws Throwable
 	__CULocation_Vector = null;
 	__CUClimateStation_Vector = null;
 	__CUClimateStation_match_Vector = null;
-	__CUDelayTableAssignment_match_Vector = null;
+	//__CUDelayTableAssignment_match_Vector = null;
 	__CULocation_match_Vector = null;
 	__CUIrrigationPracticeTS_match_Vector = null;
 	__CUPenmanMonteith_Vector = null;
@@ -5248,7 +4193,8 @@ so that a warning can be printed using warnAboutDataMatches().
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
 */
 protected void findAndAddSMOperationalRight ( StateMod_OperationalRight opr, boolean replace )
-{	String id = opr.getID(), routine = "StateDMI_Processor.findAndAddSMOperationalRight";
+{	String id = opr.getID();
+	//String routine = "StateDMI_Processor.findAndAddSMOperationalRight";
 
 	int pos = StateMod_Util.indexOf( __SMOperationalRightList, id );
 	if ( pos >= 0 ) {
@@ -5755,20 +4701,21 @@ Find parcel from a Vector of HydroBase_ParcelUseTS.
 }
 */
 
+// TODO smalers 2019-05-29 decide whether to keep or delete method
 /**
-Find parcels from a Vector of HydroBase_ParcelUseTS.
-@return parcels from a Vector of HydroBase_ParcelUseTS.
-@param parcelusets_Vector Vector of HydroBase_ParcelUseTS to search.
+Find parcels from a list of HydroBase_ParcelUseTS.
+@return parcels from a list of HydroBase_ParcelUseTS.
+@param parcelusets_Vector list of HydroBase_ParcelUseTS to search.
 @param div Division for data.
 @param ids_array Array of parcel identifiers to search for.
 @param datetime1 Start for query.
 @param datetime2 End for query.
 */
-private List findParcelUseTSListForParcelList(
-		List parcelusets_Vector, int div,
-				int [] ids_array,
-				DateTime datetime1, DateTime datetime2 )
-{	List crop_patterns = new Vector();
+@SuppressWarnings("unused")
+private List<HydroBase_ParcelUseTS> findParcelUseTSListForParcelList(
+		List<HydroBase_ParcelUseTS> parcelusets_Vector, int div,
+		int [] ids_array, DateTime datetime1, DateTime datetime2 )
+{	List<HydroBase_ParcelUseTS> crop_patterns = new Vector<HydroBase_ParcelUseTS>();
 	// For debugging...
 	/*
 	Vector ids_Vector = new Vector();
@@ -5797,7 +4744,7 @@ private List findParcelUseTSListForParcelList(
 	}
 	int pts_year;
 	for ( int i = 0; i < size; i++ ) {
-		pts = (HydroBase_ParcelUseTS)parcelusets_Vector.get(i);
+		pts = parcelusets_Vector.get(i);
 		if ( div != pts.getDiv() ) {
 			continue;
 		}
@@ -5818,6 +4765,7 @@ private List findParcelUseTSListForParcelList(
 	return crop_patterns;
 }
 
+// TODO smalers 2019-05-29 need to evaluate whether to use function
 /**
 Find crop patterns from a Vector of HydroBase_StructureIrrigSummaryTS (new
 is HydroBase_StructureView).
@@ -5829,11 +4777,11 @@ is HydroBase_StructureView) to search.
 @param datetime1 First year to query.
 @param datetime2 Last year to query.
 */
-private List findStructureIrrigSummaryTSListForWDIDListLand_usePeriod
-				( List irrigsummaryts_Vector,
-						List culoc_wdids,
-				DateTime datetime1, DateTime datetime2 )
-{	List crop_patterns = new Vector ();
+@SuppressWarnings("unused")
+private List<HydroBase_StructureView> findStructureIrrigSummaryTSListForWDIDListLand_usePeriod (
+	List<HydroBase_StructureView> irrigsummaryts_Vector, List<String> culoc_wdids,
+	DateTime datetime1, DateTime datetime2 )
+{	List<HydroBase_StructureView> crop_patterns = new Vector<HydroBase_StructureView>();
 	int size = 0;
 	if ( irrigsummaryts_Vector != null ) {
 		size = irrigsummaryts_Vector.size();
@@ -5856,15 +4804,14 @@ private List findStructureIrrigSummaryTSListForWDIDListLand_usePeriod
 	String sits_id;
 	String culoc_wdid;
 	for ( int i = 0; i < size; i++ ) {
-		sits = (HydroBase_StructureView)
-			irrigsummaryts_Vector.get(i);
+		sits = irrigsummaryts_Vector.get(i);
 		sits_year = sits.getCal_year();
 		if ( (sits_year < year1) || (sits_year > year2) ) {
 			continue;
 		}
 		sits_id = sits.getStructure_id();
 		for ( iid = 0; iid < wdids_size; iid++ ) {
-			culoc_wdid = (String)culoc_wdids.get(iid);
+			culoc_wdid = culoc_wdids.get(iid);
 			if ( culoc_wdid.equalsIgnoreCase(sits_id) ) {
 				crop_patterns.add ( sits );
 			}
@@ -5946,19 +4893,21 @@ public boolean getCancelProcessingRequested ()
 Return the list of commands.
 @return the list of commands.
 */
-public List getCommands ()
+public List<Command> getCommands ()
 {
 	return __commandList;
 }
 
+// TODO smalers 2019-05-29 evaluate whether to keep or remove method, maybe make public
 /**
 Helper method to return the current list of commands as a String.
 @return Text of commands that are currently in memory.
 */
+@SuppressWarnings("unused")
 private String getCommandsAsString()
 {
 	String commandStr = "";
-	List commandList = getCommands();
+	List<Command> commandList = getCommands();
 	for ( int i = 0; i < commandList.size(); i++ ) {
 		commandStr += commandList.get(i).toString() + "\n";
 	}
@@ -5971,22 +4920,6 @@ Return the name of the command file that is being processed.
 */
 public String getCommandFileName ()
 {	return __commandFilename;
-}
-
-/**
-Returns a Vector of data for the specified application and component
-@param app_type
-@param comp_type
-@return Vector of data based on the specified application and component
- */
-protected List getComponentData ( int app_type, int comp_type ){
-
-	if( app_type == StateDMI.APP_TYPE_STATEMOD && comp_type == StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY ) {
-		return __SMDiversionTSMonthlyList;
-	}
-	else {
-		return null;
-	}
 }
 
 /**
@@ -6005,7 +4938,7 @@ Return the data store for the requested name, or null if not found.
 is compatible with intended use - specify as null to not match class
 @return the data store for the requested name, or null if not found.
 */
-public DataStore getDataStoreForName ( String name, Class dataStoreClass )
+public DataStore getDataStoreForName ( String name, Class<? extends DataStore> dataStoreClass )
 {   for ( DataStore dataStore : getDataStores() ) {
         if ( dataStore.getName().equalsIgnoreCase(name) ) {
             if ( dataStoreClass != null ) {
@@ -6058,24 +4991,24 @@ public List<DataStore> getDataStores ( boolean activeOnly )
 }
 
 /**
-Return the list of data stores for the requested type (e.g., RiversideDBDataStore).  A non-null list
+Return the list of data stores for the requested type (e.g., HydroBaseRestDataStore).  A non-null list
 is guaranteed, but the list may be empty.  Only active datastores are returned, those that are enabled
 and status is 0 (Ok).
 @param dataStoreClass the data store class to match (required).
 @return the list of data stores matching the requested type
 */
-public List<DataStore> getDataStoresByType ( Class dataStoreClass )
+public List<DataStore> getDataStoresByType ( Class<? extends DataStore> dataStoreClass )
 {
 	return getDataStoresByType ( dataStoreClass, true );
 }
 
 /**
-Return the list of data stores for the requested type (e.g., RiversideDBDataStore).  A non-null list
+Return the list of data stores for the requested type (e.g., HydroBaseRestDataStore).  A non-null list
 is guaranteed, but the list may be empty.
 @param dataStoreClass the data store class to match (required).
 @return the list of data stores matching the requested type
 */
-public List<DataStore> getDataStoresByType ( Class dataStoreClass, boolean activeOnly )
+public List<DataStore> getDataStoresByType ( Class<? extends DataStore> dataStoreClass, boolean activeOnly )
 {   List<DataStore> dataStoreList = new ArrayList<DataStore>();
     for ( DataStore dataStore : getDataStores() ) {
     	// If only active are requested, then status must be 0
@@ -6117,11 +5050,13 @@ protected String getFileFromRunCommand(String cmdStr)
 	return runCmdFile;
 }
 
+// TODO smalers 2019-05-29 evaluate whether to keep or delete method
 /**
 Returns the getProgramHeader() text and HydroBase comments if HydroBase is being used.
 @return The entire program header including StateDMI and
 HydroBase information. 
 */
+@SuppressWarnings("unused")
 private String getFullProgramHeader()
 {
 	String full_header = getProgramHeader() + "\n";
@@ -6157,7 +5092,7 @@ public HydroBaseDMI getHydroBaseDMIConnection()
 Returns user-specified supplemental parcel use data to add to HydroBase data.
 @return user-specified supplemental parcel use data to add to HydroBase data.
 */
-private List getHydroBaseSupplementalParcelUseTSList ()
+private List<StateDMI_HydroBase_StructureView> getHydroBaseSupplementalParcelUseTSList ()
 {
 	return __HydroBase_Supplemental_ParcelUseTS_Vector;
 }
@@ -6198,8 +5133,7 @@ private String getProgramHeader()
 
 /**
 Return data for a named property, required by the CommandProcessor
-interface.  See the overloaded version for a list of properties that are
-handled.
+interface.  See the overloaded version for a list of properties that are handled.
 @param prop Property to set.
 @return the named property, or null if a value is not found.
 */
@@ -6282,23 +5216,23 @@ public Object getPropContents ( String prop ) throws Exception
 	}
 	else if ( prop.equalsIgnoreCase("CountyList") ) {
 		// Get the list of counties, for use in dialogs
-		List countyList = new Vector();
+		List<String> countyList = new Vector<String>();
 		if ( __hdmi != null ) {
-			List countyRefList = __hdmi.getCountyRef();
+			List<HydroBase_CountyRef> countyRefList = __hdmi.getCountyRef();
 			for( int i = 0; i < countyRefList.size(); i++ ) {
-				countyList.add ( ((HydroBase_CountyRef)countyRefList.get(i)).getCounty() );
+				countyList.add ( countyRefList.get(i).getCounty() );
 			}
 		}
 		return countyList;
 	}
 	else if ( prop.equalsIgnoreCase("CUMethod_List") ) {
 		// Get the list of CU methods, for use in crop characteristics
-		List cuMethodList = new Vector();
+		List<String> cuMethodList = new Vector<String>();
 		if ( __hdmi != null ) {
-			List hbList = __hdmi.readCUMethodList(true);
+			List<HydroBase_CUMethod> hbList = __hdmi.readCUMethodList(true);
 			HydroBase_CUMethod m;
 			for ( int i = 0; i < hbList.size(); i++ ) {
-				m = (HydroBase_CUMethod)hbList.get(i);
+				m = hbList.get(i);
 				cuMethodList.add ( m.getMethod_desc());
 			}
 		}
@@ -6306,7 +5240,7 @@ public Object getPropContents ( String prop ) throws Exception
 	}
 	else if ( prop.equalsIgnoreCase("CUPenmanMonteithMethod_List") ) {
 		// Get the list of distinct CU methods used with Penman-Montieth
-		List<String> cuPenmanMonteithMethodList = new Vector();
+		List<String> cuPenmanMonteithMethodList = new Vector<String>();
 		if ( __hdmi != null ) {
 			List<HydroBase_CUPenmanMonteith> hbList = __hdmi.getPenmanMonteithCUMethod();
 			for ( HydroBase_CUPenmanMonteith pm: hbList ) {
@@ -6326,14 +5260,14 @@ public Object getPropContents ( String prop ) throws Exception
     }
 	else if ( prop.equalsIgnoreCase("HUCList") ) {
 		// Get the list of HUC basin identifiers, for use in dialogs
-		List hucList = __hdmi.getHUC();
+		List<Integer> hucList = __hdmi.getHUC();
 		return hucList;
 	}
 	else if ( prop.equalsIgnoreCase("HydroBaseDMI") ) {
 		return __hdmi;
 	}
 	else if ( prop.equalsIgnoreCase("HydroBaseDMIList") ) {
-		List v = new Vector ();
+		List<HydroBaseDMI> v = new Vector<HydroBaseDMI>();
 		v.add ( __hdmi );
 		return v;
 	}
@@ -6510,36 +5444,36 @@ public Object getPropContents ( String prop ) throws Exception
 Handle the OutputComments property request.  This includes, for example,
 the commands that are active and HydroBase version information that documents
 data available for a command.
-@return Vector of String containing comments for output.
+@return list of String containing comments for output.
 */
-private Vector getPropContents_OutputComments()
+private List<String> getPropContents_OutputComments()
 {
-	Vector comments = new Vector();
+	List<String> comments = new Vector<String>();
 	// Commands.  Show the file name but all commands may be in memory.
-	comments.addElement ( "-----------------------------------------------------------------------" );
+	comments.add ( "-----------------------------------------------------------------------" );
 	String commands_filename = getCommandFileName();
 	if ( commands_filename == null ) {
-		comments.addElement ( "Command file name:  COMMANDS NOT SAVED TO FILE" );
+		comments.add ( "Command file name:  COMMANDS NOT SAVED TO FILE" );
 	}
 	else {
-	    comments.addElement ( "Command file name: \"" + commands_filename + "\"" );
+	    comments.add ( "Command file name: \"" + commands_filename + "\"" );
 	}
-	comments.addElement ( "Commands: " );
-	List commandList = getCommands();
+	comments.add ( "Commands: " );
+	List<Command> commandList = getCommands();
 	int size_commands = commandList.size();
 	for ( int i = 0; i < size_commands; i++ ) {
-		comments.add ( ((Command)commandList.get(i)).toString() );
+		comments.add ( commandList.get(i).toString() );
 	}
 	// Save information about data sources.
 	HydroBaseDMI hbdmi = getHydroBaseDMIConnection();
-	List hbdmi_Vector = new Vector();
+	List<HydroBaseDMI> hbdmiList = new Vector<HydroBaseDMI>();
 	if ( hbdmi != null ) {
-		hbdmi_Vector.add ( hbdmi );
+		hbdmiList.add ( hbdmi );
 	}
-	int hsize = hbdmi_Vector.size();
+	int hsize = hbdmiList.size();
 	String db_comments[] = null;
 	for ( int ih = 0; ih < hsize; ih++ ) {
-		hbdmi = (HydroBaseDMI)hbdmi_Vector.get(ih);
+		hbdmi = hbdmiList.get(ih);
 		if ( hbdmi != null ) {
 			try {
 			    db_comments = hbdmi.getVersionComments ();
@@ -6550,11 +5484,11 @@ private Vector getPropContents_OutputComments()
 		}
 		if ( db_comments != null ) {
 			for ( int i = 0; i < db_comments.length; i++ ) {
-				comments.addElement(db_comments[i]);
+				comments.add(db_comments[i]);
 			}
 		}
 	}
-	return new Vector(comments);
+	return new Vector<String>(comments);
 }
 
 /**
@@ -6571,7 +5505,7 @@ Return the list of property names available from the processor.
 These properties can be requested using getPropContents().
 @return the list of property names available from the processor.
 */
-public Collection getPropertyNameList( boolean includeBuiltInProperties, boolean includeDynamicProperties )
+public Collection<String> getPropertyNameList( boolean includeBuiltInProperties, boolean includeDynamicProperties )
 {
 	// Create a set that includes the above.
     TreeSet<String> set = new TreeSet<String>();
@@ -6625,9 +5559,9 @@ public boolean getReadOnly ()
     // Loop through the commands and check comments for the special string
     int size = size();
     Command c;
-    List commandList = getCommands();
+    List<Command> commandList = getCommands();
     for ( int i = 0; i < size; i++ ) {
-        c = (Command)commandList.get(i);
+        c = commandList.get(i);
         String commandString = c.toString();
         if ( commandString.trim().startsWith("#") &&
                 (StringUtil.indexOfIgnoreCase(commandString,readOnlyString,0) > 0) ) {
@@ -6652,7 +5586,7 @@ public boolean getRunStatus()
 Return the list of StateCU_BlaneyCriddle being maintained by this StateDMI_Processor.
 @return the list of StateCU_BlaneyCriddle being maintained by this StateDMI_Processor.
 */
-public List getStateCUBlaneyCriddleList()
+public List<StateCU_BlaneyCriddle> getStateCUBlaneyCriddleList()
 {	return __CUBlaneyCriddle_Vector;
 }
 
@@ -6660,7 +5594,7 @@ public List getStateCUBlaneyCriddleList()
 Return the list of StateCU_BlaneyCriddle matches being maintained by this StateDMI_Processor.
 @return the list of StateCU_BlaneyCriddle matches being maintained by this StateDMI_Processor.
 */
-public List getStateCUBlaneyCriddleMatchList()
+public List<String> getStateCUBlaneyCriddleMatchList()
 {	return __CUBlaneyCriddle_match_Vector;
 }
 
@@ -6668,7 +5602,7 @@ public List getStateCUBlaneyCriddleMatchList()
 Return the list of StateCU_ClimateStation being maintained by this StateDMI_Processor.
 @return the list of StateCU_ClimateStation being maintained by this StateDMI_Processor.
 */
-public List getStateCUClimateStationList()
+public List<StateCU_ClimateStation> getStateCUClimateStationList()
 {	return __CUClimateStation_Vector;
 }
 
@@ -6676,7 +5610,7 @@ public List getStateCUClimateStationList()
 Return the list of StateCU_ClimateStation matches being maintained by this StateDMI_Processor.
 @return the list of StateCU_ClimateStation matches being maintained by this StateDMI_Processor.
 */
-protected List getStateCUClimateStationMatchList()
+protected List<String> getStateCUClimateStationMatchList()
 {	return __CUClimateStation_match_Vector;
 }
 
@@ -6684,7 +5618,7 @@ protected List getStateCUClimateStationMatchList()
 Return the list of StateCU_CropCharacteristics being maintained by this StateDMI_Processor.
 @return the list of StateCU_CropCharacteristics being maintained by this StateDMI_Processor.
 */
-public List getStateCUCropCharacteristicsList()
+public List<StateCU_CropCharacteristics> getStateCUCropCharacteristicsList()
 {	return __CUCropCharacteristics_Vector;
 }
 
@@ -6692,7 +5626,7 @@ public List getStateCUCropCharacteristicsList()
 Return the list of StateCU_CropCharacteristics matches being maintained by this StateDMI_Processor.
 @return the list of StateCU_CropCharacteristics matches being maintained by this StateDMI_Processor.
 */
-protected List getStateCUCropCharacteristicsMatchList()
+protected List<String> getStateCUCropCharacteristicsMatchList()
 {	return __CUCropCharacteristics_match_Vector;
 }
 
@@ -6701,7 +5635,7 @@ protected List getStateCUCropCharacteristicsMatchList()
 Return the list of StateCU_CropPatternTS being maintained by this StateDMI_Processor.
 @return the list of StateCU_CropPatternTS being maintained by this StateDMI_Processor.
 */
-public List getStateCUCropPatternTSList()
+public List<StateCU_CropPatternTS> getStateCUCropPatternTSList()
 {	return __CUCropPatternTS_Vector;
 }
 
@@ -6709,7 +5643,7 @@ public List getStateCUCropPatternTSList()
 Return the list of StateCU_CropPatternTS matches being maintained by this StateDMI_Processor.
 @return the list of StateCU_CropPatternTS matches being maintained by this StateDMI_Processor.
 */
-public List getStateCUCropPatternTSMatchList()
+public List<String> getStateCUCropPatternTSMatchList()
 {	return __CUCropPatternTS_match_Vector;
 }
 
@@ -6717,7 +5651,7 @@ public List getStateCUCropPatternTSMatchList()
 Return the list of StateCU_IrrigationPracticeTS being maintained by this StateDMI_Processor.
 @return the list of StateCU_IrrigationPracticeTS being maintained by this StateDMI_Processor.
 */
-public List getStateCUIrrigationPracticeTSList()
+public List<StateCU_IrrigationPracticeTS> getStateCUIrrigationPracticeTSList()
 {	return __CUIrrigationPracticeTS_Vector;
 }
 
@@ -6725,7 +5659,7 @@ public List getStateCUIrrigationPracticeTSList()
 Return the list of StateCU_IrrigationPracticeTS matches being maintained by this StateDMI_Processor.
 @return the list of StateCU_IrrigationPracticeTS matches being maintained by this StateDMI_Processor.
 */
-public List getStateCUIrrigationPracticeTSMatchList()
+public List<String> getStateCUIrrigationPracticeTSMatchList()
 {	return __CUIrrigationPracticeTS_match_Vector;
 }
 
@@ -6733,7 +5667,7 @@ public List getStateCUIrrigationPracticeTSMatchList()
 Return the list of StateCU_Location being maintained by this StateDMI_Processor.
 @return the list of StateCU_Location being maintained by this StateDMI_Processor.
 */
-public List getStateCULocationList()
+public List<StateCU_Location> getStateCULocationList()
 {	return __CULocation_Vector;
 }
 
@@ -6741,7 +5675,7 @@ public List getStateCULocationList()
 Return the list of StateCU_Location matches being maintained by this StateDMI_Processor.
 @return the list of StateCU_Location matches being maintained by this StateDMI_Processor.
 */
-public List getStateCULocationMatchList()
+public List<String> getStateCULocationMatchList()
 {	return __CULocation_match_Vector;
 }
 
@@ -6757,7 +5691,7 @@ public List<StateCU_PenmanMonteith> getStateCUPenmanMonteithList()
 Return the list of StateCU_BlaneyCriddle matches being maintained by this StateDMI_Processor.
 @return the list of StateCU_BlaneyCriddle matches being maintained by this StateDMI_Processor.
 */
-public List getStateCUPenmanMonteithMatchList()
+public List<String> getStateCUPenmanMonteithMatchList()
 {	return __CUPenmanMonteith_match_Vector;
 }
 
@@ -6781,7 +5715,7 @@ public DateTime getOutputPeriodStart()
 Return the list of consumptive water requirement monthly TS being maintained by this StateDMI_Processor.
 @return the list of consumptive water requirement monthly TS being maintained by this StateDMI_Processor.
 */
-public List getStateModConsumptiveWaterRequirementTSMonthlyList ()
+public List<MonthTS> getStateModConsumptiveWaterRequirementTSMonthlyList ()
 {	return __SMConsumptiveWaterRequirementTSMonthlyList;
 }
 
@@ -6789,7 +5723,7 @@ public List getStateModConsumptiveWaterRequirementTSMonthlyList ()
 Return the list of consumptive water requirement monthly TS matches being maintained by this StateDMI_Processor.
 @return the list of consumptive water requirement monthly TS matches being maintained by this StateDMI_Processor.
 */
-public List getStateModConsumptiveWaterRequirementTSMonthlyMatchList ()
+public List<String> getStateModConsumptiveWaterRequirementTSMonthlyMatchList ()
 {	return __SMConsumptiveWaterRequirementTSMonthly_match_Vector;
 }
 
@@ -6799,7 +5733,7 @@ These are used by both StateCU and StateMod data sets.
 @param interval TimeInterval.MONTH or TimeInterval.DAY, indicating the interval for delay tables.
 @return the list of StateMod_DelayTable being maintained by this StateDMI_Processor.
 */
-public List getStateModDelayTableList ( int interval )
+public List<StateMod_DelayTable> getStateModDelayTableList ( int interval )
 {	if ( interval == TimeInterval.MONTH ) {
 		return __SMDelayTableMonthlyList;
 	}
@@ -6817,7 +5751,7 @@ These are used by both StateCU and StateMod data sets.
 @param interval TimeInterval.MONTH or TimeInterval.DAY, indicating the interval for delay tables.
 @return the list of StateMod_DelayTable matches being maintained by this StateDMI_Processor.
 */
-public List getStateModDelayTableMatchList ( int interval )
+public List<String> getStateModDelayTableMatchList ( int interval )
 {	if ( interval == TimeInterval.MONTH ) {
 		return __SMDelayTableMonthly_match_Vector;
 	}
@@ -6833,7 +5767,7 @@ public List getStateModDelayTableMatchList ( int interval )
 Return the list of diversion demand daily TS being maintained by this StateDMI_Processor.
 @return the list of diversion demand daily TS being maintained by this StateDMI_Processor.
 */
-public List getStateModDiversionDemandTSDailyList ()
+public List<DayTS> getStateModDiversionDemandTSDailyList ()
 {	return __SMDemandTSDailyList;
 }
 
@@ -6841,7 +5775,7 @@ public List getStateModDiversionDemandTSDailyList ()
 Return the list of diversion demand monthly TS being maintained by this StateDMI_Processor.
 @return the list of diversion demand monthly TS being maintained by this StateDMI_Processor.
 */
-public List getStateModDiversionDemandTSMonthlyList ()
+public List<MonthTS> getStateModDiversionDemandTSMonthlyList ()
 {	return __SMDemandTSMonthlyList;
 }
 
@@ -6849,7 +5783,7 @@ public List getStateModDiversionDemandTSMonthlyList ()
 Return the list of diversion demand monthly TS matches being maintained by this StateDMI_Processor.
 @return the list of diversion demand monthly TS matches being maintained by this StateDMI_Processor.
 */
-protected List getStateModDiversionDemandTSMonthlyMatchList ()
+protected List<String> getStateModDiversionDemandTSMonthlyMatchList ()
 {	return __SMDemandTSMonthly_match_Vector;
 }
 
@@ -6857,7 +5791,7 @@ protected List getStateModDiversionDemandTSMonthlyMatchList ()
 Return the list of diversion historical daily TS being maintained by this StateDMI_Processor.
 @return the list of diversion historical daily TS being maintained by this StateDMI_Processor.
 */
-public List getStateModDiversionHistoricalTSDailyList ()
+public List<DayTS> getStateModDiversionHistoricalTSDailyList ()
 {	return __SMDiversionTSDailyList;
 }
 
@@ -6865,7 +5799,7 @@ public List getStateModDiversionHistoricalTSDailyList ()
 Return the list of diversion historical monthly TS copy being maintained by this StateDMI_Processor.
 @return the list of diversion historical monthly TS copy being maintained by this StateDMI_Processor.
 */
-public List getStateModDiversionHistoricalTSMonthlyCopyList ()
+public List<MonthTS> getStateModDiversionHistoricalTSMonthlyCopyList ()
 {	return __SMDiversionTSMonthly2List;
 }
 
@@ -6873,7 +5807,7 @@ public List getStateModDiversionHistoricalTSMonthlyCopyList ()
 Return the list of diversion historical monthly TS being maintained by this StateDMI_Processor.
 @return the list of diversion historical monthly TS being maintained by this StateDMI_Processor.
 */
-public List getStateModDiversionHistoricalTSMonthlyList ()
+public List<MonthTS> getStateModDiversionHistoricalTSMonthlyList ()
 {	return __SMDiversionTSMonthlyList;
 }
 
@@ -6881,7 +5815,7 @@ public List getStateModDiversionHistoricalTSMonthlyList ()
 Return the list of diversion historical monthly TS matches being maintained by this StateDMI_Processor.
 @return the list of diversion historical monthly TS matches being maintained by this StateDMI_Processor.
 */
-protected List getStateModDiversionHistoricalTSMonthlyMatchList ()
+protected List<String> getStateModDiversionHistoricalTSMonthlyMatchList ()
 {	return __SMDiversionTSMonthly_match_Vector;
 }
 
@@ -6889,7 +5823,7 @@ protected List getStateModDiversionHistoricalTSMonthlyMatchList ()
 Return the list of StateMod_DiversionRight being maintained by this StateDMI_Processor.
 @return the list of StateMod_DiversionRight being maintained by this StateDMI_Processor.
 */
-public List getStateModDiversionRightList ()
+public List<StateMod_DiversionRight> getStateModDiversionRightList ()
 {	return __SMDiversionRightList;
 }
 
@@ -6897,7 +5831,7 @@ public List getStateModDiversionRightList ()
 Return the list of StateMod_DiversionRight matches being maintained by this StateDMI_Processor.
 @return the list of StateMod_DiversionRight matches being maintained by this StateDMI_Processor.
 */
-public List getStateModDiversionRightMatchList ()
+public List<String> getStateModDiversionRightMatchList ()
 {	return __SMDiversionRight_match_Vector;
 }
 
@@ -6913,7 +5847,7 @@ public List<StateMod_Diversion> getStateModDiversionStationList ()
 Return the list of StateMod_Diversion matches being maintained by this StateDMI_Processor.
 @return the list of StateMod_Diversion matches being maintained by this StateDMI_Processor.
 */
-public List getStateModDiversionStationMatchList ()
+public List<String> getStateModDiversionStationMatchList ()
 {	return __SMDiversion_match_Vector;
 }
 
@@ -6923,7 +5857,7 @@ being maintained by the StateDMI processor.
 @return the list of instream flow demand (average monthly) time series
 being maintained by the StateDMI processor.
 */
-public List getStateModInstreamFlowDemandTSAverageMonthlyList()
+public List<MonthTS> getStateModInstreamFlowDemandTSAverageMonthlyList()
 {	return __SMInstreamFlowDemandTSAverageMonthlyList;
 }
 
@@ -6933,7 +5867,7 @@ being maintained by the StateDMI processor.
 @return the list of instream flow demand (average monthly) time series matches
 being maintained by the StateDMI processor.
 */
-public List getStateModInstreamFlowDemandTSAverageMonthlyMatchList()
+public List<String> getStateModInstreamFlowDemandTSAverageMonthlyMatchList()
 {	return __SMInstreamFlowDemandTSAverageMonthly_match_Vector;
 }
 
@@ -6941,7 +5875,7 @@ public List getStateModInstreamFlowDemandTSAverageMonthlyMatchList()
 Returns the list of StateMod_InstreamFlowRight being maintained by the StateDMI processor.
 @return the list of StateMod_InstreamFlowRight being maintained by the StateDMI processor.
 */
-public List getStateModInstreamFlowRightList()
+public List<StateMod_InstreamFlowRight> getStateModInstreamFlowRightList()
 {	return __SMInstreamFlowRightList;
 }
 
@@ -6949,7 +5883,7 @@ public List getStateModInstreamFlowRightList()
 Returns the list of StateMod_InstreamFlowRight matches being maintained by the StateDMI processor.
 @return the list of StateMod_InstreamFlowRight matches being maintained by the StateDMI processor.
 */
-public List getStateModInstreamFlowRightMatchList()
+public List<String> getStateModInstreamFlowRightMatchList()
 {	return __SMInstreamFlowRight_match_Vector;
 }
 
@@ -6957,7 +5891,7 @@ public List getStateModInstreamFlowRightMatchList()
 Returns the list of StateMod_InstreamFlow being maintained by the StateDMI processor.
 @return the list of StateMod_InstreamFlow being maintained by the StateDMI processor.
 */
-public List getStateModInstreamFlowStationList()
+public List<StateMod_InstreamFlow> getStateModInstreamFlowStationList()
 {	return __SMInstreamFlowStationList;
 }
 
@@ -6965,7 +5899,7 @@ public List getStateModInstreamFlowStationList()
 Returns the list of StateMod_InstreamFlow matches being maintained by the StateDMI processor.
 @return the list of StateMod_InstreamFlow matches being maintained by the StateDMI processor.
 */
-public List getStateModInstreamFlowStationMatchList()
+public List<String> getStateModInstreamFlowStationMatchList()
 {	return __SMInstreamFlow_match_Vector;
 }
 
@@ -6997,7 +5931,7 @@ public List<String> getStateModOperationalRightMatchList ()
 Return the list of pattern time series used with Fill*Pattern().
 @return the list of pattern time series used with Fill*Pattern().
 */
-protected List getStateModPatternTSMonthlyList()
+protected List<StringMonthTS> getStateModPatternTSMonthlyList()
 {
 	return __SMPatternTSMonthlyList;
 }
@@ -7054,7 +5988,7 @@ public List<String> getStateModPlanWellAugmentationMatchList ()
 Return the list of StateMod_PrfGageData being maintained by this StateDMI_Processor.
 @return the list of StateMod_PrfGageData being maintained by this StateDMI_Processor.
 */
-public List getStateModPrfGageDataList()
+public List<StateMod_PrfGageData> getStateModPrfGageDataList()
 {	return __SMPrfGageData_Vector;
 }
 
@@ -7078,7 +6012,7 @@ public List<String> getStateModReservoirReturnMatchList ()
 Return the list of StateMod_ReservoirRight being maintained by this StateDMI_Processor.
 @return the list of StateMod_ReservoirRight being maintained by this StateDMI_Processor.
 */
-public List getStateModReservoirRightList()
+public List<StateMod_ReservoirRight> getStateModReservoirRightList()
 {	return __SMReservoirRightList;
 }
 
@@ -7086,7 +6020,7 @@ public List getStateModReservoirRightList()
 Return the list of StateMod_ReservoirRight matches being maintained by this StateDMI_Processor.
 @return the list of StateMod_ReservoirRight matches being maintained by this StateDMI_Processor.
 */
-public List getStateModReservoirRightMatchList()
+public List<String> getStateModReservoirRightMatchList()
 {	return __SMReservoirRight_match_Vector;
 }
 
@@ -7094,7 +6028,7 @@ public List getStateModReservoirRightMatchList()
 Return the list of StateMod_Reservoir being maintained by this StateDMI_Processor.
 @return the list of StateMod_Reservoir being maintained by this StateDMI_Processor.
 */
-public List getStateModReservoirStationList ()
+public List<StateMod_Reservoir> getStateModReservoirStationList ()
 {	return __SMReservoirStationList;
 }
 
@@ -7102,7 +6036,7 @@ public List getStateModReservoirStationList ()
 Return the list of StateMod_Reservoir matches being maintained by this StateDMI_Processor.
 @return the list of StateMod_Reservoir matches being maintained by this StateDMI_Processor.
 */
-public List getStateModReservoirStationMatchList ()
+public List<String> getStateModReservoirStationMatchList ()
 {	return __SMReservoir_match_Vector;
 }
 
@@ -7110,7 +6044,7 @@ public List getStateModReservoirStationMatchList ()
 Return the list of StateMod_RiverNetworkNode being maintained by this StateDMI_Processor.
 @return the list of StateMod_RiverNetworkNode being maintained by this StateDMI_Processor.
 */
-public List getStateModRiverNetworkNodeList ()
+public List<StateMod_RiverNetworkNode> getStateModRiverNetworkNodeList ()
 {	return __SMRiverNetworkNode_Vector;
 }
 
@@ -7118,7 +6052,7 @@ public List getStateModRiverNetworkNodeList ()
 Return the list of StateMod_RiverNetworkNode matches being maintained by this StateDMI_Processor.
 @return the list of StateMod_RiverNetworkNode matches being maintained by this StateDMI_Processor.
 */
-protected List getStateModRiverNetworkNodeMatchList ()
+protected List<String> getStateModRiverNetworkNodeMatchList ()
 {	return __SMRiverNetworkNode_match_Vector;
 }
 
@@ -7126,7 +6060,7 @@ protected List getStateModRiverNetworkNodeMatchList ()
 Return the list of StateMod_StreamEstimate being maintained by this StateDMI_Processor.
 @return the list of StateMod_StreamEstimate being maintained by this StateDMI_Processor.
 */
-public List getStateModStreamEstimateStationList()
+public List<StateMod_StreamEstimate> getStateModStreamEstimateStationList()
 {	return __SMStreamEstimateStationList;
 }
 
@@ -7134,7 +6068,7 @@ public List getStateModStreamEstimateStationList()
 Return the list of StateMod_StreamEstimate matches being maintained by this StateDMI_Processor.
 @return the list of StateMod_StreamEstimate matches being maintained by this StateDMI_Processor.
 */
-public List getStateModStreamEstimateStationMatchList ()
+public List<String> getStateModStreamEstimateStationMatchList ()
 {	return __SMStreamEstimate_match_Vector;
 }
 
@@ -7142,7 +6076,7 @@ public List getStateModStreamEstimateStationMatchList ()
 Return the list of StateMod_StreamEstimateCoefficients being maintained by this StateDMI_Processor.
 @return the list of StateMod_StreamEstimateCoefficients being maintained by this StateDMI_Processor.
 */
-public List getStateModStreamEstimateCoefficientsList()
+public List<StateMod_StreamEstimate_Coefficients> getStateModStreamEstimateCoefficientsList()
 {	return __SMStreamEstimateCoefficients_Vector;
 }
 
@@ -7150,7 +6084,7 @@ public List getStateModStreamEstimateCoefficientsList()
 Return the list of StateMod_StreamEstimate_Coefficients matches being maintained by this StateDMI_Processor.
 @return the list of StateMod_StreamEstimate_Coefficients matches being maintained by this StateDMI_Processor.
 */
-public List getStateModStreamEstimateCoefficientsMatchList ()
+public List<String> getStateModStreamEstimateCoefficientsMatchList ()
 {	return __SMStreamEstimateCoefficients_match_Vector;
 }
 
@@ -7158,7 +6092,7 @@ public List getStateModStreamEstimateCoefficientsMatchList ()
 Return the list of StateMod_StreamGage being maintained by this StateDMI_Processor.
 @return the list of StateMod_StreamGage being maintained by this StateDMI_Processor.
 */
-public List getStateModStreamGageStationList ()
+public List<StateMod_StreamGage> getStateModStreamGageStationList ()
 {	return __SMStreamGageStationList;
 }
 
@@ -7166,7 +6100,7 @@ public List getStateModStreamGageStationList ()
 Return the list of StateMod_StreamGage matches being maintained by this StateDMI_Processor.
 @return the list of StateMod_StreamGage matches being maintained by this StateDMI_Processor.
 */
-public List getStateModStreamGageStationMatchList ()
+public List<String> getStateModStreamGageStationMatchList ()
 {	return __SMStreamGage_match_Vector;
 }
 
@@ -7174,7 +6108,7 @@ public List getStateModStreamGageStationMatchList ()
 Return the list of well demand monthly TS being maintained by this StateDMI_Processor.
 @return the list of well demand monthly TS being maintained by this StateDMI_Processor.
 */
-public List getStateModWellDemandTSMonthlyList ()
+public List<MonthTS> getStateModWellDemandTSMonthlyList ()
 {	return __SMWellDemandTSMonthlyList;
 }
 
@@ -7182,7 +6116,7 @@ public List getStateModWellDemandTSMonthlyList ()
 Return the list of well demand monthly TS matches being maintained by this StateDMI_Processor.
 @return the list of well demand monthly TS matches being maintained by this StateDMI_Processor.
 */
-protected List getStateModWellDemandTSMonthlyMatchList ()
+protected List<String> getStateModWellDemandTSMonthlyMatchList ()
 {	return __SMWellDemandTSMonthly_match_Vector;
 }
 
@@ -7190,7 +6124,7 @@ protected List getStateModWellDemandTSMonthlyMatchList ()
 Return the list of well historical pumping monthly TS being maintained by this StateDMI_Processor.
 @return the list of well historical pumping monthly TS being maintained by this StateDMI_Processor.
 */
-public List getStateModWellHistoricalPumpingTSMonthlyList ()
+public List<MonthTS> getStateModWellHistoricalPumpingTSMonthlyList ()
 {	return __SMWellHistoricalPumpingTSMonthlyList;
 }
 
@@ -7198,7 +6132,7 @@ public List getStateModWellHistoricalPumpingTSMonthlyList ()
 Return the list of well historical pumping monthly TS matches being maintained by this StateDMI_Processor.
 @return the list of well historical pumping monthly TS matches being maintained by this StateDMI_Processor.
 */
-public List getStateModWellHistoricalPumpingTSMonthlyMatchList ()
+public List<String> getStateModWellHistoricalPumpingTSMonthlyMatchList ()
 {	return __SMWellHistoricalPumpingTSMonthly_match_Vector;
 }
 
@@ -7214,7 +6148,7 @@ public List<StateMod_Well> getStateModWellStationList ()
 Return the list of StateMod_WellRight being maintained by this StateDMI_Processor.
 @return the list of StateMod_WellRight being maintained by this StateDMI_Processor.
 */
-public List getStateModWellRightList()
+public List<StateMod_WellRight> getStateModWellRightList()
 {	return __SMWellRightList;
 }
 
@@ -7222,7 +6156,7 @@ public List getStateModWellRightList()
 Return the list of StateMod_WellRight matches being maintained by this StateDMI_Processor.
 @return the list of StateMod_WellRight matches being maintained by this StateDMI_Processor.
 */
-protected List getStateModWellRightMatchList()
+protected List<String> getStateModWellRightMatchList()
 {	return __SMWellRight_match_Vector;
 }
 
@@ -7230,7 +6164,7 @@ protected List getStateModWellRightMatchList()
 Return the list of StateMod_Well matches being maintained by this StateDMI_Processor.
 @return the list of StateMod_Well matches being maintained by this StateDMI_Processor.
 */
-public List getStateModWellStationMatchList ()
+public List<String> getStateModWellStationMatchList ()
 {	return __SMWell_match_Vector;
 }
 
@@ -7241,42 +6175,6 @@ Return the TSSupplier name.
 public String getTSSupplierName()
 {	return "StateDMI_Processor";
 }
-
-/**
-Find the position of a StateCU_Data object in the data Vector, using a WDID identifer.
-The position for the first match is returned.  This method is included here
-because putting in the StateCU package would require referencing HydroBaseDMI.
-It is preferred to have StateCU stand on its own.
-@return the position, or -1 if not found.
-@param wd Water district.
-@param id identifier.
-*/
-// TODO SAM 2007-02-18 Evaluate if needed
-/*
-private int indexOfCUDataUsingWDID ( Vector data, int wd, int id )
-{	int size = 0;
-	if ( data != null ) {
-		size = data.size();
-	}
-	StateCU_Data d = null;
-	int [] wdid_parts = new int[2];
-	for (int i = 0; i < size; i++) {
-		d = (StateCU_Data)data.get(i);
-		try {	// Parse out the WDID and compare to that which is
-			// passed in...
-			HydroBase_WaterDistrict.parseWDID(d.getID(),wdid_parts);
-			if ( (wdid_parts[0] == wd) && (wdid_parts[1] == id) ) {
-				return i;
-			}
-		}
-		catch ( Exception e ) {
-			// Not a WDID...
-			continue;
-		}
-	}
-	return -1;
-}
-*/
 
 /**
 Return the current working directory for the processor.
@@ -7429,13 +6327,13 @@ Notify registered CommandListListeners about one or more commands being changed.
 @param index0 The index (0+) of the first command that is added.
 @param index1 The index (0+) of the last command that is added.
 */
-private void notifyCommandListListenersOfChange ( int index0, int index1 )
-{	if ( __CommandListListener_array != null ) {
-		for ( int i = 0; i < __CommandListListener_array.length; i++ ) {
-			__CommandListListener_array[i].commandChanged(index0, index1);
-		}
-	}
-}
+//private void notifyCommandListListenersOfChange ( int index0, int index1 )
+//{	if ( __CommandListListener_array != null ) {
+//		for ( int i = 0; i < __CommandListListener_array.length; i++ ) {
+//			__CommandListListener_array[i].commandChanged(index0, index1);
+//		}
+//	}
+//}
 
 /**
 Notify registered CommandListListeners about one or more commands being removed.
@@ -7503,22 +6401,6 @@ protected void notifyCommandProcessorListenersOfCommandStarted (
 }
 
 /**
-Notify registered ProcessListener objects of a status change for processing
-(e.g., cancel, error, success).
-@param status numeric status code (see STATUS_*).
-@param message String message to pass to the calling code.
-*/
-/*FIXME SAM 2007-10-18 Need to replace the following with the above
-private void notifyListenersOfProcessStatus ( int status, String message )
-{	if ( __listeners != null ) {
-		for ( int i = 0; i <__listeners.length;i++){
-			__listeners[i].processStatus ( status, message );
-		}
-	}
-}
-*/
-
-/**
 Process a list of commands, resulting in lists of data set objects and properties.  The resulting
 objects can be displayed in the GUI.
 <b>Filling with historical averages is handled for monthly time series
@@ -7556,7 +6438,7 @@ controlling command file.
 private void processCommands ( List<Command> commandList, PropList app_PropList )
 throws Exception
 {	String	message, routine = "StateDMI.processCommands";
-	String message_tag = "ProcessCommands"; // Tag used with messages generated in this method.
+	//String message_tag = "ProcessCommands"; // Tag used with messages generated in this method.
 	int error_count = 0;	// For errors during time series retrieval
 	int update_count = 0;	// For warnings about command updates
 	if ( commandList == null ) {
@@ -8031,7 +6913,7 @@ results in incomplete products.
 </table>
 @exception Exception If there is an error in the commands file.
 */
-private void processCommands_OLD ( List command_Vector, PropList props )
+private void processCommands_OLD ( List<Command> command_Vector, PropList props )
 throws Exception
 {	String	message, routine = "StateDMI_Processor.processCommands";
 	// FIXME SAM 2007-10-22 Need to convert to a property
@@ -8045,7 +6927,7 @@ throws Exception
 				// obsolete or need updating
 	runSuccessful = true;
 
-	List commands = command_Vector;	// Commands to process
+	List<Command> commands = command_Vector;	// Commands to process
 	if ( command_Vector == null ) {
 		// Process all commands
 		commands = command_Vector;
@@ -8072,7 +6954,7 @@ throws Exception
 				// __num_prepended_commands - the user will
 				// see command numbers in messages like (12),
 				// indicating the twelfth command.
-	int i_for_notify;	// Zero index position for commands, adjusted
+	//int i_for_notify;	// Zero index position for commands, adjusted
 				// for __num_prepended_commands
 	
 	// Reset all the data/results vectors to be empty.  Currently each time the
@@ -8136,8 +7018,7 @@ throws Exception
 		// the first user-defined command will have:
 		// i_for_message = 1 - 1 + 1 = 1
 		i_for_message = i - __num_prepended_commands + 1;
-		i_for_notify = i_for_message - 1;// Expected to be
-						// zero-referenced
+		//i_for_notify = i_for_message - 1;// Expected to be zero-referenced
 		command_tag = ""+i_for_message;	// Command number as integer 1+,
 						// for message/log handler.
 		try {	// Catch errors in all the commands.
@@ -9812,9 +8693,9 @@ throws Exception
 	// Get the index of the requested command...
 	int index = indexOf ( command );
 	// Get the setWorkingDir() commands...
-	List neededCommandsList = new Vector();
+	List<String> neededCommandsList = new Vector<String>();
 	neededCommandsList.add ( "SetWorkingDir" );
-	List setWorkingDir_CommandVector = StateDMI_Processor_Util.getCommandsBeforeIndex (
+	List<Command> setWorkingDir_CommandVector = StateDMI_Processor_Util.getCommandsBeforeIndex (
 			index,
 			this,
 			neededCommandsList,
@@ -9828,7 +8709,7 @@ throws Exception
 		int size = setWorkingDir_CommandVector.size();
 		// Add all the commands (currently no method to add all because this is normally not done).
 		for ( int i = 0; i < size; i++ ) {
-			statedmi_processor.addCommand ( (Command)setWorkingDir_CommandVector.get(i));
+			statedmi_processor.addCommand ( setWorkingDir_CommandVector.get(i));
 		}
 		// Run the commands to set the working directory in the temporary processor...
 		try {
@@ -9925,7 +8806,8 @@ throws Exception
 			bean.setWarningRecommendationText (	"This is likely a software code error.");
 			throw new RequestParameterNotFoundException ( warning );
 	}
-	List commands = (List)o;
+	@SuppressWarnings("unchecked")
+	List<Command> commands = (List<Command>)o;
 	// Whether commands should create output...
 	Object o3 = request_params.getContents ( "CreateOutput" );
 	if ( o3 == null ) {
@@ -10353,7 +9235,7 @@ protected List<StateDMI_HydroBase_StructureView> readSupplementalStructureIrrigS
 	CommandStatus status, String command_tag, int warningLevel, int warning_count )
 {	String routine = "StateDMI_Processor.readSupplementalStructureIrrigSummaryTSListForWDIDList";
 	if ( cropPatterns == null ) {
-		cropPatterns = new Vector();
+		cropPatterns = new Vector<StateDMI_HydroBase_StructureView>();
 	}
 	int cpsize = cropPatterns.size();
 	StateDMI_HydroBase_StructureView sits = null; // Supplemental
@@ -10452,10 +9334,8 @@ a file name if the time series are stored in files, or may be a true identifier
 string if the time series is stored in a database.  The specified period is
 read.  The data are converted to the requested units.
 @param tsident_string Time series identifier or file name to read.
-@param req_date1 First date to query.  If specified as null the entire period
-will be read.
-@param req_date2 Last date to query.  If specified as null the entire period
-will be read.
+@param req_date1 First date to query.  If specified as null the entire period will be read.
+@param req_date2 Last date to query.  If specified as null the entire period will be read.
 @param req_units Requested units to return data.  If specified as null or an
 empty string the units will not be converted.
 @param read_data if true, the data will be read.  If false, only the time series
@@ -10464,9 +9344,7 @@ header will be read.
 @exception Exception if an error occurs during the read.
 */
 public TS readTimeSeries (	String tsident_string,
-				DateTime req_date1, DateTime req_date2,
-				String req_units,
-				boolean read_data )
+	DateTime req_date1, DateTime req_date2, String req_units, boolean read_data )
 throws Exception
 {	Message.printStatus ( 1, "", "Reading \"" + tsident_string + "\"" );
 
@@ -10492,7 +9370,7 @@ throws Exception
 	ts.formatOutput( new PropList ("x") );
 	return ts;
 
-/* SAMX - need to fill out functionality
+/* TODO old comment - need to fill out functionality
 	int size = 0;
 	if ( _tslist != null ) {
 		size = _tslist.size();
@@ -10637,10 +9515,8 @@ If not null, all data are reset, except for the identifier, which is assumed
 to have been set in the calling code.  This can be used to query a single
 time series from a file that contains multiple time series.
 @param fname File name to read.
-@param date1 First date to query.  If specified as null the entire period will
-be read.
-@param date2 Last date to query.  If specified as null the entire period will
-be read.
+@param date1 First date to query.  If specified as null the entire period will be read.
+@param date2 Last date to query.  If specified as null the entire period will be read.
 @param req_units Requested units to return data.  If specified as null or an
 empty string the units will not be converted.
 @param read_data if true, the data will be read.  If false, only the time series
@@ -10649,9 +9525,7 @@ header will be read.
 @exception Exception if an error occurs during the read.
 */
 public TS readTimeSeries (	TS req_ts, String fname,
-				DateTime date1, DateTime date2,
-				String req_units,
-				boolean read_data )
+	DateTime date1, DateTime date2, String req_units, boolean read_data )
 throws Exception
 {	return null;
 }
@@ -10660,13 +9534,10 @@ throws Exception
 Method for TSSupplier interface.
 Read a time series list from a file (this is typically used used where a time
 series file can contain one or more time series).
-The specified period is
-read.  The data are converted to the requested units.
+The specified period is read.  The data are converted to the requested units.
 @param fname File to read.
-@param date1 First date to query.  If specified as null the entire period will
-be read.
-@param date2 Last date to query.  If specified as null the entire period will
-be read.
+@param date1 First date to query.  If specified as null the entire period will be read.
+@param date2 Last date to query.  If specified as null the entire period will be read.
 @param req_units Requested units to return data.  If specified as null or an
 empty string the units will not be converted.
 @param read_data if true, the data will be read.  If false, only the time series
@@ -10674,10 +9545,8 @@ header will be read.
 @return Vector of time series of appropriate type (e.g., MonthTS, HourTS).
 @exception Exception if an error occurs during the read.
 */
-public List readTimeSeriesList (	String fname,
-					DateTime date1, DateTime date2,
-					String req_units,
-					boolean read_data )
+public List<TS> readTimeSeriesList ( String fname,
+	DateTime date1, DateTime date2, String req_units, boolean read_data )
 throws Exception
 {	return null;
 }
@@ -10701,10 +9570,8 @@ header will be read.
 @return Vector of time series of appropriate type (e.g., MonthTS, HourTS).
 @exception Exception if an error occurs during the read.
 */
-public List readTimeSeriesList (	TSIdent tsident, String fname,
-					DateTime date1, DateTime date2,
-					String req_units,
-					boolean read_data )
+public List<TS> readTimeSeriesList ( TSIdent tsident, String fname,
+	DateTime date1, DateTime date2, String req_units, boolean read_data )
 throws Exception {
 	return null;
 }
@@ -10721,7 +9588,7 @@ public void removeAllCommandProcessorEventListeners ( )
 Remove all commands.
 */
 public void removeAllCommands ()
-{	List commandList = getCommands();
+{	List<Command> commandList = getCommands();
 	int size = commandList.size();
 	if ( size > 0 ) {
 		commandList.clear ();
@@ -10735,7 +9602,7 @@ Remove a command at a position.
 */
 public void removeCommandAt ( int index )
 {	String routine = "StateDMI_Processor.removeCommandAt";
-	List commandList = getCommands();
+	List<Command> commandList = getCommands();
 	commandList.remove ( index );
 	notifyCommandListListenersOfRemove ( index, index );
 	Message.printStatus(2, routine, "Remove command object at [" + index + "]" );
@@ -10816,34 +9683,9 @@ public void removeProcessListener ( ProcessListener listener )
 Reset a __CU*_match_Vector to empty.
 @param matchList List of matching identifiers/names to reset to empty.
 */
-protected void resetDataMatches ( List matchList )
+protected void resetDataMatches ( List<String> matchList )
 {	matchList.clear();
 }
-
-/**
-Run the processor.  When run as a thread from the StateDMIGUI, this method is
-called from the Thread.start() method.
-*/
-/* FIXME SAM remove when code transition is complete
-public void run ()
-{	__is_running = true;
-	try {	processCommands ();
-		if ( __command_warning_Vector.size() == 0 ) {
-			// No warnings during the run...
-			notifyListenersOfProcessStatus ( STATUS_SUCCESS,
-			"Success" );
-		}
-		else {	// There were some warnings during the run...
-			notifyListenersOfProcessStatus ( STATUS_ERROR,
-			"Warnings Detected" );
-		}
-	}
-	catch ( Exception e ) {
-		notifyListenersOfProcessStatus ( STATUS_ERROR, "Error" );
-	}
-	__is_running = false;
-}
-*/
 
 /**
 Reset the workflow global properties to defaults, necessary when a command processor is rerun.
@@ -10946,7 +9788,7 @@ reset before running.
 
 </table>
 */
-public void runCommands ( List commands, PropList props )
+public void runCommands ( List<Command> commands, PropList props )
 throws Exception
 {
     // Reset the global workflow properties if requested
@@ -10992,7 +9834,7 @@ Run the specified commands.  If no commands are specified, run all that are bein
 @param commands Vector of Command to process.
 @param props Properties to control run, including:  CreateOutput=True|False.
 */
-public void runCommands_OLD ( List commands, PropList props )
+public void runCommands_OLD ( List<Command> commands, PropList props )
 throws Exception
 {
 	processCommands_OLD ( commands, props );
@@ -11068,7 +9910,7 @@ public void setCancelProcessingRequested ( boolean cancel_processing_requested )
 Set the command list, typically only called from constructor.
 @param commandList list of commands for processor.
 */
-public void setCommands ( List commandList )
+public void setCommands ( List<Command> commandList )
 {
 	__commandList = commandList;
 }
@@ -11233,7 +10075,9 @@ startup directory.
 public void setPropContents ( String prop, Object contents ) throws Exception
 {	if ( prop.equalsIgnoreCase("HydroBaseDMIList") ) {
 		// TODO SAM 2005-06-08 Currently only allow one connection...
-		List<HydroBaseDMI> v = (List<HydroBaseDMI>)contents;
+		@SuppressWarnings("unchecked")
+		List<HydroBaseDMI> objectList = (List<HydroBaseDMI>)contents;
+		List<HydroBaseDMI> v = objectList;
 		__hdmi = v.get(0);
 	}
 	else if ( prop.equalsIgnoreCase("DataStore" ) ) {
@@ -11252,43 +10096,67 @@ public void setPropContents ( String prop, Object contents ) throws Exception
 		__OutputYearType = (YearType)contents;
 	}
 	else if ( prop.equalsIgnoreCase("StateCU_IrrigationPracticeTS_List") ) {
-		__CUIrrigationPracticeTS_Vector = (List)contents;
+		@SuppressWarnings("unchecked")
+		List<StateCU_IrrigationPracticeTS> objectList = (List<StateCU_IrrigationPracticeTS>)contents;
+		__CUIrrigationPracticeTS_Vector = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("StateCU_Location_List") ) {
-		__CULocation_Vector = (List)contents;
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> objectList = (List<StateCU_Location>)contents;
+		__CULocation_Vector = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("StateMod_DiversionDemandTSMonthly_List") ) {
-		__SMDemandTSMonthlyList = (List)contents;
+		@SuppressWarnings("unchecked")
+		List<MonthTS> objectList = (List<MonthTS>)contents;
+		__SMDemandTSMonthlyList = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("StateMod_DiversionHistoricalTSMonthly_List") ) {
-		__SMDiversionTSMonthlyList = (List)contents;
+		@SuppressWarnings("unchecked")
+		List<MonthTS> objectList = (List<MonthTS>)contents;
+		__SMDiversionTSMonthlyList = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("StateMod_Network") ) {
 		__SM_network = (StateMod_NodeNetwork)contents;
 	}
 	else if ( prop.equalsIgnoreCase("StateMod_PlanReturn_List") ) {
-		__SMPlanReturnList = (List<StateMod_ReturnFlow>)contents;
+		@SuppressWarnings("unchecked")
+		List<StateMod_ReturnFlow> objectList = (List<StateMod_ReturnFlow>)contents;
+		__SMPlanReturnList = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("StateMod_PlanStation_List") ) {
-		__SMPlanList = (List)contents;
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan> objectList = (List<StateMod_Plan>)contents;
+		__SMPlanList = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("StateMod_PlanWellAugmentation_List") ) {
-		__SMPlanWellAugmentationList = (List<StateMod_Plan_WellAugmentation>)contents;
+		@SuppressWarnings("unchecked")
+		List<StateMod_Plan_WellAugmentation> objectList = (List<StateMod_Plan_WellAugmentation>)contents;
+		__SMPlanWellAugmentationList = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("StateMod_RiverNetworkNode_List") ) {
-		__SMRiverNetworkNode_Vector = (List)contents;
+		@SuppressWarnings("unchecked")
+		List<StateMod_RiverNetworkNode> objectList = (List<StateMod_RiverNetworkNode>)contents;
+		__SMRiverNetworkNode_Vector = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("StateMod_WellDemandTSMonthly_List") ) {
-		__SMWellDemandTSMonthlyList = (List)contents;
+		@SuppressWarnings("unchecked")
+		List<MonthTS> objectList = (List<MonthTS>)contents;
+		__SMWellDemandTSMonthlyList = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("StateMod_WellHistoricalPumpingTSMonthly_List") ) {
-		__SMWellHistoricalPumpingTSMonthlyList = (List)contents;
+		@SuppressWarnings("unchecked")
+		List<MonthTS> objectList = (List<MonthTS>)contents;
+		__SMWellHistoricalPumpingTSMonthlyList = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("StateModWellRightList") || prop.equalsIgnoreCase("StateMod_WellRight_List") ) {
-		__SMWellRightList = (List)contents;
+		@SuppressWarnings("unchecked")
+		List<StateMod_WellRight> objectList = (List<StateMod_WellRight>)contents;
+		__SMWellRightList = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("StateMod_WellStation_List") ) {
-		__SMWellList = (List)contents;
+		@SuppressWarnings("unchecked")
+		List<StateMod_Well> objectList = (List<StateMod_Well>)contents;
+		__SMWellList = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("DefaultWDIDLength") || // Newer
 		prop.equalsIgnoreCase("WDIDLength" ) ) { // Older
@@ -11332,23 +10200,23 @@ Print a warning about key identifier/name matches that have occurred when adding
 @param replace If true, an existing instance is replaced if found.  If false,
 the original instance is used.  This flag should be consistent with how the StateCU_Location were processed.
 @param matchList List of strings containing the key id/name values that have matches.
-@param data_type String to use in messages to indentify the data object type (e.g., "CU Locations").
+@param data_type String to use in messages to identify the data object type (e.g., "CU Locations").
 */
-protected void warnAboutDataMatches ( Object command, boolean replace, List matchList, String data_type )
+protected void warnAboutDataMatches ( Object command, boolean replace, List<String> matchList, String data_type )
 {	int size = matchList.size();
 
 	if (size == 0) {
 		return;
 	}
 
-	StringBuffer matches = new StringBuffer ( (String)matchList.get(0) );
+	StringBuffer matches = new StringBuffer ( matchList.get(0) );
 	String id;
 	int maxwidth = 100;
 	String nl = System.getProperty ( "line.separator" );
 	for (int i = 1; i < size; i++) {
 		matches.append ( ", " );
 		// Limit to "maxwidth" characters per line...
-		id = (String)matchList.get(i);
+		id = matchList.get(i);
 		// 2 is for the ", "
 		if ( (matches.length()%maxwidth + (id.length() + 2)) >= maxwidth) {
 			matches.append ( nl );

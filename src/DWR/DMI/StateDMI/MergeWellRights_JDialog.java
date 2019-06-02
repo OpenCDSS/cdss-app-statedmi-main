@@ -65,6 +65,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for the MergeWellRights() command.
 */
+@SuppressWarnings("serial")
 public class MergeWellRights_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener {
 
@@ -302,7 +303,7 @@ private void initialize ( JFrame parent, MergeWellRights_Command command )
     
 	JGUIUtil.addComponent(main_JPanel, new JLabel ("Merge parcel years?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List MergeParcelYears_Vector = new Vector(2);
+    List<String> MergeParcelYears_Vector = new Vector<String>(3);
     MergeParcelYears_Vector.add ( "" );
     MergeParcelYears_Vector.add ( __command._False );
     MergeParcelYears_Vector.add ( __command._True );
@@ -317,7 +318,7 @@ private void initialize ( JFrame parent, MergeWellRights_Command command )
     
 	JGUIUtil.addComponent(main_JPanel, new JLabel ("Sum right decrees?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List SumDecrees_Vector = new Vector(2);
+    List<String> SumDecrees_Vector = new Vector<String>(3);
     SumDecrees_Vector.add ( "" );
     SumDecrees_Vector.add ( __command._False );
     SumDecrees_Vector.add ( __command._True );
@@ -343,7 +344,7 @@ private void initialize ( JFrame parent, MergeWellRights_Command command )
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Right ID format:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List format_Vector = new Vector(3);
+    List<String> format_Vector = new Vector<String>(3);
 	format_Vector.add ( "" );
 	format_Vector.add ( "" + StateModWellRightIdFormatType.RIGHTID_NN );
 	__IDFormat_JComboBox = new SimpleJComboBox(false);

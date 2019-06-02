@@ -61,6 +61,7 @@ import DWR.StateMod.StateMod_InstreamFlow;
 /**
 Editor for FillInstreamFlowStation() and SetInstreamFlowStation() commands.
 */
+@SuppressWarnings("serial")
 public class FillAndSetInstreamFlowStation_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -306,7 +307,7 @@ private void initialize ( JFrame parent, FillAndSetInstreamFlowStation_Command c
     JGUIUtil.addComponent(main_JPanel, new JLabel ("On/Off:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__OnOff_JComboBox = new SimpleJComboBox();
-	List idivsw = StateMod_Diversion.getIdivswChoices(true);
+	List<String> idivsw = StateMod_Diversion.getIdivswChoices(true);
 	idivsw.add ( 0, "" );	// Blank to indicate no change
 	__OnOff_JComboBox.setData( idivsw );
 	__OnOff_JComboBox.addItemListener (this);
@@ -330,7 +331,7 @@ private void initialize ( JFrame parent, FillAndSetInstreamFlowStation_Command c
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Demand type:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__DemandType_JComboBox = new SimpleJComboBox();
-	List iifcom = StateMod_InstreamFlow.getIifcomChoices ( true );
+	List<String> iifcom = StateMod_InstreamFlow.getIifcomChoices ( true );
 	iifcom.add ( 0, "" );
 	__DemandType_JComboBox.setData( iifcom );
 	__DemandType_JComboBox.addItemListener (this);
@@ -343,7 +344,7 @@ private void initialize ( JFrame parent, FillAndSetInstreamFlowStation_Command c
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List if_not_found_Vector = new Vector();
+        List<String> if_not_found_Vector = new Vector<String>();
     if_not_found_Vector.add ( "" );
 	if ( __command instanceof SetInstreamFlowStation_Command ) {
 		if_not_found_Vector.add ( __command._Add );

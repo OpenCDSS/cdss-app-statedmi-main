@@ -34,7 +34,7 @@ import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Parcel;
 import DWR.StateCU.StateCU_Util;
 import DWR.StateMod.StateMod_Util;
-
+import DWR.StateMod.StateMod_WellRight;
 import RTi.TS.TSUtil;
 import RTi.TS.YearTS;
 import RTi.Util.Message.Message;
@@ -93,7 +93,7 @@ Do this by getting the
 irrigation practice data for the parcel year (which has references to the parcels used to
 create the data) and check those parcels for whether they have rights in a
 year.  If they do, include the parcels.
-@param smrights_YearTS_Vector Vector of YearTS for the rights for parcels.  This
+@param smrights_YearTS_Vector List of YearTS for the rights for parcels.  This
 will be used to look up a time series for the matching parcel.
 @param ipyts The IrrigationPracticeTS that is having a component filled, passed in because
 the stored parcel information is at this level.
@@ -106,7 +106,7 @@ data type in "yts".  CURRENTLY IGNORED - ALWAYS FILLED.
 @param ParcelYear_int the parcel year to use for parcel data.
 */
 private void fillIrrigationPracticeTSUsingRights (
-		List smrights_YearTS_Vector,
+		List<YearTS> smrights_YearTS_Vector,
 		StateCU_IrrigationPracticeTS ipyts,
 		StateCU_CropPatternTS cdsts,
 		String datatype,
@@ -120,7 +120,7 @@ private void fillIrrigationPracticeTSUsingRights (
 		" year parcel data and rights associated with parcels.");
 	// Get the parcels for the irrigation practice TS for the year in
 	// question.  This will return HydroBase and user-supplied records.
-	List parcels = ipyts.getParcelListForYear ( ParcelYear_int );
+	List<StateCU_Parcel> parcels = ipyts.getParcelListForYear ( ParcelYear_int );
 	int nparcel = 0;
 	if ( parcels != null ) {
 		nparcel = parcels.size();
@@ -263,7 +263,7 @@ private void fillIrrigationPracticeTSUsingRights (
 		double parcel_area;		// Parcel area
 		boolean rights_available = false;	// Indicates if rights are available for parcel
 		for ( int iparcel = 0; iparcel < nparcel; iparcel++ ) {
-			parcel = (StateCU_Parcel)parcels.get(iparcel);
+			parcel = parcels.get(iparcel);
 			parcel_area = parcel.getArea();
 			irrig_type = parcel.getIrrigationMethod();
 			is_high_efficiency = false;
@@ -439,7 +439,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(7);
     valid_Vector.add ( "ID" );
 	valid_Vector.add ( "IncludeSurfaceWaterSupply" );
 	valid_Vector.add ( "IncludeGroundwaterOnlySupply" );
@@ -508,6 +508,9 @@ private void processSingleParcelForPeriod (
 	double old_value; // Old time series value
 	for ( int iyear = 0;
 		date.lessThanOrEqualTo(FillEnd_DateTime); date.addYear(1), iyear++ ) {
+		if ( iyear < 0 ) {
+			// Put this here to avoid compiler warning about iyear not being used
+		}
 		year = date.getYear();
 		// Check to see if the parcel rights in the year in question are
 		// > 0.0.  If so, the parcel is on, add its acreage to the appropriate
@@ -710,10 +713,12 @@ CommandWarningException, CommandException
 	
 	// Get the time series to fill...
 	
-	List ipyList = null;
+	List<StateCU_IrrigationPracticeTS> ipyList = null;
 	int ipyListSize = 0;
 	try {
-		ipyList = (List)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_IrrigationPracticeTS> dataList = (List<StateCU_IrrigationPracticeTS>)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List");
+		ipyList = dataList;
 		ipyListSize = ipyList.size();
 	}
 	catch ( Exception e ) {
@@ -737,11 +742,12 @@ CommandWarningException, CommandException
 	
 	// Get the crop pattern time series to check that GWflood + GWsprinkler equal to CDS total acres.
 	
-	List cdsList = null;
+	List<StateCU_CropPatternTS> cdsList = null;
 	int cdsListSize = 0;
 	try {
-		Object o = processor.getPropContents( "StateCU_CropPatternTS_List");
-		cdsList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_CropPatternTS> dataList = (List<StateCU_CropPatternTS>)processor.getPropContents( "StateCU_CropPatternTS_List");
+		cdsList = dataList;
 		cdsListSize = cdsList.size();
 	}
 	catch ( Exception e ) {
@@ -767,10 +773,12 @@ CommandWarningException, CommandException
 	// Get the CU locations, which is where collection information is stored,
 	// necessary to determine if groundwater only location...
 	
-	List culocList = null;
+	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
 	try {
-		culocList = (List)processor.getPropContents( "StateCU_Location_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
 		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {
@@ -793,10 +801,12 @@ CommandWarningException, CommandException
 	
 	// Get the well rights, which are needed to create the time series by parcel...
 	
-	List werList = null;
+	List<StateMod_WellRight> werList = null;
 	int werListSize = 0;
 	try {
-		werList = (List)processor.getPropContents( "StateMod_WellRight_List");
+		@SuppressWarnings("unchecked")
+		List<StateMod_WellRight> dataList = (List<StateMod_WellRight>)processor.getPropContents( "StateMod_WellRight_List");
+		werList = dataList;
 		werListSize = werList.size();
 	}
 	catch ( Exception e ) {
@@ -877,7 +887,7 @@ CommandWarningException, CommandException
 	
 	try {
 		// Convert the well rights to annual time series...
-		List smrights_YearTS_Vector = null;
+		List<YearTS> smrights_YearTS_Vector = null;
 		try {
 			smrights_YearTS_Vector = StateMod_Util.createWaterRightTimeSeriesList (
 				werList,
@@ -972,7 +982,7 @@ CommandWarningException, CommandException
 						message, "Verify that crop pattern time series is defined for location." ) );
 			}
 			else {
-				cdsts = (StateCU_CropPatternTS)cdsList.get(pos);
+				cdsts = cdsList.get(pos);
 			}
 			// Fill using rights, for the requested period.
 			fillIrrigationPracticeTSUsingRights (

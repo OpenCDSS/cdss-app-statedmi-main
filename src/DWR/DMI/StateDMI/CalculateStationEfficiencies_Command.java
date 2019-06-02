@@ -480,7 +480,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(7);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "EffMin" );
 	valid_Vector.add ( "EffMax" );
@@ -514,9 +514,9 @@ public boolean editCommand ( JFrame parent )
 /**
 Return the list of files that were created by this command.
 */
-public List getGeneratedFileList ()
+public List<File> getGeneratedFileList ()
 {
-	List list = new Vector();
+	List<File> list = new Vector<File>();
 	if ( getOutputFile() != null ) {
 		list.add ( getOutputFile() );
 	}
@@ -542,31 +542,34 @@ Print the efficiency report header.
 @param month2 Ending calendar month for data.
 @param year2 Ending calendar year for data.
 @param eff_round Increment in efficiencies, percent.
-@param divsta Vector of StateMod_Diversion being processed.
+@param divsta list of StateMod_Diversion being processed or null if wells are being processed.
+@param wellsta list of StateMod_Well being processed or null if diversions are being processed.
 @param eff_ignore_le_zero Indicate whether values <= zero should be considered in average values.
 */
 private void printEfficiencyReportHeader ( PrintWriter ofp, double efficiency_low,
 	double efficiency_high, YearType calendar, int month1,
 	int year1, int month2, int year2, double eff_round,
-	List divsta, boolean eff_ignore_le_zero )
-	// multistruct is Vector of MultiStructData
-	// divsta is Vector of SMDiversion
+	List<StateMod_Diversion> divsta, List<StateMod_Well> wellsta, boolean eff_ignore_le_zero )
+	// multistruct is list of MultiStructData
+	// divsta is Vector of StateMod_Diversion
 {	int ndivsta = 0;
 	if ( divsta != null ) {
 		ndivsta = divsta.size();
+	}
+	int nwellsta = 0;
+	if ( wellsta != null ) {
+		nwellsta = wellsta.size();
 	}
 	boolean is_div = true;	// True if diversions, false if wells.
 	String station_type = "diversion";
 	String tstype = "diversion";
 	if ( ndivsta > 0 ) {
-		if ( divsta.get(0) instanceof StateMod_Diversion ) {
-			is_div = true;
-		}
-		else {
-			is_div = false;
-			station_type = "well";
-			tstype = "pumping";
-		}
+		is_div = true;
+	}
+	else if ( nwellsta > 0 ) {
+		is_div = false;
+		station_type = "well";
+		tstype = "pumping";
 	}
 
 	String newline = System.getProperty ( "line.separator" );
@@ -1033,14 +1036,7 @@ private void printEfficiencyReportItem ( PrintWriter repofp, int flag,
 /**
 Print the demands report showing efficiencies, etc. for each structure.  The
 summary information comes from the StructureData Vector whereas detailed
-information for each year are recomputed (carrying around takes a lot of
-memory.
-** 15 May 1996	Steven A. Malers, RTi	Broke out of the ProcessDemands code.
-** 19 Jun 1997	SAM, RTi		Enable the high detail report again.
-**					It was disabled because of problems
-**					with aggregation?
-** 2004-09-01	SAM, RTi		Pull in code from demandts.  Change as
-**					little as possible.
+information for each year are recomputed (carrying around takes a lot of memory.
 ** ----------------------------------------------------------------------------
 ** Variable	I/O	Description
 **
@@ -1051,30 +1047,29 @@ memory.
 ** dem_all	L	Matrix of demands (years x months).
 ** demts_ok	L	Indicates if the demand time series exists.
 ** div_all	L	Matrix of diversions (years x months).
-** divsta	I	List of diversion data.
+** divstaList	I	List of diversion stations.
+** wellstaList	I	List of well stations.
 ** divts_ok	L	Indicates if the diversion time series exists.
 ** eff_all	L	Matrix of efficiencies (years x months).
 ** eff_high	I	Highest efficiency allowed for modeling.
 ** eff_low	I	Lowest efficiency allowed for modeling.
-** eff_ok	L	Indicates if the total efficiency is in the accepted
-**			range.
+** eff_ok	L	Indicates if the total efficiency is in the accepted range.
 ** eff_round0	I	Value to round efficiencies to.
 ** iflag	L	Flag indicating what to print.
 ** ndivsta	I	The number of diversion stations.
-** ndivmonthdata L	The number of months in the historic period (i.e., how
-**			many Januaries).
+** ndivmonthdata L	The number of months in the historic period (i.e., how many Januaries).
 ** month*	I	Beginning and ending months for output.
 ** outrepfile	L	Name of the output file.
 ** rep_detail	I	Detail desired for report.
 ** repofp	L	Pointer to output file.
 ** routine	L	Name of this routine.
-** sdevtotal	L	Standard deviation of efficiencies for structure for
-**			total period of record.
+** sdevtotal	L	Standard deviation of efficiencies for structure for total period of record.
 ** year*	I	Beginning and ending years for output.
 ** ----------------------------------------------------------------------------
 */
 // FIXME SAM 2009-02-10 Evaluate how to handle errors
-private void printEfficiencyReport ( String EffReportFile, List sta, int month1, int year1,
+private void printEfficiencyReport ( String EffReportFile, List<StateMod_Diversion> divstaList,
+	List<StateMod_Well> wellstaList, int month1, int year1,
 	int month2, int year2, YearType calendar, boolean rep_high_detail, double eff_low, double eff_high,
 	double eff_round0, boolean eff_create_stm, boolean eff_ignore_le_zero )
 throws Exception
@@ -1104,17 +1099,19 @@ throws Exception
 	// Determine whether a list of StateMod_Diversion or StateMod_Well have been passed...
 
 	boolean is_div = true;
-	Object o = sta.get(0);
-	if ( o instanceof StateMod_Diversion ) {
+	if ( (divstaList != null) && (divstaList.size() > 0) ) {
 		is_div = true;
 	}
 	else {
 		is_div = false;
 	}
 
-	int ndivsta = 0;
-	if ( sta != null ) {
-		ndivsta = sta.size();
+	int nsta = 0;
+	if ( divstaList != null ) {
+		nsta = divstaList.size();
+	}
+	if ( wellstaList != null ) {
+		nsta = wellstaList.size();
 	}
 
 	// Open the report file...
@@ -1134,7 +1131,7 @@ throws Exception
 	// Print the header to the efficiency report...
 
 	printEfficiencyReportHeader ( repofp, eff_low, eff_high, calendar, month1, year1, month2, year2,
-		eff_round0, sta, eff_ignore_le_zero );
+		eff_round0, divstaList, wellstaList, eff_ignore_le_zero );
 
 	double [] cwr_monthly = null; // Used to retrieve average values from
 	double [] ddh_monthly = null; // StateMod_Diversion objects
@@ -1151,9 +1148,9 @@ throws Exception
 		acre_eff_bas[i] = 0.0;
 		acre_eff[i]	= 0.0;
 	}
-	for ( i = 0; i < ndivsta; i++ ) {
+	for ( i = 0; i < nsta; i++ ) {
 		if ( is_div ) {
-			div_i = (StateMod_Diversion)sta.get(i);
+			div_i = divstaList.get(i);
 			demsrc_i = div_i.getDemsrc();
 			cwr_monthly = div_i.getAverageMonthlyCWR();
 			ddh_monthly = div_i.getAverageMonthlyHistoricalDiversions();
@@ -1162,7 +1159,7 @@ throws Exception
 			eff_stddev = div_i.getCalculatedEfficiencyStddevs();
 		}
 		else {
-			well_i = (StateMod_Well)sta.get(i);
+			well_i = wellstaList.get(i);
 			demsrc_i = well_i.getDemsrcw();
 			cwr_monthly = well_i.getAverageMonthlyCWR();
 			ddh_monthly = well_i.getAverageMonthlyHistoricalPumping();
@@ -1545,18 +1542,22 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	
     // Get the historical time series
     
-    List histTSList = null;
+    List<MonthTS> histTSList = null;
     String stationType = "";
     int histTSListSize = 0;
     int compType = StateMod_DataSet.COMP_UNKNOWN; // station type being processed
     try {
     	if ( this instanceof CalculateDiversionStationEfficiencies_Command ) {
-			histTSList = (List)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
+			@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
+			histTSList = dataList;
 			stationType = "diversion";
 			compType = StateMod_DataSet.COMP_DIVERSION_STATIONS;
 		}
     	else if ( this instanceof CalculateWellStationEfficiencies_Command ) {
-    		histTSList = (List)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
+    		@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
+    		histTSList = dataList;
     		stationType = "well";
     		compType = StateMod_DataSet.COMP_WELL_STATIONS;
 		}
@@ -1584,10 +1585,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     // Get the consumptive water requirement time series if doing the IWR/Hist
     
-    List cwrTSList = null;
+    List<MonthTS> cwrTSList = null;
     int cwrTSListSize = 0;
     try {
-		cwrTSList = (List)processor.getPropContents ( "StateMod_ConsumptiveWaterRequirementTSMonthly_List" );
+		@SuppressWarnings("unchecked")
+		List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_ConsumptiveWaterRequirementTSMonthly_List" );
+		cwrTSList = dataList;
     	cwrTSListSize = cwrTSList.size();
     }
     catch ( Exception e ) {
@@ -1611,16 +1614,22 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     }
     
     // Get the stations, used to set efficiencies
-    List stationList = null;
+    List<StateMod_Diversion> ddsList = null;
+    List<StateMod_Well> wesList = null;
     int stationListSize = 0;
 	try {
 		if ( compType == StateMod_DataSet.COMP_DIVERSION_STATIONS ) {
-    		stationList = (List)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		ddsList = dataList;
+    		stationListSize = ddsList.size();
     	}
 		else if ( compType == StateMod_DataSet.COMP_WELL_STATIONS ) {
-    		stationList = (List)processor.getPropContents ( "StateMod_WellStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List" );
+    		wesList = dataList;
+    		stationListSize = wesList.size();
     	}
-		stationListSize = stationList.size();
 	}
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
@@ -1832,19 +1841,22 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	// Used with multistruct...
 
     	StateMod_Diversion div_part = null; // Secondary diversion.
-    	List partids = null; // Secondary IDs.
+    	List<String> partids = null; // Secondary IDs.
     	int collection_size = 0; // Number of parts...
     	String part_id; // Secondary ID.
     	double multistruct_area = 0.0; // Total area for a multistruct.
+    	if ( multistruct_area < 0.0 ) {
+    		// TODO put in to prevent compiler warning - should the value be output?
+    	}
     	int matchCount = 0; // IDs that match
     	for ( int i = 0; i < stationListSize; i++ ) {
     		if ( compType == StateMod_DataSet.COMP_DIVERSION_STATIONS ) {
-    			div = (StateMod_Diversion)stationList.get(i);
+    			div = ddsList.get(i);
     			id = div.getID();
     			demsrc = div.getDemsrc();
     		}
     		else if (compType == StateMod_DataSet.COMP_WELL_STATIONS ) {
-    			well = (StateMod_Well)stationList.get(i);
+    			well = wesList.get(i);
     			id = well.getID();
     			demsrc = well.getDemsrcw();
     			if ( well.getIdvcomw() != 1 ) {
@@ -1961,7 +1973,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		                message, "Verify that an IWR (CWR) time series is available." ) );
     			continue;
     		}
-    		iwr_ts = (MonthTS)cwrTSList.get(pos);
+    		iwr_ts = cwrTSList.get(pos);
     		if(compType==StateMod_DataSet.COMP_DIVERSION_STATIONS){
     			div.setConsumptiveWaterRequirementMonthTS ( iwr_ts );
     		}
@@ -1996,9 +2008,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				collection_size = partids.size();
     			}
     			for ( int ic = 0; ic < collection_size; ic++ ) {
-    				part_id = (String)partids.get(ic);
+    				part_id = partids.get(ic);
     				// Diversion (for area)...
-    				pos = StateMod_Util.indexOf ( stationList, part_id );
+    				pos = StateMod_Util.indexOf ( ddsList, part_id );
     				if ( pos < 0 ) {
     					message = "No diversion station found as MultiStruct part \"" +
     					part_id + "\" area for weighted average may be in error.";
@@ -2009,7 +2021,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				                message, "Verify that MultiStruct part is defined and has area." ) );
     				}
     				else {
-    					div_part = (StateMod_Diversion)stationList.get(pos);
+    					div_part = ddsList.get(pos);
     					if ( div.getArea() > 0.0 ) {
     						multistruct_area += div_part.getArea();
     					}
@@ -2295,8 +2307,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		if ( (compType ==StateMod_DataSet.COMP_DIVERSION_STATIONS)&& div.isCollection() &&
     			div.getCollectionType().equalsIgnoreCase(StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT)) {
     			for ( int ic = 0; ic < collection_size; ic++ ) {
-    				part_id = (String)partids.get(ic);
-    				pos = StateMod_Util.indexOf ( stationList, part_id );
+    				part_id = partids.get(ic);
+    				pos = StateMod_Util.indexOf ( wesList, part_id );
     				if ( pos < 0 ) {
     					message = "No diversion station found as MultiStruct part \"" +
     					part_id + "\" not setting average efficiencies for the part.";
@@ -2307,7 +2319,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				                message, "Verify that MultiStruct parts are valid identifiers." ) );
     					continue;
     				}
-    				div_part = (StateMod_Diversion)stationList.get(pos);
+    				div_part = ddsList.get(pos);
     				div_part.setAverageMonthlyCWR (	(double [])monthly_demand.clone() );
     				div_part.setAverageMonthlyHistoricalDiversions ((double [])monthly_diversion.clone() );
     				div_part.setCalculatedEfficiencies ((double [])efficiency_computed.clone());
@@ -2326,7 +2338,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			if ( compType == StateMod_DataSet.COMP_DIVERSION_STATIONS ) {
     				printEfficiencyReport (
     				EffReportFile_full,
-    				stationList,
+    				ddsList,
+    				null,
     				EffCalcStart_DateTime.getMonth(),
     				EffCalcStart_DateTime.getYear(),
     				EffCalcEnd_DateTime.getMonth(),
@@ -2342,7 +2355,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			else if(compType == StateMod_DataSet.COMP_WELL_STATIONS ) {
     				printEfficiencyReport (
     				EffReportFile_full,
-    				stationList,
+    				null,
+    				wesList,
     				EffCalcStart_DateTime.getMonth(),
     				EffCalcStart_DateTime.getYear(),
     				EffCalcEnd_DateTime.getMonth(),

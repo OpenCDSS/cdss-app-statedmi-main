@@ -170,7 +170,7 @@ throws InvalidCommandParameterException
 	}
     
 	// Check for invalid parameters...
-	Vector valid_Vector = new Vector();
+	Vector<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "InputFile" );
 	if ( this instanceof ReadStreamGageStationsFromNetwork_Command ){
 		valid_Vector.add ( "IncludeStreamEstimateStations" );
@@ -225,7 +225,7 @@ throws Exception
 
 	// Now process the data from the network.  First get the diversion stations...
 
-	List diversionStationList = net.getNodesForType(HydrologyNode.NODE_TYPE_DIV);
+	List<HydrologyNode> diversionStationList = net.getNodesForType(HydrologyNode.NODE_TYPE_DIV);
 	int diversionStationListSize = 0;
 	if ( diversionStationList != null ) {
 		diversionStationListSize = diversionStationList.size();
@@ -236,7 +236,7 @@ throws Exception
 	StateMod_Diversion div;
 	HydrologyNode node = null;
 	for (int i = 0; i < diversionStationListSize; i++) {
-		node = (HydrologyNode)diversionStationList.get(i);
+		node = diversionStationList.get(i);
 		div = new StateMod_Diversion ( false );
 		div.setID ( node.getCommonID() );
 		div.setCgoto ( node.getCommonID() );
@@ -290,7 +290,7 @@ throws Exception
 
 	// Now process the data from the network.  First get the instream flow stations...
 
-	List instreamFlowStationList = net.getNodesForType(HydrologyNode.NODE_TYPE_ISF);
+	List<HydrologyNode> instreamFlowStationList = net.getNodesForType(HydrologyNode.NODE_TYPE_ISF);
 	int instreamFlowStationSize = 0;
 	if ( instreamFlowStationList != null ) {
 		instreamFlowStationSize = instreamFlowStationList.size();
@@ -301,7 +301,7 @@ throws Exception
 	StateMod_InstreamFlow ifs;
 	HydrologyNode node = null;
 	for (int i = 0; i < instreamFlowStationSize; i++) {
-		node = (HydrologyNode)instreamFlowStationList.get(i);
+		node = instreamFlowStationList.get(i);
 		ifs = new StateMod_InstreamFlow ( false );
 		ifs.setID ( node.getCommonID() );
 		ifs.setCgoto ( node.getCommonID() );
@@ -337,7 +337,7 @@ throws Exception
 
 	// Now process the data from the network.  First get the reservoir stations...
 
-	List reservoirStationList = net.getNodesForType(HydrologyNode.NODE_TYPE_RES);
+	List<HydrologyNode> reservoirStationList = net.getNodesForType(HydrologyNode.NODE_TYPE_RES);
 	int reservoirStationSize = 0;
 	if ( reservoirStationList != null ) {
 		reservoirStationSize = reservoirStationList.size();
@@ -348,7 +348,7 @@ throws Exception
 	StateMod_Reservoir res;
 	HydrologyNode node = null;
 	for (int i = 0; i < reservoirStationSize; i++) {
-		node = (HydrologyNode)reservoirStationList.get(i);
+		node = reservoirStationList.get(i);
 		res = new StateMod_Reservoir ( false );
 		res.setID ( node.getCommonID() );
 		res.setCgoto ( node.getCommonID() );
@@ -384,7 +384,7 @@ throws Exception
 	// Now process the data from the network.  The nodes are the baseflow
 	// nodes that are not flow nodes...
 
-	List estimateList = net.getBaseflowNodes();
+	List<HydrologyNode> estimateList = net.getBaseflowNodes();
 	int size = 0;
 	if ( estimateList != null ) {
 		size = estimateList.size();
@@ -396,7 +396,7 @@ throws Exception
 	StateMod_StreamEstimate estimate;
 	int countAdded = 0;
 	for (int i = 0; i < size; i++) {
-		node = (HydrologyNode)estimateList.get(i);
+		node = estimateList.get(i);
 		if ( node.getType() == HydrologyNode.NODE_TYPE_FLOW ) {
 			// Do not include because the station is listed in the RIS file...
 			String message = "Not including flow node \"" + node.getCommonID() +
@@ -446,7 +446,7 @@ throws Exception
 	// indicated as baseflow nodes.  Those that are not indicated as
 	// baseflow are treated as "other" nodes in modeling.
 
-	List streamGageStationList = net.getBaseflowNodes();
+	List<HydrologyNode> streamGageStationList = net.getBaseflowNodes();
 	int streamGageStationListSize = 0;
 	if ( streamGageStationList != null ) {
 		streamGageStationListSize = streamGageStationList.size();
@@ -458,7 +458,7 @@ throws Exception
 	HydrologyNode node, downstream_flow_node;
 	StateMod_StreamGage gage;
 	for (int i = 0; i < streamGageStationListSize; i++) {
-		node = (HydrologyNode)streamGageStationList.get(i);
+		node = streamGageStationList.get(i);
 		if ( node.getType() == HydrologyNode.NODE_TYPE_FLOW ) {
 			gage = new StateMod_StreamGage();
 			gage.setID ( node.getCommonID() );
@@ -536,7 +536,7 @@ throws Exception
 	// This is used to print a warning.
 	processor.resetDataMatches ( processor.getStateModWellStationMatchList() );
 
-	List wellList = null;
+	List<HydrologyNode> wellList = null;
 	StateMod_Well well;
 
 	// Now process the data from the network.  First get the well stations...
@@ -551,7 +551,7 @@ throws Exception
 
 	HydrologyNode node = null;
 	for (int i = 0; i < size; i++) {
-		node = (HydrologyNode)wellList.get(i);
+		node = wellList.get(i);
 		well = new StateMod_Well ( false );
 		well.setID ( node.getCommonID() );
 		well.setCgoto ( node.getCommonID() );

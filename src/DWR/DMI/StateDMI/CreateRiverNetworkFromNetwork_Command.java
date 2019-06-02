@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Vector;
 
 import DWR.StateMod.StateMod_NodeNetwork;
-
+import DWR.StateMod.StateMod_RiverNetworkNode;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.IO.AbstractCommand;
@@ -77,7 +77,7 @@ throws InvalidCommandParameterException
 	CommandStatus status = getCommandStatus();
 	status.clearLog(CommandPhaseType.INITIALIZATION);
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
 
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
 
@@ -163,12 +163,12 @@ CommandWarningException, CommandException
 		// Create the river network. The node types will not be known because
 		// the RIN does not explicitly carry the node types...
 
-		List riverNetworkNodeList = net.createStateModRiverNetwork();
+		List<StateMod_RiverNetworkNode> riverNetworkNodeList = net.createStateModRiverNetwork();
 
 		// Always make sure that a non-null list is available...
 
 		if ( riverNetworkNodeList == null ) {
-			riverNetworkNodeList = new Vector ();
+			riverNetworkNodeList = new Vector<StateMod_RiverNetworkNode>();
 	        message = "No river nodes were created from the network.";
 	        Message.printWarning ( warning_level, 
 	        MessageUtil.formatMessageTag(command_tag, ++warning_count),

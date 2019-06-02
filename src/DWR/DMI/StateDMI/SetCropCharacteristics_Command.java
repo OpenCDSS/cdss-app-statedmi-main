@@ -251,7 +251,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(16);
     valid_Vector.add ( "CropType" );
 	valid_Vector.add ( "PlantingMonth" );
     valid_Vector.add ( "PlantingDay" );
@@ -337,10 +337,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of crop characteristics...
 	
-	List cchList = null;
+	List<StateCU_CropCharacteristics> cchList = null;
 	int cchListSize = 0;
 	try {
-		cchList = (List)processor.getPropContents( "StateCU_CropCharacteristics_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_CropCharacteristics> dataList = (List<StateCU_CropCharacteristics>)processor.getPropContents( "StateCU_CropCharacteristics_List");
+		cchList = dataList;
 		cchListSize = cchList.size();
 	}
 	catch ( Exception e ) {

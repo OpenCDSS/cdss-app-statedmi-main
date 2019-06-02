@@ -158,7 +158,8 @@ throws InvalidCommandParameterException
 						message, "Specify a property name." ) );
 	}
 	else {
-		List valid_properties = new Vector(StateDMICommandProcessorUtil.getPropertyNameList(processor));
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		List<String> valid_properties = new Vector(StateDMICommandProcessorUtil.getPropertyNameList(processor));
 		int size = 0;
 		if ( valid_properties != null ) {
 			size = valid_properties.size();
@@ -189,7 +190,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(3);
 	valid_Vector.add ( "OutputFile" );
 	valid_Vector.add ( "PropertyName" );
 	valid_Vector.add ( "Append" );
@@ -217,9 +218,9 @@ public boolean editCommand ( JFrame parent )
 /**
 Return the list of files that were created by this command.
 */
-public List getGeneratedFileList ()
+public List<File> getGeneratedFileList ()
 {
-	List list = new Vector();
+	List<File> list = new Vector<File>();
 	if ( getOutputFile() != null ) {
 		list.add ( getOutputFile() );
 	}

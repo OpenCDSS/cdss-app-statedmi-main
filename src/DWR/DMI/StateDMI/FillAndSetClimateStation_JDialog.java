@@ -58,6 +58,7 @@ import RTi.Util.Message.Message;
 /**
 Editor dialog for FillClimateStation() and SetClimateStation() commands.
 */
+@SuppressWarnings("serial")
 public class FillAndSetClimateStation_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -86,7 +87,7 @@ Command editor constructor.
 @param command Command to edit.
 */
 public FillAndSetClimateStation_JDialog (JFrame parent, Command command,
-	List Region1_List, List Region2_List ) {
+	List<String> Region1_List, List<String> Region2_List ) {
 	super(parent, true);
 	initialize (parent, command, Region1_List, Region2_List );
 }
@@ -223,11 +224,11 @@ Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
-private void initialize (JFrame parent, Command command, List Region1_List, List Region2_List )
+private void initialize (JFrame parent, Command command, List<String> Region1_List, List<String> Region2_List )
 {	__command = command;
-	__Region1_List = new Vector ( Region1_List );
+	__Region1_List = new Vector<String>( Region1_List );
 	__Region1_List.add ( 0, "" );
-	__Region2_List = new Vector ( Region2_List );
+	__Region2_List = new Vector<String>( Region2_List );
 	__Region2_List.add ( 0, "" );
 
 	addWindowListener(this);
@@ -357,7 +358,7 @@ private void initialize (JFrame parent, Command command, List Region1_List, List
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>();
     IfNotFound_List.add("");
 	if ( __command instanceof FillClimateStation_Command ) {
 		IfNotFound_List.add ( ((FillClimateStation_Command)__command)._Ignore );

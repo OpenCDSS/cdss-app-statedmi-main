@@ -126,7 +126,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(3);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "DefaultTable" );
 	valid_Vector.add ( "IfNotFound" );
@@ -191,16 +191,22 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     // Get the data needed for the command
 	
-    List stationList = null;
+    List<StateMod_Diversion> smdivList = null;
+    List<StateMod_Well> smwellList = null;
     int stationListSize = 0;
     try {
     	if ( this instanceof SetDiversionStationDelayTablesFromNetwork_Command ) {
-    		stationList = (List)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		smdivList = dataList;
+    		stationListSize = smdivList.size();
     	}
     	else if ( this instanceof SetWellStationDelayTablesFromNetwork_Command ) {
-    		stationList = (List)processor.getPropContents ( "StateMod_WellStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List" );
+    		smwellList = dataList;
+    		stationListSize = smwellList.size();
     	}
-		stationListSize = stationList.size();
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
@@ -260,15 +266,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	StateMod_Well well = null;
     	StateMod_ReturnFlow smret = null;
     	HydrologyNode node = null; // Node in the network
-    	List smret_Vector = null; // List of smret.
+    	List<StateMod_ReturnFlow> smret_Vector = null; // List of smret.
     	String id = null; // Diversion or well ID.
     	for ( int i = 0; i < stationListSize; i++ ) {
     		if ( do_div ) {
-    			div = (StateMod_Diversion)stationList.get(i);
+    			div = smdivList.get(i);
     			id = div.getID();
     		}
     		else if ( do_well ) {
-    			well = (StateMod_Well)stationList.get(i);
+    			well = smwellList.get(i);
     			id = well.getID();
     		}
     		if ( !id.matches(idpattern_Java) ) {
@@ -319,7 +325,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		smret.setCrtnid ( node.getCommonID() );
     		smret.setPcttot ( 100.0 );
     		smret.setIrtndl ( DefaultTable );
-    		smret_Vector = new Vector();	// Do not reuse!
+    		smret_Vector = new Vector<StateMod_ReturnFlow>();	// Do not reuse!
     		smret_Vector.add ( smret );
     		if ( do_div ) {
     			div.setReturnFlow ( smret_Vector );

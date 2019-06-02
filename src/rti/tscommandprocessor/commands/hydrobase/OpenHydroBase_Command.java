@@ -149,7 +149,7 @@ throws InvalidCommandParameterException
 	}
     
     // Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
     valid_Vector.add ( "OdbcDsn" );
     valid_Vector.add ( "DatabaseServer" );
     valid_Vector.add ( "DatabaseName" );
@@ -194,7 +194,7 @@ throws InvalidCommandSyntaxException, InvalidCommandParameterException
     
     CommandStatus status = getCommandStatus();
 	
-    List tokens = StringUtil.breakStringList ( command, "()", StringUtil.DELIM_SKIP_BLANKS );
+    List<String> tokens = StringUtil.breakStringList ( command, "()", StringUtil.DELIM_SKIP_BLANKS );
 
 	if ( (tokens == null) ) {
 		message = "Invalid syntax for \"" + command + "\".  Expecting OpenHydroBase(...).";
@@ -380,11 +380,14 @@ throws CommandException
 	// Get the DMI instances from the processor...
 
 	CommandProcessor processor = getCommandProcessor();
-	List dmilist = null;
-	try { Object o = processor.getPropContents ( "HydroBaseDMIList" );
-			if ( o != null ) {
-				dmilist = (List)o;
-			}
+	List<HydroBaseDMI> dmilist = null;
+	try {
+		Object o = processor.getPropContents ( "HydroBaseDMIList" );
+		if ( o != null ) {
+			@SuppressWarnings("unchecked")
+			List<HydroBaseDMI> dataList = (List<HydroBaseDMI>)o;
+			dmilist = dataList;
+		}
 	}
 	catch ( Exception e ) {
 		// Not fatal, but of use to developers.
@@ -398,7 +401,7 @@ throws CommandException
 	
 	int size = 0;
 	if ( dmilist == null ) {
-		dmilist = new Vector();
+		dmilist = new Vector<HydroBaseDMI>();
 	}
 	size = dmilist.size();
 	HydroBaseDMI hbdmi2 = null;

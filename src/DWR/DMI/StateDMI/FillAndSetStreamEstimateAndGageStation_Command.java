@@ -130,7 +130,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(5);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "Name" );
 	valid_Vector.add ( "RiverNodeID" );
@@ -162,7 +162,8 @@ public boolean editCommand ( JFrame parent )
 /**
 Process FillStreamEstimateStation() and FillStreamGageStation() commands.
 */
-private int processFillCommands ( List streamEstimateStationList, List streamGageStationList,
+private int processFillCommands ( List<StateMod_StreamEstimate> streamEstimateStationList,
+		List<StateMod_StreamGage> streamGageStationList,
 		int warningCount, int warningLevel, String commandTag, CommandStatus status,
 		String ID, String idpattern_Java,
 		boolean fill_Name, String Name,
@@ -187,7 +188,7 @@ private int processFillCommands ( List streamEstimateStationList, List streamGag
 	int matchCount = 0;
 	for (int i = 0; i < size; i++) {
 		if ( this instanceof FillStreamGageStation_Command ) {
-			gage = (StateMod_StreamGage)streamGageStationList.get(i);
+			gage = streamGageStationList.get(i);
 			id = gage.getID();
 			if ( !id.matches(idpattern_Java) ) {
 				// Identifier does not match...
@@ -208,7 +209,7 @@ private int processFillCommands ( List streamEstimateStationList, List streamGag
 			}
 		}
 		else if ( this instanceof FillStreamEstimateStation_Command ) {
-			estimate = (StateMod_StreamEstimate)streamEstimateStationList.get(i);
+			estimate = streamEstimateStationList.get(i);
 			id = estimate.getID();
 			if ( !id.matches(idpattern_Java) ) {
 				// Identifier does not match...
@@ -278,7 +279,8 @@ private int processFillCommands ( List streamEstimateStationList, List streamGag
 /**
 Process SetStreamEstimateStation() and SetStreamGageStation() commands.
 */
-private int processSetCommands ( List streamEstimateStationList, List streamGageStationList,
+private int processSetCommands ( List<StateMod_StreamEstimate> streamEstimateStationList,
+		List<StateMod_StreamGage> streamGageStationList,
 		int warningCount, int warningLevel, String commandTag, CommandStatus status,
 		String ID, String idpattern_Java,
 		boolean fill_Name, String Name,
@@ -490,16 +492,21 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     // Get the data needed for the command
     
-    List streamGageStationList = null;
-    List streamEstimateStationList = null;
+    List<StateMod_StreamGage> streamGageStationList = null;
+    List<StateMod_StreamEstimate> streamEstimateStationList = null;
     try {
     	if ( (this instanceof FillStreamGageStation_Command) ||
     		(this instanceof SetStreamGageStation_Command) ) {
-    		streamGageStationList = (List)processor.getPropContents ( "StateMod_StreamGageStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_StreamGage>dataList = (List<StateMod_StreamGage>)processor.getPropContents ( "StateMod_StreamGageStation_List" );
+    		streamGageStationList = dataList;
     	}
     	else if ( (this instanceof FillStreamEstimateStation_Command) ||
         	(this instanceof SetStreamEstimateStation_Command) ) {
-    		streamEstimateStationList = (List)processor.getPropContents ( "StateMod_StreamEstimateStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_StreamEstimate> dataList =
+				(List<StateMod_StreamEstimate>)processor.getPropContents ( "StateMod_StreamEstimateStation_List" );
+    		streamEstimateStationList = dataList;
     	}
     }
     catch ( Exception e ) {

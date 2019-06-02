@@ -111,7 +111,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(2);
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "IfNotFound" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
@@ -169,10 +169,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of climate stations...
 	
-	List stationList = null;
+	List<StateMod_InstreamFlow> stationList = null;
 	int stationListSize = 0;
 	try {
-		stationList = (List)processor.getPropContents ( "StateMod_InstreamFlowStation_List");
+		@SuppressWarnings("unchecked")
+		List<StateMod_InstreamFlow> dataList = (List<StateMod_InstreamFlow>)processor.getPropContents ( "StateMod_InstreamFlowStation_List");
+		stationList = dataList;
 		stationListSize = stationList.size();
 	}
 	catch ( Exception e ) {

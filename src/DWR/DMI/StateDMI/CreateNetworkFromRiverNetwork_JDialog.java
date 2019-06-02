@@ -55,6 +55,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for the CreateNetworkFromRiverNetwork() command.
 */
+@SuppressWarnings("serial")
 public class CreateNetworkFromRiverNetwork_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener
 {

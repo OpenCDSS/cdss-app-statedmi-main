@@ -220,7 +220,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(14);
     valid_Vector.add ( "ID" );
 	valid_Vector.add ( "SetStart" );
 	valid_Vector.add ( "SetEnd" );
@@ -312,10 +312,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of irrigation practice time series...
 	
-	List ipyList = null;
+	List<StateCU_IrrigationPracticeTS> ipyList = null;
 	int ipyListSize = 0;
 	try {
-		ipyList = (List)processor.getPropContents( "StateCU_IrrigationPracticeTS_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_IrrigationPracticeTS> dataList = (List<StateCU_IrrigationPracticeTS>)processor.getPropContents( "StateCU_IrrigationPracticeTS_List");
+		ipyList = dataList;
 		ipyListSize = ipyList.size();
 	}
 	catch ( Exception e ) {
@@ -330,10 +332,12 @@ CommandWarningException, CommandException
 	
 	// Get the CU locations to check groundwater supply
 	
-	List culocList = null;
+	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
 	try {
-		culocList = (List)processor.getPropContents( "StateCU_Location_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
 		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {

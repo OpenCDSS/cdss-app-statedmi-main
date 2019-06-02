@@ -201,7 +201,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(6);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "ListFile" );
 	valid_Vector.add ( "IDCol" );
@@ -279,10 +279,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     // Get the data needed for the command
     
-    List cdsList = null;
+    List<StateCU_CropPatternTS> cdsList = null;
     int cdsListSize = 0;
     try {
-		cdsList = (List)processor.getPropContents ( "StateCU_CropPatternTS_List" );
+		@SuppressWarnings("unchecked")
+		List<StateCU_CropPatternTS> dataList = (List<StateCU_CropPatternTS>)processor.getPropContents ( "StateCU_CropPatternTS_List" );
+		cdsList = dataList;
 		cdsListSize = cdsList.size();
     }
     catch ( Exception e ) {

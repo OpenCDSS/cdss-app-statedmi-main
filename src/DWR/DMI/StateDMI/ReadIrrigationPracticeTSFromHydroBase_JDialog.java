@@ -59,6 +59,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for ReadIrrigationPracticeTSFromHydroBase() command.
 */
+@SuppressWarnings("serial")
 public class ReadIrrigationPracticeTSFromHydroBase_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener
 {
@@ -238,7 +239,7 @@ private void initialize ( JFrame parent, ReadIrrigationPracticeTSFromHydroBase_C
    	
    	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Optimization level:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	List Optimization_Vector = new Vector(3);
+	List<String> Optimization_Vector = new Vector<String>(3);
 	Optimization_Vector.add ( "" );
 	Optimization_Vector.add ( __command._UseLessMemory );
 	Optimization_Vector.add ( __command._UseMoreMemory );

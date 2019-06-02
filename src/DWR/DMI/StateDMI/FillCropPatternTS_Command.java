@@ -33,7 +33,7 @@ import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Parcel;
 import DWR.StateCU.StateCU_Util;
 import DWR.StateMod.StateMod_Util;
-
+import DWR.StateMod.StateMod_WellRight;
 import RTi.TS.TS;
 import RTi.TS.TSUtil;
 import RTi.TS.YearTS;
@@ -275,7 +275,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
     valid_Vector.add ( "ID" );
 	valid_Vector.add ( "IncludeSurfaceWaterSupply" );
     valid_Vector.add ( "IncludeGroundwaterOnlySupply" );
@@ -343,7 +343,7 @@ It is also passed in to avoid issues pulling out the crop name from a composite 
 @param ParcelYear_int the parcel year to use for parcel data.
 */
 private int fillCropPatternTSUsingRights (
-		List werYearTSList, StateCU_CropPatternTS cdsts, String cropName, YearTS yts,
+		List<TS> werYearTSList, StateCU_CropPatternTS cdsts, String cropName, YearTS yts,
 		DateTime FillStart_DateTime, DateTime FillEnd_DateTime, int ParcelYear_int,
 		int warning_level, int warning_count, String command_tag, CommandStatus status )
 {	String routine = "FillCropPatternTS_Command.fillCropPatternTSUsingRights";
@@ -353,7 +353,7 @@ private int fillCropPatternTSUsingRights (
 		FillStart_DateTime + " to " + FillEnd_DateTime + " by using " + ParcelYear_int +
 		" year parcel data and rights associated with parcels.");
 	// Get the parcels for the crop pattern TS for the year and crop in question...
-	List parcels = cdsts.getParcelListForYearAndCropName ( ParcelYear_int, cropName );
+	List<StateCU_Parcel> parcels = cdsts.getParcelListForYearAndCropName ( ParcelYear_int, cropName );
 	int nparcel = 0;
 	if ( parcels != null ) {
 		nparcel = parcels.size();
@@ -364,7 +364,7 @@ private int fillCropPatternTSUsingRights (
 	StateCU_Parcel parcel = null; // Individual parcel to process.
 	// Debugging...
 	for ( int i = 0; i < nparcel; i++ ) {
-		parcel = (StateCU_Parcel)parcels.get(i);
+		parcel = parcels.get(i);
 		Message.printStatus ( 2, routine, parcel.toString() );
 	}
 	double parcelRightDecree; // Decree for a parcel at a point in time
@@ -508,7 +508,7 @@ CommandWarningException, CommandException
 	// TODO SAM 2005-07-31
 	// Could be more robust by looping through all crops to see how many
 	// crop type matches are found.
-	List cropTypeList = new Vector(); // list of crop types to process
+	List<String> cropTypeList = new Vector<String>(); // list of crop types to process
 	int cropTypeList_size = 0;
 	if ( NormalizeTotals == null ) { // Only used by ProrateAgStats
 		// Figure out the default...
@@ -564,11 +564,12 @@ CommandWarningException, CommandException
 	
 	// Get the list of CU locations, needed to check whether surface or ground water...
 	
-	List culocList = null;
+	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
 	try {
-		Object o = processor.getPropContents( "StateCU_Location_List");
-		culocList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
 		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {
@@ -592,11 +593,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of crop pattern time series...
 	
-	List cdsList = null;
+	List<StateCU_CropPatternTS> cdsList = null;
 	int cdsListSize = 0;
 	try {
-		Object o = processor.getPropContents( "StateCU_CropPatternTS_List");
-		cdsList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_CropPatternTS> dataList = (List<StateCU_CropPatternTS>)processor.getPropContents( "StateCU_CropPatternTS_List");
+		cdsList = dataList;
 		cdsListSize = cdsList.size();
 	}
 	catch ( Exception e ) {
@@ -610,14 +612,15 @@ CommandWarningException, CommandException
 	}
 	
 	// Get well rights and period needed for filling with well rights
-	List werList = null;
+	List<StateMod_WellRight> werList = null;
 	int werListSize = 0;
 	DateTime OutputStart_DateTime = null;
 	DateTime OutputEnd_DateTime = null;
 	if ( this instanceof FillCropPatternTSUsingWellRights_Command ) {
 		try {
-			Object o = processor.getPropContents( "StateMod_WellRight_List");
-			werList = (List)o;
+			@SuppressWarnings("unchecked")
+			List<StateMod_WellRight> dataList = (List<StateMod_WellRight>)processor.getPropContents( "StateMod_WellRight_List");
+			werList = dataList;
 			werListSize = werList.size();
 		}
 		catch ( Exception e ) {
@@ -709,7 +712,7 @@ CommandWarningException, CommandException
 		double observedTotalPrev; // Used with repeat-filling of arrays.
 		double agstatsObservedTotalPrev;
 
-		List werYearTSList = null;
+		List<TS> werYearTSList = null;
 		if ( this instanceof FillCropPatternTSUsingWellRights_Command ) {
 			// Convert the well rights to annual time series...
 			werYearTSList = StateMod_Util.createWaterRightTimeSeriesList (
@@ -756,7 +759,7 @@ CommandWarningException, CommandException
 		StateCU_CropPatternTS cupatts = null;
 		StateCU_Location culoc = null;
 		String id;
-		List cropNames = null;
+		List<String> cropNames = null;
 		String cropName = null;
 		int ncrops = 0;
 		int icrop = 0;
@@ -1009,13 +1012,13 @@ CommandWarningException, CommandException
 				if ( CropType.indexOf("*") >= 0 ) {
 					// Wildcards are used...
 					// Get all the crop types for the current CU location...
-					cropTypeList = new Vector();
+					cropTypeList = new Vector<String>();
 					cropNames = cupatts.getCropNames();
 					ncrops = cropNames.size();
 					// Loop through the crops and see which ones match - it is conceivable that the
 					// wildcard specifies a subset of crops...
 					for ( icrop = 0; icrop < ncrops; icrop++ ) {
-						cropName = (String)cropNames.get(icrop);
+						cropName = cropNames.get(icrop);
 						if ( cropName.matches(croppattern_Java) ) {
 							cropTypeList.add (cropName );
 						}

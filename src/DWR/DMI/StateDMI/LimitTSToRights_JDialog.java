@@ -64,6 +64,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for Limit*TSToRights() commands.
 */
+@SuppressWarnings("serial")
 public class LimitTSToRights_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -434,7 +435,7 @@ private void initialize ( JFrame parent, LimitTSToRights_Command command )
 
    	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Use OnOff date?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-       	List onoff_Vector = new Vector(3);
+       	List<String> onoff_Vector = new Vector<String>(3);
 	onoff_Vector.add ( "" );
 	onoff_Vector.add ( __False );
 	onoff_Vector.add ( __True );
@@ -463,7 +464,7 @@ private void initialize ( JFrame parent, LimitTSToRights_Command command )
 		(__command instanceof LimitWellDemandTSMonthlyToRights_Command) ){
         JGUIUtil.addComponent(main_JPanel, new JLabel ( "Limit to current rights:"),
 			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-       	List LimitToCurrent_Vector = new Vector(3);
+       	List<String> LimitToCurrent_Vector = new Vector<String>(3);
 		LimitToCurrent_Vector.add ( "" );
 		LimitToCurrent_Vector.add ( __False );
 		LimitToCurrent_Vector.add ( __True );

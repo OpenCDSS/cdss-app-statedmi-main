@@ -255,7 +255,7 @@ throws InvalidCommandParameterException
         }
     }
 	// Check for invalid parameters...
-	List<String> valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "InputFile" );
 	valid_Vector.add ( "PageLayout" );
 	valid_Vector.add ( "PrinterName" );
@@ -293,9 +293,9 @@ public boolean editCommand ( JFrame parent )
 /**
 Return the list of files that were created by this command.
 */
-public List getGeneratedFileList ()
+public List<File> getGeneratedFileList ()
 {
-    List list = new Vector();
+    List<File> list = new Vector<File>();
     if ( getOutputFile() != null ) {
         list.add ( getOutputFile() );
     }

@@ -65,6 +65,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for ReadIrrigationPracticeTSFromList() command.
  */
+@SuppressWarnings("serial")
 public class ReadIrrigationPracticeTSFromList_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -457,8 +458,8 @@ private void initialize (JFrame parent, Command command) {
 		"Optional - ending year to read data (default=process all)."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
-	List column_Vector = new Vector(100);
-	List column2_Vector = new Vector(101);
+	List<String> column_Vector = new Vector<String>(100);
+	List<String> column2_Vector = new Vector<String>(101);
 	column2_Vector.add ( "" );
 	for ( int i = 1; i <= 100; i++ ) {
 		column_Vector.add ( "" + i );

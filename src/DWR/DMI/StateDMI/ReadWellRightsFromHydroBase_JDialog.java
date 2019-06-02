@@ -63,6 +63,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for the ReadWellRightsFromHydroBase() command.
 */
+@SuppressWarnings("serial")
 public class ReadWellRightsFromHydroBase_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener {
 
@@ -320,7 +321,7 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
    	
    	JGUIUtil.addComponent(general_JPanel, new JLabel ( "Optimization level:"),
 		0, ++yGeneral, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	List optimizationList = new ArrayList<String>(3);
+	List<String> optimizationList = new ArrayList<String>(3);
 	optimizationList.add ( "" );
 	optimizationList.add ( __command._UseLessMemory );
 	optimizationList.add ( __command._UseMoreMemory );
@@ -389,7 +390,7 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
    	
    	JGUIUtil.addComponent(explicitWDID_JPanel, new JLabel ("Read well rights?:"),
 		0, ++yExplicitWDID, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-   	List read_Vector = new Vector(3);
+   	List<String> read_Vector = new Vector<String>(3);
    	read_Vector.add ( "" );
 	read_Vector.add ( __command._True );
 	read_Vector.add ( __command._False );
@@ -473,7 +474,7 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
    	
    	JGUIUtil.addComponent(rightPermit_JPanel, new JLabel ("Define right how?:"),
 		0, ++yRightPermit, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-   	List define_Vector = new Vector(4);
+   	List<String> define_Vector = new Vector<String>(4);
    	define_Vector.add ( "" );
 	define_Vector.add ( "" + DefineWellRightHowType.EARLIEST_DATE );
 	define_Vector.add ( "" + DefineWellRightHowType.LATEST_DATE );
@@ -533,7 +534,7 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
     
    	JGUIUtil.addComponent(decree_JPanel, new JLabel ( "Use APEX?:"),
 		0, ++yDecree, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-   	List apex_Vector = new Vector(3);
+   	List<String> apex_Vector = new Vector<String>(3);
    	apex_Vector.add ( "" );
 	apex_Vector.add ( __command._True );
 	apex_Vector.add ( __command._False );
@@ -586,7 +587,7 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 
     JGUIUtil.addComponent(id_JPanel, new JLabel ( "Right ID format:"),
 		0, ++yId, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List formatChoices = new ArrayList<String>(6);
+    List<String> formatChoices = new ArrayList<String>(6);
 	formatChoices.add ( "" );
 	formatChoices.add ( __command._HydroBaseID );
 	formatChoices.add ( __command._StationIDW_NN );
@@ -635,7 +636,7 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 
    	JGUIUtil.addComponent(onOff_JPanel, new JLabel ( "OnOff default:"),
 		0, ++yOnOff, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	List onoffList = new ArrayList<String>(3);
+	List<String> onoffList = new ArrayList<String>(3);
 	onoffList.add ( "" );
 	onoffList.add ( __command._1 );
 	onoffList.add ( __command._AppropriationDate );

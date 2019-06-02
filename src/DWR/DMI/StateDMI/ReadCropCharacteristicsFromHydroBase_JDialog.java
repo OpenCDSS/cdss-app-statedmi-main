@@ -59,6 +59,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for ReadCropCharacteristicsFromHydroBase() command.
 */
+@SuppressWarnings("serial")
 public class ReadCropCharacteristicsFromHydroBase_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener
 {
@@ -79,7 +80,7 @@ ReadCropCharacteristicsFromHydroBase_JDialog constructor.
 @param cuMethodList List of CU method strings.
 */
 public ReadCropCharacteristicsFromHydroBase_JDialog (JFrame parent,
-	ReadCropCharacteristicsFromHydroBase_Command command, List cuMethodList )
+	ReadCropCharacteristicsFromHydroBase_Command command, List<String> cuMethodList )
 {	super(parent, true);
 	initialize (parent, command, cuMethodList );
 }
@@ -165,7 +166,7 @@ Instantiates the GUI components.
 @param cuMethodList Vector of CU method strings.
 */
 private void initialize (JFrame parent, 
-		ReadCropCharacteristicsFromHydroBase_Command command, List cuMethodList )
+		ReadCropCharacteristicsFromHydroBase_Command command, List<String> cuMethodList )
 {	__command = command;
 
 	addWindowListener(this);
@@ -195,7 +196,7 @@ private void initialize (JFrame parent,
     JGUIUtil.addComponent(main_JPanel, new JLabel ("CU Method:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__CUMethod_JComboBox = new SimpleJComboBox(false);
-	__CUMethod_JComboBox.setData ( new Vector(cuMethodList) );
+	__CUMethod_JComboBox.setData ( new Vector<String>(cuMethodList) );
 	__CUMethod_JComboBox.addItemListener(this);
     JGUIUtil.addComponent(main_JPanel, __CUMethod_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);

@@ -1,4 +1,4 @@
-// StateDMI -  Main program class which is responsible for batch or UI.
+// StateDMI -  Main program class that runs batch or UI.
 
 /* NoticeStart
 
@@ -21,319 +21,6 @@ You should have received a copy of the GNU General Public License
 
 NoticeEnd */
 
-//------------------------------------------------------------------------------
-// StateDMI -  Main program class which is responsible for starting either an
-//		applet or stand alone GUIs.
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-//
-// 10 Sep 2002	J. Thomas Sapienza, RTi	Initial version from older class.
-// 11 Sep 2002	JTS, RTi		Convert AWT to Swing.
-// 03 Oct 2002 	JTS, RTi		Set up proper program name and version
-//					information.  Message logging works.
-// 2002-10-04	JTS, RTi		DBHost information pulled out of command
-//					line for the login JDialog.
-// 2002-10-14	Steven A. Malers, RTi	Review code for initial release.
-//					Specifically:
-//					* Open log file with user name.
-//					* Default debug to off and set warning
-//					  and status levels lower.
-// 2002-11-14	SAM, RTi		Update to version 01.02.00.  See
-//					StateDMIMainGUI for details.
-// 2003-04-22	SAM, RTi		Update to version 01.03.00.  See
-//					StateDMIMainGUI for details.  This
-//					version now will be used for StateCU
-//					files or StateMod files, but not both.
-//					* Remove batch log file from here.
-//					* Check for a command line argument
-//					  -statecu or -statemod to indicate how
-//					  the interface should appear.
-//					* Remove call to HBParse() since it is
-//					  old-style.
-// 2003-06-04	SAM, RTi		Update to version 01.04.00.
-//					* Use the new StateCU package where
-//					  classes are named StateCU_XXX.
-//					* Use the new TS package (uses DateTime,
-//					  etc.).
-//					* Change the name of the GUI class to
-//					  StateDMI_JFrame.
-//					* Change to use JApplet instead of
-//					  Applet.
-// 2003-08-10	SAM, RTi		* Split initialize() into initialize1()
-//					  and initialize2() to handle setup
-//					  before and after arguments are
-//					  parsed.  Previously the home directory
-//					  was not being detected correctly.
-//					* Enable -h and -v command line options.
-// 2004-01-13	SAM, RTi		Update to version 01.05.00 Beta to
-//					prepare for a beta release to the State.
-// 2004-03-02	SAM, RTi		Update to version 01.06.00 Beta to
-//					prepare for a beta release to the State.
-// 2004-03-03	SAM, RTi		Update to version 01.07.00 Beta to
-//					prepare for a beta release to the State.
-// 2004-04-01	SAM, RTi		Update to version 01.08.00 Beta to
-//					prepare hopefully the final test version
-//					* Add a couple more commands for StateCU
-// 2004-04-08	SAM, RTi		Update to version 01.09.00 to
-//					release to the State.
-// 2004-04-10	SAM, RTi		Update to version 01.10.00.
-//					* Enable setCropPatternTSFromList() for
-//					  Rio Grande work.
-//					* Begin enabling StateMod commands.
-// 2004-05-28	SAM, RTi		Update to version 01.11.00.
-//					* Add fillCropPatternTSConstant().
-// 2004-06-01	SAM, RTi		Update to version 01.12.00.
-//					* Start cranking through StateMod
-//					  commands.
-// 2004-07-12	SAM, RTi		Update to version 01.13.00.
-//					* Release recent StateCU changes to
-//					  Erin Wilson and include some initial
-//					  StateMod commands.
-// 2004-08-22	SAM, RTi		Update to version 01.14.00.
-//					* Release additional StateMod features.
-// 2004-09-16	SAM, RTi		Update to version 01.15.00.
-//					* Previous release had all but wells so
-//					  enable wells.
-// 2004-09-30	SAM, RTi		Update to version 01.15.01.
-//					* Version sent to Leondard Rice for
-//					  Rio Grande testing.
-// 2004-10-01	SAM, RTi		Update to version 1.15.02.
-//					* Official version for full
-//					  functionality and documentation.
-//					* Add -release option to test image
-//					  file packaging in the Jar file.
-// 2004-10-07	SAM, RTi		Update to version 1.15.03.
-//					* Add type 6 for well station
-//					  DemandType.
-// 2004-10-11	SAM, RTi		Update to version 1.15.04.
-//					* Follow up to previous item.  Cleaned
-//					  up some messages in HydroBaseDMI.
-// 2004-10-21	SAM, RTi		Update to version 1.15.05.
-//					* Minor bug fix with crop pattern TS.
-// 2004-11-01	SAM, RTi		Update to version 1.16.00.
-//					* Add readIrrigationPracticeWellData
-//					  FromHydroBase().
-//					* Minor fixes in reservoir station and
-//					  account dialog based on feedback from
-//					  Rick Parsons.
-// 2004-12-17	SAM, RTi		Update to version 1.16.01.
-//					* Fix bug where diversion station ID
-//					  that looks like a WDID but is not in
-//					  HydroBase was causing null exceptions.
-// 2005-01-12	SAM, RTi		Update to version 1.16.02.
-//					* Fix bug where
-//					  setDiversionStationDelayTablesFromRTN
-//					  command name was not being set
-//					  properly by the editor.
-//					* Fix bug where name in list file was
-//					  not getting set for collections.
-// 2005-01-13	SAM, RTi		Update to version 1.16.03.
-//					* Change default for file writes to
-//					  OverwriteFile (instead of UpdateFile).
-//					* Fix bug where setting output year type
-//					  was not having an effect.
-//					* Add setDiversionHistoricalTSMonthly
-//					  Constant().
-// 2005-01-18	SAM, RTi		Update to version 1.17.00.
-//					* Implement output component displays.
-//					* Add sortDiversionHistoricalTSMonthly()
-//					  command.
-//					* Rework the default sizing of display
-//					  panels.
-// 2005-01-26	SAM, RTi		Update to version 1.17.01.
-//					* Resolve issue filling diversion
-//					  historical time series with a
-//					  constant.
-// 2005-01-27	SAM, RTi		Update to version 1.17.02.
-//					* Rework readSprinklerParcelsFromList()
-//					  to only read the parcel identifiers
-//					  from the list.
-// 2005-01-31	SAM, RTi		Update to version 1.17.03.
-//					* The above was not finished.  Continue
-//					  here as time allows.
-//					* Instream flow monthly needed
-//					  setOutputYearType(), not
-//					  setOutputPeriod().
-//					* Fix bug where some reservoir station
-//					  data does not seem to be coming out
-//					  of HydroBase.
-// 2005-02-01	SAM, RTi		Update to version 1.17.04.
-//					* Do not automatically manipulate dead
-//					  storage when writing StateMod
-//					  reservoir account information.
-// 2005-02-02	SAM, RTi		Update to version 1.17.05.
-//					* Resolve issue where limiting
-//					  diversions to rights is introducing
-//					  to many zeros.
-// 2005-02-07	SAM, RTi		Update to version 1.17.06.
-//					* Fix problem limiting diversions to
-//					  rights (ignores not being handled).
-// 2005-02-09	SAM, RTi		Update to version 1.17.07.
-//					* Add limitDiversionDemandTSMonthly
-//					  ToRights().
-// 2005-02-10	SAM, RTi		Update to version 1.17.08.
-//					* Provide more options for limiting
-//					  demands to rights.
-//					* Handle the rights switch when limiting
-//					  diversions and demands to rights.
-// 2005-02-14	SAM, RTi		Update to version 1.17.09.
-//					* Change default sort order for stream
-//					  gage stations to be the network.
-// 2005-02-24	SAM, RTi		Update to version 1.17.10.
-//					* Try to finish implementing IPY
-//					  commands for use on the Rio Grande.
-// 2005-03-11	SAM, RTi		* Turn on message levels in the output,
-//					  to evaluate better user feedback.
-// 2005-03-21	SAM, RTi		Update to version 1.17.11.
-//					* Get the IPY working.
-// 2005-03-25	SAM, RTi		Update to version 1.17.12.
-//					* Add warnings for obsolete commands.
-//					* Change default console output to zero
-//					  for warnings and status messages.
-// 2005-04-05	SAM, RTi		Update to version 1.17.13.
-//					* Finalize results displays for ISF,
-//					  Reservoir, Well, and network data.
-// 2005-05-02	SAM, RTi		* Change the log file warning level to
-//					  3.
-// 2005-06-01	SAM, RTi		Change the version to 1.17.13 BETA for
-//					the initial release with stored
-//					procedures.
-// 2005-06-03	SAM, RTi		Change the version to 1.17.14 BETA.
-//					* Change writeCropPatternTSToStateCU()
-//					  to allow writing only the total acres,
-//					  to facilitate checks.
-// 2005-06-08	J. Thomas Sapienza, RTi	Added call to setApplicationHomeDir().
-// 2005-06-28	SAM, RTi		Change to version 1.17.15.
-// 2005-07-08	SAM, RTi		Change to version 1.17.16.
-// 2005-07-13	SAM, RTi		Change to version 1.17.17.
-// 2005-07-27	SAM, RTi		Change to version 1.17.18.
-// 2005-08-11	SAM, RTi		Change to version 1.17.19.
-// 2005-08-18	SAM, RTi		Change to version 1.17.20.
-// 2005-10-03	SAM, RTi		Update to version 1.18.00.
-//					* Begin finalizing list commands.
-//					* Add commands for well pumping time
-//					  series.
-// 2005-10-10	SAM, RTi		Update to version 1.18.01.
-//					* Continue finalizing list commands.
-//					* Do a sweep and convert command dialog
-//					  command JTextFields to JTextAreas.
-// 2005-10-12	SAM, RTi		Update to version 1.18.02.
-//					* For well stations default the
-//					  diversion station ID to "N/A".
-// 2005-10-13	SAM, RTi		Update to version 1.18.03.
-//					* Implement a few changes to support the
-//					  separate commands files like Ray
-//					  Bennett requested.
-// 2005-10-18	SAM, RTi		Update to version 1.18.04.
-//					* Additional minor changes for well
-//					  processing based on Ray Bennett
-//					  feedback.
-// 2005-11-02	JTS, RTi		Update to version 1.18.05:
-//					* Changed the path string for loading
-//					  the application's Icon.
-// 2005-11-14	SAM, RTi		* Implement
-//					  setDiversionStationsFromList() and
-//					  setWellStationsFromList() commands.
-// 2005-11-21	SAM, RTi		Update to version 1.18.06:
-// 		JTS, RTi		* Reworked Icon-loading code to be more
-//					  verbose about the process so that 
-//					  debugging it is easier.  
-//					* Add readDiversionDemandTSMonthlyFrom
-//					  StateMod().
-// 2005-11-22	SAM, RTi		Update to version 1.18.07:
-//					* Add AWC to readCULocationsFromList().
-// 2005-12-06	SAM, RTi		Update to version 1.18.08:
-//					* Add
-//					  fillDiversionStationsFromNetwork(),
-//					  fillInstreamFlowStationsFromNetwork(),
-//					  fillReservoirStationsFromNetwork(),
-//					  fillWellStationsFromNetwork().
-// 2005-12-23	SAM, RTi		Update to version 1.18.09:
-//					* Some fixes in the network editor were
-//					  implemented.
-// 2006-01-30	SAM, RTi		Update to version 1.18.10:
-//					* Update
-//					  readWellDemandTSMonthlyFromStateMod()
-//					  to include IgnoreWells and IgnoreDWs
-//					  parameters.
-//					* Set the startup status message level
-//					  for the terminal to 0.
-// 2006-01-31	SAM, RTi		Update to version 1.19.00:
-// 2006-04-10	SAM, RTi		Update to version 1.20.00:
-//					* Respond to feedback from Ray Bennett.
-//					  Mainly revise messaging to make
-//					  processing of wells easier.
-// 2006-04-24	SAM, RTi		Update to version 1.20.01:
-//					* Continue troubleshooting well data
-//					  processing.
-// 2006-04-30	SAM, RTi		Update to version 1.20.02:
-//					* Always create the check file.  If no
-//					  check messages are available, print a
-//					  general message.
-//					* Change well rights to use receipt for
-//					  their identifiers.
-//					* Add translateBlaneyCriddle().
-//					* Add translageCropCharacteristics()
-// 2006-06-12	SAM, RTi		Update to version 1.20.03:
-//					* Add read*FromList() to all menus that
-//					  through oversight did not have them
-//					  added.
-//					* Fix problem where "see check file"
-//					  dialog was being shown before editing
-//					  commands, when processing the working
-//					  directory.
-// 2006-06-13	SAM, RTi		Update to version 1.20.04:
-//					* When writing list files, make sure to
-//					  add to the list of output files.
-// 2006-06-27	SAM, RTi		Update to version 1.20.05:
-//					* Several sort commands were not
-//					  properly hooked into menus - command
-//					  dialogs were not showing.
-// 2006-07-07	SAM, RTi		* In synchronizeIrrigationPracticeAnd
-//					  CropPatternTS(), remove the code that
-//					  resets groundwater acreage to
-//					  sprinkler acreage if groundwater is
-//					  less - it is unneeded.
-// 2006-10-09	SAM, RTi		Update to version 1.21.00:
-//					* Adjust reading well rights to reread
-//					  from the database rather than relying
-//					  on the "wells" table and add the APEX
-//					  amounts to the absolute decrees.
-// 2006-10-24	SAM, RTi		Update to version 1.22.00:
-//					* Change readWellRightsFromHydroBase
-//					  IDFormat dialog note and fix to make
-//					  sure IDs are being formatted for
-//					  previous release.
-// 2006-11-03	SAM, RTi		Update to version 2.00.00:
-//					* First release using the NSIS
-//					  installer.
-//					* First release using the new
-//					  development environment.
-// 2006-11-08	KAT, RTi		Changed how the -home argument
-//					  is used so that relative paths work.
-// 2007-01-04	SAM, RTi		Update version to 2.01.00.
-//					* Add command to set river network node.
-//					* Update for new StateCU file crop name length.
-//					* Clean up this class based on Eclipse warnings.
-// 2007-03-04	SAM, RTi		Change version date to 2007-03-02 to be
-//					consistent with other CDSS software.
-// 2007-03-23	SAM, RTi		Update to version 2.03.00 to include
-//					some StateCU file format cleanup and IPY fixes.
-// 2007-03-27	SAM, RTi		Update to version 2.04.00 to include
-//					updates to help with Rio Grande 2002 parcel data.
-// 2007-04-16	SAM, RTi		Update to version 2.05.00 to include
-//					more updates for the Rio Grande.
-// 2007-04-22	SAM, RTi		Update to version 2.06.00 to include more
-//					updates for the Rio Grande.
-// 2007-05-01	SAM, RTi		Update to version 2.07.00 to fix problem
-//					writing *wer and editing readWellRightsFromHydroBase().
-// 2007-05-11	SAM, RTi		Update to version 2.08.00 to enable multiple
-//					snapshots of irrigated lands in the CDS file.
-//------------------------------------------------------------------------------
-// EndHeader
-
 package DWR.DMI.StateDMI;
 
 import java.io.File;
@@ -341,8 +28,6 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
-
-import javax.swing.JApplet;
 
 import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
 import DWR.DMI.HydroBaseDMI.HydroBase_Util;
@@ -361,10 +46,9 @@ import riverside.datastore.DataStoreFactory;
 
 /**
 The StateDMI class is the entry point into the StateDMI application.  The
-program can run either as an applet or a stand-alone application.  The main
-program performs basic initialization and then starts up the graphical user interface.
+program can run either in batch mode or UI application.
 */
-public class StateDMI extends JApplet
+public class StateDMI
 {
 
 public static final String PROGRAM_NAME = "StateDMI";
@@ -483,30 +167,6 @@ public static String getPropValue ( String property )
 		return null;
 	}
 	return __statedmi_props.getValue ( property );
-}
-
-/**
-Instantiates the application instance from an applet.
-*/
-public void init()
-{
-	StateDMISession session = StateDMISession.getInstance();
-	IOUtil.setApplet ( this );
-	IOUtil.setProgramData ( PROGRAM_NAME, PROGRAM_VERSION, null );
-	initialize1();
-    try {
-      	parseArgs( session, this );
-	}
-	catch ( Exception e ) {
-        Message.printWarning( 1, "StateDMI", "Error parsing command line arguments.  Using default behavior." );
-        Message.printWarning( 1, "StateDMI", e );
-    }
-
-    // Instantiate main GUI
-
-	initialize2();
-	setIcon();
-	__stateDMI_JFrame = new StateDMI_JFrame (session, __app_type );
 }
 
 /**
@@ -1258,39 +918,6 @@ throws Exception
 		    // Assume that a command file has been specified on the command line
 		    setupUsingCommandFile ( args[i], false );
 		}
-	}
-}
-
-/**
-Parse the command-line arguments for the applet, determined from the applet data.
-@param a JApplet for this application.
-*/
-public static void parseArgs ( StateDMISession session, JApplet a )
-throws Exception
-{	String home = a.getParameter("-home");
-	String test = a.getParameter("-test");
-	String statecu = a.getParameter("-statecu");
-	String statemod = a.getParameter("-statemod");
-
-	if ( home != null ) {
-		//__home = home;
-		__home = (new File(home)).getCanonicalPath().toString();
-		
-		IOUtil.setProgramWorkingDir(__home);
-		JGUIUtil.setLastFileDialogDirectory(__home);
-		IOUtil.setApplicationHomeDir(__home);
-	}
-
-	if ( statecu != null ) {
-		__app_type = APP_TYPE_STATECU;
-	}
-
-	if ( statemod != null ) {
-		__app_type = APP_TYPE_STATEMOD;
-	}
-
-	if ( test != null ) {
-		IOUtil.testing(true);
 	}
 }
 

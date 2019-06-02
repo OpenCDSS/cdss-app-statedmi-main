@@ -58,6 +58,7 @@ import RTi.Util.String.StringUtil;
 /**
 Editor for SetCropCharacteristics() command.
 */
+@SuppressWarnings("serial")
 public class SetCropCharacteristics_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -409,7 +410,7 @@ private void initialize (JFrame parent, SetCropCharacteristics_Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Inches."),
 		5, y, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
-    List frost_Vector = new Vector();
+    List<String> frost_Vector = new Vector<String>(3);
 	frost_Vector.add ( "0 - Mean Temperature" );
 	frost_Vector.add ( "1 - 28 F frost" );
 	frost_Vector.add ( "2 - 32 F frost" );
@@ -454,7 +455,7 @@ private void initialize (JFrame parent, SetCropCharacteristics_Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List IfNotFound_Vector = new Vector();
+    List<String> IfNotFound_Vector = new Vector<String>(5);
     IfNotFound_Vector.add ( "" );
 	IfNotFound_Vector.add ( __command._Add );
 	IfNotFound_Vector.add ( __command._Ignore );

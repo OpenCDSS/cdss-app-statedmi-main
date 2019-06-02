@@ -29,7 +29,6 @@ import DWR.DMI.StateDMI.StateDMI_Processor;
 import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -53,7 +52,6 @@ import RTi.Util.String.StringUtil;
 import RTi.Util.Table.DataTable;
 import RTi.Util.Table.TableField;
 import RTi.Util.Table.TableRecord;
-import RTi.Util.Time.DateTime;
 
 /**
 This class initializes, checks, and runs the CopyPropertiesToTable_Command() command.
@@ -179,12 +177,13 @@ private DataTable getDiscoveryTable()
 /**
 Return a list of objects of the requested type.  This class only keeps a list of DataTable objects.
 */
-public List getObjectList ( Class c )
+@SuppressWarnings("unchecked")
+public <T> List<T> getObjectList ( Class<T> c )
 {   DataTable table = getDiscoveryTable();
-    List<DataTable> v = null;
+    List<T> v = null;
     if ( (table != null) && (c == table.getClass()) ) {
-        v = new ArrayList<DataTable>();
-        v.add ( table );
+        v = new ArrayList<T>();
+        v.add ( (T)table );
     }
     return v;
 }
@@ -416,6 +415,7 @@ CommandWarningException, CommandException
                         // TODO SAM 2012-09-30 Is it possible to check the type even if null?
                         continue;
                     }
+                    /* TODO Dead code that needs to be evaluated
                     else if ( propertyValue instanceof String ) {
                         table.addField(new TableField(TableField.DATA_TYPE_STRING, tableOutputColumnName, -1, -1), null);
                     }
@@ -452,6 +452,7 @@ CommandWarningException, CommandException
                     }
                     Message.printStatus(2, routine, "Did not match property name \"" + tableOutputColumnNames[i] +
                         "\" as column table so added to table." );
+                    */
                 }
             }
                 
@@ -523,10 +524,12 @@ CommandWarningException, CommandException
                 Object propertyValue = ""; // TODO SAM Enable ts.getProperty(propertyName);
                 // If the property value is null, just skip setting it - default value for columns is null
                 // TODO SAM 2011-04-27 Should this be a warning?
+                /* TODO dead code that needs to be evaluated
                 if ( propertyValue == null ) {
                     Message.printStatus(2,routine,"Time series property \"" + propertyName + "\" is null, not copying");
                     continue;
                 }
+                */
                 // Get the matching table column
                 try {
                     // Get the value from the table

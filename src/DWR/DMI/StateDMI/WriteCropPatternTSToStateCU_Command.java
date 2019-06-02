@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Vector;
 
 import DWR.StateCU.StateCU_CropPatternTS;
-import DWR.StateCU.StateCU_DataSet;
 
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
@@ -212,7 +211,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	Vector valid_Vector = new Vector();
+	Vector<String> valid_Vector = new Vector<String>(7);
 	valid_Vector.add ( "OutputFile" );
 	valid_Vector.add ( "OutputStart" );
 	valid_Vector.add ( "OutputEnd" );
@@ -248,9 +247,9 @@ public boolean editCommand ( JFrame parent )
 /**
 Return the list of files that were created by this command.
 */
-public List getGeneratedFileList ()
+public List<File> getGeneratedFileList ()
 {
-	List list = new Vector();
+	List<File> list = new Vector<File>();
 	if ( getOutputFile() != null ) {
 		list.add ( getOutputFile() );
 	}
@@ -319,12 +318,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     try {
         // Get the comments to add to the top of the file.
 
-        List OutputComments_List = null;
+        List<String> OutputComments_List = null;
         try {
         	Object o = processor.getPropContents ( "OutputComments" );
             // Comments are available so use them...
             if ( o != null ) {
-                OutputComments_List = (List)o;
+            	@SuppressWarnings("unchecked")
+				List<String> outputCommentsList = (List<String>)o;
+                OutputComments_List = outputCommentsList;
             }
         }
         catch ( Exception e ) {
@@ -382,10 +383,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		writeProps.set ( "WriteOnlyTotal", WriteOnlyTotal );
     	}
 
+		@SuppressWarnings("unchecked")
+		List<StateCU_CropPatternTS> cpList = (List<StateCU_CropPatternTS>)processor.getPropContents("StateCU_CropPatternTS_List");
 		Message.printStatus ( 2, routine,
 		"Writing (updating) CU Crop Pattern TS to file: \"" + OutputFile_full + "\"");
 		StateCU_CropPatternTS.writeStateCUFile ( OutputFile_prevFull, OutputFile_full,
-			(List)processor.getPropContents("StateCU_CropPatternTS_List"),
+			cpList,
 			OutputComments_List, OutputStart_DateTime, OutputEnd_DateTime, writeProps );
 
     	// Set the filename for the FileGenerator interface
