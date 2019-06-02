@@ -271,7 +271,7 @@ throws InvalidCommandParameterException
 	}
 	if ( (EvapStations != null) && (EvapStations.length() > 0) ) {
 		// Make sure values are in pairs of two...
-		List tokens = StringUtil.breakStringList(EvapStations, " ,;",StringUtil.DELIM_SKIP_BLANKS);
+		List<String> tokens = StringUtil.breakStringList(EvapStations, " ,;",StringUtil.DELIM_SKIP_BLANKS);
 		if ( (tokens == null) || (tokens.size()%2 != 0) ) {
 			message = "Evaporation station data are not specified as pairs of ID,%.";
 	        warning += "\n" + message;
@@ -288,8 +288,8 @@ throws InvalidCommandParameterException
 			for ( int i = 0; i < nsta; i++ ) {
 				// TODO SAM 2004-06-06 Need to check station ID if a list is supplied...
 				// Check the percent...
-				id = (String)tokens.get(i*2);
-				percent = (String)tokens.get(i*2 + 1);
+				id = tokens.get(i*2);
+				percent = tokens.get(i*2 + 1);
 				if ( !StringUtil.isDouble(percent) ) {
 					message = "Evaporation station " + id + " percent (" + percent + ") is not a number.";
 			        warning += "\n" + message;
@@ -306,7 +306,7 @@ throws InvalidCommandParameterException
 	}
 	if ( (PrecipStations != null) && (PrecipStations.length() > 0) ) {
 		// Make sure values are in pairs of two...
-		List tokens = StringUtil.breakStringList(PrecipStations, " ,;", StringUtil.DELIM_SKIP_BLANKS);
+		List<String> tokens = StringUtil.breakStringList(PrecipStations, " ,;", StringUtil.DELIM_SKIP_BLANKS);
 		if ( (tokens == null) || (tokens.size()%2 != 0) ) {
 			message = "Precipitation station data are not specified as pairs of ID,%.";
 	        warning += "\n" + message;
@@ -322,9 +322,9 @@ throws InvalidCommandParameterException
 			for ( int i = 0; i < nsta; i++ ) {
 				// TODO SAM 2004-06-06 Need to check station ID if a list is supplied...
 				// Check the percent...
-				id = (String)tokens.get(i*2);
-				percent = (String)tokens.get(i*2 + 1);
-				percent = (String)tokens.get(i*2 + 1);
+				id = tokens.get(i*2);
+				percent = tokens.get(i*2 + 1);
+				percent = tokens.get(i*2 + 1);
 				if ( !StringUtil.isDouble(percent) ) {
 					message = "Precipitation station " + (String)tokens.get(i*2) + " percent (" +
 						percent + ") is not a number.";
@@ -342,7 +342,7 @@ throws InvalidCommandParameterException
 	}
 	if ( (ContentAreaSeepage != null) && (ContentAreaSeepage.length() > 0) ) {
 		// Make values are in triplets...
-		List tokens = StringUtil.breakStringList(ContentAreaSeepage, ",; \n",StringUtil.DELIM_SKIP_BLANKS);
+		List<String> tokens = StringUtil.breakStringList(ContentAreaSeepage, ",; \n",StringUtil.DELIM_SKIP_BLANKS);
 		boolean badData = false; // Used specifically here
 		if ( (tokens == null) || (tokens.size()%3 != 0) ) {
 			message = "Content/Area/Seepage data are not specified as triplets of content,area,seepage.";
@@ -360,7 +360,7 @@ throws InvalidCommandParameterException
 			String val;
 			for ( int i = 0; i < ndata; i++ ) {
 				// Check the content...
-				val = (String)tokens.get(i*3 );
+				val = tokens.get(i*3 );
 				if ( !StringUtil.isDouble(val) ) {
 					message = "Content (" + val + ") is not a number.";
 			        warning += "\n" + message;
@@ -373,7 +373,7 @@ throws InvalidCommandParameterException
 					__ContentAreaSeepage_content[i] = StringUtil.atod(val);
 				}
 				// Check the area...
-				val = (String)tokens.get(i*3 + 1);
+				val = tokens.get(i*3 + 1);
 				if ( !StringUtil.isDouble(val) ) {
 					message = "Area (" + val + ") is not a number.";
 			        warning += "\n" + message;
@@ -386,7 +386,7 @@ throws InvalidCommandParameterException
 					__ContentAreaSeepage_area[i] = StringUtil.atod(val);
 				}
 				// Check the seepage...
-				val = (String)tokens.get(i*3 + 2);
+				val = tokens.get(i*3 + 2);
 				if ( !StringUtil.isDouble(val) ) {
 					message = "Seepage (" + val + ") is not a number.";
 			        warning += "\n" + message;
@@ -469,7 +469,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(20);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "Name" );
 	valid_Vector.add ( "RiverNodeID" );
@@ -625,10 +625,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     // Get the data needed for the command
     
-    List reservoirStationList = null;
+    List<StateMod_Reservoir> reservoirStationList = null;
     int reservoirStationListSize = 0;
     try {
-    	reservoirStationList = (List)processor.getPropContents ( "StateMod_ReservoirStation_List" );
+    	@SuppressWarnings("unchecked")
+		List<StateMod_Reservoir> resList = (List<StateMod_Reservoir>)processor.getPropContents ( "StateMod_ReservoirStation_List" );
+    	reservoirStationList = resList;
     	reservoirStationListSize = reservoirStationList.size();
     }
     catch ( Exception e ) {
@@ -771,9 +773,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	if ( this instanceof FillReservoirStation_Command ) {
     		action = "Filling ";
     	}
-    	List climate_Vector = null; // Used to set evaporation and precipitation station data.
+    	List<StateMod_ReservoirClimate> climate_Vector = null; // Used to set evaporation and precipitation station data.
     	for (int i = 0; i < reservoirStationListSize; i++) {
-    		res = (StateMod_Reservoir)reservoirStationList.get(i);
+    		res = reservoirStationList.get(i);
     		id = res.getID();
     		if ( !id.matches(idpattern_Java) ) {
     			// Identifier does not match...
@@ -838,10 +840,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		// (not filling) since probably need multiple commands for each reservoir.
     		if ( fill_AccountID ) {
     			Message.printStatus ( 2, routine, "Setting " + id + " AccountID -> " + AccountID );
-    			List accounts = null;
+    			List<StateMod_ReservoirAccount> accounts = null;
     			if ( AccountID.equalsIgnoreCase("1") ) {
     				// If the first account for the reservoir, remove the old accounts...
-    				accounts = new Vector ();
+    				accounts = new Vector<StateMod_ReservoirAccount>();
     			}
     			else {
     				// Get the old accounts and edit...
@@ -882,7 +884,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			StateMod_ReservoirClimate.getNumEvap(res.getClimates()) == 0)) ) {
     			Message.printStatus ( 2, routine, action + id + " EvapStations -> " + EvapStations );
     			if ( climate_Vector == null ) {
-    				climate_Vector = new Vector ( __EvapStations_percent.length );
+    				climate_Vector = new Vector<StateMod_ReservoirClimate>( __EvapStations_percent.length );
     			}
     			StateMod_ReservoirClimate evap;
     			for ( int ievap = 0; ievap < __EvapStations_percent.length; ievap++ ) {
@@ -897,7 +899,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			StateMod_ReservoirClimate.getNumPrecip(res.getClimates()) == 0)) ) {
     			Message.printStatus ( 2, routine, action + id + " PrecipStations -> " + PrecipStations );
     			if ( climate_Vector == null ) {
-    				climate_Vector = new Vector ( __PrecipStations_percent.length );
+    				climate_Vector = new Vector<StateMod_ReservoirClimate>( __PrecipStations_percent.length );
     			}
     			StateMod_ReservoirClimate precip;
     			for ( int iprecip = 0; iprecip < __PrecipStations_percent.length; iprecip++ ) {
@@ -914,7 +916,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		if ( fill_ContentAreaSeepage && (!fill || ( (res.getAreaCaps().size()) == 0)) ) {
     			Message.printStatus ( 2, routine, action + id + " ContentAreaSeepage -> " + ContentAreaSeepage );
     			StateMod_ReservoirAreaCap areacap;
-    			List areacap_Vector = new Vector(__ContentAreaSeepage_content.length);
+    			List<StateMod_ReservoirAreaCap> areacap_Vector = new Vector<StateMod_ReservoirAreaCap>(__ContentAreaSeepage_content.length);
     			for ( int iareacap = 0; iareacap < __ContentAreaSeepage_content.length; iareacap++ ) {
     				areacap = new StateMod_ReservoirAreaCap ();
     				areacap.setConten(__ContentAreaSeepage_content[iareacap]);
@@ -985,12 +987,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			}
 			if ( fill_AccountID ) {
 				Message.printStatus ( 2, routine, "Setting " + id + " AccountID -> " + AccountID);
-				List accounts = null;
+				List<StateMod_ReservoirAccount> accounts = null;
 				if ( AccountID.equalsIgnoreCase("1") ) {
 					// If the first account for the reservoir, remove the old accounts...
 					Message.printStatus ( 2, routine, "Setting " + id +
 						" first clearing all accounts since setting the first account.");
-					accounts = new Vector ();
+					accounts = new Vector<StateMod_ReservoirAccount>();
 				}
 				else {
 					// Get the old accounts and edit...
@@ -1032,7 +1034,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				Message.printStatus ( 2, routine, "Setting " + id + " EvapStations -> " + EvapStations);
 				StateMod_ReservoirClimate evap;
     			if ( climate_Vector == null ) {
-    				climate_Vector = new Vector ( __EvapStations_percent.length );
+    				climate_Vector = new Vector<StateMod_ReservoirClimate>( __EvapStations_percent.length );
     			}
 				for ( int ievap = 0; ievap < __EvapStations_percent.length; ievap++ ) {
 					evap = new StateMod_ReservoirClimate ();
@@ -1046,7 +1048,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				Message.printStatus ( 2, routine, "Setting " + id + " PrecipStations -> " + PrecipStations);
 				StateMod_ReservoirClimate precip;
     			if ( climate_Vector == null ) {
-    				climate_Vector = new Vector ( __PrecipStations_percent.length );
+    				climate_Vector = new Vector<StateMod_ReservoirClimate>( __PrecipStations_percent.length );
     			}
 				for ( int iprecip = 0; iprecip < __PrecipStations_percent.length; iprecip++ ) {
 					precip=new StateMod_ReservoirClimate ();
@@ -1062,7 +1064,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			if ( fill_ContentAreaSeepage ) {
 				Message.printStatus ( 2, routine, "Setting " + id + " ContentAreaSeepage -> " + ContentAreaSeepage);
 				StateMod_ReservoirAreaCap areacap;
-				List areacap_Vector = new Vector(__ContentAreaSeepage_content.length);
+				List<StateMod_ReservoirAreaCap> areacap_Vector = new Vector<StateMod_ReservoirAreaCap>(__ContentAreaSeepage_content.length);
 				for ( int iareacap = 0; iareacap < __ContentAreaSeepage_content.length; iareacap++ ) {
 					areacap=new StateMod_ReservoirAreaCap();
 					areacap.setConten( __ContentAreaSeepage_content[iareacap]);
@@ -1256,7 +1258,7 @@ public String toString ( PropList parameters )
 		//ContentAreaSeepage.replace('\n',';');
 		// Reformat completely...
 		StringBuffer ContentAreaSeepage_buffer = new StringBuffer ();
-		List v2 = StringUtil.breakStringList( ContentAreaSeepage, ",; \n", StringUtil.DELIM_SKIP_BLANKS);
+		List<String> v2 = StringUtil.breakStringList( ContentAreaSeepage, ",; \n", StringUtil.DELIM_SKIP_BLANKS);
 		int size = 0;
 		if ( v2 != null ) {
 			size = v2.size();
@@ -1274,7 +1276,7 @@ public String toString ( PropList parameters )
 			}
 			// Add the item...
 			ContentAreaSeepage_buffer.
-			append ( (String)v2.get(i) );
+			append ( v2.get(i) );
 		}
 		ContentAreaSeepage = ContentAreaSeepage_buffer.toString();
 		if ( b.length() > 0 ) {

@@ -27,14 +27,12 @@ import java.util.List;
 import java.util.Vector;
 
 import RTi.Util.IO.Command;
-import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.CommandProcessorRequestResultsBean;
 import RTi.Util.IO.CommandStatusProvider;
 import RTi.Util.IO.CommandStatusType;
 import RTi.Util.IO.CommandStatusUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
-import RTi.Util.String.StringUtil;
 
 /**
 This class contains static utility methods to support TSCommandProcessor.  These methods
@@ -48,21 +46,21 @@ Get the commands before the indicated index position.  Only the requested comman
 are returned.  Use this, for example, to get the setWorkingDir() commands above
 the insert position for a readXXX() command, so the working directory can be
 defined and used in the editor dialog.
-@return List of commands (as Vector of Command instances) before the index that match the commands in
+@return List of commands before the index that match the commands in
 the needed_commands_Vector.  This will always return a non-null Vector, even if
 no commands are in the Vector.
 @param index The index in the command list before which to search for other commands.
-@param processor A TSCommandProcessor with commands to search.
+@param processor A StateDMIC_Processor with commands to search.
 @param needed_commands_String_Vector Vector of commands (as String) that need to be processed
 (e.g., "setWorkingDir").  Only the main command name should be defined.
 @param last_only if true, only the last item above the insert point
 is returned.  If false, all matching commands above the point are returned in
 the order from top to bottom.
 */
-public static List getCommandsBeforeIndex (
+public static List<Command> getCommandsBeforeIndex (
 	int index,
 	StateDMI_Processor processor,
-	List needed_commands_String_Vector,
+	List<String> needed_commands_String_Vector,
 	boolean last_only )
 {	// Now search backwards matching commands for each of the requested
 	// commands...
@@ -71,15 +69,15 @@ public static List getCommandsBeforeIndex (
 		size = needed_commands_String_Vector.size();
 	}
 	String needed_command_string;
-	List found_commands = new Vector();
+	List<Command> found_commands = new Vector<Command>();
 	// Get the commands from the processor
-	List commands = processor.getCommands();
+	List<Command> commands = processor.getCommands();
 	Command command;
 	// Now loop up through the command list...
 	for ( int ic = (index - 1); ic >= 0; ic-- ) {
-		command = (Command)commands.get(ic);
+		command = commands.get(ic);
 		for ( int i = 0; i < size; i++ ) {
-			needed_command_string = (String)needed_commands_String_Vector.get(i);
+			needed_command_string = needed_commands_String_Vector.get(i);
 			//((String)_command_List.getItem(ic)).trim() );
 			if (	needed_command_string.regionMatches(true,0,command.toString().trim(),0,
 					needed_command_string.length() ) ) {
@@ -96,7 +94,7 @@ public static List getCommandsBeforeIndex (
 		if ( size <= 1 ) {
 			return found_commands;
 		}
-		List found_commands_sorted = new Vector(size);
+		List<Command> found_commands_sorted = new Vector<Command>(size);
 		for ( int i = size - 1; i >= 0; i-- ) {
 			found_commands_sorted.add ( found_commands.get(i));
 		}
@@ -109,8 +107,8 @@ Get the commands above an index position.
 @param pos Index (0+) before which to get commands.  The command at the indicated
 position is NOT included in the search.
 */
-private static List getCommandsBeforeIndex ( StateDMI_Processor processor, int pos )
-{	List commands = new Vector();
+private static List<Command> getCommandsBeforeIndex ( StateDMI_Processor processor, int pos )
+{	List<Command> commands = new Vector<Command>();
 	int size = processor.size();
 	if ( pos > size ) {
 		pos = size;

@@ -224,7 +224,7 @@ throws InvalidCommandParameterException
 	
 	if ( (EffMonthly != null) && (EffMonthly.length() > 0) ) {
 		// Make sure 12 numbers are specified...
-		List tokens = StringUtil.breakStringList(EffMonthly, ", ", 0);
+		List<String> tokens = StringUtil.breakStringList(EffMonthly, ", ", 0);
 		int ntokens = 0;
 		if ( tokens != null ) {
 			ntokens = tokens.size();
@@ -239,7 +239,7 @@ throws InvalidCommandParameterException
 		else {
 			__EffMonthly_double = new double[12];
 			for ( int i = 0; i < 12; i++ ) {
-				String eff = ((String)tokens.get(i)).trim();
+				String eff = tokens.get(i).trim();
 				if ( !StringUtil.isDouble(eff) ) {
 					message = "Monthly efficiency (" + tokens.get(i) + ") is invalid.";
 			        warning += "\n" + message;
@@ -256,7 +256,7 @@ throws InvalidCommandParameterException
 	
 	if ( (Returns != null) && (Returns.length() > 0) ) {
 		// Make sure that values are in pairs of three...
-		List tokens = StringUtil.breakStringList(Returns, ",; ", StringUtil.DELIM_SKIP_BLANKS);
+		List<String> tokens = StringUtil.breakStringList(Returns, ",; ", StringUtil.DELIM_SKIP_BLANKS);
 		if ( (tokens == null) || (tokens.size()%3 != 0) ) {
 			message = "Return data must be specified as triplets of location ID, percent, and table ID.";
 	        warning += "\n" + message;
@@ -271,9 +271,9 @@ throws InvalidCommandParameterException
 			__ReturnsPercent_double = new double[nreturn];
 			for ( int i = 0; i < nreturn; i++ ) {
 				// TODO SAM 2004-06-06 Need to check return location if a network is supplied...
-				__ReturnsNodeID[i] = (String)tokens.get(i*3);
+				__ReturnsNodeID[i] = tokens.get(i*3);
 				// Check the percent...
-				String val = ((String)tokens.get(i*3 + 1)).trim();
+				String val = tokens.get(i*3 + 1).trim();
 				if ( !StringUtil.isDouble(val ) ) {
 					message = "Return percent (" + val + ") is invalid.";
 			        warning += "\n" + message;
@@ -286,7 +286,7 @@ throws InvalidCommandParameterException
 				}
 
 				// TODO SAM 2004-06-07 Need to check the return table identifier if it is supplied.
-				val = (String)tokens.get(i*3 + 2);
+				val = tokens.get(i*3 + 2);
 				if ( !StringUtil.isInteger(val ) ) {
 					message = "Return table identifier (" + val + ") is invalid.";
 			        warning += "\n" + message;
@@ -304,7 +304,7 @@ throws InvalidCommandParameterException
 	if ( (this instanceof FillWellStation_Command) || (this instanceof SetWellStation_Command) ) {
 		if ( (Depletions != null) && (Depletions.length() > 0) ) {
 			// Make sure that values are in pairs of three...
-			List tokens = StringUtil.breakStringList(Depletions, ",; ", StringUtil.DELIM_SKIP_BLANKS);
+			List<String> tokens = StringUtil.breakStringList(Depletions, ",; ", StringUtil.DELIM_SKIP_BLANKS);
 			if ( (tokens == null) || (tokens.size()%3 != 0) ) {
 				message = "Depletion data must be specified as triplets of location ID, percent, and table ID.";
 		        warning += "\n" + message;
@@ -319,9 +319,9 @@ throws InvalidCommandParameterException
 				__DepletionsPercent_double = new double[nreturn];
 				for ( int i = 0; i < nreturn; i++ ) {
 					// TODO SAM 2004-06-06 Need to check depletion location if a network is supplied...
-					__DepletionsNodeID[i] = (String)tokens.get(i*3);
+					__DepletionsNodeID[i] = tokens.get(i*3);
 					// Check the percent...
-					String val = ((String)tokens.get(i*3 + 1)).trim();
+					String val = tokens.get(i*3 + 1).trim();
 					if ( !StringUtil.isDouble(val ) ) {
 						message = "Depletion percent (" + val + ") is not an integer.";
 				        warning += "\n" + message;
@@ -334,7 +334,7 @@ throws InvalidCommandParameterException
 					}
 	
 					// TODO SAM 2004-06-07 Need to check the depletion table identifier if it is supplied.
-					val = (String)tokens.get(i*3 + 2);
+					val = tokens.get(i*3 + 2);
 					if ( !StringUtil.isInteger(val ) ) {
 						message = "Depletion table identifier (" + val + ") is not an integer.";
 				        warning += "\n" + message;
@@ -378,7 +378,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "Name" );
 	valid_Vector.add ( "RiverNodeID" );
@@ -432,7 +432,7 @@ public boolean editCommand ( JFrame parent )
 /**
 Process the diversion stations.
 */
-private int processDiversionStations ( List divList, boolean fill, YearType outputYearType,
+private int processDiversionStations ( List<StateMod_Diversion> divList, boolean fill, YearType outputYearType,
 		int warningCount, int warningLevel, String commandTag, CommandStatus status,
 		String ID, String idpattern_Java,
 		String Name, boolean fill_Name,
@@ -583,7 +583,7 @@ private int processDiversionStations ( List divList, boolean fill, YearType outp
 		}
 		if ( fill_Returns && (!fill || (div.getNrtn() == 0)) ) {
 			Message.printStatus ( 2, routine, action + id + " Returns -> " + Returns);
-			List returns = new Vector ();
+			List<StateMod_ReturnFlow> returns = new Vector<StateMod_ReturnFlow>();
 			StateMod_ReturnFlow ret;
 			for ( int iret = 0; iret < __ReturnsPercent_double.length; iret++ ) {
 				ret = new StateMod_ReturnFlow (	StateMod_DataSet.COMP_DIVERSION_STATIONS);
@@ -708,7 +708,7 @@ private int processDiversionStations ( List divList, boolean fill, YearType outp
 		}
 		if ( fill_Returns ) {
 			Message.printStatus ( 2, routine, "Setting " + id + " Returns -> " + Returns);
-			List returns = new Vector ();
+			List<StateMod_ReturnFlow> returns = new Vector<StateMod_ReturnFlow>();
 			StateMod_ReturnFlow ret;
 			for ( int iret = 0; iret < ReturnsPercent.length; iret++ ) {
 				ret = new StateMod_ReturnFlow ( StateMod_DataSet.COMP_DIVERSION_STATIONS);
@@ -746,7 +746,7 @@ private int processDiversionStations ( List divList, boolean fill, YearType outp
 /**
 Process the well stations.
 */
-private int processWellStations ( List wellList, boolean fill, YearType outputYearType,
+private int processWellStations ( List<StateMod_Well> wellList, boolean fill, YearType outputYearType,
 		int warningCount, int warningLevel, String commandTag, CommandStatus status,
 		String ID, String idpattern_Java,
 		String Name, boolean fill_Name,
@@ -775,7 +775,7 @@ private int processWellStations ( List wellList, boolean fill, YearType outputYe
 	}
 	int wellListSize = wellList.size();
 	for (int i = 0; i < wellListSize; i++) {
-		well = (StateMod_Well)wellList.get(i);
+		well = wellList.get(i);
 		id = well.getID();
 		if ( !id.matches(idpattern_Java) ) {
 			// Identifier does not match...
@@ -899,7 +899,7 @@ private int processWellStations ( List wellList, boolean fill, YearType outputYe
 		}
 		if ( fill_Returns && (!fill || (well.getNrtnw() == 0)) ) {
 			Message.printStatus ( 2, routine, action + id + " Returns -> " + Returns);
-			List returns = new Vector ();
+			List<StateMod_ReturnFlow> returns = new Vector<StateMod_ReturnFlow>();
 			StateMod_ReturnFlow ret;
 			for ( int iret = 0; iret < ReturnsPercent.length; iret++ ) {
 				ret = new StateMod_ReturnFlow (	StateMod_DataSet.COMP_WELL_STATIONS);
@@ -912,7 +912,7 @@ private int processWellStations ( List wellList, boolean fill, YearType outputYe
 		}
 		if ( fill_Depletions && (!fill || (well.getNrtnw2() == 0)) ) {
 			Message.printStatus ( 2, routine, action + id + " Depletions -> " + Depletions);
-			List depletions = new Vector ();
+			List<StateMod_ReturnFlow> depletions = new Vector<StateMod_ReturnFlow> ();
 			StateMod_ReturnFlow ret;
 			for ( int iret = 0; iret < DepletionsPercent.length; iret++ ) {
 				ret = new StateMod_ReturnFlow ( StateMod_DataSet.COMP_WELL_STATIONS);
@@ -1046,7 +1046,7 @@ private int processWellStations ( List wellList, boolean fill, YearType outputYe
 		}
 		if ( fill_Returns ) {
 			Message.printStatus ( 2, routine, "Setting " + id + " Returns -> " + Returns);
-			List returns = new Vector ();
+			List<StateMod_ReturnFlow> returns = new Vector<StateMod_ReturnFlow>();
 			StateMod_ReturnFlow ret;
 			for ( int iret = 0; iret < ReturnsPercent.length; iret++ ) {
 				ret = new StateMod_ReturnFlow (	StateMod_DataSet.COMP_WELL_STATIONS);
@@ -1059,7 +1059,7 @@ private int processWellStations ( List wellList, boolean fill, YearType outputYe
 		}
 		if ( fill_Depletions ) {
 			Message.printStatus ( 2, routine, "Setting " + id + " Depletions -> "+Depletions);
-			List depletions = new Vector ();
+			List<StateMod_ReturnFlow> depletions = new Vector<StateMod_ReturnFlow>();
 			StateMod_ReturnFlow ret;
 			for ( int iret = 0; iret < DepletionsPercent.length; iret++ ) {
 				ret = new StateMod_ReturnFlow (
@@ -1200,16 +1200,18 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     // Get the data needed for the command
     
-    List divList = null;
-    List wellList = null;
+    List<StateMod_Diversion> divList = null;
+    List<StateMod_Well> wellList = null;
     try {
-    	if ( (this instanceof FillDiversionStation_Command) ||
-    		(this instanceof SetDiversionStation_Command) ) {
-    		divList = (List)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    	if ( (this instanceof FillDiversionStation_Command) || (this instanceof SetDiversionStation_Command) ) {
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		divList = dataList;
     	}
-    	else if ( (this instanceof FillWellStation_Command) ||
-        		(this instanceof SetWellStation_Command) ) {
-    		wellList = (List)processor.getPropContents ( "StateMod_WellStation_List" );
+    	else if ( (this instanceof FillWellStation_Command) || (this instanceof SetWellStation_Command) ) {
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List" );
+    		wellList = dataList;
     	}
     }
     catch ( Exception e ) {

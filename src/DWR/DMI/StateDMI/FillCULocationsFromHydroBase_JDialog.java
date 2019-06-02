@@ -61,6 +61,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for FillCULocationsFromHydroBase() command.
 */
+@SuppressWarnings("serial")
 public class FillCULocationsFromHydroBase_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener,
 ChangeListener {
@@ -257,7 +258,7 @@ private void initialize (JFrame parent, Command command)
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("CU location type:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List loctype = new Vector(2);
+    List<String> loctype = new Vector<String>(2);
     loctype.add("");
 	loctype.add(__command._Structure);
 	__CULocType_JComboBox = new SimpleJComboBox (false);
@@ -271,7 +272,7 @@ private void initialize (JFrame parent, Command command)
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Region1 Type:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List region1 = new Vector(2);
+    List<String> region1 = new Vector<String>(2);
     region1.add("");
 	region1.add(__command._County);
 	__Region1Type_JComboBox = new SimpleJComboBox (false);
@@ -285,7 +286,7 @@ private void initialize (JFrame parent, Command command)
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Region2 type:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List region2 = new Vector(2);
+    List<String> region2 = new Vector<String>(2);
     region2.add("");
 	region2.add(__command._HUC);
 	__Region2Type_JComboBox = new SimpleJComboBox (false);
@@ -300,7 +301,7 @@ private void initialize (JFrame parent, Command command)
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>(4);
     IfNotFound_List.add("");
 	IfNotFound_List.add ( __command._Ignore );
 	IfNotFound_List.add ( __command._Warn );

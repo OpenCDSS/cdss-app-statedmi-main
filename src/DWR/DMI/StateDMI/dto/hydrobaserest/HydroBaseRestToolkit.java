@@ -23,10 +23,8 @@ NoticeEnd */
 
 package DWR.DMI.StateDMI.dto.hydrobaserest;
 
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import DWR.DMI.HydroBaseDMI.HydroBase_NetAmts;
 import DWR.DMI.HydroBaseDMI.HydroBase_ParcelUseTS;

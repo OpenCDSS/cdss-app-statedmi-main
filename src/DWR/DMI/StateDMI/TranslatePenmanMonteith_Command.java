@@ -115,7 +115,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(3);
 	valid_Vector.add ( "OldCropType" );
 	valid_Vector.add ( "NewCropType" );
 	valid_Vector.add ( "IfNotFound" );
@@ -172,10 +172,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
 	// Get the list of crop coefficients...
 	
-	List kbcList = null;
+	List<StateCU_PenmanMonteith> kbcList = null;
 	int kbcListSize = 0;
 	try {
-		kbcList = (List)processor.getPropContents( "StateCU_PenmanMonteith_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_PenmanMonteith> dataList = (List<StateCU_PenmanMonteith>)processor.getPropContents( "StateCU_PenmanMonteith_List");
+		kbcList = dataList;
 		kbcListSize = kbcList.size();
 	}
 	catch ( Exception e ) {

@@ -116,7 +116,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(2);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "IfNotFound" );
     warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
@@ -179,11 +179,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     // Get the data needed for the command
     
-    List tsList = null;
+    List<MonthTS> tsList = null;
     int compType = StateMod_DataSet.COMP_UNKNOWN; // Used to look up time series metadata
     try {
 		if ( this instanceof SetInstreamFlowDemandTSAverageMonthlyFromRights_Command ) {
-			tsList = (List)processor.getPropContents ( "StateMod_InstreamFlowDemandTSAverageMonthly_List" );
+			@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_InstreamFlowDemandTSAverageMonthly_List" );
+			tsList = dataList;
 			compType = StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY;
 		}
     }
@@ -198,10 +200,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
                 message, "Report to software support.  See log file for details." ) );
     }
     
-    List rightList = null;
+    List<StateMod_InstreamFlowRight> rightList = null;
     int rightListSize = 0;
     try {
-		rightList = (List)processor.getPropContents ( "StateMod_InstreamFlowRight_List" );
+		@SuppressWarnings("unchecked")
+		List<StateMod_InstreamFlowRight> dataList = (List<StateMod_InstreamFlowRight>)processor.getPropContents ( "StateMod_InstreamFlowRight_List" );
+		rightList = dataList;
     	rightListSize = rightList.size();
     }
     catch ( Exception e ) {

@@ -215,7 +215,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "Name" );
 	valid_Vector.add ( "StationID" );
@@ -347,31 +347,45 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     // Get the data needed for the command
     
-    List rightList = null;
+	List<StateMod_DiversionRight> ddrList = null;
+	List<StateMod_ReservoirRight> rerList = null;
+	List<StateMod_InstreamFlowRight> ifrList = null;
+	List<StateMod_WellRight> werList = null;
     int rightListSize = 0;
     int compType = StateMod_DataSet.COMP_UNKNOWN; // Integer to increase performance in loop below
     try {
     	if ( (this instanceof FillDiversionRight_Command) ||
     		(this instanceof SetDiversionRight_Command) ) {
-    		rightList = (List)processor.getPropContents ( "StateMod_DiversionRight_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_DiversionRight> dataList = (List<StateMod_DiversionRight>)processor.getPropContents ( "StateMod_DiversionRight_List" );
+    		ddrList = dataList;
     		compType = StateMod_DataSet.COMP_DIVERSION_RIGHTS;
+    		rightListSize = ddrList.size();
     	}
     	else if ( (this instanceof FillReservoirRight_Command) ||
         	(this instanceof SetReservoirRight_Command) ) {
-    		rightList = (List)processor.getPropContents ( "StateMod_ReservoirRight_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_ReservoirRight> dataList = (List<StateMod_ReservoirRight>)processor.getPropContents ( "StateMod_ReservoirRight_List" );
+    		rerList = dataList;
     		compType = StateMod_DataSet.COMP_RESERVOIR_RIGHTS;
+    		rightListSize = rerList.size();
     	}
     	else if ( (this instanceof FillInstreamFlowRight_Command) ||
         	(this instanceof SetInstreamFlowRight_Command) ) {
-    		rightList = (List)processor.getPropContents ( "StateMod_InstreamFlowRight_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_InstreamFlowRight> dataList = (List<StateMod_InstreamFlowRight>)processor.getPropContents ( "StateMod_InstreamFlowRight_List" );
+    		ifrList = dataList;
     		compType = StateMod_DataSet.COMP_INSTREAM_RIGHTS;
+    		rightListSize = ifrList.size();
     	}
     	else if ( (this instanceof FillWellRight_Command) ||
         	(this instanceof SetWellRight_Command) ) {
-    		rightList = (List)processor.getPropContents ( "StateMod_WellRight_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_WellRight> dataList = (List<StateMod_WellRight>)processor.getPropContents ( "StateMod_WellRight_List" );
+    		werList = dataList;
     		compType = StateMod_DataSet.COMP_WELL_RIGHTS;
+    		rightListSize = werList.size();
     	}
-    	rightListSize = rightList.size();
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
@@ -463,19 +477,19 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	}
     	for (int i = 0; i < rightListSize; i++) {
     		if ( compType == StateMod_DataSet.COMP_DIVERSION_RIGHTS ){
-    			ddr = (StateMod_DiversionRight)rightList.get(i);
+    			ddr = ddrList.get(i);
     			id = ddr.getID();
     		}
     		else if ( compType == StateMod_DataSet.COMP_RESERVOIR_RIGHTS ){
-    			rer = (StateMod_ReservoirRight)rightList.get(i);
+    			rer = rerList.get(i);
     			id = rer.getID();
     		}
     		else if ( compType == StateMod_DataSet.COMP_INSTREAM_RIGHTS ) {
-    			ifr = (StateMod_InstreamFlowRight)rightList.get(i);
+    			ifr = ifrList.get(i);
     			id = ifr.getID();
     		}
     		else if ( compType == StateMod_DataSet.COMP_WELL_RIGHTS ){
-    			wer = (StateMod_WellRight)rightList.get(i);
+    			wer = werList.get(i);
     			id = wer.getID();
     		}
     		if ( !id.matches(idpattern_Java) ) {
@@ -689,16 +703,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    				Message.printStatus ( 2, routine, "Setting " + id + " OnOff -> " + OnOff );
 	    				ddr.setSwitch ( OnOff_int );
 	    			}
-	    			pos = StateMod_Util.findWaterRightInsertPosition( rightList, ddr );
+	    			pos = StateMod_Util.findWaterRightInsertPosition( ddrList, ddr );
 	    			if ( pos < 0 ) {
 	    				// Insert at the end...
 	    				Message.printStatus ( 2, routine, "Cannot determine insert position for right \""
 	    				+ ddr.getID() + "\" adding at end." );
-	    				rightList.add ( ddr );
+	    				ddrList.add ( ddr );
 	    			}
 	    			else {
 	    				// Do the insert at the given location...
-	    				rightList.add ( pos, ddr );
+	    				ddrList.add ( pos, ddr );
 	    			}
     			}
     			else if ( compType == StateMod_DataSet.COMP_RESERVOIR_RIGHTS ) {
@@ -749,16 +763,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    				Message.printStatus ( 2, routine, "Setting " + id + " OpRightID -> " + OpRightID);
 	    				rer.setCopid ( OpRightID );
 	    			}
-	    			pos = StateMod_Util.findWaterRightInsertPosition( rightList, rer );
+	    			pos = StateMod_Util.findWaterRightInsertPosition( rerList, rer );
 	    			if ( pos < 0 ) {
 	    				// Insert at the end...
 	    				Message.printStatus ( 2, routine, "Cannot determine insert position for right \""
 	    				+ rer.getID() + "\" adding at end." );
-	    				rightList.add ( rer );
+	    				rerList.add ( rer );
 	    			}
 	    			else {
 	    				// Do the insert at the given location...
-	    				rightList.add (pos, rer );
+	    				rerList.add (pos, rer );
 	    			}
     			}
     			else if ( compType == StateMod_DataSet.COMP_INSTREAM_RIGHTS ){
@@ -794,16 +808,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    				Message.printStatus ( 2, routine, "Setting " + id + " OnOff -> " + OnOff );
 	    				ifr.setSwitch ( OnOff_int );
 	    			}
-	    			pos = StateMod_Util.findWaterRightInsertPosition( rightList, ifr );
+	    			pos = StateMod_Util.findWaterRightInsertPosition( ifrList, ifr );
 	    			if ( pos < 0 ) {
 	    				// Insert at the end...
 	    				Message.printStatus ( 2, routine, "Cannot determine insert position for right \""
 	    				+ ifr.getID() + "\" adding at end." );
-	    				rightList.add ( ifr );
+	    				ifrList.add ( ifr );
 	    			}
 	    			else {
 	    				// Do the insert at the given location...
-	    				rightList.add(pos,ifr );
+	    				ifrList.add(pos,ifr );
 	    			}
     			}
     			else if ( compType == StateMod_DataSet.COMP_WELL_RIGHTS ) {
@@ -838,16 +852,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    				Message.printStatus ( 2, routine, "Setting " + id + " OnOff -> " + OnOff );
 	    				wer.setSwitch ( OnOff_int );
 	    			}
-	    			pos = StateMod_Util.findWaterRightInsertPosition(rightList, wer );
+	    			pos = StateMod_Util.findWaterRightInsertPosition(werList, wer );
 	    			if ( pos < 0 ) {
 	    				// Insert at the end...
 	    				Message.printStatus ( 2, routine, "Cannot determine insert position for right \""
 	    				+ wer.getID() + "\" adding at end." );
-	    				rightList.add ( wer );
+	    				werList.add ( wer );
 	    			}
 	    			else {
 	    				// Do the insert at the given location...
-	    				rightList.add(pos,wer );
+	    				werList.add(pos,wer );
 	    			}
     			}
     		}

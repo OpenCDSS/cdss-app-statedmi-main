@@ -110,6 +110,7 @@ Evaluate whether a cell value matches an exclude pattern.
 @param filtersMap map of column 
 @return true if the cell matches a filter
 */
+@SuppressWarnings("unused")
 private boolean cellMatchesFilter ( String columnName, String cellValue, Hashtable<String,String> filtersMap )
 {
     if ( filtersMap == null ) {
@@ -352,6 +353,7 @@ Get the array of cell ranges based on one of the input address methods.
 @param excelTableName a table name, treated as named range
 @return null if no area reference can be determined
 */
+@SuppressWarnings("unused")
 private AreaReference getAreaReference ( Workbook wb, Sheet sheet,
     String excelAddress, String excelNamedRange, String excelTableName )
 {   String routine = "WriteTableToExcel_Command.getAreaReference";

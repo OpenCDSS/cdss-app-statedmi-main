@@ -57,6 +57,7 @@ import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 
+@SuppressWarnings("serial")
 public class StartLog_JDialog extends JDialog
 implements ActionListener, KeyListener, WindowListener
 {

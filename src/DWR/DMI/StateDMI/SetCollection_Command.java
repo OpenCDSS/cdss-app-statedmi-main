@@ -215,7 +215,7 @@ throws InvalidCommandParameterException
 	}
     
 	// Check for invalid parameters...
-	Vector valid_Vector = new Vector();
+	Vector<String> valid_Vector = new Vector<String>(6);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "PartIDs" );
 	valid_Vector.add ( "Year" );
@@ -344,34 +344,42 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     // Get the data needed for the command
     
-    List culocList = null;
-    List divList = null;
-    List resList = null;
-    List wellList = null;
+    List<StateCU_Location> culocList = null;
+    List<StateMod_Diversion> divList = null;
+    List<StateMod_Reservoir> resList = null;
+    List<StateMod_Well> wellList = null;
     try {
     	Object o = null;
 		if ( nodeType.equals(_Diversion) || nodeType.equals(_Well) ) {
 			o = processor.getPropContents ( "StateCU_Location_List" );
 			if ( o != null ) {
-				culocList = (List)o;
+				@SuppressWarnings("unchecked")
+				List<StateCU_Location> dataList = (List<StateCU_Location>)o;
+				culocList = dataList;
 			}
 	    }
 		if ( nodeType.equals(_Diversion) ) {
 			o = processor.getPropContents ( "StateMod_DiversionStation_List" );
 			if ( o != null ) {
-				divList = (List)o;
+				@SuppressWarnings("unchecked")
+				List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)o;
+				divList = dataList;
 			}
 	    }
 		if ( nodeType.equals(_Reservoir) ) {
 			o = processor.getPropContents ( "StateMod_ReservoirStation_List" );
 			if ( o != null ) {
-				resList = (List)o;
+				@SuppressWarnings("unchecked")
+				List<StateMod_Reservoir> dataList = (List<StateMod_Reservoir>)o;
+				resList = dataList;
 			}
 	    }
 		if ( nodeType.equals(_Well) ) {
 			o = processor.getPropContents ( "StateMod_WellStation_List" );
 			if ( o != null ) {
-				wellList = (List)o;
+				@SuppressWarnings("unchecked")
+				List<StateMod_Well> dataList = (List<StateMod_Well>)o;
+				wellList = dataList;
 			}
 	    }
     }
@@ -487,7 +495,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				continue;
     			}
     			// Have a match so set the data...
-    			List tokens = StringUtil.breakStringList ( PartIDs, ", ", StringUtil.DELIM_SKIP_BLANKS );
+    			List<String> tokens = StringUtil.breakStringList ( PartIDs, ", ", StringUtil.DELIM_SKIP_BLANKS );
     			Message.printStatus ( 2, routine,
     				"Setting " + id + " " + collectionType + " parts (" + PartType + ") -> " + tokens );
     			if ( div.isCollection() ) {
@@ -528,7 +536,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				continue;
     			}
     			// Have a match so set the data...
-    			List tokens = StringUtil.breakStringList ( PartIDs, ", ", StringUtil.DELIM_SKIP_BLANKS );
+    			List<String> tokens = StringUtil.breakStringList ( PartIDs, ", ", StringUtil.DELIM_SKIP_BLANKS );
     			Message.printStatus ( 2, routine,
     				"Setting " + id + " " + collectionType + " parts (" + PartType + ") -> " + tokens );
     			if ( res.isCollection() ) {

@@ -39,6 +39,7 @@ import DWR.StateMod.StateMod_Well;
 import DWR.StateMod.StateMod_WellRight;
 
 import RTi.TS.MonthTS;
+import RTi.TS.TS;
 import RTi.TS.TSData;
 import RTi.TS.TSUtil;
 import RTi.Util.Math.MathUtil;
@@ -245,7 +246,7 @@ throws InvalidCommandParameterException
 	}
    
 	// Check for invalid parameters...
-	Vector valid_Vector = new Vector();
+	Vector<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "InputFile" );
 	valid_Vector.add ( "ID" );
 	if ( !(this instanceof LimitIrrigationPracticeTSToRights_Command) ) {
@@ -323,7 +324,7 @@ rights.  Well pumping can be set to the rights.  The process is as follows:
 public void runCommand ( int command_number )
 throws InvalidCommandParameterException, CommandWarningException, CommandException
 {
-    String routine = getClass().getName() + ".runCommand", message;
+    String routine = getClass().getSimpleName() + ".runCommand", message;
     int warning_level = 2;
     String command_tag = "" + command_number;
     int warning_count = 0;
@@ -342,7 +343,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	}
 	String ID_Java = StringUtil.replaceString(ID,"*",".*");
     String IgnoreID = parameters.getValue ( "IgnoreID" );
-	List IgnoreID_Vector = null;
+	List<String> IgnoreID_Vector = null;
 	int IgnoreID_Vector_size = 0;
 	if ( IgnoreID != null ) {
 		// Parse out the parts...
@@ -374,7 +375,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     String SetFlag = parameters.getValue ( "SetFlag" );
     
     // Get the stations/locations being processed
-    List stationList = null;
+    List<StateMod_Diversion> ddsList = null;
+    List<StateMod_Well> wesList = null;
+    List<StateCU_Location> culocList = null;
     String rightType = "";
     String stationType = "";
 	boolean do_diversions = false;	// booleans to increase performance
@@ -384,25 +387,33 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     try {
     	if ( (this instanceof LimitDiversionHistoricalTSMonthlyToRights_Command) ||
     		(this instanceof LimitDiversionDemandTSMonthlyToRights_Command)) {
-    		stationList = (List)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		ddsList = dataList;
     		rightType = "diversion";
     		stationType = "diversion";
     		do_diversions = true;
+    		stationListSize = ddsList.size();
     	}
     	else if ( (this instanceof LimitWellHistoricalPumpingTSMonthlyToRights_Command) ||
     		(this instanceof LimitWellDemandTSMonthlyToRights_Command)) {
-    		stationList = (List)processor.getPropContents ( "StateMod_WellStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List" );
+    		wesList = dataList;
     		rightType = "well";
     		stationType = "well";
     		do_wells = true;
+    		stationListSize = wesList.size();
     	}
        	else if ( this instanceof LimitIrrigationPracticeTSToRights_Command ) {
-    		stationList = (List)processor.getPropContents ( "StateCU_Location_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents ( "StateCU_Location_List" );
+    		culocList = dataList;
     		rightType = "well";
     		stationType = "CU location";
     		do_maxpumping = true;
+    		stationListSize = culocList.size();
     	}
-    	stationListSize = stationList.size();
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
@@ -417,28 +428,39 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
  
     // Get the time series being processed
 
-    List tsList = null;
+    List<? extends TS> tsList = null;
+    List<StateCU_IrrigationPracticeTS> ipyList = null;
 	int tsListSize = 0;
 	String tsType = null;
     try {
     	if ( this instanceof LimitDiversionHistoricalTSMonthlyToRights_Command ) {
-    		tsList = (List)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
+    		@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
+    		tsList = dataList;
     		tsType = "diversion historical time series (monthly)";
     	}
     	else if ( this instanceof LimitDiversionDemandTSMonthlyToRights_Command ) {
-    		tsList = (List)processor.getPropContents ( "StateMod_DiversionDemandTSMonthly_List" );
+    		@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_DiversionDemandTSMonthly_List" );
+    		tsList = dataList;
     		tsType = "diversion demand time series (monthly)";
     	}
     	else if ( this instanceof LimitWellHistoricalPumpingTSMonthlyToRights_Command ) {
-    		tsList = (List)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
+    		@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
+    		tsList = dataList;
     		tsType = "well historical pumping time series (monthly)";
     	}
     	else if ( this instanceof LimitWellDemandTSMonthlyToRights_Command ) {
-    		tsList = (List)processor.getPropContents ( "StateMod_WellDemandTSMonthly_List" );
+    		@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_WellDemandTSMonthly_List" );
+    		tsList = dataList;
     		tsType = "well demand time series (monthly)";
     	}
        	else if ( this instanceof LimitIrrigationPracticeTSToRights_Command ) {
-       		tsList = (List)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List" );
+       		@SuppressWarnings("unchecked")
+			List<StateCU_IrrigationPracticeTS> dataList = (List<StateCU_IrrigationPracticeTS>)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List" );
+    		ipyList = dataList;
        		tsType = "irrigation practice time series";
     	}
     	tsListSize = tsList.size();
@@ -464,17 +486,23 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
    }
     
     // If the rights input file is not specified, check that rights are available in memory
-    List processorRightList = null;
+    List<StateMod_DiversionRight> processorDivRightList = null;
+    List<StateMod_WellRight> processorWellRightList = null;
     int processorRightListSize = 0;
     if ( InputFile == null ) {
         try {
         	if ( do_diversions ) {
-        		processorRightList = (List)processor.getPropContents ( "StateMod_DiversionRight_List" );
+        		@SuppressWarnings("unchecked")
+				List<StateMod_DiversionRight> dataList = (List<StateMod_DiversionRight>)processor.getPropContents ( "StateMod_DiversionRight_List" );
+        		processorDivRightList = dataList;
+        		processorRightListSize = processorDivRightList.size();
         	}
         	else if ( do_wells ) {
-        		processorRightList = (List)processor.getPropContents ( "StateMod_WellRight_List" );
+        		@SuppressWarnings("unchecked")
+				List<StateMod_WellRight> dataList = (List<StateMod_WellRight>)processor.getPropContents ( "StateMod_WellRight_List" );
+        		processorWellRightList = dataList;
+        		processorRightListSize = processorWellRightList.size();
         	}
-        	processorRightListSize = processorRightList.size();
         }
         catch ( Exception e ) {
             Message.printWarning ( log_level, routine, e );
@@ -517,11 +545,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     }
     
     // Get the original time series copy..
-    List diversionTSCopyList = null;
+    List<MonthTS> diversionTSCopyList = null;
     int diversionTSCopyListSize = 0;
     if ( need_diversion_ts_monthly_copy ) {
 	    try {
-	    	diversionTSCopyList = (List)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly2_List" );
+	    	@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly2_List" );
+	    	diversionTSCopyList = dataList;
 	    }
 	    catch ( Exception e ) {
 	        Message.printWarning ( log_level, routine, e );
@@ -688,7 +718,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	
     	// Read the rights file...
 
-    	List rightList = null;
+    	List<StateMod_DiversionRight> ddrList = null;
+    	List<StateMod_WellRight> werList = null;
+    	int rightListSize = 0;
     	if ( InputFile != null ) {
     		InputFile_full = IOUtil.verifyPathForOS(
             IOUtil.toAbsolutePath(StateDMICommandProcessorUtil.getWorkingDir(processor),InputFile) );
@@ -697,10 +729,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		if ( InputFile_full != null ) {
     			Message.printStatus ( 2, routine, "Rights for limit are being read from \"" + InputFile + "\"" );
     			if ( do_diversions ) {
-    				rightList = StateMod_DiversionRight.readStateModFile(InputFile_full );
+    				ddrList = StateMod_DiversionRight.readStateModFile(InputFile_full );
+    				rightListSize = ddrList.size();
     			}
     			else if ( do_wells ) {
-    	    		rightList = StateMod_WellRight.readStateModFile (InputFile_full );
+    	    		werList = StateMod_WellRight.readStateModFile (InputFile_full );
+    	    		rightListSize = werList.size();
     			}
     		}
     		else {
@@ -709,9 +743,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	}
     	else {
     		// Use what was read in previously
-    		rightList = processorRightList;
+        	ddrList = processorDivRightList;
+    		werList = processorWellRightList;
+        	if ( do_diversions ) {
+ 	   			rightListSize = ddrList.size();
+        	}
+        	else if ( do_wells ) {
+ 	   			rightListSize = werList.size();
+        	}
     	}
-    	int rightListSize = rightList.size();
 
     	// Make sure that data are available...
 
@@ -775,7 +815,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		int pos = 0; // Position of time series in array
 		String id = null; // Diversion or CU location ID.
 		int count = 0; // Count of rights for the time series' structure, including the initial condition right imposed here.
-		List appro_dates = null; // Vector of appropriation dates associated with the rights.
+		List<DateTime> appro_dates = null; // List of appropriation dates associated with the rights.
 		HydroBase_AdministrationNumber admin_num = null;
 		double double_admin_num;
 		boolean found_senior = false; // Used to track whether there is a non-free-water senior right.
@@ -823,15 +863,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		int matchCount = 0;
 		for ( int i = 0; i < stationListSize; i++ ) {
 			if ( do_diversions ) {
-				div = (StateMod_Diversion)stationList.get(i);
+				div = ddsList.get(i);
 				id = div.getID();
 			}
 			else if ( do_wells){
-				well = (StateMod_Well)stationList.get(i);
+				well = wesList.get(i);
 				id = well.getID();
 			}
 			else if ( do_maxpumping ){
-				culoc = (StateCU_Location)stationList.get(i);
+				culoc = culocList.get(i);
 				id = culoc.getID();
 			}
 			if ( !id.matches(ID_Java) ) {
@@ -841,7 +881,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			// Check for IDs to ignore...
 			ignore = false;
 			for ( int iignore = 0; iignore < IgnoreID_Vector_size; iignore++ ) {
-				if ( id.matches((String)IgnoreID_Vector.get(iignore))){
+				if ( id.matches(IgnoreID_Vector.get(iignore))){
 					// The ID matches one of the ignore structures so ignore processing the station.
 					ignore = true;
 					break;
@@ -951,10 +991,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			}
 			else if ( do_maxpumping ) {
 				// Get the irrigation practice time series (contains time series for each data type in the file)...
-				pos = StateCU_Util.indexOf(tsList,id);
+				pos = StateCU_Util.indexOf(ipyList,id);
 				if ( pos >= 0 ) {
 					// Get the time series...
-					ipy = (StateCU_IrrigationPracticeTS)tsList.get(pos);
+					ipy = ipyList.get(pos);
 				}
 				if ( (pos < 0) || (ipy == null) ) {
 					Message.printStatus ( 2, routine, "Unable to find irrigation practice time series for \""+ id +
@@ -974,15 +1014,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			found_fw = false;
 			admin_num = null;
 			senior_admin_num = null;
-			appro_dates = new Vector ( 10, 5 );
+			appro_dates = new Vector<DateTime>( 10, 5 );
 
 			// Get the rights for the specified time series, using the location identifier to match the rights.
 
 			for ( ir = 0; ir < rightListSize; ir++  ) {
 				// Handle each right type...
 				if ( do_diversions ) {
-					rights_i = (StateMod_DiversionRight)
-					rightList.get(ir);
+					rights_i = ddrList.get(ir);
 					if ( rights_i == null ) {
 						continue;
 					}
@@ -999,7 +1038,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					smdecree = rights_i.getDcrdiv();
 				}
 				else if ( do_wells ) {
-					wrights_i = (StateMod_WellRight)rightList.get(ir);
+					wrights_i = werList.get(ir);
 					if ( wrights_i == null ) {
 						continue;
 					}
@@ -1219,7 +1258,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			String [] sorted_rightids = new String[count];
 			double [] sorted_decrees = new double[count];
 			boolean [] sorted_is_fw = new boolean[count];
-			List sorted_appro_dates = new Vector(count);
+			List<DateTime> sorted_appro_dates = new Vector<DateTime>(count);
 			int [] sort_order = new int[count];
 
 			for ( int is = 0; is < count; is++ ) {

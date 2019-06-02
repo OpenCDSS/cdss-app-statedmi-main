@@ -71,6 +71,7 @@ import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.IO.PropList;
 import RTi.Util.String.StringUtil;
 
+@SuppressWarnings("serial")
 public class ReadClimateStationsFromHydroBase_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener {
 /**
@@ -101,9 +102,9 @@ Button to accept the entries on the form.
 private SimpleJButton	__okJButton = null;	
 
 /**
-Vector containing the command and parameters to be filled in on the form.
+List containing the command and parameters to be filled in on the form.
 */
-private List		__commandVector = null;
+private List<String> __commandVector = null;
 
 /**
 Command editor constructor
@@ -113,7 +114,7 @@ Command editor constructor
 */
 public ReadClimateStationsFromHydroBase_JDialog (JFrame parent,
 							PropList props,
-							List command)
+							List<String> command)
 {	super(parent, true);
 	initialize (parent,
 		"Edit ReadClimateStationsFromHydroBase() Command", 
@@ -155,9 +156,9 @@ Return the text for the command.
 @return the text for the command or null if there is a problem with the 
 command.
 */
-public List getText () {
+public List<String> getText () {
 	if ((__commandVector != null) && ((__commandVector.size() == 0) ||
-		((String)__commandVector.get(0)).equals(""))) {
+		__commandVector.get(0).equals(""))) {
 		return null;
 	}
 	return __commandVector;
@@ -170,8 +171,7 @@ Instantiates the GUI components.
 @param app_PropList Properties from the application.
 @param command Vector of String containing the command.
 */
-private void initialize (JFrame parent, String title, PropList props, 
-		List command)
+private void initialize (JFrame parent, String title, PropList props, List<String> command)
 {	__commandVector = command;
 
 	addWindowListener(this);
@@ -301,8 +301,8 @@ private void refresh () {
 	if (__firstTime) {
 		__firstTime = false;
 		// Parse the incoming string and fill the fields...
-		List v = StringUtil.breakStringList (
-			((String)__commandVector.get(0)).trim(),"() ,",
+		List<String> v = StringUtil.breakStringList (
+			__commandVector.get(0).trim(),"() ,",
 			StringUtil.DELIM_SKIP_BLANKS |
 			StringUtil.DELIM_ALLOW_STRINGS);
 		if ((v != null) && (v.size() == 3)) {
@@ -337,7 +337,7 @@ private void refresh () {
 Return the command as a Vector of String.
 @return returns the command text or null if no command.
 */
-public List response (int status) {
+public List<String> response (int status) {
 	setVisible(false);
 	dispose();
 	if (status == 0) {

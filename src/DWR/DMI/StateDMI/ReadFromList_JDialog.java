@@ -62,9 +62,9 @@ import RTi.Util.Message.Message;
 /**
 Command editor for Read*FromList() for StateMod data.  These commands only read the basic
 information (ID, Name) from lists, with the expectation that the remainder of data will be
-filled from HydroBase.  This is unlike the StateCU commands, which read all the data from
-list files.
+filled from HydroBase.  This is unlike the StateCU commands, which read all the data from list files.
 */
+@SuppressWarnings("serial")
 public class ReadFromList_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -398,7 +398,7 @@ private void initialize ( JFrame parent, Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("ID column:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List column_Vector = new Vector(100);
+    List<String> column_Vector = new Vector<String>(100);
 	column_Vector.add ( "" );	// Not available
 	for ( int i = 1; i <= 100; i++ ) {
 		column_Vector.add ( "" + i );

@@ -44,7 +44,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-
 import java.util.List;
 import java.util.Vector;
 
@@ -58,6 +57,7 @@ import RTi.Util.Message.Message;
 /**
 Command editor for the FillCULocation() and SetCULocation() commands.
 */
+@SuppressWarnings("serial")
 public class FillAndSetCULocation_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -75,8 +75,8 @@ private JTextField __AWC_JTextField = null;
 private SimpleJComboBox	__IfNotFound_JComboBox = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
-private List __Region1_List = null;
-private List __Region2_List = null;
+private List<String> __Region1_List = null;
+private List<String> __Region2_List = null;
 private Command __command = null; // Command to edit
 private boolean __ok = false; // Has user pressed OK to close the dialog?
 
@@ -88,7 +88,7 @@ Command editor constructor.
 @param region2_List List of region2 strings.
 */
 public FillAndSetCULocation_JDialog (JFrame parent, Command command,
-	List Region1_List, List Region2_List ) {
+	List<String> Region1_List, List<String> Region2_List ) {
 	super(parent, true);
 	initialize (parent, command, Region1_List, Region2_List );
 }
@@ -217,11 +217,11 @@ Instantiates the GUI components.
 @param Region1 Vector of Region1 strings.
 @param region2 Vector of region2 strings.
 */
-private void initialize (JFrame parent, Command command, List Region1_List, List Region2_List )
+private void initialize (JFrame parent, Command command, List<String> Region1_List, List<String> Region2_List )
 {	__command = command;
-	__Region1_List = new Vector ( Region1_List );
+	__Region1_List = new Vector<String>( Region1_List );
 	__Region1_List.add ( 0, "" );
-	__Region2_List = new Vector ( Region2_List );
+	__Region2_List = new Vector<String>( Region2_List );
 	__Region2_List.add ( 0, "" );
 
 	addWindowListener(this);
@@ -331,7 +331,7 @@ private void initialize (JFrame parent, Command command, List Region1_List, List
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Region 2:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__Region2_JComboBox = new SimpleJComboBox ( 10, true );
-	__Region2_JComboBox.setData ( __Region2_List );
+	__Region2_JComboBox.setData ( __Region1_List );
 	__Region2_JComboBox.addItemListener (this);
 	__Region2_JComboBox.addKeyListener (this);
         JGUIUtil.addComponent(main_JPanel, __Region2_JComboBox,
@@ -352,7 +352,7 @@ private void initialize (JFrame parent, Command command, List Region1_List, List
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>();
     IfNotFound_List.add("");
     if ( __command instanceof FillCULocation_Command ) {
 		IfNotFound_List.add ( ((FillCULocation_Command)__command)._Ignore );

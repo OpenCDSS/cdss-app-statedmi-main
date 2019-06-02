@@ -129,7 +129,7 @@ throws InvalidCommandParameterException
 	}
 	
 	if ( (AdminNumClasses != null) && !AdminNumClasses.equals("") ) {
-		List v = StringUtil.breakStringList ( AdminNumClasses, " ,", StringUtil.DELIM_SKIP_BLANKS );
+		List<String> v = StringUtil.breakStringList ( AdminNumClasses, " ,", StringUtil.DELIM_SKIP_BLANKS );
 		if ( (v == null) || (v.size() == 0) ) {
 			message = "AdminNumClasses has zero values.";
 			warning += "\n" + message;
@@ -140,7 +140,7 @@ throws InvalidCommandParameterException
 		int nAdminNumClasses = v.size();
 		__AdminNumClasses_double = new double[nAdminNumClasses];
 		for ( int i = 0; i < nAdminNumClasses; i++ ) {
-			String val = (String)v.get(i);
+			String val = v.get(i);
 			if ( !StringUtil.isDouble(val) ) {
 				message = "AdminNumClass value " + val + " is not a number.";
 				warning += "\n" + message;
@@ -155,7 +155,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "DecreeMin" );
     valid_Vector.add ( "AdminNumClasses" );
@@ -220,10 +220,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of reservoir stations...
 	
-	List stationList = null;
+	List<StateMod_Reservoir> stationList = null;
 	int stationListSize = 0;
 	try {
-		stationList = (List)processor.getPropContents ( "StateMod_ReservoirStation_List");
+		@SuppressWarnings("unchecked")
+		List<StateMod_Reservoir> dataList = (List<StateMod_Reservoir>)processor.getPropContents ( "StateMod_ReservoirStation_List");
+		stationList = dataList;
 		stationListSize = stationList.size();
 	}
 	catch ( Exception e ) {
@@ -287,24 +289,24 @@ CommandWarningException, CommandException
 		int [] sum_count = new int[nAdminNumClasses]; // Count for sum.
 
 		StateMod_Reservoir res = null; // StateMod reservoir station to process
-		List hbresr_Vector = null; // List of rights from HydroBase
-		List hbresr_sorted_Vector = new Vector(100);
+		List<HydroBase_NetAmts> hbresr_Vector = null; // List of rights from HydroBase
+		List<HydroBase_NetAmts> hbresr_sorted_Vector = new Vector<HydroBase_NetAmts>(100);
 						// List of rights from HydroBase,after manual sort on admin number
-		List hbresr_part_Vector =null;// List of rights for an aggregate part.
+		List<HydroBase_NetAmts> hbresr_part_Vector =null;// List of rights for an aggregate part.
 		int nhbresr = 0; // The number of rights read from HydroBase
 		int nhbresr_part = 0; // The number of rights read from HydroBase, for a collection part
 		HydroBase_NetAmts hbresr = null; // Single right from HydroBase
 		StateMod_ReservoirRight resr = null; // Single StateMod reservoir right
 		int resr_count = 0; // Count of reservoir rights to add (accounts for some being ignored).
 		int ir = 0; // Counter for rights in loop.
-		List parts = null;
+		List<String> parts = null;
 		int psize = 0; // Number of parts in a collection
 		int iparts = 0; // Index for iterating through parts
 		String part_id = ""; // Identifier for a part in a collection
 		int [] wdid_parts = new int[2];	// Parts when a WDID is parsed
 		double decree = 0.0;
 		String id;	// Reservoir ID.
-		List order_Vector = new Vector (1);
+		List<String> order_Vector = new Vector<String>(1);
 		order_Vector.add ("net_amts.admin_no");
 		order_Vector.add ("net_amts.order_no");
 						// Sometimes a WDID will have rights
@@ -320,21 +322,21 @@ CommandWarningException, CommandException
 		boolean is_system = false; // or system
 		int ic = 0; // Loop counter for water right classes.
 		double irtem = 0.0; // StateMod water right admin number.
-		List resr_agg_Vector = new Vector(100); // References to the water rights for classes.
+		List<StateMod_ReservoirRight> resr_agg_Vector = new Vector<StateMod_ReservoirRight>(100); // References to the water rights for classes.
 		HydroBase_AdministrationNumber admin_data;
 						// Used to convert between administration number and appropriation date
 		DateTime appro_date = null; // Appropriation date for an administration number.
 		double [] irtem_array = null; // Used to sort rights in a collection.
 		int [] sort_order = null; // Array used when sorting rights in a collection.
-		int matchCount = 0;
+		//int matchCount = 0;
 		for ( int i = 0; i < stationListSize; i++ ) {
-			res = (StateMod_Reservoir)stationList.get(i);
+			res = stationList.get(i);
 			id = res.getID();
 			if ( !id.matches(idpattern_Java) ) {
 				// Identifier does not match...
 				continue;
 			}
-			++matchCount;
+			//++matchCount;
 			// Defaults for each structure...
 
 			decree = StateMod_Util.MISSING_DOUBLE;
@@ -382,7 +384,7 @@ CommandWarningException, CommandException
 							DMIUtil.MISSING_INT, wdid_parts[0], wdid_parts[1], false, null );
 						// Add to the main vector...
 						if ( hbresr_Vector == null ) {
-							hbresr_Vector = new Vector(50);
+							hbresr_Vector = new Vector<HydroBase_NetAmts>(50);
 						}
 						nhbresr_part = 0;
 						if ( hbresr_part_Vector != null ) {

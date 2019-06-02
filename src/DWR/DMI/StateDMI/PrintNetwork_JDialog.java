@@ -70,6 +70,7 @@ import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 /**
 Editor for PrintTextFile command.
 */
+@SuppressWarnings("serial")
 public class PrintNetwork_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -470,7 +471,7 @@ private void initialize ( JFrame parent, PrintNetwork_Command command )
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Page layout:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-   	List<String> layoutList = new Vector(3);
+   	List<String> layoutList = new Vector<String>(3);
    	// FIXME SAM 2009-03-06 Add list of layouts from network - need to evaluate discovery because
    	// network may not be available when editing command - therefore, allow editable choice below
 	layoutList.add ( "" );
@@ -488,7 +489,7 @@ private void initialize ( JFrame parent, PrintNetwork_Command command )
     //this.__printerJob = PrinterJob.getPrinterJob();
     this.__printServiceArray = PrinterJob.lookupPrintServices();
     this.__defaultPrintService = PrintServiceLookup.lookupDefaultPrintService();
-    List<String> printerNames = new Vector();
+    List<String> printerNames = new Vector<String>();
     printerNames.add ( "" ); // Corresponds to default printer
     for ( int i = 0; i < this.__printServiceArray.length; i++ ) {
         printerNames.add (this.__printServiceArray[i].getName());

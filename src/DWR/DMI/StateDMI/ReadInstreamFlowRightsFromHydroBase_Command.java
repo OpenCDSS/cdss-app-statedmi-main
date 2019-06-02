@@ -110,7 +110,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "OnOffDefault" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
@@ -168,10 +168,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of instream flow stations...
 	
-	List stationList = null;
+	List<StateMod_InstreamFlow> stationList = null;
 	int stationListSize = 0;
 	try {
-		stationList = (List)processor.getPropContents ( "StateMod_InstreamFlowStation_List");
+		@SuppressWarnings("unchecked")
+		List<StateMod_InstreamFlow> dataList = (List<StateMod_InstreamFlow>)processor.getPropContents ( "StateMod_InstreamFlowStation_List");
+		stationList = dataList;
 		stationListSize = stationList.size();
 	}
 	catch ( Exception e ) {
@@ -232,14 +234,14 @@ CommandWarningException, CommandException
 		StateMod_InstreamFlow ifs = null; // StateMod station.
 		StateMod_InstreamFlowRight ifr = null; // StateMod water right.
 		String id; // Instream flow ID.
-		List hb_rights;	// Water rights from HydroBase
+		List<HydroBase_NetAmts> hb_rights;	// Water rights from HydroBase
 		int nrights; // Number of rights for the station
 		int iright; // Counter for rights for station
 		int [] wdid_parts = new int[2]; // WDID parts
 		HydroBase_NetAmts hb_right; // Water right from HydroBase
 		HydroBase_AdministrationNumber admin_data = null;
 		for ( int i = 0; i < stationListSize; i++ ) {
-			ifs = (StateMod_InstreamFlow)stationList.get(i);
+			ifs = stationList.get(i);
 			id = ifs.getID();
 			if ( !id.matches(idpattern_Java) ) {
 				// Identifier does not match...

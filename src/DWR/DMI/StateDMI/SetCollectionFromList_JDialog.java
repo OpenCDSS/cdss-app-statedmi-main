@@ -69,6 +69,7 @@ import RTi.Util.String.StringUtil;
 /**
 Command editor dialog for Set*FromList() (set collections) commands.
 */
+@SuppressWarnings("serial")
 public class SetCollectionFromList_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -500,7 +501,7 @@ private void initialize ( JFrame parent, Command command )
         JGUIUtil.addComponent(main_JPanel, new JLabel ( __collectionType + " part type:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 		__PartType_JComboBox = new SimpleJComboBox(false);
-		List part_Vector = new Vector(2);
+		List<String> part_Vector = new Vector<String>(3);
 		part_Vector.add ( StateMod_Well.COLLECTION_PART_TYPE_DITCH );
 		part_Vector.add ( StateMod_Well.COLLECTION_PART_TYPE_PARCEL );
 		part_Vector.add ( StateMod_Well.COLLECTION_PART_TYPE_WELL );
@@ -537,7 +538,7 @@ private void initialize ( JFrame parent, Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("ID column:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List column_Vector = new Vector(100);
+        List<String> column_Vector = new Vector<String>(100);
 	column_Vector.add ( "" );	// Not available
 	for ( int i = 1; i <= 100; i++ ) {
 		column_Vector.add ( "" + i );
@@ -589,7 +590,7 @@ private void initialize ( JFrame parent, Command command )
    	
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Parts listed how:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List parts_Vector = new Vector(2);
+    List<String> parts_Vector = new Vector<String>(2);
 	parts_Vector.add ( __command._InColumn );
 	parts_Vector.add ( __command._InRow );
 	__PartsListedHow_JComboBox = new SimpleJComboBox(false);
@@ -615,7 +616,7 @@ private void initialize ( JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>(4);
     IfNotFound_List.add("");
 	IfNotFound_List.add ( __command._Ignore );
 	IfNotFound_List.add ( __command._Warn );

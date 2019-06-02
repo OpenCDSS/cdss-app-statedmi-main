@@ -160,7 +160,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "ID" );
 	if ( (this instanceof FillStreamGageStationsFromNetwork_Command) ||
 		(this instanceof FillStreamEstimateStationsFromNetwork_Command)||
@@ -236,36 +236,50 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     // Get the data needed for the command
 	
-    List list = null;
+    List<? extends StateMod_Data> list = null;
     int listSize = 0;
     int compType = StateMod_DataSet.COMP_UNKNOWN; // Used for loops to improve performance
     try {
     	if ( this instanceof FillStreamGageStationsFromNetwork_Command ) {
-    		list = (List)processor.getPropContents ( "StateMod_StreamGageStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_StreamGage> dataList = (List<StateMod_StreamGage>)processor.getPropContents ( "StateMod_StreamGageStation_List" );
+    		list = dataList;
     		compType = StateMod_DataSet.COMP_STREAMGAGE_STATIONS;
     	}
       	else if ( this instanceof FillDiversionStationsFromNetwork_Command ) {
-    		list = (List)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		list = dataList;
     		compType = StateMod_DataSet.COMP_DIVERSION_STATIONS;
     	}
       	else if ( this instanceof FillInstreamFlowStationsFromNetwork_Command ) {
-    		list = (List)processor.getPropContents ( "StateMod_InstreamFlowStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_InstreamFlow> dataList = (List<StateMod_InstreamFlow>)processor.getPropContents ( "StateMod_InstreamFlowStation_List" );
+    		list = dataList;
     		compType = StateMod_DataSet.COMP_INSTREAM_STATIONS;
     	}
     	else if ( this instanceof FillReservoirStationsFromNetwork_Command ) {
-    		list = (List)processor.getPropContents ( "StateMod_ReservoirStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Reservoir> dataList = (List<StateMod_Reservoir>)processor.getPropContents ( "StateMod_ReservoirStation_List" );
+    		list = dataList;
     		compType = StateMod_DataSet.COMP_RESERVOIR_STATIONS;
     	}
     	else if ( this instanceof FillStreamEstimateStationsFromNetwork_Command ) {
-    		list = (List)processor.getPropContents ( "StateMod_StreamEstimateStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_StreamEstimate> dataList = (List<StateMod_StreamEstimate>)processor.getPropContents ( "StateMod_StreamEstimateStation_List" );
+    		list = dataList;
     		compType = StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS;
     	}
     	else if ( this instanceof FillWellStationsFromNetwork_Command ) {
-    		list = (List)processor.getPropContents ( "StateMod_WellStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List" );
+    		list = dataList;
     		compType = StateMod_DataSet.COMP_WELL_STATIONS;
     	}
     	else if ( this instanceof FillRiverNetworkFromNetwork_Command ) {
-    		list = (List)processor.getPropContents ( "StateMod_RiverNetworkNode_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_RiverNetworkNode> dataList = (List<StateMod_RiverNetworkNode>)processor.getPropContents ( "StateMod_RiverNetworkNode_List" );
+    		list = dataList;
     		compType = StateMod_DataSet.COMP_RIVER_NETWORK;
     	}
 		listSize = list.size();

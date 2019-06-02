@@ -64,6 +64,7 @@ import RTi.Util.Message.Message;
 /**
 Command editor dialog for simple Read*FromStateCU() commands, which share the same parameters.
 */
+@SuppressWarnings("serial")
 public class ReadFromStateCU_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -397,7 +398,7 @@ private void initialize (JFrame parent, Command command )
     	__command instanceof ReadIrrigationPracticeTSFromStateCU_Command) {
 	    JGUIUtil.addComponent(main_JPanel, new JLabel ("Version:"),
 			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	    List version_Vector = new Vector();
+	    List<String> version_Vector = new Vector<String>(2);
 		version_Vector.add ( "" );
 		version_Vector.add ( __command._10 );
 		__Version_JComboBox = new SimpleJComboBox(false);
@@ -413,7 +414,7 @@ private void initialize (JFrame parent, Command command )
     if ( __command instanceof ReadCropPatternTSFromStateCU_Command ) {
 	    JGUIUtil.addComponent(main_JPanel, new JLabel ("Read data from:"),
         	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	    List ReadDataFrom_Vector = new Vector();
+	    List<String> ReadDataFrom_Vector = new Vector<String>(3);
 	    ReadDataFrom_Vector.add ( "" );
 	    ReadDataFrom_Vector.add ( __command._CropArea );
 	    ReadDataFrom_Vector.add ( __command._TotalAreaAndCropFraction );

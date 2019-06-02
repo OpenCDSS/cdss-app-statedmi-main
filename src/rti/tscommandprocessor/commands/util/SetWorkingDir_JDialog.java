@@ -56,6 +56,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for SetWorkingDir() command.
 */
+@SuppressWarnings("serial")
 public class SetWorkingDir_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {

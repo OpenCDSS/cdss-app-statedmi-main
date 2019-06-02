@@ -153,7 +153,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(3);
     valid_Vector.add ( "CropType" );
 	valid_Vector.add ( "Coefficients" );
 	valid_Vector.add ( "IfNotFound" );
@@ -214,7 +214,9 @@ CommandWarningException, CommandException
 	
 	List<StateCU_PenmanMonteith> kpmList = null;
 	try {
-		kpmList = (List<StateCU_PenmanMonteith>)processor.getPropContents( "StateCU_PenmanMonteith_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_PenmanMonteith> dataList = (List<StateCU_PenmanMonteith>)processor.getPropContents( "StateCU_PenmanMonteith_List");
+		kpmList = dataList;
 	}
 	catch ( Exception e ) {
 		message = "Error requesting StateCU_PenmanMonteith_List from processor.";

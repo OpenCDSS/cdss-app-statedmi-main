@@ -33,7 +33,8 @@ import RTi.Util.IO.CommandListListener;
 This class provides a way for the Swing JList and other components to
 display time series commands that are managed in a StateDMI_Processor.
  */
-public class StateDMI_Processor_ListModel extends AbstractListModel
+@SuppressWarnings("serial")
+public class StateDMI_Processor_ListModel extends AbstractListModel<Object>
 implements CommandListListener
 {
 
@@ -197,4 +198,3 @@ public int size()
 }
 
 }
-

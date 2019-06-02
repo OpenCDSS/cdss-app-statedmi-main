@@ -152,7 +152,7 @@ throws InvalidCommandParameterException
     }
 
     // Check for invalid parameters...
-    List valid_Vector = new Vector();
+    List<String> valid_Vector = new Vector<String>(3);
     valid_Vector.add ( "WorkingDir" );
     valid_Vector.add ( "RunMode" );
     valid_Vector.add ( "RunOnOS" );
@@ -196,7 +196,7 @@ throws InvalidCommandSyntaxException, InvalidCommandParameterException
 	}
 	else {
 	    // Parse the old command...
-		List tokens = StringUtil.breakStringList ( command_string,
+		List<String> tokens = StringUtil.breakStringList ( command_string,
 			"(,)", StringUtil.DELIM_ALLOW_STRINGS );
 		if ( tokens.size() != 3 ) {
 			message =
@@ -204,8 +204,8 @@ throws InvalidCommandSyntaxException, InvalidCommandParameterException
 			Message.printWarning ( warning_level, routine, message);
 			throw new InvalidCommandSyntaxException ( message );
 		}
-		String WorkingDir = ((String)tokens.get(1)).trim();
-		String RunMode = ((String)tokens.get(2)).trim();
+		String WorkingDir = tokens.get(1).trim();
+		String RunMode = tokens.get(2).trim();
 		PropList parameters = new PropList ( getCommandName() );
 		parameters.setHowSet ( Prop.SET_FROM_PERSISTENT );
 		if ( WorkingDir.length() > 0 ) {

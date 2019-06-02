@@ -69,7 +69,7 @@ not (e.g., "Cancel" was pressed.
 */
 public boolean editCommand ( JFrame parent )
 {	// The command will be modified if changed...
-	List v = new Vector();
+	List<String> v = new Vector<String>();
     v.add( getCommandString() );
 	return (new Comment_JDialog ( parent, v )).ok();
 }

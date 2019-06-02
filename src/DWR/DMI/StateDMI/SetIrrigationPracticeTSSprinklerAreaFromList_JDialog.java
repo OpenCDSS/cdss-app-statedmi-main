@@ -77,6 +77,7 @@ import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Table.DataTable;
 
+@SuppressWarnings("serial")
 public class SetIrrigationPracticeTSSprinklerAreaFromList_JDialog
 extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
@@ -97,7 +98,7 @@ private SimpleJButton	__ok_JButton = null;
 private SimpleJButton	__browse_JButton = null;
 private SimpleJButton	__path_JButton = null;
 private String		__working_dir = null;	
-private List		__command_Vector = null;
+private List<String>		__command_Vector = null;
 private String		__command =
 			"setIrrigationPracticeTSSprinklerAreaFromList";
 /**
@@ -108,7 +109,7 @@ Constructor
 */
 public SetIrrigationPracticeTSSprinklerAreaFromList_JDialog ( JFrame parent,
 								PropList props,
-								List command)
+								List<String> command)
 {	super(parent, true);
 	initialize (parent, props, command );
 }
@@ -253,9 +254,9 @@ Return the text for the command.
 @return the text for the command or null if there is a problem with the 
 command.
 */
-public List getText () {
+public List<String> getText () {
 	if ((__command_Vector != null) && ((__command_Vector.size() == 0) ||
-		((String)__command_Vector.get(0)).equals(""))) {
+		__command_Vector.get(0).equals(""))) {
 		return null;
 	}
 	return __command_Vector;
@@ -268,7 +269,7 @@ Instantiates the GUI components.
 @param app_PropList Properties from the application.
 @param command Vector of String containing the command.
 */
-private void initialize ( JFrame parent, PropList props, List command )
+private void initialize ( JFrame parent, PropList props, List<String> command )
 {	__command_Vector = command;
 	__working_dir = props.getValue ("WorkingDir");
 
@@ -370,7 +371,7 @@ private void initialize ( JFrame parent, PropList props, List command )
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	// Data will be reset after selecting a file
-	List column_Vector = new Vector();
+	List<String> column_Vector = new Vector<String>();
 	column_Vector.add ( "" );	// Not available
 
        	JGUIUtil.addComponent(main_JPanel,new JLabel("Parcel ID year:"),
@@ -480,7 +481,7 @@ file.
 private void populateJComboBoxes ( String file )
 {	// Open the DBase table and only read the header, closing the file after
 	// the read...
-	List choices = new Vector();
+	List<String> choices = new Vector<String>();
 	choices.add ( "" );
 	DataTable table;
 	try {	// Read the headings from the list file...
@@ -531,13 +532,13 @@ private void refresh ()
 	__error_wait = false;
 	if (__first_time) {
 		__first_time = false;
-		List v = StringUtil.breakStringList (
-			((String)__command_Vector.get(0)).trim(),"()",
+		List<String> v = StringUtil.breakStringList (
+			__command_Vector.get(0).trim(),"()",
 			StringUtil.DELIM_SKIP_BLANKS );
 		PropList props = null;
 		if ( (v != null) && (v.size() > 1) ) {
 			props = PropList.parse (
-				(String)v.get(1), routine, "," );
+				v.get(1), routine, "," );
 		}
 		else {	props = new PropList ( routine );
 		}
@@ -671,7 +672,7 @@ private void refresh ()
 Return the command as a Vector of String.
 @return returns the command text or null if no command.
 */
-public List response (int status) {
+public List<String> response (int status) {
 	setVisible(false);
 	dispose();
 	if (status == 0) {
@@ -681,7 +682,7 @@ public List response (int status) {
 	}
 	else {	refresh();
 		if (	(__command_Vector.size() == 0) ||
-			((String)__command_Vector.get(0)).equals("")) {
+			__command_Vector.get(0).equals("")) {
 			return null;
 		}
 		return __command_Vector;

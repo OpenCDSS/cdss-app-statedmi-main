@@ -60,6 +60,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for ReadPatternFile() command.
 */
+@SuppressWarnings("serial")
 public class ReadPatternFile_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {

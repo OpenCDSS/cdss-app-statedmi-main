@@ -348,9 +348,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     String ListFile_full = ListFile;
     try {
-        boolean readData = true;
+        //boolean readData = true;
         if ( command_phase == CommandPhaseType.DISCOVERY ){
-            readData = false;
+            //readData = false;
         }
         ListFile_full = IOUtil.verifyPathForOS(
                 IOUtil.toAbsolutePath(StateDMICommandProcessorUtil.getWorkingDir(processor),ListFile) );

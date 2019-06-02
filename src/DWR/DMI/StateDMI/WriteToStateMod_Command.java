@@ -265,9 +265,9 @@ public boolean editCommand ( JFrame parent )
 /**
 Return the list of files that were created by this command.
 */
-public List getGeneratedFileList ()
+public List<File> getGeneratedFileList ()
 {
-	List list = new Vector();
+	List<File> list = new Vector<File>();
 	if ( getOutputFile() != null ) {
 		list.add ( getOutputFile() );
 	}
@@ -338,12 +338,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     try {
         // Get the comments to add to the top of the file.
 
-        List OutputComments_List = null;
+        List<String> OutputComments_List = null;
         try {
         	Object o = processor.getPropContents ( "OutputComments" );
             // Comments are available so use them...
             if ( o != null ) {
-                OutputComments_List = (List)o;
+                @SuppressWarnings("unchecked")
+				List<String> outputCommentList = (List<String>)o;
+                OutputComments_List = outputCommentList;
             }
         }
         catch ( Exception e ) {
@@ -371,9 +373,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			//processor.runStateModDataCheck( StateMod_DataSet.COMP_STREAMGAGE_STATIONS );
 	        Message.printStatus ( 2, routine, "Writing StateMod stream gage stations file \"" +
 	        	OutputFile_full + "\"" );
+			@SuppressWarnings("unchecked")
+			List<StateMod_StreamGage> dataList = (List<StateMod_StreamGage>)processor.getPropContents("StateMod_StreamGageStation_List");
 			StateMod_StreamGage.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				(List)processor.getPropContents("StateMod_StreamGageStation_List"),
-				OutputComments_List, true );
+				dataList, OutputComments_List, true );
 		}
 		else if ( this instanceof WriteDelayTablesMonthlyToStateMod_Command ) {
 			// The -1 below is the "interv" variable in the StateMod control file.  In this case
@@ -383,8 +386,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			//processor.runStateModDataCheck( StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY );
 	        Message.printStatus ( 2, routine, "Writing StateMod delay tables (monthly) file \"" +
 		       	OutputFile_full + "\"" );
-			StateMod_DelayTable.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				(List)processor.getPropContents("StateMod_DelayTableMonthly_List"),
+			@SuppressWarnings("unchecked")
+			List<StateMod_DelayTable> dataList = (List<StateMod_DelayTable>)processor.getPropContents("StateMod_DelayTableMonthly_List");
+			StateMod_DelayTable.writeStateModFile(OutputFile_prevFull, OutputFile_full, dataList,
 				OutputComments_List, -1, Precision_int );
 		}
 		else if ( this instanceof WriteDelayTablesDailyToStateMod_Command ) {
@@ -395,9 +399,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			//processor.runStateModDataCheck( StateMod_DataSet.COMP_DELAY_TABLES_DAILY );
 			Message.printStatus ( 2, routine, "Writing StateMod delay tables (daily) file \"" +
 			   	OutputFile_full + "\"" );
-				StateMod_DelayTable.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-					(List)processor.getPropContents("StateMod_DelayTableDaily_List"),
-					OutputComments_List, -1, Precision_int );
+			@SuppressWarnings("unchecked")
+			List<StateMod_DelayTable> dataList = (List<StateMod_DelayTable>)processor.getPropContents("StateMod_DelayTableDaily_List");
+			StateMod_DelayTable.writeStateModFile(OutputFile_prevFull, OutputFile_full, dataList,
+				OutputComments_List, -1, Precision_int );
 		}
     	else if ( this instanceof WriteDiversionStationsToStateMod_Command ) {
 			// Check the diversion stations (will be output later in check file)...
@@ -405,8 +410,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			//processor.runStateModDataCheck( StateMod_DataSet.COMP_DIVERSION_STATIONS );
 	        Message.printStatus ( 2, routine, "Writing StateMod diversion stations file \"" +
 	        	OutputFile_full + "\"" );
-			StateMod_Diversion.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				(List)processor.getPropContents("StateMod_DiversionStation_List"), OutputComments_List );
+			@SuppressWarnings("unchecked")
+			List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents("StateMod_DiversionStation_List");
+			StateMod_Diversion.writeStateModFile(OutputFile_prevFull, OutputFile_full, dataList,
+				OutputComments_List );
 		}
     	else if ( this instanceof WriteDiversionRightsToStateMod_Command ) {
 			// Check the diversion rights (will be output later in check file)...
@@ -414,8 +421,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			//processor.runStateModDataCheck( StateMod_DataSet.COMP_DIVERSION_RIGHTS );
 	        Message.printStatus ( 2, routine, "Writing StateMod diversion rights file \"" +
 	        	OutputFile_full + "\"" );
-			StateMod_DiversionRight.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				(List)processor.getPropContents("StateMod_DiversionRight_List"), OutputComments_List );
+			@SuppressWarnings("unchecked")
+			List<StateMod_DiversionRight> dataList = (List<StateMod_DiversionRight>)processor.getPropContents("StateMod_DiversionRight_List");
+			StateMod_DiversionRight.writeStateModFile(OutputFile_prevFull, OutputFile_full, dataList,
+				OutputComments_List );
 		}
     	else if ( this instanceof WriteReservoirStationsToStateMod_Command ) {
 			// Check the reservoir stations (will be output later in check file)...
@@ -423,8 +432,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			//processor.runStateModDataCheck( StateMod_DataSet.COMP_RESERVOIR_STATIONS );
 	        Message.printStatus ( 2, routine, "Writing StateMod reservoir stations file \"" +
 	        	OutputFile_full + "\"" );
-			StateMod_Reservoir.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				(List)processor.getPropContents("StateMod_ReservoirStation_List"), OutputComments_List );
+			@SuppressWarnings("unchecked")
+			List<StateMod_Reservoir> dataList = (List<StateMod_Reservoir>)processor.getPropContents("StateMod_ReservoirStation_List");
+			StateMod_Reservoir.writeStateModFile(OutputFile_prevFull, OutputFile_full, dataList, OutputComments_List );
 		}
     	else if ( this instanceof WriteReservoirRightsToStateMod_Command ) {
 			// Check the reservoir rights (will be output later in check file)...
@@ -432,14 +442,17 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			//processor.runStateModDataCheck( StateMod_DataSet.COMP_RESERVOIR_RIGHTS );
 	        Message.printStatus ( 2, routine, "Writing StateMod reservoir rights file \"" +
 	        	OutputFile_full + "\"" );
-			StateMod_ReservoirRight.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				(List)processor.getPropContents("StateMod_ReservoirRight_List"), OutputComments_List );
+			@SuppressWarnings("unchecked")
+			List<StateMod_ReservoirRight> dataList = (List<StateMod_ReservoirRight>)processor.getPropContents("StateMod_ReservoirRight_List");
+			StateMod_ReservoirRight.writeStateModFile(OutputFile_prevFull, OutputFile_full, dataList,
+				OutputComments_List );
 		}
 		else if ( this instanceof WriteReservoirReturnToStateMod_Command ) {
 	        Message.printStatus ( 2, routine, "Writing StateMod reservoir return flow file \"" +
 	        	OutputFile_full + "\"" );
-			StateMod_ReturnFlow.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				"Reservoir", (List)processor.getPropContents("StateMod_ReservoirReturn_List"),
+			@SuppressWarnings("unchecked")
+			List<StateMod_ReturnFlow> dataList = (List<StateMod_ReturnFlow>)processor.getPropContents("StateMod_ReservoirReturn_List");
+			StateMod_ReturnFlow.writeStateModFile(OutputFile_prevFull, OutputFile_full, "Reservoir", dataList,
 				OutputComments_List );
 		}
     	else if ( this instanceof WriteInstreamFlowStationsToStateMod_Command ) {
@@ -448,41 +461,49 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			//processor.runStateModDataCheck( StateMod_DataSet.COMP_INSTREAM_STATIONS );
 	        Message.printStatus ( 2, routine, "Writing StateMod instream flow stations file \"" +
 	        	OutputFile_full + "\"" );
-			StateMod_InstreamFlow.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				(List)processor.getPropContents("StateMod_InstreamFlowStation_List"), OutputComments_List );
+			@SuppressWarnings("unchecked")
+			List<StateMod_InstreamFlow> dataList = (List<StateMod_InstreamFlow>)processor.getPropContents("StateMod_InstreamFlowStation_List");
+			StateMod_InstreamFlow.writeStateModFile(OutputFile_prevFull, OutputFile_full, dataList,
+				OutputComments_List );
 		}
     	else if ( this instanceof WriteInstreamFlowRightsToStateMod_Command ) {
 	        Message.printStatus ( 2, routine, "Writing StateMod instream flow rights file \"" +
 	        	OutputFile_full + "\"" );
-			StateMod_InstreamFlowRight.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				(List)processor.getPropContents("StateMod_InstreamFlowRight_List"), OutputComments_List );
+			@SuppressWarnings("unchecked")
+			List<StateMod_InstreamFlowRight> dataList = (List<StateMod_InstreamFlowRight>)processor.getPropContents("StateMod_InstreamFlowRight_List");
+			StateMod_InstreamFlowRight.writeStateModFile(OutputFile_prevFull, OutputFile_full, dataList,
+				OutputComments_List );
 		}
 		else if ( this instanceof WritePlanStationsToStateMod_Command ) {
 	        Message.printStatus ( 2, routine, "Writing StateMod plan stations file \"" +
 	        	OutputFile_full + "\"" );
-			StateMod_Plan.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				(List)processor.getPropContents("StateMod_PlanStation_List"),
+			@SuppressWarnings("unchecked")
+			List<StateMod_Plan> dataList = (List<StateMod_Plan>)processor.getPropContents("StateMod_PlanStation_List");
+			StateMod_Plan.writeStateModFile(OutputFile_prevFull, OutputFile_full, dataList,
 				OutputComments_List );
 		}
 		else if ( this instanceof WritePlanWellAugmentationToStateMod_Command ) {
 	        Message.printStatus ( 2, routine, "Writing StateMod well augmentation plan data file \"" +
 	        	OutputFile_full + "\"" );
-			StateMod_Plan_WellAugmentation.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				(List)processor.getPropContents("StateMod_PlanWellAugmentation_List"),
+			@SuppressWarnings("unchecked")
+			List<StateMod_Plan_WellAugmentation> dataList = (List<StateMod_Plan_WellAugmentation>)processor.getPropContents("StateMod_PlanWellAugmentation_List");
+			StateMod_Plan_WellAugmentation.writeStateModFile(OutputFile_prevFull, OutputFile_full, dataList,
 				OutputComments_List );
 		}
 		else if ( this instanceof WritePlanReturnToStateMod_Command ) {
 	        Message.printStatus ( 2, routine, "Writing StateMod plan return flow file \"" +
 	        	OutputFile_full + "\"" );
-			StateMod_ReturnFlow.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				"Plan", (List)processor.getPropContents("StateMod_PlanReturn_List"),
+			@SuppressWarnings("unchecked")
+			List<StateMod_ReturnFlow> dataList = (List<StateMod_ReturnFlow>)processor.getPropContents("StateMod_PlanReturn_List");
+			StateMod_ReturnFlow.writeStateModFile(OutputFile_prevFull, OutputFile_full, "Plan", dataList,
 				OutputComments_List );
 		}
 		else if ( this instanceof WriteStreamEstimateStationsToStateMod_Command ) {
 	        Message.printStatus ( 2, routine, "Writing StateMod stream estimate stations file \"" +
 	        	OutputFile_full + "\"" );
-			StateMod_StreamEstimate.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				(List)processor.getPropContents("StateMod_StreamEstimateStation_List"),
+			@SuppressWarnings("unchecked")
+			List<StateMod_StreamEstimate> dataList = (List<StateMod_StreamEstimate>)processor.getPropContents("StateMod_StreamEstimateStation_List");
+			StateMod_StreamEstimate.writeStateModFile(OutputFile_prevFull, OutputFile_full, dataList,
 				OutputComments_List, true );
 		}
 		else if ( this instanceof WriteStreamEstimateCoefficientsToStateMod_Command ) {
@@ -491,8 +512,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			//processor.runStateModDataCheck( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS );
 	        Message.printStatus ( 2, routine, "Writing StateMod stream estimate coefficients file \"" +
 	        	OutputFile_full + "\"" );
-			StateMod_StreamEstimate_Coefficients.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				(List)processor.getPropContents("StateMod_StreamEstimateCoefficients_List"),
+			@SuppressWarnings("unchecked")
+			List<StateMod_StreamEstimate_Coefficients> dataList = (List<StateMod_StreamEstimate_Coefficients>)processor.getPropContents("StateMod_StreamEstimateCoefficients_List");
+			StateMod_StreamEstimate_Coefficients.writeStateModFile(OutputFile_prevFull, OutputFile_full, dataList,
 				OutputComments_List );
 		}
     	else if ( this instanceof WriteWellStationsToStateMod_Command ) {
@@ -501,8 +523,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			//processor.runStateModDataCheck( StateMod_DataSet.COMP_WELL_STATIONS );
 	        Message.printStatus ( 2, routine, "Writing StateMod well stations file \"" +
 	        	OutputFile_full + "\"" );
-			StateMod_Well.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				(List)processor.getPropContents("StateMod_WellStation_List"), OutputComments_List );
+			@SuppressWarnings("unchecked")
+			List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents("StateMod_WellStation_List");
+			StateMod_Well.writeStateModFile(OutputFile_prevFull, OutputFile_full, dataList,
+				OutputComments_List );
 		}
     	else if ( this instanceof WriteWellRightsToStateMod_Command ) {
 	        Message.printStatus ( 2, routine, "Writing StateMod well rights file \"" +
@@ -514,9 +538,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	        if ( WriteExtendedDataComments != null ) {
 	        	writeProps.set ( "WriteExtendedDataComments", "" + WriteExtendedDataComments );
 	        }
-			StateMod_WellRight.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				(List)processor.getPropContents("StateMod_WellRight_List"), OutputComments_List,
-				writeProps );
+			@SuppressWarnings("unchecked")
+			List<StateMod_WellRight> dataList = (List<StateMod_WellRight>)processor.getPropContents("StateMod_WellRight_List");
+			StateMod_WellRight.writeStateModFile(OutputFile_prevFull, OutputFile_full, dataList,
+				OutputComments_List, writeProps );
 		}
        	else if ( this instanceof WriteNetworkToStateMod_Command ) {
 			// Check the network (will be output later in check file)...
@@ -544,17 +569,19 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			//processor.runStateModDataCheck( StateMod_DataSet.COMP_RIVER_NETWORK );
 	        Message.printStatus ( 2, routine, "Writing StateMod river network file \"" +
 	        	OutputFile_full + "\"" );
-			StateMod_RiverNetworkNode.writeStateModFile(OutputFile_prevFull, OutputFile_full,
-				(List)processor.getPropContents("StateMod_RiverNetworkNode_List"),
+			@SuppressWarnings("unchecked")
+			List<StateMod_RiverNetworkNode> dataList = (List<StateMod_RiverNetworkNode>)processor.getPropContents("StateMod_RiverNetworkNode_List");
+			StateMod_RiverNetworkNode.writeStateModFile(OutputFile_prevFull, OutputFile_full, dataList,
 				OutputComments_List, true );
 		}
     	else if ( this instanceof WriteOperationalRightsToStateMod_Command ) {
 	        Message.printStatus ( 2, routine, "Writing StateMod operational rights file \"" +
 	        	OutputFile_full + "\"" );
+			@SuppressWarnings("unchecked")
+			List<StateMod_OperationalRight> dataList = (List<StateMod_OperationalRight>)processor.getPropContents("StateMod_OperationalRight_List");
 			// 2 is the file version (introduced for StateMod version 12 change)
-			StateMod_OperationalRight.writeStateModFile(OutputFile_prevFull, OutputFile_full, 2,
-				(List)processor.getPropContents("StateMod_OperationalRight_List"), OutputComments_List,
-				(StateMod_DataSet)null );
+			StateMod_OperationalRight.writeStateModFile(OutputFile_prevFull, OutputFile_full, 2, dataList,
+				OutputComments_List, (StateMod_DataSet)null );
 		}
        	else if ( this instanceof WriteResponseToStateMod_Command ) {
 	        Message.printStatus ( 2, routine, "Writing StateMod response file \"" + OutputFile_full + "\"" );

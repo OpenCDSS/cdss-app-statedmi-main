@@ -61,6 +61,7 @@ import DWR.StateMod.StateMod_ReservoirRight;
 /**
 Editor for Fill*Right() and Set*Right() commands.
 */
+@SuppressWarnings("serial")
 public class FillAndSetRight_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -453,7 +454,7 @@ private void initialize ( JFrame parent, FillAndSetRight_Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("On/Off:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__OnOff_JComboBox = new SimpleJComboBox(true);
-	List idivsw = StateMod_Diversion.getIdivswChoices(true);
+	List<String> idivsw = StateMod_Diversion.getIdivswChoices(true);
 	idivsw.add ( 0, "" );	// Blank to indicate no change
 	__OnOff_JComboBox.setData( idivsw );
 	__OnOff_JComboBox.addItemListener (this);
@@ -470,7 +471,7 @@ private void initialize ( JFrame parent, FillAndSetRight_Command command )
         JGUIUtil.addComponent(main_JPanel, new JLabel ( "Account served by right:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 		__AccountDist_JComboBox = new SimpleJComboBox(true);
-		List iresco = StateMod_ReservoirRight.getIrescoChoices(true);
+		List<String> iresco = StateMod_ReservoirRight.getIrescoChoices(true);
 		iresco.add ( 0, "" ); // Blank to indicate no change
 		__AccountDist_JComboBox.setData( iresco );
 		__AccountDist_JComboBox.addItemListener (this);
@@ -483,7 +484,7 @@ private void initialize ( JFrame parent, FillAndSetRight_Command command )
         JGUIUtil.addComponent(main_JPanel, new JLabel ( "Right type:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 		__RightType_JComboBox = new SimpleJComboBox(true);
-		List ityrsr = StateMod_ReservoirRight.getItyrsrChoices( true);
+		List<String> ityrsr = StateMod_ReservoirRight.getItyrsrChoices( true);
 		ityrsr.add ( 0, "" ); // Blank to indicate no change
 		__RightType_JComboBox.setData( ityrsr );
 		__RightType_JComboBox.addItemListener (this);
@@ -496,7 +497,7 @@ private void initialize ( JFrame parent, FillAndSetRight_Command command )
         JGUIUtil.addComponent(main_JPanel, new JLabel ( "Fill type:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 		__FillType_JComboBox = new SimpleJComboBox(true);
-		List n2fill = StateMod_ReservoirRight.getN2fillChoices( true);
+		List<String> n2fill = StateMod_ReservoirRight.getN2fillChoices( true);
 		n2fill.add ( 0, "" ); // Blank to indicate no change
 		__FillType_JComboBox.setData( n2fill );
 		__FillType_JComboBox.addItemListener (this);
@@ -521,7 +522,7 @@ private void initialize ( JFrame parent, FillAndSetRight_Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>();
     IfNotFound_List.add ( "" );
     if ( (__command instanceof SetDiversionRight_Command)||
     	(__command instanceof SetReservoirRight_Command) ||
@@ -547,7 +548,7 @@ private void initialize ( JFrame parent, FillAndSetRight_Command command )
     	(__command instanceof SetWellRight_Command) ) {
 	    JGUIUtil.addComponent(main_JPanel, new JLabel ("If found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	    List IfFound_List = new Vector();
+	    List<String> IfFound_List = new Vector<String>();
 	    IfFound_List.add ( "" );
 	    IfFound_List.add ( __command._Set );
 	    IfFound_List.add ( __command._Ignore );

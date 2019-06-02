@@ -58,6 +58,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for SetCropPatternTS() command.
 */
+@SuppressWarnings("serial")
 public class SetCropPatternTS_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -328,7 +329,7 @@ private void initialize (JFrame parent, Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Irrigation method:"),
        		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List IrrigationMethod_Vector = new Vector();
+    List<String> IrrigationMethod_Vector = new Vector<String>(2);
     IrrigationMethod_Vector.add ( __command._Flood );
     IrrigationMethod_Vector.add ( __command._Sprinkler );
     __IrrigationMethod_JComboBox = new SimpleJComboBox(false);
@@ -342,7 +343,7 @@ private void initialize (JFrame parent, Command command )
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Supply type:"),
        	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List SupplyType_Vector = new Vector();
+    List<String> SupplyType_Vector = new Vector<String>(2);
     SupplyType_Vector.add ( __command._Ground );
     SupplyType_Vector.add ( __command._Surface );
     __SupplyType_JComboBox = new SimpleJComboBox(false);
@@ -356,7 +357,7 @@ private void initialize (JFrame parent, Command command )
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Set to missing:"),
    		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List SetToMissing_Vector = new Vector();
+    List<String> SetToMissing_Vector = new Vector<String>(3);
     SetToMissing_Vector.add ( "" );
     SetToMissing_Vector.add ( __command._True );
     SetToMissing_Vector.add ( __command._False );
@@ -371,7 +372,7 @@ private void initialize (JFrame parent, Command command )
         
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Process when:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List process_when_Vector = new Vector();
+    List<String> process_when_Vector = new Vector<String>(3);
 	process_when_Vector.add ( "" );
 	process_when_Vector.add ( __command._Now );
 	process_when_Vector.add ( __command._WithParcels );
@@ -387,7 +388,7 @@ private void initialize (JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>(4);
     IfNotFound_List.add("");
 	IfNotFound_List.add ( __command._Ignore );
 	IfNotFound_List.add ( __command._Warn );

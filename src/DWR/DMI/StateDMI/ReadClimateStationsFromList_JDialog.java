@@ -62,6 +62,7 @@ import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 
+@SuppressWarnings("serial")
 public class ReadClimateStationsFromList_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -310,7 +311,7 @@ private void initialize (JFrame parent, Command command)
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Climate station ID column:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	List column_Vector = new Vector(100);
+	List<String> column_Vector = new Vector<String>(100);
 	column_Vector.add ( "" );	// Not available
 	for ( int i = 1; i <= 100; i++ ) {
 		column_Vector.add ( "" + i );

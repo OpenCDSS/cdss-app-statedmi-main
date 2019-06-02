@@ -24,6 +24,7 @@ import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.IO.Command;
 import RTi.Util.IO.PropList;
 
+@SuppressWarnings("serial")
 public class Exit_JDialog extends JDialog
 implements ActionListener, KeyListener, WindowListener
 {

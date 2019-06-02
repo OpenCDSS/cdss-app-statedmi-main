@@ -167,7 +167,7 @@ throws InvalidCommandParameterException
 	else {
 		if ( (CurveType != null) && CurveType.equalsIgnoreCase(_CurveType_DAY_short) ) {
 			// Verify that 25 values are specified
-			List tokens = StringUtil.breakStringList ( Coefficients, ", ", StringUtil.DELIM_SKIP_BLANKS );
+			List<String> tokens = StringUtil.breakStringList ( Coefficients, ", ", StringUtil.DELIM_SKIP_BLANKS );
 			if ( (tokens == null) || tokens.size() != 25) {
 				message = "Curve type " + _CurveType_DAY_short + " requires 25 numbers.";
 				warning += "\n" + message;
@@ -178,7 +178,7 @@ throws InvalidCommandParameterException
 			else {
 				__Coefficients_double = new double[25];
 				for ( int i = 0; i < 25; i++ ) {
-					String val = (String)tokens.get(i);
+					String val = tokens.get(i);
 					if ( !StringUtil.isDouble(val) ) {
 						message = "Coefficient value (" + val + ") is not a valid number.";
 						warning += "\n" + message;
@@ -194,7 +194,7 @@ throws InvalidCommandParameterException
 		}
 		else if ( (CurveType != null) && CurveType.equalsIgnoreCase(_CurveType_PERCENT_short) ) {
 			// Verify that 21 values are specified
-			List tokens = StringUtil.breakStringList ( Coefficients, ", ", StringUtil.DELIM_SKIP_BLANKS );
+			List<String> tokens = StringUtil.breakStringList ( Coefficients, ", ", StringUtil.DELIM_SKIP_BLANKS );
 			if ( (tokens == null) || tokens.size() != 21) {
 				message = "Curve type " + _CurveType_PERCENT_short + " requires 21 numbers.";
 				warning += "\n" + message;
@@ -205,7 +205,7 @@ throws InvalidCommandParameterException
 			else {
 				__Coefficients_double = new double[21];
 				for ( int i = 0; i < 21; i++ ) {
-					String val = (String)tokens.get(i);
+					String val = tokens.get(i);
 					if ( !StringUtil.isDouble(val) ) {
 						message = "Coefficient value (" + val + ") is not a valid number.";
 						warning += "\n" + message;
@@ -233,7 +233,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
     valid_Vector.add ( "CropType" );
 	valid_Vector.add ( "CurveType" );
     valid_Vector.add ( "BlaneyCriddleMethod" );
@@ -296,10 +296,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of Blaney-Criddle objects...
 	
-	List kbcList = null;
+	List<StateCU_BlaneyCriddle> kbcList = null;
 	int kbcListSize = 0;
 	try {
-		kbcList = (List)processor.getPropContents( "StateCU_BlaneyCriddle_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_BlaneyCriddle> dataList = (List<StateCU_BlaneyCriddle>)processor.getPropContents( "StateCU_BlaneyCriddle_List");
+		kbcList = dataList;
 		kbcListSize = kbcList.size();
 	}
 	catch ( Exception e ) {

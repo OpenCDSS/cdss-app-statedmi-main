@@ -63,6 +63,7 @@ import RTi.Util.Message.Message;
 /**
 Command editor dialog for the WriteProperty() command.
 */
+@SuppressWarnings("serial")
 public class WriteProperty_JDialog extends JDialog
 implements ActionListener, KeyListener, ItemListener, WindowListener
 {
@@ -267,7 +268,7 @@ private void initialize ( JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Property to write:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__PropertyName_JComboBox = new SimpleJComboBox(false);
-	__PropertyName_JComboBox.setData ( new Vector(StateDMICommandProcessorUtil.getPropertyNameList(processor)) );
+	__PropertyName_JComboBox.setData ( new Vector<String>(StateDMICommandProcessorUtil.getPropertyNameList(processor)) );
 	__PropertyName_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __PropertyName_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -277,7 +278,7 @@ private void initialize ( JFrame parent, Command command )
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Append to file?:"),
     		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List Append_Vector = new Vector();
+    List<String> Append_Vector = new Vector<String>(3);
     Append_Vector.add ( "" );
     Append_Vector.add ( __command._False );
     Append_Vector.add ( __command._True );

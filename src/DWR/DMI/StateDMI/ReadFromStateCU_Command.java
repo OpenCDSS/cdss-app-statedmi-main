@@ -197,7 +197,7 @@ throws InvalidCommandParameterException
 	}
     
 	// Check for invalid parameters...
-	Vector valid_Vector = new Vector();
+	Vector<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "InputFile" );
 	if ( (this instanceof ReadCropPatternTSFromStateCU_Command) ||
 		(this instanceof ReadIrrigationPracticeTSFromStateCU_Command) ) {
@@ -256,7 +256,7 @@ throws InvalidCommandSyntaxException, InvalidCommandParameterException
 	}
 	else {
 		// Parse the old command...
-		List tokens = StringUtil.breakStringList (command_string,
+		List<String> tokens = StringUtil.breakStringList (command_string,
 			"(,)", StringUtil.DELIM_ALLOW_STRINGS );
 		if ( tokens.size() != 2 ) {
 			message = "Invalid syntax for command.  Expecting ReadCULocationsFromStateCU(InputFile).";
@@ -266,7 +266,7 @@ throws InvalidCommandSyntaxException, InvalidCommandParameterException
                     message, "Use the command editor to correct the command." ) );
 			throw new InvalidCommandSyntaxException ( message );
 		}
-		String InputFile = ((String)tokens.get(1)).trim();
+		String InputFile = tokens.get(1).trim();
 		PropList parameters = new PropList ( getCommandName() );
 		parameters.setHowSet ( Prop.SET_FROM_PERSISTENT );
 		if ( InputFile.length() > 0 ) {
@@ -287,7 +287,8 @@ irrigation practice total match in years with non-missing data.
 @param ipy_tslist List of StateCU_IrrigationPracticeTS to check against.
 @param status CommandStatus to append check warnings.
 */
-private void readCropPatternTSFromStateCU_checkCropPatternTS ( List cds_tslist, List ipy_tslist, CommandStatus status )
+private void readCropPatternTSFromStateCU_checkCropPatternTS ( List<StateCU_CropPatternTS> cds_tslist,
+	List<StateCU_IrrigationPracticeTS> ipy_tslist, CommandStatus status )
 {	
 	int cds_size = 0;
 	if ( cds_tslist != null ) {
@@ -306,7 +307,7 @@ private void readCropPatternTSFromStateCU_checkCropPatternTS ( List cds_tslist, 
 	int ipy_pos;
 	for ( int i = 0; i < cds_size; i++ ) {
 		// Get the crop pattern TS...
-		cds_ts = (StateCU_CropPatternTS)cds_tslist.get(i);
+		cds_ts = cds_tslist.get(i);
 		cds_id = cds_ts.getID();
 		// Get the irrigation practice TS...
 		ipy_pos = StateCU_Util.indexOf(	ipy_tslist,cds_id);
@@ -315,7 +316,7 @@ private void readCropPatternTSFromStateCU_checkCropPatternTS ( List cds_tslist, 
 			ipy_ts = null;
 		}
 		else {
-			ipy_ts = (StateCU_IrrigationPracticeTS)ipy_tslist.get(ipy_pos);
+			ipy_ts = ipy_tslist.get(ipy_pos);
 			ipy_total_yts = ipy_ts.getTacreTS();
 		}
 		// Loop through the period and check the acreage.
@@ -482,7 +483,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    	// are read from more than one main source. This is used to print a warning.
 	    	processor.resetDataMatches ( processor.getStateCUClimateStationMatchList() );
 
-	    	List cliList = StateCU_ClimateStation.readStateCUFile ( InputFile_full );
+	    	List<StateCU_ClimateStation> cliList = StateCU_ClimateStation.readStateCUFile ( InputFile_full );
 
 			int size = 0;
 			if ( cliList != null ) {
@@ -508,7 +509,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			// are read from more than one main source (e.g., CCH, and HydroBase).
 			// This is used to print a warning.
 			processor.resetDataMatches ( processor.getStateCUCropCharacteristicsMatchList());
-			List cchList = StateCU_CropCharacteristics.readStateCUFile ( InputFile_full );
+			List<StateCU_CropCharacteristics> cchList = StateCU_CropCharacteristics.readStateCUFile ( InputFile_full );
 
 			int size = cchList.size();
 	
@@ -517,7 +518,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	
 			StateCU_CropCharacteristics cch;
 			for (int i = 0; i < size; i++) {
-				cch = (StateCU_CropCharacteristics)cchList.get(i);
+				cch = cchList.get(i);
 				// Replace or add in the __CUCropCharacteristics_Vector...
 				processor.findAndAddCUCropCharacteristics ( cch, true );
 			}
@@ -535,7 +536,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			processor.resetDataMatches ( processor.getStateCUBlaneyCriddleMatchList() );
 
 			// If an exception is thrown, let the calling code catch it...
-			List kbc_Vector = StateCU_BlaneyCriddle.readStateCUFile ( InputFile_full );
+			List<StateCU_BlaneyCriddle> kbc_Vector = StateCU_BlaneyCriddle.readStateCUFile ( InputFile_full );
 
 			int size = kbc_Vector.size();
 
@@ -544,7 +545,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
 			StateCU_BlaneyCriddle kbc;
 			for (int i = 0; i < size; i++) {
-				kbc = (StateCU_BlaneyCriddle)kbc_Vector.get(i);
+				kbc = kbc_Vector.get(i);
 				// Replace or add in the __CUBlaneyCriddle_Vector...
 				processor.findAndAddCUBlaneyCriddle ( kbc, true );
 			}
@@ -573,7 +574,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    	// are read from more than one main source. This is used to print a warning.
 	    	processor.resetDataMatches ( processor.getStateCULocationMatchList() );
 
-	    	List culocList = StateCU_Location.readStateCUFile ( InputFile_full );
+	    	List<StateCU_Location> culocList = StateCU_Location.readStateCUFile ( InputFile_full );
 
 			int size = 0;
 			if ( culocList != null ) {
@@ -587,7 +588,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			String id;
 			int wdidLength = 0;	// Length of WDIDs in data set
 			for (int i = 0; i < size; i++) {
-				culoc = (StateCU_Location)culocList.get(i);
+				culoc = culocList.get(i);
 				// Replace or add in the list...
 				processor.findAndAddCULocation ( culoc, true );
 				// Assume numeric fields are WDIDs and reset the default width for WDIDs in output.
@@ -628,7 +629,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				read_props.set ( "ReadDataFrom", ReadDataFrom );
 			}
 			// If an exception is thrown, let the calling code catch it...
-			List cdsList = StateCU_CropPatternTS.readStateCUFile (
+			List<StateCU_CropPatternTS> cdsList = StateCU_CropPatternTS.readStateCUFile (
 				InputFile_full, OutputStart_DateTime, OutputEnd_DateTime, read_props );
 
 			int size = cdsList.size();
@@ -639,16 +640,18 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
 			StateCU_CropPatternTS cds;
 			for (int i = 0; i < size; i++) {
-				cds = (StateCU_CropPatternTS)cdsList.get(i);
+				cds = cdsList.get(i);
 				// Replace or add in the __CUCropPatternTS_Vector...
 				processor.findAndAddCUCropPatternTS ( cds, true );
 			}
 			
 			boolean CheckData_boolean = true; // Always do the check but may make a parameter later
 			if ( CheckData_boolean ) {
-				readCropPatternTSFromStateCU_checkCropPatternTS (
-					(List)processor.getPropContents("StateCU_CropPatternTS_List"),
-					(List)processor.getPropContents("StateCU_IrrigationPracticeTS_List"), status );
+				@SuppressWarnings("unchecked")
+				List<StateCU_CropPatternTS> cptsList = (List<StateCU_CropPatternTS>)processor.getPropContents("StateCU_CropPatternTS_List");
+				@SuppressWarnings("unchecked")
+				List<StateCU_IrrigationPracticeTS> ipyList = (List<StateCU_IrrigationPracticeTS>)processor.getPropContents("StateCU_IrrigationPracticeTS_List");
+				readCropPatternTSFromStateCU_checkCropPatternTS ( cptsList, ipyList, status );
 			}
 
 			// Warn about identifiers that have been replaced in the processor list...
@@ -666,7 +669,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			if ( Version != null ) {
 				read_props.set ( "Version", Version );
 			}
-			List ipyList = StateCU_IrrigationPracticeTS.readStateCUFile (
+			List<StateCU_IrrigationPracticeTS> ipyList = StateCU_IrrigationPracticeTS.readStateCUFile (
 				InputFile_full, OutputStart_DateTime, OutputEnd_DateTime, read_props );
 
 			int size = ipyList.size();
@@ -676,7 +679,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
 			StateCU_IrrigationPracticeTS ipy;
 			for (int i = 0; i < size; i++) {
-				ipy = (StateCU_IrrigationPracticeTS)ipyList.get(i);
+				ipy = ipyList.get(i);
 				// Replace or add in the __CUIrrigationPracticeTS_Vector...
 				processor.findAndAddCUIrrigationPracticeTS ( ipy, true );
 			}

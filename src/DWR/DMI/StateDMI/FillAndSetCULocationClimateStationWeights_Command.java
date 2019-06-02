@@ -164,7 +164,7 @@ throws InvalidCommandParameterException
 		if ( IncludeOrographicPrecAdj_boolean ) {
 			++sizeExpected;
 		}
-		List tokens = StringUtil.breakStringList ( Weights, ",;", 0 );
+		List<String> tokens = StringUtil.breakStringList ( Weights, ",;", 0 );
 		int size = 0; // Number of tokens 
 		if ( tokens == null ) {
 			message = "Weights parameter (" + Weights + ") is not properly defined.";
@@ -226,44 +226,44 @@ throws InvalidCommandParameterException
 			for ( int i = 0; i < size; i++ ) {
 				if ( i%sizeExpected == 0 ) {
 					// Station ids....
-					__Weights_stationIDs[i/sizeExpected] = (String)tokens.get(i);
+					__Weights_stationIDs[i/sizeExpected] = tokens.get(i);
 				}
 				else if ( (i)%sizeExpected == 1 ) {
 					// Temperature weights...
 					if ( !StringUtil.isDouble((String)tokens.get(i) ) ) {
 						message = "Weights (" + Weights +
-						") temperature weight value " + (String)tokens.get(i) + " is not a number.";
+						") temperature weight value " + tokens.get(i) + " is not a number.";
 						warning += "\n" + message;
 						status.addToLog ( CommandPhaseType.INITIALIZATION,
 							new CommandLogRecord(CommandStatusType.FAILURE, message,
 								"Specify the temperature station weights as a number" ) );	
 					}
-					__Weights_tempWts[i/sizeExpected] = StringUtil.atod( (String)tokens.get(i) );
+					__Weights_tempWts[i/sizeExpected] = StringUtil.atod( tokens.get(i) );
 				}
 				else if ( (i)%sizeExpected == 2 ) {
 					// Precipitation weights...
-					if ( !StringUtil.isDouble((String)tokens.get(i) ) ) {
+					if ( !StringUtil.isDouble(tokens.get(i) ) ) {
 						message = "Weights (" + Weights +
-						") precipitation weight value " + (String)tokens.get(i) + " is not a number.";
+						") precipitation weight value " + tokens.get(i) + " is not a number.";
 						warning += "\n" + message;
 						status.addToLog ( CommandPhaseType.INITIALIZATION,
 							new CommandLogRecord(CommandStatusType.FAILURE, message,
 								"Specify the precipitation station weights as a number" ) );	
 					}
-					__Weights_precWts[i/sizeExpected] = StringUtil.atod((String)tokens.get(i) );
+					__Weights_precWts[i/sizeExpected] = StringUtil.atod(tokens.get(i) );
 				}
 				else if ( ((i)%sizeExpected == 3) && IncludeOrographicTempAdj_boolean ) {
 					// Orographic temperature weights...
 					if ( !StringUtil.isDouble((String)tokens.get(i) ) ) {
 						message = "Weights " + Weights +
-						" orographic temperature adjustment value " + (String)tokens.get(i) +
+						" orographic temperature adjustment value " + tokens.get(i) +
 						" is not a number.";
 						warning += "\n" + message;
 						status.addToLog ( CommandPhaseType.INITIALIZATION,
 							new CommandLogRecord(CommandStatusType.FAILURE, message,
 								"Specify the orographic temperature adjustment value as a number" ) );	
 					}
-					__Weights_ota[i/sizeExpected] = StringUtil.atod( (String)tokens.get(i) );
+					__Weights_ota[i/sizeExpected] = StringUtil.atod( tokens.get(i) );
 				}
 				else if ( (((i)%sizeExpected == 3) && !IncludeOrographicTempAdj_boolean) ||
 					(((i)%sizeExpected == 4) && IncludeOrographicTempAdj_boolean &&
@@ -271,14 +271,14 @@ throws InvalidCommandParameterException
 					// Orographic precipitation weights...
 					if ( !StringUtil.isDouble((String)tokens.get(i) ) ) {
 						message = "Weights " + Weights +
-						" orographic precipitation adjustment value " + (String)tokens.get(i) +
+						" orographic precipitation adjustment value " + tokens.get(i) +
 						" is not a number.";
 						warning += "\n" + message;
 						status.addToLog ( CommandPhaseType.INITIALIZATION,
 							new CommandLogRecord(CommandStatusType.FAILURE, message,
 								"Specify the orographic precipitation adjustment value as a number" ) );	
 					}
-					__Weights_opa[i/sizeExpected] = StringUtil.atod((String)tokens.get(i) );
+					__Weights_opa[i/sizeExpected] = StringUtil.atod(tokens.get(i) );
 				}
 			}
 		}
@@ -296,7 +296,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(5);
     valid_Vector.add ( "ID" );
 	valid_Vector.add ( "IncludeOrographicTempAdj" );
     valid_Vector.add ( "IncludeOrographicPrecAdj" );
@@ -374,11 +374,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of climate stations...
 	
-	List culocList = null;
+	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
 	try {
-		Object o = processor.getPropContents( "StateCU_Location_List");
-		culocList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
 		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {

@@ -58,6 +58,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for Set*TS() and Set*TSConstant() commands (except instream flow constant!).
 */
+@SuppressWarnings("serial")
 public class SetTS_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener {
 
@@ -307,7 +308,7 @@ private void initialize ( JFrame parent, SetTS_Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "<= zero values in average?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List le_Vector = new Vector(2);
+    List<String> le_Vector = new Vector<String>(2);
 	le_Vector.add ( "" );
 	le_Vector.add ( __command._False );
 	le_Vector.add ( __command._True );
@@ -322,7 +323,7 @@ private void initialize ( JFrame parent, SetTS_Command command )
    	
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List if_not_found_Vector = new Vector();
+        List<String> if_not_found_Vector = new Vector<String>(5);
     if_not_found_Vector.add ( "" );
 	if_not_found_Vector.add ( __command._Add );
 	if_not_found_Vector.add ( __command._Ignore );

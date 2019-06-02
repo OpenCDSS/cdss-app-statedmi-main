@@ -57,6 +57,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for Sort*() commands.
 */
+@SuppressWarnings("serial")
 public class Sort_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -309,7 +310,7 @@ private void initialize ( JFrame parent, Command command )
 	JGUIUtil.addComponent(main_JPanel, new JLabel ("Order:"), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__Order_JComboBox = new SimpleJComboBox(false);
-	List order_Vector = new Vector(2);
+	List<String> order_Vector = new Vector<String>(2);
 	order_Vector.add ( "" );
 	if ( __command instanceof SortWellRights_Command ) {
 		order_Vector.add ( __IDAscending );
@@ -338,7 +339,7 @@ private void initialize ( JFrame parent, Command command )
     	JGUIUtil.addComponent(main_JPanel, new JLabel ("Order2:"), 
 			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 		__Order2_JComboBox = new SimpleJComboBox(false);
-		List Order2_Vector = new Vector(3);
+		List<String> Order2_Vector = new Vector<String>(3);
 		Order2_Vector.add ( "" );
     	Order2_Vector.add ( __IDAscending );
     	Order2_Vector.add ( __LocationIDAscending );

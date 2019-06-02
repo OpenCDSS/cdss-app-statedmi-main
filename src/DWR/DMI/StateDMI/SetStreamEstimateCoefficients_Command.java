@@ -127,7 +127,7 @@ throws InvalidCommandParameterException
 	}
 	
 	if ( (BaseData != null) && (BaseData.length() > 0) ) {
-		List v = StringUtil.breakStringList ( BaseData, ",", 0 );
+		List<String> v = StringUtil.breakStringList ( BaseData, ",", 0 );
 		if ( (v == null) || (v.size()%2 != 0) ) {
 			message = "The base data is not specified in pairs.";
 	        warning += "\n" + message;
@@ -142,8 +142,8 @@ throws InvalidCommandParameterException
 			__BaseData_coef = new double[size/2];
 			String coef, id;
 			for ( int i = 0; i < size; i += 2 ) {
-				coef = ((String)v.get(i)).trim();
-				id = ((String)v.get(i + 1)).trim();
+				coef = v.get(i).trim();
+				id = v.get(i + 1).trim();
 				if ( !StringUtil.isDouble(coef) ) {
 					message = "The base flow coefficient (" + coef + ") is not a number.";
 			        warning += "\n" + message;
@@ -160,7 +160,7 @@ throws InvalidCommandParameterException
 		}
 	}
 	if ( (GainData != null) && (GainData.length() > 0) ) {
-		List v = StringUtil.breakStringList ( GainData, ",", 0 );
+		List<String> v = StringUtil.breakStringList ( GainData, ",", 0 );
 		if ( (v == null) || (v.size()%2 != 0) ) {
 			message = "The gain data is not specified in pairs.";
 	        warning += "\n" + message;
@@ -175,8 +175,8 @@ throws InvalidCommandParameterException
 			__GainData_coef = new double[size/2];
 			String coef, id;
 			for ( int i = 0; i < size; i += 2 ) {
-				coef = ((String)v.get(i)).trim();
-				id = ((String)v.get(i + 1)).trim();
+				coef = v.get(i).trim();
+				id = v.get(i + 1).trim();
 				if ( !StringUtil.isDouble(coef) ) {
 					message = "The gain flow coefficient (" + coef + ") is not a number.";
 			        warning += "\n" + message;
@@ -205,7 +205,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(5);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "ProrationFactor" );
 	valid_Vector.add ( "BaseData" );
@@ -273,11 +273,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     // Get the data needed for the command
     
-    List streamEstimateCoefficientsList = null;
+    List<StateMod_StreamEstimate_Coefficients> streamEstimateCoefficientsList = null;
     int streamEstimateCoefficientsListSize = 0;
     try {
-   		streamEstimateCoefficientsList = (List)processor.getPropContents (
+   		@SuppressWarnings("unchecked")
+		List<StateMod_StreamEstimate_Coefficients> dataList = (List<StateMod_StreamEstimate_Coefficients>)processor.getPropContents (
    			"StateMod_StreamEstimateCoefficients_List" );
+   		streamEstimateCoefficientsList = dataList;
    		streamEstimateCoefficientsListSize = streamEstimateCoefficientsList.size();
     }
     catch ( Exception e ) {

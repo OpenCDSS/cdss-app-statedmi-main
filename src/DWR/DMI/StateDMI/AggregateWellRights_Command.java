@@ -102,7 +102,7 @@ throws InvalidCommandParameterException
 	}
 	
 	if ( (AdminNumClasses != null) && !AdminNumClasses.equals("") ) {
-		List v = StringUtil.breakStringList ( AdminNumClasses, " ,", StringUtil.DELIM_SKIP_BLANKS );
+		List<String> v = StringUtil.breakStringList ( AdminNumClasses, " ,", StringUtil.DELIM_SKIP_BLANKS );
 		if ( (v == null) || (v.size() == 0) ) {
 			message = "AdminNumClasses has zero values.";
 			warning += "\n" + message;
@@ -128,7 +128,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(2);
     valid_Vector.add ( "AdminNumClasses" );
     valid_Vector.add ( "OnOffDefault" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
@@ -172,31 +172,31 @@ the well station name.
 parcel years, before merging.
 @return the merged list of StateMod_WaterRight.
 */
-private List aggregateWellRights ( List smwells, List smrights_orig, int OnOffDefault_int,
+private List<StateMod_WellRight> aggregateWellRights ( List<StateMod_Well> smwells, List<StateMod_WellRight> smrights_orig, int OnOffDefault_int,
 	int warningLevel, int warningCount, String commandTag, CommandStatus status)
 {	String routine = "aggregateWellRights_command.aggregateWellRights";
 	
 	// Determine the unique list of well locations for the rights (independent of year)...
 	
-	List smwells_loc = StateMod_Util.getWaterRightLocationList ( smrights_orig, -1 );
+	List<String> smwells_loc = StateMod_Util.getWaterRightLocationList ( smrights_orig, -1 );
 	
 	int smwells_size = 0;
 	if ( smwells_loc != null ) {
 		smwells_size = smwells_loc.size();
 	}
 	String id_loc;
-	List smrights = new Vector();	// Rights returned after the merge
+	List<StateMod_WellRight> smrights = new Vector<StateMod_WellRight>();	// Rights returned after the merge
 	StateMod_Well well = null;	// Well for location
 	// Loop through the well station locations, by identifier...
 	for ( int iwell = 0; iwell < smwells_size; iwell++ ) {
-		id_loc = (String)smwells_loc.get(iwell);
+		id_loc = smwells_loc.get(iwell);
 		int pos = StateMod_Util.indexOf ( smwells, id_loc );
 		well = null;	// Default - well station not found
 		boolean gw_only = false;
 		boolean is_aggregate = false;
 		if ( pos >= 0 ) {
 			// Found a matching well
-			well = (StateMod_Well)smwells.get(pos);
+			well = smwells.get(pos);
 		}
 		if ( well != null ) {
 			// Determine whether aggregate/collection, etc.
@@ -213,7 +213,7 @@ private List aggregateWellRights ( List smwells, List smrights_orig, int OnOffDe
 		Message.printStatus ( 2, routine, "Aggregating location " + id_loc + " well rights." );
 		// Get all the rights at the location, for all years (although the data for multiple
 		// years should have been merged previously).
-		List rights_loc = StateMod_Util.getWaterRightsForLocation ( smrights_orig, id_loc, -1 );
+		List<StateMod_WellRight> rights_loc = StateMod_Util.getWaterRightsForLocation ( smrights_orig, id_loc, -1 );
 		// If no rights, no need to process...
 		if ( rights_loc.size() == 0 ) {
 			continue;
@@ -222,7 +222,7 @@ private List aggregateWellRights ( List smwells, List smrights_orig, int OnOffDe
 		// specified as parameters...
 		if ( is_aggregate && (__AdminNumClasses_double.length > 0) ) {
 			// Declare and initialize lists each time for a location...
-			List rights_aggregated_loc = new Vector();// For a location
+			List<StateMod_WellRight> rights_aggregated_loc = new Vector<StateMod_WellRight>();// For a location
 			initializeAggregateRights ( id_loc, well, gw_only, rights_aggregated_loc );
 			double [] sum_decree_irtem = new double[__AdminNumClasses_double.length];
 			double [] sum_decree = new double[__AdminNumClasses_double.length];
@@ -230,7 +230,8 @@ private List aggregateWellRights ( List smwells, List smrights_orig, int OnOffDe
 			aggregateWellRightsForLocation ( rights_loc, rights_aggregated_loc,
 					sum_decree_irtem, sum_decree, sum_count,
 					warningLevel, warningCount, commandTag, status);
-			List smrights_nonzero = removeZeroDecreeAggregateRightsForLocation ( id_loc, rights_aggregated_loc,
+			List<StateMod_WellRight> smrights_nonzero =
+					removeZeroDecreeAggregateRightsForLocation ( id_loc, rights_aggregated_loc,
 					sum_decree_irtem, sum_decree, sum_count, OnOffDefault_int,
 					warningLevel, warningCount, commandTag, status );
 			// Now add the aggregate rights to the final results...
@@ -255,7 +256,7 @@ Accumulate the data using classes.  This logic follows the old watright logic in
 @param rights_loc Rights at a location.
 @param rights_aggregated_loc Aggregated rights at a location.
 */
-private void aggregateWellRightsForLocation ( List rights_loc, List rights_aggregated_loc,
+private void aggregateWellRightsForLocation ( List<StateMod_WellRight> rights_loc, List<StateMod_WellRight> rights_aggregated_loc,
 		double [] sum_decree_irtem, double [] sum_decree, int [] sum_count,
 		int warningLevel, int warningCount, String commandTag, CommandStatus status )
 {	String routine = "aggregateWellRights_Command.aggregateWellRightsForLocation";
@@ -273,7 +274,7 @@ private void aggregateWellRightsForLocation ( List rights_loc, List rights_aggre
 	int rights_loc_size = rights_loc.size();
 	boolean found_class;
 	for ( int iright = 0; iright < rights_loc_size; iright++ ) {
-		wellr_single = (StateMod_WellRight)rights_loc.get ( iright );
+		wellr_single = rights_loc.get ( iright );
 		decree = wellr_single.getDecree();
 		irtem = StringUtil.atod(wellr_single.getAdministrationNumber());
 		found_class = false;
@@ -348,7 +349,7 @@ processed.  Resulting zero decrees can be removed later.
 @param rights_aggregated_loc Aggregated rights at a location.  Should initially
 be an empty Vector and will be filled in with new StateMod_WellRight for each class.
 */
-private void initializeAggregateRights ( String id_loc, StateMod_Well well, boolean gw_only, List rights_aggregated_loc )
+private void initializeAggregateRights ( String id_loc, StateMod_Well well, boolean gw_only, List<StateMod_WellRight> rights_aggregated_loc )
 {	StateMod_WellRight wellr;
 	for ( int ic = 0; ic < __AdminNumClasses_double.length; ic++ ) {
 		wellr = new StateMod_WellRight ();
@@ -389,7 +390,8 @@ Use an integer because the original administration numbers were integers and any
 remainder might mistakenly be converted to an appropriation date.
 @param rights_aggregated_loc Aggregated rights at a location.
 */
-private List removeZeroDecreeAggregateRightsForLocation ( String id_loc, List rights_aggregated_loc,
+private List<StateMod_WellRight> removeZeroDecreeAggregateRightsForLocation ( String id_loc,
+	List<StateMod_WellRight> rights_aggregated_loc,
 	double [] sum_decree_irtem, double [] sum_decree, int [] sum_count,	int OnOffDefault_int,
 	int warningLevel, int warningCount, String commandTag, CommandStatus status )
 {	String routine = "aggregateWellRights_Command.removeZeroDecreeAggregateRightsForLocation";
@@ -399,9 +401,9 @@ private List removeZeroDecreeAggregateRightsForLocation ( String id_loc, List ri
 	double irtem;
 	// Loop through the aggregate rights, which should match in number the
 	// water rights classes set up during initialization.  Only save ones that have non-zero decree.
-	List nonzero_rights = new Vector();
+	List<StateMod_WellRight> nonzero_rights = new Vector<StateMod_WellRight>();
 	for ( int ic = 0; ic < __AdminNumClasses_double.length; ic++ ) {
-		wellr = (StateMod_WellRight)rights_aggregated_loc.get(ic);
+		wellr = rights_aggregated_loc.get(ic);
 		decree_string = StringUtil.formatString( sum_decree[ic], "%.2f");
 		if ( decree_string.equalsIgnoreCase("0.00")){
 			Message.printStatus ( 2, routine, "Decree for " + wellr.getID() +
@@ -498,9 +500,11 @@ CommandWarningException, CommandException
 
 	// Get the list of well stations...
 	
-	List stationList = null;
+	List<StateMod_Well> stationList = null;
 	try {
-		stationList = (List)processor.getPropContents ( "StateMod_WellStation_List");
+		@SuppressWarnings("unchecked")
+		List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List");
+		stationList = dataList;
 		if ( stationList.size() == 0 ) {
 			message = "No well stations are available for processing.";
 			Message.printWarning(warningLevel,
@@ -523,9 +527,11 @@ CommandWarningException, CommandException
 	
 	// Get the list of well rights (probably empty)...
 	
-	List rightList = null;
+	List<StateMod_WellRight> rightList = null;
 	try {
-		rightList = (List)processor.getPropContents ( "StateMod_WellRight_List");
+		@SuppressWarnings("unchecked")
+		List<StateMod_WellRight> dataList = (List<StateMod_WellRight>)processor.getPropContents ( "StateMod_WellRight_List");
+		rightList = dataList;
 		if ( rightList.size() == 0 ) {
 			message = "No well rights are available for processing.";
 			Message.printWarning(warningLevel,
@@ -559,7 +565,7 @@ CommandWarningException, CommandException
 	try {
 		// Aggregate the well rights...
 		
-		List smrights = aggregateWellRights ( stationList, rightList, OnOffDefault_int,
+		List<StateMod_WellRight> smrights = aggregateWellRights ( stationList, rightList, OnOffDefault_int,
 				warningLevel, warningCount, commandTag, status);
 		
 		// Set the rights back in the processor...

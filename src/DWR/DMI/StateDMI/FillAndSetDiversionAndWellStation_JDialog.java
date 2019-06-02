@@ -62,6 +62,7 @@ import DWR.StateMod.StateMod_Well;
 /**
 Editor for FillDiversionStation(), SetDiversionStation(), FillWellStation() and SetWellStation() commands.
 */
+@SuppressWarnings("serial")
 public class FillAndSetDiversionAndWellStation_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -480,7 +481,7 @@ private void initialize ( JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("On/Off:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__OnOff_JComboBox = new SimpleJComboBox();
-	List idivsw = StateMod_Diversion.getIdivswChoices(true);
+	List<String> idivsw = StateMod_Diversion.getIdivswChoices(true);
 	idivsw.add ( 0, "" );	// Blank to indicate no change
 	__OnOff_JComboBox.setData( idivsw );
 	__OnOff_JComboBox.addItemListener (this);
@@ -512,7 +513,7 @@ private void initialize ( JFrame parent, Command command )
         JGUIUtil.addComponent(main_JPanel, new JLabel ("Replacement Res. Option:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 		__ReplaceResOption_JComboBox = new SimpleJComboBox ();
-		List ireptype = StateMod_Diversion.getIreptypeChoices(true);
+		List<String> ireptype = StateMod_Diversion.getIreptypeChoices(true);
 		ireptype.add ( 0, "" );
 		__ReplaceResOption_JComboBox.setData ( ireptype );
 		__ReplaceResOption_JComboBox.addItemListener (this);
@@ -538,7 +539,7 @@ private void initialize ( JFrame parent, Command command )
         JGUIUtil.addComponent(main_JPanel, new JLabel ("Admin Num. Shift:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 		__AdminNumShift_JComboBox = new SimpleJComboBox(true);
-		List AdminNumShift = StateMod_Well.getPrimaryChoices(true);
+		List<String> AdminNumShift = StateMod_Well.getPrimaryChoices(true);
 		AdminNumShift.add ( 0, "" ); // Blank to indicate no change
 		__AdminNumShift_JComboBox.setData( AdminNumShift );
 		__AdminNumShift_JComboBox.addItemListener (this);
@@ -577,7 +578,7 @@ private void initialize ( JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Demand type:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__DemandType_JComboBox = new SimpleJComboBox();
-	List idvcom = null;
+	List<String> idvcom = null;
 	if ( (__command instanceof SetDiversionStation_Command) ||
 		(__command instanceof FillDiversionStation_Command)) {
 		idvcom = StateMod_Diversion.getIdvcomChoices ( true );
@@ -608,7 +609,7 @@ private void initialize ( JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Use type:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__UseType_JComboBox = new SimpleJComboBox();
-	List irturn = StateMod_Diversion.getIrturnChoices ( true );
+	List<String> irturn = StateMod_Diversion.getIrturnChoices ( true );
 	irturn.add ( 0, "" );
 	__UseType_JComboBox.setData( irturn );
 	__UseType_JComboBox.addItemListener (this);
@@ -621,7 +622,7 @@ private void initialize ( JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Demand source:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__DemandSource_JComboBox = new SimpleJComboBox();
-	List demsrc = StateMod_Diversion.getDemsrcChoices ( true );
+	List<String> demsrc = StateMod_Diversion.getDemsrcChoices ( true );
 	demsrc.add ( 0, "" );
 	__DemandSource_JComboBox.setData( demsrc );
 	__DemandSource_JComboBox.addItemListener (this);
@@ -671,7 +672,7 @@ private void initialize ( JFrame parent, Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List if_not_found_Vector = new Vector();
+        List<String> if_not_found_Vector = new Vector<String>();
     if_not_found_Vector.add ( "" );
     if ((__command instanceof SetDiversionStation_Command) ||
 		(__command instanceof SetWellStation_Command) ) {

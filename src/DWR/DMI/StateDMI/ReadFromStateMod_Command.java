@@ -249,7 +249,7 @@ throws InvalidCommandParameterException
 	}
     
 	// Check for invalid parameters...
-	Vector valid_Vector = new Vector();
+	Vector<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "InputFile" );
 	if ( (this instanceof ReadDelayTablesMonthlyFromStateMod_Command) ||
 		(this instanceof ReadDelayTablesDailyFromStateMod_Command) ){
@@ -310,7 +310,7 @@ private int readControlFromStateMod ( StateDMI_Processor processor,
 		CommandStatus status, CommandPhaseType command_phase,
 		String InputFile_full, StateMod_DataSet stateModDataSet )
 throws Exception
-{	String routine = "ReadFromStateMod_Command.readControlFromStateMod";
+{	//String routine = "ReadFromStateMod_Command.readControlFromStateMod";
 
 	// Reset the control information to initial values
 	stateModDataSet.initializeControlData();
@@ -336,14 +336,18 @@ throws Exception
 	// are read from more than one main source. This is used to print a warning.
 	processor.resetDataMatches ( processor.getStateCULocationMatchList() );
 
-	List smlocList = null;
+	List<StateMod_Diversion> smdivList = null;
+	List<StateMod_Well> smwellList = null;
 	boolean isdiv = false;
+	int size = 0;
 	if ( StateMod_Diversion.isStateModDiversionFile(InputFile_full) ) {
-		smlocList = StateMod_Diversion.readStateModFile( InputFile_full );
+		smdivList = StateMod_Diversion.readStateModFile( InputFile_full );
+		size = smdivList.size();
 		isdiv = true;
 	}
 	else if ( StateMod_Well.isStateModWellFile(InputFile_full) ) {
-		smlocList = StateMod_Well.readStateModFile( InputFile_full );
+		smwellList = StateMod_Well.readStateModFile( InputFile_full );
+		size = smwellList.size();
 		isdiv = false;
 	}
 	else {
@@ -357,11 +361,6 @@ throws Exception
         throw new CommandException ( message );
 	}
 
-	int size = 0;
-	if ( smlocList != null ) {
-		size = smlocList.size();
-	}
-
 	// Loop through the diversions and add new CULocation instances for each
 	// diversion, checking the demsrc flag...
 
@@ -371,7 +370,7 @@ throws Exception
 		// Process diversions...
 		StateMod_Diversion diversion;
 		for (int i = 0; i < size; i++) {
-			diversion = (StateMod_Diversion)smlocList.get(i);
+			diversion = smdivList.get(i);
 			// Only add if the demand source flag is 1, 2, 3, 4, or 8...
 			demsrc = diversion.getDemsrc();
 			if ( (demsrc != StateMod_Diversion.DEMSRC_GIS) &&
@@ -395,7 +394,7 @@ throws Exception
 		// wells...
 		StateMod_Well well;
 		for (int i = 0; i < size; i++) {
-			well = (StateMod_Well)smlocList.get(i);
+			well = smwellList.get(i);
 			// Only add if the demand source flag is 1, 2, 3, 4, or 8...
 			demsrc = well.getDemsrcw();
 			if ( (demsrc != StateMod_Diversion.DEMSRC_GIS) &&
@@ -446,7 +445,7 @@ throws Exception
 	// Read the stream delay tables.  Always read as percent (-1 below) and force the user to
 	// scale since the file itself gives no indication of whether it contains percent or fraction.
 
-	List delayTableList = null;
+	List<StateMod_DelayTable> delayTableList = null;
 	if ( Interval_int == TimeInterval.DAY ) {
 		// False indicates daily.
 		delayTableList = StateMod_DelayTable.readStateModFile ( InputFile_full, false, -1 );
@@ -464,7 +463,7 @@ throws Exception
 
 	StateMod_DelayTable dly;
 	for (int i = 0; i < delayTablesListSize; i++) {
-		dly = (StateMod_DelayTable)delayTableList.get(i);
+		dly = delayTableList.get(i);
 		if ( Scale != null ) {
 			// Scale the delay table values...
 			dly.scale ( Scale_double );
@@ -579,7 +578,7 @@ throws Exception
 
 	// Read the diversion rights...
 
-	List diversionRightList = StateMod_DiversionRight.readStateModFile ( InputFile_full );
+	List<StateMod_DiversionRight> diversionRightList = StateMod_DiversionRight.readStateModFile ( InputFile_full );
 	int diversionRightListSize = 0;
 	if ( diversionRightList != null ) {
 		diversionRightListSize = diversionRightList.size();
@@ -618,7 +617,7 @@ throws Exception
 
 	// Read the reservoir stations...
 
-	List diversionStationList = StateMod_Diversion.readStateModFile ( InputFile_full );
+	List<StateMod_Diversion> diversionStationList = StateMod_Diversion.readStateModFile ( InputFile_full );
 	int diversionStationListSize = 0;
 	if ( diversionStationList != null ) {
 		diversionStationListSize = diversionStationList.size();
@@ -629,7 +628,7 @@ throws Exception
 	StateMod_Diversion dds;
 	// Process stations...
 	for (int i = 0; i < diversionStationListSize; i++) {
-		dds = (StateMod_Diversion)diversionStationList.get(i);
+		dds = diversionStationList.get(i);
 		// Replace or add in the list...
 		processor.findAndAddSMDiversion ( dds, true );
 	}
@@ -694,7 +693,7 @@ throws Exception
 
 	// Read the instream flow rights...
 
-	List instreamFlowRightList = StateMod_InstreamFlowRight.readStateModFile ( InputFile_full );
+	List<StateMod_InstreamFlowRight> instreamFlowRightList = StateMod_InstreamFlowRight.readStateModFile ( InputFile_full );
 	int instreamFlowRightListSize = 0;
 	if ( instreamFlowRightList != null ) {
 		instreamFlowRightListSize = instreamFlowRightList.size();
@@ -733,7 +732,7 @@ throws Exception
 
 	// Read the instream flow stations...
 
-	List instreamFlowStationList = StateMod_InstreamFlow.readStateModFile ( InputFile_full );
+	List<StateMod_InstreamFlow> instreamFlowStationList = StateMod_InstreamFlow.readStateModFile ( InputFile_full );
 	int instreamFlowStationListSize = 0;
 	if ( instreamFlowStationList != null ) {
 		instreamFlowStationListSize = instreamFlowStationList.size();
@@ -810,7 +809,7 @@ throws Exception
 
 	// Read the operational rights...
 
-	List operationalRightList = StateMod_OperationalRight.readStateModFile ( InputFile_full,
+	List<StateMod_OperationalRight> operationalRightList = StateMod_OperationalRight.readStateModFile ( InputFile_full,
 		(StateMod_DataSet)null );
 	int operaionalRightListSize = 0;
 	if ( operationalRightList != null ) {
@@ -1005,7 +1004,7 @@ throws Exception
 
 	// Read the reservoir rights...
 
-	List reservoirRightList = StateMod_ReservoirRight.readStateModFile ( InputFile_full );
+	List<StateMod_ReservoirRight> reservoirRightList = StateMod_ReservoirRight.readStateModFile ( InputFile_full );
 	int reservoirRightListSize = 0;
 	if ( reservoirRightList != null ) {
 		reservoirRightListSize = reservoirRightList.size();
@@ -1044,7 +1043,7 @@ throws Exception
 
 	// Read the reservoir stations...
 
-	List reservoirStationList = StateMod_Reservoir.readStateModFile ( InputFile_full );
+	List<StateMod_Reservoir> reservoirStationList = StateMod_Reservoir.readStateModFile ( InputFile_full );
 	int reservoirStationListSize = 0;
 	if ( reservoirStationList != null ) {
 		reservoirStationListSize = reservoirStationList.size();
@@ -1106,7 +1105,7 @@ throws Exception
 
 	// Read the river network nodes...
 
-	List riverNetworkNodeList = StateMod_RiverNetworkNode.readStateModFile ( InputFile_full );
+	List<StateMod_RiverNetworkNode> riverNetworkNodeList = StateMod_RiverNetworkNode.readStateModFile ( InputFile_full );
 	int riverNetworkNodeListSize = 0;
 	if ( riverNetworkNodeList != null ) {
 		riverNetworkNodeListSize = riverNetworkNodeList.size();
@@ -1117,7 +1116,7 @@ throws Exception
 	StateMod_RiverNetworkNode node;
 	// Process stations...
 	for (int i = 0; i < riverNetworkNodeListSize; i++) {
-		node = (StateMod_RiverNetworkNode)riverNetworkNodeList.get(i);
+		node = riverNetworkNodeList.get(i);
 		// Replace or add in the list...
 		processor.findAndAddSMRiverNetworkNode ( node, true );
 	}
@@ -1145,7 +1144,7 @@ throws Exception
 
 	// Read the stream estimate coefficients...
 
-	List streamEstimateCoefficientList = StateMod_StreamEstimate_Coefficients.readStateModFile ( InputFile_full );
+	List<StateMod_StreamEstimate_Coefficients> streamEstimateCoefficientList = StateMod_StreamEstimate_Coefficients.readStateModFile ( InputFile_full );
 	int streamEstimateCoefficientsListSize = 0;
 	if ( streamEstimateCoefficientList != null ) {
 		streamEstimateCoefficientsListSize = streamEstimateCoefficientList.size();
@@ -1156,7 +1155,7 @@ throws Exception
 	StateMod_StreamEstimate_Coefficients coeff;
 	// Process stations...
 	for (int i = 0; i < streamEstimateCoefficientsListSize; i++) {
-		coeff = (StateMod_StreamEstimate_Coefficients)streamEstimateCoefficientList.get(i);
+		coeff = streamEstimateCoefficientList.get(i);
 		// Replace or add in the list...
 		processor.findAndAddSMStreamEstimateCoefficients ( coeff, true );
 	}
@@ -1184,7 +1183,7 @@ throws Exception
 
 	// Read the stream estimate stations...
 
-	List streamEstimateStationList = StateMod_StreamEstimate.readStateModFile ( InputFile_full );
+	List<StateMod_StreamEstimate> streamEstimateStationList = StateMod_StreamEstimate.readStateModFile ( InputFile_full );
 	int streamEstimateStationListSize = 0;
 	if ( streamEstimateStationList != null ) {
 		streamEstimateStationListSize = streamEstimateStationList.size();
@@ -1195,7 +1194,7 @@ throws Exception
 	StateMod_StreamEstimate estimate;
 	// Process stations...
 	for (int i = 0; i < streamEstimateStationListSize; i++) {
-		estimate = (StateMod_StreamEstimate)streamEstimateStationList.get(i);
+		estimate = streamEstimateStationList.get(i);
 		// Replace or add in the list...
 		processor.findAndAddSMStreamEstimate ( estimate, true );
 	}
@@ -1223,7 +1222,7 @@ throws Exception
 
 	// Read the stream gage stations...
 
-	List streamGageStationList = StateMod_StreamGage.readStateModFile ( InputFile_full );
+	List<StateMod_StreamGage> streamGageStationList = StateMod_StreamGage.readStateModFile ( InputFile_full );
 	int streamGageStationListSize = 0;
 	if ( streamGageStationList != null ) {
 		streamGageStationListSize = streamGageStationList.size();
@@ -1234,7 +1233,7 @@ throws Exception
 	StateMod_StreamGage gage;
 	// Process gages...
 	for (int i = 0; i < streamGageStationListSize; i++) {
-		gage = (StateMod_StreamGage)streamGageStationList.get(i);
+		gage = streamGageStationList.get(i);
 		// Replace or add in the __CUStreamGage_Vector...
 		processor.findAndAddSMStreamGage ( gage, true );
 	}
@@ -1253,7 +1252,7 @@ private int readWellDemandTSMonthlyFromStateMod ( StateDMI_Processor processor,
 		int warning_level, int warning_count, String command_tag,
 		CommandStatus status, CommandPhaseType command_phase,
 		String InputFile_full, DateTime OutputStart_DateTime, DateTime OutputEnd_DateTime,
-		List wellList, boolean IgnoreWells_boolean, boolean IgnoreDWs_boolean )
+		List<StateMod_Well> wellList, boolean IgnoreWells_boolean, boolean IgnoreDWs_boolean )
 throws Exception
 {	String routine = "ReadFromStateMod_Command.readWellDemandTSMonthlyromStateMod";
 	// Remove all the elements for the list that tracks when identifiers
@@ -1315,7 +1314,7 @@ private int readWellHistoricalPumpingTSMonthlyFromStateMod ( StateDMI_Processor 
 		int warning_level, int warning_count, String command_tag,
 		CommandStatus status, CommandPhaseType command_phase,
 		String InputFile_full, DateTime OutputStart_DateTime, DateTime OutputEnd_DateTime,
-		List wellList, boolean IgnoreDiversions_boolean )
+		List<StateMod_Well> wellList, boolean IgnoreDiversions_boolean )
 throws Exception
 {	String routine = "ReadFromStateMod_Command.readWellHistoricalPumpingTSMonthlyromStateMod";
 	// Remove all the elements for the list that tracks when identifiers
@@ -1369,12 +1368,12 @@ throws Exception
 	// Remove all the elements for the list that tracks when identifiers
 	// are read from more than one main source...
 	// This is used to print a warning.
-	List matchList = processor.getStateModWellRightMatchList();
+	List<String> matchList = processor.getStateModWellRightMatchList();
 	processor.resetDataMatches ( matchList );
 
 	// Read the well rights...
 
-	List wellRightList = StateMod_WellRight.readStateModFile ( InputFile_full );
+	List<StateMod_WellRight> wellRightList = StateMod_WellRight.readStateModFile ( InputFile_full );
 	int wellRightListSize = 0;
 	if ( wellRightList != null ) {
 		wellRightListSize = wellRightList.size();
@@ -1383,13 +1382,13 @@ throws Exception
 	// Loop through the rights and add new instances in the processor...
 
 	StateMod_WellRight wellr;
-	List processorRightList = processor.getStateModWellRightList();
+	List<StateMod_WellRight> processorRightList = processor.getStateModWellRightList();
 	if ( !Append_boolean ) {
 		// Clear the rights first...
 		processorRightList.clear();
 	}
 	for ( int i = 0; i < wellRightListSize; i++ ) {
-		wellr = (StateMod_WellRight)wellRightList.get(i);
+		wellr = wellRightList.get(i);
 		StateDMI_Util.findAndAddSMWellRight ( processorRightList,
 			matchList, wellr, StateDMI_Util._IF_MATCH_APPEND );
 	}
@@ -1417,7 +1416,7 @@ throws Exception
 
 	// Read the well stations...
 
-	List wellList = StateMod_Well.readStateModFile ( InputFile_full );
+	List<StateMod_Well> wellList = StateMod_Well.readStateModFile ( InputFile_full );
 	int wellListSize = 0;
 	if ( wellList != null ) {
 		wellListSize = wellList.size();
@@ -1545,13 +1544,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     }
     
     // Get well stations if reading demands or historical pumping.
-    List wellList = null;
+    List<StateMod_Well> wellList = null;
     if ( (this instanceof ReadWellDemandTSMonthlyFromStateMod_Command &&
     	(IgnoreWells_boolean || IgnoreDWs_boolean)) ||
     	(this instanceof ReadWellHistoricalPumpingTSMonthlyFromStateCU_Command) ||
     	(this instanceof ReadWellHistoricalPumpingTSMonthlyFromStateMod_Command)) {
         try {
-       		wellList = (List)processor.getPropContents ( "StateMod_WellStation_List" );
+       		@SuppressWarnings("unchecked")
+			List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List" );
+       		wellList = dataList;
         }
         catch ( Exception e ) {
             Message.printWarning ( log_level, routine, e );

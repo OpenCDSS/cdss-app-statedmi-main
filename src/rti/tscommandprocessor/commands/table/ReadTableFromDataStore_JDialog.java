@@ -728,7 +728,6 @@ public boolean ok ()
 Populate the database list based on the selected datastore.
 @param dmi DMI to use when selecting database list
 */
-@SuppressWarnings("unchecked")
 private void populateDataStoreCatalogChoices ( DMI dmi )
 {   String routine = getClass().getSimpleName() + ".populateDataStoreDatastoreChoices";
     List<String> catalogList = null;
@@ -772,7 +771,6 @@ private void populateDataStoreCatalogChoices ( DMI dmi )
 Populate the procedure list based on the selected database.
 @param dmi DMI to use when selecting procedure list
 */
-@SuppressWarnings("unchecked")
 private void populateDataStoreProcedureChoices ( DMI dmi )
 {   String routine = getClass().getSimpleName() + "populateDataStoreProcedureChoices";
     List<String> procList = null;
@@ -813,7 +811,6 @@ private void populateDataStoreProcedureChoices ( DMI dmi )
 Populate the schema list based on the selected database.
 @param dmi DMI to use when selecting schema list
 */
-@SuppressWarnings("unchecked")
 private void populateDataStoreSchemaChoices ( DMI dmi )
 {   String routine = getClass().getName() + "populateDataStoreSchemaChoices";
     List<String> schemaList = null;
@@ -859,7 +856,6 @@ private void populateDataStoreSchemaChoices ( DMI dmi )
 Populate the table list based on the selected database.
 @param dmi DMI to use when selecting table list
 */
-@SuppressWarnings("unchecked")
 private void populateDataStoreTableChoices ( DMI dmi )
 {   String routine = getClass().getName() + "populateDataStoreTableChoices";
     List<String> tableList = null;

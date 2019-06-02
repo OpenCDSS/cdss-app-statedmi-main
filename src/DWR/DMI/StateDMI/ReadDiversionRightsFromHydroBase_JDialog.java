@@ -61,6 +61,7 @@ import riverside.datastore.DataStore;
 /**
 Editor for ReadDiversionRightsFromHydroBase() command.
 */
+@SuppressWarnings("serial")
 public class ReadDiversionRightsFromHydroBase_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener
 {
@@ -284,7 +285,7 @@ private void initialize (JFrame parent, ReadDiversionRightsFromHydroBase_Command
 
 	JGUIUtil.addComponent(main_JPanel, new JLabel ( "OnOff default:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	List onoff_Vector = new Vector(3);
+	List<String> onoff_Vector = new Vector<String>(3);
 	onoff_Vector.add ( "" );
 	onoff_Vector.add ( __command._1 );
 	onoff_Vector.add ( __command._AppropriationDate );
@@ -300,7 +301,7 @@ private void initialize (JFrame parent, ReadDiversionRightsFromHydroBase_Command
     // Datastore ID options
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Datastore ID:"), 0, ++y, 1, 1, 0, 0, GridBagConstraints.NONE, GridBagConstraints.EAST);
     List<DataStore> DataStores = __statedmiProcessor.getDataStores();
-    List datastoreList = new Vector();
+    List<String> datastoreList = new Vector<String>();
     datastoreList.add("");
     for(int i = 0; i < DataStores.size(); i++){
     	datastoreList.add(DataStores.get(i).getName());

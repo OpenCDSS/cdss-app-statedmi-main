@@ -62,6 +62,7 @@ import DWR.StateCU.StateCU_IrrigationPracticeTS;
 /**
 Editor for FillIrrigationPracticeTSInterpolate() and FillIrrigationPracticeTSRepeat() commands.
 */
+@SuppressWarnings("serial")
 public class FillIrrigationPracticeTS_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener {
 
@@ -280,7 +281,7 @@ private void initialize ( JFrame parent, FillIrrigationPracticeTS_Command comman
 
   	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Data type:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-   	List datatype_Vector = StateCU_IrrigationPracticeTS.getTimeSeriesDataTypes ( false, false );
+   	List<String> datatype_Vector = StateCU_IrrigationPracticeTS.getTimeSeriesDataTypes ( false, false );
 	datatype_Vector.add ( 0, "" );
 	__DataType_JComboBox = new SimpleJComboBox(false);
 	__DataType_JComboBox.setData ( datatype_Vector );
@@ -315,7 +316,7 @@ private void initialize ( JFrame parent, FillIrrigationPracticeTS_Command comman
 	if ( __command instanceof FillIrrigationPracticeTSRepeat_Command ) {
        	JGUIUtil.addComponent(main_JPanel, new JLabel ("Fill direction:"),
 			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-       	List direction_Vector = new Vector();
+       	List<String> direction_Vector = new Vector<String>();
        	direction_Vector.add ( "" );
 		direction_Vector.add ( __command._Backward );
 		direction_Vector.add ( __command._Forward );
@@ -355,7 +356,7 @@ private void initialize ( JFrame parent, FillIrrigationPracticeTS_Command comman
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>();
     IfNotFound_List.add("");
 	IfNotFound_List.add ( __command._Ignore );
 	IfNotFound_List.add ( __command._Warn );

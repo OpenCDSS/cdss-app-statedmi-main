@@ -181,7 +181,7 @@ throws InvalidCommandParameterException
     }
 
 	// Check for invalid parameters...
-    List valid_Vector = new Vector();
+    List<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "InputFile" );
 	//valid_Vector.add ( "InheritParentWorkflowProperties" );
     valid_Vector.add ( "ExpectedStatus" );
@@ -306,7 +306,7 @@ CommandWarningException, CommandException
 						"Severity is max of commands file that was run (may not be a problem).",
 						"See additional status messages and refer to log file if warning/failure."));
             // Append the log records from the command file that was run.
-            CommandStatusUtil.appendLogRecords ( status, runner.getProcessor().getCommands() );
+            CommandStatusUtil.appendLogRecords ( status, (List)runner.getProcessor().getCommands() );
             if ( maxSeverity.greaterThanOrEqualTo(CommandStatusType.WARNING)) {
                 testPassFail = __FAIL;
             }

@@ -82,6 +82,7 @@ showing information for a single structure at the top, there are choices to sele
 of diversions in the data set (to show the related parcels) and another section to display the wells related
 to the parcels.  This gives a complete picture of the water supply for parcels.
 */
+@SuppressWarnings("serial")
 public class HydroBase_GUI_IrrigatedAcresTool extends JFrame implements ActionListener,
 	ItemListener, KeyListener, WindowListener
 {
@@ -305,7 +306,7 @@ Filter the well information to include only well stations that are collections u
 @param collectionPartType part type to return in list.
 */
 private List<StateMod_Well> filterWellCollections ( List<StateMod_Well> wellStationList, String collectionPartType )
-{	List<StateMod_Well> list = new Vector();
+{	List<StateMod_Well> list = new Vector<StateMod_Well>();
 	for ( StateMod_Well well : wellStationList ) {
 		if ( well.isCollection() &&
 			well.getCollectionPartType().equalsIgnoreCase(collectionPartType)) {
@@ -586,7 +587,8 @@ private void setupGUI ( List<StateMod_Diversion>diversionStationList,
 	int[] widths = null;
 	JScrollWorksheet jsw = null;
 	try {
-		HydroBase_TableModel_IrrigatedAcresTool tm = new HydroBase_TableModel_IrrigatedAcresTool(new Vector());
+		HydroBase_TableModel_IrrigatedAcresTool tm =
+			new HydroBase_TableModel_IrrigatedAcresTool(new Vector<HydroBase_ParcelUseTSStructureToParcel>());
 		HydroBase_CellRenderer cr = new HydroBase_CellRenderer(tm);
 	
 		jsw = new JScrollWorksheet(cr, tm, p);
@@ -700,7 +702,7 @@ private void setupGUI ( List<StateMod_Diversion>diversionStationList,
 	int[] widths2 = null;
 	JScrollWorksheet jsw2 = null;
 	try {
-		HydroBase_TableModel_Wells tm2 = new HydroBase_TableModel_Wells(new Vector());
+		HydroBase_TableModel_Wells tm2 = new HydroBase_TableModel_Wells(new Vector<HydroBase_Wells>());
 		HydroBase_CellRenderer cr = new HydroBase_CellRenderer(tm2);
 	
 		jsw2 = new JScrollWorksheet(cr, tm2, p2);
@@ -781,7 +783,7 @@ private void submitDitchParcelQuery()
 	int parcelYear = getDiversionParcelYear();
 	
 	List<HydroBase_ParcelUseTSStructureToParcel> divParcel1List = null; // One WDID
-	List<HydroBase_ParcelUseTSStructureToParcel> divParcelList = new Vector(); // All WDID
+	List<HydroBase_ParcelUseTSStructureToParcel> divParcelList = new Vector<HydroBase_ParcelUseTSStructureToParcel>(); // All WDID
 	HydroBase_Structure struct = null;
 	int wdidParts[];
 	String text = __diversionStationList_JTextArea.getText().trim();
@@ -855,7 +857,7 @@ private void submitParcelWellQuery()
 	}
 	
 	List<HydroBase_Wells> wellParcel1List = null; // One parcel
-	List<HydroBase_Wells> wellParcelList = new Vector(); // All parcels
+	List<HydroBase_Wells> wellParcelList = new Vector<HydroBase_Wells>(); // All parcels
 	String text = __parcelList_JTextArea.getText().trim();
 	if ( text.equals("") ) {
 		return;
@@ -905,7 +907,8 @@ Transfer the parcels from the diversion/parcel data to the well/parcel parcel ID
 Filter by the division and parcel year if > 0.
 */
 private void transferParcelsFromDiversions ( int div, int parcelYear )
-{	JWorksheet_AbstractTableModel tm = __divParcelWorksheet.getTableModel();
+{	@SuppressWarnings("unchecked")
+	JWorksheet_AbstractTableModel<HydroBase_ParcelUseTSStructureToParcel> tm = __divParcelWorksheet.getTableModel();
 	int [] selectedRows = __divParcelWorksheet.getSelectedRows();
 	int rowCount = __divParcelWorksheet.getRowCount();
 	StringBuffer b = new StringBuffer(); // to hold text list of parcel identifiers
@@ -928,7 +931,7 @@ private void transferParcelsFromDiversions ( int div, int parcelYear )
 Transfer a single parcel from the diversion/parcel data to the well/parcel parcel ID list text area.
 Filter by the division and parcel year if > 0.
 */
-private void transferParcelFromDiversions ( JWorksheet_AbstractTableModel tm,
+private void transferParcelFromDiversions ( JWorksheet_AbstractTableModel<HydroBase_ParcelUseTSStructureToParcel> tm,
 	StringBuffer b, int row, int div, int parcelYear )
 {
 	String tableYear = "" + tm.getValueAt(row, HydroBase_TableModel_IrrigatedAcresTool.COL_YEAR);

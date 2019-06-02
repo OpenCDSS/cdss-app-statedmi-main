@@ -1,9 +1,9 @@
-import java.io.File;
+//import java.io.File;
 
 //import junit.extensions.abbot.ScriptFixture;
 //import junit.extensions.abbot.ScriptTestSuite;
 //import junit.extensions.abbot.TestHelper;
-import junit.framework.Test;
+//import junit.framework.Test;
 
 public class AbbotTestSuite //extends ScriptFixture
 {

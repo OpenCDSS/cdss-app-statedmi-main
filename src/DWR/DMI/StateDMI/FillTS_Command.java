@@ -33,6 +33,7 @@ import DWR.StateMod.StateMod_Diversion;
 import DWR.StateMod.StateMod_Util;
 
 import RTi.TS.MonthTS;
+import RTi.TS.StringMonthTS;
 import RTi.TS.TS;
 import RTi.TS.TSUtil;
 import RTi.Util.Message.Message;
@@ -240,7 +241,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "ID" );
 	if ( (this instanceof FillDiversionHistoricalTSMonthlyAverage_Command) || 
 		(this instanceof FillDiversionHistoricalTSMonthlyPattern_Command) ) {
@@ -353,7 +354,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     // Get the data needed for the command
     
-    List tsList = null;
+    List<TS> tsList = null;
     int tsListSize = 0;
     int compType = StateMod_DataSet.COMP_UNKNOWN;
     String dataType = "";
@@ -361,27 +362,35 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	if ( (this instanceof FillDiversionHistoricalTSMonthlyAverage_Command) ||
 			(this instanceof FillDiversionHistoricalTSMonthlyConstant_Command) ||
 			(this instanceof FillDiversionHistoricalTSMonthlyPattern_Command)) {
-    		tsList = (List)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
+    		@SuppressWarnings("unchecked")
+			List<TS> dataList = (List<TS>)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
+    		tsList = dataList;
     		dataType = "diversion historical";
     		compType = StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY;
     	}
     	else if ( (this instanceof FillDiversionDemandTSMonthlyAverage_Command) ||
 			(this instanceof FillDiversionDemandTSMonthlyConstant_Command) ||
 			(this instanceof FillDiversionDemandTSMonthlyPattern_Command) ) {
-			tsList = (List)processor.getPropContents ( "StateMod_DiversionDemandTSMonthly_List" );
+			@SuppressWarnings("unchecked")
+			List<TS> dataList = (List<TS>)processor.getPropContents ( "StateMod_DiversionDemandTSMonthly_List" );
+			tsList = dataList;
 			dataType = "diversion demand";
 			compType = StateMod_DataSet.COMP_DEMAND_TS_MONTHLY;
 		}
     	else if ( (this instanceof FillWellHistoricalPumpingTSMonthlyAverage_Command) ||
 			(this instanceof FillWellHistoricalPumpingTSMonthlyConstant_Command) ||
 			(this instanceof FillWellHistoricalPumpingTSMonthlyPattern_Command)){
-			tsList = (List)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
+			@SuppressWarnings("unchecked")
+			List<TS> dataList = (List<TS>)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
+			tsList = dataList;
 			compType = StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY;
 		}
     	else if ( (this instanceof FillWellDemandTSMonthlyAverage_Command) ||
 			(this instanceof FillWellDemandTSMonthlyConstant_Command) ||
 			(this instanceof FillWellDemandTSMonthlyPattern_Command) ){
-			tsList = (List)processor.getPropContents ( "StateMod_WellDemandTSMonthly_List" );
+			@SuppressWarnings("unchecked")
+			List<TS> dataList = (List<TS>)processor.getPropContents ( "StateMod_WellDemandTSMonthly_List" );
+			tsList = dataList;
 			dataType = "well demand";
 			compType = StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY;
 		}
@@ -399,10 +408,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     }
     
     // Get the diversion stations if needed to check collections
-    List divStationList = null;
+    List<StateMod_Diversion> divStationList = null;
     if ( !IncludeCollections_boolean && (compType == StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY) ) {
     	try {
-    		divStationList = (List)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		divStationList = dataList;
     	}
         catch ( Exception e ) {
             Message.printWarning ( log_level, routine, e );
@@ -480,10 +491,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	
     // Get the existing list of pattern time series - not used directly here but needed for check
 	if ( fillPattern ) {
-	    List patternList = null;
+	    List<StringMonthTS> patternList = null;
 	    int patternListSize = 0;
 	    try {
-	   		patternList = (List)processor.getPropContents ( "StateMod_PatternTSMonthly_List" );
+	   		@SuppressWarnings("unchecked")
+			List<StringMonthTS> dataList = (List<StringMonthTS>)processor.getPropContents ( "StateMod_PatternTSMonthly_List" );
+	   		patternList = dataList;
 	   		patternListSize = patternList.size();
 	    }
 	    catch ( Exception e ) {

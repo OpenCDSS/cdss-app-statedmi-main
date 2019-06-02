@@ -60,6 +60,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for the AggregateWellRights() command.
 */
+@SuppressWarnings("serial")
 public class AggregateWellRights_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener,
 ChangeListener {
@@ -205,7 +206,7 @@ private void initialize ( JFrame parent, AggregateWellRights_Command command )
         
 	JGUIUtil.addComponent(main_JPanel, new JLabel ("OnOff default:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	List onoff_Vector = new Vector(3);
+	List<String> onoff_Vector = new Vector<String>(3);
 	onoff_Vector.add ( "" );
 	onoff_Vector.add ( __command._1 );
 	onoff_Vector.add ( __command._AppropriationDate );

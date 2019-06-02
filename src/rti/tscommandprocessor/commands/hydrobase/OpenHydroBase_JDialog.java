@@ -98,6 +98,7 @@ import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
+@SuppressWarnings("serial")
 public class OpenHydroBase_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -818,30 +819,27 @@ private void retrieveDatabaseNames(String server) {
 	
 		Connection c = dmi.getConnection();
 		DatabaseMetaData dmd = c.getMetaData();
-		List v = DMIUtil.processResultSet(dmd.getCatalogs());
+		List<List<Object>> v = DMIUtil.processResultSet(dmd.getCatalogs());
 		dmi.close();
 		__DatabaseName_JComboBox.removeAllItems();
-		List v2 = null;
+		List<Object> v2 = null;
 		int size = v.size();
 
 		if (size == 0) {
 			// No database found -- this should NEVER happen, but just in case ...
-			v.add(__NO_DATABASES);
 			__DatabaseName_JComboBox.add(__NO_DATABASES);
 			return;
 		}
 		
 		s = null;
 		int count = 0;
-		List v3 = new Vector();
 		for (int i = 0; i < size; i++) {
-			v2 = (List)v.get(i);
+			v2 = (List<Object>)v.get(i);
 			s = (String)v2.get(0);
 			s = s.trim();
 
 			// Only add those database that start with "HydroBase"
 			if (StringUtil.startsWithIgnoreCase(s, __HYDROBASE)) {
-				v3.add(s);
 				__DatabaseName_JComboBox.add(s);
 				count++;
 			}
@@ -849,7 +847,6 @@ private void retrieveDatabaseNames(String server) {
 
 		if (count == 0) {
 			// no databases were found that started with "HydroBase"
-			v3.add(__NO_DATABASES);
 			__DatabaseName_JComboBox.add(__NO_DATABASES);
 		}
 		else {
@@ -880,7 +877,7 @@ public void windowDeiconified( WindowEvent evt ){;}
 public void windowIconified( WindowEvent evt ){;}
 public void windowOpened( WindowEvent evt ){;}
 
-List __serverNames = null;
+List<String> __serverNames = null;
 
 /**
 Reads the configuration file.
@@ -899,7 +896,7 @@ private void readConfigurationFile() {
 
 	String serverNames = configurationProps.getValue("HydroBase.ServerNames");
 	if (serverNames == null) {
-		__serverNames = new Vector();
+		__serverNames = new Vector<String>();
 		if (IOUtil.testing()) {
 			__serverNames.add("hbserver");
 		}

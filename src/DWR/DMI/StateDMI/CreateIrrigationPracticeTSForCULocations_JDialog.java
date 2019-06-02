@@ -60,6 +60,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for CreateIrrigationPracticeTSForCULocations() command.
 */
+@SuppressWarnings("serial")
 public class CreateIrrigationPracticeTSForCULocations_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener
 {
@@ -217,7 +218,7 @@ private void initialize ( JFrame parent, CreateIrrigationPracticeTSForCULocation
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>(4);
     IfNotFound_List.add("");
 	IfNotFound_List.add ( __command._Ignore );
 	IfNotFound_List.add ( __command._Warn );
@@ -314,6 +315,7 @@ private void refresh ()
 		// Get the properties from the command
 		props = __command.getCommandParameters();
 		ID = props.getValue ( "ID" );
+		IfNotFound = props.getValue ( "IfNotFound" );
 		if ( ID != null ) {
 			__ID_JTextField.setText(ID);
 		}

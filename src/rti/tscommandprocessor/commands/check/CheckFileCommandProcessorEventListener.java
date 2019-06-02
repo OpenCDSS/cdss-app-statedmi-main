@@ -43,7 +43,7 @@ import RTi.Util.Message.Message;
 public class CheckFileCommandProcessorEventListener implements CommandProcessorEventListener
 {
     
-private List __eventList = new Vector(10);
+private List<CommandProcessorEvent> __eventList = new Vector<CommandProcessorEvent>(10);
 
 private File __checkFile = null;
 
@@ -116,14 +116,14 @@ throws Exception
 /**
  * Get the list of MissingObjectEvent from the queued up list of events.
  */
-private List getMissingObjectEventList ()
+private List<MissingObjectEvent> getMissingObjectEventList ()
 {
-    List eventList = new Vector();
-    Object event;
+    List<MissingObjectEvent> eventList = new Vector<MissingObjectEvent>();
+    CommandProcessorEvent event;
     for ( int i = 0; i < __eventList.size(); i++ ) {
        event = __eventList.get(i);
        if ( event instanceof MissingObjectEvent ) {
-           eventList.add ( event );
+           eventList.add ( (MissingObjectEvent) event );
        }
     }
     return eventList;
@@ -218,7 +218,7 @@ Writes the HTML for the MissingObjectEvents.
 @param int index Current index of the data list.
 @throws Exception
  */
-private void writeMissingObjectEvents( HTMLWriter html, List missingObjectEventList )
+private void writeMissingObjectEvents( HTMLWriter html, List<MissingObjectEvent> missingObjectEventList )
 throws Exception
 {
     // Headers for the table.
@@ -247,7 +247,7 @@ throws Exception
     String [] rowData = new String[3];
     PropList tdProps = getTdProps();
     for ( int i = 0; i < missingObjectEventList.size(); i++ ) {
-        event = (MissingObjectEvent)missingObjectEventList.get(i);
+        event = missingObjectEventList.get(i);
         rowData[0] = "" + (i + 1);
         rowData[1] = event.getMissingObjectID();
         // toString() must return a "nice" string for this to work...
@@ -275,7 +275,7 @@ private void writeTableOfContents( HTMLWriter html )  throws Exception
     tableStart.add("bordercolor=black");
     tableStart.add("cellspacing=1");
     tableStart.add("cellpadding=1");
-    String [] data_table_header = {"Component", "Type of Check", "# Problems", "# Total Checks"};
+    //String [] data_table_header = {"Component", "Type of Check", "# Problems", "# Total Checks"};
     //html follows ...
     html.headerStart( 4, getTitleProps() );    // <h3> tag
     html.addText( "Table Of Contents" );

@@ -62,6 +62,7 @@ import DWR.StateMod.StateMod_ReservoirAccount;
 /**
 Editor for FillReservoirStation() and SetReservoirStation() commands.
 */
+@SuppressWarnings("serial")
 public class FillAndSetReservoirStation_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -400,7 +401,7 @@ private void initialize ( JFrame parent, FillAndSetReservoirStation_Command comm
     JGUIUtil.addComponent(main_JPanel, new JLabel ("On/Off:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__OnOff_JComboBox = new SimpleJComboBox();
-	List iressw = StateMod_Reservoir.getIresswChoices(true);
+	List<String> iressw = StateMod_Reservoir.getIresswChoices(true);
 	iressw.add ( 0, "" );	// Blank to indicate no change
 	__OnOff_JComboBox.setData( iressw );
 	__OnOff_JComboBox.addItemListener (this);
@@ -414,7 +415,7 @@ private void initialize ( JFrame parent, FillAndSetReservoirStation_Command comm
     JGUIUtil.addComponent(main_JPanel, new JLabel ("One fill rule:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__OneFillRule_JComboBox = new SimpleJComboBox();
-	List rdate = StateMod_Reservoir.getRdateChoices(true);
+	List<String> rdate = StateMod_Reservoir.getRdateChoices(true);
 	rdate.add ( 0, "" );	// Blank to indicate no change
 	__OneFillRule_JComboBox.setData( rdate );
 	__OneFillRule_JComboBox.addItemListener (this);
@@ -520,7 +521,7 @@ private void initialize ( JFrame parent, FillAndSetReservoirStation_Command comm
     JGUIUtil.addComponent(account_JPanel, new JLabel ( "Evaporation distribution:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__AccountEvap_JComboBox = new SimpleJComboBox();
-	List pcteva = StateMod_ReservoirAccount.getPctevaChoices(true);
+	List<String> pcteva = StateMod_ReservoirAccount.getPctevaChoices(true);
 	pcteva.add ( 0, "" );	// Blank to indicate no change
 	__AccountEvap_JComboBox.setData( pcteva );
 	__AccountEvap_JComboBox.addItemListener (this);
@@ -533,7 +534,7 @@ private void initialize ( JFrame parent, FillAndSetReservoirStation_Command comm
     JGUIUtil.addComponent(account_JPanel, new JLabel ( "One fill rule calculation:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__AccountOneFill_JComboBox = new SimpleJComboBox();
-	List n2own = StateMod_ReservoirAccount.getN2ownChoices(true);
+	List<String> n2own = StateMod_ReservoirAccount.getN2ownChoices(true);
 	n2own.add ( 0, "" );	// Blank to indicate no change
 	__AccountOneFill_JComboBox.setData( n2own );
 	__AccountOneFill_JComboBox.addItemListener (this);
@@ -579,7 +580,7 @@ private void initialize ( JFrame parent, FillAndSetReservoirStation_Command comm
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>();
 	IfNotFound_List.add ( "" );
 	if ( __command instanceof SetReservoirStation_Command ) {
 		IfNotFound_List.add ( __command._Add );
@@ -825,7 +826,7 @@ private void refresh ()
 			// Force 3 values per line - formatting in the standard way (this will throw away a
 			// user's manual edits but that is hopefully not an issue)...
 			StringBuffer ContentAreaSeepage_buffer = new StringBuffer ();
-			List v2 = StringUtil.breakStringList(
+			List<String> v2 = StringUtil.breakStringList(
 				ContentAreaSeepage, ",; \n", StringUtil.DELIM_SKIP_BLANKS);
 			int size = 0;
 			if ( v2 != null ) {
@@ -844,7 +845,7 @@ private void refresh ()
 				}
 				// Add the item...
 				ContentAreaSeepage_buffer.
-				append ( (String)v2.get(i) );
+				append ( v2.get(i) );
 			}
 			ContentAreaSeepage = ContentAreaSeepage_buffer.toString();
 			__ContentAreaSeepage_JTextArea.setText(ContentAreaSeepage);

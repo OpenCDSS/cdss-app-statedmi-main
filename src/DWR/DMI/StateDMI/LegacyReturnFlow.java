@@ -204,11 +204,11 @@ private void initialize ()
 
 /**
 Read a legacy return flow file, as originally used with the watright program.
-@return a Vector of LegacyReturnFlow.
+@return a list of LegacyReturnFlow.
 @param rtnfile Name of the return flow/depletion file.
 @exception IOException if there is an error opening/reading the file.
 */
-public static List readReturnFile ( String rtnfile )
+public static List<LegacyReturnFlow> readReturnFile ( String rtnfile )
 throws IOException
 {	BufferedReader	ifp = null;
 	int		i, linenum = 0, num;
@@ -217,7 +217,8 @@ throws IOException
 			table;
 	double		eff = 0.0;
 	LegacyReturnFlow	rinfo;
-	List		list, rinfo_vec = new Vector();
+	List<LegacyReturnFlow> rinfo_vec = new Vector<LegacyReturnFlow>();
+	List<String> list;
 	boolean		warning_known = false;	// Whether the code is handling
 						// a known condition (false
 						// means that a generic message
@@ -232,7 +233,7 @@ throws IOException
 	ifp = new BufferedReader( new FileReader(
 		IOUtil.getPathUsingWorkingDir(rtnfile) ) );
 
-	while( true ){
+	while( true ) {
 		// Let an exception be thrown and caught in the main loop...
 		if( (line = ifp.readLine()) == null ) {
 			// End of file...
@@ -268,9 +269,9 @@ throws IOException
 			warning_known = true;
 			throw new IOException ( message );
 		}
-		id 	= (String)list.get(0);
-		num	= StringUtil.atoi((String)list.get(1));
-		eff	= StringUtil.atod((String)list.get(2));
+		id 	= list.get(0);
+		num	= StringUtil.atoi(list.get(1));
+		eff	= StringUtil.atod(list.get(2));
 		table	= (String)list.get(3);
 		// Put a check in to see if the line has a % character.  For
 		// now assume that no % is in the identifier...
@@ -354,18 +355,17 @@ throws IOException
 				warning_known = true;
 				throw new IOException ( message );
 			}
-			rinfo.__return_id[i] =
-				((String)list.get(0)).trim();
+			rinfo.__return_id[i] = list.get(0).trim();
 			// Get rid of the percent on the fly...
 			rinfo.__return_percent[i] = StringUtil.atod(
-				((String)list.get(1)).replace( '%', ' '));
+				list.get(1).replace( '%', ' '));
 
 			// If the list size is >= 3, also set the delay table
 			// information...
 
 			if ( list.size() >= 3 ) {
 				rinfo.__return_table[i] =
-				((String)list.get(2)).trim();
+				list.get(2).trim();
 			}
 			else {	// Default to structure default...
 				rinfo.__return_table[i] = table;
@@ -382,11 +382,6 @@ throws IOException
 
 		rinfo_vec.add( rinfo );
 	}
-	try {	ifp.close();
-	}
-	catch( IOException e ){
-	}
-
 	return rinfo_vec;
 	}
 	catch ( Exception e ) {
@@ -410,6 +405,13 @@ throws IOException
 			// warnings.
 			Message.printWarning ( 3, routine, e);
 			throw new IOException ( message );
+		}
+	}
+	finally {
+		try {
+			ifp.close();
+		}
+		catch( IOException e ){
 		}
 	}
 }

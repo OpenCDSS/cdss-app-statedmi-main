@@ -66,6 +66,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for CalculateDiversionStationEfficiencies() and CalculateWellStationEfficiencies() commands.
 */
+@SuppressWarnings("serial")
 public class CalculateStationEfficiencies_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener,
 ChangeListener {
@@ -368,7 +369,7 @@ private void initialize ( JFrame parent, CalculateStationEfficiencies_Command co
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("<= zero values in average?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List le_Vector = new Vector(2);
+    List<String> le_Vector = new Vector<String>(3);
 	le_Vector.add ( "" );
 	le_Vector.add ( __command._False );
 	le_Vector.add ( __command._True );
@@ -393,7 +394,7 @@ private void initialize ( JFrame parent, CalculateStationEfficiencies_Command co
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List if_not_found_Vector = new Vector();
+    List<String> if_not_found_Vector = new Vector<String>(4);
     if_not_found_Vector.add ( "" );
 	if_not_found_Vector.add ( __command._Ignore );
 	if_not_found_Vector.add ( __command._Warn );
@@ -508,6 +509,7 @@ private void refresh ()
 		EffCalcEnd = props.getValue ( "EffCalcEnd" );
 		LEZeroInAverage = props.getValue ( "LEZeroInAverage" );
 		EffReportFile = props.getValue ( "EffReportFile" );
+		IfNotFound = props.getValue ( "IfNotFound" );
 		if ( ID != null ) {
 			__ID_JTextField.setText(ID);
 		}

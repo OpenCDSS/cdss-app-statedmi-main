@@ -45,6 +45,7 @@ import RTi.Util.IO.CommandWarningException;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.InvalidCommandParameterException;
 import RTi.Util.IO.PropList;
+import RTi.TS.StringMonthTS;
 import RTi.Util.IO.AbstractCommand;
 
 /**
@@ -146,7 +147,7 @@ throws InvalidCommandParameterException
 	}
    
 	// Check for invalid parameters...
-	Vector valid_Vector = new Vector();
+	Vector<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "InputFile" );
     warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
 
@@ -203,9 +204,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     String InputFile = parameters.getValue ( "InputFile" );
     
     // Get the existing list of pattern time series.
-    List patternList = null;
+    List<StringMonthTS> patternList = null;
     try {
-   		patternList = (List)processor.getPropContents ( "StateMod_PatternTSMonthly_List" );
+   		@SuppressWarnings("unchecked")
+		List<StringMonthTS> dataList = (List<StringMonthTS>)processor.getPropContents ( "StateMod_PatternTSMonthly_List" );
+   		patternList = dataList;
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
@@ -254,7 +257,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	"\"." );
     	// Read the fill pattern file.  Since multiple options are allowed,
     	// create a temporary list and then append to the main list...
-    	List fill_pattern_ts = StateMod_TS.readPatternTimeSeriesList( InputFile_full, true );
+    	List<StringMonthTS> fill_pattern_ts = StateMod_TS.readPatternTimeSeriesList( InputFile_full, true );
     	if ( fill_pattern_ts == null ) {
     		message = "No pattern time series read from \"" + InputFile_full + "\" - will not fill with patterns.";
             Message.printWarning ( warning_level,

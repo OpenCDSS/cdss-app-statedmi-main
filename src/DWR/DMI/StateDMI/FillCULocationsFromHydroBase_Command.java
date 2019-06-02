@@ -153,7 +153,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(5);
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "CULocType" );
     valid_Vector.add ( "Region1Type" );
@@ -223,11 +223,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of climate stations...
 	
-	List culocList = null;
+	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
 	try {
-		Object o = processor.getPropContents( "StateCU_Location_List");
-		culocList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
 		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {

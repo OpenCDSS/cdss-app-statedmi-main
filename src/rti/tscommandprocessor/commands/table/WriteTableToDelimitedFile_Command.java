@@ -566,7 +566,8 @@ private void writeGoogleBigQueryTableSchema ( DataTable table, String outputSche
 	out.print ( "{" + nl );
 	out.print ( i1 + "\"schema\": {" + nl );
 	out.print ( i2 + "\"fields\": [" + nl );
-	String colName, colDescription, dataTypeSchema;
+	String colName, dataTypeSchema;
+	//String colDescription;
 	int colType;
 	int irow;
 	for ( int icol = 0; icol < table.getNumberOfFields(); icol++ ) {
@@ -732,10 +733,11 @@ private void writeJSONTableSchema ( DataTable table, String outputSchemaFile ) t
 	String i1 = "  ", i2 = "    ", i3 = "      ";
 	out.print ( "{" + nl );
 	out.print ( i1 + "\"fields\": [" + nl );
-	String colName, colDescription, dataTypeSchema;
+	String colName, dataTypeSchema;
+	//String colDescription;
 	int colType;
 	int irow;
-	TableField field;
+	//TableField field;
 	for ( int icol = 0; icol < table.getNumberOfFields(); icol++ ) {
 		colName = table.getFieldName(icol);
 		// TODO sam 2017-01-18 need to enable

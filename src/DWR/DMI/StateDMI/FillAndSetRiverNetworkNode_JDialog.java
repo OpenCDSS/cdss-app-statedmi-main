@@ -57,6 +57,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for SetRiverNetworkNode() and FillRiverNetworkNode() commands.
 */
+@SuppressWarnings("serial")
 public class FillAndSetRiverNetworkNode_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -307,7 +308,7 @@ private void initialize (JFrame parent, FillAndSetRiverNetworkNode_Command comma
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, 
 		GridBagConstraints.EAST);
-    List if_not_found_Vector = new Vector();
+    List<String> if_not_found_Vector = new Vector<String>();
     if_not_found_Vector.add ( "" );
     if ( __command instanceof SetRiverNetworkNode_Command ) {
     	if_not_found_Vector.add ( __command._Add );

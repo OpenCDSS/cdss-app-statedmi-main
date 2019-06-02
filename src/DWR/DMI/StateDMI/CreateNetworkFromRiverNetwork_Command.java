@@ -86,7 +86,7 @@ throws InvalidCommandParameterException
 	CommandStatus status = getCommandStatus();
 	status.clearLog(CommandPhaseType.INITIALIZATION);
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
 
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
 
@@ -137,7 +137,9 @@ CommandWarningException, CommandException
 	List<StateMod_RiverNetworkNode> riverNetworkNodeList = null;
 	int riverNetworkNodeListSize = 0;
 	try {
-		riverNetworkNodeList = (List<StateMod_RiverNetworkNode>)processor.getPropContents ( "StateMod_RiverNetworkNode_List");
+		@SuppressWarnings("unchecked")
+		List<StateMod_RiverNetworkNode> dataList = (List<StateMod_RiverNetworkNode>)processor.getPropContents ( "StateMod_RiverNetworkNode_List");
+		riverNetworkNodeList = dataList;
 		riverNetworkNodeListSize = riverNetworkNodeList.size();
 	}
 	catch ( Exception e ) {
@@ -163,7 +165,9 @@ CommandWarningException, CommandException
 	
     List<StateMod_StreamGage> streamGageStationList = null;
     try {
-    	streamGageStationList = (List<StateMod_StreamGage>)processor.getPropContents ( "StateMod_StreamGageStation_List" );
+    	@SuppressWarnings("unchecked")
+		List<StateMod_StreamGage> dataList = (List<StateMod_StreamGage>)processor.getPropContents ( "StateMod_StreamGageStation_List" );
+    	streamGageStationList = dataList;
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
@@ -180,7 +184,9 @@ CommandWarningException, CommandException
 	
     List<StateMod_StreamEstimate> streamEstimateStationList = null;
     try {
-    	streamEstimateStationList = (List<StateMod_StreamEstimate>)processor.getPropContents ( "StateMod_StreamEstimateStation_List" );
+    	@SuppressWarnings("unchecked")
+		List<StateMod_StreamEstimate> dataList = (List<StateMod_StreamEstimate>)processor.getPropContents ( "StateMod_StreamEstimateStation_List" );
+    	streamEstimateStationList = dataList;
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
@@ -197,7 +203,9 @@ CommandWarningException, CommandException
     
     List<StateMod_Diversion> diversionStationList = null;
     try {
-    	diversionStationList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    	@SuppressWarnings("unchecked")
+		List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    	diversionStationList = dataList;
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
@@ -214,7 +222,9 @@ CommandWarningException, CommandException
     
     List<StateMod_Reservoir> reservoirStationList = null;
     try {
-    	reservoirStationList = (List<StateMod_Reservoir>)processor.getPropContents ( "StateMod_ReservoirStation_List" );
+    	@SuppressWarnings("unchecked")
+		List<StateMod_Reservoir> dataList = (List<StateMod_Reservoir>)processor.getPropContents ( "StateMod_ReservoirStation_List" );
+    	reservoirStationList = dataList;
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
@@ -231,7 +241,9 @@ CommandWarningException, CommandException
     
     List<StateMod_InstreamFlow> instreamFlowStationList = null;
     try {
-    	instreamFlowStationList = (List<StateMod_InstreamFlow>)processor.getPropContents ( "StateMod_InstreamFlowStation_List" );
+    	@SuppressWarnings("unchecked")
+		List<StateMod_InstreamFlow> dataList = (List<StateMod_InstreamFlow>)processor.getPropContents ( "StateMod_InstreamFlowStation_List" );
+    	instreamFlowStationList = dataList;
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
@@ -248,7 +260,9 @@ CommandWarningException, CommandException
     
     List<StateMod_Well> wellStationList = null;
     try {
-    	wellStationList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List" );
+    	@SuppressWarnings("unchecked")
+		List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List" );
+    	wellStationList = dataList;
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
@@ -265,7 +279,9 @@ CommandWarningException, CommandException
     
     List<StateMod_Plan> planStationList = null;
     try {
-    	planStationList = (List<StateMod_Plan>)processor.getPropContents ( "StateMod_PlanStation_List" );
+    	@SuppressWarnings("unchecked")
+		List<StateMod_Plan> dataList = (List<StateMod_Plan>)processor.getPropContents ( "StateMod_PlanStation_List" );
+    	planStationList = dataList;
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );

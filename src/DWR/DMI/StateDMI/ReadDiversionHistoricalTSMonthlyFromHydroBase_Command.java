@@ -34,7 +34,6 @@ import DWR.DMI.HydroBaseDMI.HydroBase_Util;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.StateMod.StateMod_DataSet;
 import DWR.StateMod.StateMod_Diversion;
-import RTi.TS.DayTS;
 import RTi.TS.MonthTS;
 import RTi.TS.MonthTSLimits;
 import RTi.TS.TS;
@@ -286,7 +285,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "IncludeExplicit");
     valid_Vector.add ( "IncludeCollections" );
@@ -407,7 +406,6 @@ private int fillUsingCIUFlag ( TS ts, HydroBaseDMI hbdmi,
 	// HydroBase currently in use value
 	String ciu = struct.getCiu();
 	// set the fill value
-	String fillValue = "0";
 	String fillFlag = "";
 	if( FillUsingCIUFlag.equals( "Auto" )) {
 		fillFlag = ciu;
@@ -660,10 +658,12 @@ CommandWarningException, CommandException
 	
 	// Get the list of diversion stations...
 	
-	List stationList = null;
+	List<StateMod_Diversion> stationList = null;
 	int stationListSize = 0;
 	try {
-		stationList = (List)processor.getPropContents ( "StateMod_DiversionStation_List");
+		@SuppressWarnings("unchecked")
+		List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List");
+		stationList = dataList;
 		stationListSize = stationList.size();
 	}
 	catch ( Exception e ) {
@@ -710,7 +710,7 @@ CommandWarningException, CommandException
 						// fill commands.
 		TSIdent tsident = null; 	// TSIDent for time series
 		MonthTS pts = null; // Part time series, to add to ts.
-		List parts = null;
+		List<String> parts = null;
 		int psize = 0; // Number of parts in a collection
 		int iparts = 0; // Index for iterating through parts
 		int part_count = 0; // Counter (1+) of parts in a collection

@@ -51,6 +51,7 @@ import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.Time.YearType;
 
+@SuppressWarnings("serial")
 public class SetOutputYearType_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {

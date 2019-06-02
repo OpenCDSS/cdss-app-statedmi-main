@@ -61,6 +61,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for the SetIrrigationPracticeTSPumpingMaxUsingWellRights() command.
 */
+@SuppressWarnings("serial")
 public class SetIrrigationPracticeTSPumpingMaxUsingWellRights_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener
 {
@@ -281,7 +282,7 @@ private void initialize ( JFrame parent, Command command )
    	
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Include surface water supply?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List IncludeSurfaceWaterSupply_Vector = new Vector();
+    List<String> IncludeSurfaceWaterSupply_Vector = new Vector<String>(3);
 	IncludeSurfaceWaterSupply_Vector.add ( "" );
 	IncludeSurfaceWaterSupply_Vector.add ( __command._False );
 	IncludeSurfaceWaterSupply_Vector.add ( __command._True );
@@ -297,7 +298,7 @@ private void initialize ( JFrame parent, Command command )
     
 	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Include groundwater only supply?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	List IncludeGroundwaterOnlySupply_Vector = new Vector();
+	List<String> IncludeGroundwaterOnlySupply_Vector = new Vector<String>(3);
 	IncludeGroundwaterOnlySupply_Vector.add ( "" );
 	IncludeGroundwaterOnlySupply_Vector.add ( __command._False );
 	IncludeGroundwaterOnlySupply_Vector.add ( __command._True );
@@ -384,7 +385,7 @@ private void initialize ( JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>(4);
     IfNotFound_List.add("");
 	IfNotFound_List.add ( __command._Ignore );
 	IfNotFound_List.add ( __command._Warn );

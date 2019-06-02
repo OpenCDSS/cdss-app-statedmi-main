@@ -52,6 +52,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for the CalculateStreamEstimateCoefficients() command.
 */
+@SuppressWarnings("serial")
 public class CalculateStreamEstimateCoefficients_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {

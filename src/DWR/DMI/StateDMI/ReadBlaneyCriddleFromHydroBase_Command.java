@@ -98,7 +98,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
     valid_Vector.add ( "BlaneyCriddleMethod" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
 
@@ -119,9 +119,11 @@ not (e.g., "Cancel" was pressed.
 public boolean editCommand ( JFrame parent )
 {	String routine = getClass().getName() + ".editCommand";
 	CommandProcessor processor = getCommandProcessor();
-	List BlaneyCriddleMethod_List = new Vector();
+	List<String> BlaneyCriddleMethod_List = new Vector<String>();
 	try {
-		BlaneyCriddleMethod_List = (List)processor.getPropContents("CUMethod_List");
+		@SuppressWarnings("unchecked")
+		List<String> dataList = (List<String>)processor.getPropContents("CUMethod_List");
+		BlaneyCriddleMethod_List = dataList;
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( 3, routine, "Error getting Blaney-Criddle method list - will not be listed in editor." );
@@ -189,7 +191,7 @@ CommandWarningException, CommandException
 
 		// Read from HydroBase...
 
-		List hbc_Vector = hbdmi.readCUBlaneyCriddleListForMethodDesc ( BlaneyCriddleMethod, false );
+		List<HydroBase_CUBlaneyCriddle> hbc_Vector = hbdmi.readCUBlaneyCriddleListForMethodDesc ( BlaneyCriddleMethod, false );
 
 		int size = 0;
 		if ( hbc_Vector != null ) {

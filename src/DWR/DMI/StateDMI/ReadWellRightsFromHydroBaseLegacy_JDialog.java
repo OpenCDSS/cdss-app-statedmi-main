@@ -105,6 +105,7 @@ import RTi.Util.Time.DateTime;
 import DWR.StateCU.StateCU_DataSet;
 import DWR.StateMod.StateMod_DataSet;
 
+@SuppressWarnings("serial")
 public class ReadWellRightsFromHydroBaseLegacy_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener,
 ChangeListener {
@@ -143,7 +144,7 @@ private SimpleJComboBox	__OnOffDefault_JComboBox = null;
 private JTextArea	__command_JTextArea=null;
 private SimpleJButton	__cancel_JButton = null;
 private SimpleJButton	__ok_JButton = null;	
-private List		__command_Vector = null;
+private List<String>		__command_Vector = null;
 private String		__command = null;
 private int		__app_type;
 private int		__comp_type;
@@ -158,7 +159,7 @@ Command editor constructor
 */
 public ReadWellRightsFromHydroBaseLegacy_JDialog (	JFrame parent,
 						PropList props,
-						List command,
+						List<String> command,
 						int app_type,
 						int comp_type )
 {	super(parent, true);
@@ -325,9 +326,9 @@ Return the text for the command.
 @return the text for the command or null if there is a problem with the 
 command.
 */
-public List getText () {
+public List<String> getText () {
 	if ((__command_Vector != null) && ((__command_Vector.size() == 0) ||
-		((String)__command_Vector.get(0)).equals(""))) {
+		__command_Vector.get(0).equals(""))) {
 		return null;
 	}
 	return __command_Vector;
@@ -342,7 +343,7 @@ Instantiates the GUI components.
 @param comp_type Component type for the application.
 */
 private void initialize (	JFrame parent, PropList props, 
-		List command, int app_type, int comp_type )
+		List<String> command, int app_type, int comp_type )
 {	__command_Vector = command;
 	__app_type = app_type;
 	__comp_type = comp_type;
@@ -479,7 +480,7 @@ private void initialize (	JFrame parent, PropList props,
        	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Right ID format:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-       	List format_Vector = new Vector(3);
+       	List<String> format_Vector = new Vector<String>(3);
 	format_Vector.add ( "" );
 	format_Vector.add ( __HydroBaseID );
 	format_Vector.add ( __StationIDW_NN );
@@ -563,7 +564,7 @@ private void initialize (	JFrame parent, PropList props,
        	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Define right how?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-       	List define_Vector = new Vector(4);
+       	List<String> define_Vector = new Vector<String>(3);
 	define_Vector.add ( __EarliestDate );
 	define_Vector.add ( __LatestDate );
 	define_Vector.add ( __RightIfAvailable );
@@ -579,7 +580,7 @@ private void initialize (	JFrame parent, PropList props,
        	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Read well rights?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-       	List read_Vector = new Vector(3);
+       	List<String> read_Vector = new Vector<String>(2);
 	read_Vector.add ( __True );
 	read_Vector.add ( __False );
 	__ReadWellRights_JComboBox = new SimpleJComboBox(false);
@@ -594,7 +595,7 @@ private void initialize (	JFrame parent, PropList props,
        	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Use Apex?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-       	List apex_Vector = new Vector(3);
+       	List<String> apex_Vector = new Vector<String>(2);
 	apex_Vector.add ( __True );
 	apex_Vector.add ( __False );
 	__UseApex_JComboBox = new SimpleJComboBox(false);
@@ -612,7 +613,7 @@ private void initialize (	JFrame parent, PropList props,
 		JGUIUtil.addComponent(main_JPanel, new JLabel (
 			"OnOff default:"),
 			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-		List onoff_Vector = new Vector(3);
+		List<String> onoff_Vector = new Vector<String>(3);
 		onoff_Vector.add ( "" );
 		onoff_Vector.add ( __1 );
 		onoff_Vector.add ( __Year );
@@ -720,8 +721,8 @@ private void refresh ()
 	if (__first_time) {
 		__first_time = false;
 		// Parse the incoming string and fill the fields...
-		List v = StringUtil.breakStringList (
-			((String)__command_Vector.get(0)).trim(),"()",
+		List<String> v = StringUtil.breakStringList (
+			__command_Vector.get(0).trim(),"()",
 			StringUtil.DELIM_SKIP_BLANKS );
 		PropList props = null;
 		if ( (v != null) && (v.size() > 1) ) {
@@ -976,7 +977,7 @@ private void refresh ()
 Return the time command as a Vector of String.
 @return returns the command text or null if no command.
 */
-public List response (int status)
+public List<String> response (int status)
 {	setVisible(false);
 	dispose();
 	if (status == 0) {
@@ -986,7 +987,7 @@ public List response (int status)
 	}
 	else {	refresh();
 		if (	(__command_Vector.size() == 0) ||
-			((String)__command_Vector.get(0)).equals("")) {
+			__command_Vector.get(0).equals("")) {
 			return null;
 		}
 		return __command_Vector;

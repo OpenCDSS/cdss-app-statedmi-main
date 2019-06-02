@@ -59,6 +59,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for the FillNetworkFromHydroBase() command.
 */
+@SuppressWarnings("serial")
 public class FillNetworkFromHydroBase_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener {
 
@@ -201,7 +202,7 @@ private void initialize ( JFrame parent, FillNetworkFromHydroBase_Command comman
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Location estimate:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__LocationEstimate_JComboBox = new SimpleJComboBox();
-	List choices = new Vector ( 2 );
+	List<String> choices = new Vector<String> ( 2 );
 	choices.add ( "" );
 	choices.add ( __command._Interpolate );
 	__LocationEstimate_JComboBox.setData ( choices );

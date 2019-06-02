@@ -131,7 +131,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(2);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "IfNotFound" );
     warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
@@ -213,7 +213,7 @@ throws InvalidCommandSyntaxException, InvalidCommandParameterException
 		getCommandName() + "_Command.parseCommand",
 		message;
 
-	List tokens = StringUtil.breakStringList ( command,
+	List<String> tokens = StringUtil.breakStringList ( command,
 			"()", StringUtil.DELIM_SKIP_BLANKS );
 	if ( (tokens == null) || tokens.size() < 2 ) {
 		// Must have at least the command name, location ID
@@ -224,7 +224,7 @@ throws InvalidCommandSyntaxException, InvalidCommandParameterException
 	}
 	// Get the input needed to process the file...
 	try {	setCommandParameters ( PropList.parse ( Prop.SET_FROM_PERSISTENT,
-			(String)tokens.get(1), routine, "," ) );
+			tokens.get(1), routine, "," ) );
 	}
 	catch ( Exception e ) {
 		message = "Syntax error in \"" + command +
@@ -293,11 +293,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of well stations...
 	
-	List wellList = null;
+	List<StateMod_Well> wellList = null;
 	int wellListSize = 0;
 	try {
-		Object o = processor.getPropContents( "StateMod_WellStation_List");
-		wellList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents( "StateMod_WellStation_List");
+		wellList = dataList;
 		wellListSize = wellList.size();
 	}
 	catch ( Exception e ) {
@@ -313,10 +314,11 @@ CommandWarningException, CommandException
 	
 	// Get the diversion stations...
 	
-	List divList = null;
+	List<StateMod_Diversion> divList = null;
 	try {
-		Object o = processor.getPropContents( "StateMod_DiversionStation_List");
-		divList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents( "StateMod_DiversionStation_List");
+		divList = dataList;
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( log_level, routine, e );

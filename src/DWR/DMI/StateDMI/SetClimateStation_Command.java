@@ -142,7 +142,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(9);
     valid_Vector.add ( "ID" );
 	valid_Vector.add ( "Name" );
     valid_Vector.add ( "Latitude" );
@@ -172,21 +172,29 @@ public boolean editCommand ( JFrame parent )
 {	String routine = "SetClimateStation_Command.editCommand";
 	// The command will be modified if changed
 	CommandProcessor processor = getCommandProcessor();
-	List Region1_List = new Vector();
-	List Region2_List = new Vector();
+	List<String> Region1_List = new Vector<String>();
+	List<Integer> Region2_List = new Vector<Integer>();
+	List<String> Region2String_List = new Vector<String>();
 	try {
-		Region1_List = (List)processor.getPropContents("CountyList");
+		@SuppressWarnings("unchecked")
+		List<String> dataList = (List<String>)processor.getPropContents("CountyList");
+		Region1_List = dataList;
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( 3, routine, "Error getting county list - will not be listed in Region1." );
 	}
 	try {
-		Region2_List = (List)processor.getPropContents("HUCList");
+		@SuppressWarnings("unchecked")
+		List<Integer> dataList = (List<Integer>)processor.getPropContents("HUCList");
+		Region2_List = dataList;
+		for ( Integer i : Region2_List ) {
+			Region2String_List.add("" + i);
+		}
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( 3, routine, "Error getting HUC list - will not be listed in Region2." );
 	}
-	return (new FillAndSetClimateStation_JDialog ( parent, this, Region1_List, Region2_List )).ok();
+	return (new FillAndSetClimateStation_JDialog ( parent, this, Region1_List, Region2String_List )).ok();
 }
 
 // Parse command is in the base class
@@ -231,11 +239,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of climate stations...
 	
-	List stationList = null;
+	List<StateCU_ClimateStation> stationList = null;
 	int stationListSize = 0;
 	try {
-		Object o = processor.getPropContents( "StateCU_ClimateStation_List");
-		stationList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_ClimateStation> dataList = (List<StateCU_ClimateStation>)processor.getPropContents( "StateCU_ClimateStation_List");
+		stationList = dataList;
 		stationListSize = stationList.size();
 	}
 	catch ( Exception e ) {

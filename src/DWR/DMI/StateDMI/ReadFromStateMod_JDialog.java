@@ -64,9 +64,10 @@ import RTi.Util.Message.Message;
 
 /**
 Command editor dialog for simple Read*FromStateMod() commands, which share the same parameters.
-Some commands use additional paramters.  If too many special parameters are needed create separate command
+Some commands use additional parameters.  If too many special parameters are needed create separate command
 and/or editor classes.
 */
+@SuppressWarnings("serial")
 public class ReadFromStateMod_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -726,7 +727,7 @@ private void initialize ( JFrame parent, Command command )
 		(__command instanceof ReadWellDemandTSMonthlyFromStateMod_Command) ) {
        	JGUIUtil.addComponent(main_JPanel, new JLabel ( "Ignore diversion/well stations?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List ignore_Vector = new Vector(3);
+        List<String> ignore_Vector = new Vector<String>(3);
 		ignore_Vector.add ( "" );
 		ignore_Vector.add ( __command._False );
 		ignore_Vector.add ( __command._True );
@@ -741,7 +742,7 @@ private void initialize ( JFrame parent, Command command )
 
        	JGUIUtil.addComponent(main_JPanel, new JLabel (	"Ignore well stations?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-		ignore_Vector = new Vector(3);
+		ignore_Vector = new Vector<String>(3);
 		ignore_Vector.add ( "" );
 		ignore_Vector.add ( __command._False );
 		ignore_Vector.add ( __command._True );
@@ -757,7 +758,7 @@ private void initialize ( JFrame parent, Command command )
 	if ( __command instanceof ReadWellHistoricalPumpingTSMonthlyFromStateCU_Command ) {
       	JGUIUtil.addComponent(main_JPanel, new JLabel (	"Ignore diversion stations?:"),
   			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-		List ignore_Vector = new Vector(3);
+		List<String> ignore_Vector = new Vector<String>(3);
 		ignore_Vector.add ( "" );
 		ignore_Vector.add ( __command._False );
 		ignore_Vector.add ( __command._True );
@@ -774,7 +775,7 @@ private void initialize ( JFrame parent, Command command )
 	if ( __command instanceof ReadWellRightsFromStateMod_Command ){
 	    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Append?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        	List Append_Vector = new Vector(3);
+        List<String> Append_Vector = new Vector<String>(3);
 		Append_Vector.add ( "" );
 		Append_Vector.add ( __command._False );
 		Append_Vector.add ( __command._True );
@@ -791,7 +792,7 @@ private void initialize ( JFrame parent, Command command )
 	if ( __command instanceof ReadResponseFromStateMod_Command ){
 	    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Read data?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List<String> readDataChoices = new Vector(3);
+        List<String> readDataChoices = new Vector<String>(3);
 		readDataChoices.add ( "" );
 		readDataChoices.add ( __command._False );
 		readDataChoices.add ( __command._True );

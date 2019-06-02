@@ -154,7 +154,7 @@ throws InvalidCommandParameterException
 		}
 
 		// Check for invalid parameters...
-		List valid_Vector = new Vector();
+		List<String> valid_Vector = new Vector<String>(4);
 	    valid_Vector.add ( "ID" );
 		valid_Vector.add ( "SetStart" );
 		valid_Vector.add ( "SetEnd" );
@@ -234,10 +234,12 @@ CommandWarningException, CommandException
 	
 	// Get the list of irrigation practice time series...
 	
-	List ipyList = null;
+	List<StateCU_IrrigationPracticeTS> ipyList = null;
 	int ipyListSize = 0;
 	try {
-		ipyList = (List)processor.getPropContents( "StateCU_IrrigationPracticeTS_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_IrrigationPracticeTS> dataList = (List<StateCU_IrrigationPracticeTS>)processor.getPropContents( "StateCU_IrrigationPracticeTS_List");
+		ipyList = dataList;
 		ipyListSize = ipyList.size();
 	}
 	catch ( Exception e ) {
@@ -252,9 +254,11 @@ CommandWarningException, CommandException
 	
 	// Get the list of crop pattern time series...
 	
-	List cdsList = null;
+	List<StateCU_CropPatternTS> cdsList = null;
 	try {
-		cdsList = (List)processor.getPropContents( "StateCU_CropPatternTS_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_CropPatternTS> dataList = (List<StateCU_CropPatternTS>)processor.getPropContents( "StateCU_CropPatternTS_List");
+		cdsList = dataList;
 	}
 	catch ( Exception e ) {
 		message = "Error requesting StateCU_CropPatternTS_List from processor.";

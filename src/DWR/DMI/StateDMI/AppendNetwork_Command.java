@@ -308,7 +308,7 @@ throws InvalidCommandParameterException
 	}
     
 	// Check for invalid parameters...
-	Vector valid_Vector = new Vector();
+	Vector<String> valid_Vector = new Vector<String>(6);
 	valid_Vector.add ( "InputFile" );
 	valid_Vector.add ( "AppendHow" );
 	valid_Vector.add ( "ExistingDownstreamNodeID" );

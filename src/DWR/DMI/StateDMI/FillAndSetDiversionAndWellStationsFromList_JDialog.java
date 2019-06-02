@@ -65,6 +65,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for the FillDiversionStationsFromList() and FillWellStationsFromList() commands.
 */
+@SuppressWarnings("serial")
 public class FillAndSetDiversionAndWellStationsFromList_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -471,8 +472,8 @@ private void initialize ( JFrame parent, Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel(idlabel),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List columnID_Vector = new Vector(100);
-    List column_Vector = new Vector(100);
+    List<String> columnID_Vector = new Vector<String>(100);
+    List<String> column_Vector = new Vector<String>(100);
 	column_Vector.add ( "" );	// For no change.
 	for ( int i = 1; i <= 100; i++ ) {
 		columnID_Vector.add ( "" + i );
@@ -649,7 +650,7 @@ private void initialize ( JFrame parent, Command command )
 
    	JGUIUtil.addComponent(main_JPanel, new JLabel ("Delimiter:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-   	List delim_Vector = new Vector(100);
+   	List<String> delim_Vector = new Vector<String>(5);
 	delim_Vector.add ( "" );	// For default (comma)
 	delim_Vector.add ( "," );
 	delim_Vector.add ( __command._Space );
@@ -668,7 +669,7 @@ private void initialize ( JFrame parent, Command command )
    	JGUIUtil.addComponent(main_JPanel,
 		new JLabel ("Merge delimiters:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-   	List mergedelim_Vector = new Vector(100);
+   	List<String> mergedelim_Vector = new Vector<String>(3);
 	mergedelim_Vector.add ( "" );	// For default (true)
 	mergedelim_Vector.add ( __command._False );
 	mergedelim_Vector.add ( __command._True );
@@ -684,7 +685,7 @@ private void initialize ( JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>(4);
     IfNotFound_List.add("");
 	IfNotFound_List.add ( __command._Ignore );
 	IfNotFound_List.add ( __command._Warn );

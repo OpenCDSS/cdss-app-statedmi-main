@@ -58,6 +58,7 @@ import RTi.Util.String.StringUtil;
 /**
 Editor for SetIrrigationPracticeTS() command.
 */
+@SuppressWarnings("serial")
 public class SetIrrigationPracticeTS_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -440,7 +441,7 @@ private void initialize (JFrame parent, SetIrrigationPracticeTS_Command command 
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Groundwater mode:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List gwmode_Vector = new Vector();
+    List<String> gwmode_Vector = new Vector<String>(4);
 	gwmode_Vector.add ( "" );
 	gwmode_Vector.add ( "1 - Surface + GW used to maximize supply.");
 	gwmode_Vector.add ( "2 - Surface water used first.");
@@ -465,7 +466,7 @@ private void initialize (JFrame parent, SetIrrigationPracticeTS_Command command 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>(4);
     IfNotFound_List.add("");
 	IfNotFound_List.add ( __command._Ignore );
 	IfNotFound_List.add ( __command._Warn );

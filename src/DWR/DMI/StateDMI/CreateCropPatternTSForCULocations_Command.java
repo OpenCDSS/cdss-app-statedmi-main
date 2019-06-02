@@ -118,7 +118,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(3);
     valid_Vector.add ( "ID" );
 	valid_Vector.add ( "Units" );
 	valid_Vector.add ( "IfNotFound" );
@@ -182,11 +182,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of CU locations...
 	
-	List culocList = null;
+	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
 	try {
-		Object o = processor.getPropContents( "StateCU_Location_List");
-		culocList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
 		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {
@@ -210,10 +211,11 @@ CommandWarningException, CommandException
 	
 	// Get the list of crop pattern time series...
 	
-	List cdsList = null;
+	List<StateCU_CropPatternTS> cdsList = null;
 	try {
-		Object o = processor.getPropContents( "StateCU_CropPatternTS_List");
-		cdsList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_CropPatternTS> dataList = (List<StateCU_CropPatternTS>)processor.getPropContents( "StateCU_CropPatternTS_List");
+		cdsList = dataList;
 	}
 	catch ( Exception e ) {
 		message = "Error requesting StateCU_CropPatternTS_List from processor.";

@@ -30,7 +30,6 @@ import java.util.Vector;
 
 import DWR.StateCU.StateCU_CropPatternTS;
 
-import RTi.TS.YearTS;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.IO.AbstractCommand;
@@ -44,7 +43,6 @@ import RTi.Util.IO.CommandWarningException;
 import RTi.Util.IO.InvalidCommandParameterException;
 import RTi.Util.IO.PropList;
 import RTi.Util.String.StringUtil;
-import RTi.Util.Time.DateTime;
 
 /**
 <p>
@@ -117,7 +115,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
     valid_Vector.add ( "ID" );
 	valid_Vector.add ( "CropType" );
 	valid_Vector.add ( "IfNotFound" );
@@ -178,11 +176,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of crop pattern time series...
 	
-	List cdsList = null;
+	List<StateCU_CropPatternTS> cdsList = null;
 	int cdsListSize = 0;
 	try {
-		Object o = processor.getPropContents( "StateCU_CropPatternTS_List");
-		cdsList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_CropPatternTS> dataList = (List<StateCU_CropPatternTS>)processor.getPropContents( "StateCU_CropPatternTS_List");
+		cdsList = dataList;
 		cdsListSize = cdsList.size();
 	}
 	catch ( Exception e ) {

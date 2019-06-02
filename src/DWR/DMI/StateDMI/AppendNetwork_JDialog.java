@@ -65,6 +65,7 @@ import RTi.Util.Message.Message;
 /**
 Command editor dialog for the AppendNetwork() command.
 */
+@SuppressWarnings("serial")
 public class AppendNetwork_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -296,7 +297,7 @@ private void initialize ( JFrame parent, AppendNetwork_Command command )
         
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Append how?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	List<String> AppendHow_Vector = new Vector(3);
+	List<String> AppendHow_Vector = new Vector<String>(3);
 	AppendHow_Vector.add ( "" + StateMod_NodeNetwork_AppendHowType.ADD_UPSTREAM_OF_DOWNSTREAM );
 	AppendHow_Vector.add ( "" + StateMod_NodeNetwork_AppendHowType.REPLACE_UPSTREAM_OF_DOWNSTREAM );
 	__AppendHow_JComboBox = new SimpleJComboBox(false);

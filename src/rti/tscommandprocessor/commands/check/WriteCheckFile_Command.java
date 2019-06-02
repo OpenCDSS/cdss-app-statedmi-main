@@ -196,9 +196,9 @@ public boolean editCommand ( JFrame parent )
 /**
 Return the list of files that were created by this command.
 */
-public List getGeneratedFileList ()
+public List<File> getGeneratedFileList ()
 {
-    List list = new Vector();
+    List<File> list = new Vector<File>();
     if ( getOutputFile() != null ) {
         list.add ( getOutputFile() );
     }
@@ -622,13 +622,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     try {
         // Get the comments to add to the top of the file.
 
-        List OutputComments_List = new ArrayList<String>();
+        List<String> OutputComments_List = new ArrayList<String>();
         if ( writeHeaderComments ) {
 	        try {
 	            Object o = processor.getPropContents ( "OutputComments" );
 	            // Comments are available so use them...
 	            if ( o != null ) {
-	                OutputComments_List = (List)o;
+	                @SuppressWarnings("unchecked")
+					List<String> outputCommentsList = (List<String>)o;
+	                OutputComments_List = outputCommentsList;
 	            }
 	        }
 	        catch ( Exception e ) {
@@ -849,7 +851,7 @@ throws Exception {
 	            newComments2 = new ArrayList<String>();
 	        }
 	        else {
-	            newComments2 = new ArrayList(newComments);
+	            newComments2 = new ArrayList<String>(newComments);
 	        }
 	        newComments2.add(0,"");
 	        newComments2.add(1,IOUtil.getProgramName() + " check file containing all warning/failure messages from run.");

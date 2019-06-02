@@ -319,7 +319,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>();
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "ListFile" );
 	valid_Vector.add ( "InputStart" );
@@ -368,9 +368,9 @@ private int readIrrigationPracticeTSFromList(
 		String IrrigationMethodCol, int IrrigationMethodCol_int,
 		String SupplyTypeCol, int SupplyTypeCol_int,
 		int InputStart_int, int InputEnd_int,
-		List CULocation_Vector,
-		List CUIrrigationPracticeTS_Vector,
-		List Supplemental_ParcelUseTS_Vector )
+		List<StateCU_Location> CULocation_Vector,
+		List<StateCU_IrrigationPracticeTS> CUIrrigationPracticeTS_Vector,
+		List<StateDMI_HydroBase_ParcelUseTS> Supplemental_ParcelUseTS_Vector )
 throws CommandException, Exception
 {	String routine = "ReadIrrigationPracticeTSFromList_Command.readIrrigationPracticeTSFromList";
 	String message;
@@ -1306,9 +1306,11 @@ CommandWarningException, CommandException
 	
 	// Get the list of CU locations...
 	
-	List culocList = null;
+	List<StateCU_Location> culocList = null;
 	try {
-		culocList = (List)processor.getPropContents ( "StateCU_Location_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents ( "StateCU_Location_List");
+		culocList = dataList;
 	}
 	catch ( Exception e ) {
 		message = "Error requesting CU location data from processor.";
@@ -1321,10 +1323,12 @@ CommandWarningException, CommandException
 	
 	// Get the irrigation practice time series to process.
 	
-	List ipyList = null;
+	List<StateCU_IrrigationPracticeTS> ipyList = null;
 	int ipyListSize = 0;
 	try {
-		ipyList = (List)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_IrrigationPracticeTS> dataList = (List<StateCU_IrrigationPracticeTS>)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List");
+		ipyList = dataList;
 		ipyListSize = ipyList.size();
 	}
 	catch ( Exception e ) {
@@ -1349,10 +1353,12 @@ CommandWarningException, CommandException
 	// Get the supplemental crop pattern data specified with SetCropPatternTS() and
 	// SetCropPatternTSFromList() commands...
 	
-	List hydroBaseSupplementalParcelUseTSList = null;
+	List<StateDMI_HydroBase_StructureView> hydroBaseSupplementalParcelUseTSList = null;
 	try {
-		hydroBaseSupplementalParcelUseTSList =
-			(List)processor.getPropContents ( "HydroBase_SupplementalParcelUseTS_List");
+		@SuppressWarnings("unchecked")
+		List<StateDMI_HydroBase_StructureView> dataList = 
+			(List<StateDMI_HydroBase_StructureView>)processor.getPropContents ( "HydroBase_SupplementalParcelUseTS_List");
+		hydroBaseSupplementalParcelUseTSList = dataList;
 	}
 	catch ( Exception e ) {
 		message = "Error requesting supplemental parcel use data from processor.";
@@ -1442,6 +1448,7 @@ CommandWarningException, CommandException
 	}
 
 	try {
+		/* TODO smalers 2019-06-01 NEED TO ENABLE
 		warning_count = readIrrigationPracticeTSFromList (
 			command_tag, warningLevel, warning_count, status,
 			commandPhase,
@@ -1456,6 +1463,7 @@ CommandWarningException, CommandException
 			culocList,
 			ipyList,
 			hydroBaseSupplementalParcelUseTSList );
+			*/
 	}
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );

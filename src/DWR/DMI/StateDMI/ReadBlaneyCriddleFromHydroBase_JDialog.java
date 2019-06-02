@@ -59,6 +59,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for the ReadBlaneyCriddleFromHydroBase() command.
 */
+@SuppressWarnings("serial")
 public class ReadBlaneyCriddleFromHydroBase_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener
 {
@@ -76,10 +77,10 @@ private boolean __ok = false;
 Command editor constructor.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
-@param cuMethodList Vector of CU method strings.
+@param cuMethodList List of CU method strings.
 */
 public ReadBlaneyCriddleFromHydroBase_JDialog ( JFrame parent,
-	ReadBlaneyCriddleFromHydroBase_Command command, List cuMethodList ) {
+	ReadBlaneyCriddleFromHydroBase_Command command, List<String> cuMethodList ) {
 	super(parent, true);
 	initialize (parent, command, cuMethodList );
 }
@@ -165,7 +166,7 @@ Instantiates the GUI components.
 @param command Command to edit.
 @param cuMethodList List of CU method strings.
 */
-private void initialize (JFrame parent, ReadBlaneyCriddleFromHydroBase_Command command, List cuMethodList )
+private void initialize (JFrame parent, ReadBlaneyCriddleFromHydroBase_Command command, List<String> cuMethodList )
 {	__command = command;
 
 	addWindowListener(this);
@@ -199,7 +200,7 @@ private void initialize (JFrame parent, ReadBlaneyCriddleFromHydroBase_Command c
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Blaney-Criddle Method:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__BlaneyCriddleMethod_JComboBox = new SimpleJComboBox();
-	__BlaneyCriddleMethod_JComboBox.setData ( new Vector(cuMethodList) );
+	__BlaneyCriddleMethod_JComboBox.setData ( new Vector<String>(cuMethodList) );
 	__BlaneyCriddleMethod_JComboBox.addItemListener(this);
     JGUIUtil.addComponent(main_JPanel, __BlaneyCriddleMethod_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);

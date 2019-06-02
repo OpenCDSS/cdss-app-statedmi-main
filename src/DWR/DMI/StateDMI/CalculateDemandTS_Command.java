@@ -115,7 +115,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(2);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "IfNotFound" );
 
@@ -191,21 +191,25 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	
 	// Demand time series
     
-    List demandTSList = null;
+    List<MonthTS> demandTSList = null;
     int compType = StateMod_DataSet.COMP_UNKNOWN;
     String dataType = "";
     String stationType = "";
     try {
     	if ( (this instanceof CalculateDiversionDemandTSMonthly_Command) ||
 			(this instanceof CalculateDiversionDemandTSMonthlyAsMax_Command) ) {
-			demandTSList = (List)processor.getPropContents ( "StateMod_DiversionDemandTSMonthly_List" );
+			@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_DiversionDemandTSMonthly_List" );
+			demandTSList = dataList;
 			dataType = "diversion demand";
 			stationType = "diversion";
 			compType = StateMod_DataSet.COMP_DEMAND_TS_MONTHLY;
 		}
     	else if ( (this instanceof CalculateWellDemandTSMonthly_Command) ||
 			(this instanceof CalculateWellDemandTSMonthlyAsMax_Command) ){
-			demandTSList = (List)processor.getPropContents ( "StateMod_WellDemandTSMonthly_List" );
+			@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_WellDemandTSMonthly_List" );
+			demandTSList = dataList;
 			dataType = "well demand";
 			stationType = "well";
 			compType = StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY;
@@ -224,15 +228,19 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     // Get the historical time series if doing the maximum
     
-    List histTSList = null;
+    List<MonthTS> histTSList = null;
     //int histTSListSize = 0;
     if ( do_max ) {
 	    try {
 	    	if ( this instanceof CalculateDiversionDemandTSMonthlyAsMax_Command ) {
-				histTSList = (List)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
+				@SuppressWarnings("unchecked")
+				List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_DiversionHistoricalTSMonthly_List" );
+				histTSList = dataList;
 			}
 	    	else if ( this instanceof CalculateWellDemandTSMonthlyAsMax_Command ) {
-	    		histTSList = (List)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
+	    		@SuppressWarnings("unchecked")
+				List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_WellHistoricalPumpingTSMonthly_List" );
+	    		histTSList = dataList;
 			}
 	    	//histTSListSize = demandTSList.size();
 	    }
@@ -250,11 +258,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     // Get the consumptive water requirement time series if doing the IWR/Hist
     
-    List cwrTSList = null;
+    List<MonthTS> cwrTSList = null;
     int cwrTSListSize = 0;
     if ( do_iwr ) {
 	    try {
-			cwrTSList = (List)processor.getPropContents ( "StateMod_ConsumptiveWaterRequirementTSMonthly_List" );
+			@SuppressWarnings("unchecked")
+			List<MonthTS> dataList = (List<MonthTS>)processor.getPropContents ( "StateMod_ConsumptiveWaterRequirementTSMonthly_List" );
+			cwrTSList = dataList;
 	    	cwrTSListSize = cwrTSList.size();
 	    }
 	    catch ( Exception e ) {
@@ -279,16 +289,22 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     }
     
     // Get the stations, used to perform ID checks
-    List stationList = null;
+    List<StateMod_Diversion> divstaList = null;
+    List<StateMod_Well> wellstaList = null;
     int stationListSize = 0;
 	try {
 		if ( compType == StateMod_DataSet.COMP_DEMAND_TS_MONTHLY ) {
-    		stationList = (List)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Diversion> dataList = (List<StateMod_Diversion>)processor.getPropContents ( "StateMod_DiversionStation_List" );
+    		divstaList = dataList;
+    		stationListSize = divstaList.size();
     	}
 		else if ( compType == StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY ) {
-    		stationList = (List)processor.getPropContents ( "StateMod_WellStation_List" );
+    		@SuppressWarnings("unchecked")
+			List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List" );
+    		wellstaList = dataList;
+    		stationListSize = wellstaList.size();
     	}
-		stationListSize = stationList.size();
 	}
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
@@ -455,11 +471,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	int matchCount = 0;
     	for ( int i = 0; i < stationListSize; i++ ) {
     		if ( compType == StateMod_DataSet.COMP_DEMAND_TS_MONTHLY ) {
-    			div = (StateMod_Diversion)stationList.get(i);
+    			div = divstaList.get(i);
     			id = div.getID();
     		}
     		else if ( compType == StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY ) {
-    			well = (StateMod_Well)stationList.get(i);
+    			well = wellstaList.get(i);
     			if ( well.getIdvcomw() != 1 ) {
     				// Can only process well-only where demand time
     				// series are supplied for calculations to make sense...
@@ -565,14 +581,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    				div.getCollectionType().equalsIgnoreCase(StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT)) {
 	    				// This is the primary diversion station in a MultiStruct.  Set all of the secondary
 	    				// demand time series to zero.
-	    				List partids = div.getCollectionPartIDs(0);
+	    				List<String> partids = div.getCollectionPartIDs(0);
 	    				int collection_size = 0;
 	    				if ( partids != null ) {
 	    					collection_size = partids.size();
 	    				}
 	    				String part_id;
 	    				for ( int ic = 0; ic < collection_size; ic++ ) {
-	    					part_id = (String)partids.get(ic);
+	    					part_id = partids.get(ic);
 	    					pos = TSUtil.indexOf ( demandTSList, part_id, "Location", 0 );
 	    					if ( pos < 0 ) {
 	    						// No demand time series is available...
@@ -666,14 +682,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    				// First clone the diversion time series so it is not changed...
 	    				MonthTS ddh_ts2 = (MonthTS)ddh_ts.clone();
 	    				// Now loop through the parts and add the historical time series for the parts...
-	    				List partids = div.getCollectionPartIDs(0);
+	    				List<String> partids = div.getCollectionPartIDs(0);
 	    				int collection_size = 0;
 	    				if ( partids != null ) {
 	    					collection_size = partids.size();
 	    				}
 	    				String part_id;
 	    				for ( int ic = 0; ic < collection_size; ic++ ) {
-	    					part_id = (String)partids.get(ic);
+	    					part_id = partids.get(ic);
 	    					pos = TSUtil.indexOf ( histTSList, part_id, "Location", 0 );
 	    					if ( pos < 0 ) {
 	    						// No diversion time series is available...

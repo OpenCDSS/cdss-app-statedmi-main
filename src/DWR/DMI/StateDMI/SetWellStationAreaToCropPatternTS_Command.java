@@ -130,7 +130,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(2);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "IfNotFound" );
     warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
@@ -238,11 +238,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of well stations...
 	
-	List wellList = null;
+	List<StateMod_Well> wellList = null;
 	int wellListSize = 0;
 	try {
-		Object o = processor.getPropContents( "StateMod_WellStation_List");
-		wellList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents( "StateMod_WellStation_List");
+		wellList = dataList;
 		wellListSize = wellList.size();
 	}
 	catch ( Exception e ) {
@@ -258,10 +259,11 @@ CommandWarningException, CommandException
 	
 	// Get the crop pattern time series, which are needed to set the data...
 	
-	List cdsList = null;
+	List<StateCU_CropPatternTS> cdsList = null;
 	try {
-		Object o = processor.getPropContents( "StateCU_CropPatternTS_List");
-		cdsList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_CropPatternTS> dataList = (List<StateCU_CropPatternTS>)processor.getPropContents( "StateCU_CropPatternTS_List");
+		cdsList = dataList;
 	}
 	catch ( Exception e ) {
 		message = "Unable to get crop pattern time series to set well station area (" + e + ").";

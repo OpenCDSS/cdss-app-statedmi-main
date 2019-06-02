@@ -157,7 +157,7 @@ throws InvalidCommandParameterException
 	// Parse the crop patterns - check the data and keep for use when running
 	
 	if ( (CropPattern != null) && (SetToMissing == null) ) {
-		List tokens = StringUtil.breakStringList ( CropPattern,	", ", StringUtil.DELIM_SKIP_BLANKS );
+		List<String> tokens = StringUtil.breakStringList ( CropPattern,	", ", StringUtil.DELIM_SKIP_BLANKS );
 		if ( tokens == null ) {
 			message = "The crop pattern is not valid.";
 			warning += "\n" + message;
@@ -178,7 +178,7 @@ throws InvalidCommandParameterException
 		for ( int i = 0; i < size; i++ ) {
 			if ( i%2 == 0 ) {
 				// Even, crop names....
-				__cropTypes[i/2] = (String)tokens.get(i);
+				__cropTypes[i/2] = tokens.get(i);
 			}
 			else {
 				// Odd... area...
@@ -191,7 +191,7 @@ throws InvalidCommandParameterException
 							message, "Specify the crop pattern area as a number." ) );
 				}
 				else {
-					__areas[i/2] = StringUtil.atod((String)tokens.get(i) );
+					__areas[i/2] = StringUtil.atod(tokens.get(i) );
 				}
 			}
 		}
@@ -253,7 +253,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(9);
     valid_Vector.add ( "ID" );
 	valid_Vector.add ( "SetStart" );
 	valid_Vector.add ( "SetEnd" );
@@ -350,7 +350,9 @@ CommandWarningException, CommandException
 	List<StateCU_CropPatternTS> cdsList = null;
 	int cdsListSize = 0;
 	try {
-		cdsList = (List<StateCU_CropPatternTS>)processor.getPropContents( "StateCU_CropPatternTS_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_CropPatternTS> dataList = (List<StateCU_CropPatternTS>)processor.getPropContents( "StateCU_CropPatternTS_List");
+		cdsList = dataList;
 		cdsListSize = cdsList.size();
 	}
 	catch ( Exception e ) {
@@ -367,8 +369,9 @@ CommandWarningException, CommandException
 	
 	List<StateDMI_HydroBase_ParcelUseTS> supplementalParcelList = null;
 	try {
-		Object o = processor.getPropContents( "HydroBase_Supplemental_ParcelUseTS_List");
-		supplementalParcelList = (List<StateDMI_HydroBase_ParcelUseTS>)o;
+		@SuppressWarnings("unchecked")
+		List<StateDMI_HydroBase_ParcelUseTS> dataList = (List<StateDMI_HydroBase_ParcelUseTS>)processor.getPropContents( "HydroBase_Supplemental_ParcelUseTS_List");
+		supplementalParcelList = dataList;
 	}
 	catch ( Exception e ) {
 		message = "Error requesting HydroBase_Supplemental_ParcelUseTS_List from processor.";
@@ -454,7 +457,7 @@ CommandWarningException, CommandException
 		StateCU_CropPatternTS cds = null;
 		String cds_id;
 		int year = 0;
-		List crop_names;	// From an existing CropPatternTS
+		List<String> crop_names;	// From an existing CropPatternTS
 		int ncrop_names = 0;
 		double missing;	// Used to set data to missing
 		YearTS ts = null;	// Crop time series to process.

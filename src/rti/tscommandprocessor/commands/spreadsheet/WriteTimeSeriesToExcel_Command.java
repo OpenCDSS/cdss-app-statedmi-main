@@ -387,7 +387,7 @@ Return the list of files that were created by this command.
 */
 public List<File> getGeneratedFileList ()
 {
-	List<File> list = new Vector();
+	List<File> list = new Vector<File>();
 	if ( getOutputFile() != null ) {
 		list.add ( getOutputFile() );
 	}
@@ -1480,9 +1480,9 @@ throws FileNotFoundException, IOException
         // Set the cell formats for output (will be used for the data rows).
         // All formats for the column headings are text.
         DataFormat [] cellFormats = new DataFormat[cols];
-        DataFormat cellFormatHeader = wb.createDataFormat();
+        //DataFormat cellFormatHeader = wb.createDataFormat();
         CellStyle [] cellStyles = new CellStyle[cols];
-        CellStyle cellStyleHeader = wb.createCellStyle();
+        //CellStyle cellStyleHeader = wb.createCellStyle();
         // Initialize styles corresponding to styleTable, newer approach to styling.
         // The styles in this table will be used by default with the above setting style information to the below.
         TimeSeriesConditionAndStyleManager columnStyleManager = null;
@@ -1494,7 +1494,7 @@ throws FileNotFoundException, IOException
         	styleManager = new TimeSeriesConditionAndStyleManager(tslist,conditionTable,styleTable,wb);
         }
         int [] cellTypes = new int[cols];
-        int cellTypeHeader = Cell.CELL_TYPE_STRING;
+        //int cellTypeHeader = Cell.CELL_TYPE_STRING;
         int col = 0;
         // TODO SAM 2015-02-17 Need to figure out how to store date/time in numeric - for now format a string
         List<String> columnNames = new ArrayList<String>();

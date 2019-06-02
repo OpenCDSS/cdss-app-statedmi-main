@@ -28,7 +28,7 @@ import javax.swing.JFrame;
 import java.util.List;
 import java.util.Vector;
 
-import DWR.StateMod.StateMod_PrfGageData;
+//import DWR.StateMod.StateMod_PrfGageData;
 
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
@@ -132,7 +132,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(3);
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "GageID" );
 	valid_Vector.add ( "IfNotFound" );
@@ -177,13 +177,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     CommandPhaseType command_phase = CommandPhaseType.RUN;
     CommandStatus status = getCommandStatus();
     status.clearLog(CommandPhaseType.RUN);
-    StateDMI_Processor processor = (StateDMI_Processor)getCommandProcessor();
+    //StateDMI_Processor processor = (StateDMI_Processor)getCommandProcessor();
     
     // Not all of these are used with diversions and/or wells but it is OK to request all.
 
     PropList parameters = getCommandParameters();
-	String ID = parameters.getValue ( "ID" );
-	String GageID = parameters.getValue ( "GageID" );
+	//String ID = parameters.getValue ( "ID" );
+	//String GageID = parameters.getValue ( "GageID" );
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
 	if ( IfNotFound == null ) {
 		IfNotFound = _Warn; // Default
@@ -198,8 +198,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     }
 
     try {
-    	StateMod_PrfGageData prf = new StateMod_PrfGageData ( ID, GageID );
-    	boolean found = processor.findAndAddSMPrfGageData ( prf, true );
+    	//StateMod_PrfGageData prf = new StateMod_PrfGageData ( ID, GageID );
+    	//boolean found = processor.findAndAddSMPrfGageData ( prf, true );
 
     	// If nothing was matched take additional actions...
 

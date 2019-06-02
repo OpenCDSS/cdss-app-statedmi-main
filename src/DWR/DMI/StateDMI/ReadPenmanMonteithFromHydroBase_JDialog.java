@@ -59,6 +59,7 @@ import RTi.Util.Message.Message;
 /**
 Editor for the ReadPenmanMonteithFromHydroBase() command.
 */
+@SuppressWarnings("serial")
 public class ReadPenmanMonteithFromHydroBase_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener
 {
@@ -79,7 +80,7 @@ Command editor constructor.
 @param cuMethodList Vector of CU method strings.
 */
 public ReadPenmanMonteithFromHydroBase_JDialog ( JFrame parent,
-	ReadPenmanMonteithFromHydroBase_Command command, List cuMethodList ) {
+	ReadPenmanMonteithFromHydroBase_Command command, List<String> cuMethodList ) {
 	super(parent, true);
 	initialize (parent, command, cuMethodList );
 }
@@ -165,7 +166,7 @@ Instantiates the GUI components.
 @param command Command to edit.
 @param cuMethodList List of CU method strings.
 */
-private void initialize (JFrame parent, ReadPenmanMonteithFromHydroBase_Command command, List cuMethodList )
+private void initialize (JFrame parent, ReadPenmanMonteithFromHydroBase_Command command, List<String> cuMethodList )
 {	__command = command;
 
 	addWindowListener(this);
@@ -199,7 +200,7 @@ private void initialize (JFrame parent, ReadPenmanMonteithFromHydroBase_Command 
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "PenmanMonteith Method:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__PenmanMonteithMethod_JComboBox = new SimpleJComboBox();
-	__PenmanMonteithMethod_JComboBox.setData ( new Vector(cuMethodList) );
+	__PenmanMonteithMethod_JComboBox.setData ( new Vector<String>(cuMethodList) );
 	__PenmanMonteithMethod_JComboBox.addItemListener(this);
     JGUIUtil.addComponent(main_JPanel, __PenmanMonteithMethod_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);

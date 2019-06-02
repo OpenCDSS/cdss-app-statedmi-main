@@ -390,10 +390,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			int insertBeforeColNum = -1;
 			int oldCol = -1;
 			boolean canProcess = true;
-			boolean doSetDateTime = false;
-			if ( tupleDateTimeStrings.length > 0 ) {
-				doSetDateTime = true;
-			}
+			//boolean doSetDateTime = false;
+			//if ( tupleDateTimeStrings.length > 0 ) {
+				//doSetDateTime = true;
+			//}
 			// If an insert column was requested, get the column number
 			if ( (InsertBeforeColumn != null) && !InsertBeforeColumn.isEmpty() ) {
 				try {

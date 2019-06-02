@@ -83,7 +83,7 @@ public Beta_CreateNaturalFlowShapefile ()
 	
 	// Loop through the networks and extract the natural flow stations.
 	
-	List allnfnodes = new Vector();
+	List<HydrologyNode> allnfnodes = new Vector<HydrologyNode>();
 	for ( int inet = 0; inet < networks.length; inet++ ) {
 		StateMod_NodeNetwork net = null;
 		try {
@@ -96,7 +96,7 @@ public Beta_CreateNaturalFlowShapefile ()
 		
 		// Get the baseflow nodes...
 		
-		List nfnodes = net.getBaseflowNodes();
+		List<HydrologyNode> nfnodes = net.getBaseflowNodes();
 		int size_nfnodes = nfnodes.size();
 		Message.printStatus(2, routine, "Got " + size_nfnodes + " natural flow nodes" );
 		
@@ -112,7 +112,7 @@ public Beta_CreateNaturalFlowShapefile ()
 		GeoLayer layer;
 		GRPoint point;
 		for ( int inode = 0; inode < size_nfnodes; inode++ ) {
-			node = (HydrologyNode)nfnodes.get(inode);
+			node = nfnodes.get(inode);
 			allnfnodes.add ( node );
 			String node_id = node.getCommonID();
 			Message.printStatus(2, routine, "Searching for node \"" + node_id + "\"" );

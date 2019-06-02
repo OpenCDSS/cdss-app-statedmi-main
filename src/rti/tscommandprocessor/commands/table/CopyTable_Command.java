@@ -159,12 +159,13 @@ private DataTable getDiscoveryTable()
 /**
 Return a list of objects of the requested type.  This class only keeps a list of DataTable objects.
 */
-public List getObjectList ( Class c )
+@SuppressWarnings("unchecked")
+public <T> List<T> getObjectList ( Class<T> c )
 {   DataTable table = getDiscoveryTable();
-    List<DataTable> v = null;
+    List<T> v = null;
     if ( (table != null) && (c == table.getClass()) ) {
-        v = new ArrayList<DataTable>();
-        v.add ( table );
+        v = new ArrayList<T>();
+        v.add ( (T)table );
     }
     return v;
 }

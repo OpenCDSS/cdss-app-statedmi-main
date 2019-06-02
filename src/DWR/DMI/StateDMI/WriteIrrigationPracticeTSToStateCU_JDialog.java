@@ -81,6 +81,7 @@ import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 
+@SuppressWarnings("serial")
 public class WriteIrrigationPracticeTSToStateCU_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener {
 
@@ -361,7 +362,7 @@ private void initialize (JFrame parent, WriteIrrigationPracticeTSToStateCU_Comma
             
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Version:"),
        	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List version_Vector = new Vector();
+    List<String> version_Vector = new Vector<String>(2);
     version_Vector.add ( "" );
     version_Vector.add ( __command._10 );
     __Version_JComboBox = new SimpleJComboBox(false);
@@ -375,7 +376,7 @@ private void initialize (JFrame parent, WriteIrrigationPracticeTSToStateCU_Comma
      
     JGUIUtil.addComponent(main_JPanel, new JLabel ("One location per file?:"),
        	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List OneLocationPerFile_Vector = new Vector(3);
+    List<String> OneLocationPerFile_Vector = new Vector<String>(3);
     OneLocationPerFile_Vector.add ( "" );
     OneLocationPerFile_Vector.add ( __command._False );
     OneLocationPerFile_Vector.add ( __command._True );
@@ -390,7 +391,7 @@ private void initialize (JFrame parent, WriteIrrigationPracticeTSToStateCU_Comma
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Check data?:"),
            	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List CheckData_Vector = new Vector(3);
+    List<String> CheckData_Vector = new Vector<String>(3);
     CheckData_Vector.add ( "" );
     CheckData_Vector.add ( __command._False );
     CheckData_Vector.add ( __command._True );
@@ -406,7 +407,7 @@ private void initialize (JFrame parent, WriteIrrigationPracticeTSToStateCU_Comma
         
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Write how:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List write_how_Vector = new Vector();
+    List<String> write_how_Vector = new Vector<String>(3);
 	write_how_Vector.add ( "" );
 	write_how_Vector.add ( __command._OverwriteFile );
 	write_how_Vector.add ( __command._UpdateFile );

@@ -109,7 +109,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(2);
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "IfNotFound" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
@@ -167,11 +167,12 @@ CommandWarningException, CommandException
 		
 	// Get the list of climate stations...
 	
-	List culocList = null;
+	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
 	try {
-		Object o = processor.getPropContents( "StateCU_Location_List");
-		culocList = (List)o;
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
 		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {
@@ -221,7 +222,7 @@ CommandWarningException, CommandException
 		double precwt, tempwt;
 		String culocRegion1;
 		String culocRegion2;
-		List hcliList;
+		List<HydroBase_StationGeolocCUClimWts> hcliList;
 		int matchCount = 0;	// Number of matching IDs that have data in HydroBase
 		for (int i = 0; i < culocListSize; i++) {
 			culoc = (StateCU_Location)culocList.get(i);

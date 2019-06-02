@@ -61,13 +61,14 @@ import RTi.Util.Message.Message;
 /**
 Editor for Fill*StationsFromHydroBase() commands.
 */
+@SuppressWarnings("serial")
 public class FillStationsFromHydroBase_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener {
 
 // Used with DefineRightHow
-private final String __EarliestDate = "EarliestDate";
-private final String __LatestDate = "LatestDate";
-private final String __RightIfAvailable = "RightIfAvailable";
+//private final String __EarliestDate = "EarliestDate";
+//private final String __LatestDate = "LatestDate";
+//private final String __RightIfAvailable = "RightIfAvailable";
 
 /**
 Used with CheckStructures
@@ -458,7 +459,7 @@ private void initialize ( JFrame parent, Command command )
 		(__command instanceof FillRiverNetworkFromHydroBase_Command)){
         JGUIUtil.addComponent(main_JPanel, new JLabel ("Name format:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List formats = new Vector(3);
+        List<String> formats = new Vector<String>(3);
         formats.add("");
         formats.add(__StationName);
         formats.add(__StationName_NodeType);
@@ -476,7 +477,7 @@ private void initialize ( JFrame parent, Command command )
 		__command instanceof FillStreamEstimateStationsFromHydroBase_Command ) {
         JGUIUtil.addComponent(main_JPanel, new JLabel ("Check structures?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List v = new Vector(1);
+        List<String> v = new Vector<String>(3);
 		v.add("");
 		v.add(__False);
 		v.add(__True);
@@ -584,7 +585,7 @@ private void initialize ( JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-    List IfNotFound_List = new Vector();
+    List<String> IfNotFound_List = new Vector<String>(4);
     IfNotFound_List.add("");
 	IfNotFound_List.add ( _Ignore );
 	IfNotFound_List.add ( _Warn );

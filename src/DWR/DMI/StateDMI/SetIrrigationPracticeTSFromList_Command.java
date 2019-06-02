@@ -284,7 +284,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List valid_Vector = new Vector();
+	List<String> valid_Vector = new Vector<String>(20);
 	valid_Vector.add ( "ListFile" );
 	valid_Vector.add ( "ID" );
 	valid_Vector.add ( "IDCol" );
@@ -376,10 +376,12 @@ CommandWarningException, CommandException
 	
 	// Get the irrigation practice time series to process.
 	
-	List ipyList = null;
+	List<StateCU_IrrigationPracticeTS> ipyList = null;
 	int ipyListSize = 0;
 	try {
-		ipyList = (List)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List");
+		@SuppressWarnings("unchecked")
+		List<StateCU_IrrigationPracticeTS> dataList = (List<StateCU_IrrigationPracticeTS>)processor.getPropContents ( "StateCU_IrrigationPracticeTS_List");
+		ipyList = dataList;
 		ipyListSize = ipyList.size();
 	}
 	catch ( Exception e ) {
@@ -646,7 +648,8 @@ CommandWarningException, CommandException
 		//boolean fill_IrrigationMethod = false;
 		//boolean fill_SupplyType = false;
 		TableRecord rec = null;
-		int matchCount = 0;
+		// TODO smalers 2019-05-28 enable matchCount
+		//int matchCount = 0;
 		int year;
 		int pos = 0; // Location of ID in data component Vector
 		int Year_int; // Integer value of year from column in file
@@ -683,7 +686,7 @@ CommandWarningException, CommandException
 			ipy = (StateCU_IrrigationPracticeTS)ipyList.get(pos);
 			// OK to set the data...
 			// Get the data values from the table one time...
-			++matchCount;
+			//++matchCount;
 			ipy_id = id;
 			Year_int = -1; // Indicate not to set for a specific year
 			if ( YearCol != null ) {

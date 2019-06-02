@@ -83,6 +83,7 @@ import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 
+@SuppressWarnings("serial")
 public class ReadIrrigationPracticeTSWellData_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
@@ -102,7 +103,7 @@ private SimpleJButton	__ok_JButton = null;
 private SimpleJButton	__browse_JButton = null;
 private SimpleJButton	__path_JButton = null;
 private String		__working_dir = null;	
-private List		__command_Vector = null;
+private List<String>		__command_Vector = null;
 private String		__command = null;
 private boolean		__read_list = false;
 
@@ -115,7 +116,7 @@ Command editor constructor
 */
 public ReadIrrigationPracticeTSWellData_JDialog (	JFrame parent,
 							PropList props,
-							List command,
+							List<String> command,
 							boolean read_list )
 {	super(parent, true);
 	initialize ( parent, props, command, read_list );
@@ -260,9 +261,9 @@ Return the text for the command.
 @return the text for the command or null if there is a problem with the 
 command.
 */
-public List getText () {
+public List<String> getText () {
 	if ((__command_Vector != null) && ((__command_Vector.size() == 0) ||
-		((String)__command_Vector.get(0)).equals(""))) {
+		__command_Vector.get(0).equals(""))) {
 		return null;
 	}
 	return __command_Vector;
@@ -276,7 +277,7 @@ Instantiates the GUI components.
 @param command Vector of String containing the command.
 @param read_list true if reading a list file, false if reading from HydroBase.
 */
-private void initialize (	JFrame parent, PropList props, List command,
+private void initialize (	JFrame parent, PropList props, List<String> command,
 				boolean read_list )
 {	__command_Vector = command;
 	__working_dir = props.getValue ("WorkingDir");
@@ -374,7 +375,7 @@ private void initialize (	JFrame parent, PropList props, List command,
 
         JGUIUtil.addComponent(main_JPanel, new JLabel ("Parcel ID column:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List column_Vector = new Vector(100);
+        List<String> column_Vector = new Vector<String>(100);
 	column_Vector.add ( "" );	// Not available
 	for ( int i = 1; i <= 100; i++ ) {
 		column_Vector.add ( "" + i );
@@ -512,8 +513,8 @@ private void refresh ()
 	__error_wait = false;
 	if (__first_time) {
 		__first_time = false;
-		List v = StringUtil.breakStringList (
-			((String)__command_Vector.get(0)).trim(),"()",
+		List<String> v = StringUtil.breakStringList (
+			__command_Vector.get(0).trim(),"()",
 			StringUtil.DELIM_SKIP_BLANKS );
 		PropList props = null;
 		if ( (v != null) && (v.size() > 1) ) {
@@ -681,10 +682,10 @@ private void refresh ()
 }
 
 /**
-Return the command as a Vector of String.
+Return the command as a list of String.
 @return returns the command text or null if no command.
 */
-public List response (int status) {
+public List<String> response (int status) {
 	setVisible(false);
 	dispose();
 	if (status == 0) {
@@ -694,7 +695,7 @@ public List response (int status) {
 	}
 	else {	refresh();
 		if (	(__command_Vector.size() == 0) ||
-			((String)__command_Vector.get(0)).equals("")) {
+			__command_Vector.get(0).equals("")) {
 			return null;
 		}
 		return __command_Vector;
