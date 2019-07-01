@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -268,6 +269,7 @@ private final String __RESOURCE_PATH = "/DWR/DMI/StateDMI";
 /**
 Indicate the application type for the StateDMI run so that
 menus can be set for StateCU or StateMod.
+See StateDMI.APP_TYPE_*
 */
 private int __appType = 0;
 
@@ -1019,6 +1021,8 @@ private JMenuItem
 	__Commands_General_FileHandling_WebGet_JMenuItem = null,
 	__Commands_General_FileHandling_CompareFiles_JMenuItem = null,
 	__Commands_General_FileHandling_MergeListFileColumns_JMenuItem = null,
+	__Commands_General_FileHandling_AppendFile_JMenuItem = null,
+	__Commands_General_FileHandling_CopyFile_JMenuItem = null,
 	__Commands_General_FileHandling_ListFiles_JMenuItem = null,
 	__Commands_General_FileHandling_UnzipFile_JMenuItem = null,
     __Commands_General_FileHandling_RemoveFile_JMenuItem = null;
@@ -1092,6 +1096,12 @@ private JMenu
 private JMenuItem
 	__Commands_TableJoin_AppendTable_JMenuItem,
 	__Commands_TableJoin_JoinTables_JMenuItem;
+
+// Analyze Table
+private JMenu
+	__Commands_TableAnalyze_JMenu = null;
+private JMenuItem
+	__Commands_TableAnalyze_CompareTables_JMenuItem;
 
 // Manipulate Table Values
 private JMenu
@@ -1617,9 +1627,15 @@ private JMenuItem
 	__Tools_ListWellStationRightTotals_JMenuItem,
 	__Tools_HydrobaseParcelWaterSupply_JMenuItem,
 	__Tools_MergeListFileColumns_JMenuItem,
+	__Tools_ViewLogFile_Startup_JMenuItem,
 
 	__Help_AboutStateDMI_JMenuItem,
 	__Help_ViewDocumentation_JMenuItem = null,
+	__Help_ViewDocumentation_ReleaseNotes_JMenuItem = null,
+	__Help_ViewDocumentation_UserManual_JMenuItem = null,
+	__Help_ViewDocumentation_CommandReference_JMenuItem = null,
+	__Help_ViewDocumentation_DatastoreReference_JMenuItem = null,
+	__Help_ViewDocumentation_Troubleshooting_JMenuItem = null,
 	__Help_ViewTrainingMaterials_JMenuItem = null;
 
 
@@ -1732,7 +1748,7 @@ private String
 	__File_Properties_String = "Properties",
 	__File_Properties_HydroBase_String = "HydroBase",
 	__File_Properties_DataSet_String = "Data Set",
-	__File_SetWorkingDirectory_String = "Set Working Directory ...",
+	//__File_SetWorkingDirectory_String = "Set Working Directory ...",
 	__File_Test_String = "Test",
 	__File_SwitchToStateCU_String = "Switch to StateCU",
 	__File_SwitchToStateMod_String = "Switch to StateMod",
@@ -1977,6 +1993,8 @@ private String
 	__Commands_General_FileHandling_WebGet_String = "WebGet()... <get file(s) from the web>",
 	__Commands_General_FileHandling_MergeListFileColumns_String = "MergeListFileColumns() ...",
     __Commands_General_FileHandling_RemoveFile_String = "RemoveFile()... <remove file(s)>",
+    __Commands_General_FileHandling_AppendFile_String = "AppendFile()... <append file(s)>",
+    __Commands_General_FileHandling_CopyFile_String = "CopyFile()... <copy file(s)>",
     __Commands_General_FileHandling_ListFiles_String = "ListFiles()... <list file(s) to a table>",
     __Commands_General_FileHandling_UnzipFile_String = "UnzipFile()... <unzip file>",
 
@@ -2036,7 +2054,7 @@ private String
 	__Commands_TableJoin_String = "Append, Join Tables",
 	__Commands_TableJoin_AppendTable_String = "AppendTable()... <append a table's rows to another table>",
 	__Commands_TableJoin_JoinTables_String = "JoinTables()... <join a table's rows to another table by matching column value(s)>",
-	
+
 	// Manipulate Table Values
 	__Commands_TableManipulate_String = "Manipulate Table Values",
 	__Commands_TableManipulate_InsertTableColumn_String = "InsertTableColumn()... <insert table column>",
@@ -2052,6 +2070,10 @@ private String
 	__Commands_TableManipulate_InsertTableRow_String = "InsertTableRow()... <insert table row(s)>",
 	__Commands_TableManipulate_SortTable_String = "SortTable()... <sort a table's rows>",
 	__Commands_TableManipulate_SplitTableRow_String = "SplitTableRow()... <split a row into multiple rows>",
+
+	// Analyze Tables
+	__Commands_TableAnalyze_String = "Analyze Tables",
+	__Commands_TableAnalyze_CompareTables_String = "CompareTables()... <compare two tables (indicate differences)>",
 	
 	// Output Table
 	__Commands_TableOutput_String = "Output Table",
@@ -2765,17 +2787,19 @@ private String
 	__Tools_ListSurfaceWaterDiversions_String = "List Surface Water Diversions",
 	__Tools_ListWellStationRightTotals_String = "List Well Station Right Totals",
 	__Tools_HydrobaseParcelWaterSupply_String = "HydroBase - Parcel Water Supply...",
+	__Tools_ViewLogFile_Startup_String = "Diagnostics - View Log File (Startup)",
 	// Currently Diagnostics are added dynamically.
 
 	// Help menu...
 
 	__Help_AboutStateDMI_String = "About StateDMI",
-	__Help_ViewDocumentation_String = "View Documentation",
+	__Help_ViewDocumentation_String = "View Documentation (PDF)",
 	__Help_ViewDocumentation_ReleaseNotes_String = "View Documentation - Release Notes",
 	__Help_ViewDocumentation_UserManual_String = "View Documentation - User Manual",
 	__Help_ViewDocumentation_CommandReference_String = "View Documentation - Command Reference",
 	__Help_ViewDocumentation_DatastoreReference_String = "View Documentation - Datastore Reference",
-	__Help_ViewTrainingMaterials_String = "View Training Materials",
+	__Help_ViewDocumentation_Troubleshooting_String = "View Documentation - Troubleshooting",
+	//__Help_ViewTrainingMaterials_String = "View Training Materials",
 
 	// Commands list pop-up menu (may be selectively added to/removed from the popup menu)...
 
@@ -2828,7 +2852,7 @@ public StateDMI_JFrame ( StateDMISession session, int app_type )
 	// Open remaining datastores, displaying dialog if SystemLogin or SystemPassword property is "prompt"
 	// TODO SAM 2010-09-03 migrate more input types to datastores
 	try {
-		Message.printStatus(2, rtn, "Opening datastores from TSTool GUI...");
+		Message.printStatus(2, rtn, "Opening datastores from StateDMI UI...");
 	    StateDMI.openDataStoresAtStartup(session,__statedmiProcessor,false);
 	}
 	catch ( Exception e ) {
@@ -2958,6 +2982,7 @@ public void actionPerformed ( ActionEvent event )
 		reportProp.set ( "PrintFont", "Courier" );
 		reportProp.set ( "PrintSize", "7" );
 		reportProp.set ( "Title", "HydroBase Properties" );
+		reportProp.setUsingObject ( "ParentUIComponent", this );
 		List v = null;
 		if ( __hbdmi == null ) {
 			v = new Vector();
@@ -3744,6 +3769,12 @@ public void actionPerformed ( ActionEvent event )
     else if (command.equals( __Commands_General_FileHandling_WebGet_String ) ) {
     	commandList_EditCommand( __Commands_General_FileHandling_WebGet_String, null, __INSERT_COMMAND);
     }
+    else if (command.equals( __Commands_General_FileHandling_AppendFile_String ) ) {
+    	commandList_EditCommand( __Commands_General_FileHandling_AppendFile_String, null, __INSERT_COMMAND);
+    }
+    else if (command.equals( __Commands_General_FileHandling_CopyFile_String ) ) {
+    	commandList_EditCommand( __Commands_General_FileHandling_CopyFile_String, null, __INSERT_COMMAND);
+    }
     else if (command.equals( __Commands_General_FileHandling_ListFiles_String ) ) {
     	commandList_EditCommand( __Commands_General_FileHandling_ListFiles_String, null, __INSERT_COMMAND);
     }
@@ -3844,23 +3875,20 @@ public void actionPerformed ( ActionEvent event )
         commandList_EditCommand ( __Commands_Spreadsheet_CloseExcelWorkbook_String, null, __INSERT_COMMAND );
     }
 	
-	// Table Commands...
-	
+	// Table Commands / Create, Copy, Free Table ...
+
     else if (command.equals( __Commands_TableCreate_NewTable_String) ) {
         commandList_EditCommand ( __Commands_TableCreate_NewTable_String, null, __INSERT_COMMAND );
     }
     else if (command.equals( __Commands_TableCreate_CopyTable_String) ) {
         commandList_EditCommand ( __Commands_TableCreate_CopyTable_String, null, __INSERT_COMMAND );
     }
-    else if (command.equals( __Commands_TableJoin_AppendTable_String) ) {
-        commandList_EditCommand ( __Commands_TableJoin_AppendTable_String, null, __INSERT_COMMAND );
+    else if (command.equals( __Commands_TableCreate_FreeTable_String) ) {
+        commandList_EditCommand ( __Commands_TableCreate_FreeTable_String, null, __INSERT_COMMAND );
     }
-    else if (command.equals( __Commands_TableJoin_JoinTables_String) ) {
-        commandList_EditCommand ( __Commands_TableJoin_JoinTables_String, null, __INSERT_COMMAND );
-    }
-    else if (command.equals( __Commands_TableManipulate_SortTable_String) ) {
-        commandList_EditCommand ( __Commands_TableManipulate_SortTable_String, null, __INSERT_COMMAND );
-    }
+
+	// Table Commands / Read Table...
+
     else if (command.equals( __Commands_TableRead_ReadTableFromDataStore_String) ) {
     	commandList_EditCommand( __Commands_TableRead_ReadTableFromDataStore_String, null, __INSERT_COMMAND );
     }
@@ -3876,12 +3904,25 @@ public void actionPerformed ( ActionEvent event )
     else if (command.equals( __Commands_TableRead_ReadTableFromFixedFormatFile_String) ) {
         commandList_EditCommand ( __Commands_TableRead_ReadTableFromFixedFormatFile_String, null, __INSERT_COMMAND );
     }
+
     /*else if (command.equals( __Commands_TableRead_ReadTableFromJSON_String) ) {
         commandList_EditCommand ( __Commands_TableRead_ReadTableFromJSON_String, null, __INSERT_COMMAND );
     }
     else if (command.equals( __Commands_TableRead_ReadTableFromXML_String) ) {
         commandList_EditCommand ( __Commands_TableRead_ReadTableFromXML_String, null, __INSERT_COMMAND );
     }*/
+
+	// Table Commands / Append/Join Tables...
+
+    else if (command.equals( __Commands_TableJoin_AppendTable_String) ) {
+        commandList_EditCommand ( __Commands_TableJoin_AppendTable_String, null, __INSERT_COMMAND );
+    }
+    else if (command.equals( __Commands_TableJoin_JoinTables_String) ) {
+        commandList_EditCommand ( __Commands_TableJoin_JoinTables_String, null, __INSERT_COMMAND );
+    }
+
+	// Table Commands / Manipulate Table Values ...
+
     else if (command.equals( __Commands_TableManipulate_FormatTableDateTime_String) ) {
         commandList_EditCommand ( __Commands_TableManipulate_FormatTableDateTime_String, null, __INSERT_COMMAND );
     }
@@ -3915,15 +3956,18 @@ public void actionPerformed ( ActionEvent event )
     else if (command.equals( __Commands_TableManipulate_TableMath_String) ) {
         commandList_EditCommand ( __Commands_TableManipulate_TableMath_String, null, __INSERT_COMMAND );
     }
-    /*else if (command.equals( __Commands_TableManipulate_TableTimeSeriesMath_String) ) {
-        commandList_EditCommand ( __Commands_TableManipulate_TableTimeSeriesMath_String, null, __INSERT_COMMAND );
+    else if (command.equals( __Commands_TableManipulate_SortTable_String) ) {
+        commandList_EditCommand ( __Commands_TableManipulate_SortTable_String, null, __INSERT_COMMAND );
     }
+
+	// Table Commands / Analyze Tables ...
+
     else if (command.equals( __Commands_TableAnalyze_CompareTables_String) ) {
         commandList_EditCommand ( __Commands_TableAnalyze_CompareTables_String, null, __INSERT_COMMAND );
-    }*/
-    /*else if (command.equals( __Commands_TableOutput_WriteTableToDataStore_String) ){
-    	commandList_EditCommand ( __Commands_TableOutput_WriteTableToDataStore_String, null, __INSERT_COMMAND);
-    }*/
+    }
+
+	// Table Commands / Output Table...
+
     else if (command.equals( __Commands_TableOutput_WriteTableToDelimitedFile_String) ) {
         commandList_EditCommand ( __Commands_TableOutput_WriteTableToDelimitedFile_String, null, __INSERT_COMMAND );
     }
@@ -3933,16 +3977,19 @@ public void actionPerformed ( ActionEvent event )
     else if (command.equals( __Commands_TableOutput_WriteTableToHTML_String) ) {
         commandList_EditCommand ( __Commands_TableOutput_WriteTableToHTML_String, null, __INSERT_COMMAND );
     }
-    else if (command.equals( __Commands_TableCreate_FreeTable_String) ) {
-        commandList_EditCommand ( __Commands_TableCreate_FreeTable_String, null, __INSERT_COMMAND );
-    }
+    /*else if (command.equals( __Commands_TableOutput_WriteTableToDataStore_String) ){
+    	commandList_EditCommand ( __Commands_TableOutput_WriteTableToDataStore_String, null, __INSERT_COMMAND);
+    }*/
+
+	// Table Commands / Running and Properties...
+
     else if (command.equals( __Commands_TableRunning_SetPropertyFromTable_String) ) {
         commandList_EditCommand ( __Commands_TableRunning_SetPropertyFromTable_String, null, __INSERT_COMMAND );
     }
     else if (command.equals( __Commands_TableRunning_CopyPropertiesToTable_String) ) {
         commandList_EditCommand ( __Commands_TableRunning_CopyPropertiesToTable_String, null, __INSERT_COMMAND );
     }
-
+	
 	// StateMod Commands...
 	
 	// StateMod control - response file...
@@ -5437,6 +5484,7 @@ public void actionPerformed ( ActionEvent event )
 			reportProp.set ( "PrintFont", "Courier" );
 			reportProp.set ( "PrintSize", "7" );
 			reportProp.set ("Title", "Well Rights File Comparison");
+			reportProp.setUsingObject ( "ParentUIComponent", this );
 			new ReportJFrame ( v, reportProp );
 		}
 		catch ( Exception e ) {
@@ -5466,6 +5514,27 @@ public void actionPerformed ( ActionEvent event )
 	else if ( o == __Tools_HydrobaseParcelWaterSupply_JMenuItem ) {
 		new HydroBase_GUI_IrrigatedAcresTool ( __statedmiProcessor.getHydroBaseDMIConnection(),
 			__statedmiProcessor.getStateModDiversionStationList(), __statedmiProcessor.getStateModWellStationList() );
+	}
+	else if ( o == __Tools_ViewLogFile_Startup_JMenuItem ) {
+		// View the startup log file
+		String logFile = session.getUserLogFile();
+		// Show in a simple viewer
+		PropList reportProp = new PropList ("Startup Log File");
+		reportProp.set ( "TotalWidth", "800" );
+		reportProp.set ( "TotalHeight", "600" );
+		reportProp.set ( "DisplayFont", "Courier" );
+		reportProp.set ( "DisplaySize", "11" );
+		reportProp.set ( "PrintFont", "Courier" );
+		reportProp.set ( "PrintSize", "7" );
+		reportProp.set ( "Title", "Startup Log File" );
+		reportProp.setUsingObject ( "ParentUIComponent", this );
+		try {
+			List<String> logLines = IOUtil.fileToStringList(logFile);
+			new ReportJFrame ( logLines, reportProp );
+		}
+		catch ( Exception e ) {
+			Message.printWarning(1, routine, "Error viewing startup log file (" + e + ")." );
+		}
 	}
 
 	// Help menu...
@@ -5504,12 +5573,17 @@ public void actionPerformed ( ActionEvent event )
 		"steve.malers@openwaterfoundation.org";
 		new HelpAboutJDialog (this, "About StateDMI", helpString, true );
 	}
-	else if ( command.equals ( __Help_ViewDocumentation_String )) {
-        uiAction_ViewDocumentation ();
+	else if ( command.equals ( __Help_ViewDocumentation_String ) ||
+	    command.equals(__Help_ViewDocumentation_ReleaseNotes_String) ||
+        command.equals(__Help_ViewDocumentation_UserManual_String) ||
+        command.equals(__Help_ViewDocumentation_CommandReference_String) ||
+        command.equals(__Help_ViewDocumentation_DatastoreReference_String) ||
+        command.equals(__Help_ViewDocumentation_Troubleshooting_String) ) {
+        uiAction_ViewDocumentation ( command );
     }
-    else if ( command.equals ( __Help_ViewTrainingMaterials_String )) {
-        uiAction_ViewTrainingMaterials ();
-    }
+    //else if ( command.equals ( __Help_ViewTrainingMaterials_String )) {
+    //    uiAction_ViewTrainingMaterials ();
+    //}
 	
 	// Check the GUI state and disable buttons, etc., depending on the selections that are made
 	// (for example this enables the paste menus when commands are copied)...
@@ -6882,100 +6956,132 @@ private void dataSet_UpdateList()
 //TODO smalers 2018-08-28 in the future may need a lookup file to ensure portability
 //of documentation across software versions but for now assume the organization.
 /**
-* Format a URL to display help for a topic.
-* The document root is taken from TSTool configuration properties and otherwise the
-* URL pattern follows the standard created for the documentation.
-* @param group a group (category) to organize items.
-* For example, the group might be "command".
-* @param item the specific item for the URL.
-* For example, the item might be a command name.
-*/
+ * Format a URL to display help for a topic.
+ * The document root is taken from StateDMI configuration properties and otherwise the
+ * URL pattern follows the standard created for the documentation.
+ * @param group a group (category) to organize items.
+ * For example, the group might be "command".
+ * @param item the specific item for the URL.
+ * For example, the item might be a command name.
+ */
 public String formatHelpViewerUrl ( String group, String item ) {
 	String routine = "formatHelpViewerUrl";
 	// The location of the documentation is relative to root URI on the web.
- // - two locations are allowed to help transition from OWF to OpenCDSS location
+    // - two locations are allowed to help transition from OWF to OpenCDSS location
 	// - use the first found URL
- String docRootUri = StateDMI.getPropValue ( "StateDMI.UserDocumentationUri" );
- String docRootUri2 = StateDMI.getPropValue ( "StateDMI.UserDocumentationUri2" );
- System.out.println("[StateDMI_JFrame.formatHelpViewerUrl:7469] docRootUri: " + docRootUri + ", docRootUri2: " + docRootUri2);
- List<String> docRootUriList= new ArrayList<String>(2);
- docRootUriList.add(docRootUri);
- docRootUriList.add(docRootUri2);
- if ( (docRootUri == null) || docRootUri.isEmpty() ) {
- 	Message.printWarning(2, "",
- 		"Unable to determine documentation for group \"" + group + "\" and item \"" +
- 		item + "\" - no TSTool.UserDocumenationUri configuration property defined." );
- }
- else {
- 	int failCount = 0;
- 	int [] responseCode = new int[docRootUriList.size()];
- 	int i = -1;
- 	for ( String uri : docRootUriList ) {
- 		// Initialize response code to -1 which means unchecked
- 		++i;
- 		responseCode[i] = -1;
+    String docRootUri = StateDMI.getPropValue ( "StateDMI.UserDocumentationUri" );
+    String docRootUri2 = StateDMI.getPropValue ( "StateDMI.UserDocumentationUri2" );
+    List<String> docRootUriList= new ArrayList<String>(2);
+   	String version = IOUtil.getProgramVersion();
+   	int pos = version.indexOf(" ");
+   	if ( pos > 0 ) {
+   		version = version.substring(0, pos);
+   	}
+    if ( docRootUri != null ) {
+    	// First replace "latest" with the software version so that specific version is shown
+    	String docRootUriVersion = docRootUri.replace("latest", version);
+    	docRootUriList.add(docRootUriVersion);
+    	if ( !docRootUriVersion.equals(docRootUri) ) {
+    		// Also add the URL with "latest"
+    		docRootUriList.add(docRootUri);
+    	}
+    }
+    if ( docRootUri2 != null ) {
+    	// First replace "latest" with the software version so that specific version is shown
+    	String docRootUri2Version = docRootUri2.replace("latest", version);
+    	docRootUriList.add(docRootUri2Version);
+    	if ( !docRootUri2Version.equals(docRootUri2) ) {
+    		// Add the URL with "latest"
+    		docRootUriList.add(docRootUri2);
+    	}
+    }
+    if ( (docRootUri == null) || docRootUri.isEmpty() ) {
+    	Message.printWarning(2, "",
+    		"Unable to determine documentation for group \"" + group + "\" and item \"" +
+    		item + "\" - no StateDMI.UserDocumenationUri configuration property defined." );
+    }
+    else {
+    	int failCount = 0;
+    	int [] responseCode = new int[docRootUriList.size()];
+    	int i = -1;
+    	for ( String uri : docRootUriList ) {
+    		Message.printStatus(2, routine, "URI is " + uri );
+    		// Initialize response code to -1 which means unchecked
+    		++i;
+    		responseCode[i] = -1;
 	    	// Make sure the URI has a slash at end
- 		if ( (uri != null) && !uri.isEmpty() ) { 
+    		if ( (uri != null) && !uri.isEmpty() ) { 
 		    	String docUri = "";
-		    	if ( !docRootUri.endsWith("/") ) {
-		    		docRootUri += "/";
+		    	if ( !uri.endsWith("/") ) {
+		    		uri += "/";
 		    	}
 		    	// Specific documentation requests from the UI
+		    	docUri = null;
 			    if ( item.equals(__Help_ViewDocumentation_ReleaseNotes_String) ) {
-			        docUri = docRootUri + "appendix-release-notes/release-notes/";
+			        docUri = uri + "appendix-release-notes/release-notes/";
 			    }
 			    else if ( item.equals(__Help_ViewDocumentation_UserManual_String) ) {
-			        docUri = docRootUri; // Go to the main documentation
+			        docUri = uri; // Go to the main documentation
 			    }
 			    else if ( item.equals(__Help_ViewDocumentation_CommandReference_String) ) {
-			        docUri = docRootUri + "command-ref/overview/";
+			        docUri = uri + "command-ref/overview/";
 			    }
 			    else if ( item.equals(__Help_ViewDocumentation_DatastoreReference_String) ) {
-			        docUri = docRootUri + "datastore-ref/overview/";
+			        docUri = uri + "datastore-ref/overview/";
+			    }
+			    else if ( item.equals(__Help_ViewDocumentation_Troubleshooting_String) ) {
+			        docUri = uri + "troubleshooting/troubleshooting/";
 			    }
 			    // Generic requests by group
 			    else if ( group.equalsIgnoreCase("command") ) {
-			    	docUri = docRootUri + "command-ref/" + item + "/" + item + "/";
+			    	docUri = uri + "command-ref/" + item + "/" + item + "/";
 			    }
-		        // Now display using the default application for the file extension
-		        Message.printStatus(2, routine, "Opening documentation \"" + docUri + "\"" );
-		        // The Desktop.browse() method will always open, even if the page does not exist,
-		        // and it won't return the HTTP error code in this case.
-		        // Therefore, do a check to see if the URI is available before opening in a browser
-		        URL url = null;
-		        try {
-		        	url = new URL(docUri);
-		        	HttpURLConnection huc = (HttpURLConnection)url.openConnection();
-		        	huc.connect();
-		        	responseCode[i] = huc.getResponseCode();
-		        }
-		        catch ( MalformedURLException e ) {
-		        	Message.printWarning(2, "", "Unable to display documentation at \"" + docUri + "\" - malformed URL." );
-		        }
-		        catch ( IOException e ) {
-		        	Message.printWarning(2, "", "Unable to display documentation at \"" + docUri + "\" - IOException (" + e + ")." );
-		        }
-		        catch ( Exception e ) {
-		        	Message.printWarning(2, "", "Unable to display documentation at \"" + docUri + "\" - Exception (" + e + ")." );
-		        }
-		        finally {
-		        	// Any cleanup?
-		        }
-		        if ( responseCode[i] < 400 ) {
-		        	// Looks like a valid URI to display
-			        return docUri.toString();
-		        }
-		        else {
-		        	++failCount;
-		        }
- 		}
- 	}
-     if ( failCount == docRootUriList.size() ) {
-     	Message.printWarning(2, "",
-     		"Unable to determine documentation for group \"" + group + "\" and item \"" +
-     		item + "\" - all URIs return error code." );
-     }
- }
+			    if ( docUri != null ) {
+			    	// Now display using the default application for the file extension
+			    	Message.printStatus(2, routine, "Opening documentation \"" + docUri + "\"" );
+			    	// The Desktop.browse() method will always open, even if the page does not exist,
+			    	// and it won't return the HTTP error code in this case.
+			    	// Therefore, do a check to see if the URI is available before opening in a browser
+			    	URL url = null;
+			    	try {
+			    		url = new URL(docUri);
+			    		HttpURLConnection huc = (HttpURLConnection)url.openConnection();
+			    		huc.connect();
+			    		responseCode[i] = huc.getResponseCode();
+			    	}
+			    	catch ( MalformedURLException e ) {
+			    		Message.printWarning(2, "", "Unable to display documentation at \"" + docUri + "\" - malformed URL." );
+			    	}
+			    	catch ( IOException e ) {
+			    		Message.printWarning(2, "", "Unable to display documentation at \"" + docUri + "\" - IOException (" + e + ")." );
+			    	}
+			    	catch ( Exception e ) {
+			    		Message.printWarning(2, "", "Unable to display documentation at \"" + docUri + "\" - Exception (" + e + ")." );
+			    	}
+			    	finally {
+			    		// Any cleanup?
+			    	}
+			    	if ( responseCode[i] < 400 ) {
+			    		// Looks like a valid URI to display
+			    		return docUri.toString();
+			    	}
+			    	else {
+			    		++failCount;
+			    	}
+			    }
+			    else {
+			    	// URL could not be determined
+			    	++failCount;
+			    }
+    		}
+    	}
+        if ( failCount == docRootUriList.size() ) {
+        	// Log the a message - show a visible dialog in calling code
+        	Message.printWarning(2, "",
+        		"Unable to determine documentation for group \"" + group + "\" and item \"" +
+        		item + "\" - all URIs that were tried return error code." );
+        }
+    }
 	return null;
 }
 
@@ -7449,13 +7555,15 @@ private void results_DisplayTimeSeries ( List tslist, String initial_view, int a
 		PropList graphprops = new PropList ( "TSView" );
 		// Default properties...
 		graphprops.set ( "InitialView", initial_view );
+		// Parent window to center the graph
+		graphprops.setUsingObject ( "TSViewParentUIComponent", this );
 		// Set the total size of the graph window...
 		graphprops.set ( "TotalWidth", "600" );
 		graphprops.set ( "TotalHeight", "400" );
 		// Set the total size of the summary window...
 		graphprops.set ( "Summary.TotalWidth", "1000" );
 		graphprops.set ( "Summary.TotalHeight", "600" );
-		graphprops.set("GraphType=Line");
+		graphprops.set ( "GraphType=Line" );
 		// Title...
 		if ( (app_type == StateDMI.APP_TYPE_STATECU) && (comp_type >= 0)  ) {
 			graphprops.set ( "TitleString", StateCU_Util.lookupTimeSeriesGraphTitle(comp_type));
@@ -8174,17 +8282,17 @@ Handle TS_ListSelector_JFrame events.
 @param action Action string that indicates which button was pressed on the
 selector ("Summary", "Table", or "Graph").
 */
-public void timeSeriesSelected ( TS_ListSelector_JFrame selector, List tslist, String action )
+public void timeSeriesSelected ( TS_ListSelector_JFrame selector, List<TS> tslist, String action )
 {	// Determine the component type for the time series.
 	int vsize = TS_ListSelector_JFrame_Vector.size();
 	TS_ListSelector_JFrame selector_saved;
 	for ( int i = 0; i < vsize; i++ ) {
-		selector_saved = (TS_ListSelector_JFrame)TS_ListSelector_JFrame_Vector.get(i);
+		selector_saved = TS_ListSelector_JFrame_Vector.get(i);
 		if ( selector_saved == selector ) {
 			// Display the time series...
 			results_DisplayTimeSeries ( tslist, action,
-			((Integer)TS_ListSelector_JFrame_app_type_Vector.get(i)).intValue(),
-			((Integer)TS_ListSelector_JFrame_comp_type_Vector.get(i)).intValue() );
+			TS_ListSelector_JFrame_app_type_Vector.get(i).intValue(),
+			TS_ListSelector_JFrame_comp_type_Vector.get(i).intValue() );
 			return;
 		}
 	}
@@ -8197,16 +8305,16 @@ of available region1 and region2 for StateCu.
 private void ui_CheckDialogInput ()
 {	if ( __region1_Vector == null ) {
 		// Get the counties from HydroBase...
-		__region1_Vector = new Vector();
+		__region1_Vector = new Vector<String>();
 		if ( __hbdmi != null ) {
-			List v = __hbdmi.getCountyRef();
+			List<HydroBase_CountyRef> v = __hbdmi.getCountyRef();
 			int size = 0;
 			if ( v != null ) {
 				size = v.size();
 			}
 			HydroBase_CountyRef county = null;
 			for ( int i = 0; i < size; i++ ) {
-				county = (HydroBase_CountyRef)v.get(i);
+				county = v.get(i);
 				__region1_Vector.add ( county.getCounty() );
 			}
 		}
@@ -8222,14 +8330,14 @@ private void ui_CheckDialogInput ()
 		// Get the Cropchar CU methods from HydroBase...
 		__cropcharCuMethod_Vector = new Vector();
 		if ( __hbdmi != null ) {
-			List v = __hbdmi.getCropcharCUMethod();
+			List<HydroBase_Cropchar> v = __hbdmi.getCropcharCUMethod();
 			int size = 0;
 			if ( v != null ) {
 				size = v.size();
 			}
 			HydroBase_Cropchar cropchar = null;
 			for ( int i = 0; i < size; i++ ) {
-				cropchar = (HydroBase_Cropchar)v.get(i);
+				cropchar = v.get(i);
 				__cropcharCuMethod_Vector.add ( cropchar.getMethod_desc() );
 			}
 		}
@@ -9124,8 +9232,12 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 
 	// Properties for the time series selector...
 
+	// TODO smalers 2019-06-30 Need to pass JFrame to something to center on StateDMI
 	PropList tsselector_props = new PropList ( "TSSelector" );
 	tsselector_props.add ( "ActionButtons=Graph,Table,Summary" );
+	tsselector_props.add ( "Width=1100" );
+	tsselector_props.add ( "Height=500" );
+	tsselector_props.setUsingObject ( "ParentUIComponent", this );
 
 	try {
 	StateMod_DataSet statemod_dataset = new StateMod_DataSet ();
@@ -9138,7 +9250,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 
 	if (componentName.equals(statemod_dataset.lookupComponentName(
 		StateMod_DataSet.COMP_STREAMGAGE_STATIONS))) {
-		new StateMod_StreamGage_Data_JFrame(
+		new StateMod_StreamGage_Data_JFrame( this,
 			__statedmiProcessor.getStateModStreamGageStationList(), titleString, editable );
 	}
 
@@ -9146,39 +9258,39 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY))) {
-		new StateMod_DelayTable_Data_JFrame(
+		new StateMod_DelayTable_Data_JFrame( this,
 			__statedmiProcessor.getStateModDelayTableList(TimeInterval.MONTH),
 			titleString, true, editable );
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_DELAY_TABLES_DAILY))) {
-		new StateMod_DelayTable_Data_JFrame(
+		new StateMod_DelayTable_Data_JFrame( this,
 			__statedmiProcessor.getStateModDelayTableList(TimeInterval.DAY),
 			titleString, false, editable );
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_DIVERSION_STATIONS))) {
-		new StateMod_Diversion_Data_JFrame(
+		new StateMod_Diversion_Data_JFrame( this,
 			__statedmiProcessor.getStateModDiversionStationList(), titleString, editable );
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_DIVERSION_STATION_DELAY_TABLES))){
-		new StateMod_Diversion_DelayTableAssignment_Data_JFrame(
+		new StateMod_Diversion_DelayTableAssignment_Data_JFrame( this,
 			__statedmiProcessor.getStateModDiversionStationList(),titleString, editable );
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_DIVERSION_STATION_COLLECTIONS))){
-		new StateMod_Diversion_Collection_Data_JFrame(
+		new StateMod_Diversion_Collection_Data_JFrame( this,
 			__statedmiProcessor.getStateModDiversionStationList(),titleString, editable );
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_DIVERSION_RIGHTS))) {
-		new StateMod_DiversionRight_Data_JFrame(
+		new StateMod_DiversionRight_Data_JFrame(this,
 			__statedmiProcessor.getStateModDiversionRightList(), titleString, editable );
 	}
 
@@ -9247,64 +9359,70 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_RESERVOIR_STATIONS))) {
-		new StateMod_Reservoir_Data_JFrame(
+		new StateMod_Reservoir_Data_JFrame( this,
 			__statedmiProcessor.getStateModReservoirStationList(), titleString, editable);
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_RESERVOIR_STATION_ACCOUNTS))){
-		new StateMod_ReservoirAccount_Data_JFrame(
-			// TODO smalers 2019-06-01 need to evaluate whether stations or accounts should be passed.
-			__statedmiProcessor.getStateModReservoirStationList(), titleString, editable );
+		new StateMod_ReservoirAccount_Data_JFrame( this,
+			StateMod_ReservoirAccount_Data_JFrame.createDataList(
+			__statedmiProcessor.getStateModReservoirStationList()), titleString, editable );
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName(
 		StateMod_DataSet.COMP_RESERVOIR_STATION_PRECIP_STATIONS))){
-		new StateMod_ReservoirClimate_Data_JFrame(
-			__statedmiProcessor.getStateModReservoirStationList(), titleString, editable, true );
+		boolean isPrecip = true; // Precipitation stations
+		new StateMod_ReservoirClimate_Data_JFrame( this,
+			StateMod_ReservoirClimate_Data_JFrame.createDataList(
+				__statedmiProcessor.getStateModReservoirStationList(),isPrecip), titleString, editable, true );
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_RESERVOIR_STATION_EVAP_STATIONS))){
-		new StateMod_ReservoirClimate_Data_JFrame(
-			__statedmiProcessor.getStateModReservoirStationList(), titleString, editable, false );
+		boolean isPrecip = false; // Evaporation stations
+		new StateMod_ReservoirClimate_Data_JFrame( this,
+			StateMod_ReservoirClimate_Data_JFrame.createDataList(
+				__statedmiProcessor.getStateModReservoirStationList(),isPrecip), titleString, editable, false );
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_RESERVOIR_STATION_CURVE))){
-		new StateMod_ReservoirAreaCap_Data_JFrame(
-			__statedmiProcessor.getStateModReservoirStationList(), titleString, editable );
+		new StateMod_ReservoirAreaCap_Data_JFrame( this,
+			StateMod_ReservoirAreaCap_Data_JFrame.createDataList(
+				__statedmiProcessor.getStateModReservoirStationList()), titleString, editable );
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_RESERVOIR_STATION_COLLECTIONS))){
-		new StateMod_Reservoir_Collection_Data_JFrame(
+		new StateMod_Reservoir_Collection_Data_JFrame( this,
 			__statedmiProcessor.getStateModReservoirStationList(), titleString, editable );
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_RESERVOIR_RIGHTS))) {
-		new StateMod_ReservoirRight_Data_JFrame(
+		new StateMod_ReservoirRight_Data_JFrame(this,
 			__statedmiProcessor.getStateModReservoirRightList(), titleString, editable);
 	}
 	
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_RESERVOIR_RETURN))) {
-		new StateMod_Reservoir_Return_Data_JFrame( __statedmiProcessor.getStateModReservoirReturnList(), titleString, editable );
+		new StateMod_Reservoir_Return_Data_JFrame( this,
+			__statedmiProcessor.getStateModReservoirReturnList(), titleString, editable );
 	}
 
 	// Reservoir time series are not currently handled by StateDMI.
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_INSTREAM_STATIONS))) {
-		new StateMod_InstreamFlow_Data_JFrame(
+		new StateMod_InstreamFlow_Data_JFrame( this,
 			__statedmiProcessor.getStateModInstreamFlowStationList(), titleString, editable );
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_INSTREAM_RIGHTS))) {
-		new StateMod_InstreamFlowRight_Data_JFrame(
+		new StateMod_InstreamFlowRight_Data_JFrame( this,
 			__statedmiProcessor.getStateModInstreamFlowRightList(), titleString, editable  );
 	}
 
@@ -9322,30 +9440,31 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_WELL_STATIONS))) {
-		new StateMod_Well_Data_JFrame( __statedmiProcessor.getStateModWellStationList(), titleString, editable );
+		new StateMod_Well_Data_JFrame( this,
+			__statedmiProcessor.getStateModWellStationList(), titleString, editable );
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_WELL_STATION_DELAY_TABLES))){
-		new StateMod_Well_DelayTableAssignment_Data_JFrame(
+		new StateMod_Well_DelayTableAssignment_Data_JFrame( this,
 			__statedmiProcessor.getStateModWellStationList(), titleString, editable, false);
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_WELL_STATION_DEPLETION_TABLES))){
-		new StateMod_Well_DelayTableAssignment_Data_JFrame(
+		new StateMod_Well_DelayTableAssignment_Data_JFrame( this,
 			__statedmiProcessor.getStateModWellStationList(), titleString, editable, true);
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_WELL_STATION_COLLECTIONS))){
-		new StateMod_Well_Collection_Data_JFrame(
+		new StateMod_Well_Collection_Data_JFrame( this,
 			__statedmiProcessor.getStateModWellStationList(), titleString, editable);
 	}
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_WELL_RIGHTS))) {
-		new StateMod_WellRight_Data_JFrame(
+		new StateMod_WellRight_Data_JFrame( this,
 			__statedmiProcessor.getStateModWellRightList(), titleString, editable);
 	}
 
@@ -9381,13 +9500,13 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 
 	if (componentName.equals(statemod_dataset.lookupComponentName(
 		StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS))) {
-		new StateMod_StreamEstimate_Data_JFrame(
+		new StateMod_StreamEstimate_Data_JFrame( this,
 			__statedmiProcessor.getStateModStreamEstimateStationList(), titleString, editable );
 	}
 
 	if (componentName.equals(statemod_dataset.lookupComponentName(
 		StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS))) {
-		new StateMod_StreamEstimateCoefficients_Data_JFrame(
+		new StateMod_StreamEstimateCoefficients_Data_JFrame( this,
 			__statedmiProcessor.getStateModStreamEstimateCoefficientsList(), titleString, editable );
 	}
 	
@@ -9395,35 +9514,38 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 	
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_PLANS))) {
-		new StateMod_Plan_Data_JFrame( __statedmiProcessor.getStateModPlanStationList(), titleString, editable );
+		new StateMod_Plan_Data_JFrame( this,
+			__statedmiProcessor.getStateModPlanStationList(), titleString, editable );
 	}
 	
 	// Plan well augmentation
 	
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_PLAN_WELL_AUGMENTATION))) {
-		new StateMod_Plan_WellAugmentation_Data_JFrame( __statedmiProcessor.getStateModPlanWellAugmentationList(), titleString, editable );
+		new StateMod_Plan_WellAugmentation_Data_JFrame( this,
+			__statedmiProcessor.getStateModPlanWellAugmentationList(), titleString, editable );
 	}
 	
 	// Plan return
 	
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_PLAN_RETURN))) {
-		new StateMod_Plan_Return_Data_JFrame( __statedmiProcessor.getStateModPlanReturnList(), titleString, editable );
+		new StateMod_Plan_Return_Data_JFrame( this,
+			__statedmiProcessor.getStateModPlanReturnList(), titleString, editable );
 	}
 
 	// Stream estimate time series are not handled by StateDMI so
 	// use TSTool or other software to display.
 
 	if (componentName.equals(statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_RIVER_NETWORK))) {
-		new StateMod_RiverNetworkNode_Data_JFrame(
+		new StateMod_RiverNetworkNode_Data_JFrame( this,
 			__statedmiProcessor.getStateModRiverNetworkNodeList(), titleString);
 	}
 	
 	// Operational rights (list the first card)
 	
 	if (componentName.equals(statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_OPERATION_RIGHTS))) {
-		new StateMod_OperationalRight_Data_JFrame(
+		new StateMod_OperationalRight_Data_JFrame( this,
 			__statedmiProcessor.getStateModOperationalRightList(), titleString, editable);
 	}
 
@@ -10252,6 +10374,10 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_WebGet_JMenuItem = 
 			new SimpleJMenuItem(__Commands_General_FileHandling_WebGet_String, this));
 	Commands_General_FileHandling_JMenu.addSeparator();
+	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_AppendFile_JMenuItem = 
+			new SimpleJMenuItem(__Commands_General_FileHandling_AppendFile_String, this));
+	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_CopyFile_JMenuItem = 
+			new SimpleJMenuItem(__Commands_General_FileHandling_CopyFile_String, this));
 	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_ListFiles_JMenuItem = 
 			new SimpleJMenuItem(__Commands_General_FileHandling_ListFiles_String, this));
 	Commands_General_FileHandling_JMenu.add( __Commands_General_FileHandling_RemoveFile_JMenuItem =
@@ -12430,6 +12556,13 @@ private void ui_InitGUIMenus_Commands_Table ( JMenuBar menuBar, int style ) {
 			new SimpleJMenuItem(__Commands_TableManipulate_SortTable_String, this));
 	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_SplitTableRow_JMenuItem = 
 			new SimpleJMenuItem(__Commands_TableManipulate_SplitTableRow_String, this));
+
+	// Add group menu for Append, Join Tables >
+	JMenu Commands_TableAnalyze_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style, 
+			__Commands_Table_JMenu, __Commands_TableAnalyze_String, false);
+	// Add Commands
+	Commands_TableAnalyze_JMenu.add(__Commands_TableAnalyze_CompareTables_JMenuItem = 
+			new SimpleJMenuItem(__Commands_TableAnalyze_CompareTables_String, this));
 	
 	// Add group menu for Output Table >
 	JMenu Commands_TableOutput_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style, 
@@ -12808,8 +12941,8 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 		__File_Properties_JMenu.add ( __File_Properties_DataSet_JMenuItem =
 			new SimpleJMenuItem( __File_Properties_DataSet_String,this));
 	}
-	fileJMenu.add(__File_SetWorkingDirectory_JMenuItem =
-		new SimpleJMenuItem( __File_SetWorkingDirectory_String, this));
+	// TODO smalers 2019-06-26 need to remove
+	//fileJMenu.add(__File_SetWorkingDirectory_JMenuItem = new SimpleJMenuItem( __File_SetWorkingDirectory_String, this));
 
 	fileJMenu.addSeparator();
 	fileJMenu.add(__File_SwitchToStateCU_JMenuItem = new SimpleJMenuItem(__File_SwitchToStateCU_String, this));
@@ -12851,9 +12984,27 @@ Initialize the Help menu.
 private void ui_InitGUIMenus_Help ( JMenuBar menuBar )
 {	JMenu helpJMenu = new JMenu("Help", true);
 	helpJMenu.add( __Help_AboutStateDMI_JMenuItem = new SimpleJMenuItem(__Help_AboutStateDMI_String, this));
+	File docFile = new File(IOUtil.verifyPathForOS(IOUtil.getApplicationHomeDir() + "/doc/UserManual/StateDMI.pdf",true));
+	if ( docFile.exists() ) {
+		helpJMenu.addSeparator();
+	    // Old single-PDF help document
+	    helpJMenu.add ( __Help_ViewDocumentation_JMenuItem = new SimpleJMenuItem(__Help_ViewDocumentation_String,this));
+		//helpJMenu.add ( __Help_ViewTrainingMaterials_JMenuItem = new SimpleJMenuItem(__Help_ViewTrainingMaterials_String,this));
+	}
+
+	// Newer convention where documents are split apart.
 	helpJMenu.addSeparator();
-	helpJMenu.add ( __Help_ViewDocumentation_JMenuItem = new SimpleJMenuItem(__Help_ViewDocumentation_String,this));
-	helpJMenu.add ( __Help_ViewTrainingMaterials_JMenuItem = new SimpleJMenuItem(__Help_ViewTrainingMaterials_String,this));
+	helpJMenu.add ( __Help_ViewDocumentation_ReleaseNotes_JMenuItem =
+	   new SimpleJMenuItem(__Help_ViewDocumentation_ReleaseNotes_String,this));
+    helpJMenu.add ( __Help_ViewDocumentation_UserManual_JMenuItem =
+       new SimpleJMenuItem(__Help_ViewDocumentation_UserManual_String,this));
+    helpJMenu.add ( __Help_ViewDocumentation_CommandReference_JMenuItem =
+       new SimpleJMenuItem(__Help_ViewDocumentation_CommandReference_String,this));
+    helpJMenu.add ( __Help_ViewDocumentation_DatastoreReference_JMenuItem =
+       new SimpleJMenuItem(__Help_ViewDocumentation_DatastoreReference_String,this));
+    helpJMenu.add ( __Help_ViewDocumentation_Troubleshooting_JMenuItem =
+       new SimpleJMenuItem(__Help_ViewDocumentation_Troubleshooting_String,this));
+
 	menuBar.add(helpJMenu);
 }
 
@@ -13035,8 +13186,11 @@ private void ui_InitGUIMenus_Tools ( JMenuBar menuBar )
 
 	__Tools_JMenu.addSeparator();
 	Message.addMessageLogListener ( this );
-	DiagnosticsJFrame diagnosticsJFrame = new DiagnosticsJFrame();
+	DiagnosticsJFrame diagnosticsJFrame = new DiagnosticsJFrame(this);
 	diagnosticsJFrame.attachMainMenu(__Tools_JMenu);
+	__Tools_JMenu.add ( __Tools_ViewLogFile_Startup_JMenuItem =
+		new SimpleJMenuItem (__Tools_ViewLogFile_Startup_String, this ));
+
 	menuBar.add(__Tools_JMenu);
 }
 
@@ -15175,7 +15329,8 @@ private void uiAction_ShowDataSetProperties ()
 	reportProp.set ( "PrintFont", "Courier" );
 	reportProp.set ( "PrintSize", "7" );
 	reportProp.set ( "Title", "Data Set Properties" );
-	List v = new Vector ( 4 );
+	reportProp.setUsingObject ( "ParentUIComponent", this );
+	List<String> v = new ArrayList<String>(4);
 	String tab = "    ";
 	v.add ( "StateDMI Data Set Properties" );
 	v.add ( "" );
@@ -15280,9 +15435,6 @@ private void uiAction_ShowDataSetProperties ()
 		v.add ( "Data set file(s) are for StateMod." );
 	}
 	new ReportJFrame ( v, reportProp );
-	// Clean up...
-	v = null;
-	reportProp = null;
 }
 
 /**
@@ -15333,6 +15485,7 @@ private void uiAction_ShowResultsOutputFile ( String selected )
                 reportProp.set ( "PrintSize", "7" );
                 reportProp.set ( "Title", selected );
                 reportProp.set ( "URL", selected );
+               	reportProp.setUsingObject ( "ParentUIComponent", this );
                 new ReportJFrame ( null, reportProp );
             }
             else {
@@ -15511,7 +15664,7 @@ void uiAction_Tool_ListWellStationRightTotals ()
 		}
 	}
 	size_wes = wes_Vector.size();
-	List<String> v = new Vector();
+	List<String> v = new Vector<String>();
 	v.add ( "\"ID\",\"Total Decree\"" );
 	for ( int i = 0; i < size_wes; i++ ) {
 		wes = wes_Vector.get(i);
@@ -15525,27 +15678,49 @@ void uiAction_Tool_ListWellStationRightTotals ()
 	reportProp.set ( "PrintFont", "Courier" );
 	reportProp.set ( "PrintSize", "7" );
 	reportProp.set ( "Title", "Well Station Right Totals" );
+   	reportProp.setUsingObject ( "ParentUIComponent", this );
 	new ReportJFrame ( v, reportProp );
 }
 
 /**
 View the documentation by displaying using the desktop application.
+@param command the string from the action event (menu string).
 */
-private void uiAction_ViewDocumentation ()
-{   String routine = getClass().getName() + ".uiAction_ViewDocumentation";
-    // The location of the documentation is relative to the application home
-	String docFileName = IOUtil.getApplicationHomeDir() + "/doc/UserManual/StateDMI.pdf";
-    // Convert for the operating system
-    docFileName = IOUtil.verifyPathForOS(docFileName, true);
-    // Now display using the default application for the file extension
-    Message.printStatus(2, routine, "Opening documentation \"" + docFileName + "\"" );
-    try {
-        Desktop desktop = Desktop.getDesktop();
-        desktop.open ( new File(docFileName) );
-    }
-    catch ( Exception e ) {
-        Message.printWarning(1, "", "Unable to display documentation at \"" + docFileName + "\" (" + e + ")." );
-    }
+private void uiAction_ViewDocumentation ( String command )
+{   String routine = getClass().getSimpleName() + ".uiAction_ViewDocumentation";
+	if ( command.equals ( __Help_ViewDocumentation_String )) {
+		// Legacy PDF documentation
+		// The location of the documentation is relative to the application home
+		String docFileName = IOUtil.getApplicationHomeDir() + "/doc/UserManual/StateDMI.pdf";
+    	// Convert for the operating system
+    	docFileName = IOUtil.verifyPathForOS(docFileName, true);
+    	// Now display using the default application for the file extension
+    	Message.printStatus(2, routine, "Opening documentation \"" + docFileName + "\"" );
+    	try {
+        	Desktop desktop = Desktop.getDesktop();
+        	desktop.open ( new File(docFileName) );
+    	}
+    	catch ( Exception e ) {
+        	Message.printWarning(1, "", "Unable to display documentation at \"" + docFileName + "\" (" + e + ")." );
+    	}
+	}
+	else {
+		// New online documentation
+		String docUri = formatHelpViewerUrl("", command);
+	    if ( docUri != null ) {
+	        try {
+	            Desktop desktop = Desktop.getDesktop();
+	            desktop.browse ( new URI(docUri) );
+	        }
+	        catch ( Exception e ) {
+	            Message.printWarning(2, routine, "Unable to display documentation at \"" + docUri + "\" (" + e + ")." );
+	        }
+	    }
+	    else {
+			// Not able to open either URI
+	    	Message.printWarning(1, "", "Unable to determine URL for documentation for \"" + command + "\"." );
+	    }	
+	}
 }
 
 /**
@@ -15710,7 +15885,7 @@ public void valueChanged ( ListSelectionEvent e )
             int maxIndex = lsm.getMaxSelectionIndex();
             for (int i = minIndex; i <= maxIndex; i++) {
                 if (lsm.isSelectedIndex(i)) {
-                    uiAction_ShowResultsOutputFile( (String)__resultsOutputFiles_JListModel.elementAt(i) );
+                    uiAction_ShowResultsOutputFile( __resultsOutputFiles_JListModel.elementAt(i) );
                 }
             }
         }
@@ -15723,7 +15898,7 @@ public void valueChanged ( ListSelectionEvent e )
             int maxIndex = lsm.getMaxSelectionIndex();
             for (int i = minIndex; i <= maxIndex; i++) {
                 if (lsm.isSelectedIndex(i)) {
-                    ui_DisplayResultsStateCUComponentTable ( (String)__resultsStateCUComponents_JListModel.get(i) );
+                    ui_DisplayResultsStateCUComponentTable ( __resultsStateCUComponents_JListModel.get(i) );
                 }
             }
         }
@@ -15736,7 +15911,7 @@ public void valueChanged ( ListSelectionEvent e )
             int maxIndex = lsm.getMaxSelectionIndex();
             for (int i = minIndex; i <= maxIndex; i++) {
                 if (lsm.isSelectedIndex(i)) {
-                    ui_DisplayResultsStateModComponentTable ( (String)__resultsStateModComponents_JListModel.get(i) );
+                    ui_DisplayResultsStateModComponentTable ( __resultsStateModComponents_JListModel.get(i) );
                 }
             }
         }
@@ -15749,7 +15924,7 @@ public void valueChanged ( ListSelectionEvent e )
             int maxIndex = lsm.getMaxSelectionIndex();
             for (int i = minIndex; i <= maxIndex; i++) {
                 if (lsm.isSelectedIndex(i)) {
-                    uiAction_ShowResultsTable( (String)__resultsTables_JListModel.elementAt(i) );
+                    uiAction_ShowResultsTable( __resultsTables_JListModel.elementAt(i) );
                 }
             }
         }

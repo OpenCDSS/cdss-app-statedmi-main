@@ -37,6 +37,7 @@ import rti.tscommandprocessor.commands.logging.StartLog_Command;
 import rti.tscommandprocessor.commands.spatial.WriteTableToGeoJSON_Command;
 import rti.tscommandprocessor.commands.spatial.WriteTableToShapefile_Command;
 import rti.tscommandprocessor.commands.table.AppendTable_Command;
+import rti.tscommandprocessor.commands.table.CompareTables_Command;
 import rti.tscommandprocessor.commands.table.CopyPropertiesToTable_Command;
 import rti.tscommandprocessor.commands.table.CopyTable_Command;
 import rti.tscommandprocessor.commands.table.DeleteTableColumns_Command;
@@ -73,10 +74,12 @@ import rti.tscommandprocessor.commands.spreadsheet.WriteTableToExcel_Command;
 import rti.tscommandprocessor.commands.table.WriteTableToHTML_Command;
 import rti.tscommandprocessor.commands.time.SetOutputPeriod_Command;
 import rti.tscommandprocessor.commands.time.SetOutputYearType_Command;
+import rti.tscommandprocessor.commands.util.AppendFile_Command;
 import rti.tscommandprocessor.commands.util.CommentBlockEnd_Command;
 import rti.tscommandprocessor.commands.util.CommentBlockStart_Command;
 import rti.tscommandprocessor.commands.util.Comment_Command;
 import rti.tscommandprocessor.commands.util.CompareFiles_Command;
+import rti.tscommandprocessor.commands.util.CopyFile_Command;
 import rti.tscommandprocessor.commands.util.Exit_Command;
 import rti.tscommandprocessor.commands.util.FTPGet_Command;
 import rti.tscommandprocessor.commands.util.FormatDateTimeProperty_Command;
@@ -141,10 +144,13 @@ throws UnknownCommandException
 	}
 
 	// "a" commands
-	if ( StringUtil.startsWithIgnoreCase( commandString, "AggregateWellRights") ){
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "AggregateWellRights") ){
 		return new AggregateWellRights_Command ();
 	}
-	if ( StringUtil.startsWithIgnoreCase( commandString, "AppendNetwork") ){
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "AppendFile") ) {
+        return new AppendFile_Command ();
+    }
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "AppendNetwork") ){
 		return new AppendNetwork_Command ();
 	}
 	
@@ -252,6 +258,12 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"CompareFiles") ) {
 		return new CompareFiles_Command ();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString,"CompareTables") ) {
+		return new CompareTables_Command ();
+	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "CopyFile") ) {
+        return new CopyFile_Command ();
+    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "CopyPropertiesToTable") ) {
         return new CopyPropertiesToTable_Command ();
     }
@@ -919,12 +931,13 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetPlanStation")) {
 		return new SetPlanStation_Command();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetPropertyFromTable") ) {
+		// Put this before SetProperty to avoid ambiguity
+        return new SetPropertyFromTable_Command ();
+    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetProperty" )) {
 		return new SetProperty_Command ();
 	}
-	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetPropertyFromTable") ) {
-        return new SetPropertyFromTable_Command ();
-    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"SetReservoirAggregateFromList") ) {
 		return new SetReservoirAggregateFromList_Command ();
 	}

@@ -506,6 +506,7 @@ private void initialize ( JFrame parent, Command command )
 		part_Vector.add ( StateMod_Well.COLLECTION_PART_TYPE_PARCEL );
 		part_Vector.add ( StateMod_Well.COLLECTION_PART_TYPE_WELL );
 		__PartType_JComboBox.setData(part_Vector);
+		__PartType_JComboBox.select(0);
 		__PartType_JComboBox.addItemListener (this);
     	JGUIUtil.addComponent(main_JPanel, __PartType_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -545,6 +546,7 @@ private void initialize ( JFrame parent, Command command )
 	}
 	__IDCol_JComboBox = new SimpleJComboBox(false);
 	__IDCol_JComboBox.setData ( column_Vector );
+	__IDCol_JComboBox.select (0);
 	__IDCol_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __IDCol_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -556,6 +558,7 @@ private void initialize ( JFrame parent, Command command )
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__NameCol_JComboBox = new SimpleJComboBox(false);
 	__NameCol_JComboBox.setData ( column_Vector );
+	__NameCol_JComboBox.select ( 0 );
 	__NameCol_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __NameCol_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -567,6 +570,7 @@ private void initialize ( JFrame parent, Command command )
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__PartIDsCol_JComboBox = new SimpleJComboBox(false);
 	__PartIDsCol_JComboBox.setData ( column_Vector );
+	__PartIDsCol_JComboBox.select (0);
 	__PartIDsCol_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __PartIDsCol_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -595,6 +599,7 @@ private void initialize ( JFrame parent, Command command )
 	parts_Vector.add ( __command._InRow );
 	__PartsListedHow_JComboBox = new SimpleJComboBox(false);
 	__PartsListedHow_JComboBox.setData ( parts_Vector );
+	__PartsListedHow_JComboBox.select ( 0 );
 	__PartsListedHow_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __PartsListedHow_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -606,6 +611,7 @@ private void initialize ( JFrame parent, Command command )
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__PartIDsColMax_JComboBox = new SimpleJComboBox(false);
 	__PartIDsColMax_JComboBox.setData ( column_Vector );
+	__PartIDsColMax_JComboBox.select ( 0 );
 	__PartIDsColMax_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __PartIDsColMax_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -622,6 +628,7 @@ private void initialize ( JFrame parent, Command command )
 	IfNotFound_List.add ( __command._Warn );
 	IfNotFound_List.add ( __command._Fail );
 	__IfNotFound_JComboBox.setData( IfNotFound_List );
+	__IfNotFound_JComboBox.select( 0 );
 	__IfNotFound_JComboBox.addItemListener (this);
     JGUIUtil.addComponent(main_JPanel, __IfNotFound_JComboBox,
 	1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);

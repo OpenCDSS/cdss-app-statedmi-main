@@ -25,13 +25,16 @@ package DWR.DMI.StateDMI;
 
 import javax.swing.JFrame;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
 import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
+import DWR.DMI.HydroBaseDMI.HydroBaseDataStore;
 import DWR.DMI.HydroBaseDMI.HydroBase_AdministrationNumber;
 import DWR.DMI.HydroBaseDMI.HydroBase_NetAmts;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
+import DWR.DMI.StateDMI.dto.hydrobaserest.HydroBaseRestToolkit;
 import DWR.StateMod.StateMod_Reservoir;
 import DWR.StateMod.StateMod_ReservoirRight;
 import DWR.StateMod.StateMod_Util;
@@ -52,6 +55,9 @@ import RTi.Util.IO.InvalidCommandParameterException;
 import RTi.Util.IO.PropList;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
+import cdss.dmi.hydrobase.rest.ColoradoHydroBaseRestDataStore;
+import cdss.dmi.hydrobase.rest.dao.WaterRightsNetAmount;
+import riverside.datastore.DataStore;
 
 /**
 <p>
@@ -155,7 +161,8 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List<String> valid_Vector = new Vector<String>();
+	List<String> valid_Vector = new ArrayList<String>(5);
+    valid_Vector.add ( "DataStore" );
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "DecreeMin" );
     valid_Vector.add ( "AdminNumClasses" );
@@ -238,21 +245,50 @@ CommandWarningException, CommandException
 				message, "Report problem to software support." ) );
 	}
 	
-	// Get the HydroBase DMI...
-	
+	String DataStore = parameters.getValue("DataStore");
 	HydroBaseDMI hbdmi = null;
-	try {
-		Object o = processor.getPropContents( "HydroBaseDMI");
-		hbdmi = (HydroBaseDMI)o;
+	ColoradoHydroBaseRestDataStore hbRestDatastore = null;
+	HydroBaseDataStore hbDatastore = null;
+	// If there is a datastore open it otherwise open hydrobase dmi
+	if ( (DataStore != null) && !DataStore.isEmpty() ) {
+		// Get the datastore
+		DataStore datastore0 = processor.getDataStoreForName(DataStore, DataStore.class);
+		if ( datastore0 == null ) {
+			message = "Error getting datastore \"" + DataStore + "\".";
+			Message.printWarning(warning_level,
+				MessageUtil.formatMessageTag( command_tag, ++warning_count),
+				routine, message );
+			status.addToLog ( CommandPhaseType.RUN,
+				new CommandLogRecord(CommandStatusType.FAILURE,
+					message, "Check datastore configuration." ) );
+		}
+		else {
+			Message.printStatus(2, routine, "Selected data store is \"" + DataStore + "\"");
+			if ( datastore0 instanceof ColoradoHydroBaseRestDataStore ) {
+				hbRestDatastore = (ColoradoHydroBaseRestDataStore)datastore0;
+			}
+			else if ( datastore0 instanceof HydroBaseDataStore ) {
+				hbDatastore = (HydroBaseDataStore)datastore0;
+				// Get the DMI for the datastore
+				hbdmi = (HydroBaseDMI)hbDatastore.getDMI();
+			}
+		}
 	}
-	catch ( Exception e ) {
-		message = "Error requesting HydroBase connection from processor.";
-		Message.printWarning(warning_level,
-			MessageUtil.formatMessageTag( command_tag, ++warning_count),
-			routine, message );
-		status.addToLog ( CommandPhaseType.RUN,
-			new CommandLogRecord(CommandStatusType.FAILURE,
-				message, "Report problem to software support." ) );
+	else {
+		// Get the HydroBase DMI...
+		try {
+			Object o = processor.getPropContents( "HydroBaseDMI");
+			hbdmi = (HydroBaseDMI)o;
+		}
+		catch ( Exception e ) {
+			message = "Error requesting HydroBase connection from processor.";
+			Message.printWarning(warning_level,
+				MessageUtil.formatMessageTag( command_tag, ++warning_count),
+				routine, message );
+			status.addToLog ( CommandPhaseType.RUN,
+				new CommandLogRecord(CommandStatusType.FAILURE,
+					message, "Report problem to software support." ) );
+		}
 	}
 	
 	if ( warning_count > 0 ) {
@@ -363,7 +399,7 @@ CommandWarningException, CommandException
 					psize = parts.size();
 				}
 				for ( iparts = 0; iparts < psize; iparts++ ) {
-					part_id = (String)parts.get(iparts);
+					part_id = parts.get(iparts);
 					try {
 						// Parse out the WDID...
 						HydroBase_WaterDistrict.parseWDID(part_id,wdid_parts);
@@ -380,8 +416,24 @@ CommandWarningException, CommandException
 						continue;
 					}
 					try {
-						hbresr_part_Vector = hbdmi.readNetAmtsList (
-							DMIUtil.MISSING_INT, wdid_parts[0], wdid_parts[1], false, null );
+						// If using a datastore get the data from web services and then convert to StateDMI POJO
+						if ( DataStore != null ) {
+							// Make sure the WDID is 7 characters, can be an issue with older datasets and tests
+							List<WaterRightsNetAmount>datastore_part_list = hbRestDatastore.getWaterRightsNetAmountForVolume(
+								HydroBase_WaterDistrict.formWDID(7,part_id));
+							hbresr_part_Vector = new ArrayList<HydroBase_NetAmts>();
+							for ( int j = 0; j < datastore_part_list.size(); j++ ) {
+								WaterRightsNetAmount waterRight = datastore_part_list.get(j);
+								hbresr_part_Vector.add(HydroBaseRestToolkit.getInstance().toHydroBaseNetAmounts(waterRight));
+							}
+						}
+						else {
+							// Query only nonzero storage rights
+							boolean doNonZeroNetRateAbs = false;
+							boolean doNonZeroNetVolAbs = true;
+							hbresr_part_Vector = hbdmi.readNetAmtsList (
+								DMIUtil.MISSING_INT, wdid_parts[0], wdid_parts[1], doNonZeroNetRateAbs, doNonZeroNetVolAbs, null );
+						}
 						// Add to the main vector...
 						if ( hbresr_Vector == null ) {
 							hbresr_Vector = new Vector<HydroBase_NetAmts>(50);
@@ -417,7 +469,7 @@ CommandWarningException, CommandException
 				if ( ((is_aggregate && (nAdminNumClasses == 0)) || is_system) && (nhbresr > 0) ) {
 					irtem_array = new double[nhbresr];
 					for ( ir = 0; ir < nhbresr; ir++ ) {
-						hbresr = (HydroBase_NetAmts)hbresr_Vector.get(ir);
+						hbresr = hbresr_Vector.get(ir);
 						irtem_array[ir] = hbresr.getAdmin_no();
 					}
 					sort_order = new int[nhbresr];
@@ -443,8 +495,24 @@ CommandWarningException, CommandException
 					continue;
 				}
 				try {
-					hbresr_Vector =	hbdmi.readNetAmtsList (
-							DMIUtil.MISSING_INT, wdid_parts[0], wdid_parts[1], false, null );
+					// If using a datastore get the data from web services and then convert to StateDMI POJO
+					if ( DataStore != null ) {
+						// Make sure the WDID is 7 characters, can be an issue with older datasets and tests
+						List<WaterRightsNetAmount>datastore_part_list = hbRestDatastore.getWaterRightsNetAmountForVolume(
+							HydroBase_WaterDistrict.formWDID(7,id));
+						hbresr_Vector = new ArrayList<HydroBase_NetAmts>();
+						for ( int j = 0; j < datastore_part_list.size(); j++ ) {
+							WaterRightsNetAmount waterRight = datastore_part_list.get(j);
+							hbresr_Vector.add(HydroBaseRestToolkit.getInstance().toHydroBaseNetAmounts(waterRight));
+						}
+					}
+					else {
+						// Query only nonzero storage rights
+						boolean doNonZeroNetRateAbs = false;
+						boolean doNonZeroNetVolAbs = true;
+						hbresr_Vector =	hbdmi.readNetAmtsList (
+							DMIUtil.MISSING_INT, wdid_parts[0], wdid_parts[1], doNonZeroNetRateAbs, doNonZeroNetVolAbs, null );
+					}
 				}
 				catch ( Exception e ) {
 					Message.printWarning ( 3, routine,
@@ -620,6 +688,7 @@ public String toString ( PropList parameters )
 		return getCommandName() + "()";
 	}
 	
+	String DataStore = parameters.getValue ( "DataStore" );
 	String ID = parameters.getValue ( "ID" );
 	String DecreeMin = parameters.getValue ( "DecreeMin" );
 	String OnOffDefault = parameters.getValue ( "OnOffDefault" );
@@ -627,7 +696,16 @@ public String toString ( PropList parameters )
 		
 	StringBuffer b = new StringBuffer ();
 
+	if ( DataStore != null && DataStore.length() > 0 ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "DataStore=\"" + DataStore + "\"" );
+	}
 	if ( ID != null && ID.length() > 0 ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
 		b.append ( "ID=\"" + ID + "\"" );
 	}
 	if ( DecreeMin != null && DecreeMin.length() > 0 ) {
