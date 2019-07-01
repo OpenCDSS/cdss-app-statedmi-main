@@ -28,8 +28,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -48,6 +50,7 @@ import java.awt.event.WindowListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -56,6 +59,7 @@ import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
+import riverside.datastore.DataStore;
 
 /**
 Editor for the ReadInstreamFlowRightsFromHydroBase() command.
@@ -67,6 +71,7 @@ implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeList
 
 private boolean __error_wait = false;
 private boolean __first_time = true;
+private SimpleJComboBox __DataStore_JComboBox = null;
 private JTextField __ID_JTextField=null;
 private SimpleJComboBox __OnOffDefault_JComboBox = null;
 private JTextArea __command_JTextArea=null;
@@ -74,6 +79,7 @@ private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
 private ReadInstreamFlowRightsFromHydroBase_Command __command = null;
 private boolean __ok = false;
+private StateDMI_Processor __statedmiProcessor = null;
 
 /**
 Command editor constructor
@@ -109,12 +115,16 @@ Check the input.  If errors exist, warn the user and set the __error_wait flag
 to true.  This should be called before response() is allowed to complete.
 */
 private void checkInput () {
+	String DataStore = __DataStore_JComboBox.getSelected();
 	String ID = __ID_JTextField.getText().trim();
 	String OnOffDefault = __OnOffDefault_JComboBox.getSelected();
 	
 	// Put together a list of parameters to check...
 	PropList props = new PropList ( "" );
 
+	if ( DataStore.length() > 0 ){
+		props.set ( "Datastore", DataStore );
+	}
 	if (ID.length() > 0 ) {
 		props.set("ID", ID);
 	}
@@ -140,9 +150,11 @@ already been checked and no errors were detected.
 */
 private void commitEdits()
 {
+	String DataStore = __DataStore_JComboBox.getSelected();
 	String ID = __ID_JTextField.getText().trim();
 	String OnOffDefault = __OnOffDefault_JComboBox.getSelected();
 
+	__command.setCommandParameter ( "DataStore" , DataStore );
 	__command.setCommandParameter("ID", ID);
 	__command.setCommandParameter("OnOffDefault", OnOffDefault);
 }
@@ -152,26 +164,13 @@ public void stateChanged(ChangeEvent e) {
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	__ID_JTextField = null;
-	__OnOffDefault_JComboBox = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command = null;
-	__ok_JButton = null;
-	super.finalize ();
-}
-
-/**
 Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
 private void initialize (JFrame parent, ReadInstreamFlowRightsFromHydroBase_Command command) {
 	__command = command;
+    __statedmiProcessor = (StateDMI_Processor)__command.getCommandProcessor();
 
 	addWindowListener(this);
 
@@ -191,7 +190,11 @@ private void initialize (JFrame parent, ReadInstreamFlowRightsFromHydroBase_Comm
 		"This command reads instream flow rights from HydroBase, " +
 		"using the instream flow station identifiers to find rights."),
 		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(paragraph, new JLabel ("Net absolute water rights are read by default."),
+    JGUIUtil.addComponent(paragraph, new JLabel (
+		"For database qeuery, net absolute rate water rights having 'net_rate_abs' > 0 are included."),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel (
+		"For web services request, net absolute water rights having units starting with 'C' (cfs) are included."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"The output water right identifier is assigned as the" +
@@ -200,6 +203,26 @@ private void initialize (JFrame parent, ReadInstreamFlowRightsFromHydroBase_Comm
        
 	JGUIUtil.addComponent(main_JPanel, paragraph,
 		0, y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+
+    // Datastore ID options
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Datastore:"), 0, ++y, 1, 1, 0, 0, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    List<DataStore> DataStores = __statedmiProcessor.getDataStores();
+    List<String> datastoreList = new ArrayList<String>();
+    datastoreList.add("");
+    for(int i = 0; i < DataStores.size(); i++){
+    	datastoreList.add(DataStores.get(i).getName());
+    }
+    __DataStore_JComboBox = new SimpleJComboBox(false);
+    __DataStore_JComboBox.setToolTipText("Specify HydroBase or ColoradoHydroBaseRest datastore, blank for direct database query");
+    __DataStore_JComboBox.setData(datastoreList);
+    __DataStore_JComboBox.select(0);
+    __DataStore_JComboBox.addItemListener(this);
+    JGUIUtil.addComponent(main_JPanel, __DataStore_JComboBox,
+    		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Optional - datastore (default=direct HydroBase query)."),
+    		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Instream flow station ID:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -300,6 +323,7 @@ Refresh the command from the other text field contents.
 */
 private void refresh ()
 {	String routine = "ReadInstreamFlowRightsFromHydroBase.refresh";
+	String DataStore = "";
 	String ID = "";
 	String OnOffDefault = "";
 	PropList props = null;
@@ -309,8 +333,24 @@ private void refresh ()
 	
 		// Get the properties from the command
 		props = __command.getCommandParameters();
+		DataStore = props.getValue ( "DataStore" );
 		ID = props.getValue ( "ID" );
 		OnOffDefault = props.getValue ( "OnOffDefault" );
+		if ( DataStore == null ) {
+			// Select default...
+			__DataStore_JComboBox.select ( 0 );
+		}
+		else {
+			if ( JGUIUtil.isSimpleJComboBoxItem(
+				__DataStore_JComboBox, DataStore, JGUIUtil.NONE, null, null ) ) {
+				__DataStore_JComboBox.select (  DataStore );
+			}
+			else {
+				Message.printWarning ( 1, routine, "Existing command references an invalid DataStore " +
+				"value \"" + DataStore + "\".  Select a different value or Cancel.");
+				__error_wait = true;
+			}
+		}
 		if ( ID != null ) {
 			__ID_JTextField.setText(ID);
 		}
@@ -336,11 +376,13 @@ private void refresh ()
 
 	// Always get the value that is selected...
 
+	DataStore = __DataStore_JComboBox.getSelected();
 	ID = __ID_JTextField.getText().trim();
 	if ( __OnOffDefault_JComboBox != null ) {
 		OnOffDefault = __OnOffDefault_JComboBox.getSelected();
 	}
 	props = new PropList(__command.getCommandName());
+	props.add ( "DataStore=" + DataStore );
 	props.add("ID=" + ID);
 	props.add("OnOffDefault=" + OnOffDefault);
 	__command_JTextArea.setText( __command.toString(props) );

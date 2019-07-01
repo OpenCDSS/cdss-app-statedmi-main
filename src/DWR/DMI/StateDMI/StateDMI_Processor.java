@@ -4947,7 +4947,8 @@ public DataStore getDataStoreForName ( String name, Class<? extends DataStore> d
                 }
                 // Also check for common base classes
                 // TODO SAM 2012-01-31 Why not just use instanceof all the time?
-                else if ( (dataStoreClass == DatabaseDataStore.class) && dataStore instanceof DatabaseDataStore ) {
+                //else if ( (dataStoreClass == DatabaseDataStore.class) && dataStore instanceof DatabaseDataStore ) {
+                else if ( dataStoreClass.isInstance(dataStore) ) {
                     ; // Match is OK
                 }
                 else {
@@ -9950,9 +9951,10 @@ protected void setDataStore ( DataStore dataStore, boolean closeOld )
     if ( dataStore == null ) {
         return;
     }
-    if ( Message.isDebugOn ) {
-    	Message.printDebug(1, routine, "Setting datastore \"" + dataStore.getName() + "\"" );
-    }
+    //if ( Message.isDebugOn ) {
+    	//Message.printDebug(1, routine, "Setting datastore \"" + dataStore.getName() + "\"" );
+    	Message.printStatus(2, routine, "Setting datastore \"" + dataStore.getName() + "\"" );
+    //}
     for ( DataStore ds : __dataStoreList ) {
         if ( ds.getName().equalsIgnoreCase(dataStore.getName())){
             // The input name of the current instance matches that of the instance in the list.
@@ -9990,6 +9992,7 @@ protected void setDataStore ( DataStore dataStore, boolean closeOld )
 	    	}
 	    }
 	    if ( !added ) {
+	    	// Add at the end
 	    	__dataStoreList.add ( dataStore );
 	    }
 	}
