@@ -3335,83 +3335,6 @@ throws Exception
 }
 
 /**
-Clean up for garbage collection.
-@exception Throwable if there is an error.
-*/
-protected void finalize()
-throws Throwable
-{	__gui = null;
-	__commandFilename = null;
-	__commandList = null;
-	__OutputStart_DateTime = null;
-	__OutputEnd_DateTime = null;
-	__CUBlaneyCriddle_Vector = null;
-	__CUCropCharacteristics_Vector = null;
-	__CUCropPatternTS_Vector = null;
-	//__HydroBase_Supplemental_StructureIrrigSummaryTS_Vector = null;
-	__HydroBase_Supplemental_ParcelUseTS_Vector = null;
-	__CUIrrigationPracticeTS_Vector = null;
-	__CULocation_Vector = null;
-	__CUClimateStation_Vector = null;
-	__CUClimateStation_match_Vector = null;
-	//__CUDelayTableAssignment_match_Vector = null;
-	__CULocation_match_Vector = null;
-	__CUIrrigationPracticeTS_match_Vector = null;
-	__CUPenmanMonteith_Vector = null;
-	__CUPenmanMonteith_match_Vector = null;
-	__SMDelayTableMonthlyList = null;
-	__SMDelayTableMonthly_match_Vector = null;
-	__SMDelayTableDailyList = null;
-	__SMDelayTableDaily_match_Vector = null;
-	__SMDiversionStationList = null;
-	__SMDiversion_match_Vector = null;
-	__SMDiversionRightList = null;
-	__SMDiversionRight_match_Vector = null;
-	__SMDiversionTSMonthlyList = null;
-	__SMDiversionTSMonthly_match_Vector = null;
-	__SMDiversionTSMonthly2List = null;
-	__SMConsumptiveWaterRequirementTSMonthlyList = null;
-	__SMConsumptiveWaterRequirementTSMonthly_match_Vector = null;
-	__SMDemandTSMonthlyList = null;
-	__SMDemandTSMonthly_match_Vector = null;
-	__SMPatternTSMonthlyList = null;
-	__SMDiversionTSDailyList = null;
-	// TODO SAM 2007-02-18 Enable if needed
-	//__SMDiversionTSDaily_match_Vector = null;
-	__SM_network = null;
-	__SMReservoirStationList = null;
-	__SMReservoirRightList = null;
-	__SMReservoir_match_Vector = null;
-	__SMReservoirRight_match_Vector = null;
-	__SMInstreamFlowStationList = null;
-	__SMInstreamFlowRightList = null;
-	__SMInstreamFlow_match_Vector = null;
-	__SMInstreamFlowDemandTSAverageMonthlyList = null;
-	// TODO SAM 2007-02-18 Enable if needed.
-	//__SMInstreamFlowDemandTSAverageMonthly_match_Vector = null;
-	__SMStreamGageStationList = null;
-	__SMStreamGage_match_Vector = null;
-	__SMStreamEstimateStationList = null;
-	__SMStreamEstimate_match_Vector = null;
-	__SMStreamEstimateCoefficients_Vector = null;
-	__SMStreamEstimateCoefficients_match_Vector = null;
-	__SMPrfGageData_Vector = null;
-	__SMPrfGageData_match_Vector = null;
-	__SMWellList = null;
-	__SMWellRightList = null;
-	__SMWell_match_Vector = null;
-	__SMWellRight_match_Vector = null;
-	__SMWellHistoricalPumpingTSMonthlyList = null;
-	__SMWellDemandTSMonthlyList = null;
-	__SMRiverNetworkNode_Vector = null;
-	__SMRiverNetworkNode_match_Vector = null;
-	__SMOperationalRight_match_Vector = null;
-	__hdmi = null;
-	__listeners = null;
-	super.finalize();
-}
-
-/**
 Find an AgStats time series using the location (county) and data type (crop).
 @return the found time series or null if not found.
 @param county County to find.
@@ -6269,6 +6192,70 @@ public boolean getIsRunning ()
 }
 
 /**
+Get a date/time from a string.  The string is first expanded to fill ${Property} strings and then the
+matching property name is used to determine the date/time using the following rules:
+<ol>
+<li> If the string is null, "*" or "", return null.</li>
+<li> If the string uses a standard name InputStart (QueryStart), InputEnd (QueryEnd), OutputStart, OutputEnd, return the corresponding DateTime.</li>
+<li> Check the processor date/time hash table for user-defined date/time properties.</li>
+<li> Parse the string using DateTime.parse().
+</ol>
+@param dtString Date/time string to parse.
+@exception if the date/time cannot be determined using the defined procedure.
+*/
+protected DateTime getDateTime ( String dtString )
+throws Exception
+{
+	if ( dtString != null ) {
+		dtString = dtString.trim();
+	}
+	if ( (dtString == null) || dtString.isEmpty() || dtString.equals("*") ) {
+		// Want to use all available...
+		return null;
+	}
+
+	// TODO SAM 2015-05-17 Need to decide whether to continue supporting or move to ${OutputEnd} notation exclusively
+	// Handle built-in property ${InputStart} etc. below so that nulls don't cause an issue (nulls are OK for full period)
+	// Check for named DateTime instances...
+
+	if ( dtString.equalsIgnoreCase("OutputEnd") || dtString.equalsIgnoreCase("${OutputEnd}") || dtString.equalsIgnoreCase("OutputPeriodEnd") ) {
+		return __OutputEnd_DateTime;
+	}
+	else if(dtString.equalsIgnoreCase("OutputStart") || dtString.equalsIgnoreCase("${OutputStart}") || dtString.equalsIgnoreCase("OutputPeriodStart") ) {
+		return __OutputStart_DateTime;
+	}
+	/* Not used in StateDMI, is used in TSTool
+	else if(dtString.equalsIgnoreCase("InputEnd") || dtString.equalsIgnoreCase("${InputEnd}") || dtString.equalsIgnoreCase("QueryEnd") ||
+		dtString.equalsIgnoreCase("QueryPeriodEnd") ) {
+		return __InputEnd_DateTime;
+	}
+	else if(dtString.equalsIgnoreCase("InputStart") || dtString.equalsIgnoreCase("${InputStart}") || dtString.equalsIgnoreCase("QueryStart") ||
+		dtString.equalsIgnoreCase("QueryPeriodStart") ) {
+		return __InputStart_DateTime;
+	}
+	*/
+	
+	// Check for requested user-defined property
+	if ( dtString.startsWith("${") && dtString.endsWith("}") ) {
+		String propName = dtString.substring(2,dtString.length() - 1);
+		Object o = this.getPropContents(propName);
+		if ( o != null ) {
+			if ( o instanceof DateTime ) {
+				return (DateTime)o;
+			}
+			else if ( o instanceof String ) {
+				// Reset the string and try parsing below
+				dtString = (String)o;
+			}
+		}
+	}
+
+	// Else did not find a date time so try parse the string (OK to throw an exception)...
+
+	return DateTime.parse ( dtString );
+}
+
+/**
 Search for a fill pattern TS.
 @return reference to found StringMonthTS instance.
 @param PatternID Fill pattern identifier to search for.
@@ -8512,6 +8499,9 @@ throws Exception
     if ( request.equalsIgnoreCase("AddCommandProcessorEventListener") ) {
         return processRequest_AddCommandProcessorEventListener ( request, request_params );
     }
+	else if ( request.equalsIgnoreCase("DateTime") ) {
+		return processRequest_DateTime ( request, request_params );
+	}
     else if ( request.equalsIgnoreCase("GetTable") ) {
         return processRequest_GetTable ( request, request_params );
     }
@@ -8572,6 +8562,40 @@ throws Exception
     addCommandProcessorEventListener ( listener );
     // No data are returned in the bean.
     return bean;
+}
+
+/**
+Get a date/time property (DateTime instances) from a string.  The string is first expanded to fill ${Property} strings and then the
+matching property name is used to determine the date/time using the following rules:
+<ol>
+<li> If the string is null, "*" or "", return null.</li>
+<li> If the string uses a standard name InputStart (QueryStart), InputEnd (QueryEnd), OutputStart, OutputEnd, return the corresponding DateTime.</li>
+<li> Check the processor date/time hash table for user-defined date/time properties.</li>
+<li> Parse the string using DateTime.parse().
+</ol>
+@param request the processor request "DateTime" for logging
+@param request_params request parameters:
+<ol>
+<li> DateTime - date/time string to process into a DateTime object
+</ol>
+*/
+private CommandProcessorRequestResultsBean processRequest_DateTime ( String request, PropList request_params )
+throws Exception
+{	StateDMIProcessorRequestResultsBean bean = new StateDMIProcessorRequestResultsBean();
+	// Get the necessary parameters...
+	Object o = request_params.getContents ( "DateTime" );
+	if ( o == null ) {
+		String warning = "Request DateTime() does not provide a DateTime parameter.";
+		bean.setWarningText ( warning );
+		bean.setWarningRecommendationText ( "This is likely a software code error.");
+		throw new RequestParameterNotFoundException ( warning );
+	}
+	String DateTime = (String)o;
+	DateTime dt = getDateTime ( DateTime );
+	PropList results = bean.getResultsPropList();
+	// This will be set in the bean because the PropList is a reference...
+	results.setUsingObject("DateTime", dt );
+	return bean;
 }
 
 /**
@@ -9696,7 +9720,7 @@ throws Exception
 {   String routine = getClass().getName() + ".resetWorkflowProperties";
     Message.printStatus(2, routine, "Resetting workflow properties." );
     
- // First clear user-defined properties.
+    // First clear user-defined properties.
     __propertyHashmap.clear();
     // Define some standard properties
     __propertyHashmap.put ( "ComputerName", InetAddress.getLocalHost().getHostName() ); // Useful for messages
@@ -9996,6 +10020,25 @@ protected void setDataStore ( DataStore dataStore, boolean closeOld )
 	    	__dataStoreList.add ( dataStore );
 	    }
 	}
+}
+
+/**
+Set the list of all DataStore instances known to the processor.  These are named database
+connections that correspond to input type/name for time series.
+This method is normally only called in special cases.  For example, the RunCommands() command
+sets the data stores from the main processor into the called commands.
+Note that each data store in the list is set using setDataStore() - the instance of the list that
+manages the data stores is not reset.
+@param dataStoreList list of DataStore to use in the processor
+@param closeOld if true, then any matching data stores are first closed before being set to the
+new value (normally this should be false if, for example, a list of data stores from one processor
+is passed to another)
+*/
+public void setDataStores ( List<DataStore> dataStoreList, boolean closeOld )
+{
+    for ( DataStore dataStore : dataStoreList ) {
+        setDataStore(dataStore, closeOld );
+    }
 }
 
 /**
