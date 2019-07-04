@@ -203,9 +203,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			List<StateMod_Well> dataList = (List<StateMod_Well>)processor.getPropContents ( "StateMod_WellStation_List" );
     		smwellList = dataList;
     		compType = StateMod_DataSet.COMP_WELL_STATIONS;
-    		stationListSize = smwellList.size();
+    		if ( smwellList == null ) {
+    			stationListSize = 0;
+    		}
+    		else {
+    			stationListSize = smwellList.size();
+    		}
     	}
-    	stationListSize = smwellList.size();
     	Message.printStatus ( 2, routine, "Have " + stationListSize + " " + stationType + " stations.");
     }
     catch ( Exception e ) {
