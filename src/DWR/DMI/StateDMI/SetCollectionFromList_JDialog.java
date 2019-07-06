@@ -29,8 +29,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -47,18 +49,19 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import java.io.File;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import DWR.StateMod.StateMod_Diversion;
-import DWR.StateMod.StateMod_Well;
-
+import DWR.StateMod.StateMod_Diversion_CollectionType;
+import DWR.StateMod.StateMod_Well_CollectionPartIdType;
+import DWR.StateMod.StateMod_Well_CollectionPartType;
 import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.IOUtil;
@@ -90,11 +93,17 @@ private SimpleJComboBox __PartIDsColMax_JComboBox = null;
 private SimpleJComboBox	__IfNotFound_JComboBox = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
+private SimpleJButton __help_JButton = null;
 private SimpleJButton __browse_JButton = null;
 private SimpleJButton __path_JButton = null;
 private String __working_dir = null;	
 private SetCollectionFromList_Command __command = null;
 private boolean __ok = false;
+
+// Used for button labels...
+
+private final String __AddWorkingDirectoryToFile = "Abs";
+private final String __RemoveWorkingDirectoryFromFile = "Rel";
 
 /**
 Type of collection:  "Aggregate", "System", or "MultiStruct" - see StateMod definitions.
@@ -152,6 +161,9 @@ public void actionPerformed(ActionEvent event)
 	else if ( o == __cancel_JButton ) {
 		response ( false );
 	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", __command.getCommandName());
+	}
 	else if ( o == __ok_JButton ) {
 		refresh ();
 		checkInput ();
@@ -160,11 +172,11 @@ public void actionPerformed(ActionEvent event)
 		}
 	}
 	else if ( o == __path_JButton ) {
-		if (__path_JButton.getText().equals("Add Working Directory")) {
+		if (__path_JButton.getText().equals(__AddWorkingDirectoryToFile)) {
 			__ListFile_JTextField.setText (
 			IOUtil.toAbsolutePath(__working_dir, __ListFile_JTextField.getText()));
 		}
-		else if (__path_JButton.getText().equals( "Remove Working Directory")) {
+		else if (__path_JButton.getText().equals(__RemoveWorkingDirectoryFromFile)) {
 			try {
 				__ListFile_JTextField.setText (
 				IOUtil.toRelativePath (__working_dir, __ListFile_JTextField.getText()));
@@ -317,23 +329,6 @@ private void commitEdits()
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable {
-	__ListFile_JTextField = null;
-	__PartType_JComboBox = null;
-	__browse_JButton = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command = null;
-	__ok_JButton = null;
-	__path_JButton = null;
-	__working_dir = null;
-	super.finalize ();
-}
-
-/**
 Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
@@ -354,16 +349,16 @@ private void initialize ( JFrame parent, Command command )
 	}
 	
 	if ( StringUtil.indexOfIgnoreCase(
-		__command.getCommandName(), StateMod_Diversion.COLLECTION_TYPE_AGGREGATE,0) >= 0 ) {
-		__collectionType = StateMod_Diversion.COLLECTION_TYPE_AGGREGATE;
+		__command.getCommandName(), StateMod_Diversion_CollectionType.AGGREGATE.toString(),0) >= 0 ) {
+		__collectionType = StateMod_Diversion_CollectionType.AGGREGATE.toString();
 	}
 	else if ( StringUtil.indexOfIgnoreCase(
-		__command.getCommandName(), StateMod_Diversion.COLLECTION_TYPE_SYSTEM,0) >= 0 ) {
-		__collectionType = StateMod_Diversion.COLLECTION_TYPE_SYSTEM;
+		__command.getCommandName(), StateMod_Diversion_CollectionType.SYSTEM.toString(),0) >= 0 ) {
+		__collectionType = StateMod_Diversion_CollectionType.SYSTEM.toString();
 	}
 	else if ( StringUtil.indexOfIgnoreCase(
-		__command.getCommandName(), StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT,0) >= 0 ) {
-		__collectionType = StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT;
+		__command.getCommandName(), StateMod_Diversion_CollectionType.MULTISTRUCT.toString(),0) >= 0 ) {
+		__collectionType = StateMod_Diversion_CollectionType.MULTISTRUCT.toString();
 	}
 
 	addWindowListener(this);
@@ -383,128 +378,137 @@ private void initialize ( JFrame parent, Command command )
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sets a " + __nodeType + " " + __collectionType +
 		" location's information from a list file." ),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-    if ( (__command instanceof SetWellAggregateFromList_Command) ||
-    	(__command instanceof SetWellSystemFromList_Command) ) {
-		// Not really relevant for other station types.
-		JGUIUtil.addComponent(paragraph, new JLabel (
-    	"<html><b>The Well aggregate part type \"" + StateMod_Well.COLLECTION_PART_TYPE_PARCEL +
-    	"\" is provided for historical compatibility but may be phased out in favor of using Well with WDID and Receipt.</b></html>"),
-    	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-	}
-	if ( __collectionType.equalsIgnoreCase(StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT) ) {
+		0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+	if ( __collectionType.equalsIgnoreCase(StateMod_Diversion_CollectionType.MULTISTRUCT.toString()) ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
-		"A \"MultiStruct\" is used when demands are met using water from different tributaries." ),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		    "A \"MultiStruct\" is used when demands are met using water from different tributaries." ),
+		    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
-		"Each diversion station is represented in the model network"),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		    "Each diversion station is represented in the model network"),
+		    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
-		"and the historical water rights and diversion time series " +
-		"are distinct for each diversion station." ),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		    "and the historical water rights and diversion time series are distinct for each diversion station." ),
+		    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
-		"However, the efficiencies are estimated using combined " +
-		"demand and historical diversion time series," ),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		    "However, the efficiencies are estimated using combined demand and historical diversion time series," ),
+		    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
-		"and total demands are used for the primary structure, " +
-		"with zero demands on the other structure(s)." ),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		    "and total demands are used for the primary structure, with zero demands on the other structure(s)." ),
+		    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
-		"Operating rules are used to handle sharing diversion water."),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		    "Operating rules are used to handle sharing diversion water."),
+		    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        JGUIUtil.addComponent(paragraph, new JLabel ( "The primary ID will receive all demands."),
+		    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
     else {
     	if ( __command instanceof SetWellAggregateFromList_Command ) {
     		// Not really relevant for other station types.
     		JGUIUtil.addComponent(paragraph, new JLabel (
-        	"This command can be used with StateMod " + __nodeType + " stations and StateCU CU Locations."),
-        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	    "This command can be used with StateMod " + __nodeType + " stations and StateCU CU Locations."),
+        	    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     	}
         JGUIUtil.addComponent(paragraph, new JLabel (
-		"Each " + __collectionType +
-		" is a location where individual parts are combined into a single feature."),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		    "Each " + __collectionType + " is a location where individual parts are combined into a single feature."),
+		    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 		JGUIUtil.addComponent(paragraph, new JLabel (
-		"An \"Aggregate\" is used with Set" + __nodeType +
-		"AggregateFromList() when water rights will be aggregated into classes." ),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		    "An \"Aggregate\" is used with Set" + __nodeType + "AggregateFromList() when water rights will be aggregated into classes." ),
+		    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
-		"A \"System\" is used with Set" + __nodeType +
-		"SystemFromList() when individual water rights will be maintained." ),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		    "A \"System\" is used with Set" + __nodeType + "SystemFromList() when individual water rights will be maintained." ),
+		    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 		if ( __nodeType.equalsIgnoreCase(__command._Diversion) ) {
         	JGUIUtil.addComponent(paragraph, new JLabel (
         		"For example, multiple nearby or related ditches may be grouped as a single identifier."),
-        		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-        	JGUIUtil.addComponent(paragraph, new JLabel (
-        		"When grouping ditches, specify the diversion station IDs for the parts in the list file."),
-        		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        		0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 		}
 		else if ( __nodeType.equalsIgnoreCase(__command._Reservoir) ) {
         	JGUIUtil.addComponent(paragraph, new JLabel (
-        	"For example, multiple nearby or related reservoirs may be grouped as a single identifier."),
-        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-        	JGUIUtil.addComponent(paragraph, new JLabel (
-    			"When grouping reservoirs, specify the reservoir station IDs for the parts in the list file."),
-    			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	    "For example, multiple nearby or related reservoirs may be grouped as a single identifier."),
+        	    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 		}
 		else if ( __nodeType.equalsIgnoreCase(__command._Well) ) {
 			JGUIUtil.addComponent(paragraph, new JLabel (
-			"For example, well-only groups of wells or parcels may be grouped as a single identifier."),
-			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			    "For example, well-only groups of wells or parcels may be grouped as a single identifier."),
+			    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         	JGUIUtil.addComponent(paragraph, new JLabel (
-        	"Wells associated with ditches are grouped by specifying ditch identifiers for the parts."),
-        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	    "Wells associated with ditches are grouped by specifying ditch identifiers for the parts."),
+        	    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         	JGUIUtil.addComponent(paragraph, new JLabel (
-			"When grouping wells using parcels, specify parcel identifiers for the" +
-			" parts and indicate the year and water division for the parcel data."),
-			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			    "When grouping wells using parcels, specify parcel identifiers for the" +
+			    " parts and indicate the year and water division for the parcel data."),
+			    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         	JGUIUtil.addComponent(paragraph, new JLabel (
-			"When grouping wells using well identifiers (WDIDs or permit receipt numbers), specify the column for PartIdTypeColumn."),
-			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			    "<html><b>Grouping wells using parcels is an older approach that is being phased out.  " +
+			    "Indicate the year and water division for the parcel data.</b></html>"),
+			    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		}
+        JGUIUtil.addComponent(paragraph, new JSeparator (SwingConstants.HORIZONTAL),
+            0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+        JGUIUtil.addComponent(paragraph, new JLabel (
+		    "<html><b>Collection type:</b>  " + __collectionType + "</html>"),
+		    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		if ( __nodeType.equalsIgnoreCase(__command._Diversion) ) {
+            JGUIUtil.addComponent(paragraph, new JLabel (
+		        "<html><b>Part type:</b>  Ditch (part ID type assumed to be WDID)</html>"),
+		        0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		}
+		else if ( __nodeType.equalsIgnoreCase(__command._Reservoir) ) {
+            JGUIUtil.addComponent(paragraph, new JLabel (
+		        "<html><b>Part type:</b>  Reservoir (part ID type assumed to be WDID)</html>"),
+		        0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		}
+		else if ( __nodeType.equalsIgnoreCase(__command._Well) ) {
+            JGUIUtil.addComponent(paragraph, new JLabel (
+		        "<html><b>Part type:</b>  Ditch (part ID is ditch WDID), Parcel (part ID is parcel ID), "
+		        + "or Well (part ID can be well permit or structure WDID)</html>"),
+		        0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 		}
 	}
-	if ( __collectionType.equalsIgnoreCase(
-		StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT) ) {
-        	JGUIUtil.addComponent(paragraph, new JLabel ( "The primary ID will receive all demands."),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-	}
+    JGUIUtil.addComponent(paragraph, new JSeparator (SwingConstants.HORIZONTAL),
+        0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel ( "Columns should be delimited by commas."),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-        JGUIUtil.addComponent(paragraph, new JLabel (
-		"It is recommended that the location of the file be " +
-		"specified using a path relative to the working directory."),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
-        JGUIUtil.addComponent(paragraph, new JLabel ( ""),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel (
+		"It is recommended that the location of the file is specified using a path relative to the working directory."),
+		0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+    JGUIUtil.addComponent(paragraph, new JLabel ( ""),
+		0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	if (__working_dir != null) {
         JGUIUtil.addComponent(paragraph, new JLabel ( "The working directory is: " + __working_dir), 
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	}
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
-		0, ++y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 8, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JSeparator (SwingConstants.HORIZONTAL),
+        0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("List file:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__ListFile_JTextField = new JTextField (35);
 	__ListFile_JTextField.addKeyListener (this);
-        JGUIUtil.addComponent(main_JPanel, __ListFile_JTextField,
+    JGUIUtil.addComponent(main_JPanel, __ListFile_JTextField,
 		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__browse_JButton = new SimpleJButton ("Browse", this);
-        JGUIUtil.addComponent(main_JPanel, __browse_JButton,
+	__browse_JButton = new SimpleJButton ("...", this);
+	__browse_JButton.setToolTipText("Browse for file");
+    JGUIUtil.addComponent(main_JPanel, __browse_JButton,
 		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
-        
+	if ( __working_dir != null ) {
+		// Add the button to allow conversion to/from relative path...
+		__path_JButton = new SimpleJButton(__RemoveWorkingDirectoryFromFile,this);
+	    JGUIUtil.addComponent(main_JPanel, __path_JButton,
+	    	7, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	}
+ 
 	if ( __nodeType.equalsIgnoreCase(__command._Well) ) {
         JGUIUtil.addComponent(main_JPanel, new JLabel ( __collectionType + " part type:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 		__PartType_JComboBox = new SimpleJComboBox(false);
-		List<String> part_Vector = new Vector<String>(3);
-		part_Vector.add ( StateMod_Well.COLLECTION_PART_TYPE_DITCH );
-		part_Vector.add ( StateMod_Well.COLLECTION_PART_TYPE_PARCEL );
-		part_Vector.add ( StateMod_Well.COLLECTION_PART_TYPE_WELL );
+		List<String> part_Vector = new ArrayList<String>(3);
+		part_Vector.add ( StateMod_Well_CollectionPartType.DITCH.toString() );
+		part_Vector.add ( StateMod_Well_CollectionPartType.PARCEL.toString() );
+		part_Vector.add ( StateMod_Well_CollectionPartType.WELL.toString() );
 		__PartType_JComboBox.setData(part_Vector);
 		__PartType_JComboBox.select(0);
 		__PartType_JComboBox.addItemListener (this);
@@ -583,12 +587,12 @@ private void initialize ( JFrame parent, Command command )
 			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 		__PartIDTypeColumn_JTextField = new JTextField(10);
 		__PartIDTypeColumn_JTextField.setToolTipText("Column name or number for the part ID type - column value will be " +
-			StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_WDID + " or " + StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_RECEIPT );
+			StateMod_Well_CollectionPartIdType.WDID + " or " + StateMod_Well_CollectionPartIdType.RECEIPT );
 		__PartIDTypeColumn_JTextField.addKeyListener (this);
 		JGUIUtil.addComponent(main_JPanel, __PartIDTypeColumn_JTextField,
 			1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	   	JGUIUtil.addComponent(main_JPanel, new JLabel (
-			"Required for " + StateMod_Well.COLLECTION_PART_TYPE_WELL + " " + __collectionType + " part type."), 
+			"Required for " + StateMod_Well_CollectionPartType.WELL + " " + __collectionType + " part type."), 
 			3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
    	}
    	
@@ -654,15 +658,12 @@ private void initialize ( JFrame parent, Command command )
         JGUIUtil.addComponent(main_JPanel, button_JPanel, 
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
-	if (__working_dir != null) {
-		// Add the button to allow conversion to/from relative path...
-		__path_JButton = new SimpleJButton("Remove Working Directory", this);
-		button_JPanel.add (__path_JButton);
-	}
 	__cancel_JButton = new SimpleJButton("Cancel", this);
 	button_JPanel.add (__cancel_JButton);
 	__ok_JButton = new SimpleJButton("OK", this);
 	button_JPanel.add (__ok_JButton);
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	setTitle ( "Edit " + __command.getCommandName() + "() Command" );
 	// JDialogs do not need to be resizable...
@@ -893,27 +894,29 @@ private void refresh ()
 	IDCol = __IDCol_JComboBox.getSelected();
 	NameCol = __NameCol_JComboBox.getSelected();
 	PartIDsCol = __PartIDsCol_JComboBox.getSelected();
-	PartIDTypeColumn = __PartIDTypeColumn_JTextField.getText().trim();
 	PartIDsColMax = __PartIDsColMax_JComboBox.getSelected();
 	PartsListedHow = __PartsListedHow_JComboBox.getSelected();
 	IfNotFound = __IfNotFound_JComboBox.getSelected();
 	parameters.add("IDCol=" + IDCol);
 	parameters.add("NameCol=" + NameCol);
 	parameters.add("PartIDsCol=" + PartIDsCol);
-	parameters.add("PartIDTypeColumn=" + PartIDTypeColumn);
 	parameters.add("PartIDsColMax=" + PartIDsColMax);
 	parameters.add("PartsListedHow=" + PartsListedHow);
 	parameters.add("IfNotFound=" + IfNotFound);
+   	if ( (__command instanceof SetWellAggregateFromList_Command) || (__command instanceof SetWellSystemFromList_Command) ) {
+   		PartIDTypeColumn = __PartIDTypeColumn_JTextField.getText().trim();
+   		parameters.add("PartIDTypeColumn=" + PartIDTypeColumn);
+   	}
 	__command_JTextArea.setText( __command.toString(parameters) );
 	// Check the path and determine what the label on the path button should be...
 	if (__path_JButton != null) {
 		__path_JButton.setEnabled (true);
 		File f = new File (ListFile);
 		if (f.isAbsolute()) {
-			__path_JButton.setText ("Remove Working Directory");
+			__path_JButton.setText (__RemoveWorkingDirectoryFromFile);
 		}
 		else {
-			__path_JButton.setText ("Add Working Directory");
+			__path_JButton.setText (__AddWorkingDirectoryToFile);
 		}
 	}
 }

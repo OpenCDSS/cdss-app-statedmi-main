@@ -34,6 +34,7 @@ import DWR.DMI.HydroBaseDMI.HydroBase_Util;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.StateMod.StateMod_DataSet;
 import DWR.StateMod.StateMod_Diversion;
+import DWR.StateMod.StateMod_Diversion_CollectionType;
 import RTi.TS.MonthTS;
 import RTi.TS.MonthTSLimits;
 import RTi.TS.TS;
@@ -716,7 +717,7 @@ CommandWarningException, CommandException
 		int part_count = 0; // Counter (1+) of parts in a collection
 		String part_id = ""; // Identifier for a part in a collection
 		int [] wdid_parts = new int[2];	// Parts when a WDID is parsed
-		String collection_type = null;
+		StateMod_Diversion_CollectionType collection_type = null;
 		boolean fillUsingCIU = false;
 		String id;	// Diversion ID.
 		boolean blank_ts_created; // Indicates if a blank time series needed to be added (in which case
@@ -724,7 +725,7 @@ CommandWarningException, CommandException
 		boolean is_wdid; // Used to help manage messages for HydroBase and non-HydroBase structures.
 		for ( int i = 0; i < stationListSize; i++ ) {
 			ts = null;	// If null at the end a blank time series will be added.
-			div = (StateMod_Diversion)stationList.get(i);
+			div = stationList.get(i);
 			id = div.getID();
 			if ( !id.matches(ID_Java) ) {
 				// Do not read...
@@ -771,7 +772,7 @@ CommandWarningException, CommandException
 								// collection and will be initialized.  If true, it is added to the first TS.
 				collection_type = div.getCollectionType();
 				for ( iparts = 0; iparts < psize; iparts++ ) {
-					part_id = (String)parts.get(iparts);
+					part_id = parts.get(iparts);
 					Message.printStatus ( 2, routine, "Reading diversion time series for \"" + id +
 					"\" (part " + (iparts + 1) + ": "+part_id +")");
 					try {

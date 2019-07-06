@@ -34,6 +34,7 @@ import DWR.DMI.HydroBaseDMI.HydroBase_StructureReservoir;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.StateMod.StateMod_Reservoir;
 import DWR.StateMod.StateMod_ReservoirAreaCap;
+import DWR.StateMod.StateMod_Reservoir_CollectionType;
 import DWR.StateMod.StateMod_Util;
 
 import RTi.Util.Message.Message;
@@ -236,7 +237,7 @@ CommandWarningException, CommandException
 		String name = "";
 		int [] wdid_parts = new int[2];	// Parts when a WDID is parsed
 		double volmax = 0.0;
-		String collection_type = null;
+		StateMod_Reservoir_CollectionType collection_type = null;
 		String id; // Reservoir ID.
 		int matchCount = 0;
 		for ( int i = 0; i < stationListSize; i++ ) {

@@ -36,9 +36,10 @@ import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
 import DWR.StateCU.StateCU_CropPatternTS;
 import DWR.StateCU.StateCU_Location;
+import DWR.StateCU.StateCU_Location_CollectionPartIdType;
+import DWR.StateCU.StateCU_Location_CollectionPartType;
 import DWR.StateCU.StateCU_Parcel;
 import DWR.StateCU.StateCU_Util;
-import DWR.StateMod.StateMod_Well;
 import RTi.DMI.DMIUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
@@ -510,15 +511,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		// Loop through locations...
 		int matchCount = 0;
 		List<String> partIdList = null; // List of aggregate/system parts
-		List<String> partIdTypeList = null; // List of aggregate/system parts ID types (will contain "WDID" or "Receipt")
+		List<StateCU_Location_CollectionPartIdType> partIdTypeList = null; // List of aggregate/system parts ID types (will contain "WDID" or "Receipt")
 		//String collectionType = null;
-		String collectionPartType = null; // Parts used for collection.  Mainly need to key on StateMod_WellStation.
+		StateCU_Location_CollectionPartType collectionPartType = null; // Parts used for collection.  Mainly need to key on StateMod_WellStation.
 		boolean isCollection = false;
 		for ( int i = 0; i < culocListSize; i++ ) {
 			culoc = culocList.get(i);
 			culoc_id = culoc.getID();
 			isCollection = culoc.isCollection();
-			collectionPartType = "";
+			collectionPartType = null;
 			if ( !culoc_id.matches(idpattern_Java) ) {
 				// Identifier does not match...
 				continue;
@@ -581,7 +582,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					replace_flag = 0;
 				}
 	
-				else if ( isCollection && collectionPartType.equalsIgnoreCase(StateCU_Location.COLLECTION_PART_TYPE_DITCH)){
+				else if ( isCollection && (collectionPartType == StateCU_Location_CollectionPartType.DITCH) ) {
 					processing_ditches = true;
 					Message.printStatus ( 2, routine, "Processing diversion aggregate/system \"" + culoc_id + "\"" );
 					// Aggregate/system diversion...
@@ -659,7 +660,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	
 					replace_flag = 1;	// 1 means add
 				}
-				else if ( isCollection && collectionPartType.equalsIgnoreCase( StateMod_Well.COLLECTION_PART_TYPE_PARCEL)) {
+				else if ( isCollection && (collectionPartType == StateCU_Location_CollectionPartType.PARCEL)) {
 					// Well aggregate/system (read the individual parcels)...
 					processing_ditches = false;
 					Message.printStatus ( 2, routine, "Processing well aggregate/system \"" + culoc_id + "\"" );
@@ -808,7 +809,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						}
 					}
 				}
-				else if ( isCollection && collectionPartType.equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_WELL) ) {
+				else if ( isCollection && (collectionPartType == StateCU_Location_CollectionPartType.WELL) ) {
 					processing_ditches = false;
 					Message.printStatus ( 2, routine, "Processing well aggregate/system \"" + culoc_id + "\" using list of WDID/permit receipt for parts." );
 					// First get the parcels that are associated with the wells and then use the same logic as if processing parcels
@@ -828,16 +829,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					int [] parcelYearArray = new int[1]; // For one year
 					for ( String partId : partIdList ) {
 						++iPart;
-						String partIdType = partIdTypeList.get(iPart);
+						StateCU_Location_CollectionPartIdType partIdType = partIdTypeList.get(iPart);
 						Message.printStatus ( 2, routine, "  Processing part ID \"" + partId + "\" part type " + partIdType + "." );
 						// Get the well 
-						if ( partIdType.equalsIgnoreCase("WDID") ) {
+						if ( partIdType == StateCU_Location_CollectionPartIdType.WDID ) {
 							// Read rights for well structure WDID
 							// Split the WDID into parts in case it is not always 7 digits
 							int [] wdidParts = HydroBase_WaterDistrict.parseWDID(partId,null);
 							hbWellsList = hbdmi.readWellsWellToParcelList(-1, -1, -1, null, wdidParts[0], wdidParts[1]);
 						}
-						else if ( partIdType.equalsIgnoreCase("RECEIPT") ) {
+						else if ( partIdType == StateCU_Location_CollectionPartIdType.RECEIPT ) {
 							// Read rights for well permit receipt
 							hbWellsList = hbdmi.readWellsWellToParcelList(-1, -1, -1, partId, -1, -1);
 						}

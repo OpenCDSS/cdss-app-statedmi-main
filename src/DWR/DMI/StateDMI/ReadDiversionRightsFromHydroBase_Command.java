@@ -37,6 +37,7 @@ import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.DMI.StateDMI.dto.hydrobaserest.HydroBaseRestToolkit;
 import DWR.StateMod.StateMod_Diversion;
 import DWR.StateMod.StateMod_DiversionRight;
+import DWR.StateMod.StateMod_Diversion_CollectionType;
 import DWR.StateMod.StateMod_Util;
 
 import RTi.DMI.DMIUtil;
@@ -401,12 +402,10 @@ CommandWarningException, CommandException
 			is_system = false;
 			hbdivr_Vector = null; // Set to null so can re-use for aggregates
 			if ( div.isCollection() ) {
-				if ( div.getCollectionType().equalsIgnoreCase(
-					StateMod_Diversion.COLLECTION_TYPE_AGGREGATE)) {
+				if ( div.getCollectionType() == StateMod_Diversion_CollectionType.AGGREGATE ) {
 					is_aggregate = true;
 				}
-				if ( div.getCollectionType().equalsIgnoreCase(
-					StateMod_Diversion.COLLECTION_TYPE_SYSTEM)) {
+				if ( div.getCollectionType() == StateMod_Diversion_CollectionType.SYSTEM ) {
 					is_system = true;
 				}
 			}

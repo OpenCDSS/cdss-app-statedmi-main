@@ -32,6 +32,7 @@ import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
 import DWR.DMI.HydroBaseDMI.HydroBase_StructureView;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.StateMod.StateMod_Diversion;
+import DWR.StateMod.StateMod_Diversion_CollectionType;
 import DWR.StateMod.StateMod_Util;
 
 import RTi.Util.Message.Message;
@@ -245,12 +246,12 @@ CommandWarningException, CommandException
 		double capacity = 0.0;
 		double area = 0.0;
 		int demsrc = 0;
-		String collectionType = null;
+		StateMod_Diversion_CollectionType collectionType = null;
 		String id = "";	// Diversion ID.
 		int matchCount = 0;
 		for ( int i = 0; i < stationListSize; i++ ) {
 			try {
-				div = (StateMod_Diversion)stationList.get(i);
+				div = stationList.get(i);
 				id = div.getID();
 				if ( !id.matches(idpattern_Java) ) {
 					// Identifier does not match...

@@ -32,7 +32,7 @@ import DWR.DMI.HydroBaseDMI.HydroBase_AdministrationNumber;
 import DWR.StateMod.StateMod_Util;
 import DWR.StateMod.StateMod_Well;
 import DWR.StateMod.StateMod_WellRight;
-
+import DWR.StateMod.StateMod_Well_CollectionType;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.IO.AbstractCommand;
@@ -201,7 +201,7 @@ private List<StateMod_WellRight> aggregateWellRights ( List<StateMod_Well> smwel
 		if ( well != null ) {
 			// Determine whether aggregate/collection, etc.
 			gw_only = well.hasGroundwaterOnlySupply();
-			if ( well.getCollectionType().equalsIgnoreCase(StateMod_Well.COLLECTION_TYPE_AGGREGATE)){
+			if ( well.getCollectionType() == StateMod_Well_CollectionType.AGGREGATE ) {
 				is_aggregate = true;
 			}
 			// Also include all D&W to keep the number of rights down in the results
