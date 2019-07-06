@@ -30,9 +30,17 @@ import java.util.List;
 import java.util.Vector;
 
 import DWR.StateCU.StateCU_Location;
+import DWR.StateCU.StateCU_Location_CollectionPartIdType;
+import DWR.StateCU.StateCU_Location_CollectionPartType;
+import DWR.StateCU.StateCU_Location_CollectionType;
 import DWR.StateMod.StateMod_Diversion;
+import DWR.StateMod.StateMod_Diversion_CollectionType;
 import DWR.StateMod.StateMod_Reservoir;
+import DWR.StateMod.StateMod_Reservoir_CollectionType;
 import DWR.StateMod.StateMod_Well;
+import DWR.StateMod.StateMod_Well_CollectionPartIdType;
+import DWR.StateMod.StateMod_Well_CollectionPartType;
+import DWR.StateMod.StateMod_Well_CollectionType;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.String.StringUtil;
@@ -301,17 +309,18 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		nodeType = _Reservoir;
 	}
 	
+	// Use string initially and later in this function
 	if ( StringUtil.indexOfIgnoreCase(
-		getCommandName(), StateMod_Diversion.COLLECTION_TYPE_AGGREGATE,0) >= 0 ) {
-		collectionType = StateMod_Diversion.COLLECTION_TYPE_AGGREGATE;
+		getCommandName(), StateMod_Diversion_CollectionType.AGGREGATE.toString(),0) >= 0 ) {
+		collectionType = StateMod_Diversion_CollectionType.AGGREGATE.toString();
 	}
 	else if ( StringUtil.indexOfIgnoreCase(
-		getCommandName(), StateMod_Diversion.COLLECTION_TYPE_SYSTEM,0) >= 0 ) {
-		collectionType = StateMod_Diversion.COLLECTION_TYPE_SYSTEM;
+		getCommandName(), StateMod_Diversion_CollectionType.SYSTEM.toString(),0) >= 0 ) {
+		collectionType = StateMod_Diversion_CollectionType.SYSTEM.toString();
 	}
 	else if ( StringUtil.indexOfIgnoreCase(
-		getCommandName(), StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT,0) >= 0 ) {
-		collectionType = StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT;
+		getCommandName(), StateMod_Diversion_CollectionType.MULTISTRUCT.toString(),0) >= 0 ) {
+		collectionType = StateMod_Diversion_CollectionType.MULTISTRUCT.toString();
 	}
 
     PropList parameters = getCommandParameters();
@@ -418,7 +427,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	StateCU_Location culoc;
     	boolean matchFound = false;
     	for (int i = 0; i < size; i++) {
-    		culoc = (StateCU_Location)culocList.get(i);
+    		culoc = culocList.get(i);
     		id = culoc.getID();
     		if ( !id.equalsIgnoreCase(ID) ) {
     			// Identifier does not match...
@@ -427,18 +436,18 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		// Have a match so set the data...
     		List<String> tokens = StringUtil.breakStringList ( PartIDs, ", ", StringUtil.DELIM_SKIP_BLANKS );
     		List<String> partIdList = new ArrayList<String>();
-    		List<String> partIdTypeList = new ArrayList<String>();
+    		List<StateCU_Location_CollectionPartIdType> partIdTypeList = new ArrayList<StateCU_Location_CollectionPartIdType>();
     		for ( String partId : tokens ) {
     			// Look for any IDs starting with p: and strip off.
     			if ( partId.startsWith("p:") ) {
     				// Assume a receipt number
     				partIdList.add(partId.substring(2));
-    				partIdTypeList.add(StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_RECEIPT);
+    				partIdTypeList.add(StateCU_Location_CollectionPartIdType.RECEIPT);
     			}
     			else {
     				// Assume a WDID
     				partIdList.add(partId);
-    				partIdTypeList.add(StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_WDID);
+    				partIdTypeList.add(StateCU_Location_CollectionPartIdType.WDID);
     			}
     		}
     		Message.printStatus ( 2, routine,
@@ -453,22 +462,47 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	            new CommandLogRecord(CommandStatusType.FAILURE,
     	                message, "Last collection information specified will apply." ) );
     		}
-    		if ( collectionType.equalsIgnoreCase( StateCU_Location.COLLECTION_TYPE_AGGREGATE) ) {
-    			culoc.setCollectionType ( StateCU_Location.COLLECTION_TYPE_AGGREGATE );
+    		if ( collectionType.equalsIgnoreCase( StateCU_Location_CollectionType.AGGREGATE.toString()) ) {
+    			culoc.setCollectionType ( StateCU_Location_CollectionType.AGGREGATE );
     		}
-    		else if ( collectionType.equalsIgnoreCase(StateCU_Location.COLLECTION_TYPE_SYSTEM) ) {
-    			culoc.setCollectionType ( StateCU_Location.COLLECTION_TYPE_SYSTEM );
+    		else if ( collectionType.equalsIgnoreCase(StateCU_Location_CollectionType.SYSTEM.toString()) ) {
+    			culoc.setCollectionType ( StateCU_Location_CollectionType.SYSTEM );
     		}
-    		culoc.setCollectionPartType ( PartType );
+   			StateCU_Location_CollectionPartType collectionPartTypeForCuloc = StateCU_Location_CollectionPartType.valueOfIgnoreCase(PartType);
+				if ( collectionPartTypeForCuloc == null ) {
+   				message = "CU Location collection \"" + id + "\" part type \"" + PartType + "\" is invalid.";
+   				Message.printWarning ( warning_level, 
+   					MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+   				status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+   					message, "Verify that part type is valid." ) );
+			}
+    		culoc.setCollectionPartType ( collectionPartTypeForCuloc );
     		if ( nodeType.equalsIgnoreCase(_Well) ) {
     			culoc.setCollectionDiv ( Div_int );
-    			if ( PartType.equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_PARCEL) ) {
+    			if ( PartType.equalsIgnoreCase(StateCU_Location_CollectionPartType.PARCEL.toString()) ) {
     				culoc.setCollectionPartIDsForYear ( Year_int, partIdList );
     			}
-    			else if ( PartType.equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_DITCH) ) {
+    			else if ( PartType.equalsIgnoreCase(StateCU_Location_CollectionPartType.DITCH.toString()) ) {
     				culoc.setCollectionPartIDs ( partIdList );
     			}
-    			else if ( PartType.equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_WELL) ) {
+    			else if ( PartType.equalsIgnoreCase(StateCU_Location_CollectionPartType.WELL.toString()) ) {
+    				/* Should be OK - TODO smalers w019-07-05 remove this when tested out
+    				List<StateCU_Location_CollectionPartIdType> partIdTypesForCuloc = new ArrayList<StateCU_Location_CollectionPartIdType>();
+    				String partIdTypeForLoop;
+    				for ( int iPart = 0; i < partIdTypeList.size(); i++ ) {
+    					partIdTypeForLoop = partIdTypeList.get(iPart);
+    					StateMod_Well_CollectionPartIdType partIdTypeForCuloc = StateMod_Well_CollectionPartIdType.valueOfIgnoreCase(partIdTypeForLoop);
+    					if ( partIdTypeForCuloc == null ) {
+    						message = "CU Location collection \"" + id + "\" part ID \"" + partIdList.get(iPart) +
+    							"\" has invalid part ID type \"" + partIdTypeForLoop + "\".";
+    						Message.printWarning ( warning_level, 
+    							MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+    						status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+    							message, "Verify that part ID type is valid." ) );
+    					}
+    				}
+    				culoc.setCollectionPartIDs ( partIdList, partIdTypesForCuloc );
+    				*/
     				culoc.setCollectionPartIDs ( partIdList, partIdTypeList );
     			}
     		}
@@ -488,7 +522,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		}
     		StateMod_Diversion div;
     		for (int i = 0; i < size; i++) {
-    			div = (StateMod_Diversion)divList.get(i);
+    			div = divList.get(i);
     			id = div.getID();
     			if ( !id.equalsIgnoreCase(ID) ) {
     				// Identifier does not match...
@@ -499,23 +533,30 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			Message.printStatus ( 2, routine,
     				"Setting " + id + " " + collectionType + " parts (" + PartType + ") -> " + tokens );
     			if ( div.isCollection() ) {
-        	        message = "Diversion \"" + id + "\" is already a collection (" +
-    	        	div.getCollectionType() + ").";
+        	        message = "Diversion \"" + id + "\" is already a collection (" + div.getCollectionType() + ").";
 	    	        Message.printWarning ( warning_level, 
-	    	        MessageUtil.formatMessageTag(command_tag, ++warning_count),
-	    	        routine, message );
+	    	        	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
 	    	        status.addToLog ( command_phase,
-    	            new CommandLogRecord(CommandStatusType.FAILURE,
-    	                message, "Last collection information specified will apply." ) );
+	    	        	new CommandLogRecord(CommandStatusType.FAILURE,
+	    	        		message, "Last collection information specified will apply." ) );
     			}
-    			if ( collectionType.equalsIgnoreCase(StateMod_Diversion.COLLECTION_TYPE_AGGREGATE) ){
-    				div.setCollectionType (	StateMod_Diversion.COLLECTION_TYPE_AGGREGATE );
+    			if ( collectionType.equalsIgnoreCase(StateMod_Diversion_CollectionType.AGGREGATE.toString()) ){
+    				div.setCollectionType (	StateMod_Diversion_CollectionType.AGGREGATE );
     			}
-    			else if(collectionType.equalsIgnoreCase(StateMod_Diversion.COLLECTION_TYPE_SYSTEM) ){
-    				div.setCollectionType (	StateMod_Diversion.COLLECTION_TYPE_SYSTEM );
+    			else if(collectionType.equalsIgnoreCase(StateMod_Diversion_CollectionType.SYSTEM.toString()) ){
+    				div.setCollectionType (	StateMod_Diversion_CollectionType.SYSTEM );
     			}
-    			else if(collectionType.equalsIgnoreCase(StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT)){
-    				div.setCollectionType (StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT);
+    			else if(collectionType.equalsIgnoreCase(StateMod_Diversion_CollectionType.MULTISTRUCT.toString())){
+    				div.setCollectionType (StateMod_Diversion_CollectionType.MULTISTRUCT);
+    			}
+    			else {
+        	        message = "Diversion \"" + id + "\" collection type (" + div.getCollectionType() + ") is invalid.";
+	    	        Message.printWarning ( warning_level, 
+	    	        	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+	    	        status.addToLog ( command_phase,
+	    	        	new CommandLogRecord(CommandStatusType.FAILURE,
+	    	        		message, "Last collection information specified will apply." ) );
+	    	        continue;
     			}
     			div.setCollectionPartIDs ( tokens );
     			matchFound = true;
@@ -529,7 +570,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		}
     		StateMod_Reservoir res;
     		for (int i = 0; i < size; i++) {
-    			res = (StateMod_Reservoir)resList.get(i);
+    			res = resList.get(i);
     			id = res.getID();
     			if ( !id.equalsIgnoreCase(ID) ) {
     				// Identifier does not match...
@@ -549,11 +590,20 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	            new CommandLogRecord(CommandStatusType.FAILURE,
     	                message, "Last collection information specified will apply." ) );
     			}
-    			if ( collectionType.equalsIgnoreCase(StateMod_Reservoir.COLLECTION_TYPE_AGGREGATE)){
-    				res.setCollectionType (	StateMod_Reservoir.COLLECTION_TYPE_AGGREGATE );
+    			if ( collectionType.equalsIgnoreCase(StateMod_Reservoir_CollectionType.AGGREGATE.toString())){
+    				res.setCollectionType (	StateMod_Reservoir_CollectionType.AGGREGATE );
     			}
-    			else if(collectionType.equalsIgnoreCase(StateMod_Reservoir.COLLECTION_TYPE_SYSTEM)){
-    				res.setCollectionType (	StateMod_Reservoir.COLLECTION_TYPE_SYSTEM );
+    			else if(collectionType.equalsIgnoreCase(StateMod_Reservoir_CollectionType.SYSTEM.toString())){
+    				res.setCollectionType (	StateMod_Reservoir_CollectionType.SYSTEM );
+    			}
+    			else {
+        	        message = "Reservoir \"" + id + "\" collection type (" + res.getCollectionType() + ") is invalid.";
+	    	        Message.printWarning ( warning_level, 
+	    	        	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+	    	        status.addToLog ( command_phase,
+	    	        	new CommandLogRecord(CommandStatusType.FAILURE,
+	    	        		message, "Last collection information specified will apply." ) );
+	    	        continue;
     			}
     			res.setCollectionPartIDs ( tokens );
     			matchFound = true;
@@ -567,7 +617,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		}
     		StateMod_Well well;
     		for (int i = 0; i < size; i++) {
-    			well = (StateMod_Well)wellList.get(i);
+    			well = wellList.get(i);
     			id = well.getID();
     			if ( !id.equalsIgnoreCase(ID) ) {
     				// Identifier does not match...
@@ -578,18 +628,18 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			Message.printStatus ( 2, routine,
     				"Setting " + id + " " + collectionType + " parts (" + PartType + ") -> " + tokens );
         		List<String> partIdList = new ArrayList<String>();
-        		List<String> partIdTypeList = new ArrayList<String>();
+        		List<StateMod_Well_CollectionPartIdType> partIdTypeList = new ArrayList<StateMod_Well_CollectionPartIdType>();
         		for ( String partId : tokens ) {
         			// Look for any IDs starting with p: and strip off.
         			if ( partId.startsWith("p:") ) {
         				// Assume a receipt number
         				partIdList.add(partId.substring(2));
-        				partIdTypeList.add(StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_RECEIPT);
+        				partIdTypeList.add(StateMod_Well_CollectionPartIdType.RECEIPT);
         			}
         			else {
         				// Assume a WDID
         				partIdList.add(partId);
-        				partIdTypeList.add(StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_WDID);
+        				partIdTypeList.add(StateMod_Well_CollectionPartIdType.WDID);
         			}
         		}
     			if ( well.isCollection() ) {
@@ -602,21 +652,45 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	            new CommandLogRecord(CommandStatusType.FAILURE,
     	                message, "Last collection information specified will apply." ) );
     			}
-    			if ( collectionType.equalsIgnoreCase( StateMod_Well.COLLECTION_TYPE_AGGREGATE) ) {
-    				well.setCollectionType ( StateMod_Well.COLLECTION_TYPE_AGGREGATE );
+    			if ( collectionType.equalsIgnoreCase(StateMod_Well_CollectionType.AGGREGATE.toString()) ) {
+    				well.setCollectionType ( StateMod_Well_CollectionType.AGGREGATE );
     			}
-    			else if(collectionType.equalsIgnoreCase( StateMod_Well.COLLECTION_TYPE_SYSTEM) ) {
-    				well.setCollectionType ( StateMod_Well.COLLECTION_TYPE_SYSTEM );
+    			else if(collectionType.equalsIgnoreCase( StateMod_Well_CollectionType.SYSTEM.toString()) ) {
+    				well.setCollectionType ( StateMod_Well_CollectionType.SYSTEM );
     			}
-    			well.setCollectionPartType ( PartType );
-    			if ( PartType.equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_PARCEL) ) {
+    			else {
+        	        message = "Well \"" + id + "\" collection type (" + well.getCollectionType() + ") is invalid.";
+	    	        Message.printWarning ( warning_level, 
+	    	        	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+	    	        status.addToLog ( command_phase,
+	    	        	new CommandLogRecord(CommandStatusType.FAILURE,
+	    	        		message, "Last collection information specified will apply." ) );
+	    	        continue;
+    			}
+    			StateMod_Well_CollectionPartType collectionPartTypeForWell = StateMod_Well_CollectionPartType.valueOfIgnoreCase(PartType);
+ 				if ( collectionPartTypeForWell == null ) {
+    				message = "CU Location collection \"" + id + "\" part type \"" + PartType + "\" is invalid.";
+    				Message.printWarning ( warning_level, 
+    					MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+    				status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+    					message, "Verify that part type is valid." ) );
+ 				}
+    			well.setCollectionPartType ( collectionPartTypeForWell );
+    			if ( collectionPartTypeForWell == StateMod_Well_CollectionPartType.PARCEL ) {
     				well.setCollectionPartIDsForYear ( Year_int, partIdList );
     			}
-    			else if ( PartType.equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_DITCH) ) {
+    			else if ( collectionPartTypeForWell == StateMod_Well_CollectionPartType.DITCH ) {
     				well.setCollectionPartIDsForYear ( Year_int, partIdList );
     			}
-    			else if ( PartType.equalsIgnoreCase(StateMod_Well.COLLECTION_PART_TYPE_WELL) ) {
+    			else if ( collectionPartTypeForWell == StateMod_Well_CollectionPartType.WELL ) {
     				well.setCollectionPartIDs ( partIdList, partIdTypeList );
+    			}
+    			else {
+    				message = "CU Location collection \"" + id + "\" part type \"" + PartType + "\" is invalid.";
+    				Message.printWarning ( warning_level, 
+    					MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+    				status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+    					message, "Verify that part type is valid." ) );
     			}
     			well.setCollectionDiv ( Div_int );
     			matchFound = true;

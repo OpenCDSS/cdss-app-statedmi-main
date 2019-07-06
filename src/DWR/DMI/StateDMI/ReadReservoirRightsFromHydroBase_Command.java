@@ -37,6 +37,7 @@ import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.DMI.StateDMI.dto.hydrobaserest.HydroBaseRestToolkit;
 import DWR.StateMod.StateMod_Reservoir;
 import DWR.StateMod.StateMod_ReservoirRight;
+import DWR.StateMod.StateMod_Reservoir_CollectionType;
 import DWR.StateMod.StateMod_Util;
 
 import RTi.DMI.DMIUtil;
@@ -383,10 +384,10 @@ CommandWarningException, CommandException
 			is_system = false;
 			hbresr_Vector = null; // Set to null so can re-use for aggregates
 			if ( res.isCollection() ) {
-				if ( res.getCollectionType().equalsIgnoreCase(StateMod_Reservoir.COLLECTION_TYPE_AGGREGATE)) {
+				if ( res.getCollectionType() == StateMod_Reservoir_CollectionType.AGGREGATE ) {
 					is_aggregate = true;
 				}
-				if ( res.getCollectionType().equalsIgnoreCase(StateMod_Reservoir.COLLECTION_TYPE_SYSTEM)) {
+				if ( res.getCollectionType() == StateMod_Reservoir_CollectionType.SYSTEM ) {
 					is_system = true;
 				}
 			}

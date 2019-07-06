@@ -34,6 +34,7 @@ import java.util.Vector;
 import DWR.StateMod.StateMod_Right;
 import DWR.StateMod.StateMod_Util;
 import DWR.StateMod.StateMod_WellRight;
+import DWR.StateMod.StateMod_Well_CollectionPartIdType;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.IO.AbstractCommand;
@@ -232,7 +233,7 @@ private void formatWellRightIds ( List<StateMod_WellRight> smrights, String perm
 		for ( StateMod_WellRight smright : smrights ) {
 			smWellRight = smright;
 			id = smWellRight.getID();
-			if ( smWellRight.getCollectionPartIdType().equalsIgnoreCase("Receipt")) {
+			if ( smWellRight.getCollectionPartIdType() == StateMod_Well_CollectionPartIdType.RECEIPT ) {
 				smWellRight.setID(String.format(permitIDPreFormat, id));
 			}
 		}
@@ -268,7 +269,7 @@ private void formatWellRightIds ( List<StateMod_WellRight> smrights, String perm
 		for ( StateMod_WellRight smright : smrights ) {
 			smWellRight = smright;
 			id = smWellRight.getID();
-			if ( smWellRight.getCollectionPartIdType().equalsIgnoreCase("Receipt")) {
+			if ( smWellRight.getCollectionPartIdType() == StateMod_Well_CollectionPartIdType.RECEIPT ) {
 				smWellRight.setID(String.format(permitIDPostFormat, id));
 			}
 		}

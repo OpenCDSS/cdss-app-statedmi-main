@@ -35,6 +35,7 @@ import java.util.Vector;
 import DWR.StateMod.StateMod_Data;
 import DWR.StateMod.StateMod_DataSet;
 import DWR.StateMod.StateMod_Diversion;
+import DWR.StateMod.StateMod_Diversion_CollectionType;
 import DWR.StateMod.StateMod_Util;
 import DWR.StateMod.StateMod_Well;
 
@@ -1995,7 +1996,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		// Add to the diversion historical and demand time series if a MultiStruct...
 
     		if ( (compType == StateMod_DataSet.COMP_DIVERSION_STATIONS) && div.isCollection() &&
-    			div.getCollectionType().equalsIgnoreCase(StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT)) {
+    			(div.getCollectionType() == StateMod_Diversion_CollectionType.MULTISTRUCT) ) {
     			// First clone the time series so they are not changed...
     			MonthTS ddh_ts2 = (MonthTS)h_ts.clone();
     			MonthTS iwr_ts2 = (MonthTS)iwr_ts.clone();
@@ -2305,7 +2306,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		// The part data will have been set above for the first part of the check...
 
     		if ( (compType ==StateMod_DataSet.COMP_DIVERSION_STATIONS)&& div.isCollection() &&
-    			div.getCollectionType().equalsIgnoreCase(StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT)) {
+    			(div.getCollectionType() == StateMod_Diversion_CollectionType.MULTISTRUCT) ) {
     			for ( int ic = 0; ic < collection_size; ic++ ) {
     				part_id = partids.get(ic);
     				pos = StateMod_Util.indexOf ( wesList, part_id );

@@ -10714,6 +10714,7 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 		new SimpleJMenuItem(__Commands_StateCU_CULocations_SetCULocation_String, this));
 	Commands_StateCU_CULocations_JMenu.add(__Commands_StateCU_CULocations_SetCULocationsFromList_JMenuItem=
 		new SimpleJMenuItem(__Commands_StateCU_CULocations_SetCULocationsFromList_String,this));
+	Commands_StateCU_CULocations_JMenu.addSeparator();
 	Commands_StateCU_CULocations_JMenu.add(
 		new SimpleJMenuItem(__Commands_StateCU_CULocations_SetDiversionAggregate_String,this));
 	Commands_StateCU_CULocations_JMenu.add(

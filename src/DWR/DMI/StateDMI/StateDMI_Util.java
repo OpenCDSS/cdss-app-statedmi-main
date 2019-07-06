@@ -29,14 +29,17 @@ import java.util.List;
 import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
 import DWR.DMI.HydroBaseDMI.HydroBase_AdministrationNumber;
 import DWR.DMI.HydroBaseDMI.HydroBase_NetAmts;
+import DWR.DMI.HydroBaseDMI.HydroBase_NetAmts_CollectionPartIdType;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import DWR.StateCU.StateCU_Parcel;
 import DWR.StateCU.StateCU_Supply;
 import DWR.StateMod.StateMod_Util;
-import DWR.StateMod.StateMod_Well;
 import DWR.StateMod.StateMod_WellRight;
+import DWR.StateMod.StateMod_Well_CollectionPartIdType;
+import DWR.StateMod.StateMod_Well_CollectionPartType;
+import DWR.StateMod.StateMod_Well_CollectionType;
 import RTi.DMI.DMIUtil;
 import RTi.Util.IO.CommandLogRecord;
 import RTi.Util.IO.CommandPhaseType;
@@ -214,6 +217,44 @@ public static boolean isParcelClassForEstimatedWell ( int parcelClass )
 	}
 	else {
 		return false;
+	}
+}
+
+/**
+ * Lookup the HydroBase_NetAmts_CollectionPartIdType from 
+ * a StateMod_Well_CollectionPartIdType.
+ * @return the HydroBase_NetAmts_CollectionPartIdType matching 
+ * a StateMod_Well_CollectionPartIdType, or null if no match.
+ */
+private static HydroBase_NetAmts_CollectionPartIdType lookupHydroBaseNetAmtsCollectionPartIdType(
+	StateMod_Well_CollectionPartIdType stateModWellCollectionPartIdType ) {
+	if ( stateModWellCollectionPartIdType == StateMod_Well_CollectionPartIdType.RECEIPT ) {
+		return HydroBase_NetAmts_CollectionPartIdType.RECEIPT;
+	}
+	else if ( stateModWellCollectionPartIdType == StateMod_Well_CollectionPartIdType.WDID ) {
+		return HydroBase_NetAmts_CollectionPartIdType.WDID;
+	}
+	else {
+		return null;
+	}
+}
+
+/**
+ * Lookup the StateMod_Well_CollectionPartIdType
+ * from the HydroBase_NetAmts_CollectionPartIdType.
+ * @return the StateMod_Well_CollectionPartIdType matching
+ * a HydroBase_NetAmts_CollectionPartIdType matching, or null if no match.
+ */
+public static StateMod_Well_CollectionPartIdType lookupWellCollectionPartIdType(
+	HydroBase_NetAmts_CollectionPartIdType hydrobaseNetAmtsCollectionPartIdType ) {
+	if ( hydrobaseNetAmtsCollectionPartIdType == HydroBase_NetAmts_CollectionPartIdType.RECEIPT ) {
+		return StateMod_Well_CollectionPartIdType.RECEIPT;
+	}
+	else if ( hydrobaseNetAmtsCollectionPartIdType == HydroBase_NetAmts_CollectionPartIdType.WDID ) {
+		return StateMod_Well_CollectionPartIdType.WDID;
+	}
+	else {
+		return null;
 	}
 }
 
@@ -981,10 +1022,13 @@ protected static int readWellRightsFromHydroBaseWellParcelsHelper (
 	// TODO SAM 2016-05-18 Need to fix this if receipt part type was requested
 	// - but needs to be consistent with above
 	if ( usePermitDate ) {
-		hbwellr.setCollectionIdPartType(StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_RECEIPT);
+		hbwellr.setCollectionIdPartType(
+			lookupHydroBaseNetAmtsCollectionPartIdType(
+				StateMod_Well_CollectionPartIdType.RECEIPT));
 	}
 	else {
-		hbwellr.setCollectionIdPartType(StateMod_Well.COLLECTION_WELL_PART_ID_TYPE_RECEIPT);
+		hbwellr.setCollectionIdPartType(
+			lookupHydroBaseNetAmtsCollectionPartIdType(StateMod_Well_CollectionPartIdType.RECEIPT));
 	}
 	// Add to the return list and return the error count...
 	hbwellrList.add ( hbwellr );
@@ -1026,10 +1070,10 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 	String commandTag, int warningLevel, int warningCount, CommandStatus status,
 	String routine,
 	String wellStationId,
-	String collectionType,
-	String collectionPartType,
+	StateMod_Well_CollectionType collectionType,
+	StateMod_Well_CollectionPartType collectionPartType,
 	String partId,
-	String partIdType,
+	StateMod_Well_CollectionPartIdType partIdType,
 	DefineWellRightHowType defineWellRightHow,
 	boolean useApex,
 	double defaultAdminNumber,
@@ -1042,13 +1086,13 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 	// First read from the HydroBase vw_CDSS_Wells view
 	List<HydroBase_Wells> hbWellsList = null;
 	int wdidParts[] = null;
-	if ( partIdType.equalsIgnoreCase("WDID") ) {
+	if ( partIdType == StateMod_Well_CollectionPartIdType.WDID ) {
 		// Read rights for well structure WDID
 		// Split the WDID into parts in case it is not always 7 digits
 		wdidParts = HydroBase_WaterDistrict.parseWDID(partId,null);
 		hbWellsList = hdmi.readWellsList(null, wdidParts[0], wdidParts[1]);
 	}
-	else if ( partIdType.equalsIgnoreCase("RECEIPT") ) {
+	else if ( partIdType == StateMod_Well_CollectionPartIdType.RECEIPT ) {
 		// Read rights for well permit receipt
 		// Split the WDID into parts in case it is not always 7 digits
 		hbWellsList = hdmi.readWellsList(partId, -1, -1);
@@ -1087,7 +1131,7 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 		// However, one of the parts may be missing.
 		// Base what data are used by the part type that was requested.
 		HydroBase_Wells hbWells = hbWellsList.get(0);
-		if ( partIdType.equalsIgnoreCase("RECEIPT") ) {
+		if ( partIdType == StateMod_Well_CollectionPartIdType.RECEIPT ) {
 			// Use the data directly
 			message = "Requested well " + partIdType + " for well station \"" + wellStationId +
 					"\" - RECEIPT is requested so using receipt data from Wells table";

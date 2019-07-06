@@ -60,7 +60,7 @@ import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
 import DWR.StateMod.StateMod_Diversion;
 import DWR.StateMod.StateMod_Util;
 import DWR.StateMod.StateMod_Well;
-
+import DWR.StateMod.StateMod_Well_CollectionPartType;
 import RTi.Util.IO.PropList;
 
 import RTi.Util.GUI.JGUIUtil;
@@ -198,8 +198,8 @@ public HydroBase_GUI_IrrigatedAcresTool ( HydroBaseDMI dmi, List<StateMod_Divers
 {
     __dmi = dmi;
     __diversionStationList = diversionStationList;
-    __wellsWithDitchStationList = filterWellCollections(wellStationList, StateMod_Well.COLLECTION_PART_TYPE_DITCH);
-    __wellsWithParcelStationList = filterWellCollections(wellStationList, StateMod_Well.COLLECTION_PART_TYPE_PARCEL);
+    __wellsWithDitchStationList = filterWellCollections(wellStationList, StateMod_Well_CollectionPartType.DITCH);
+    __wellsWithParcelStationList = filterWellCollections(wellStationList, StateMod_Well_CollectionPartType.PARCEL);
     JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
     setupGUI ( __diversionStationList, __wellsWithDitchStationList, __wellsWithParcelStationList );
 }
@@ -305,11 +305,10 @@ Filter the well information to include only well stations that are collections u
 @param wellStationList list of well stations to filter.
 @param collectionPartType part type to return in list.
 */
-private List<StateMod_Well> filterWellCollections ( List<StateMod_Well> wellStationList, String collectionPartType )
+private List<StateMod_Well> filterWellCollections ( List<StateMod_Well> wellStationList, StateMod_Well_CollectionPartType collectionPartType )
 {	List<StateMod_Well> list = new Vector<StateMod_Well>();
 	for ( StateMod_Well well : wellStationList ) {
-		if ( well.isCollection() &&
-			well.getCollectionPartType().equalsIgnoreCase(collectionPartType)) {
+		if ( well.isCollection() && (well.getCollectionPartType() == collectionPartType) ) {
 			list.add ( well );
 		}
 	}

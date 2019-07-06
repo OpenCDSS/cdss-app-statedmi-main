@@ -39,6 +39,8 @@ import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
 import DWR.DMI.StateDMI.dto.hydrobaserest.HydroBaseRestToolkit;
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import DWR.StateCU.StateCU_Location;
+import DWR.StateCU.StateCU_Location_CollectionPartType;
+import DWR.StateCU.StateCU_Location_CollectionType;
 import DWR.StateCU.StateCU_Util;
 import RTi.TS.YearTS;
 import RTi.Util.Message.Message;
@@ -981,8 +983,8 @@ CommandWarningException, CommandException
 		
 		StateCU_Location culoc = null;	// StateCU location to process (used when do_ipy = true).
 		List<String> parts = null;
-		String collectionType = null;
-		String collectionPartType = null;
+		StateCU_Location_CollectionType collectionType = null;
+		StateCU_Location_CollectionPartType collectionPartType = null;
 		String culocId = null; // Well ID for CU location
 		boolean isCollection = false;	// Indicate whether the well/location is a collection (aggregate or system)
 		
@@ -1004,9 +1006,9 @@ CommandWarningException, CommandException
 			// Clear out the parcels saved with the well...
 			//well.getParcels().removeAllElements();
 			isCollection = false;
-			collectionType = "";	// Default...
+			collectionType = null;	// Default...
 			isCollection = culoc.isCollection();
-			collectionPartType = ""; 
+			collectionPartType = null; 
 			// The collection part list may vary by parcel year (although traditionally
 			// D&W aggregation is constant for the period in CDSS modeling).
 			// The collection type should not vary.
@@ -1080,7 +1082,7 @@ CommandWarningException, CommandException
 					yts.setDataValue ( date, 0.0 );
 				}
 	
-				if ( culoc.hasGroundwaterOnlySupply() && collectionPartType.equalsIgnoreCase(StateCU_Location.COLLECTION_PART_TYPE_PARCEL) ) {
+				if ( culoc.hasGroundwaterOnlySupply() && (collectionPartType == StateCU_Location_CollectionPartType.PARCEL) ) {
 					// StateCU Location that is a collection of parcels
 					// (and therefore a well-only location)...
 					Message.printStatus ( 2, routine, locType + " \"" + culocId + "\" is associated with a collection of parcels..." );
@@ -1101,7 +1103,7 @@ CommandWarningException, CommandException
 							Div_int,
 							warningLevel, warning_count, command_tag, status, cacheHydroBase);
 				}
-				else if ( culoc.hasGroundwaterOnlySupply() && collectionPartType.equalsIgnoreCase(StateCU_Location.COLLECTION_PART_TYPE_WELL) ) {
+				else if ( culoc.hasGroundwaterOnlySupply() && (collectionPartType == StateCU_Location_CollectionPartType.WELL) ) {
 					// StateCU Location that is a collection of parcels
 					// (and therefore a well-only location)...
 					message = locType + " \"" + culocId + "\" is associated with a collection of wells - not yet supported";
@@ -1127,7 +1129,7 @@ CommandWarningException, CommandException
 					}
 					else {
 						// To reuse code below, just use a single part...
-						collectionType = "(explicit)";
+						//collectionType = "(explicit)";
 						// TODO SAM 2006-01-31
 						//name = div.getName();
 						//name = well.getName();

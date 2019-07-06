@@ -30,6 +30,7 @@ import java.util.Vector;
 
 import DWR.StateMod.StateMod_DataSet;
 import DWR.StateMod.StateMod_Diversion;
+import DWR.StateMod.StateMod_Diversion_CollectionType;
 import DWR.StateMod.StateMod_Well;
 
 import RTi.TS.MonthTS;
@@ -578,7 +579,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    				}
 	    			}
 	    			if ( (compType == StateMod_DataSet.COMP_DEMAND_TS_MONTHLY) && div.isCollection() &&
-	    				div.getCollectionType().equalsIgnoreCase(StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT)) {
+	    				(div.getCollectionType() == StateMod_Diversion_CollectionType.MULTISTRUCT) ) {
 	    				// This is the primary diversion station in a MultiStruct.  Set all of the secondary
 	    				// demand time series to zero.
 	    				List<String> partids = div.getCollectionPartIDs(0);
@@ -676,7 +677,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    			}
 	    			// Add to the historical diversion time series if a MultiStruct...
 	    			if ( (compType == StateMod_DataSet.	COMP_DEMAND_TS_MONTHLY) && div.isCollection() &&
-	    				div.getCollectionType().equalsIgnoreCase(StateMod_Diversion.COLLECTION_TYPE_MULTISTRUCT)) {
+	    				(div.getCollectionType() == StateMod_Diversion_CollectionType.MULTISTRUCT) ) {
 	    				Message.printStatus ( 2, routine, "Adding diversion historical TS (monthly) "+
 	    				"parts for MultiStruct \""+ id + "\"..." );
 	    				// First clone the diversion time series so it is not changed...
