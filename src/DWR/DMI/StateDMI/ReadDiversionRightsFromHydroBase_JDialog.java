@@ -52,7 +52,6 @@ import javax.swing.event.ChangeListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
@@ -297,12 +296,12 @@ private void initialize (JFrame parent, ReadDiversionRightsFromHydroBase_Command
 
 	JGUIUtil.addComponent(main_JPanel, new JLabel ( "OnOff default:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	List<String> onoff_Vector = new Vector<String>(3);
-	onoff_Vector.add ( "" );
-	onoff_Vector.add ( __command._1 );
-	onoff_Vector.add ( __command._AppropriationDate );
+	List<String> onoffList = new ArrayList<String>(3);
+	onoffList.add ( "" );
+	onoffList.add ( __command._1 );
+	onoffList.add ( __command._AppropriationDate );
 	__OnOffDefault_JComboBox = new SimpleJComboBox(false);
-	__OnOffDefault_JComboBox.setData ( onoff_Vector );
+	__OnOffDefault_JComboBox.setData ( onoffList );
 	__OnOffDefault_JComboBox.select ( 0 );
 	__OnOffDefault_JComboBox.addItemListener(this);
 	JGUIUtil.addComponent(main_JPanel, __OnOffDefault_JComboBox,
@@ -310,7 +309,6 @@ private void initialize (JFrame parent, ReadDiversionRightsFromHydroBase_Command
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Optional - default OnOff switch (default=" + __command._AppropriationDate + ")."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-    
 
 	JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);

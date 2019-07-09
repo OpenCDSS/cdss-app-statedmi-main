@@ -28,8 +28,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -54,6 +56,7 @@ import java.util.Vector;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 
@@ -71,6 +74,7 @@ private JTextArea __command_JTextArea=null;
 private SimpleJComboBox __IfNotFound_JComboBox = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
+private SimpleJButton __help_JButton = null;
 private CheckStateMod_Command __command = null;
 private boolean __ok = false;
 
@@ -93,6 +97,9 @@ public void actionPerformed(ActionEvent event)
 
 	if ( o == __cancel_JButton ) {
 		response (false);
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", __command.getCommandName() );
 	}
 	else if ( o == __ok_JButton ) {
 		refresh ();
@@ -177,17 +184,17 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
 	getContentPane().add ("North", main_JPanel);
-	int y = 0;
+	int y = -1;
 
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
-	int yy = 0;
+	int yy = -1;
 	String idLabel = "ID";
 	String note = "identifiers";
 	if ( __command instanceof CheckStreamGageStations_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks stream gage stations, generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing (undefined) required values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) River network ID is not found in the network (if network node list is available)."),
@@ -200,7 +207,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	else if ( __command instanceof CheckDiversionStations_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks diversion stations, generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing (undefined) required values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Invalid values."),
@@ -215,7 +222,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	else if ( __command instanceof CheckDiversionRights_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks diversion rights, generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing (undefined) required values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Invalid values."),
@@ -228,7 +235,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	else if ( __command instanceof CheckDiversionHistoricalTSMonthly_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks diversion historical time series (monthly), generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Invalid values (negatives)."),
@@ -241,7 +248,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	else if ( __command instanceof CheckDiversionDemandTSMonthly_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks diversion demand time series (monthly), generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Invalid values (negatives)."),
@@ -254,7 +261,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	else if ( __command instanceof CheckReservoirStations_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks reservoir stations, generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing (undefined) required values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Invalid values."),
@@ -269,7 +276,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	else if ( __command instanceof CheckReservoirRights_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks reservoir rights, generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing (undefined) required values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Invalid values."),
@@ -282,7 +289,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	else if ( __command instanceof CheckInstreamFlowStations_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks instream flow stations, generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing (undefined) required values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Invalid values."),
@@ -299,7 +306,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	else if ( __command instanceof CheckInstreamFlowRights_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks instream flow rights, generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing (undefined) required values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Invalid values."),
@@ -312,7 +319,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	else if ( __command instanceof CheckInstreamFlowDemandTSAverageMonthly_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks instream flow demand time series (average monthly), generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Invalid values (negatives)."),
@@ -325,7 +332,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	else if ( __command instanceof CheckWellStations_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks well stations, generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing (undefined) required values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Invalid values."),
@@ -340,7 +347,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	else if ( __command instanceof CheckWellRights_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks well rights, generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Decree <= 0 after formatting for StateMod file"),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Well station capacity = sum of well rights (if well stations are available)."),
@@ -356,7 +363,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	else if ( __command instanceof CheckWellHistoricalPumpingTSMonthly_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks well historical pumping time series (monthly), generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Invalid values (negatives)."),
@@ -369,7 +376,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	else if ( __command instanceof CheckWellDemandTSMonthly_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks well demand time series (monthly), generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Invalid values (negatives)."),
@@ -382,7 +389,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	else if ( __command instanceof CheckRiverNetwork_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks river network stations (nodes), generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing (undefined) required values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Invalid values."),
@@ -395,7 +402,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	if ( __command instanceof CheckStreamEstimateStations_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks stream estimate stations, generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing (undefined) required values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) River network ID is not found in the network (if network node list is available)."),
@@ -408,7 +415,7 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	if ( __command instanceof CheckStreamEstimateCoefficients_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks stream estimate coefficients, generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing (undefined) required values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Invalid values."),
@@ -420,7 +427,9 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	}
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
-		0, y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	
     JGUIUtil.addComponent(main_JPanel, new JLabel (idLabel),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -470,6 +479,8 @@ private void initialize ( JFrame parent, CheckStateMod_Command command )
 	button_JPanel.add (__ok_JButton);
 	__cancel_JButton = new SimpleJButton("Cancel", this);
 	button_JPanel.add (__cancel_JButton);
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	setTitle ( "Edit " + __command.getCommandName() + "() Command" );
 	// JDialogs do not need to be resizable...
