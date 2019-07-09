@@ -163,6 +163,8 @@ import RTi.Util.Message.MessageLogListener;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Table.DataTable;
 import RTi.Util.Table.DataTable_JFrame;
+import RTi.Util.Table.TableColumnType;
+import RTi.Util.Table.TableField;
 import RTi.Util.Time.TimeInterval;
 import riverside.datastore.DataStore;
 import riverside.datastore.DataStores_JFrame;
@@ -542,7 +544,7 @@ private JList<String> __resultsTables_JList = null;
 /**
 Popup menu for table results.
 */
-//private JPopupMenu __resultsTables_JPopupMenu = null;
+private JPopupMenu __resultsTables_JPopupMenu = null;
 
 /**
 JList data model for final time series (a list of table identifiers associated with __results_tables_JList).
@@ -2800,6 +2802,10 @@ private String
 	__Help_ViewDocumentation_DatastoreReference_String = "View Documentation - Datastore Reference",
 	__Help_ViewDocumentation_Troubleshooting_String = "View Documentation - Troubleshooting",
 	//__Help_ViewTrainingMaterials_String = "View Training Materials",
+	
+	// Results at bottom of window
+	
+	__Results_Table_Properties_String = "Table properties...",
 
 	// Commands list pop-up menu (may be selectively added to/removed from the popup menu)...
 
@@ -7420,14 +7426,6 @@ public void keyReleased(KeyEvent event)
 public void keyTyped(KeyEvent e) {
 }
 
-private void maybeShowPopup(MouseEvent e) {
-	if (e.isPopupTrigger()) {
-		// Need to adjust the coordinates of the popup because of a Java bug...
-		Point pt = JGUIUtil.computeOptimalPosition ( e.getPoint(), e.getComponent(), __Commands_JPopupMenu );
-		__Commands_JPopupMenu.show(e.getComponent(),pt.x,pt.y);
-	}
-}
-
 /**
 Handle mouse clicked events.  If multiple clicks in the commands area, then
 edit the selected command.
@@ -7443,23 +7441,42 @@ public void mouseClicked ( MouseEvent event )
 	}
 }
 
-public void mouseDragged(MouseEvent e) {}
-
-public void mouseEntered(MouseEvent e) {}
-
-public void mouseExited(MouseEvent e) {}
-
-public void mousePressed(MouseEvent e) {
-	if (e.getButton() == 3) {
-		MouseEvent ee = new MouseEvent(e.getComponent(), e.getID(), e.getWhen(),
-				16, e.getX(), e.getY(), e.getClickCount(), false, 1);
-		mousePressed(ee);
-	}
-	maybeShowPopup(e);
+/**
+Handle mouse entered event.  Nothing is done.
+*/
+public void mouseEntered(MouseEvent event) {
 }
 
-public void mouseReleased(MouseEvent e) {
-	maybeShowPopup(e);
+/**
+Handle mouse exited event.  Nothing is done.
+*/
+public void mouseExited(MouseEvent event) {
+}
+
+/**
+Handle mouse pressed event.
+*/
+public void mousePressed(MouseEvent event) {
+	int mods = event.getModifiers();
+	Component c = event.getComponent();
+    // Popup for commands...
+	if ( (c == ui_GetCommandJList()) && (__commands_JListModel.size() > 0) &&
+		((mods & MouseEvent.BUTTON3_MASK) != 0) ) {
+		Point pt = JGUIUtil.computeOptimalPosition ( event.getPoint(), c, __Commands_JPopupMenu );
+		__Commands_JPopupMenu.show ( c, pt.x, pt.y );
+	}
+    // Popup for table results list, right click since left click automatically shows table...
+    else if ( (c == __resultsTables_JList) && (__resultsTables_JListModel.size() > 0) //) {//&&
+        && ((mods & MouseEvent.BUTTON3_MASK) == MouseEvent.BUTTON3_MASK) ) {
+        Point pt = JGUIUtil.computeOptimalPosition (event.getPoint(), c, __resultsTables_JPopupMenu );
+        __resultsTables_JPopupMenu.show ( c, pt.x, pt.y );
+    }
+}
+
+/**
+Handle mouse released event.  Nothing is done.
+*/
+public void mouseReleased(MouseEvent event) {
 }
 
 /**
@@ -9618,7 +9635,7 @@ private boolean ui_GetIgnoreListSelectionEvent()
 //FIXME SAM 2007-11-01 Need to use /tmp etc for a startup home if not
 //specified so the software install home is not used.
 /**
-Return the initial working directory, which will be the softare startup
+Return the initial working directory, which will be the software startup
 home, or the location of new command files.
 This directory is suitable for initializing a workflow processing run.
 @return the initial working directory, which should always be non-null.
@@ -10144,6 +10161,10 @@ private void ui_InitGUI ()
 	}
 	JGUIUtil.addComponent(center_JPanel, main_JSplitPane,
 		0, 0, 10, 10, 1.0, 1.0, GridBagConstraints.BOTH, GridBagConstraints.CENTER);
+	
+	// Popup menu for results
+	
+	ui_InitGUIMenus_ResultsPopup ();
 
 	// Bottom panel for the information TextFields.  Add this as the south
 	// panel of the main interface since it is not resizable...
@@ -13008,6 +13029,16 @@ private void ui_InitGUIMenus_Help ( JMenuBar menuBar )
 
 	menuBar.add(helpJMenu);
 }
+	
+/**
+Define the popup menus for results other than StateCU and StateMod.
+*/
+private void ui_InitGUIMenus_ResultsPopup ()
+{	__resultsTables_JPopupMenu = new JPopupMenu("Table Results Actions");
+    ActionListener_ResultsTables tables_l = new ActionListener_ResultsTables();
+    __resultsTables_JPopupMenu = new JPopupMenu("Table Results Actions");
+    __resultsTables_JPopupMenu.add( new SimpleJMenuItem ( __Results_Table_Properties_String, tables_l ) );
+}
 
 /**
 Initialize the Results menu for StateCU.
@@ -15525,7 +15556,7 @@ private void uiAction_ShowResultsTable ( String selected )
             Message.printWarning (1, routine,
                 "Unable to get table \"" + tableId + "\" from processor to view." );  
         }
-        new DataTable_JFrame ( "Table \"" + tableId + "\"", table );
+        new DataTable_JFrame ( this, "Table \"" + tableId + "\"", table );
     }
     catch (Exception e2) {
         Message.printWarning (1, routine, "Unable to view table \"" + tableId + "\"" );
@@ -15547,6 +15578,64 @@ private String uiAction_ShowResultsTable_GetTableID ( String tableDisplayString 
     int pos2 = tableDisplayString.indexOf( " -"); // Break between ID
     String tableId = tableDisplayString.substring(pos1+1,pos2).trim();
     return tableId;
+}
+
+/**
+Show the properties for a table.
+*/
+private void uiAction_ShowTableProperties ()
+{   String routine = getClass().getSimpleName() + "uiAction_ShowTableProperties";
+    try {
+        // Simple text display of HydroBase properties.
+        PropList reportProp = new PropList ("Table Properties");
+        reportProp.set ( "TotalWidth", "600" );
+        reportProp.set ( "TotalHeight", "600" );
+        reportProp.set ( "DisplayFont", __FIXED_WIDTH_FONT );
+        reportProp.set ( "DisplaySize", "11" );
+        reportProp.set ( "PrintFont", __FIXED_WIDTH_FONT );
+        reportProp.set ( "PrintSize", "7" );
+        reportProp.set ( "Title", "Table Properties" );
+        List<String> v = new Vector<String>();
+        // Get the table of interest
+        if ( __resultsTables_JList.getModel().getSize() > 0 ) {
+            // If something is selected, show properties for the selected.  Otherwise, show properties for all.
+            // TODO SAM 2012-10-12 Add intelligence to select based on mouse click?
+            int [] sel = __resultsTables_JList.getSelectedIndices();
+            if ( sel.length == 0 ) {
+                // Process all
+                sel = new int[__resultsTables_JList.getModel().getSize()];
+                for ( int i = 0; i < sel.length; i++ ) {
+                    sel[i] = i;
+                }
+            }
+            for ( int i = 0; i < sel.length; i++ ) {
+                // TODO SAM 2012-10-15 Evaluate putting this in DataTable class for general use
+                String displayString = __resultsTables_JList.getModel().getElementAt(sel[i]);
+                String tableId = uiAction_ShowResultsTable_GetTableID ( displayString );
+                DataTable t = commandProcessor_GetTable ( tableId );
+                v.add ( "" );
+                v.add ( "Table \"" + t.getTableID() + "\" properties:" );
+                for ( int ifld = 0; ifld < t.getNumberOfFields(); ifld++ ) {
+                	StringBuilder b = new StringBuilder();
+                	b.append("   Column[" + ifld + "] name=\"" + t.getFieldName(ifld) + "\" type=");
+                	if ( t.isColumnArray(t.getFieldDataType(ifld))) {
+                		// Array column
+                		b.append("Array of " + TableColumnType.valueOf(t.getFieldDataType(ifld) - TableField.DATA_TYPE_ARRAY_BASE));
+                	}
+                	else {
+                		b.append(TableColumnType.valueOf(t.getFieldDataType(ifld)));
+                	}
+                	b.append(" width=" + t.getFieldWidth(ifld) + " precision=" + t.getFieldPrecision(ifld));
+                	v.add(b.toString());
+                }
+            }
+        }
+        reportProp.setUsingObject ( "ParentUIComponent", this ); // Use so that interactive graphs are displayed on same screen as TSTool main GUI
+        new ReportJFrame ( v, reportProp );
+    }
+    catch ( Exception e ) {
+        Message.printWarning ( 1, routine, "Error displaying table properties (" + e + ")." );
+    }
 }
 
 /**
@@ -16050,6 +16139,24 @@ public void windowIconified(WindowEvent e)
 
 public void windowOpened(WindowEvent e)
 {
+}
+
+/**
+Internal class to handle action events from table results list.
+*/
+private class ActionListener_ResultsTables implements ActionListener
+{
+    /**
+    Handle a group of actions for the ensemble popup menu.
+    @param event Event to handle.
+    */
+    public void actionPerformed (ActionEvent event)
+    {   String command = event.getActionCommand();
+
+        if ( command.equals(__Results_Table_Properties_String) ) {
+            uiAction_ShowTableProperties();
+        }
+    }
 }
 
 }

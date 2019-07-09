@@ -49,18 +49,6 @@ public StateDMI_HydroBase_ParcelUseTS() {
 }
 
 /**
-Cleans up variables when the class is disposed of.  Sets all the member
-variables (that aren't primitives) to null.
-*/
-protected void finalize()
-throws Throwable {
-	_supply_type = null;
-	_location_id = null;
-	
-	super.finalize();
-}
-
-/**
 Returns whether the record has been processed.
 @return true if the record has been processed.
 */
@@ -115,8 +103,8 @@ Return a string representation of this object.
 */
 public String toString() {
 	return "StateDMI_" + super.toString() + "\n" +
-		"Supply_type:        " + _supply_type + "\n" +
-		"LocationID:               " + _location_id + "\n}";
+		"Supply_type: " + _supply_type + "\n" +
+		"LocationID:  " + _location_id + "\n}";
 	// FIXME SAM 2007-06-10 Remove redundant bracket
 }
 

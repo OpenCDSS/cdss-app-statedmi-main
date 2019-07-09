@@ -162,14 +162,14 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List<String> valid_Vector = new ArrayList<String>(6);
-    valid_Vector.add ( "DataStore" );
-    valid_Vector.add ( "ID" );
-    valid_Vector.add ( "DecreeMin" );
-    valid_Vector.add ( "IgnoreUseType" );
-    valid_Vector.add ( "AdminNumClasses" );
-    valid_Vector.add ( "OnOffDefault" );
-	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	List<String> validList = new ArrayList<String>(6);
+    validList.add ( "DataStore" );
+    validList.add ( "ID" );
+    validList.add ( "DecreeMin" );
+    validList.add ( "IgnoreUseType" );
+    validList.add ( "AdminNumClasses" );
+    validList.add ( "OnOffDefault" );
+	warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	if ( warning.length() > 0 ) {
 		Message.printWarning ( warning_level,
