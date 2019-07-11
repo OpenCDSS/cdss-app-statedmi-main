@@ -844,13 +844,28 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				if ( id.equalsIgnoreCase( culoc_id) ) {
     					foundMatch = true;
     					partId = (String)rec.getFieldValue(PartIDsCol_int);
+    					partId = partId.trim();
     					if ( partId.length() > 0 ) {
     						partIds.add ( partId );
+    						if ( PartIDTypeColumn_int >= 0 ) {
+    							// Also save the part id type
+    							partIdType = (String)rec.getFieldValue(PartIDTypeColumn_int);
+    							partIdType = partIdType.trim();
+    							partIdTypes.add ( partIdType );
+    						}
+    						else {
+    							// Assume WDID
+    							// - TODO smalers 2019-07-10 could allow P: in id for receipt
+    							partIdTypes.add ( "WDID" );
+    						}
     					}
-    					if ( PartIDTypeColumn_int >= 0 ) {
-    						// Also save the part id type
-    						partIdType = (String)rec.getFieldValue(PartIDTypeColumn_int);
-    						partIdTypes.add ( partIdType );
+    					else {
+    						message = "CU location " + nodeTypeFromCommand + " collection \"" + culoc_id +
+    							"\" has blank part ID for part " + partIds.size() + 1;
+							Message.printWarning ( warning_level, 
+								MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+							status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+								message, "Verify that the part ID is specified." ) );
     					}
     				}
     			}
@@ -890,9 +905,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			else if ( nodeTypeFromCommand.equalsIgnoreCase(_Well) && PartType.equalsIgnoreCase(_Well) ) {
     				List<StateCU_Location_CollectionPartIdType> partIdTypesForCuloc = new ArrayList<StateCU_Location_CollectionPartIdType>();
     				String partIdTypeForLoop;
-    				for ( int iPart = 0; i < partIdTypes.size(); i++ ) {
+    				for ( int iPart = 0; iPart < partIdTypes.size(); iPart++ ) {
     					partIdTypeForLoop = partIdTypes.get(iPart);
     					StateCU_Location_CollectionPartIdType partIdTypeForCuloc = StateCU_Location_CollectionPartIdType.valueOfIgnoreCase(partIdTypeForLoop);
+   						partIdTypesForCuloc.add(partIdTypeForCuloc); // Add in any case so ID and type lists align
     					if ( partIdTypeForCuloc == null ) {
     						message = "CU Location collection \"" + culoc_id + "\" part ID \"" + partIds.get(iPart) +
     							"\" has invalid part ID type \"" + partIdTypeForLoop + "\".";
@@ -937,7 +953,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				}
     			}
     		} // End match found
-    	} // End loop on locations
+    	} // End loop on CU locations
 
     	// Process StateMod data.
 
@@ -1007,7 +1023,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		}
     		else {
     			// The part IDs are in the multiple rows using the indicated column.
-    			// Read data until the sm_id changes or there are no more items in the table...
+    			// Read all the data because the well ID may not be sorted
     			partIds = new ArrayList<String>();
     			partIdTypes = new ArrayList<String>();
     			name = null;
@@ -1016,22 +1032,37 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				id = (String)rec.getFieldValue(IDCol_int);
     				if ( id.equalsIgnoreCase( sm_id) ) {
     					foundMatch = true;
-    					partId = (String) rec.getFieldValue(PartIDsCol_int);
+    					partId = (String)rec.getFieldValue(PartIDsCol_int);
+    					partId = partId.trim();
     					if ( partId.length() > 0 ) {
     						partIds.add ( partId );
-    					}
-    					if ( PartIDTypeColumn_int >= 0 ) {
-    						partIdType = (String)rec.getFieldValue(PartIDTypeColumn_int);
-    						partIdTypes.add ( partIdType );
-    					}
-    					// Take the first name in the desired column
-        				if ( (NameCol_int >= 0) && (name == null) ) {
-        					// Name has not been found so try to get it from the row
-        					String name0 = (String)rec.getFieldValue(NameCol_int);
-        					if ( name0.length() > 0 ) {
-        						name = name0;
+    						if ( PartIDTypeColumn_int >= 0 ) {
+    							partIdType = (String)rec.getFieldValue(PartIDTypeColumn_int);
+    							partIdType = partIdType.trim();
+    							partIdTypes.add ( partIdType );
+    						}
+    						else {
+    							// Assume WDID
+    							// - TODO smalers 2019-07-10 could allow P: in id for receipt
+    							partIdTypes.add ( "WDID" );
+    						}
+    						// Take the first name in the desired column
+        					if ( (NameCol_int >= 0) && (name == null) ) {
+        						// Name has not been found so try to get it from the row
+        						String name0 = (String)rec.getFieldValue(NameCol_int);
+        						if ( name0.length() > 0 ) {
+        							name = name0;
+        						}
         					}
-        				}
+    					}
+    					else {
+    						message = "StateMod " + nodeTypeFromCommand + " collection \"" + sm_id +
+    							"\" has blank part ID for part " + partIds.size() + 1;
+							Message.printWarning ( warning_level, 
+								MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+							status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+								message, "Verify that the part ID is specified." ) );
+    					}
     				}
     			}
     		}
@@ -1105,10 +1136,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         				// Set the well collection as a list of part IDs and their types - same over the full period
     					String partIdTypeForLoop;
     					List<StateMod_Well_CollectionPartIdType> partIdTypesForWell = new ArrayList<StateMod_Well_CollectionPartIdType>();
-    					for ( int iPart = 0; i < partIdTypes.size(); i++ ) {
+    					for ( int iPart = 0; iPart < partIdTypes.size(); iPart++ ) {
     						partIdTypeForLoop = partIdTypes.get(iPart);
     						StateMod_Well_CollectionPartIdType partIdTypeForWell = StateMod_Well_CollectionPartIdType.valueOfIgnoreCase(partIdTypeForLoop);
-    						partIdTypesForWell.add(partIdTypeForWell);
+    						partIdTypesForWell.add(partIdTypeForWell); // Add in any case so list is aligned with the ID list
     						if ( partIdTypeForWell == null ) {
     							message = "StateMod well collection \"" + sm_id + "\" part ID \"" + partIds.get(iPart) +
     								"\" has invalid part ID type \"" + partIdTypeForLoop + "\".";
@@ -1128,7 +1159,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    				}
 	    				b.append("]");
 	    				Message.printStatus ( 2, routine, "Setting StateMod " + sm_id + " " + nodeTypeFromCommand
-	    				+ " " + collectionType + " Part IDs (" + PartType + ") -> " + b );
+	    					+ " " + collectionType + " Part IDs (" + PartType + ") -> " + b );
     				}
     				else {
     					// No need to set the division and year...
@@ -1166,14 +1197,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		for ( int j = 0; j < listrecord_matched.length; j++ ) {
     			if ( !listrecord_matched[j]) {
     				if ( b.length() == 0 ) {
-    					b.append ( (listfile_ids.get(j)).toString() );
+    					b.append ( listfile_ids.get(j) );
     				}
     				else {
-    					b.append ( ", " + (listfile_ids.get(j)).toString() );
+    					b.append ( ", " + listfile_ids.get(j) );
     				}
     			}
     		}
-    		String yearString = " ";
+    		String yearString = "";
     		if ( Year != null ) {
     			yearString = " (year " + Year + ")";
     		}
