@@ -6671,7 +6671,7 @@ throws IOException
 	// If any lines in the file are different from the commands, mark the file as dirty.
 	// Changes may automatically occur during the load because of automated updates to commands.
 	BufferedReader in = new BufferedReader ( new InputStreamReader(IOUtil.getInputStream ( path )) );
-	List strings = new Vector();
+	List<String> strings = new ArrayList<String>();
 	String line;
 	while ( true ) {
 	    line = in.readLine();
@@ -6692,7 +6692,7 @@ throws IOException
 	CommandStatusProvider csp = null;
 	int numAutoChanges = 0;
 	for ( int i = 0; i < size_orig; i++ ) {
-	    line = (String)strings.get(i);
+	    line = strings.get(i);
 	    command = __statedmiProcessor.get(i);
 	    if ( !line.equals(command.toString()) ) {
 	        Message.printStatus( 2, routine, "Command " + (i + 1) +
@@ -9150,6 +9150,9 @@ private void ui_DisplayResultsStateCUComponentTable ( String componentName )
 
 	PropList tsselector_props = new PropList ( "TSSelector" );
 	tsselector_props.add ( "ActionButtons=Graph,Table,Summary" );
+	tsselector_props.add ( "Width=1100" );
+	tsselector_props.add ( "Height=500" );
+	tsselector_props.setUsingObject ( "ParentUIComponent", this );
 
 	try {
 	StateCU_DataSet statecu_dataset = new StateCU_DataSet ();
@@ -9161,7 +9164,7 @@ private void ui_DisplayResultsStateCUComponentTable ( String componentName )
 	int app_type = StateDMI.APP_TYPE_STATECU;
 
 	if (componentName.equals(statecu_dataset.lookupComponentName(StateCU_DataSet.COMP_CLIMATE_STATIONS))) {
-		new StateCU_ClimateStation_Data_JFrame(
+		new StateCU_ClimateStation_Data_JFrame(this,
 			__statedmiProcessor.getStateCUClimateStationList(),titleString, editable);
 	}
 
@@ -9169,33 +9172,33 @@ private void ui_DisplayResultsStateCUComponentTable ( String componentName )
 
 	else if (componentName.equals(statecu_dataset.lookupComponentName(
 		StateCU_DataSet.COMP_CROP_CHARACTERISTICS))) {
-		new StateCU_CropCharacteristics_Data_JFrame(
+		new StateCU_CropCharacteristics_Data_JFrame(this,
 			__statedmiProcessor.getStateCUCropCharacteristicsList(),titleString, editable);
 	}
 
 	else if (componentName.equals(statecu_dataset.lookupComponentName(StateCU_DataSet.COMP_BLANEY_CRIDDLE))) {
-		new StateCU_BlaneyCriddle_Data_JFrame(
+		new StateCU_BlaneyCriddle_Data_JFrame(this,
 			__statedmiProcessor.getStateCUBlaneyCriddleList(),titleString, editable);
 	}
 	
 	else if (componentName.equals(statecu_dataset.lookupComponentName(StateCU_DataSet.COMP_PENMAN_MONTEITH))) {
-		new StateCU_PenmanMonteith_Data_JFrame( __statedmiProcessor.getStateCUPenmanMonteithList(),titleString, editable);
+		new StateCU_PenmanMonteith_Data_JFrame(this, __statedmiProcessor.getStateCUPenmanMonteithList(),titleString, editable);
 	}
 
 	else if (componentName.equals(statecu_dataset.lookupComponentName(StateCU_DataSet.COMP_CU_LOCATIONS))) {
-		new StateCU_Location_Data_JFrame(__statedmiProcessor.getStateCULocationList(),
+		new StateCU_Location_Data_JFrame(this, __statedmiProcessor.getStateCULocationList(),
 			titleString, editable);
 	}
 
 	else if (componentName.equals(statecu_dataset.lookupComponentName(
 		StateCU_DataSet.COMP_CU_LOCATION_CLIMATE_STATIONS))) {
-		new StateCU_Location_ClimateStation_Data_JFrame(
+		new StateCU_Location_ClimateStation_Data_JFrame(this,
 			__statedmiProcessor.getStateCULocationList(),titleString + " Climate Stations", editable);
 	}
 
 	else if (componentName.equals(statecu_dataset.lookupComponentName(
 		StateCU_DataSet.COMP_CU_LOCATION_COLLECTIONS))) {
-		new StateCU_Location_Collection_Data_JFrame(
+		new StateCU_Location_Collection_Data_JFrame(this,
 			__statedmiProcessor.getStateCULocationList(), titleString, editable);
 	}
 
@@ -13276,14 +13279,14 @@ private void ui_LoadCommandFile ( String command_file, boolean runOnLoad )
     try {
         numAutoChanges = commandProcessor_ReadCommandFile ( command_file );
         // Add CommandProgressListener for each command so GUI can listen to command progress
-        List commands = __statedmiProcessor.getCommands();
+        List<Command> commands = __statedmiProcessor.getCommands();
         int commandsSize = 0;
         if ( commands != null ) {
         	commandsSize = commands.size();
         }
         Command command = null;
         for ( int i = 0; i < commandsSize; i++ ) {
-        	command = (Command)commands.get(i);
+        	command = commands.get(i);
         	// TODO SAM 2009-03-23 Evaluate whether to define and interface rather than rely on
         	// AbstractCommand here.
         	if ( command instanceof AbstractCommand ) {

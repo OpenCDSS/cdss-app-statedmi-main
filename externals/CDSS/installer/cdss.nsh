@@ -39,7 +39,7 @@
 
 Name "${DISPLAYNAME}"
 # NAMEVERSION is used for:
-#    -the menu (e.g., TSTool-10.01.01)
+#    -the menu (e.g., StateDMI-10.01.01)
 #    -the installation folder
 #    -the registry key
 # The pattern Name-Version works for everything except StateModGUI because
@@ -61,7 +61,7 @@ Name "${DISPLAYNAME}"
 !endif
 
 SetCompressor lzma
-BrandingText "Open Water Foundation"
+BrandingText "OpenCDSS"
 
 # Included files
 !include "UMUI.nsh"
@@ -93,7 +93,7 @@ InstallDirRegKey HKLM "${REGKEY}" Path
 
 # MUI Overrides for Text
 !define MUI_PAGE_HEADER_SUBTEXT "This wizard will guide you through the installation of ${DISPLAYNAME}"
-!define MUI_WELCOMEPAGE_TEXT "The installation will be independent of other versions of ${DISPLAYNAME} software that have been previously installed."
+!define MUI_WELCOMEPAGE_TEXT "The installation will be independent of other versions of ${DISPLAYNAME} software that have been previously installed, which allows multiple versions to be installed and run."
 !define MUI_COMPONENTSPAGE_TEXT_TOP "Select the components to install by checking the corresponding boxes.  Click Next to continue."
 !define MUI_COMPONENTSPAGE_TEXT_DESCRIPTION_INFO "Position the mouse over a component to view its description."
 !define MUI_DIRECTORYPAGE_TEXT_TOP "Setup will install ${DISPLAYNAME} in the following folder.  It is recommended that a versioned software folder under the main CDSS folder be specified.  To install in a different folder, click Browse and select another folder.  Click Next to continue."
@@ -181,10 +181,10 @@ SectionEnd
 
 
 ##################################################
-# SECTION: TSTool
+# SECTION: StateDMI
 #
 # BRIEF: 
-#  Installs the TSTool specific files.
+#  Installs the StateDMI specific files.
 #  These may change each release so
 #  the files included may need to be 
 #  updated. 
@@ -207,15 +207,16 @@ Section "${CODENAME}" ${CODENAME}
         File /r /x *.jar "${INST_BUILD_DIR}\bin"
     !endif
 
-    File /nonfatal /r "${INST_BUILD_DIR}\examples"
+    File /r "${INST_BUILD_DIR}\datastores"
+    #File /nonfatal /r "${INST_BUILD_DIR}\examples"
     File /r "${INST_BUILD_DIR}\system"
-    File /nonfatal /r "${INST_BUILD_DIR}\python"
+    #File /nonfatal /r "${INST_BUILD_DIR}\python"
     
     # Insert the -home Directory into the .bat file
     # according to the user's install location
     ${textreplace::ReplaceInFile} "$INSTDIR\bin\${CODENAME}.bat" "$INSTDIR\bin\${CODENAME}.bat" "SET HOMED=\CDSS" "SET HOMED=$INSTDIR" "" $0
     
-    # Write some registry keys for TSTool
+    # Write some registry keys for StateDMI
     WriteRegStr HKLM "${REGKEY}" Path $INSTDIR
     WriteRegStr HKLM "${REGKEY}" StartMenuGroup $StartMenuGroup
     SetOverwrite off
@@ -241,7 +242,7 @@ SectionEnd
 #
 # BRIEF:
 #  Installs current documentation   
-#  for TSTool to C:\CDSS\doc\TSTool
+#  for StateDMI, documentation is now online, so a minimal README is installed locally.
 #
 # The /o stands for optional.  This
 # allows the component page to uncheck
@@ -270,13 +271,13 @@ SectionEnd
 #
 # BRIEF: 
 #  This section creates the start -> apps
-#  shortcuts as CDSS -> TSTool -> uninstall
-#                             -> run TSTool
+#  shortcuts as CDSS -> StateDMI -> uninstall
+#                             -> run StateDMI
 #  
 ##############################################
 Section "Start Menu" StartMenu
 
-    # make sure user chose to install TSTool
+    # make sure user chose to install StateDMI
     strcmp $choseApp "0" 0 +2
       Goto skipMenu
     
@@ -288,8 +289,10 @@ Section "Start Menu" StartMenu
     CreateShortCut "$SMPROGRAMS\$StartMenuGroup\${NAMEVERSION}.lnk" "$INSTDIR\bin\${CODENAME}.exe"
     
     # Shortcut for uninstall of program
-    SetOutPath $SMPROGRAMS\$StartMenuGroup\Uninstall
-    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\Uninstall\${NAMEVERSION}.lnk" $INSTDIR\Uninstall_${NAMEVERSION}.exe
+    # - as of StateDMI 5.00.00 2019-07-10 don't include the uninstall menu because it takes up space
+    # - can remove using normal Windows software uninstall tool
+    #SetOutPath $SMPROGRAMS\$StartMenuGroup\Uninstall
+    #CreateShortcut "$SMPROGRAMS\$StartMenuGroup\Uninstall\${NAMEVERSION}.lnk" $INSTDIR\Uninstall_${NAMEVERSION}.exe
     
     skipMenu:
     
@@ -297,9 +300,10 @@ Section "Start Menu" StartMenu
     strcmp $choseDocs "0" 0 +2
       Goto Done
       
-    # Shortcut for TSTool documentation
-    SetOutPath $SMPROGRAMS\$StartMenuGroup\Documentation
-    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\Documentation\${NAMEVERSION} User Manual.lnk" $INSTDIR\doc\UserManual\${CODENAME}.pdf
+    # Shortcut for StateDMI documentation
+    # - as of StateDMI 5.00.00 2019-07-10 don't need this since it is on the web and accessible from StateDMI Help menu
+    #SetOutPath $SMPROGRAMS\$StartMenuGroup\Documentation
+    #CreateShortcut "$SMPROGRAMS\$StartMenuGroup\Documentation\${NAMEVERSION} User Manual.lnk" $INSTDIR\doc\UserManual\${CODENAME}.pdf
       
     !insertmacro MUI_STARTMENU_WRITE_END  
       
@@ -352,8 +356,10 @@ Section "Uninstall"
     DetailPrint "Removing Menu Items and Links"
     # delete registry and StartMenu stuff
     DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${NAMEVERSION}.lnk"
-    Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\Uninstall\${NAMEVERSION}.lnk"
-    Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\Documentation\${NAMEVERSION} User Manual.lnk"
+    # Comment the following since uninstall link should no longer be added as of 2019-07-10
+    #Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\Uninstall\${NAMEVERSION}.lnk"
+    # Comment the following since documentation link should no longer be added as of 2019-07-10
+    #Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\Documentation\${NAMEVERSION} User Manual.lnk"
     RmDir /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\Documentation"
     RmDir /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\Uninstall"
     Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\${NAMEVERSION}.lnk"
@@ -372,9 +378,10 @@ Section "Uninstall"
     # Remove files from install directory
     RmDir /r /REBOOTOK $INSTDIR\bin
     RmDir /r /REBOOTOK $INSTDIR\doc
-    RmDir /r /REBOOTOK $INSTDIR\examples
+    RmDir /r /REBOOTOK $INSTDIR\datastores
+    #RmDir /r /REBOOTOK $INSTDIR\examples
     RmDir /r /REBOOTOK $INSTDIR\logs
-    RmDir /r /REBOOTOK $INSTDIR\python
+    #RmDir /r /REBOOTOK $INSTDIR\python
     RmDir /r /REBOOTOK $INSTDIR\system
     
     !ifdef FILE_EXT
@@ -396,7 +403,7 @@ SectionEnd
 ### Section Descriptions ###
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${Docs} "Enabling this component will install ${DISPLAYNAME} documentation to the CDSS\${NAMEVERSION}\doc folder."
-  !insertmacro MUI_DESCRIPTION_TEXT ${TSTool} "Enabling this component will install ${DISPLAYNAME} software in the CDSS\${NAMEVERSION} folder."
+  !insertmacro MUI_DESCRIPTION_TEXT ${StateDMI} "Enabling this component will install ${DISPLAYNAME} software in the CDSS\${NAMEVERSION} folder."
   !insertmacro MUI_DESCRIPTION_TEXT ${StartMenu} "Enabling this component will install start menu folders."
   !insertmacro MUI_DESCRIPTION_TEXT ${DesktopShortcut} "Enabling this component will install a desktop shortcut to run the ${DISPLAYNAME} application."
   !insertmacro MUI_DESCRIPTION_TEXT ${BaseComponents} "Enabling this component will install the CDSS base components, including software and configuration files"
@@ -423,6 +430,7 @@ Function .onInstSuccess
     IfSilent 0 +2
       Goto skipThis
       
+    # TODO smalers 2019-07-10 README is online and available from Help menu
     ### delete these comments to include a readme
     #MessageBox MB_YESNO "Would you like to view the README?" IDYES yes IDNO no
     #yes:
@@ -432,13 +440,15 @@ Function .onInstSuccess
     #  DetailPrint "Skipping README"
     #next2:
     
-    MessageBox MB_YESNO "Would you like to run the program?" IDYES true IDNO false
-    true:
-      Exec '"$INSTDIR\bin\${CODENAME}.exe"'
-      Goto next
-    false:
-      DetailPrint "User chose to not start application"
-    next:
+    MessageBox MB_OK "Run ${CODENAME} from Start / CDSS / ${NAMEVERSION}"
+    # For now don't allow running the application because the install is as root
+    # and don't know how to get back to normal user
+    #true:
+    #  Exec '"$INSTDIR\bin\${CODENAME}.exe"'
+    #  Goto next
+    #false:
+    #  DetailPrint "User chose to not start application"
+    #next:
                 
     skipThis:
     

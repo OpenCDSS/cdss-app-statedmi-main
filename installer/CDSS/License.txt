@@ -1,10 +1,16 @@
-CDSS products include data and software from State of Colorado sources and from 
-external sources like the U. S. Geological Survey (USGS). The following disclaimer 
-applies to CDSS products:
+StateDMI
+StateDMI is a part of Colorado's Decision Support Systems (CDSS)
+Copyright (C) 1997-2019 Colorado Department of Natural Resources
 
-CDSS products and associated access are under development at this time. Access is 
-provided solely to test and demonstrate CDSS capabilities. In the future, this access 
-may be restricted or offered for a fee. The State assumes no legal liability or 
-responsibility for the accuracy, completeness, or usefulness of any information, 
-apparatus, product, or process disclosed herein. It is the user's responsibility to 
-determine the fitness of the data for a particular purpose.
+StateDMI is free software:  you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+StateDMI is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+    along with StateDMI.  If not, see <https://www.gnu.org/licenses/>.

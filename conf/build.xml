@@ -31,27 +31,49 @@
 		<antcall target="mergePDF" inheritall="true"></antcall>
 	</target>
     
-    <!-- this is called after standard-local-install and allows common resources to be copied in -->
+    <!-- This is called after standard-local-install and allows common resources to be copied in. -->
+	<!-- Also will need to make sure that externals/CDSS/cdss.nsh includes all the folders. -->
     <target name="-install-local" depends="-standard-exe">
-    	<!-- Run-time binary files. -->
+    	<!-- bin - run-time binary files. -->
         <!--<copy todir="${install.dir}/bin" file="externals/shellcon/shellcon.exe"/>-->
         <!-- <copy todir="${install.dir}/bin" file="scripts/StateDMI.bat"/>-->
     	<copy todir="${install.dir}/bin" file="installer/CDSS/StateDMI.l4j.ini"/>
-    	<!-- Documentation -->
+    	<copy todir="${install.dir}/bin" file="resources/runtime/bin/README.md"/>
+
+    	<!-- datastores - datastore configuration files -->
+        <mkdir dir="${install.dir}/datastores"/>
+        <copy todir="${install.dir}/datastores" file="resources/runtime/datastores/HydroBase.cfg"/>
+        <copy todir="${install.dir}/datastores" file="resources/runtime/datastores/HydroBaseWeb.cfg"/>
+        <copy todir="${install.dir}/datastores" file="resources/runtime/datastores/README.md"/>
+
+    	<!-- doc - documentation -->
+    	<!-- Documentation is now online so don't copy -->
+    	<!--
     	<mkdir dir="${install.dir}/doc/UserManual"/>
         <copy todir="${install.dir}/doc/UserManual" file="doc/UserManual/dist_CDSS/StateDMI.pdf"/>
+        -->
+    	<!-- TODO smalers 2019-07-10 not sure where "doc" folder is created -->
+        <copy todir="${install.dir}/doc/README.md" file="resources/runtime/doc/README.md"/>
+
         <!-- this gives an absolute path -->
         <property name="install.home" location="${install.dir}"/>
         <!--
         <replace file="${install.dir}/bin/TSTool.ini" token="@HOME@" value="${install.home}"/>
         -->
-    	<!-- Log file folder -->
+
+    	<!-- logs - log file folder -->
         <mkdir dir="${install.dir}/logs"/>
-    	<!-- System configuration files -->
+
+    	<!-- system - system configuration files -->
+        <copy todir="${install.dir}/system" file="resources/runtime/system/CDSS.cfg"/>
         <copy todir="${install.dir}/system" file="resources/runtime/system/DATAUNIT"/>
+        <copy todir="${install.dir}/system" file="resources/runtime/system/README.md"/>
+        <copy todir="${install.dir}/system" file="resources/runtime/system/StateDMI.cfg"/>
     	<!-- Training slideshows under doc/Training -->
     	<!-- If this becomes onerous, put in a separate target so it can be run like the PDF build -->
     	<!-- Omit bit files that can be regenerated, but otherwise include files for users to poke around -->
+    	<!-- TODO smalers 2019-07-10 need to move training materials online now -->
+    	<!--
     	<mkdir dir="${install.dir}/doc/Training"/>
     	<copy todir="${install.dir}/doc/Training">
     		<fileset dir="doc/Training">
@@ -63,9 +85,13 @@
     			<exclude name="**/graphics/**"/>
     			</fileset>
     		</copy>
+    	-->
     	<!-- CDSS overview -->
+    	<!-- TODO smalers 2019-07-10 need to move overview documentation to online docs -->
+    	<!--
     	<mkdir dir="${install.dir}/doc/CDSS-overview"/>
     	<copy todir="${install.dir}/doc/CDSS-overview" file="doc/CDSSOverview/CDSS-overview.pdf"/>
+    	-->
     </target>
     
     <target name="-standard-exe" depends="-init-installer" description="create StateDMI.exe">
