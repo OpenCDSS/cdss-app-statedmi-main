@@ -49,6 +49,7 @@ import java.awt.event.WindowListener;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
@@ -71,6 +72,7 @@ private SimpleJComboBox __DataFrom_JComboBox = null;
 private JTextField __AreaPrecision_JTextField=null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
+private SimpleJButton __help_JButton = null;
 private ReadCropPatternTSFromHydroBase_Command __command = null;
 private boolean __ok = false;
 
@@ -88,11 +90,15 @@ public ReadCropPatternTSFromHydroBase_JDialog (	JFrame parent, ReadCropPatternTS
 Responds to ActionEvents.
 @param event ActionEvent object
 */
-public void actionPerformed(ActionEvent event) {
+public void actionPerformed(ActionEvent event)
+{	Object o = event.getSource();
 	String s = event.getActionCommand();
 
 	if (s.equals("Cancel")) {
 		response (false);
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", __command.getCommandName());
 	}
 	else if (s.equals("OK")) {
 		refresh ();
@@ -170,21 +176,6 @@ private void commitEdits()
 		String AreaPrecision = __AreaPrecision_JTextField.getText().trim();
 		__command.setCommandParameter("AreaPrecision", AreaPrecision);
 	}
-}
-
-/**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable {
-	__cancel_JButton = null;
-	__ID_JTextField = null;
-	__InputStart_JTextField = null;
-	__InputEnd_JTextField = null;
-	__command_JTextArea = null;
-	__command = null;
-	__ok_JButton = null;
-	super.finalize ();
 }
 
 /**
@@ -308,6 +299,8 @@ private void initialize ( JFrame parent, ReadCropPatternTSFromHydroBase_Command 
 	button_JPanel.add (__cancel_JButton);
 	__ok_JButton = new SimpleJButton("OK", this);
 	button_JPanel.add (__ok_JButton);
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	setTitle ( "Edit " + __command.getCommandName() + "() Command" );
 	// JDialogs do not need to be resizable...

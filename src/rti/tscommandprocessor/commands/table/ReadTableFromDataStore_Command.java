@@ -2,22 +2,22 @@
 
 /* NoticeStart
 
-StateDMI
-StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+CDSS Time Series Processor Java Library
+CDSS Time Series Processor Java Library is a part of Colorado's Decision Support Systems (CDSS)
+Copyright (C) 1994-2019 Colorado Department of Natural Resources
 
-StateDMI is free software:  you can redistribute it and/or modify
+CDSS Time Series Processor Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-StateDMI is distributed in the hope that it will be useful,
+    CDSS Time Series Processor Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-    along with StateDMI.  If not, see <https://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with CDSS Time Series Processor Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
 
@@ -32,7 +32,10 @@ import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 import java.io.File;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import RTi.DMI.DMI;
@@ -59,6 +62,7 @@ import RTi.Util.IO.PropList;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Table.DataTable;
 import RTi.Util.Table.ResultSetToDataTableFactory;
+import RTi.Util.Time.DateTime;
 
 /**
 This class initializes, checks, and runs the ReadTableFromDataStore() command.
@@ -206,7 +210,7 @@ throws InvalidCommandParameterException
     }
     
 	//  Check for invalid parameters...
-	List<String> validList = new ArrayList<String>(12);
+	List<String> validList = new ArrayList<String>(14);
     validList.add ( "DataStore" );
     validList.add ( "DataStoreCatalog" );
     validList.add ( "DataStoreSchema" );
@@ -217,6 +221,8 @@ throws InvalidCommandParameterException
     validList.add ( "Sql" );
     validList.add ( "SqlFile" );
     validList.add ( "DataStoreProcedure" );
+    validList.add ( "ProcedureParameters" );
+    validList.add ( "ProcedureReturnProperty" );
     validList.add ( "TableID" );
     validList.add ( "RowCountProperty" );
     warning = TSCommandProcessorUtil.validateParameterNames ( validList, this, warning );    
@@ -352,6 +358,19 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     String Sql = parameters.getValue ( "Sql" );
     String SqlFile = parameters.getValue("SqlFile");
     String DataStoreProcedure = parameters.getValue("DataStoreProcedure");
+    String ProcedureParameters = parameters.getValue ( "ProcedureParameters" );
+    // Use a LinkedHashMap to retain the parameter order
+    HashMap<String,String> procedureParameters = new LinkedHashMap<String,String>();
+    if ( (ProcedureParameters != null) && (ProcedureParameters.length() > 0) && (ProcedureParameters.indexOf(":") > 0) ) {
+        // First break map pairs by comma
+        List<String>pairs = StringUtil.breakStringList(ProcedureParameters, ",", 0 );
+        // Now break pairs and put in hashtable
+        for ( String pair : pairs ) {
+            String [] parts = pair.split(":");
+            procedureParameters.put(parts[0].trim(), parts[1].trim() );
+        }
+    }
+    String ProcedureReturnProperty = parameters.getValue ( "ProcedureReturnProperty" );
     String TableID = parameters.getValue ( "TableID" );
     if ( (TableID != null) && !TableID.isEmpty() && (commandPhase == CommandPhaseType.RUN) && TableID.indexOf("${") >= 0 ) {
    		TableID = TSCommandProcessorUtil.expandParameterValue(processor, this, TableID);
@@ -480,6 +499,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         String queryString = "";
         // Execute the query as appropriate depending on how the query was specified
         ResultSet rs = null;
+        DMIStoredProcedureData procedureData = null; // Used below if stored procedure
+        int errorCount = 0; // Count of errors that will prevent further processing
         try {
             if ( DataStoreTable != null ) {
                 // Query using the statement that was built above
@@ -524,33 +545,146 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
             }
             else if ( (DataStoreProcedure != null) && !DataStoreProcedure.equals("") ) {
                 // Run a stored procedure
-                q.setStoredProcedureData(new DMIStoredProcedureData(dmi,DataStoreProcedure));
-                rs = q.executeStoredProcedure();
-                Message.printStatus(2, routine, "Executed query \"" + dmi.getLastQueryString() + "\".");
+            	// - declaring the procedure will fill its internal metadata
+            	Message.printStatus(2, routine, "Executing stored procedure \"" + DataStoreProcedure + "\"");
+            	procedureData = new DMIStoredProcedureData(dmi,DataStoreProcedure);
+                q.setStoredProcedureData(procedureData);
+                // Iterate through the parameters
+                // - it is OK that the number of parameters is 0
+                // - parameter position in statement is 1+, 2+ if the procedure has a return code
+                int parameterNum = 0;
+                if (procedureData.hasReturnValue()) {
+                	// If the procedure has a return value, offset parameters by one
+                	// - will have values 2+ below
+                	parameterNum = 1;
+                }
+                int parameterNum0 = -1; // 0-offset index 
+                for ( Map.Entry<String,String> entry : procedureParameters.entrySet() ) {
+                	++parameterNum;
+                	++parameterNum0;
+                	// For the following only a few common core types are enabled in the q.setValue() methods.
+                	// Therefore, convert the SQL types into common types depending on data type precision.
+                	// Issues that arise will have to be addressed by adding additional data types and overloaded methods.
+                	int parameterType = procedureData.getParameterType(parameterNum0);
+                	if ( (parameterType == java.sql.Types.BOOLEAN) ) {
+                		boolean b = Boolean.parseBoolean(entry.getValue());
+                		q.setValue(b,parameterNum);
+                	}
+                	else if ( (parameterType == java.sql.Types.BIGINT) ) {
+                		long l = Long.parseLong(entry.getValue());
+                		q.setValue(l,parameterNum);
+                	}
+                	else if (
+                		(parameterType == java.sql.Types.INTEGER) ) {
+                		int i = Integer.parseInt(entry.getValue());
+                		q.setValue(i,parameterNum);
+                	}
+                	else if (
+                		(parameterType == java.sql.Types.DECIMAL) ||
+                		(parameterType == java.sql.Types.FLOAT) ||
+                		(parameterType == java.sql.Types.REAL) ) {
+                		float f = Float.parseFloat(entry.getValue());
+                		q.setValue(f,parameterNum);
+                	}
+                	else if ( (parameterType == java.sql.Types.DOUBLE) ) {
+                		double d = Double.parseDouble(entry.getValue());
+                		q.setValue(d,parameterNum);
+                	}
+                	else if (
+                		(parameterType == java.sql.Types.LONGVARCHAR) ||
+                		(parameterType == java.sql.Types.VARCHAR) ) {
+                		String s = entry.getValue();
+                		q.setValue(s,parameterNum);
+                	}
+                	else if ( parameterType == java.sql.Types.DATE ) {
+                		// Use DateTime to add a layer of parsing and error handling
+                		String s = entry.getValue();
+                		DateTime dt = DateTime.parse(s);
+                		q.setValue(dt,parameterNum);
+                	}
+                	else if ( parameterType == java.sql.Types.TIMESTAMP ) {
+                		// Use DateTime to add a layer of parsing and error handling
+                		String s = entry.getValue();
+                		DateTime dt = DateTime.parse(s);
+                		q.setValue(dt,parameterNum);
+                	}
+                	else {
+                		++errorCount;
+                		message = "Don't know how to handle procedure parameter type " + parameterType + " (from java.sql.Types)";
+                		Message.printWarning ( 2, routine, message );
+                		status.addToLog ( commandPhase,
+                    		new CommandLogRecord(CommandStatusType.FAILURE,
+                        		message, "Need to update the software.") );
+                	}
+                }
+                if ( errorCount == 0 ) {
+                	rs = q.executeStoredProcedureQuery();
+                	// Query string is formatted as procedure call:  procedureName(param1,param2,...)
+                	queryString = q.toString();
+                	Message.printStatus(2, routine, "Executed query \"" + queryString + "\".");
+                }
             }
-            ResultSetToDataTableFactory factory = new ResultSetToDataTableFactory();
-            String tableID = TSCommandProcessorUtil.expandParameterValue(processor,this,TableID);
-            table = factory.createDataTable(dmi.getDatabaseEngineType(), rs, tableID);
+            if ( errorCount == 0 ) {
+            	// Continue processing the table (otherwise errors above will likely cause issues)
+            	ResultSetToDataTableFactory factory = new ResultSetToDataTableFactory();
+            	String tableID = TSCommandProcessorUtil.expandParameterValue(processor,this,TableID);
+            	table = factory.createDataTable(dmi.getDatabaseEngineType(), rs, tableID);
+
+            	// Process the return status after processing the resultset as per JDBC documentation:
+            	// https://docs.oracle.com/javase/8/docs/api/java/sql/CallableStatement.html
+            	// - "a call's ResultSet objects and update counts should be processed prior to getting the values of output parameters"
+            	// - if the following code is run before processing the ResultSet, exceptions occur about closed resultset
+               	if ( (procedureData != null) && procedureData.hasReturnValue()) {
+               		// The return value was registered with when the callable statement was set up.
+               		// It could be any type and does not necessarily indicate an error code.
+               		// Log the return value and then set as a property if requested.
+               		// The return value type is not needed here so use generic Object.
+   	                Object returnObject = q.getReturnValue();
+   	                Message.printStatus(2, routine, "Return value from stored procedure \"" + procedureData.getProcedureName() + "\" is:  " + returnObject);
+   	                // The above gets the return value out of the statement but need to also to get the resultset to continue  processing.
+   	                // - TODO this is not needed
+   	                //rs = q.getCallableStatement().getResultSet();
+               	    if ( (ProcedureReturnProperty != null) && !ProcedureReturnProperty.isEmpty() ) {
+               	    	// Want to set the return value to property, either to use as data or check the error status.
+       	                String returnProperty = TSCommandProcessorUtil.expandParameterValue(processor, this, ProcedureReturnProperty);
+       	                // Return value can be of any type so get it as an object
+                        PropList request_params = new PropList ( "" );
+                        request_params.setUsingObject ( "PropertyName", returnProperty );
+                        request_params.setUsingObject ( "PropertyValue", returnObject );
+                        try {
+                            processor.processRequest( "SetProperty", request_params);
+                        }
+                        catch ( Exception e ) {
+                            message = "Error requesting SetProperty(Property=\"" + returnProperty + "\") from processor.";
+                            Message.printWarning(log_level,
+                                MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+                            status.addToLog ( CommandPhaseType.RUN,
+                                new CommandLogRecord(CommandStatusType.FAILURE,
+                                    message, "Report the problem to software support." ) );
+                        }
+                    }
+               	}
             
-            // Set the table in the processor...
+            	// Set the table in the processor...
             
-            PropList request_params = new PropList ( "" );
-            request_params.setUsingObject ( "Table", table );
-            try {
-                processor.processRequest( "SetTable", request_params);
-            }
-            catch ( Exception e ) {
-                message = "Error requesting SetTable(Table=...) from processor.";
-                Message.printWarning(warning_level,
-                        MessageUtil.formatMessageTag( command_tag, ++warning_count),
-                        routine, message );
-                status.addToLog ( commandPhase,
-                        new CommandLogRecord(CommandStatusType.FAILURE,
-                           message, "Report problem to software support." ) );
-            }
+            	PropList request_params = new PropList ( "" );
+            	request_params.setUsingObject ( "Table", table );
+            	try {
+                	processor.processRequest( "SetTable", request_params);
+            	}
+            	catch ( Exception e ) {
+                	message = "Error requesting SetTable(Table=...) from processor.";
+                	Message.printWarning(warning_level,
+                        	MessageUtil.formatMessageTag( command_tag, ++warning_count),
+                        	routine, message );
+                	status.addToLog ( commandPhase,
+                        	new CommandLogRecord(CommandStatusType.FAILURE,
+                           	message, "Report problem to software support." ) );
+            	}
+        	}
         }
         catch ( Exception e ) {
-            message = "Error querying data store \"" + DataStore + "\" using SQL \"" + queryString + " (" + e + ").";
+            message = "Error querying datastore \"" + DataStore + "\" using SQL \"" + queryString + " (" + e + ").";
             Message.printWarning ( 2, routine, message );
             status.addToLog ( commandPhase,
                 new CommandLogRecord(CommandStatusType.FAILURE,
@@ -627,6 +761,8 @@ public String toString ( PropList props )
 	String Sql = props.getValue( "Sql" );
 	String SqlFile = props.getValue( "SqlFile" );
 	String DataStoreProcedure = props.getValue( "DataStoreProcedure" );
+	String ProcedureParameters = props.getValue( "ProcedureParameters" );
+	String ProcedureReturnProperty = props.getValue( "ProcedureReturnProperty" );
     String TableID = props.getValue( "TableID" );
     String RowCountProperty = props.getValue( "RowCountProperty" );
 	StringBuffer b = new StringBuffer ();
@@ -689,6 +825,18 @@ public String toString ( PropList props )
             b.append ( "," );
         }
         b.append ( "DataStoreProcedure=\"" + DataStoreProcedure + "\"" );
+    }
+    if ( (ProcedureParameters != null) && (ProcedureParameters.length() > 0) ) {
+        if ( b.length() > 0 ) {
+            b.append ( "," );
+        }
+        b.append ( "ProcedureParameters=\"" + ProcedureParameters + "\"" );
+    }
+    if ( (ProcedureReturnProperty != null) && (ProcedureReturnProperty.length() > 0) ) {
+        if ( b.length() > 0 ) {
+            b.append ( "," );
+        }
+        b.append ( "ProcedureReturnProperty=\"" + ProcedureReturnProperty + "\"" );
     }
     if ( (TableID != null) && (TableID.length() > 0) ) {
         if ( b.length() > 0 ) {

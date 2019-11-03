@@ -779,7 +779,7 @@ private int readHydroBaseIrrigationPracticeTSForWellList (
 		int Div_int,
 		List<StateDMI_HydroBase_ParcelUseTS> HydroBase_Supplemental_ParcelUseTS_List,
 		int warningLevel, int warning_count, String command_tag, CommandStatus status, boolean cacheHydroBase )
-{	String routine = getClass().getSimpleName() + ".readHydroBaseIrrigationPracticeTSForLocationList";
+{	String routine = getClass().getSimpleName() + ".readHydroBaseIrrigationPracticeTSForWellList";
 	String message;
 
 	// Loop through each location and for each WDID part get the parcel list.
@@ -978,7 +978,6 @@ CommandWarningException, CommandException
 	if ( !Optimization.equalsIgnoreCase(_UseMoreMemory) ) {
 		cacheHydroBase = false;
 	}
-	
 
 	String locType = "CU location";	// Used with messages
 
@@ -1334,6 +1333,11 @@ CommandWarningException, CommandException
 						// but logic allows year-specific collection to be implemented
 						parts = culoc.getCollectionPartIDsForYear ( parcelYear );
 						partIdTypes = culoc.getCollectionPartIDTypes ();
+						// Uncomment for debugging...
+						//for ( int ipart = 0; ipart < parts.size(); ++ipart ) {
+						//	Message.printStatus(2,routine,"  For location " + culoc.getID() + " partId=" + parts.get(ipart) +
+						//		" partIdType=" + partIdTypes.get(ipart));
+						//}
 					}
 					else {
 						// To reuse code below, just use a single part...

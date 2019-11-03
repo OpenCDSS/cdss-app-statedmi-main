@@ -2,22 +2,22 @@
 
 /* NoticeStart
 
-StateDMI
-StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+CDSS Time Series Processor Java Library
+CDSS Time Series Processor Java Library is a part of Colorado's Decision Support Systems (CDSS)
+Copyright (C) 1994-2019 Colorado Department of Natural Resources
 
-StateDMI is free software:  you can redistribute it and/or modify
+CDSS Time Series Processor Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-StateDMI is distributed in the hope that it will be useful,
+    CDSS Time Series Processor Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-    along with StateDMI.  If not, see <https://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with CDSS Time Series Processor Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
 
@@ -98,11 +98,12 @@ throws InvalidCommandParameterException
     }
     
 	// Check for invalid parameters...
-	List<String> validList = new ArrayList<String>(5);
+	List<String> validList = new ArrayList<>(6);
     validList.add ( "TableID" );
     validList.add ( "AppendTableID" );
     validList.add ( "IncludeColumns" );
     validList.add ( "ColumnMap" );
+    validList.add ( "ColumnData" );
     validList.add ( "ColumnFilters" );
     warning = TSCommandProcessorUtil.validateParameterNames ( validList, this, warning );    
 
@@ -173,6 +174,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	AppendTableID = TSCommandProcessorUtil.expandParameterValue(processor, this, AppendTableID);
     }
     String IncludeColumns = parameters.getValue ( "IncludeColumns" );
+    if ( (IncludeColumns != null) && !IncludeColumns.isEmpty() && (commandPhase == CommandPhaseType.RUN) && IncludeColumns.indexOf("${") >= 0 ) {
+   		IncludeColumns = TSCommandProcessorUtil.expandParameterValue(processor, this, IncludeColumns);
+    }
     String [] includeColumns = null;
     if ( (IncludeColumns != null) && !IncludeColumns.equals("") ) {
         includeColumns = IncludeColumns.split(",");
@@ -181,6 +185,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         }
     }
     String ColumnMap = parameters.getValue ( "ColumnMap" );
+    if ( (ColumnMap != null) && !ColumnMap.isEmpty() && (commandPhase == CommandPhaseType.RUN) && ColumnMap.indexOf("${") >= 0 ) {
+   		ColumnMap = TSCommandProcessorUtil.expandParameterValue(processor, this, ColumnMap);
+    }
     Hashtable<String,String> columnMap = new Hashtable<String,String>();
     if ( (ColumnMap != null) && (ColumnMap.length() > 0) && (ColumnMap.indexOf(":") > 0) ) {
         // First break map pairs by comma
@@ -189,6 +196,20 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         for ( String pair : pairs ) {
             String [] parts = pair.split(":");
             columnMap.put(parts[0].trim(), parts[1].trim() );
+        }
+    }
+    String ColumnData = parameters.getValue ( "ColumnData" );
+    if ( (ColumnData != null) && !ColumnData.isEmpty() && (commandPhase == CommandPhaseType.RUN) && ColumnData.indexOf("${") >= 0 ) {
+   		ColumnData = TSCommandProcessorUtil.expandParameterValue(processor, this, ColumnData);
+    }
+    Hashtable<String,String> columnData = new Hashtable<String,String>();
+    if ( (ColumnData != null) && (ColumnData.length() > 0) && (ColumnData.indexOf(":") > 0) ) {
+        // First break map pairs by comma
+        List<String>pairs = StringUtil.breakStringList(ColumnData, ",", 0 );
+        // Now break pairs and put in hashtable
+        for ( String pair : pairs ) {
+            String [] parts = pair.split(":");
+            columnData.put(parts[0].trim(), parts[1].trim() );
         }
     }
     String ColumnFilters = parameters.getValue ( "ColumnFilters" );
@@ -275,7 +296,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
 	try {
     	// Append to the table...
-        table.appendTable ( table, appendTable, includeColumns, columnMap, columnFilters );
+        table.appendTable ( table, appendTable, includeColumns, columnMap, columnData, columnFilters );
     }
 	catch ( Exception e ) {
 		Message.printWarning ( 3, routine, e );
@@ -307,6 +328,7 @@ public String toString ( PropList props )
     String AppendTableID = props.getValue( "AppendTableID" );
 	String IncludeColumns = props.getValue( "IncludeColumns" );
 	String ColumnMap = props.getValue( "ColumnMap" );
+	String ColumnData = props.getValue( "ColumnData" );
 	String ColumnFilters = props.getValue( "ColumnFilters" );
 	StringBuffer b = new StringBuffer ();
     if ( (TableID != null) && (TableID.length() > 0) ) {
@@ -332,6 +354,12 @@ public String toString ( PropList props )
             b.append ( "," );
         }
         b.append ( "ColumnMap=\"" + ColumnMap + "\"" );
+    }
+    if ( (ColumnData != null) && (ColumnData.length() > 0) ) {
+        if ( b.length() > 0 ) {
+            b.append ( "," );
+        }
+        b.append ( "ColumnData=\"" + ColumnData + "\"" );
     }
     if ( (ColumnFilters != null) && (ColumnFilters.length() > 0) ) {
         if ( b.length() > 0 ) {

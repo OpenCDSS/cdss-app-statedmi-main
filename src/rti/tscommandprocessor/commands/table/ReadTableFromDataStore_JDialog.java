@@ -1,23 +1,23 @@
-// ReadTableFromDataStore_JDialog - editor for ReadTableFromDataStore command
+// ReadTableFromDataStore_JDialog - editor dialog for ReadTableFromDataStore command
 
 /* NoticeStart
 
-StateDMI
-StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+CDSS Time Series Processor Java Library
+CDSS Time Series Processor Java Library is a part of Colorado's Decision Support Systems (CDSS)
+Copyright (C) 1994-2019 Colorado Department of Natural Resources
 
-StateDMI is free software:  you can redistribute it and/or modify
+CDSS Time Series Processor Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-StateDMI is distributed in the hope that it will be useful,
+    CDSS Time Series Processor Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-    along with StateDMI.  If not, see <https://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with CDSS Time Series Processor Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
 
@@ -36,8 +36,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import DWR.DMI.StateDMI.StateDMI_Processor;
 import riverside.datastore.DataStore;
+import DWR.DMI.StateDMI.StateDMI_Processor;
 import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 
 import java.awt.Color;
@@ -58,8 +58,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import RTi.DMI.DMI;
+import RTi.DMI.DMISelectStatement;
+import RTi.DMI.DMIStoredProcedureData;
 import RTi.DMI.DMIUtil;
 import RTi.DMI.DatabaseDataStore;
+import RTi.Util.GUI.DictionaryJDialog;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
@@ -96,12 +99,15 @@ private JTextField __Top_JTextField = null;
 private JTextArea __Sql_JTextArea = null;
 private JTextField __SqlFile_JTextField = null;
 private SimpleJComboBox __DataStoreProcedure_JComboBox = null;
+private JTextArea __ProcedureParameters_JTextArea = null;
+private JTextField __ProcedureReturnProperty_JTextField = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;
 private SimpleJButton __help_JButton = null;
 private ReadTableFromDataStore_Command __command = null;
 private boolean __ok = false;
 private String __working_dir = null;
+private JFrame __parent = null;
 
 private boolean __ignoreItemEvents = false; // Used to ignore cascading events when working with choices
 
@@ -123,7 +129,8 @@ Responds to ActionEvents.
 @param event ActionEvent object
 */
 public void actionPerformed(ActionEvent event)
-{	Object o = event.getSource();
+{	String routine = getClass().getSimpleName() + ".actionPerformed";
+	Object o = event.getSource();
 
     if ( o == __browse_JButton ) {
         // Browse for the file to read...
@@ -189,6 +196,60 @@ public void actionPerformed(ActionEvent event)
         }
         refresh ();
     }
+    else if ( event.getActionCommand().equalsIgnoreCase("EditProcedureParameters") ) {
+        // Edit the dictionary in the dialog.  It is OK for the string to be blank.
+        String ProcedureParameters = __ProcedureParameters_JTextArea.getText().trim();
+        List<String> notesList = new ArrayList<>();
+        String procedureName = __DataStoreProcedure_JComboBox.getSelected();
+        if ( (procedureName == null) || procedureName.isEmpty() ) {
+        	notesList.add("Procedure to run:  NOT SPECIFIED" );
+        }
+        else {
+        	notesList.add("Procedure to run:  " + procedureName );
+        	// Get the parameter names and types for the procedure
+        	// - Need to declare a procedure
+        	DMISelectStatement q = new DMISelectStatement(__dmi);
+        	DMIStoredProcedureData procedureData = null;
+        	try {
+    	    	procedureData = new DMIStoredProcedureData(__dmi,procedureName);
+    	    	q.setStoredProcedureData(procedureData);
+    	    	if ( procedureData.hasReturnValue() ) {
+    	    		notesList.add("Procedure has return value of type: " + procedureData.getReturnTypeString() );
+    	    	}
+    	    	else {
+    	    		notesList.add("Procedure does not return a value." );
+    	    	}
+        		int nParams = procedureData.getNumParameters();
+        		if ( nParams > 0 ) {
+        			notesList.add("Procedure has " + nParams + " parameters.");
+        			notesList.add("Specify procedure parameter name and values, with parameter values that match the type, as follows:");
+    	    		// Get the procedure information
+        			for ( int i = 0; i < nParams; i++ ) {
+    	    			notesList.add("    Parameter " + (i + 1) + ": name = \"" + procedureData.getParameterName(i) + "\", type=\"" + procedureData.getParameterTypeString(i) + "\"");
+        			}
+        			notesList.add("The parameter names provided to the command are for information.");
+        			notesList.add("The parameter order and data type when calling the procedure are critical.");
+        			notesList.add("For example, make sure to provide properly-formatted numbers if type indicates numeric input.");
+        			notesList.add("Format date/times using syntax YYYY-MM-DD hh:mm:ss to appropriate precision for date and date/time.");
+        		}
+        		else {
+        			notesList.add("The procedure does not have any input parameters.");
+        			notesList.add("Therefore this command parameter (ProcedureParameters) is not used.");
+        		}
+        	}
+        	catch ( Exception e ) {
+    	    	Message.printWarning(3, routine, "Unable to created procedure object for \"" + procedureName + "\"" );
+    	    	notesList.add("Unable to determine procedure metadata.  Check log file for errors.");
+        	}
+        }
+        String [] notes = notesList.toArray(new String[0]);
+        String dict = (new DictionaryJDialog ( __parent, true, ProcedureParameters,
+            "Edit ProcedureParameters parameter", notes, "Parameter Name", "Parameter Value",10)).response();
+        if ( dict != null ) {
+            __ProcedureParameters_JTextArea.setText ( dict );
+            refresh();
+        }
+    }
 }
 
 /**
@@ -205,6 +266,20 @@ private void actionPerformedDataStoreCatalogSelected ( )
     //Message.printStatus(2, "", "Selected data store " + __dataStore + " __dmi=" + __dmi );
     // Now populate the schema choices corresponding to the database
     populateDataStoreSchemaChoices ( __dmi );
+}
+
+/**
+Display input parameters for the procedure.
+*/
+private void actionPerformedDataStoreProcedureSelected ( )
+{	String routine = "";
+    String procedureName = __DataStoreProcedure_JComboBox.getSelected();
+    if ( procedureName == null ) {
+        // Startup initialization
+    	Message.printStatus(2, routine, "Null procedure at startup.");
+        return;
+    }
+  	Message.printStatus(2, routine, "Selected procedure=\"" + procedureName + "\"");
 }
 
 /**
@@ -264,6 +339,8 @@ private void checkInput ()
 	String Sql = __Sql_JTextArea.getText().trim();
 	String SqlFile = __SqlFile_JTextField.getText().trim();
 	String DataStoreProcedure = __DataStoreProcedure_JComboBox.getSelected();
+	String ProcedureParameters = __ProcedureParameters_JTextArea.getText().trim().replace("\n"," ");
+	String ProcedureReturnProperty = __ProcedureReturnProperty_JTextField.getText().trim();
     String TableID = __TableID_JTextField.getText().trim();
     String RowCountProperty = __RowCountProperty_JTextField.getText().trim();
 	__error_wait = false;
@@ -294,6 +371,12 @@ private void checkInput ()
     }
     if ( DataStoreProcedure.length() > 0 ) {
         props.set ( "DataStoreProcedure", DataStoreProcedure );
+    }
+    if ( ProcedureParameters.length() > 0 ) {
+        props.set ( "ProcedureParameters", ProcedureParameters );
+    }
+    if ( ProcedureReturnProperty.length() > 0 ) {
+        props.set ( "ProcedureReturnProperty", ProcedureReturnProperty );
     }
     if ( TableID.length() > 0 ) {
         props.set ( "TableID", TableID );
@@ -327,6 +410,8 @@ private void commitEdits ()
     String Sql = __Sql_JTextArea.getText().trim().replace('\n', ' ').replace('\t', ' ');
     String SqlFile = __SqlFile_JTextField.getText().trim();
     String DataStoreProcedure = __DataStoreProcedure_JComboBox.getSelected();
+	String ProcedureParameters = __ProcedureParameters_JTextArea.getText().trim().replace("\n"," ");
+	String ProcedureReturnProperty = __ProcedureReturnProperty_JTextField.getText().trim();
     String TableID = __TableID_JTextField.getText().trim();
     String RowCountProperty = __RowCountProperty_JTextField.getText().trim();
     __command.setCommandParameter ( "DataStore", DataStore );
@@ -339,6 +424,8 @@ private void commitEdits ()
 	__command.setCommandParameter ( "Sql", Sql );
 	__command.setCommandParameter ( "SqlFile", SqlFile );
 	__command.setCommandParameter ( "DataStoreProcedure", DataStoreProcedure );
+	__command.setCommandParameter ( "ProcedureParameters", ProcedureParameters );
+	__command.setCommandParameter ( "ProcedureReturnProperty", ProcedureReturnProperty );
     __command.setCommandParameter ( "TableID", TableID );
 	__command.setCommandParameter ( "RowCountProperty", RowCountProperty );
 }
@@ -378,6 +465,7 @@ Instantiates the GUI components.
 */
 private void initialize ( JFrame parent, ReadTableFromDataStore_Command command )
 {	__command = command;
+	__parent = parent;
 	CommandProcessor processor = __command.getCommandProcessor();
     __working_dir = TSCommandProcessorUtil.getWorkingDirForCommand ( (StateDMI_Processor)processor, __command );
 
@@ -419,7 +507,7 @@ private void initialize ( JFrame parent, ReadTableFromDataStore_Command command 
         0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     }
     JGUIUtil.addComponent(paragraph, new JLabel (
-        "    4) Specify a database procedure to run (under development)."),
+        "    4) Specify a database procedure or function to run."),
         0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
         "The resulting table columns will have data types based on the query results."),
@@ -615,6 +703,48 @@ private void initialize ( JFrame parent, ReadTableFromDataStore_Command command 
     JGUIUtil.addComponent(proc_JPanel, new JLabel("Optional - database procedure to run to generate results."), 
         3, yProc, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 
+    JGUIUtil.addComponent(proc_JPanel, new JLabel ("Procedure parameters:"),
+        0, ++yProc, 1, 2, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    __ProcedureParameters_JTextArea = new JTextArea (6,35);
+    __ProcedureParameters_JTextArea.setLineWrap ( true );
+    __ProcedureParameters_JTextArea.setWrapStyleWord ( true );
+    __ProcedureParameters_JTextArea.setToolTipText("ParameterName1:ParameterValue1,ParameterName2:ParameterValue2");
+    __ProcedureParameters_JTextArea.addKeyListener (this);
+    JGUIUtil.addComponent(proc_JPanel, new JScrollPane(__ProcedureParameters_JTextArea),
+        1, yProc, 2, 2, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(proc_JPanel, new JLabel ("Required - if procedure has parameters."),
+        3, yProc, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+    JGUIUtil.addComponent(proc_JPanel, new SimpleJButton ("Edit","EditProcedureParameters",this),
+        3, ++yProc, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+
+    JGUIUtil.addComponent(proc_JPanel, new JLabel ("Return value property:"),
+        0, ++yProc, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    __ProcedureReturnProperty_JTextField = new JTextField (10);
+    __ProcedureReturnProperty_JTextField.addKeyListener (this);
+    JGUIUtil.addComponent(proc_JPanel, __ProcedureReturnProperty_JTextField,
+        1, yProc, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(proc_JPanel, new JLabel ("Optional - property to set to return value."),
+        3, yProc, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+
+    // Panel for function
+
+    int yFunc = -1;
+    JPanel func_JPanel = new JPanel();
+    func_JPanel.setLayout( new GridBagLayout() );
+    __sql_JTabbedPane.addTab ( "Function", func_JPanel );
+
+    JGUIUtil.addComponent(func_JPanel, new JLabel ("Run a function."),
+        0, ++yFunc, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(func_JPanel, new JLabel (
+        "Under development - databases vary in how they define functions and procedures.  They may be equivalent."),
+        0, ++yFunc, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(func_JPanel, new JLabel (
+        "Additional features will be added to run functions, as necessary."),
+        0, ++yFunc, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+
+	JGUIUtil.addComponent(main_JPanel, new JScrollPane(__command_JTextArea),
+		1, y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+
     // Table for results
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Table ID:"),
@@ -686,6 +816,10 @@ public void itemStateChanged (ItemEvent event)
         else if ( (event.getSource() == __DataStoreCatalog_JComboBox) && (event.getStateChange() == ItemEvent.SELECTED) ) {
             // User has selected a catalog.
             actionPerformedDataStoreCatalogSelected ();
+        }
+        else if ( (event.getSource() == __DataStoreProcedure_JComboBox) && (event.getStateChange() == ItemEvent.SELECTED) ) {
+            // User has selected a procedure.
+            actionPerformedDataStoreProcedureSelected ();
         }
         else if ( (event.getSource() == __DataStoreSchema_JComboBox) && (event.getStateChange() == ItemEvent.SELECTED) ) {
             // User has selected a schema.
@@ -916,6 +1050,8 @@ try{
     String Sql = "";
     String SqlFile = "";
     String DataStoreProcedure = "";
+    String ProcedureParameters = "";
+    String ProcedureReturnProperty = "";
     String TableID = "";
     String RowCountProperty = "";
 	PropList props = __command.getCommandParameters();
@@ -931,6 +1067,8 @@ try{
 		Sql = props.getValue ( "Sql" );
 		SqlFile = props.getValue ( "SqlFile" );
 		DataStoreProcedure = props.getValue ( "DataStoreProcedure" );
+		ProcedureParameters = props.getValue ( "ProcedureParameters" );
+		ProcedureReturnProperty = props.getValue ( "ProcedureReturnProperty" );
 		TableID = props.getValue ( "TableID" );
         RowCountProperty = props.getValue ( "RowCountProperty" );
         // The data store list is set up in initialize() but is selected here
@@ -1039,6 +1177,12 @@ try{
                   "DataStoreProcedure parameter \"" + DataStoreProcedure + "\".  Select a\ndifferent value or Cancel." );
             }
         }
+        if ( ProcedureParameters != null ) {
+            __ProcedureParameters_JTextArea.setText ( ProcedureParameters );
+        }
+        if ( ProcedureReturnProperty != null ) {
+            __ProcedureReturnProperty_JTextField.setText ( ProcedureReturnProperty );
+        }
         if ( TableID != null ) {
             __TableID_JTextField.setText ( TableID );
         }
@@ -1072,6 +1216,8 @@ try{
     if ( DataStoreProcedure == null ) {
         DataStoreProcedure = "";
     }
+	ProcedureParameters = __ProcedureParameters_JTextArea.getText().trim().replace("\n"," ");
+	ProcedureReturnProperty = __ProcedureReturnProperty_JTextField.getText().trim();
     TableID = __TableID_JTextField.getText().trim();
 	RowCountProperty = __RowCountProperty_JTextField.getText().trim();
 	props = new PropList ( __command.getCommandName() );
@@ -1085,6 +1231,8 @@ try{
 	props.add ( "Sql=" + Sql );
 	props.add ( "SqlFile=" + SqlFile);
 	props.add ( "DataStoreProcedure=" + DataStoreProcedure );
+	props.add ( "ProcedureParameters=" + ProcedureParameters );
+	props.add ( "ProcedureReturnProperty=" + ProcedureReturnProperty );
     props.add ( "TableID=" + TableID );
 	props.add ( "RowCountProperty=" + RowCountProperty );
     

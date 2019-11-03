@@ -140,21 +140,26 @@ public void actionPerformed(ActionEvent event)
 			fc = JFileChooserFactory.createJFileChooser( __working_dir );
 		}
 		fc.setDialogTitle("Select List File");
-		fc.addChoosableFileFilter( new SimpleFileFilter("csv",
-			__nodeType + " " + __collectionType + " List File") );
-		SimpleFileFilter sff = new SimpleFileFilter("lst", 
-			__nodeType + " " + __collectionType + " List File");
-		fc.addChoosableFileFilter( sff );
-		fc.addChoosableFileFilter( new SimpleFileFilter("txt", 
-			__nodeType + " " + __collectionType + " List File") );
+		// csv file is the default
+		SimpleFileFilter sff = new SimpleFileFilter("csv", __nodeType + " " + __collectionType + " List File");
+		fc.addChoosableFileFilter(sff);
+		fc.addChoosableFileFilter( new SimpleFileFilter("lst", __nodeType + " " + __collectionType + " List File") );
+		fc.addChoosableFileFilter( new SimpleFileFilter("txt", __nodeType + " " + __collectionType + " List File") );
 		fc.setFileFilter(sff);
 
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			String directory = fc.getSelectedFile().getParent();
 			String path = fc.getSelectedFile().getPath();
-			__ListFile_JTextField.setText(path);
-			JGUIUtil.setLastFileDialogDirectory(directory);
-			refresh ();
+			if ( path != null ) {
+				try {
+					__ListFile_JTextField.setText(IOUtil.toRelativePath(__working_dir, path));
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 1,"ReadStateMod_JDialog", "Error converting file to relative path." );
+				}
+				JGUIUtil.setLastFileDialogDirectory(directory);
+				refresh ();
+			}
 		}
 	}
 	else if ( o == __cancel_JButton ) {
@@ -306,7 +311,7 @@ private void commitEdits()
 	String PartIDsCol = __PartIDsCol_JComboBox.getSelected();
 	String PartIDTypeColumn = null;
 	if ( __PartIDTypeColumn_JTextField != null ) {
-		__PartIDTypeColumn_JTextField.getText().trim();
+		PartIDTypeColumn = __PartIDTypeColumn_JTextField.getText().trim();
 	}
 	String PartsListedHow = __PartsListedHow_JComboBox.getSelected();
 	String PartIDsColMax = __PartIDsColMax_JComboBox.getSelected();
