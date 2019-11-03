@@ -13634,7 +13634,8 @@ private void uiAction_CloseClicked ()
 			int x = ResponseJDialog.NO;
 			if ( __commands_JListModel.size() > 0 ) {
 				x = new ResponseJDialog ( this,
-				IOUtil.getProgramName(), "Do you want to save the changes to commands?",
+				IOUtil.getProgramName(), "Do you want to save the changes to commands?\n\n" +
+				"To view differences, Cancel and use View / Command File Diff.",
 				ResponseJDialog.YES| ResponseJDialog.NO|ResponseJDialog.CANCEL).response();
 			}
 			if ( x == ResponseJDialog.CANCEL ) {
@@ -13653,7 +13654,8 @@ private void uiAction_CloseClicked ()
 			int x = ResponseJDialog.NO;
 			if ( __commands_JListModel.size() > 0 ) {
 				x = new ResponseJDialog ( this, IOUtil.getProgramName(),
-				"Do you want to save the changes you made to\n\"" + __commandFileName + "\"?",
+				"Do you want to save the changes you made to\n\"" + __commandFileName + "\"?\n\n" +
+				"To view differences, Cancel and use View / Command File Diff.",
 				ResponseJDialog.YES| ResponseJDialog.NO|ResponseJDialog.CANCEL).response();
 			}
 			if ( x == ResponseJDialog.CANCEL ) {
@@ -13902,7 +13904,9 @@ private void uiAction_NewCommandFile ()
 			// Have not been saved before...
 			int x = ResponseJDialog.NO;
 			if ( __commands_JListModel.size() > 0 ) {
-				x = new ResponseJDialog ( this, IOUtil.getProgramName(), "Do you want to save the commands?",
+				x = new ResponseJDialog ( this, IOUtil.getProgramName(),
+				"Do you want to save the changes you made?\n\n" +
+				"To view differences, Cancel and use View / Command File Diff.",
 				ResponseJDialog.YES| ResponseJDialog.NO|ResponseJDialog.CANCEL).response();
 			}
 			if ( x == ResponseJDialog.CANCEL ) {
@@ -13920,7 +13924,8 @@ private void uiAction_NewCommandFile ()
 			int x = ResponseJDialog.NO;
 			if ( __commands_JListModel.size() > 0 ) {
 				x = new ResponseJDialog ( this,	IOUtil.getProgramName(),
-				"Do you want to save the changes you made to\n\"" + __commandFileName + "\"?",
+				"Do you want to save the changes you made to\n\"" + __commandFileName + "\"?\n\n" +
+				"To view differences, Cancel and use View / Command File Diff.",
 				ResponseJDialog.YES| ResponseJDialog.NO|ResponseJDialog.CANCEL).response();
 			}
 			if ( x == ResponseJDialog.CANCEL ) {
@@ -13949,7 +13954,7 @@ see if the list contains anything and if it does the user is prompted as to
 whether need to save the previous commands.
 */
 private void uiAction_OpenCommandFile ( String commandFile, boolean runDiscoveryOnLoad)
-{	String routine = getClass().getName() + ".uiAction_OpenCommandFile";
+{	String routine = getClass().getSimpleName() + ".uiAction_OpenCommandFile";
 	// See whether the old commands need to be cleared...
 	if ( __commandsDirty ) {
 		if ( __commandFileName == null ) {
@@ -13957,7 +13962,8 @@ private void uiAction_OpenCommandFile ( String commandFile, boolean runDiscovery
 			int x = ResponseJDialog.NO;
 			if ( __commands_JListModel.size() > 0 ) {
 				x = new ResponseJDialog ( this, IOUtil.getProgramName(),
-				"Do you want to save the changes you made?",
+				"Do you want to save the changes you made?\n\n" +
+				"To view differences, Cancel and use View / Command File Diff.",
 				ResponseJDialog.YES|ResponseJDialog.NO|ResponseJDialog.CANCEL).response();
 			}
 			if ( x == ResponseJDialog.CANCEL ) {
@@ -13980,13 +13986,15 @@ private void uiAction_OpenCommandFile ( String commandFile, boolean runDiscovery
                         "The commands are marked read-only.\n" +
                         "Press Yes to update the read-only file before opening a new file.\n" +
                         "Press No to discard edits before opening a new file.\n" +
-                        "Press Cancel and then save to a new name if desired.\n",
+                        "Press Cancel and then save to a new name if desired.\n" +
+                        "To view differences, Cancel and use View / Command File Diff.",
                         ResponseJDialog.YES|ResponseJDialog.NO|ResponseJDialog.CANCEL).response();
 			    }
 			    else {
     				x = new ResponseJDialog ( this,	IOUtil.getProgramName(),
     				"Do you want to save the changes you made to:\n"
-    				+ "\"" + __commandFileName + "\"?",
+    				+ "\"" + __commandFileName + "\"?\n\n" +
+    				"To view differences, Cancel and use View / Command File Diff.",
     				ResponseJDialog.YES| ResponseJDialog.NO|ResponseJDialog.CANCEL).response();
 			    }
 			}
@@ -14006,7 +14014,10 @@ private void uiAction_OpenCommandFile ( String commandFile, boolean runDiscovery
 		Message.printStatus ( 2, routine, "Initial directory for browsing:  \"" + initial_dir + "\"" );
 		JFileChooser fc = JFileChooserFactory.createJFileChooser ( initial_dir );
 		fc.setDialogTitle("Open " + IOUtil.getProgramName() + " Command File");
-		SimpleFileFilter sff = new SimpleFileFilter("StateDMI", "StateDMI Command File");
+		List<String> extensionList = new ArrayList<>();
+		extensionList.add("statedmi");
+		extensionList.add("StateDMI");
+		SimpleFileFilter sff = new SimpleFileFilter(extensionList, "StateDMI Command File");
 		fc.addChoosableFileFilter(sff);
 		fc.setFileFilter(sff);
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
@@ -14288,7 +14299,8 @@ private void uiAction_OpenStateCUDataSet ( )
 		int x = ResponseJDialog.NO;
 		if ( __commands_JListModel.size() > 0 ) {
 			x = new ResponseJDialog ( this,
-			IOUtil.getProgramName(), "Do you want to save the changes you made to the commands?",
+			IOUtil.getProgramName(), "Do you want to save the changes you made to the commands?\n\n" +
+			"To view differences, Cancel and use View / Command File Diff.",
 			ResponseJDialog.YES|ResponseJDialog.NO|ResponseJDialog.CANCEL).response();
 		}
 		if ( x == ResponseJDialog.CANCEL ) {
@@ -14387,7 +14399,8 @@ private void uiAction_OpenStateModDataSet ()
 		int x = ResponseJDialog.NO;
 		if ( __commands_JListModel.size() > 0 ) {
 			x = new ResponseJDialog ( this,
-			IOUtil.getProgramName(), "Do you want to save the changes you made to the commands?",
+			IOUtil.getProgramName(), "Do you want to save the changes you made to the commands?\n\n" +
+			"To view differences, Cancel and use View / Command File Diff.",
 			ResponseJDialog.YES|ResponseJDialog.NO|ResponseJDialog.CANCEL).response();
 		}
 		if ( x == ResponseJDialog.CANCEL ) {
@@ -15921,14 +15934,18 @@ private void uiAction_WriteCommandFile ( String file, boolean prompt_for_file )
 		JFileChooser fc = JFileChooserFactory.createJFileChooser(ui_GetDir_LastCommandFileOpened() );
 		fc.setDialogTitle("Save Command File");
 		// Default name...
-		File default_file = new File("commands.StateDMI");
+		File default_file = new File("commands.statedmi");
 		fc.setSelectedFile ( default_file );
-		SimpleFileFilter sff = new SimpleFileFilter("StateDMI","StateDMI Command File");
+		
+		List<String> extensions = new ArrayList<>();
+		extensions.add("statedmi");
+		extensions.add("StateDMI");
+		SimpleFileFilter sff = new SimpleFileFilter(extensions,"StateDMI Command File");
 		fc.setFileFilter(sff);
 		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 			directory = fc.getSelectedFile().getParent();
 			file = fc.getSelectedFile().getPath();
-			IOUtil.enforceFileExtension ( file, "StateDMI" );
+			IOUtil.enforceFileExtension ( file, extensions );
 			ui_SetDir_LastCommandFileOpened( directory );
 		}		
 		else {
