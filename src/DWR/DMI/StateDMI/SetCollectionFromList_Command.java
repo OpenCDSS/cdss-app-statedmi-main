@@ -47,7 +47,7 @@ import RTi.Util.Message.MessageUtil;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Table.DataTable;
 import RTi.Util.Table.TableRecord;
-import RTi.Util.IO.Command;
+import RTi.Util.IO.CommandDiscoverable;
 import RTi.Util.IO.CommandException;
 import RTi.Util.IO.CommandLogRecord;
 import RTi.Util.IO.CommandPhaseType;
@@ -57,6 +57,7 @@ import RTi.Util.IO.CommandStatusType;
 import RTi.Util.IO.CommandWarningException;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.InvalidCommandParameterException;
+import RTi.Util.IO.ObjectListProvider;
 import RTi.Util.IO.PropList;
 import RTi.Util.IO.AbstractCommand;
 
@@ -69,7 +70,7 @@ but much of the functionality is in this base class.
 The collection information is applied to StateCU_Location, StateMod_Diversion, StateMod_Reservoir,
 and StateMod_Well, with specific enumerations for types handled for each.
 */
-public abstract class SetCollectionFromList_Command extends AbstractCommand implements Command
+public abstract class SetCollectionFromList_Command extends AbstractCommand implements CommandDiscoverable, ObjectListProvider
 {
 	
 /**
@@ -100,6 +101,11 @@ protected final String _InRow = "InRow";
 protected final String _InColumn = "InColumn";
 
 /**
+The table that is created.
+*/
+private DataTable __table = null;
+
+/**
 Constructor.  The command name should be set in the constructor of derived classes.
 */
 public SetCollectionFromList_Command ()
@@ -123,11 +129,9 @@ throws InvalidCommandParameterException
 	String Div = parameters.getValue ( "Div" );
 	String PartType = parameters.getValue ( "PartType" );
 	String IDCol = parameters.getValue ( "IDCol" );
-	String NameCol = parameters.getValue ( "NameCol" );
 	String PartIDsCol = parameters.getValue ( "PartIDsCol" );
 	String PartIDTypeColumn = parameters.getValue ( "PartIDTypeColumn" );
 	String PartsListedHow = parameters.getValue ( "PartsListedHow" );
-	String PartIDsColMax = parameters.getValue ( "PartIDsColMax" );
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
 	String warning = "";
 	String message;
@@ -274,42 +278,20 @@ throws InvalidCommandParameterException
 				message, "Specify the part type as " + _Ditch + ", " + _Parcel + ", or " + _Well + ".") );
 	}
 	
-	if ( (IDCol == null) ||	(IDCol.length() == 0) ) {
+	if ( (IDCol == null) ||	IDCol.isEmpty() ) {
         message = "The ID column must be specified.";
         warning += "\n" + message;
         status.addToLog ( CommandPhaseType.INITIALIZATION,
                 new CommandLogRecord(CommandStatusType.FAILURE,
-                        message, "Specify the ID column (1+) to read." ) );
-	}
-	else if ( !StringUtil.isInteger(IDCol) ) {
-        message = "The ID column is invalid.";
-        warning += "\n" + message;
-        status.addToLog ( CommandPhaseType.INITIALIZATION,
-                new CommandLogRecord(CommandStatusType.FAILURE,
-                        message, "Specify the ID column as a number >= 1." ) );
+                        message, "Specify the ID column name or number (1+) to read." ) );
 	}
 	
-	if ( (NameCol != null) && (NameCol.length() != 0) && !StringUtil.isInteger(NameCol) ) {
-        message = "The name column is invalid.";
-        warning += "\n" + message;
-        status.addToLog ( CommandPhaseType.INITIALIZATION,
-                new CommandLogRecord(CommandStatusType.FAILURE,
-                        message, "Specify the name column as a number >= 1." ) );
-	}
-	
-	if ( (PartIDsCol == null) || (PartIDsCol.length() == 0) ) {
+	if ( (PartIDsCol == null) || PartIDsCol.isEmpty() ) {
         message = "The part ID column must be specified.";
         warning += "\n" + message;
         status.addToLog ( CommandPhaseType.INITIALIZATION,
                 new CommandLogRecord(CommandStatusType.FAILURE,
                         message, "Specify the part ID column (1+) to read." ) );
-	}
-	else if ( !StringUtil.isInteger(PartIDsCol) ) {
-        message = "The part ID column is invalid.";
-        warning += "\n" + message;
-        status.addToLog ( CommandPhaseType.INITIALIZATION,
-                new CommandLogRecord(CommandStatusType.FAILURE,
-                        message, "Specify the part ID column as a number >= 1." ) );
 	}
 	
 	if ( (PartsListedHow == null) || (PartsListedHow.length() == 0) ) {
@@ -318,14 +300,6 @@ throws InvalidCommandParameterException
 		status.addToLog ( CommandPhaseType.INITIALIZATION,
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Specify the PartsListedHow parameter as " + _InRow + " or " + _InColumn + ".") );
-	}
-	
-	if ( (PartIDsColMax != null) && (PartIDsColMax.length() != 0) && !StringUtil.isInteger(PartIDsColMax) ) {
-        message = "The part IDs column (maximum) is invalid.";
-        warning += "\n" + message;
-        status.addToLog ( CommandPhaseType.INITIALIZATION,
-                new CommandLogRecord(CommandStatusType.FAILURE,
-                        message, "Specify the part IDs column (maximum) as a number >= 1." ) );
 	}
 	
 	if ( (IfNotFound != null) && (IfNotFound.length() > 0) &&
@@ -340,8 +314,9 @@ throws InvalidCommandParameterException
 	}
     
 	// Check for invalid parameters...
-	List<String> validList = new ArrayList<String>(11);
+	List<String> validList = new ArrayList<>(12);
 	validList.add ( "ListFile" );
+	validList.add ( "TableID" );
 	validList.add ( "Year" );
 	validList.add ( "Div" );
 	validList.add ( "PartType" );
@@ -375,6 +350,29 @@ public boolean editCommand ( JFrame parent )
 	return (new SetCollectionFromList_JDialog ( parent, this )).ok();
 }
 
+/**
+Return the table that is read by this class when run in discovery mode.
+*/
+private DataTable getDiscoveryTable()
+{
+    return __table;
+}
+
+/**
+Return a list of objects of the requested type.  This class only keeps a list of DataTable objects.
+The following classes can be requested:  DataTable
+*/
+@SuppressWarnings("unchecked")
+public <T> List<T> getObjectList ( Class<T> c )
+{   DataTable table = getDiscoveryTable();
+    List<T> v = null;
+    if ( (table != null) && (c == table.getClass()) ) {
+        v = new ArrayList<T>();
+        v.add ( (T)table );
+    }
+    return v;
+}
+
 // Use base class parse method
 
 /**
@@ -404,9 +402,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 /**
 Run method internal to this class, to handle running in discovery and run mode.
 @param command_number Command number 1+ from processor.
-@param command_phase Command phase being executed (RUN or DISCOVERY).
+@param commandPhase Command phase being executed (RUN or DISCOVERY).
 */
-private void runCommandInternal ( int command_number, CommandPhaseType command_phase )
+private void runCommandInternal ( int command_number, CommandPhaseType commandPhase )
 throws InvalidCommandParameterException, CommandWarningException, CommandException
 {
     String routine = getClass().getSimpleName() + ".runCommandInternal", message;
@@ -414,6 +412,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     String command_tag = "" + command_number;
     int warning_count = 0;
     int log_level = 3;  // Log level for non-user warnings
+
+    if ( commandPhase == CommandPhaseType.DISCOVERY ) {
+        setDiscoveryTable ( null );
+    }
     
     CommandStatus status = getCommandStatus();
     status.clearLog(CommandPhaseType.RUN);
@@ -448,6 +450,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     PropList parameters = getCommandParameters();
     String ListFile = parameters.getValue ( "ListFile" );
+	if ( (ListFile != null) && (ListFile.indexOf("${") >= 0) && (commandPhase == CommandPhaseType.RUN) ) {
+		ListFile = StateDMICommandProcessorUtil.expandParameterValue(processor, this, ListFile);
+	}
+    String TableID = parameters.getValue ( "TableID" );
+	if ( (TableID != null) && (TableID.indexOf("${") >= 0) && (commandPhase == CommandPhaseType.RUN) ) {
+		TableID = StateDMICommandProcessorUtil.expandParameterValue(processor, this, TableID);
+	}
 	String Delim = parameters.getValue ( "Delim" );
 	if ( (Delim == null) || Delim.equals("") ) {
 		Delim = ","; // Default
@@ -473,25 +482,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		// Part type will have been set above from the parameter
 	}
     String IDCol = parameters.getValue ( "IDCol" );
-    int IDCol_int = Integer.parseInt(IDCol) - 1; // zero reference
     String NameCol = parameters.getValue ( "NameCol" );
-    int NameCol_int = -1;
-    if ( (NameCol != null) && !NameCol.equals("") ) {
-    	NameCol_int = Integer.parseInt(NameCol) - 1; // zero reference
-    }
     String PartIDsCol = parameters.getValue ( "PartIDsCol" );
-    int PartIDsCol_int = Integer.parseInt(PartIDsCol) - 1; // zero reference
     String PartIDTypeColumn = parameters.getValue ( "PartIDTypeColumn" );
-    int PartIDTypeColumn_int = -1;
     String PartsListedHow = parameters.getValue ( "PartsListedHow" );
     if ( (PartsListedHow == null) || PartsListedHow.equals("") ) {
     	PartsListedHow = _InRow; // Default
     }
     String PartIDsColMax = parameters.getValue ( "PartIDsColMax" );
-    int PartIDsColMax_int = -1;
-    if ( (PartIDsColMax != null) && !PartIDsColMax.equals("") ) {
-    	PartIDsColMax_int = Integer.parseInt(PartIDsColMax) -1; // zero reference
-    }
 	boolean partsInRow = true; // To simplify code below
 	if ( PartsListedHow.equalsIgnoreCase("InColumn") ) {
 		partsInRow = false;
@@ -538,7 +536,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         Message.printWarning ( warning_level, 
         MessageUtil.formatMessageTag(command_tag, ++warning_count),
         routine, message );
-        status.addToLog ( command_phase,
+        status.addToLog ( commandPhase,
             new CommandLogRecord(CommandStatusType.FAILURE,
                 message, "Report to software support.  See log file for details." ) );
     }
@@ -558,7 +556,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         Message.printWarning ( warning_level, 
         MessageUtil.formatMessageTag(command_tag, ++warning_count),
         routine, message );
-        status.addToLog ( command_phase,
+        status.addToLog ( commandPhase,
             new CommandLogRecord(CommandStatusType.FAILURE,
                 message, "Report to software support.  See log file for details." ) );
     }
@@ -578,7 +576,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         Message.printWarning ( warning_level, 
         MessageUtil.formatMessageTag(command_tag, ++warning_count),
         routine, message );
-        status.addToLog ( command_phase,
+        status.addToLog ( commandPhase,
             new CommandLogRecord(CommandStatusType.FAILURE,
                 message, "Report to software support.  See log file for details." ) );
     }
@@ -598,7 +596,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         Message.printWarning ( warning_level, 
         MessageUtil.formatMessageTag(command_tag, ++warning_count),
         routine, message );
-        status.addToLog ( command_phase,
+        status.addToLog ( commandPhase,
             new CommandLogRecord(CommandStatusType.FAILURE,
                 message, "Report to software support.  See log file for details." ) );
     }
@@ -610,7 +608,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         message = "The " + getCommandName() + "() command is being used but no diversion stations have been read.";
         Message.printWarning ( warning_level, 
         MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-        status.addToLog ( command_phase,
+        status.addToLog ( commandPhase,
             new CommandLogRecord(CommandStatusType.FAILURE,
                 message, "Use a SetWell" + collectionType +
                 "FromList() command instead if D&W nodes are being processed, " +
@@ -623,7 +621,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         message = "File \"" + ListFile_full + "\" does not exist.";
         Message.printWarning ( warning_level, 
         MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-        status.addToLog ( command_phase,
+        status.addToLog ( commandPhase,
             new CommandLogRecord(CommandStatusType.FAILURE,
                 message, "Verify that the list file name is correct." ) );
 	}
@@ -635,26 +633,146 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         routine, message );
         throw new InvalidCommandParameterException ( message );
     }
+    
+    // If here, OK to continue processing the command
 
     try {
-    	// Internal column numbers are zero-referenced, parameters are 1-referenced.  The parameters
-    	// were adjusted to zero index above
+    	// If specified, try reading the aggregation information into a table.
+    	if ( commandPhase == CommandPhaseType.RUN ) {
+    	// DO NOT indent, in order to allow comparison with previous code versions
+     	// Internal column numbers are zero-referenced, parameters are 1-referenced.  The parameters
+     	// were adjusted to zero index above
 
-    	// Read using the table...
+    	// First read the table using a table...
 
     	PropList props = new PropList ("");
     	props.set ( "Delimiter=," ); // see existing prototype
     	props.set ( "CommentLineIndicator=#" );	// New - skip lines that start with this
     	props.set ( "TrimStrings=True" ); // If true, trim strings after reading.
     	DataTable table = DataTable.parseFile ( ListFile_full, props );
+    	if ( (TableID != null) && !TableID.isEmpty() ) {
+            table.setTableID ( TableID );
+    	}
 
     	int tsize = 0;
     	if ( table != null ) {
     		tsize = table.getNumberOfRecords();
     	}
     	Message.printStatus ( 2, "", "Table has " + tsize + " records and " +
-    			table.getNumberOfFields() + " fields" );
+    		table.getNumberOfFields() + " fields" );
     	
+    	// Determine the column numbers from parameters
+        int indexErrors = 0;
+        int IDCol_int = -1;
+        if ( (IDCol != null) && !IDCol.isEmpty() ) {
+        	if ( StringUtil.isInteger(IDCol) ) {
+        		// Assume that integer is a column number
+        		IDCol_int = Integer.parseInt(IDCol) - 1; // zero reference
+        	}
+        	else {
+        		// Assume that a column name is specified
+	        	IDCol_int = table.getFieldIndex(IDCol);
+        	}
+	        if ( IDCol_int < 0 ) {
+		       	message = "Table with TableID=\"" + TableID + "\" does not contain IDCol Column=\"" +
+		       		IDCol + "\". Can't process input.";
+	            Message.printWarning(warning_level,
+	                MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+	            status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
+	                message, "Verify that the column exists in the table." ) );
+	            ++indexErrors;
+        	}
+        }
+        int NameCol_int = -1;
+        if ( (NameCol != null) && !NameCol.isEmpty() ) {
+        	if ( StringUtil.isInteger(NameCol) ) {
+        		// Assume that integer is a column number
+        		NameCol_int = Integer.parseInt(NameCol) - 1; // zero reference
+        	}
+        	else {
+        		// Assume that a column name is specified
+	        	NameCol_int = table.getFieldIndex(NameCol);
+        	}
+	        if ( NameCol_int < 0 ) {
+		       	message = "Table with TableID=\"" + TableID + "\" does not contain NameCol Column=\"" +
+		       		NameCol + "\". Can't process input.";
+	            Message.printWarning(warning_level,
+	                MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+	            status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
+	                message, "Verify that the column exists in the table." ) );
+	            ++indexErrors;
+        	}
+        }
+        int PartIDsCol_int = -1;
+        if ( (PartIDsCol != null) && !PartIDsCol.isEmpty() ) {
+        	if ( StringUtil.isInteger(PartIDsCol) ) {
+        		// Assume that integer is a column number
+        		PartIDsCol_int = Integer.parseInt(PartIDsCol) - 1; // zero reference
+        	}
+        	else {
+        		// Assume that a column name is specified
+	        	PartIDsCol_int = table.getFieldIndex(PartIDsCol);
+        	}
+	        if ( PartIDsCol_int < 0 ) {
+		       	message = "Table with TableID=\"" + TableID + "\" does not contain PartIDsCol Column=\"" +
+		       		PartIDsCol + "\". Can't process input.";
+	            Message.printWarning(warning_level,
+	                MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+	            status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
+	                message, "Verify that the column exists in the table." ) );
+	            ++indexErrors;
+        	}
+        }
+        int PartIDTypeColumn_int = -1;
+        if ( (PartIDTypeColumn != null) && !PartIDTypeColumn.isEmpty() ) {
+        	if ( StringUtil.isInteger(PartIDTypeColumn) ) {
+        		// Assume that integer is a column number
+        		PartIDTypeColumn_int = Integer.parseInt(PartIDTypeColumn) - 1; // zero reference
+        	}
+        	else {
+        		// Assume that a column name is specified
+	        	PartIDTypeColumn_int = table.getFieldIndex(PartIDTypeColumn);
+        	}
+	        if ( PartIDTypeColumn_int < 0 ) {
+		       	message = "Table with TableID=\"" + TableID + "\" does not contain PartIDTypeColumn Column=\"" +
+		       		PartIDTypeColumn + "\". Can't process input.";
+	            Message.printWarning(warning_level,
+	                MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+	            status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
+	                message, "Verify that the column exists in the table." ) );
+	            ++indexErrors;
+        	}
+        }
+        int PartIDsColMax_int = -1;
+        if ( (PartIDsColMax != null) && !PartIDsColMax.isEmpty() ) {
+        	if ( StringUtil.isInteger(PartIDsColMax) ) {
+        		// Assume that integer is a column number
+        		PartIDsColMax_int = Integer.parseInt(PartIDsColMax) - 1; // zero reference
+        	}
+        	else {
+        		// Assume that a column name is specified
+	        	PartIDsColMax_int = table.getFieldIndex(PartIDsColMax);
+        	}
+	        if ( PartIDsColMax_int < 0 ) {
+		       	message = "Table with TableID=\"" + TableID + "\" does not contain PartIDsColMax Column=\"" +
+		       		PartIDsColMax + "\". Can't process input.";
+	            Message.printWarning(warning_level,
+	                MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+	            status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
+	                message, "Verify that the column exists in the table." ) );
+	            ++indexErrors;
+        	}
+        }
+    	
+        if ( indexErrors != 0 ) {
+            // There were errors determining column 	
+	       	message = "There were errors determining table column numbers.  Cannot continue.";
+            Message.printWarning(warning_level,
+                MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+            status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
+                message, "Verify that the column(s) from previous warnings exist in the table." ) );
+        }
+        else {
     	// Allocate an array for all locations in the list file to indicate when an
     	// aggregate/system was not matched...
     	
@@ -712,7 +830,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
                     Message.printWarning ( warning_level, 
 	                    MessageUtil.formatMessageTag(command_tag, ++warning_count),
 	                    routine, message );
-                    status.addToLog ( command_phase,
+                    status.addToLog ( commandPhase,
                         new CommandLogRecord(CommandStatusType.FAILURE,
                             message, "Verify that column \"" + PartIDTypeColumn + "\" exists in the list file." ) );  		
             		throw new CommandException ( message );
@@ -728,7 +846,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
             Message.printWarning ( warning_level, 
             MessageUtil.formatMessageTag(command_tag, ++warning_count),
             routine, message );
-            status.addToLog ( command_phase,
+            status.addToLog ( commandPhase,
                 new CommandLogRecord(CommandStatusType.FAILURE,
                     message, "Specify a column <= the number of columns in the file." ) );  		
     		throw new CommandException ( message );
@@ -739,7 +857,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	        Message.printWarning ( warning_level, 
 	        MessageUtil.formatMessageTag(command_tag, ++warning_count),
 	        routine, message );
-	        status.addToLog ( command_phase,
+	        status.addToLog ( commandPhase,
 	            new CommandLogRecord(CommandStatusType.FAILURE,
 	                message, "Specify a column <= the number of columns in the file." ) );  		
 			throw new CommandException ( message );
@@ -750,7 +868,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	        Message.printWarning ( warning_level, 
 	        MessageUtil.formatMessageTag(command_tag, ++warning_count),
 	        routine, message );
-	        status.addToLog ( command_phase,
+	        status.addToLog ( commandPhase,
 	            new CommandLogRecord(CommandStatusType.FAILURE,
 	                message, "Specify a column <= the number of columns in the file." ) );  		
 			throw new CommandException ( message );
@@ -761,7 +879,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	        Message.printWarning ( warning_level, 
 	        MessageUtil.formatMessageTag(command_tag, ++warning_count),
 	        routine, message );
-	        status.addToLog ( command_phase,
+	        status.addToLog ( commandPhase,
 	            new CommandLogRecord(CommandStatusType.FAILURE,
 	                message, "Specify a column <= the number of columns in the file." ) );  		
 			throw new CommandException ( message );
@@ -772,7 +890,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	        Message.printWarning ( warning_level, 
 	        MessageUtil.formatMessageTag(command_tag, ++warning_count),
 	        routine, message );
-	        status.addToLog ( command_phase,
+	        status.addToLog ( commandPhase,
 	            new CommandLogRecord(CommandStatusType.FAILURE,
 	                message, "Specify a column <= the number of columns in the file." ) );  		
 			throw new CommandException ( message );
@@ -864,7 +982,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     							"\" has blank part ID for part " + partIds.size() + 1;
 							Message.printWarning ( warning_level, 
 								MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-							status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+							status.addToLog ( commandPhase, new CommandLogRecord(CommandStatusType.WARNING,
 								message, "Verify that the part ID is specified." ) );
     					}
     				}
@@ -877,7 +995,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
  					message = "CU Location collection \"" + culoc_id + "\" type \"" + collectionType + "\" is invalid.";
  					Message.printWarning ( warning_level, 
  						MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
- 					status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+ 					status.addToLog ( commandPhase, new CommandLogRecord(CommandStatusType.WARNING,
  						message, "Verify that the collection type is valid." ) );
  				}
     			culoc.setCollectionType ( collectionTypeForCuloc );
@@ -886,7 +1004,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				message = "CU Location collection \"" + culoc_id + "\" part type \"" + PartType + "\" is invalid.";
     				Message.printWarning ( warning_level, 
     					MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-    				status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+    				status.addToLog ( commandPhase, new CommandLogRecord(CommandStatusType.WARNING,
     					message, "Verify that part type is valid." ) );
  				}
     			culoc.setCollectionPartType ( collectionPartTypeForCuloc );
@@ -914,7 +1032,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     							"\" has invalid part ID type \"" + partIdTypeForLoop + "\".";
     						Message.printWarning ( warning_level, 
     							MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-    						status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+    						status.addToLog ( commandPhase, new CommandLogRecord(CommandStatusType.WARNING,
     							message, "Verify that part ID type is valid." ) );
     					}
     				}
@@ -1060,7 +1178,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     							"\" has blank part ID for part " + partIds.size() + 1;
 							Message.printWarning ( warning_level, 
 								MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-							status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+							status.addToLog ( commandPhase, new CommandLogRecord(CommandStatusType.WARNING,
 								message, "Verify that the part ID is specified." ) );
     					}
     				}
@@ -1074,7 +1192,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
  						message = "StateMod diversion collection \"" + sm_id + "\" type \"" + collectionType + "\" is invalid.";
  						Message.printWarning ( warning_level, 
  							MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
- 						status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+ 						status.addToLog ( commandPhase, new CommandLogRecord(CommandStatusType.WARNING,
  							message, "Verify that the collection type is valid." ) );
  					}
     				div.setCollectionType ( collectionTypeForDiv );
@@ -1093,7 +1211,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
  						message = "StateMod reservoir collection \"" + sm_id + "\" type \"" + collectionType + "\" is invalid.";
  						Message.printWarning ( warning_level, 
  							MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
- 						status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+ 						status.addToLog ( commandPhase, new CommandLogRecord(CommandStatusType.WARNING,
  							message, "Verify that the collection type is valid." ) );
  					}
     				res.setCollectionType ( collectionTypeForRes );
@@ -1112,7 +1230,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
  						message = "StateMod well collection \"" + sm_id + "\" type \"" + collectionType + "\" is invalid.";
  						Message.printWarning ( warning_level, 
  							MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
- 						status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+ 						status.addToLog ( commandPhase, new CommandLogRecord(CommandStatusType.WARNING,
  							message, "Verify that the collection type is valid." ) );
  					}
     				well.setCollectionType ( collectionTypeForWell );
@@ -1121,7 +1239,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     					message = "StateMod well collection \"" + sm_id + "\" part type \"" + PartType + "\" is invalid.";
     					Message.printWarning ( warning_level, 
     						MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-    					status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+    					status.addToLog ( commandPhase, new CommandLogRecord(CommandStatusType.WARNING,
     						message, "Verify that part type is valid." ) );
  					}
     				well.setCollectionPartType (collectionPartTypeForWell);
@@ -1145,7 +1263,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     								"\" has invalid part ID type \"" + partIdTypeForLoop + "\".";
     							Message.printWarning ( warning_level, 
     								MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-    							status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+    							status.addToLog ( commandPhase, new CommandLogRecord(CommandStatusType.WARNING,
     								message, "Verify that part ID type is valid." ) );
     						}
     					}
@@ -1222,7 +1340,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			else if ( IfNotFound.equalsIgnoreCase(_Warn) ) {
 	            Message.printWarning ( warning_level, 
         	        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-        	        status.addToLog ( command_phase, new CommandLogRecord(CommandStatusType.WARNING,
+        	        status.addToLog ( commandPhase, new CommandLogRecord(CommandStatusType.WARNING,
     	                message, "Verify that the list file contents are correct and that the indicated identifiers are included " +
 	                		"as " + nodeTypeFromCommand + " stations in the data set as intended." + message2 ) ); 
 			}
@@ -1230,10 +1348,35 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	            Message.printWarning ( warning_level, 
         	        MessageUtil.formatMessageTag(command_tag, ++warning_count),
         	        routine, message );
-        	        status.addToLog ( command_phase,
+        	        status.addToLog ( commandPhase,
         	            new CommandLogRecord(CommandStatusType.FAILURE,
         	                message, "Verify that the list file contents are correct." + message2 ) );
 			}
+    	}
+    	if ( (TableID != null) && !TableID.isEmpty() ) {
+    		// Also set the table in the processor
+            PropList request_params = new PropList ( "" );
+            request_params.setUsingObject ( "Table", table );
+            try {
+                processor.processRequest( "SetTable", request_params);
+            }
+            catch ( Exception e ) {
+                message = "Error requesting SetTable(Table=...) from processor.";
+                Message.printWarning(warning_level,
+                        MessageUtil.formatMessageTag( command_tag, ++warning_count),
+                        routine, message );
+                status.addToLog ( commandPhase,
+                        new CommandLogRecord(CommandStatusType.FAILURE,
+                           message, "Report problem to software support." ) );
+            }
+    	} // End TableID set in processor
+        } // End no index errors for table
+    	} // End run mode
+    	else if ( commandPhase == CommandPhaseType.DISCOVERY ) {
+    	    // Create an empty table and set the ID
+    	    DataTable table = new DataTable();
+            table.setTableID ( TableID );
+            setDiscoveryTable ( table );
     	}
     }
     catch ( Exception e ) {
@@ -1242,13 +1385,21 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         Message.printWarning ( warning_level, 
         MessageUtil.formatMessageTag(command_tag, ++warning_count),
         routine, message );
-        status.addToLog ( command_phase,
+        status.addToLog ( commandPhase,
                 new CommandLogRecord(CommandStatusType.FAILURE,
                         message, "See log file for details." ) );
         throw new CommandException ( message );
     }
     
-    status.refreshPhaseSeverity(command_phase,CommandStatusType.SUCCESS);
+    status.refreshPhaseSeverity(commandPhase,CommandStatusType.SUCCESS);
+}
+
+/**
+Set the table that is read by this class in discovery mode.
+*/
+private void setDiscoveryTable ( DataTable table )
+{
+    __table = table;
 }
 
 /**
@@ -1262,6 +1413,7 @@ public String toString ( PropList parameters )
 	}
 
 	String ListFile = parameters.getValue ( "ListFile" );
+	String TableID = parameters.getValue ( "TableID" );
 	String Year = parameters.getValue ( "Year" );
 	String Div = parameters.getValue ( "Div" );
 	String PartType = parameters.getValue ( "PartType" );
@@ -1276,6 +1428,12 @@ public String toString ( PropList parameters )
 	StringBuffer b = new StringBuffer ();
 	if ( (ListFile != null) && (ListFile.length() > 0) ) {
 		b.append ( "ListFile=\"" + ListFile + "\"" );
+	}
+	if ( (TableID != null) && (TableID.length() > 0) ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "TableID=\"" + TableID + "\"" );
 	}
 	if ( (this instanceof SetWellAggregateFromList_Command) ||
 		(this instanceof SetWellSystemFromList_Command) ) {
@@ -1302,19 +1460,19 @@ public String toString ( PropList parameters )
 		if ( b.length() > 0 ) {
 			b.append ( "," );
 		}
-		b.append ( "IDCol=" + IDCol );
+		b.append ( "IDCol=\"" + IDCol + "\"" );
 	}
 	if ( (NameCol != null) && (NameCol.length() > 0) ) {
 		if ( b.length() > 0 ) {
 			b.append ( "," );
 		}
-		b.append ( "NameCol=" + NameCol );
+		b.append ( "NameCol=\"" + NameCol + "\"" );
 	}
 	if ( (PartIDsCol != null) && (PartIDsCol.length() > 0) ) {
 		if ( b.length() > 0 ) {
 			b.append ( "," );
 		}
-		b.append ( "PartIDsCol=" + PartIDsCol );
+		b.append ( "PartIDsCol=\"" + PartIDsCol + "\"" );
 	}
 	if ( (PartIDTypeColumn != null) && (PartIDTypeColumn.length() > 0) ) {
 		if ( b.length() > 0 ) {
@@ -1332,7 +1490,7 @@ public String toString ( PropList parameters )
 		if ( b.length() > 0 ) {
 			b.append ( "," );
 		}
-		b.append ( "PartIDsColMax=" + PartIDsColMax );
+		b.append ( "PartIDsColMax=\"" + PartIDsColMax + "\"" );
 	}
 	if ( (IfNotFound != null) && (IfNotFound.length() > 0) ) {
 		if ( b.length() > 0 ) {
