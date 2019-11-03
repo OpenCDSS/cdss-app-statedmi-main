@@ -52,7 +52,7 @@ public class StateDMI
 {
 
 public static final String PROGRAM_NAME = "StateDMI";
-public static final String PROGRAM_VERSION = "5.00.00dev (2019-07-10)";
+public static final String PROGRAM_VERSION = "5.00.00dev (2019-11-02)";
 
 /**
 Interface for StateCU commands.
@@ -351,9 +351,9 @@ public static void main ( String args[] )
 private static int getMajorVersion () {
     int majorVersion = 0;
     try {
-    	System.out.println("program version: " + IOUtil.getProgramVersion());
+    	System.err.println("program version: " + IOUtil.getProgramVersion());
     	majorVersion = Integer.parseInt(IOUtil.getProgramVersion().split("\\.")[0].trim());
-    	System.out.println("Major version: " + majorVersion);
+    	System.err.println("Major version: " + majorVersion);
     }
     catch ( Exception e ) {
     	Message.printWarning(1, "StateDMI", "Error getting StateDMI major version number (" + e + ")." );
@@ -872,7 +872,7 @@ public static void printUsage ( )
 //"                   value is given, it will be applied to screen and file" +nl+
 //"                   output."
 		nl;
-	//System.out.println ( usage );
+	//System.err.println ( usage );
 	Message.printStatus ( 1, routine, usage );
 	quitProgram(0);
 }
@@ -882,7 +882,7 @@ Print the program version and exit the program.
 */
 public static void printVersion ( )
 {	String nl = System.getProperty ( "line.separator" );
-	System.out.println (  nl + PROGRAM_NAME + " version: " + PROGRAM_VERSION + nl + nl +
+	System.err.println (  nl + PROGRAM_NAME + " version: " + PROGRAM_VERSION + nl + nl +
 	"StateDMI is a part of Colorado's Decision Support Systems (CDSS)\n" +
 	"Copyright (C) 1997-2019 Colorado Department of Natural Resources\n" +
 	"\n" +
@@ -910,7 +910,7 @@ static void quitProgram ( int status )
 {	String	routine="StateDMI.quitProgram";
 
 	Message.printStatus ( 1, routine, "Exiting with status " + status + "." );
-	System.out.print( "STOP " + status + "\n" );
+	System.err.print( "STOP " + status + "\n" );
 	Message.closeLogFile();
 	System.exit ( status ); 
 }
@@ -1018,7 +1018,7 @@ private static void setupUsingCommandFile ( String command_file_arg, boolean is_
         String message = "Unable to determine canonical path for \"" + command_file_arg + "\"." +
         "Check that the file exists and read permissions are granted.  Not using command file.";
         Message.printWarning ( 1, routine, message );
-        System.out.println ( message );
+        System.err.println ( message );
                 
         return;
     }
@@ -1049,7 +1049,7 @@ private static void setupUsingCommandFile ( String command_file_arg, boolean is_
     if ( !command_file_full_File.exists() ) {
         String message = "Command file \"" + command_file_full + "\" does not exist.";
         Message.printWarning(1, routine, message );
-        System.out.println ( message );
+        System.err.println ( message );
         if ( is_batch ) {
              // Exit because there is nothing to do...
             quitProgram ( 1 );
@@ -1078,7 +1078,7 @@ private static void setWorkingDirUsingCommandFile ( String commandFileFull )
     // Print at level 1 because the log file is not yet initialized.
     String message = "Setting working directory to command file folder \"" + workingDir + ".\"";
     //Message.printStatus ( 1, routine, message );
-    System.out.println(message);
+    System.err.println(message);
 }
 
 }
