@@ -78,17 +78,18 @@ implements ActionListener, ItemListener, KeyListener, WindowListener
 
 private boolean __error_wait = false;	// To track errors
 private boolean __first_time = true;	// Indicate first time display
-private JTextArea __command_JTextArea=null;// For command
-private JTextField __ListFile_JTextField = null;// List file
+private JTextArea __command_JTextArea=null;
+private JTextField __ListFile_JTextField = null;
+private JTextField __TableID_JTextField = null;
 private JTextField __Year_JTextField = null;
 private SimpleJComboBox __PartType_JComboBox = null;
 private JTextField __Div_JTextField = null;
-private SimpleJComboBox __IDCol_JComboBox = null;
-private SimpleJComboBox __NameCol_JComboBox = null;
-private SimpleJComboBox __PartIDsCol_JComboBox = null;
+private JTextField __IDCol_JTextField = null;
+private JTextField __NameCol_JTextField = null;
+private JTextField __PartIDsCol_JTextField = null;
 private JTextField __PartIDTypeColumn_JTextField = null;
 private SimpleJComboBox __PartsListedHow_JComboBox = null;
-private SimpleJComboBox __PartIDsColMax_JComboBox = null;
+private JTextField __PartIDsColMax_JTextField = null;
 private SimpleJComboBox	__IfNotFound_JComboBox = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
@@ -108,6 +109,7 @@ private final String __RemoveWorkingDirectoryFromFile = "Rel";
 Type of collection:  "Aggregate", "System", or "MultiStruct" - see StateMod definitions.
 */
 private String __collectionType;
+
 /**
 Node type:  "Diversion", "Reservoir", "Well".
 */
@@ -203,20 +205,24 @@ private void checkInput () {
 	// Put together a list of parameters to check...
 	PropList props = new PropList ( "" );
 	String ListFile = __ListFile_JTextField.getText().trim();
-	String IDCol = __IDCol_JComboBox.getSelected();
-	String NameCol = __NameCol_JComboBox.getSelected();
-	String PartIDsCol = __PartIDsCol_JComboBox.getSelected();
+    String TableID = __TableID_JTextField.getText().trim();
+	String IDCol = __IDCol_JTextField.getText().trim();
+	String NameCol = __NameCol_JTextField.getText().trim();
+	String PartIDsCol = __PartIDsCol_JTextField.getText().trim();
 	String PartIDTypeColumn = null;
 	if ( __PartIDTypeColumn_JTextField != null ) {
 		PartIDTypeColumn = __PartIDTypeColumn_JTextField.getText().trim();
 	}
 	String PartsListedHow = __PartsListedHow_JComboBox.getSelected();
-	String PartIDsColMax = __PartIDsColMax_JComboBox.getSelected();
+	String PartIDsColMax = __PartIDsColMax_JTextField.getText().trim();
 	String IfNotFound = __IfNotFound_JComboBox.getSelected();
 	
 	if ( ListFile.length() > 0 ) {
 		props.set("ListFile", ListFile);
 	}
+    if ( TableID.length() > 0 ) {
+        props.set ( "TableID", TableID );
+    }
 	if ( IDCol.length() > 0 ) {
 		props.set("IDCol", IDCol);
 	}
@@ -306,18 +312,20 @@ already been checked and no errors were detected.
 */
 private void commitEdits()
 {	String ListFile = __ListFile_JTextField.getText().trim();
-	String IDCol = __IDCol_JComboBox.getSelected();
-	String NameCol = __NameCol_JComboBox.getSelected();
-	String PartIDsCol = __PartIDsCol_JComboBox.getSelected();
+    String TableID = __TableID_JTextField.getText().trim();
+	String IDCol = __IDCol_JTextField.getText().trim();
+	String NameCol = __NameCol_JTextField.getText().trim();
+	String PartIDsCol = __PartIDsCol_JTextField.getText().trim();
 	String PartIDTypeColumn = null;
 	if ( __PartIDTypeColumn_JTextField != null ) {
 		PartIDTypeColumn = __PartIDTypeColumn_JTextField.getText().trim();
 	}
 	String PartsListedHow = __PartsListedHow_JComboBox.getSelected();
-	String PartIDsColMax = __PartIDsColMax_JComboBox.getSelected();
+	String PartIDsColMax = __PartIDsColMax_JTextField.getText().trim();
 	String IfNotFound = __IfNotFound_JComboBox.getSelected();
 	
 	__command.setCommandParameter("ListFile", ListFile);
+	__command.setCommandParameter("TableID", TableID);
 	__command.setCommandParameter("IDCol", IDCol);
 	__command.setCommandParameter("NameCol", NameCol);
 	__command.setCommandParameter("PartIDsCol", PartIDsCol);
@@ -391,7 +399,11 @@ private void initialize ( JFrame parent, Command command )
 	int yy = -1;
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sets a " + __nodeType + " " + __collectionType +
-		" location's information from a list file." ),
+		" location's information from a list file, which is a comma-separated-value (CSV) file." ),
+		0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel (
+		"The file can have comment lines indicated by # and if the first non-comment line has \"quoted\" headings, " +
+        "they will be used in table headings."),
 		0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	if ( __collectionType.equalsIgnoreCase(StateMod_Diversion_CollectionType.MULTISTRUCT.toString()) ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
@@ -426,7 +438,7 @@ private void initialize ( JFrame parent, Command command )
 		    "Each " + __collectionType + " is a location where individual parts are combined into a single feature."),
 		    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 		JGUIUtil.addComponent(paragraph, new JLabel (
-		    "An \"Aggregate\" is used with Set" + __nodeType + "AggregateFromList() when water rights will be aggregated into classes." ),
+		    "An \"Aggregate\" is used with Set" + __nodeType + "AggregateFromList() when water rights will be aggregated into classes (bins)." ),
 		    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		    "A \"System\" is used with Set" + __nodeType + "SystemFromList() when individual water rights will be maintained." ),
@@ -519,6 +531,18 @@ private void initialize ( JFrame parent, Command command )
 	}
     JGUIUtil.addComponent(main_JPanel, fileButton_JPanel,
 		7, y, 1, 1, 1.0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+
+    // Table for results
+    
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Table ID:"),
+        0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    __TableID_JTextField = new JTextField (10);
+    __TableID_JTextField.setToolTipText("Specify the table ID or use ${Property} notation, used to check input.");
+    __TableID_JTextField.addKeyListener (this);
+    JGUIUtil.addComponent(main_JPanel, __TableID_JTextField,
+        1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Optional - unique identifier for the output table."),
+        3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
  
 	if ( __nodeType.equalsIgnoreCase(__command._Well) ) {
         JGUIUtil.addComponent(main_JPanel, new JLabel ( __collectionType + " part type:"),
@@ -567,11 +591,10 @@ private void initialize ( JFrame parent, Command command )
 	for ( int i = 1; i <= 100; i++ ) {
 		columnList.add ( "" + i );
 	}
-	__IDCol_JComboBox = new SimpleJComboBox(false);
-	__IDCol_JComboBox.setData ( columnList );
-	__IDCol_JComboBox.select (0);
-	__IDCol_JComboBox.addItemListener (this);
-	JGUIUtil.addComponent(main_JPanel, __IDCol_JComboBox,
+	__IDCol_JTextField = new JTextField(15);
+	__IDCol_JTextField.setToolTipText("Column name or number (1+) for the model location ID column." );
+	__IDCol_JTextField.addKeyListener (this);
+	JGUIUtil.addComponent(main_JPanel, __IDCol_JTextField,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Required - column for the " + __nodeType + " " + __collectionType + " IDs."), 
@@ -579,11 +602,10 @@ private void initialize ( JFrame parent, Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Name column:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__NameCol_JComboBox = new SimpleJComboBox(false);
-	__NameCol_JComboBox.setData ( columnList );
-	__NameCol_JComboBox.select ( 0 );
-	__NameCol_JComboBox.addItemListener (this);
-	JGUIUtil.addComponent(main_JPanel, __NameCol_JComboBox,
+	__NameCol_JTextField = new JTextField(15);
+	__NameCol_JTextField.setToolTipText("Column name or number (1+) for the model location name column." );
+	__NameCol_JTextField.addKeyListener (this);
+	JGUIUtil.addComponent(main_JPanel, __NameCol_JTextField,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Optional - column for the " + __nodeType + " " + __collectionType + " name."), 
@@ -591,11 +613,10 @@ private void initialize ( JFrame parent, Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Part IDs column:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__PartIDsCol_JComboBox = new SimpleJComboBox(false);
-	__PartIDsCol_JComboBox.setData ( columnList );
-	__PartIDsCol_JComboBox.select (0);
-	__PartIDsCol_JComboBox.addItemListener (this);
-	JGUIUtil.addComponent(main_JPanel, __PartIDsCol_JComboBox,
+	__PartIDsCol_JTextField = new JTextField(15);
+	__PartIDsCol_JTextField.setToolTipText("Column name or number (1+) for the first/only column for part IDs." );
+	__PartIDsCol_JTextField.addKeyListener (this);
+	JGUIUtil.addComponent(main_JPanel, __PartIDsCol_JTextField,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Required - first/only column for the part IDs."), 
@@ -604,8 +625,8 @@ private void initialize ( JFrame parent, Command command )
    	if ( (__command instanceof SetWellAggregateFromList_Command) || (__command instanceof SetWellSystemFromList_Command) ) {
 	    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Part ID type column:"),
 			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-		__PartIDTypeColumn_JTextField = new JTextField(10);
-		__PartIDTypeColumn_JTextField.setToolTipText("Column name or number for the part ID type - column value will be " +
+		__PartIDTypeColumn_JTextField = new JTextField(15);
+		__PartIDTypeColumn_JTextField.setToolTipText("Column name or number (1+) for the part ID type - column value will be " +
 			StateMod_Well_CollectionPartIdType.WDID + " or " + StateMod_Well_CollectionPartIdType.RECEIPT );
 		__PartIDTypeColumn_JTextField.addKeyListener (this);
 		JGUIUtil.addComponent(main_JPanel, __PartIDTypeColumn_JTextField,
@@ -632,11 +653,10 @@ private void initialize ( JFrame parent, Command command )
    	
     JGUIUtil.addComponent(main_JPanel, new JLabel("Part IDs column (max):"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__PartIDsColMax_JComboBox = new SimpleJComboBox(false);
-	__PartIDsColMax_JComboBox.setData ( columnList );
-	__PartIDsColMax_JComboBox.select ( 0 );
-	__PartIDsColMax_JComboBox.addItemListener (this);
-	JGUIUtil.addComponent(main_JPanel, __PartIDsColMax_JComboBox,
+	__PartIDsColMax_JTextField = new JTextField(15);
+	__PartIDsColMax_JTextField.setToolTipText("Column name or maximum number (1+) for the part IDs, if part IDs are in multiple columns." );
+	__PartIDsColMax_JTextField.addKeyListener (this);
+	JGUIUtil.addComponent(main_JPanel, __PartIDsColMax_JTextField,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Optional - maximum column for part IDs if in row (default is use all)."), 
@@ -737,6 +757,7 @@ Refresh the command from the other text field contents.
 private void refresh ()
 {	String routine = "SetCollectionFromList_JDialog.refresh";
 	String ListFile = "";
+	String TableID = "";
 	String Year = "";
 	String Div = "";
 	String PartType = "";
@@ -755,6 +776,7 @@ private void refresh ()
 		// Get the properties from the command
 		parameters = __command.getCommandParameters();
 		ListFile = parameters.getValue ( "ListFile" );
+		TableID = parameters.getValue ( "TableID" );
 		Year = parameters.getValue ( "Year" );
 		Div = parameters.getValue ( "Div" );
 		PartType = parameters.getValue ( "PartType" );
@@ -767,6 +789,9 @@ private void refresh ()
 		IfNotFound = parameters.getValue ( "IfNotFound" );
 		if ( ListFile != null ) {
 			__ListFile_JTextField.setText (ListFile);
+		}
+		if ( TableID != null ) {
+			__TableID_JTextField.setText (TableID);
 		}
 		if ( (Year != null) && (__Year_JTextField != null) ) {
 			__Year_JTextField.setText(Year);
@@ -792,53 +817,14 @@ private void refresh ()
 				}
 			}
 		}
-		if ( IDCol == null ) {
-			// Select default...
-			__IDCol_JComboBox.select ( 0 );
+		if ( IDCol != null ) {
+			__IDCol_JTextField.setText ( IDCol );
 		}
-		else {
-			if ( JGUIUtil.isSimpleJComboBoxItem(
-				__IDCol_JComboBox, IDCol, JGUIUtil.NONE, null, null ) ) {
-				__IDCol_JComboBox.select ( IDCol );
-			}
-			else {
-				Message.printWarning ( 1, routine,
-				"Existing command references an invalid IDCol value \"" + IDCol +
-				"\".  Select a different value or Cancel.");
-				__error_wait = true;
-			}
+		if ( NameCol != null ) {
+			__NameCol_JTextField.setText ( NameCol );
 		}
-		if ( NameCol == null ) {
-			// Select default...
-			__NameCol_JComboBox.select ( 0 );
-		}
-		else {
-			if ( JGUIUtil.isSimpleJComboBoxItem(
-				__NameCol_JComboBox, NameCol, JGUIUtil.NONE, null, null ) ) {
-				__NameCol_JComboBox.select ( NameCol );
-			}
-			else {
-				Message.printWarning ( 1, routine,
-				"Existing command references an invalid NameCol value \"" + NameCol +
-				"\".  Select a different value or Cancel.");
-				__error_wait = true;
-			}
-		}
-		if ( PartIDsCol == null ) {
-			// Select default...
-			__PartIDsCol_JComboBox.select ( 0 );
-		}
-		else {
-			if ( JGUIUtil.isSimpleJComboBoxItem(
-				__PartIDsCol_JComboBox,	PartIDsCol, JGUIUtil.NONE, null, null ) ) {
-				__PartIDsCol_JComboBox.select ( PartIDsCol );
-			}
-			else {
-				Message.printWarning ( 1, routine,
-				"Existing command references an invalid PartIDsCol value \"" +
-				PartIDsCol + "\".  Select a different value or Cancel.");
-				__error_wait = true;
-			}
+		if ( PartIDsCol != null ) {
+			__PartIDsCol_JTextField.setText ( PartIDsCol );
 		}
 		if ( PartIDTypeColumn != null ) {
 			__PartIDTypeColumn_JTextField.setText (PartIDTypeColumn);
@@ -861,20 +847,7 @@ private void refresh ()
 			}
 		}
 		if ( PartIDsColMax == null ) {
-			// Select default...
-			__PartIDsColMax_JComboBox.select ( 0 );
-		}
-		else {
-			if ( JGUIUtil.isSimpleJComboBoxItem(
-				__PartIDsColMax_JComboBox, PartIDsColMax, JGUIUtil.NONE, null, null)){
-				__PartIDsColMax_JComboBox.select ( PartIDsColMax );
-			}
-			else {
-				Message.printWarning ( 1, routine,
-				"Existing command references an invalid PartIDsColMax value \"" + PartIDsColMax +
-				"\".  Select a different value or Cancel.");
-				__error_wait = true;
-			}
+			__PartIDsColMax_JTextField.setText ( PartIDsColMax );
 		}
 		if ( IfNotFound == null ) {
 			// Select default...
@@ -898,6 +871,8 @@ private void refresh ()
 	parameters = new PropList(__command.getCommandName());
 	ListFile = __ListFile_JTextField.getText().trim();
 	parameters.add("ListFile=" + ListFile);
+	TableID = __TableID_JTextField.getText().trim();
+	parameters.add("TableID=" + TableID);
 	if ( __Year_JTextField != null ) {
 		Year = __Year_JTextField.getText().trim();
 		parameters.add("Year=" + Year);
@@ -910,10 +885,10 @@ private void refresh ()
 		PartType = __PartType_JComboBox.getSelected();
 		parameters.add("PartType=" + PartType);
 	}
-	IDCol = __IDCol_JComboBox.getSelected();
-	NameCol = __NameCol_JComboBox.getSelected();
-	PartIDsCol = __PartIDsCol_JComboBox.getSelected();
-	PartIDsColMax = __PartIDsColMax_JComboBox.getSelected();
+	IDCol = __IDCol_JTextField.getText().trim();
+	NameCol = __NameCol_JTextField.getText().trim();
+	PartIDsCol = __PartIDsCol_JTextField.getText().trim();
+	PartIDsColMax = __PartIDsColMax_JTextField.getText().trim();
 	PartsListedHow = __PartsListedHow_JComboBox.getSelected();
 	IfNotFound = __IfNotFound_JComboBox.getSelected();
 	parameters.add("IDCol=" + IDCol);
