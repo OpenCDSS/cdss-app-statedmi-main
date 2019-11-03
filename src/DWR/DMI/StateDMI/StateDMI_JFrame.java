@@ -821,6 +821,7 @@ JCheckBoxMenuItem
 	__View_ThreeLevelCommandsMenu_JCheckBoxMenuItem;
 
 private JMenuItem
+	__View_CommandFileDiff_JMenuItem = null,
 	__View_DataStores_JMenuItem = null;
 
 	// The following are used by StateCU and StateMod...
@@ -1775,6 +1776,7 @@ private String
 
 	// View menu...
 
+	__View_CommandFileDiff_String = "Command File Diff",
 	__View_DataStores_String = "Datastores",
 	__View_DataSetManager_String = "Data Set Manager",
 	__View_Map_String = "Map",
@@ -2789,7 +2791,7 @@ private String
 	__Tools_ListSurfaceWaterDiversions_String = "List Surface Water Diversions",
 	__Tools_ListWellStationRightTotals_String = "List Well Station Right Totals",
 	__Tools_HydrobaseParcelWaterSupply_String = "HydroBase - Parcel Water Supply...",
-	__Tools_ViewLogFile_Startup_String = "Diagnostics - View Log File (Startup)",
+	__Tools_ViewLogFile_Startup_String = "Diagnostics - View Log File (Startup)...",
 	// Currently Diagnostics are added dynamically.
 
 	// Help menu...
@@ -3109,6 +3111,10 @@ public void actionPerformed ( ActionEvent event )
 
 	// View menu...
 	
+    if ( command.equals(__View_CommandFileDiff_String) ) {
+        // Show visual diff of current command file and saved version
+        uiAction_ViewCommandFileDiff();
+    }
 	else if ( command.equals(__View_DataStores_String) ) {
         // Show the datastores
         uiAction_ShowDataStores();
@@ -13236,6 +13242,9 @@ private void ui_InitGUIMenus_View ( JMenuBar menuBar )
 {	JMenu viewJMenu = new JMenu ("View", true);
 	menuBar.add (viewJMenu);
 	
+    viewJMenu.add ( __View_CommandFileDiff_JMenuItem=new SimpleJMenuItem( __View_CommandFileDiff_String, this));
+    __View_CommandFileDiff_JMenuItem.setToolTipText("Use visual diff program to compare current commands with last saved version.");
+    
 	viewJMenu.add ( __View_DataStores_JMenuItem=new SimpleJMenuItem( __View_DataStores_String, this));
 
 	viewJMenu.add ( __View_Map_JCheckBoxMenuItem = new JCheckBoxMenuItem(__View_Map_String) );
@@ -15327,7 +15336,7 @@ private void uiAction_ShowCommandStatus()
         HTMLViewer hTMLViewer = new HTMLViewer();
         hTMLViewer.setTitle ( "StateDMI - Command Status" );
         hTMLViewer.setHTML(status);
-        hTMLViewer.setSize(700,400);
+        hTMLViewer.setSize(700,600);
         hTMLViewer.setVisible(true);
       }
       catch(Throwable t){
@@ -15776,6 +15785,67 @@ void uiAction_Tool_ListWellStationRightTotals ()
 }
 
 /**
+ * Show the difference between the current commands and the saved on disk command file.
+ */
+private void uiAction_ViewCommandFileDiff () {
+	// If the diff tool is not configured, provide information.
+	Prop prop = IOUtil.getProp("DiffProgram");
+	String diffProgram = null;
+	if ( prop != null ) {
+		diffProgram = prop.getValue();
+	}
+	else {
+         new ResponseJDialog ( this, IOUtil.getProgramName(),
+             "The visual diff program has not been configured in the StateDMI configuration file.\n" +
+             "Define the \"DiffProgram\" property as the path to a visual diff program, for example kdiff3\n" +
+             "Cannot show the command file difference.",
+             ResponseJDialog.OK).response();
+         return;
+	}
+	if ( IOUtil.fileExists(diffProgram) ) {
+		// Diff program exists so save a temporary file with UI commands and then compare with file version.
+		// Run the diff program on the input and output files
+		// (they should have existed because the button will have been disabled if not)
+		String file1Path = this.__commandFileName;
+		if ( file1Path == null ) {
+	         new ResponseJDialog ( this, IOUtil.getProgramName(),
+                  "No command file was previously read or saved.  The commands being edited are new.",
+                  ResponseJDialog.OK).response();
+	         return;
+		}
+		// Write the commands to a temporary file
+		String tempCommandFile = IOUtil.tempFileName();
+		File f = new File(tempCommandFile);
+		String tempFolder = f.getParent();
+		String file2Path = tempFolder + File.separator + "StateDMI-commands.TSTool";
+		try {
+			uiAction_WriteCommandFile_Helper(file2Path);
+		}
+		catch ( Exception e ) {
+			Message.printWarning(1, "", "Error saving commands to temporry file for diff (" + e + ")" );
+			return;
+		}
+		// Run the diff program
+		String [] programAndArgsList = { diffProgram, file1Path, file2Path };
+		try {
+			ProcessManager pm = new ProcessManager ( programAndArgsList,
+					0, // No timeout
+	                null, // Exit status indicator
+	                false, // Use command shell
+	                new File(tempFolder) );
+			Thread t = new Thread ( pm );
+            t.start();
+		}
+		catch ( Exception e ) {
+			Message.printWarning(1, "", "Unable to run diff program (" + e + ")" );
+		}
+	}
+	else {
+		Message.printWarning(1, "", "Visual diff program does not exist:  " + diffProgram );
+	}
+}
+
+/**
 View the documentation by displaying using the desktop application.
 @param command the string from the action event (menu string).
 */
@@ -15898,6 +15968,20 @@ private void uiAction_WriteCommandFile ( String file, boolean prompt_for_file )
 	}
 	// Update the status information...
 	ui_UpdateStatus ( false );
+}
+
+/** Helper method to write the commands to a file.
+ * @param file Path to file to write.
+ */
+private void uiAction_WriteCommandFile_Helper(String file) throws FileNotFoundException {
+	PrintWriter out = new PrintWriter(new FileOutputStream(file));
+	int size = __commands_JListModel.size();
+	Command command;
+	for (int i = 0; i < size; i++) {
+		command = (Command)__commands_JListModel.get(i);
+		out.println(command.toString());
+	}
+	out.close();
 }
 
 /**

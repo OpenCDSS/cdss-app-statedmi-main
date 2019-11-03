@@ -1,23 +1,23 @@
-// AppendTable_JDialog - editor for AppendTable command
+// AppendTable_JDialog - editor for AppendTable class
 
 /* NoticeStart
 
-StateDMI
-StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+CDSS Time Series Processor Java Library
+CDSS Time Series Processor Java Library is a part of Colorado's Decision Support Systems (CDSS)
+Copyright (C) 1994-2019 Colorado Department of Natural Resources
 
-StateDMI is free software:  you can redistribute it and/or modify
+CDSS Time Series Processor Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-StateDMI is distributed in the hope that it will be useful,
+    CDSS Time Series Processor Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-    along with StateDMI.  If not, see <https://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with CDSS Time Series Processor Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
 
@@ -67,6 +67,7 @@ private SimpleJComboBox __TableID_JComboBox = null;
 private SimpleJComboBox __AppendTableID_JComboBox = null;
 private JTextField __IncludeColumns_JTextField = null;
 private JTextArea __ColumnMap_JTextArea = null;
+private JTextArea __ColumnData_JTextArea = null;
 private JTextArea __ColumnFilters_JTextArea = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;
@@ -107,6 +108,17 @@ public void actionPerformed(ActionEvent event)
 			response ( true );
 		}
 	}
+    else if ( event.getActionCommand().equalsIgnoreCase("EditColumnData") ) {
+        // Edit the dictionary in the dialog.  It is OK for the string to be blank.
+        String ColumnData = __ColumnData_JTextArea.getText().trim();
+        String [] notes = { "Specify additional data for the records being appended." };
+        String dict = (new DictionaryJDialog ( __parent, true, ColumnData,
+            "Edit ColumnData Parameter", notes, "Column Name in Append Table", "Data value to set",10)).response();
+        if ( dict != null ) {
+            __ColumnData_JTextArea.setText ( dict );
+            refresh();
+        }
+    }
     else if ( event.getActionCommand().equalsIgnoreCase("EditColumnMap") ) {
         // Edit the dictionary in the dialog.  It is OK for the string to be blank.
         String ColumnMap = __ColumnMap_JTextArea.getText().trim();
@@ -140,6 +152,7 @@ private void checkInput ()
     String AppendTableID = __AppendTableID_JComboBox.getSelected();
 	String IncludeColumns = __IncludeColumns_JTextField.getText().trim();
 	String ColumnMap = __ColumnMap_JTextArea.getText().trim().replace("\n"," ");
+	String ColumnData = __ColumnData_JTextArea.getText().trim().replace("\n"," ");
 	String ColumnFilters = __ColumnFilters_JTextArea.getText().trim().replace("\n"," ");
 	__error_wait = false;
 
@@ -154,6 +167,9 @@ private void checkInput ()
 	}
     if ( ColumnMap.length() > 0 ) {
         props.set ( "ColumnMap", ColumnMap );
+    }
+    if ( ColumnData.length() > 0 ) {
+        props.set ( "ColumnData", ColumnData );
     }
     if ( ColumnFilters.length() > 0 ) {
         props.set ( "ColumnFilters", ColumnFilters );
@@ -178,11 +194,13 @@ private void commitEdits ()
     String AppendTableID = __AppendTableID_JComboBox.getSelected();
     String IncludeColumns = __IncludeColumns_JTextField.getText().trim();
     String ColumnMap = __ColumnMap_JTextArea.getText().trim();
+    String ColumnData = __ColumnData_JTextArea.getText().trim();
     String ColumnFilters = __ColumnFilters_JTextArea.getText().trim();
     __command.setCommandParameter ( "TableID", TableID );
     __command.setCommandParameter ( "AppendTableID", AppendTableID );
 	__command.setCommandParameter ( "IncludeColumns", IncludeColumns );
 	__command.setCommandParameter ( "ColumnMap", ColumnMap );
+	__command.setCommandParameter ( "ColumnData", ColumnData );
 	__command.setCommandParameter ( "ColumnFilters", ColumnFilters );
 }
 
@@ -270,6 +288,20 @@ private void initialize ( JFrame parent, AppendTable_Command command, List<Strin
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Optional - to change append table names (default=no changes)."),
         3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
     JGUIUtil.addComponent(main_JPanel, new SimpleJButton ("Edit","EditColumnMap",this),
+        3, ++y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+    
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Column data:"),
+        0, ++y, 1, 2, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    __ColumnData_JTextArea = new JTextArea (6,35);
+    __ColumnData_JTextArea.setLineWrap ( true );
+    __ColumnData_JTextArea.setWrapStyleWord ( true );
+    __ColumnData_JTextArea.setToolTipText("AppendColumn1:DataValue1,AppendColumn2:DataValue2");
+    __ColumnData_JTextArea.addKeyListener (this);
+    JGUIUtil.addComponent(main_JPanel, new JScrollPane(__ColumnData_JTextArea),
+        1, y, 2, 2, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Optional - to set append table data."),
+        3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+    JGUIUtil.addComponent(main_JPanel, new SimpleJButton ("Edit","EditColumnData",this),
         3, ++y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Column filters:"),
@@ -368,6 +400,7 @@ private void refresh ()
     String IncludeColumns = "";
     String DistinctColumns = "";
     String ColumnMap = "";
+    String ColumnData = "";
     String ColumnFilters = "";
 	PropList props = __command.getCommandParameters();
 	if (__first_time) {
@@ -377,6 +410,7 @@ private void refresh ()
         DistinctColumns = props.getValue ( "DistinctColumns" );
         IncludeColumns = props.getValue ( "IncludeColumns" );
         ColumnMap = props.getValue ( "ColumnMap" );
+        ColumnData = props.getValue ( "ColumnData" );
         ColumnFilters = props.getValue ( "ColumnFilters" );
         if ( TableID == null ) {
             // Select default...
@@ -402,6 +436,9 @@ private void refresh ()
         if ( ColumnMap != null ) {
             __ColumnMap_JTextArea.setText ( ColumnMap );
         }
+        if ( ColumnData != null ) {
+            __ColumnData_JTextArea.setText ( ColumnData );
+        }
         if ( ColumnFilters != null ) {
             __ColumnFilters_JTextArea.setText ( ColumnFilters );
         }
@@ -411,6 +448,7 @@ private void refresh ()
     AppendTableID = __AppendTableID_JComboBox.getSelected();
 	IncludeColumns = __IncludeColumns_JTextField.getText().trim();
 	ColumnMap = __ColumnMap_JTextArea.getText().trim();
+	ColumnData = __ColumnData_JTextArea.getText().trim();
 	ColumnFilters = __ColumnFilters_JTextArea.getText().trim();
 	props = new PropList ( __command.getCommandName() );
     props.add ( "TableID=" + TableID );
@@ -418,6 +456,7 @@ private void refresh ()
     props.add ( "DistinctColumns=" + DistinctColumns );
 	props.add ( "IncludeColumns=" + IncludeColumns );
 	props.add ( "ColumnMap=" + ColumnMap );
+	props.add ( "ColumnData=" + ColumnData );
 	props.add ( "ColumnFilters=" + ColumnFilters );
 	__command_JTextArea.setText( __command.toString ( props ) );
 }

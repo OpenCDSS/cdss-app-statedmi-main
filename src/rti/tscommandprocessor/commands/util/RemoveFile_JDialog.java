@@ -1,3 +1,26 @@
+// RemoveFile_JDialog - editor for RemoveFile command
+
+/* NoticeStart
+
+CDSS Time Series Processor Java Library
+CDSS Time Series Processor Java Library is a part of Colorado's Decision Support Systems (CDSS)
+Copyright (C) 1994-2019 Colorado Department of Natural Resources
+
+CDSS Time Series Processor Java Library is free software:  you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    CDSS Time Series Processor Java Library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with CDSS Time Series Processor Java Library.  If not, see <https://www.gnu.org/licenses/>.
+
+NoticeEnd */
+
 package rti.tscommandprocessor.commands.util;
 
 import java.awt.event.ActionEvent;
@@ -11,6 +34,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -27,6 +52,7 @@ import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
@@ -37,13 +63,14 @@ import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 public class RemoveFile_JDialog extends JDialog
 implements ActionListener, KeyListener, WindowListener
 {
-private final String __AddWorkingDirectoryFile = "Add Working Directory";
-private final String __RemoveWorkingDirectoryFile = "Remove Working Directory";
+private final String __AddWorkingDirectory = "Abs";
+private final String __RemoveWorkingDirectory = "Rel";
 
 private SimpleJButton __browse_JButton = null;
 private SimpleJButton __path_JButton = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;
+private SimpleJButton __help_JButton = null;
 private JTextField	__InputFile_JTextField = null;
 private SimpleJComboBox	__IfNotFound_JComboBox =null;
 private JTextArea __command_JTextArea = null;
@@ -90,7 +117,13 @@ public void actionPerformed( ActionEvent event )
 			}
 	
 			if (path != null) {
-				__InputFile_JTextField.setText(path );
+				// Convert path to relative path by default.
+				try {
+					__InputFile_JTextField.setText(IOUtil.toRelativePath(__working_dir, path));
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 1,"RemoveFile_JDialog", "Error converting file to relative path." );
+				}
 				JGUIUtil.setLastFileDialogDirectory(directory);
 				refresh();
 			}
@@ -98,6 +131,9 @@ public void actionPerformed( ActionEvent event )
 	}
 	else if ( o == __cancel_JButton ) {
 		response ( false );
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", "RemoveFile");
 	}
 	else if ( o == __ok_JButton ) {
 		refresh ();
@@ -107,10 +143,10 @@ public void actionPerformed( ActionEvent event )
 		}
 	}
 	else if ( o == __path_JButton ) {
-		if ( __path_JButton.getText().equals(__AddWorkingDirectoryFile) ) {
+		if ( __path_JButton.getText().equals(__AddWorkingDirectory) ) {
 			__InputFile_JTextField.setText (IOUtil.toAbsolutePath(__working_dir,__InputFile_JTextField.getText() ) );
 		}
-		else if ( __path_JButton.getText().equals(__RemoveWorkingDirectoryFile) ) {
+		else if ( __path_JButton.getText().equals(__RemoveWorkingDirectory) ) {
 			try {
                 __InputFile_JTextField.setText ( IOUtil.toRelativePath ( __working_dir,
                         __InputFile_JTextField.getText() ) );
@@ -187,17 +223,17 @@ private void initialize ( JFrame parent, RemoveFile_Command command )
 
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"This command removes a file.  The file to be removed does not need to exist when editing this command." ),
-		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     if ( __working_dir != null ) {
     	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"It is recommended that the file name be relative to the working directory, which is:"),
-		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"    " + __working_dir),
-		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     }
     JGUIUtil.addComponent(main_JPanel, new JSeparator (SwingConstants.HORIZONTAL),
-		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+		0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("File to remove:" ), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -206,17 +242,26 @@ private void initialize ( JFrame parent, RemoveFile_Command command )
 	__InputFile_JTextField.addKeyListener ( this );
         JGUIUtil.addComponent(main_JPanel, __InputFile_JTextField,
 		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__browse_JButton = new SimpleJButton ( "Browse", this );
+	__browse_JButton = new SimpleJButton ( "...", this );
+	__browse_JButton.setToolTipText("Browse for file");
     JGUIUtil.addComponent(main_JPanel, __browse_JButton,
 		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+	if ( __working_dir != null ) {
+		// Add the button to allow conversion to/from relative path...
+		__path_JButton = new SimpleJButton(__RemoveWorkingDirectory,this);
+	    JGUIUtil.addComponent(main_JPanel, __path_JButton,
+	    	7, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	}
 
    JGUIUtil.addComponent(main_JPanel, new JLabel ( "If not found?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox ( false );
-	__IfNotFound_JComboBox.addItem ( "" );	// Default
-	__IfNotFound_JComboBox.addItem ( __command._Ignore );
-	__IfNotFound_JComboBox.addItem ( __command._Warn );
-	__IfNotFound_JComboBox.addItem ( __command._Fail );
+	List<String> notFoundChoices = new ArrayList<String>();
+	notFoundChoices.add ( "" );	// Default
+	notFoundChoices.add ( __command._Ignore );
+	notFoundChoices.add ( __command._Warn );
+	notFoundChoices.add ( __command._Fail );
+	__IfNotFound_JComboBox.setData(notFoundChoices);
 	__IfNotFound_JComboBox.select ( 0 );
 	__IfNotFound_JComboBox.addActionListener ( this );
    JGUIUtil.addComponent(main_JPanel, __IfNotFound_JComboBox,
@@ -233,7 +278,7 @@ private void initialize ( JFrame parent, RemoveFile_Command command )
 	__command_JTextArea.addKeyListener ( this );
 	__command_JTextArea.setEditable ( false );
 	JGUIUtil.addComponent(main_JPanel, new JScrollPane(__command_JTextArea),
-		1, y, 6, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+		1, y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	// South Panel: North
 	JPanel button_JPanel = new JPanel();
@@ -241,23 +286,22 @@ private void initialize ( JFrame parent, RemoveFile_Command command )
         JGUIUtil.addComponent(main_JPanel, button_JPanel, 
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
-	if ( __working_dir != null ) {
-		// Add the buttons to allow conversion to/from relative path...
-		__path_JButton = new SimpleJButton( __RemoveWorkingDirectoryFile,this);
-		button_JPanel.add ( __path_JButton );
-	}
+    button_JPanel.add ( __ok_JButton = new SimpleJButton("OK", this) );
+	__ok_JButton.setToolTipText("Save changes to command");
 	button_JPanel.add(__cancel_JButton = new SimpleJButton("Cancel", this));
-	button_JPanel.add ( __ok_JButton = new SimpleJButton("OK", this) );
+	__cancel_JButton.setToolTipText("Cancel without saving changes to command");
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
-	setTitle ( "Edit " + __command.getCommandName() + "() command" );
+	setTitle ( "Edit " + __command.getCommandName() + " command" );
 	
 	// Refresh the contents...
     refresh ();
 
-	// Dialogs do not need to be resizable...
-	setResizable ( true );
     pack();
     JGUIUtil.center( this );
+	// Dialogs do not need to be resizable...
+	setResizable ( false );
     super.setVisible( true );
 }
 
@@ -330,10 +374,12 @@ private void refresh ()
 		__path_JButton.setEnabled ( true );
 		File f = new File ( InputFile );
 		if ( f.isAbsolute() ) {
-			__path_JButton.setText (__RemoveWorkingDirectoryFile);
+			__path_JButton.setText (__RemoveWorkingDirectory);
+			__path_JButton.setToolTipText("Change path to relative to command file");
 		}
 		else {
-            __path_JButton.setText (__AddWorkingDirectoryFile );
+            __path_JButton.setText (__AddWorkingDirectory );
+            __path_JButton.setToolTipText("Change path to absolute");
 		}
 	}
 }

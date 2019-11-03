@@ -161,7 +161,8 @@ uploadIndexHtmlFile() {
 	echo '</p>' >> $indexHtmlTmpFile
 	echo '<p>' >> $indexHtmlTmpFile
 	echo 'The StateDMI software is available Windows 10 and Linux.' >> $indexHtmlTmpFile
-	echo 'See the latest <a href="http://opencdss.state.co.us/statedmi/latest/doc-user/appendix-install/install/">StateDMI documentation</a> for installation information (or follow a link below for specific version documentation).' >> $indexHtmlTmpFile
+	#echo 'See the latest <a href="http://opencdss.state.co.us/statedmi/latest/doc-user/appendix-install/install/">StateDMI documentation</a> for installation information (or follow a link below for specific version documentation).' >> $indexHtmlTmpFile
+	echo 'See the latest <a href="http://opencdss.state.co.us/statedmi/latest/doc-user/">StateDMI documentation</a> (or follow a link below for specific version documentation).' >> $indexHtmlTmpFile
 	echo '</p>' >> $indexHtmlTmpFile
 	echo '<p>' >> $indexHtmlTmpFile
 	echo '<ul>' >> $indexHtmlTmpFile

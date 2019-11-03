@@ -1,3 +1,26 @@
+// CompareFiles_JDialog - editor for CompareFiles commands
+
+/* NoticeStart
+
+CDSS Time Series Processor Java Library
+CDSS Time Series Processor Java Library is a part of Colorado's Decision Support Systems (CDSS)
+Copyright (C) 1994-2019 Colorado Department of Natural Resources
+
+CDSS Time Series Processor Java Library is free software:  you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    CDSS Time Series Processor Java Library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with CDSS Time Series Processor Java Library.  If not, see <https://www.gnu.org/licenses/>.
+
+NoticeEnd */
+
 package rti.tscommandprocessor.commands.util;
 
 import java.awt.event.ActionEvent;
@@ -11,6 +34,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -27,6 +52,7 @@ import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.ProcessManager;
@@ -38,11 +64,13 @@ import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 public class CompareFiles_JDialog extends JDialog
 implements ActionListener, KeyListener, WindowListener
 {
-private final String __AddWorkingDirectoryFile1 = "Add Working Directory (File 1)";
-private final String __AddWorkingDirectoryFile2 = "Add Working Directory (File 2)";
+private final String __AddWorkingDirectoryFile1 = "Abs";
+private final String __AddWorkingDirectoryFile2 = "Abs";
+private final String __RemoveWorkingDirectoryFile1 = "Rel";
+private final String __RemoveWorkingDirectoryFile2 = "Rel";
+
 private final String __VisualDiff = "Visual Diff";
-private final String __RemoveWorkingDirectoryFile1 = "Remove Working Directory (File 1)";
-private final String __RemoveWorkingDirectoryFile2 = "Remove Working Directory (File 2)";
+private final String visualDiffLabel = "Run program to visually compare output files (see TSTool DiffProgram configuration property).";
 
 private SimpleJButton __browse1_JButton = null;
 private SimpleJButton __browse2_JButton = null;
@@ -51,11 +79,13 @@ private SimpleJButton __path2_JButton = null;
 private SimpleJButton __visualDiff_JButton = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;
+private SimpleJButton __help_JButton = null;
 private JTextField __InputFile1_JTextField = null; // First file
 private JTextField __InputFile2_JTextField = null; // Second file
 private JTextField __CommentLineChar_JTextField = null;
 private SimpleJComboBox __MatchCase_JComboBox = null;
 private SimpleJComboBox __IgnoreWhitespace_JComboBox = null;
+private JTextField __ExcludeText_JTextField = null;
 private JTextField __AllowedDiff_JTextField = null;
 private SimpleJComboBox __IfDifferent_JComboBox =null;
 private SimpleJComboBox __IfSame_JComboBox =null;
@@ -106,7 +136,13 @@ public void actionPerformed( ActionEvent event )
 			}
 	
 			if (path != null) {
-				__InputFile1_JTextField.setText(path );
+				// Convert path to relative path by default.
+				try {
+					__InputFile1_JTextField.setText(IOUtil.toRelativePath(__working_dir, path));
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 1,"CompareFiles_JDialog", "Error converting file to relative path." );
+				}
 				JGUIUtil.setLastFileDialogDirectory(directory);
 				refresh();
 			}
@@ -133,7 +169,13 @@ public void actionPerformed( ActionEvent event )
 			}
 	
 			if (path != null) {
-				__InputFile2_JTextField.setText(path );
+				// Convert path to relative path by default.
+				try {
+					__InputFile2_JTextField.setText(IOUtil.toRelativePath(__working_dir, path));
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 1,"CompareFiles_JDialog", "Error converting file to relative path." );
+				}
 				JGUIUtil.setLastFileDialogDirectory(directory);
 				refresh();
 			}
@@ -141,6 +183,9 @@ public void actionPerformed( ActionEvent event )
 	}
 	else if ( o == __cancel_JButton ) {
 		response ( false );
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", "CompareFiles");
 	}
 	else if ( o == __ok_JButton ) {
 		refresh ();
@@ -220,6 +265,7 @@ private void checkInput ()
 	String CommentLineChar = __CommentLineChar_JTextField.getText().trim();
 	String MatchCase = __MatchCase_JComboBox.getSelected();
 	String IgnoreWhitespace = __IgnoreWhitespace_JComboBox.getSelected();
+	String ExcludeText = __ExcludeText_JTextField.getText().trim();
 	String AllowedDiff = __AllowedDiff_JTextField.getText().trim();
 	String IfDifferent = __IfDifferent_JComboBox.getSelected();
 	String IfSame = __IfSame_JComboBox.getSelected();
@@ -238,6 +284,9 @@ private void checkInput ()
     }
     if ( IgnoreWhitespace.length() > 0 ) {
         props.set ( "IgnoreWhitespace", IgnoreWhitespace );
+    }
+    if ( ExcludeText.length() > 0 ) {
+        props.set ( "ExcludeText", ExcludeText );
     }
     if ( AllowedDiff.length() > 0 ) {
         props.set ( "AllowedDiff", AllowedDiff );
@@ -267,6 +316,7 @@ private void commitEdits ()
 	String CommentLineChar = __CommentLineChar_JTextField.getText().trim();
 	String MatchCase = __MatchCase_JComboBox.getSelected();
 	String IgnoreWhitespace = __IgnoreWhitespace_JComboBox.getSelected();
+    String ExcludeText = __ExcludeText_JTextField.getText().trim();
 	String AllowedDiff = __AllowedDiff_JTextField.getText().trim();
 	String IfDifferent = __IfDifferent_JComboBox.getSelected();
 	String IfSame = __IfSame_JComboBox.getSelected();
@@ -275,6 +325,7 @@ private void commitEdits ()
 	__command.setCommandParameter ( "CommentLineChar", CommentLineChar );
 	__command.setCommandParameter ( "MatchCase", MatchCase );
 	__command.setCommandParameter ( "IgnoreWhitespace", IgnoreWhitespace );
+	__command.setCommandParameter ( "ExcludeText", ExcludeText );
 	__command.setCommandParameter ( "AllowedDiff", AllowedDiff );
 	__command.setCommandParameter ( "IfDifferent", IfDifferent );
 	__command.setCommandParameter ( "IfSame", IfSame );
@@ -306,19 +357,19 @@ private void initialize ( JFrame parent, CompareFiles_Command command, String di
 
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"This command compares text files.  Comment lines starting with # are ignored." ),
-		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(main_JPanel, new JLabel ( "A line by line comparison is made."),
-		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel ( "A line by line comparison is made, alt."),
+		0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     if ( __working_dir != null ) {
     	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"It is recommended that file names are specified relative to the working directory, which is:"),
-		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"    " + __working_dir),
-		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     }
     JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
-        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+        0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "First file to compare:" ), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -327,9 +378,16 @@ private void initialize ( JFrame parent, CompareFiles_Command command, String di
 	__InputFile1_JTextField.addKeyListener ( this );
         JGUIUtil.addComponent(main_JPanel, __InputFile1_JTextField,
 		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__browse1_JButton = new SimpleJButton ( "Browse", this );
+	__browse1_JButton = new SimpleJButton ( "...", this );
+	__browse1_JButton.setToolTipText("Browse for file");
     JGUIUtil.addComponent(main_JPanel, __browse1_JButton,
 		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+	if ( __working_dir != null ) {
+		// Add the button to allow conversion to/from relative path...
+		__path1_JButton = new SimpleJButton(__RemoveWorkingDirectoryFile1,this);
+	    JGUIUtil.addComponent(main_JPanel, __path1_JButton,
+	    	7, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	}
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Second file to compare:" ), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -338,9 +396,16 @@ private void initialize ( JFrame parent, CompareFiles_Command command, String di
 	__InputFile2_JTextField.addKeyListener ( this );
         JGUIUtil.addComponent(main_JPanel, __InputFile2_JTextField,
 		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__browse2_JButton = new SimpleJButton ( "Browse", this );
-        JGUIUtil.addComponent(main_JPanel, __browse2_JButton,
+	__browse2_JButton = new SimpleJButton ( "...", this );
+	__browse2_JButton.setToolTipText("Browse for file");
+    JGUIUtil.addComponent(main_JPanel, __browse2_JButton,
 		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+	if ( __working_dir != null ) {
+		// Add the button to allow conversion to/from relative path...
+		__path2_JButton = new SimpleJButton(__RemoveWorkingDirectoryFile2,this);
+	    JGUIUtil.addComponent(main_JPanel, __path2_JButton,
+	    	7, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	}
         
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Comment line character:"),
         0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -354,9 +419,11 @@ private void initialize ( JFrame parent, CompareFiles_Command command, String di
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Match case:"),
         0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     __MatchCase_JComboBox = new SimpleJComboBox ( false );
-    __MatchCase_JComboBox.addItem ( "" );
-    __MatchCase_JComboBox.addItem ( __command._False );
-    __MatchCase_JComboBox.addItem ( __command._True );
+    List<String> matchChoices = new ArrayList<String>();
+    matchChoices.add ( "" );
+    matchChoices.add ( __command._False );
+    matchChoices.add ( __command._True );
+    __MatchCase_JComboBox.setData(matchChoices);
     __MatchCase_JComboBox.select ( 0 );
     __MatchCase_JComboBox.addActionListener ( this );
     JGUIUtil.addComponent(main_JPanel, __MatchCase_JComboBox,
@@ -368,9 +435,11 @@ private void initialize ( JFrame parent, CompareFiles_Command command, String di
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Ignore whitespace:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IgnoreWhitespace_JComboBox = new SimpleJComboBox ( false );
-	__IgnoreWhitespace_JComboBox.addItem ( "" );	// Default
-	__IgnoreWhitespace_JComboBox.addItem ( __command._False );
-	__IgnoreWhitespace_JComboBox.addItem ( __command._True );
+	List<String> ignoreChoices = new ArrayList<String>();
+	ignoreChoices.add ( "" );	// Default
+	ignoreChoices.add ( __command._False );
+	ignoreChoices.add ( __command._True );
+	__IgnoreWhitespace_JComboBox.setData(ignoreChoices);
 	__IgnoreWhitespace_JComboBox.select ( 0 );
 	__IgnoreWhitespace_JComboBox.addActionListener ( this );
     JGUIUtil.addComponent(main_JPanel, __IgnoreWhitespace_JComboBox,
@@ -378,6 +447,16 @@ private void initialize ( JFrame parent, CompareFiles_Command command, String di
     JGUIUtil.addComponent(main_JPanel, new JLabel(
 		"Optional - ignore whitespace at ends of lines (default=" + __command._False + ")"), 
 		3, y, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    
+    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Exclude text:"),
+        0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    __ExcludeText_JTextField = new JTextField ( 20 );
+    __ExcludeText_JTextField.addKeyListener ( this );
+    JGUIUtil.addComponent(main_JPanel, __ExcludeText_JTextField,
+        1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel(
+        "Optional - exclude lines matching regular expression (default=include all)"), 
+        3, y, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Allowed # of different lines:"),
         0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -391,10 +470,12 @@ private void initialize ( JFrame parent, CompareFiles_Command command, String di
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Action if different:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfDifferent_JComboBox = new SimpleJComboBox ( false );
-	__IfDifferent_JComboBox.addItem ( "" );	// Default
-	__IfDifferent_JComboBox.addItem ( __command._Ignore );
-	__IfDifferent_JComboBox.addItem ( __command._Warn );
-	__IfDifferent_JComboBox.addItem ( __command._Fail );
+	List<String> diffChoices = new ArrayList<String>();
+	diffChoices.add ( "" );	// Default
+	diffChoices.add ( __command._Ignore );
+	diffChoices.add ( __command._Warn );
+	diffChoices.add ( __command._Fail );
+	__IfDifferent_JComboBox.setData(diffChoices);
 	__IfDifferent_JComboBox.select ( 0 );
 	__IfDifferent_JComboBox.addActionListener ( this );
     JGUIUtil.addComponent(main_JPanel, __IfDifferent_JComboBox,
@@ -406,10 +487,12 @@ private void initialize ( JFrame parent, CompareFiles_Command command, String di
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Action if same:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfSame_JComboBox = new SimpleJComboBox ( false );
-	__IfSame_JComboBox.addItem ( "" );	// Default
-	__IfSame_JComboBox.addItem ( __command._Ignore );
-	__IfSame_JComboBox.addItem ( __command._Warn );
-	__IfSame_JComboBox.addItem ( __command._Fail );
+	List<String> sameChoices = new ArrayList<String>();
+	sameChoices.add ( "" );	// Default
+	sameChoices.add ( __command._Ignore );
+	sameChoices.add ( __command._Warn );
+	sameChoices.add ( __command._Fail );
+	__IfSame_JComboBox.setData(sameChoices);
 	__IfSame_JComboBox.select ( 0 );
 	__IfSame_JComboBox.addActionListener ( this );
     JGUIUtil.addComponent(main_JPanel, __IfSame_JComboBox,
@@ -426,7 +509,7 @@ private void initialize ( JFrame parent, CompareFiles_Command command, String di
 	__command_JTextArea.addKeyListener ( this );
 	__command_JTextArea.setEditable ( false );
 	JGUIUtil.addComponent(main_JPanel, new JScrollPane(__command_JTextArea),
-		1, y, 6, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+		1, y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	// South Panel: North
 	JPanel button_JPanel = new JPanel();
@@ -434,27 +517,24 @@ private void initialize ( JFrame parent, CompareFiles_Command command, String di
         JGUIUtil.addComponent(main_JPanel, button_JPanel, 
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
-	if ( __working_dir != null ) {
-		// Add the buttons to allow conversion to/from relative path...
-		__path1_JButton = new SimpleJButton(__RemoveWorkingDirectoryFile1,this);
-		button_JPanel.add ( __path1_JButton );
-		__path2_JButton = new SimpleJButton(__RemoveWorkingDirectoryFile2,this);
-		button_JPanel.add ( __path2_JButton );
-	}
-	button_JPanel.add(__visualDiff_JButton = new SimpleJButton(__VisualDiff, this));
-	__visualDiff_JButton.setToolTipText("Run program to visually compare output files (see TSTool DiffProgram configuration property).");
-	button_JPanel.add(__cancel_JButton = new SimpleJButton("Cancel", this));
 	button_JPanel.add ( __ok_JButton = new SimpleJButton("OK", this) );
+	__ok_JButton.setToolTipText("Save changes to command");
+	button_JPanel.add(__cancel_JButton = new SimpleJButton("Cancel", this));
+	__cancel_JButton.setToolTipText("Cancel without saving changes to command");
+	button_JPanel.add(__visualDiff_JButton = new SimpleJButton(__VisualDiff, this));
+	__visualDiff_JButton.setToolTipText(this.visualDiffLabel);
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 	
 	// Refresh the contents (put after buttons because want to enable/disable...
 	refresh ();
 
-	setTitle ( "Edit " + __command.getCommandName() + "() command" );
+	setTitle ( "Edit " + __command.getCommandName() + " command" );
 
-	// Dialogs do not need to be resizable...
-	setResizable ( true );
     pack();
     JGUIUtil.center( this );
+	// Dialogs do not need to be resizable...
+	setResizable ( false );
     super.setVisible( true );
 }
 
@@ -492,6 +572,7 @@ private void refresh ()
 	String CommentLineChar = "";
 	String MatchCase = "";
 	String IgnoreWhitespace = "";
+	String ExcludeText = "";
 	String AllowedDiff = "";
 	String IfDifferent = "";
 	String IfSame = "";
@@ -504,6 +585,7 @@ private void refresh ()
 		CommentLineChar = parameters.getValue ( "CommentLineChar" );
 		MatchCase = parameters.getValue ( "MatchCase" );
 		IgnoreWhitespace = parameters.getValue ( "IgnoreWhitespace" );
+		ExcludeText = parameters.getValue ( "ExcludeText" );
 		AllowedDiff = parameters.getValue ( "AllowedDiff" );
 		IfDifferent = parameters.getValue ( "IfDifferent" );
 		IfSame = parameters.getValue ( "IfSame" );
@@ -544,6 +626,9 @@ private void refresh ()
 				"IgnoreWhitespace parameter \"" + IgnoreWhitespace + "\".  Select a\ndifferent value or Cancel." );
 			}
 		}
+        if ( ExcludeText != null ) {
+            __ExcludeText_JTextField.setText ( ExcludeText );
+        }
         if ( AllowedDiff != null ) {
             __AllowedDiff_JTextField.setText ( AllowedDiff );
         }
@@ -585,6 +670,7 @@ private void refresh ()
 	CommentLineChar = __CommentLineChar_JTextField.getText().trim();
 	MatchCase = __MatchCase_JComboBox.getSelected();
 	IgnoreWhitespace = __IgnoreWhitespace_JComboBox.getSelected();
+	ExcludeText = __ExcludeText_JTextField.getText().trim();
 	AllowedDiff = __AllowedDiff_JTextField.getText().trim();
 	IfDifferent = __IfDifferent_JComboBox.getSelected();
 	IfSame = __IfSame_JComboBox.getSelected();
@@ -594,6 +680,7 @@ private void refresh ()
 	props.add ( "CommentLineChar=" + CommentLineChar );
 	props.add ( "MatchCase=" + MatchCase );
 	props.add ( "IgnoreWhitespace=" + IgnoreWhitespace );
+	props.add ( "ExcludeText=" + ExcludeText );
 	props.add ( "AllowedDiff=" + AllowedDiff );
 	props.add ( "IfDifferent=" + IfDifferent );
 	props.add ( "IfSame=" + IfSame );
@@ -604,9 +691,11 @@ private void refresh ()
 		File f = new File ( InputFile1 );
 		if ( f.isAbsolute() ) {
 			__path1_JButton.setText (__RemoveWorkingDirectoryFile1);
+			__path1_JButton.setToolTipText("Change path to relative to command file");
 		}
 		else {
 		    __path1_JButton.setText (__AddWorkingDirectoryFile1 );
+			__path1_JButton.setToolTipText("Change path to absolute");
 		}
 	}
 	if ( __path2_JButton != null ) {
@@ -614,9 +703,11 @@ private void refresh ()
 		File f = new File ( InputFile2 );
 		if ( f.isAbsolute() ) {
 			__path2_JButton.setText (__RemoveWorkingDirectoryFile2);
+			__path2_JButton.setToolTipText("Change path to relative to command file");
 		}
 		else {
 		    __path2_JButton.setText (__AddWorkingDirectoryFile2 );
+			__path2_JButton.setToolTipText("Change path to absolute");
 		}
 	}
 	// Disable the Visual Diff button if the program file does not exist or
@@ -626,9 +717,19 @@ private void refresh ()
 			IOUtil.fileExists(IOUtil.toAbsolutePath(__working_dir,__InputFile1_JTextField.getText())) &&
 			IOUtil.fileExists(IOUtil.toAbsolutePath(__working_dir,__InputFile2_JTextField.getText())) ) {
 			__visualDiff_JButton.setEnabled(true);
+			__visualDiff_JButton.setToolTipText(this.visualDiffLabel);
 		}
-		else {
+		else if ( !IOUtil.fileExists(__diffProgram)) {
 			__visualDiff_JButton.setEnabled(false);
+			__visualDiff_JButton.setToolTipText(this.visualDiffLabel + " - disabled because diff program not configured.");
+		}
+		else if ( !IOUtil.fileExists(IOUtil.toAbsolutePath(__working_dir,__InputFile1_JTextField.getText())) ) {
+			__visualDiff_JButton.setEnabled(false);
+			__visualDiff_JButton.setToolTipText(this.visualDiffLabel + " - disabled because first file does not exist.");
+		}
+		else if ( !IOUtil.fileExists(IOUtil.toAbsolutePath(__working_dir,__InputFile2_JTextField.getText())) ) {
+			__visualDiff_JButton.setEnabled(false);
+			__visualDiff_JButton.setToolTipText(this.visualDiffLabel + " - disabled because second file does not exist.");
 		}
 	}
 }

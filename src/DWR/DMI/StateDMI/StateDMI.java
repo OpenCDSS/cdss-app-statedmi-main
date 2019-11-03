@@ -499,7 +499,7 @@ throws ClassNotFoundException, IllegalAccessException, InstantiationException, E
 
 /**
 Open the datastores (e.g., database and web service connection(s)) using datastore configuration files.
-This method can be called from the UI code to automatically establish database startup database connections.SomeDataStore).
+This method can be called from the UI code to automatically establish database startup database connections.
 @param session StateDMI session, which provides user and environment information
 @param processor command processor that will have datastores opened
 @param isBatch is the software running in batch mode?  If in batch mode do not open up datastores
@@ -512,8 +512,8 @@ protected static void openDataStoresAtStartup ( StateDMISession session, StateDM
     Message.printStatus(2, routine, "Searching for StateDMI datastore configuration files in folder:  \"" +
     	session.getInstallDatastoresFolder() + "\"." );
     
-    // Allow multiple database connections via the new convention using datastore configuration files
-    // List system/*.cfg files that include "Type=" or "Type =".
+    // Allow multiple database connections via the new convention using datastore configuration files.
+    // List configuration files in the 'datastores' folder of the software installation.
     List<String> dataStoreConfigFiles = new ArrayList<String>();
     // First list the cfg files
     String installDatastoresFolder = session.getInstallDatastoresFolder();
@@ -552,17 +552,13 @@ protected static void openDataStoresAtStartup ( StateDMISession session, StateDM
     int nDataStores = dataStoreConfigFiles.size();
     // Datastore names that have been opened, so as to avoid reopening.  User datastores are opened first.
     List<String> openDataStoreNameList = new ArrayList<String>();
-	Message.printStatus(2, routine, "Trying to open " + dataStoreConfigFiles.size() + " data stores, user, then installation." );
+	Message.printStatus(2, routine, "Trying to open " + dataStoreConfigFiles.size() + " data stores (first user, then installation)." );
     for ( int iDataStore = nDataStores - 1; iDataStore >= 0; iDataStore-- ) {
     	String dataStoreFile = dataStoreConfigFiles.get(iDataStore);
         Message.printStatus ( 2, routine, "Opening datastore using properties in \"" + dataStoreFile + "\".");
         // Read the properties from the configuration file
         PropList dataStoreProps = new PropList("");
         String dataStoreFileFull = dataStoreFile;
-        // This should not be needed.
-        //if ( !IOUtil.isAbsolute(dataStoreFile)) {
-        //    dataStoreFileFull = __statedmiInstallHome + File.separator + "system" + File.separator + dataStoreFile;
-        //}
         if ( !IOUtil.fileExists(dataStoreFileFull) ) {
             Message.printWarning(3, routine, "Datastore configuration file \"" + dataStoreFileFull +
                 "\" does not exist - not opening datastore." );

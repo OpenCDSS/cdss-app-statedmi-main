@@ -22,6 +22,7 @@
     </target>
 	
 	<!-- Create the StateDMI CDSS PDF user manual -->
+	<!-- TODO smalers 2019-07-12 remove this once documentation is migrated to Markdown -->
 	<target name="create-user-manual-cdss"
 	 description="Merges PDF documentation into doc/UserManual/dist_CDSS folder" >
 		<property name="filelist" location="doc/UserManual/merge_PDF/fileList.txt" />
@@ -32,7 +33,7 @@
 	</target>
     
     <!-- This is called after standard-local-install and allows common resources to be copied in. -->
-	<!-- Also will need to make sure that externals/CDSS/cdss.nsh includes all the folders. -->
+	<!-- Also need to make sure that externals/CDSS/cdss.nsh includes all the folders consistent with below. -->
     <target name="-install-local" depends="-standard-exe">
     	<!-- bin - run-time binary files. -->
         <!--<copy todir="${install.dir}/bin" file="externals/shellcon/shellcon.exe"/>-->

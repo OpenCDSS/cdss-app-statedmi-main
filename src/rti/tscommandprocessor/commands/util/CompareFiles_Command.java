@@ -1,3 +1,26 @@
+// CompareFiles_Command - This class initializes, checks, and runs the CompareFiles() command.
+
+/* NoticeStart
+
+CDSS Time Series Processor Java Library
+CDSS Time Series Processor Java Library is a part of Colorado's Decision Support Systems (CDSS)
+Copyright (C) 1994-2019 Colorado Department of Natural Resources
+
+CDSS Time Series Processor Java Library is free software:  you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    CDSS Time Series Processor Java Library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with CDSS Time Series Processor Java Library.  If not, see <https://www.gnu.org/licenses/>.
+
+NoticeEnd */
+
 package rti.tscommandprocessor.commands.util;
 
 import java.io.FileReader;
@@ -141,6 +164,7 @@ throws InvalidCommandParameterException
 	validList.add ( "CommentLineChar" );
 	validList.add ( "MatchCase" );
 	validList.add ( "IgnoreWhitespace" );
+	validList.add ( "ExcludeText" );
 	validList.add ( "AllowedDiff" );
 	validList.add ( "IfDifferent" );
 	validList.add ( "IfSame" );
@@ -228,14 +252,17 @@ throws InvalidCommandSyntaxException, InvalidCommandParameterException
 
 /**
 Read a line from a file.  Skip over comments until the next non-comment line is found.
+Also skip lines that contain matching excludeText.
 @param in BufferedReader for open file to read.
 @param CommentLineChar character at start of line that indicates comment line.
 @param ignoreWhitespace if true, trim the lines.
+@param excludeText array of Java regular expressions - if matched, skip the line.
 @return the next line from the file, or null if at the end.
 */
-private String readLine ( BufferedReader in, String CommentLineChar, boolean ignoreWhitespace )
+private String readLine ( BufferedReader in, String CommentLineChar, boolean ignoreWhitespace, String [] excludeText )
 {	String iline;
 	int commentCount = 0;
+	int excludeCount = 0;
 	while ( true ) {
 		// Read until a non-comment line is found
 		try {
@@ -253,8 +280,21 @@ private String readLine ( BufferedReader in, String CommentLineChar, boolean ign
 			continue;
 		}
 		else {
+			// Loop through to see if any excluded text matches
+			boolean exclude = false;
+			for ( int iExclude = 0; iExclude < excludeText.length; iExclude++ ) {
+				if ( iline.matches(excludeText[iExclude]) ) {
+					++excludeCount;
+					exclude = true;
+					break;
+				}
+			}
+			if ( exclude ) {
+				continue;
+			}
 			if ( Message.isDebugOn ) {
-				Message.printDebug (1, "", "Skipped " + commentCount + " comments before getting to data line" );
+				Message.printDebug (1, "", "Skipped " + commentCount + " comments and " +
+					excludeCount + " excluded patterns before getting to data line" );
 			}
 			if ( ignoreWhitespace ) {
 				return iline.trim();
@@ -311,6 +351,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	boolean IgnoreWhitespace_boolean = false; // Default
 	if ( (IgnoreWhitespace != null) && IgnoreWhitespace.equalsIgnoreCase(_True)) {
 		IgnoreWhitespace_boolean = true;
+	}
+    String ExcludeText = parameters.getValue ( "ExcludeText" );
+    String [] excludeText = {}; // list of regular expressions, glob-style
+	if ( (ExcludeText != null) && !ExcludeText.isEmpty()) {
+		// Split by comma first
+		excludeText = ExcludeText.split(",");
+		// Convert to Java regular expressions
+		for ( int i = 0; i < excludeText.length; i++ ) {
+			excludeText[i] = excludeText[i].replace("*", ".*");
+		}
 	}
 	String AllowedDiff = parameters.getValue ( "AllowedDiff" );
 	int AllowedDiff_int = 0;
@@ -384,8 +434,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		while ( true ) {
 			// The following will discard comments and only return non-comment lines
 			// Therefore comparisons are made on chunks of non-comment lines.
-			iline1 = readLine ( in1, CommentLineChar, IgnoreWhitespace_boolean );
-			iline2 = readLine ( in2, CommentLineChar, IgnoreWhitespace_boolean );
+			iline1 = readLine ( in1, CommentLineChar, IgnoreWhitespace_boolean, excludeText );
+			iline2 = readLine ( in2, CommentLineChar, IgnoreWhitespace_boolean, excludeText );
 			if ( (iline1 == null) && (iline2 == null) ) {
 				// both are done at the same time...
 				break;
@@ -476,6 +526,7 @@ public String toString ( PropList parameters )
 	String CommentLineChar = parameters.getValue("CommentLineChar");
 	String MatchCase = parameters.getValue("MatchCase");
 	String IgnoreWhitespace = parameters.getValue("IgnoreWhitespace");
+	String ExcludeText = parameters.getValue("ExcludeText");
 	String AllowedDiff = parameters.getValue("AllowedDiff");
 	String IfDifferent = parameters.getValue("IfDifferent");
 	String IfSame = parameters.getValue("IfSame");
@@ -506,6 +557,12 @@ public String toString ( PropList parameters )
             b.append ( "," );
         }
         b.append ( "IgnoreWhitespace=" + IgnoreWhitespace );
+    }
+    if ( (ExcludeText != null) && (ExcludeText.length() > 0) ) {
+        if ( b.length() > 0 ) {
+            b.append ( "," );
+        }
+        b.append ( "ExcludeText=\"" + ExcludeText + "\"" );
     }
     if ( (AllowedDiff != null) && (AllowedDiff.length() > 0) ) {
         if ( b.length() > 0 ) {
