@@ -34,8 +34,19 @@ import rti.tscommandprocessor.commands.logging.Message_Command;
 import rti.tscommandprocessor.commands.logging.SetDebugLevel_Command;
 import rti.tscommandprocessor.commands.logging.SetWarningLevel_Command;
 import rti.tscommandprocessor.commands.logging.StartLog_Command;
+import rti.tscommandprocessor.commands.r.RunR_Command;
 import rti.tscommandprocessor.commands.spatial.WriteTableToGeoJSON_Command;
 import rti.tscommandprocessor.commands.spatial.WriteTableToShapefile_Command;
+import rti.tscommandprocessor.commands.spreadsheet.CloseExcelWorkbook_Command;
+import rti.tscommandprocessor.commands.spreadsheet.NewExcelWorkbook_Command;
+import rti.tscommandprocessor.commands.spreadsheet.ReadExcelWorkbook_Command;
+import rti.tscommandprocessor.commands.spreadsheet.ReadPropertiesFromExcel_Command;
+import rti.tscommandprocessor.commands.spreadsheet.ReadTableCellsFromExcel_Command;
+import rti.tscommandprocessor.commands.spreadsheet.ReadTableFromExcel_Command;
+import rti.tscommandprocessor.commands.spreadsheet.SetExcelCell_Command;
+import rti.tscommandprocessor.commands.spreadsheet.SetExcelWorksheetViewProperties_Command;
+import rti.tscommandprocessor.commands.spreadsheet.WriteTableCellsToExcel_Command;
+import rti.tscommandprocessor.commands.spreadsheet.WriteTableToExcel_Command;
 import rti.tscommandprocessor.commands.table.AppendTable_Command;
 import rti.tscommandprocessor.commands.table.CompareTables_Command;
 import rti.tscommandprocessor.commands.table.CopyPropertiesToTable_Command;
@@ -53,15 +64,6 @@ import rti.tscommandprocessor.commands.table.NewTable_Command;
 import rti.tscommandprocessor.commands.table.ReadTableFromDBF_Command;
 import rti.tscommandprocessor.commands.table.ReadTableFromDataStore_Command;
 import rti.tscommandprocessor.commands.table.ReadTableFromDelimitedFile_Command;
-import rti.tscommandprocessor.commands.spreadsheet.CloseExcelWorkbook_Command;
-import rti.tscommandprocessor.commands.spreadsheet.NewExcelWorkbook_Command;
-import rti.tscommandprocessor.commands.spreadsheet.ReadExcelWorkbook_Command;
-import rti.tscommandprocessor.commands.spreadsheet.ReadPropertiesFromExcel_Command;
-import rti.tscommandprocessor.commands.spreadsheet.ReadTableCellsFromExcel_Command;
-import rti.tscommandprocessor.commands.spreadsheet.ReadTableFromExcel_Command;
-import rti.tscommandprocessor.commands.spreadsheet.SetExcelCell_Command;
-import rti.tscommandprocessor.commands.spreadsheet.SetExcelWorksheetViewProperties_Command;
-import rti.tscommandprocessor.commands.spreadsheet.WriteTableCellsToExcel_Command;
 import rti.tscommandprocessor.commands.table.ReadTableFromFixedFormatFile_Command;
 import rti.tscommandprocessor.commands.table.SetPropertyFromTable_Command;
 import rti.tscommandprocessor.commands.table.SetTableValues_Command;
@@ -70,7 +72,6 @@ import rti.tscommandprocessor.commands.table.SplitTableColumn_Command;
 import rti.tscommandprocessor.commands.table.SplitTableRow_Command;
 import rti.tscommandprocessor.commands.table.TableMath_Command;
 import rti.tscommandprocessor.commands.table.WriteTableToDelimitedFile_Command;
-import rti.tscommandprocessor.commands.spreadsheet.WriteTableToExcel_Command;
 import rti.tscommandprocessor.commands.table.WriteTableToHTML_Command;
 import rti.tscommandprocessor.commands.time.SetOutputPeriod_Command;
 import rti.tscommandprocessor.commands.time.SetOutputYearType_Command;
@@ -87,6 +88,8 @@ import rti.tscommandprocessor.commands.util.FormatStringProperty_Command;
 import rti.tscommandprocessor.commands.util.ListFiles_Command;
 import rti.tscommandprocessor.commands.util.MergeListFileColumns_Command;
 import rti.tscommandprocessor.commands.util.RemoveFile_Command;
+import rti.tscommandprocessor.commands.util.RunProgram_Command;
+import rti.tscommandprocessor.commands.util.RunPython_Command;
 import rti.tscommandprocessor.commands.util.SetProperty_Command;
 import rti.tscommandprocessor.commands.util.SetWorkingDir_Command;
 import rti.tscommandprocessor.commands.util.UnzipFile_Command;
@@ -128,7 +131,7 @@ This is useful for code that is being migrated to the full command class design.
 */
 public Command newCommand ( String commandString, boolean createUnknownCommandIfNotRecognized )
 throws UnknownCommandException
-{	String routine = getClass().getName() + ".newCommand";
+{	String routine = getClass().getSimpleName() + ".newCommand";
 	commandString = commandString.trim();
 
 	// Comment commands...
@@ -792,6 +795,15 @@ throws UnknownCommandException
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "RunCommands")) {
 		return new RunCommands_Command();
+	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "RunProgram")) {
+		return new RunProgram_Command();
+	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "RunPython")) {
+		return new RunPython_Command();
+	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "RunR")) {
+		return new RunR_Command();
 	}
 	
 	// "s" commands...

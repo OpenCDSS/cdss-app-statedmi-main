@@ -575,7 +575,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
                 		q.setValue(l,parameterNum);
                 	}
                 	else if (
-                		(parameterType == java.sql.Types.INTEGER) ) {
+                		(parameterType == java.sql.Types.INTEGER) ||
+                		(parameterType == java.sql.Types.SMALLINT) ||
+                		(parameterType == java.sql.Types.TINYINT) ) {
                 		int i = Integer.parseInt(entry.getValue());
                 		q.setValue(i,parameterNum);
                 	}

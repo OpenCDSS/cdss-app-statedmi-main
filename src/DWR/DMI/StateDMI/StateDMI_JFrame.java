@@ -1054,6 +1054,7 @@ private JMenuItem
 	__Commands_General_Running_RunCommands_JMenuItem = null,
 	__Commands_General_Running_RunProgram_JMenuItem = null,
 	__Commands_General_Running_RunPython_JMenuItem = null,
+	__Commands_General_Running_RunR_JMenuItem = null,
 	__Commands_General_Running_Exit_JMenuItem = null,
 	__Commands_General_Running_SetWorkingDir_JMenuItem = null,
 	__Commands_General_Running_WritePropertiesToFile_JMenuItem = null;
@@ -2022,6 +2023,7 @@ private String
 	__Commands_General_Running_RunCommands_String = "RunCommands()... <run a command file>",
 	__Commands_General_Running_RunProgram_String = "RunProgram()... <run external program>",
     __Commands_General_Running_RunPython_String = "RunPython()... <run a Python script>",
+    __Commands_General_Running_RunR_String = "RunR()... <run an R script>",
 	__Commands_General_Running_Exit_String = "Exit() ",
 	__Commands_General_Running_SetWorkingDir_String = "SetWorkingDir() ...",
 	__Commands_General_Running_WritePropertiesToFile_String = "WritePropertiesToFile()... <write processor properties to file>",
@@ -3817,6 +3819,9 @@ public void actionPerformed ( ActionEvent event )
     else if (command.equals( __Commands_General_Running_RunPython_String) ) {
         commandList_EditCommand ( __Commands_General_Running_RunPython_String, null, __INSERT_COMMAND );
     }
+	else if (command.equals( __Commands_General_Running_RunR_String) ) {
+		commandList_EditCommand ( __Commands_General_Running_RunR_String, null, __INSERT_COMMAND );
+	}
 	else if ( action.equals( __Commands_General_Running_SetOutputPeriod_String) ) {
 		commandList_EditCommand (__Commands_General_Running_SetOutputPeriod_String, null,__INSERT_COMMAND);
 	}
@@ -10466,6 +10471,8 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 		new SimpleJMenuItem( __Commands_General_Running_RunProgram_String, this));
 	Commands_General_Running_JMenu.add( __Commands_General_Running_RunPython_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_Running_RunPython_String, this));
+	Commands_General_Running_JMenu.add( __Commands_General_Running_RunR_JMenuItem =
+		new SimpleJMenuItem( __Commands_General_Running_RunR_String, this));
 	Commands_General_Running_JMenu.addSeparator();
 	Commands_General_Running_JMenu.add( __Commands_General_Running_Exit_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_Running_Exit_String, this));
