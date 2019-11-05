@@ -136,8 +136,8 @@ throws InvalidCommandParameterException
 	String ID = parameters.getValue ( "ID" );
 	String InputStart = parameters.getValue ( "InputStart" );
 	String InputEnd = parameters.getValue( "InputEnd" );
-	String DataFrom = parameters.getValue( "DataFrom" );
-	String AreaPrecision = parameters.getValue( "AreaPrecision" );
+	String DataFrom = parameters.getValue( "DataFrom" ); // Experimental
+	String AreaPrecision = parameters.getValue( "AreaPrecision" ); // Experimental
 	String message;
 	String warning = "";
 	
@@ -186,7 +186,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List<String> valid_Vector = new Vector<String>();
+	List<String> valid_Vector = new ArrayList<>(5);
     valid_Vector.add ( "ID" );
     valid_Vector.add ( "InputStart" );
     valid_Vector.add ( "InputEnd" );
@@ -833,13 +833,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						Message.printStatus ( 2, routine, "  Processing part ID \"" + partId + "\" part type " + partIdType + "." );
 						// Get the well 
 						if ( partIdType == StateCU_Location_CollectionPartIdType.WDID ) {
-							// Read rights for well structure WDID
+							// Read well to parcel data for WDID
 							// Split the WDID into parts in case it is not always 7 digits
 							int [] wdidParts = HydroBase_WaterDistrict.parseWDID(partId,null);
 							hbWellsList = hbdmi.readWellsWellToParcelList(-1, -1, -1, null, wdidParts[0], wdidParts[1]);
 						}
 						else if ( partIdType == StateCU_Location_CollectionPartIdType.RECEIPT ) {
-							// Read rights for well permit receipt
+							// Read well to parcel data for permit receipt
 							hbWellsList = hbdmi.readWellsWellToParcelList(-1, -1, -1, partId, -1, -1);
 						}
 						Message.printStatus ( 2, routine, "    Found " + hbWellsList.size() + " matching well/parcel records for all years." );
@@ -1096,8 +1096,8 @@ public String toString ( PropList parameters )
 	String ID = parameters.getValue ( "ID" );
 	String InputStart = parameters.getValue ( "InputStart" );
 	String InputEnd = parameters.getValue( "InputEnd" );
-	String DataFrom = parameters.getValue( "DataFrom" );
-	String AreaPrecision = parameters.getValue( "AreaPrecision" );
+	String DataFrom = parameters.getValue( "DataFrom" ); // Experimental
+	String AreaPrecision = parameters.getValue( "AreaPrecision" ); // Experimental
 	
 	StringBuffer b = new StringBuffer ();
 

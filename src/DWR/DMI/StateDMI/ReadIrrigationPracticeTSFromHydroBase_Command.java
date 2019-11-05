@@ -326,7 +326,7 @@ the associated StateCU_IrrigationPracticeTS.
 @param parcel_id Parcel identifier.
 @param parcel_year Parcel year.
 @param Div_int water division as integer.
-@param percent_irrig Fraction (0 to 1) of the parcel irrigated by the location.
+@param fraction_irrig Fraction (0 to 1) of the parcel irrigated by the location.
 If a ditch this may be <= 1.  If a well, it will be 1.0.
 @param cacheHydroBase indicate whether HydroBase results should be queried up front in cache to improve
 performance (but take more memory).
@@ -341,7 +341,7 @@ private int readHydroBaseIrrigationPracticeTSForParcel (
 		int parcel_id,
 		int parcel_year,
 		int Div_int,
-		double percent_irrig,
+		double fraction_irrig,
 		int warningLevel, int warning_count, String command_tag, CommandStatus status, boolean cacheHydroBase )
 {	String routine = getClass().getSimpleName() + ".readHydroBaseIrrigationPracticeTSForParcel";
 	String message;
@@ -412,7 +412,7 @@ private int readHydroBaseIrrigationPracticeTSForParcel (
 
 	HydroBase_ParcelUseTS hbparcel = hbparcelList.get(0);
 	
-	double area = hbparcel.getArea()*percent_irrig;	// Acres
+	double area = hbparcel.getArea()*fraction_irrig;	// Acres
 	String crop = hbparcel.getLand_use();
 	String irrig_method = hbparcel.getIrrig_type();
 	// Determine whether the parcel has groundwater supply simply by trying to read the
@@ -445,7 +445,7 @@ or a D&W location where groundwater supplements surface water supply.
 @param Loctype Location type for messages.
 @param id Location identifier.
 @param parcel_ids A list of parcel identifiers.
-@param percent_irrig the fraction of the parcel irrigated by a ditch
+@param fraction_irrig the fraction (0.0 to 1.0) of the parcel irrigated by a ditch
 for the year.  This is only used when the calling code is processing
 locations with surface and groundwater supply.  Specify null or an array
 of 1.0 when processing groundwater only.
@@ -462,12 +462,12 @@ private int readHydroBaseIrrigationPracticeTSForParcelList (
 		String id,
 		String Loctype,
 		List<String> parcel_ids,
-		double [] percent_irrig,
+		double [] fraction_irrig,
 		String part_id,
 		int parcel_year,
 		int Div_int,
 		int warningLevel, int warning_count, String command_tag, CommandStatus status, boolean cacheHydroBase )
-{	String routine = getClass().getName() + ".readHydroBaseIrrigationPracticeTSForParcelList";
+{	String routine = getClass().getSimpleName() + ".readHydroBaseIrrigationPracticeTSForParcelList";
 	// Loop through each parcel and append the HydroBase rights associated with each parcel
 
 	int nparcel = 0;
@@ -480,7 +480,7 @@ private int readHydroBaseIrrigationPracticeTSForParcelList (
 	// Get the wells associated with the parcels.
 	
 	int parcel_id;	// Specific parcel identifier to process
-	double percent_irrig2;	// Percent of parcel that is irrigated by ditch
+	double fraction_irrig2;	// Fraction of parcel (0.0 to 1.0) that is irrigated by ditch, after defaulting if null
 	// if datastore read the parcel use ts list
 	if(datastore != null){
 		datastore.readParcelUseTSList(part_id);
@@ -489,11 +489,11 @@ private int readHydroBaseIrrigationPracticeTSForParcelList (
 		parcel_id = Integer.parseInt(parcel_ids.get(iparcel) );
 		// Process the HydroBase parcel data (values will be added to the
 		// irrigation practice time series)...
-		if ( percent_irrig == null ) {
-			percent_irrig2 = 1.0;
+		if ( fraction_irrig == null ) {
+			fraction_irrig2 = 1.0;
 		}
 		else {
-			percent_irrig2 = percent_irrig[iparcel];
+			fraction_irrig2 = fraction_irrig[iparcel];
 		}
 		warning_count = readHydroBaseIrrigationPracticeTSForParcel (
 				hdmi,
@@ -505,7 +505,7 @@ private int readHydroBaseIrrigationPracticeTSForParcelList (
 				parcel_id,
 				parcel_year,
 				Div_int,
-				percent_irrig2,
+				fraction_irrig2,
 				warningLevel, warning_count, command_tag, status, cacheHydroBase );
 	}
 	return warning_count;
@@ -656,13 +656,14 @@ private int readHydroBaseIrrigationPracticeTSForDiversionList (
 			// Put together a list of parcel identifiers...
 		
 			List<String> parcel_ids = new ArrayList<String>(nparcel);
-			double [] percent_irrig = new double[nparcel];
+			double [] fraction_irrig = new double[nparcel];
 		
 			HydroBase_ParcelUseTSStructureToParcel hbparcel_structure;
 			for ( int iparcel = 0; iparcel < nparcel; iparcel++ ) {
 				hbparcel_structure = hbparcelStructureList.get(iparcel);
 				parcel_ids.add ( "" + hbparcel_structure.getParcel_id() );
-				percent_irrig[iparcel] = hbparcel_structure.getPercent_irrig();
+				// percent_irrig in HydroBase is actually a fraction
+				fraction_irrig[iparcel] = hbparcel_structure.getPercent_irrig();
 			}
 			// Loop through each parcel and append the HydroBase irrigation practice
 			// data associated with each parcel
@@ -674,7 +675,7 @@ private int readHydroBaseIrrigationPracticeTSForDiversionList (
 				id,
 				Loctype,
 				parcel_ids,
-				percent_irrig,	// percent_irrig for each parcel in list
+				fraction_irrig,	// fraction_irrig for each parcel in list
 				part_id,		// Ditch part that is being processed
 				parcel_year,
 				Div_int,
@@ -747,6 +748,7 @@ Read HydroBase irrigation practice TS for a
 list of wells (WDIDs and receipts).  The parcels are associated with
 a well location where groundwater supply is the only supply
 (otherwise a D&W via diversion code would be used).
+This code is now similar to reading diversions given that the parts are often WDIDs.
 @param hdmi HydroBaseDMI instance for direct database queries.
 @param datastore datastore instance for web service queries.
 @param culoc StateCU_Location object being processed
@@ -792,30 +794,45 @@ private int readHydroBaseIrrigationPracticeTSForWellList (
 	}
 	String partId; // single well ID
 	int [] wdidParts = new int[2];
-	HydroBase_StructureView hbdiv = null; // Individual well
+	HydroBase_StructureView hbwell = null; // Individual well
 	List<HydroBase_ParcelUseTSStructureToParcel> hbparcelStructureList = null;//Structure/parcel join data
 	boolean have_structure_num = false;
 	boolean is_wdid = false;	// Whether a WDID
-	/*
-	for ( int iparts = 0; iparts < nwdids; iparts++ ) {
-		part_id = wdids.get(iparts);
-		is_wdid = HydroBase_WaterDistrict.isWDID(part_id);
-		if ( is_wdid ) {
+	StateCU_Location_CollectionPartIdType partIdType = null;
+	for ( int iparts = 0; iparts < nPartIds; iparts++ ) {
+		partId = partIds.get(iparts);
+		partIdType = partIdTypes.get(iparts);
+		// Size the parcels to be empty, will be filled in later based on WDID or Receipt data
+		List<String> parcel_ids = new ArrayList<>();
+		// Fraction of parcel irrigated by the source
+		double [] fraction_irrig = new double[0];
+		if ( partIdType == StateCU_Location_CollectionPartIdType.WDID ) {
+			// Part type is supposed to be a WDID
+			// - will try to parse the WDID below to confirm
+			is_wdid = true;
+		}
+		// WDID is used for diversion structures to connect to parcels irrigated
+		// - this goes through structure table
+		// - for wells, need to go through the wells table
+		// - therefore, disable the following code because it will always return no records
+		// - leave the code in in case HydroBase does at some point switch to this
+		boolean doWdidLikeDiversions = false; // See the next code block for what is typically done for wells.
+		if ( is_wdid && doWdidLikeDiversions ) {
 			try {
 				// Parse out the WDID...
-				HydroBase_WaterDistrict.parseWDID(part_id,wdid_parts);
+				HydroBase_WaterDistrict.parseWDID(partId,wdidParts);
 			}
 			catch ( Exception e ) {
-				if ( (nwdids == 1) && !HydroBase_WaterDistrict.isWDID(part_id)) {
-					// The diversion is a single diversion that is not a WDID.
+				if ( (nPartIds == 1) && !HydroBase_WaterDistrict.isWDID(partId) ) {
+					// The well is a single diversion that is not a WDID.
 					// Therefore a warning is not needed...
-					Message.printStatus ( 2, routine, "Diversion \"" + id +
+					Message.printStatus ( 2, routine, "Well \"" + id +
 					"\" is not a WDID.  Cannot read wells from HydroBase." );
 				}
 				else {
 					// Not a WDID - this is an error because valid structures are
 					// expected as parts of an aggregate...
-					message = "Diversion \"" + id + "\" (part " + part_id + ") is not a WDID.  Cannot " +
+					message = "Well \"" + id + "\" (part " + partId + ") is not a WDID.  Cannot " +
 						"read parcel data from HydroBase.";
 					Message.printWarning(warningLevel,
 						MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
@@ -826,18 +843,16 @@ private int readHydroBaseIrrigationPracticeTSForWellList (
 				// In any case cannot process the data...
 				continue;
 			}
-		}
-		have_structure_num = false;
-		if ( is_wdid ) {
+			have_structure_num = false;
 			try {
 				// Get the structure so the structure number can be retrieved...
-				hbdiv = hdmi.readStructureViewForWDID( wdid_parts[0], wdid_parts[1] );// parts determined above
+				hbwell = hdmi.readStructureViewForWDID( wdidParts[0], wdidParts[1] );// parts determined above
 				have_structure_num = true;
 			}
 			catch ( Exception e ) {
 				Message.printWarning ( 3, routine, e );
-				message = "Unexpected error getting structure data from HydroBase for " + id + " (part " +
-					part_id + ")(" + e + ")";
+				message = "Unexpected error getting structure data from HydroBase for well " + id + " (part " +
+					partId + ")(" + e + ")";
 				Message.printWarning(warningLevel,
 					MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
 				status.addToLog ( CommandPhaseType.RUN,
@@ -846,9 +861,9 @@ private int readHydroBaseIrrigationPracticeTSForWellList (
 				have_structure_num = false;
 			}
 			// Verify that the division for the WDID is in the requested division.
-			int wdDiv = HydroBase_Util.lookupDivisionForWaterDistrict(hdmi, wdid_parts[0]);
+			int wdDiv = HydroBase_Util.lookupDivisionForWaterDistrict(hdmi, wdidParts[0]);
 			if ( wdDiv != Div_int ) {
-				message = "Location " + id + " (part " + part_id + ") has WDID in division " + wdDiv +
+				message = "Location " + id + " (part " + partId + ") has WDID in division " + wdDiv +
 					", which is different from the requested division " + Div_int +
 					" - results will not be correct - skipping location.";
 				Message.printWarning(warningLevel,
@@ -859,8 +874,8 @@ private int readHydroBaseIrrigationPracticeTSForWellList (
 							"division and that structures do not span divisions." ) );
 				continue;
 			}
-			if ( hbdiv == null ) {
-				message = "No structure data from HydroBase for " + id + " (part " + part_id + ").";
+			if ( hbwell == null ) {
+				message = "No structure data from HydroBase for well " + id + " (part " + partId + ").";
 				Message.printWarning(warningLevel,
 					MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
 				status.addToLog ( CommandPhaseType.RUN,
@@ -868,73 +883,153 @@ private int readHydroBaseIrrigationPracticeTSForWellList (
 						message, "Verify that the structure has data in HydroBase before including as a part." ) );
 				have_structure_num = false;
 			}
-		}
-		if ( have_structure_num ) {
+		    if ( have_structure_num ) {
+		    	// Have a structure number for the part so can continue
+			    try {
+				    // Get the parcels that the well irrigates for the specific year...
+				    hbparcelStructureList = hdmi.readParcelUseTSStructureToParcelListForStructure_numCal_year(
+				    hbwell.getStructure_num(), parcel_year );
+			    }
+			    catch ( Exception e ) {
+				    Message.printWarning ( 3, routine, e );
+				    message = "Unexpected error getting structure to parcel data from HydroBase for " + id +
+					    " (part " + partId + ")";
+				    Message.printWarning(warningLevel,
+					    MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+				    status.addToLog ( CommandPhaseType.RUN,
+					    new CommandLogRecord(CommandStatusType.FAILURE,
+						    message, "Report to software support." ) );
+				    continue;
+			    }
+			    
+			    int nparcel = 0;
+			    if ( hbparcelStructureList != null ) {
+				    nparcel = hbparcelStructureList.size();
+		    
+			        Message.printStatus ( 2, routine, "Well \"" + id + "\" (part WDID " + partId +
+				        ") year=" + parcel_year + " Division=" + Div_int + " irrigates " + nparcel + " parcels" );
+
+			        // Put together a list of parcel identifiers...
+		
+			        parcel_ids = new ArrayList<String>(nparcel);
+			        fraction_irrig = new double[nparcel];
+		
+			        HydroBase_ParcelUseTSStructureToParcel hbparcel_structure;
+			        for ( int iparcel = 0; iparcel < nparcel; iparcel++ ) {
+				        hbparcel_structure = hbparcelStructureList.get(iparcel);
+				        parcel_ids.add ( "" + hbparcel_structure.getParcel_id() );
+				        fraction_irrig[iparcel] = hbparcel_structure.getPercent_irrig();
+			        }
+			    }
+		    }
+	    } // End is WDID
+		else if ( is_wdid ) {
+			// WDID - get the parcels irrigated for the well
+			// - go through the wells rather than handling like diversion record
 			try {
-				// Get the parcels that the ditch irrigates for the specific year...
-				hbparcelStructureList = hdmi.readParcelUseTSStructureToParcelListForStructure_numCal_year(
-				hbdiv.getStructure_num(), parcel_year );
+				// Parse out the WDID...
+				HydroBase_WaterDistrict.parseWDID(partId,wdidParts);
 			}
 			catch ( Exception e ) {
-				Message.printWarning ( 3, routine, e );
-				message = "Unexpected error getting structure to parcel data from HydroBase for " + id +
-					" (part " + part_id + ")";
+				// Not a WDID - this is an error because valid structures are
+				// expected as parts of an aggregate...
+				message = "Well \"" + id + "\" (part " + partId + ") is not a WDID.  Cannot " +
+					"read parcel data from HydroBase.";
 				Message.printWarning(warningLevel,
 					MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
 				status.addToLog ( CommandPhaseType.RUN,
 					new CommandLogRecord(CommandStatusType.FAILURE,
-						message, "Report to software support." ) );
+						message, "Verify that aggregate part is a valid WDID." ) );
+				// In any case cannot process the data...
 				continue;
 			}
-			
-			int nparcel = 0;
-			if ( hbparcelStructureList != null ) {
-				nparcel = hbparcelStructureList.size();
+			try {
+				List<HydroBase_Wells> hbWellParcelList = hdmi.readWellsWellToParcelList( -1, parcel_year, -1, null, wdidParts[0], wdidParts[1] );
+				int nparcel = 0;
+				if ( hbWellParcelList != null ) {
+					nparcel = hbWellParcelList.size();
+				}
+		        Message.printStatus ( 2, routine, "Well \"" + id + "\" (part WDID " + partId +
+			        ") year=" + parcel_year + " Division=" + Div_int + " irrigates " + nparcel + " parcels" );
+		        HydroBase_Wells hbwells;
+		        fraction_irrig = new double[nparcel];
+		        for ( int iparcel = 0; iparcel < nparcel; iparcel++ ) {
+			        hbwells = hbWellParcelList.get(iparcel);
+			        parcel_ids.add ( "" + hbwells.getParcel_id() );
+			        fraction_irrig[iparcel] = 1.0; // Well irrigates entire parcel
+		        }
 			}
-		
-			Message.printStatus ( 2, routine, "Diversion \"" + id + "\" (part " + part_id +
-				") year=" + parcel_year + " Div=" + Div_int + " irrigates " + nparcel + " parcels" );
+			catch ( Exception e ) {
+				    Message.printWarning ( 3, routine, e );
+				    message = "Unexpected error getting well receipt to parcel data from HydroBase for " + id +
+					    " (part " + partId + ")";
+				    Message.printWarning(warningLevel,
+					    MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+				    status.addToLog ( CommandPhaseType.RUN,
+					    new CommandLogRecord(CommandStatusType.FAILURE,
+						    message, "Report to software support." ) );
+				    continue;
+			}
+		}
+		else {
+			// Receipt - get the parcels irrigated for the well
+			try {
+				List<HydroBase_Wells> hbWellParcelList = hdmi.readWellsWellToParcelList( -1, parcel_year, -1, partId, -1, -1 );
+				int nparcel = 0;
+				if ( hbWellParcelList != null ) {
+					nparcel = hbWellParcelList.size();
+				}
+		        Message.printStatus ( 2, routine, "Well \"" + id + "\" (part receipt " + partId +
+			        ") year=" + parcel_year + " Division=" + Div_int + " irrigates " + nparcel + " parcels" );
+		        HydroBase_Wells hbwells;
+		        fraction_irrig = new double[nparcel];
+		        for ( int iparcel = 0; iparcel < nparcel; iparcel++ ) {
+			        hbwells = hbWellParcelList.get(iparcel);
+			        parcel_ids.add ( "" + hbwells.getParcel_id() );
+			        fraction_irrig[iparcel] = 1.0; // Well irrigates entire parcel
+		        }
+			}
+			catch ( Exception e ) {
+				    Message.printWarning ( 3, routine, e );
+				    message = "Unexpected error getting well receipt to parcel data from HydroBase for " + id +
+					    " (part " + partId + ")";
+				    Message.printWarning(warningLevel,
+					    MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+				    status.addToLog ( CommandPhaseType.RUN,
+					    new CommandLogRecord(CommandStatusType.FAILURE,
+						    message, "Report to software support." ) );
+				    continue;
+			}
+		}
 
-			// Put together a list of parcel identifiers...
-		
-			List<String> parcel_ids = new ArrayList<String>(nparcel);
-			double [] percent_irrig = new double[nparcel];
-		
-			HydroBase_ParcelUseTSStructureToParcel hbparcel_structure;
-			for ( int iparcel = 0; iparcel < nparcel; iparcel++ ) {
-				hbparcel_structure = (HydroBase_ParcelUseTSStructureToParcel)
-				hbparcelStructureList.get(iparcel);
-				parcel_ids.add ( "" + hbparcel_structure.getParcel_id() );
-				percent_irrig[iparcel] = hbparcel_structure.getPercent_irrig();
-			}
-			// Loop through each parcel and append the HydroBase irrigation practice
-			// data associated with each parcel
-			warning_count = readHydroBaseIrrigationPracticeTSForParcelList (
-				hdmi,
-				datastore,
-				culoc,
-				ipyts,
-				id,
-				Loctype,
-				parcel_ids,
-				percent_irrig,	// percent_irrig for each parcel in list
-				part_id,		// Ditch part that is being processed
-				parcel_year,
-				Div_int,
-				warningLevel, warning_count, command_tag, status, cacheHydroBase );
+		// Whether the part is a WDID or a receipt, will have determined the list of parcel numbers to process.
+		// Loop through each parcel and append the HydroBase irrigation practice data associated with each parcel.
+		if ( parcel_ids.size() > 0 ) {
+		    warning_count = readHydroBaseIrrigationPracticeTSForParcelList (
+			    hdmi,
+			    datastore,
+			    culoc,
+			    ipyts,
+			    id,
+			    Loctype,
+			    parcel_ids,
+			    fraction_irrig,	// fraction_irrig for each parcel in list
+			    partId,		// well part that is being processed
+			    parcel_year,
+			    Div_int,
+			    warningLevel, warning_count, command_tag, status, cacheHydroBase );
 		}
 		
 		// Now read the supplemental data provided with
 		// commands like setIrrigationPracticeTSFromList()...
-		/ * FIXME SAM 2007-10-18 Need to convert to a check to make sure that
+		/* FIXME SAM 2007-10-18 Need to convert to a check to make sure that
 		 * readIrrigationPracticeTSFromList() does not duplicate data from
 		 * HydroBase.
 		readSupplementalParcelUseTSListForLocation (
 			HydroBase_Supplemental_ParcelUseTS_List,
 			culoc, ipyts, part_id, parcel_year );
-			* /
+			*/
 	} // End loop on location part IDs.
-*/
 	return warning_count;
 }
 

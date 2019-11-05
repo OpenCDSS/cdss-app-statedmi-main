@@ -104,17 +104,17 @@ uploadIndexHtmlFile() {
 	# - $gcpFolderUrl ends with /statedmi
 	# - the initial output will look like the following, with size, timestamp, resource URL:
 	#
-	# gs://opencdss.state.co.us/statedmi/5.00.00/software/:
-	#         11  2019-04-27T10:01:42Z  gs://opencdss.state.co.us/statedmi/5.00.00/software/
-	#   94612246  2019-04-27T10:01:42Z  gs://opencdss.state.co.us/statedmi/5.00.00/software/StateDMI_CDSS_5.00.00_Setup.exe
+	# gs://opencdss.state.co.us/statedmi/12.06.00/software/:
+	#         11  2019-04-27T10:01:42Z  gs://opencdss.state.co.us/statedmi/12.06.00/software/
+	#   94612246  2019-04-27T10:01:42Z  gs://opencdss.state.co.us/statedmi/12.06.00/software/StateDMI_CDSS_12.06.00_Setup.exe
 	#
 	# gs://opencdss.state.co.us/statedmi/latest/software/:
-	#   94612246  2019-04-27T10:01:42Z  gs://opencdss.state.co.us/statedmi/5.00.00/software/StateDMI_CDSS_5.00.00_Setup.exe
+	#   94612246  2019-04-27T10:01:42Z  gs://opencdss.state.co.us/statedmi/12.06.00/software/StateDMI_CDSS_12.06.00_Setup.exe
 	# TOTAL: 2 objects, 94612246 bytes (90.27 MiB)
 	#
 	#   after filtering, the output looks like the following:
 	#
-	# 94612246  2019-04-27T10:01:42Z  gs://opencdss.state.co.us/statedmi/5.00.00/software/StateDMI_CDSS-12.06.00_Setup.exe
+	# 94612246  2019-04-27T10:01:42Z  gs://opencdss.state.co.us/statedmi/12.06.00/software/StateDMI_CDSS-12.06.00_Setup.exe
 	# 94612246  2019-04-27T10:01:47Z  gs://opencdss.state.co.us/statedmi/latest/software/StateDMI_CDSS-12.06.00_Setup.exe
 	# TODO smalers 2019-04-29 need to use Bash PIPESTATUS for error code
 	tmpGcpCatalogPath="/tmp/$USER-statedmi-catalog-ls.txt"
@@ -161,8 +161,7 @@ uploadIndexHtmlFile() {
 	echo '</p>' >> $indexHtmlTmpFile
 	echo '<p>' >> $indexHtmlTmpFile
 	echo 'The StateDMI software is available Windows 10 and Linux.' >> $indexHtmlTmpFile
-	#echo 'See the latest <a href="http://opencdss.state.co.us/statedmi/latest/doc-user/appendix-install/install/">StateDMI documentation</a> for installation information (or follow a link below for specific version documentation).' >> $indexHtmlTmpFile
-	echo 'See the latest <a href="http://opencdss.state.co.us/statedmi/latest/doc-user/">StateDMI documentation</a> (or follow a link below for specific version documentation).' >> $indexHtmlTmpFile
+	echo 'See the latest <a href="http://opencdss.state.co.us/statedmi/latest/doc-user/appendix-install/install/">StateDMI documentation</a> for installation information (or follow a link below for specific version documentation).' >> $indexHtmlTmpFile
 	echo '</p>' >> $indexHtmlTmpFile
 	echo '<p>' >> $indexHtmlTmpFile
 	echo '<ul>' >> $indexHtmlTmpFile
@@ -184,7 +183,7 @@ uploadIndexHtmlFile() {
 	echo '<hr>' >> $indexHtmlTmpFile
 	echo '<h2>Linux Download</h2>' >> $indexHtmlTmpFile
 	echo '<p>' >> $indexHtmlTmpFile
-	echo 'Install StateDMI by downloading the tar.gz file and installing in /opt/statedmi-version.' >> $indexHtmlTmpFile
+	echo 'Install StateDMI by downloading the *.run file, and run to install in /opt/statedmi-version.' >> $indexHtmlTmpFile
 	echo 'Then run statedmi from the Linux command line.' >> $indexHtmlTmpFile
 	echo '</p>' >> $indexHtmlTmpFile
 	# Generate a table of available versions for Linux
@@ -218,9 +217,13 @@ uploadIndexHtmlFile() {
 # - second argument is operating system long name to match installers:  "Windows", "Linux", or "Cygwin"
 uploadIndexHtmlFile_Table() {
 	local downloadOs dowloadPattern
+	local indexHtmlTmpCatalogFile
 	# Operating system is passed in as the required first argument
 	downloadOs=$1
 	downloadOsLong=$2
+	# The following allows sorting the list in reverse order
+	indexHtmlTmpCatalogFile="/tmp/$USER-statedmi-catalog-${downloadOs}.html"
+	indexHtmlTmpCatalogSortedFile="/tmp/$USER-statedmi-catalog-sorted-${downloadOs}.html"
 	if [ "${downloadOs}" = "win" ]; then
 		downloadPattern="exe"
 	elif [ "${downloadOs}" = "lin" ]; then
@@ -235,7 +238,7 @@ uploadIndexHtmlFile_Table() {
 		# Use GCP list from catalog file for the index.html file download file list, with format like
 		# the following (no space at beginning of the line):
 		#
-		# 12464143  2019-04-27T10:01:42Z  gs://opencdss.state.co.us/statedmi/12.06.00/software/StateDMI_CDSS_5.00.00_Setup.exe
+		# 12464143  2019-04-27T10:01:42Z  gs://opencdss.state.co.us/statedmi/12.06.00/software/StateDMI_CDSS_12.06.00_Setup.exe
 		#
 		echo '<tr><th>Download File</th><th>Product</th><th>Version</th><th>File Timestamp</th><th>Size (KB)</th><th>Operating System</th><th>User Doc</th><th>Dev Doc</th><th>API Doc</th></tr>' >> $indexHtmlTmpFile
 		#cat "${tmpGcpCatalogPath}" | awk '
@@ -275,8 +278,26 @@ uploadIndexHtmlFile_Table() {
 				}
 				# Currently always 32-bit but 64-bit will be added
 				# downloadFileArch=downloadFileParts[5]
-				docDevUrl=""
-				docUserUrl=""
+				# Documentation links for development and user documentation are only shown if exist
+				# - the file returned by curl is actually the index.html file
+				docDevUrl=sprintf("http://opencdss.state.co.us/statedmi/%s/doc-dev",downloadFileVersion)
+				docDevCurl=sprintf("curl --output /dev/null --silent --head --fail \"%s\"",docDevUrl)
+				returnStatus=system(docDevCurl)
+				if ( returnStatus == 0 ) {
+					docDevHtml=sprintf("<a href=\"%s\">View</a>",docDevUrl)
+				}
+				else {
+					docDevHtml=""
+				}
+				docUserUrl=sprintf("http://opencdss.state.co.us/statedmi/%s/doc-user",downloadFileVersion)
+				docDevCurl=sprintf("curl --output /dev/null --silent --head --fail \"%s\"",docUserUrl)
+				returnStatus=system(docDevCurl)
+				if ( returnStatus == 0 ) {
+					docUserHtml=sprintf("<a href=\"%s\">View</a>",docUserUrl)
+				}
+				else {
+					docUserHtml=""
+				}
 				docApiUrl=""
 				#if ( downloadFileOs == "cyg" ) {
 				#	downloadFileOs = "Cygwin"
@@ -287,9 +308,16 @@ uploadIndexHtmlFile_Table() {
 				#else if ( downloadFileOs == "win" ) {
 				#	downloadFileOs = "Windows"
 				#}
-				printf "<tr><td><a href=\"%s\"><code>%s</code></a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", downloadFileUrl, downloadFile, downloadFileProduct, downloadFileVersion, downloadFileDateTime, downloadFileSize, downloadFileOs, docUserUrl, docDevUrl, docApiUrl
-			}' >> $indexHtmlTmpFile
+				printf "<tr><td><a href=\"%s\"><code>%s</code></a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", downloadFileUrl, downloadFile, downloadFileProduct, downloadFileVersion, downloadFileDateTime, downloadFileSize, downloadFileOs, docUserHtml, docDevHtml, docApiUrl
+			}' > $indexHtmlTmpCatalogFile
 	fi
+	# The above is the table body, but needs to be sorted in reverse order so most recent version is listed first
+	cat $indexHtmlTmpCatalogFile | sort -r > $indexHtmlTmpCatalogSortedFile
+	echo "See sorted table content in:  ${indexHtmlTmpCatalogSortedFile}"
+	# TODO smalers 2019-09-10 need to sort so "dev" releases are listed after non-dev releases
+	echo "If necessary, edit the file to change sort order."
+	read -p "Continue with index.html creation [press return]? " answer
+	cat $indexHtmlTmpCatalogSortedFile  >> $indexHtmlTmpFile
 	echo '</table>' >> $indexHtmlTmpFile
 }
 
