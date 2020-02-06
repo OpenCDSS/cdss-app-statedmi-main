@@ -30,8 +30,7 @@ import RTi.DMI.DMIUtil;
 /**
 This class extends the base class and provides a simple boolean tracking
 mechanism to verify that the data are used only once.  The data are used to
-hold setCropPatternTS() records provided by the modeler, to supplement the
-values in HydroBase.
+hold SetCropPatternTS() records provided by the modeler, to supplement the values in HydroBase.
 */
 public class StateDMI_HydroBase_StructureView extends HydroBase_StructureView {
 
@@ -62,7 +61,7 @@ StateDMI there may be multiple ReadCropPatternTSFromHydroBase() commands that
 indicate to process the data with parcels.  The data should only be processed
 the first matching case and a warning printed if processing is attempted
 again.  This might occur, for example, if the period in the set command overlaps
-2+ years of data from Hydrobase.
+2+ years of data from HydroBase.
 @return false if the data have not been processed, true if data have been processed.
 */
 public boolean hasBeenProcessed ()
