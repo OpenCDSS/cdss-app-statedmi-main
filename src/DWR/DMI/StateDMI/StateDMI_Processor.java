@@ -270,12 +270,19 @@ private List<StateCU_CropCharacteristics> __CUCropCharacteristics_Vector = new V
 
 /**
 The internal list of StateCU_CropPatternTS being processed.
-The supplemental data are filled by the setCropPatternTS() commands.
-The supplemental data are now stored as raw parcel data and are summed
-at a ditch level when requested for use.
+See also supplemental data __HydroBase_Supplemental_ParcelUseTS.
 */
-private List<StateCU_CropPatternTS> __CUCropPatternTS_Vector = new Vector<StateCU_CropPatternTS>();
+private List<StateCU_CropPatternTS> __CUCropPatternTS_Vector = new Vector<>();
+
+/**
+The supplemental data are filled by the SetCropPatternTS() and SetCropPatternTSFromList() commands.
+The supplemental data are stored as raw parcel data and provide data when
+ReadCropPatternTSFromHydroBase is called.
+ */
+// TODO smalers 2019-11-13 remove the following once tested out
+// - old code that was problematic because it was casted and shared with multiple commands
 //private List __HydroBase_Supplemental_StructureIrrigSummaryTS_Vector = new Vector();
+private List<StateDMI_HydroBase_ParcelUseTS> __HydroBase_Supplemental_ParcelUseTS_List = new ArrayList<>();
 
 /**
 The internal list of StateCU_Location being processed.
@@ -293,6 +300,7 @@ The supplemental data are supplied with readIrrigationPracticeTSFromList and
 are used by readIrrigationPracticeTSFromHyroBase().
 */
 private List<StateCU_IrrigationPracticeTS> __CUIrrigationPracticeTS_Vector = new Vector<StateCU_IrrigationPracticeTS>();
+// TODO smalers 2019-11-13 need to fix the following to not interfere with __HydroBase_Supplemental_ParcelUseTS_List
 private List<StateDMI_HydroBase_StructureView> __HydroBase_Supplemental_ParcelUseTS_Vector = new Vector<StateDMI_HydroBase_StructureView>();
 
 /**
@@ -1232,13 +1240,13 @@ public void clearResults()
 }
 
 /**
-Convert the supplemental ParcelUseTS data (raw data specified by set commands)
-to StructureIrrigSummary records (used for ditched processing).
+Convert the supplemental StateDMI_HydroBase_ParcelUseTS data (raw data specified by set commands)
+to StateDMI_HydroBase_StructureView records (used for ditched processing).
 This method is called from a couple of commands.  Data records are set with SetCropPatternTS() and
 SetCropPatternTSFromList() commands and are later used to create crop patterns when
 ReadCropPatternTSFromHydroBase() is called.
 */
-protected List<StateDMI_HydroBase_StructureView> convertSupplementalParcelUseTSToStructureIrrigSummaryTS (
+protected List<StateDMI_HydroBase_StructureView> convertSupplementalParcelUseTSToStructureView (
 	List<StateDMI_HydroBase_ParcelUseTS> supplementalParcelUseTSList )
 {	String routine = "StateDMI_Processor.convertSupplementalParcelUseTSToStructureIrrigSummaryTS";
 	List<StateDMI_HydroBase_StructureView> HydroBase_Supplemental_StructureIrrigSummaryTS_Vector =
@@ -2897,9 +2905,9 @@ public HydroBaseDMI getHydroBaseDMIConnection()
 Returns user-specified supplemental parcel use data to add to HydroBase data.
 @return user-specified supplemental parcel use data to add to HydroBase data.
 */
-private List<StateDMI_HydroBase_StructureView> getHydroBaseSupplementalParcelUseTSList ()
+private List<StateDMI_HydroBase_ParcelUseTS> getHydroBaseSupplementalParcelUseTSList ()
 {
-	return __HydroBase_Supplemental_ParcelUseTS_Vector;
+	return __HydroBase_Supplemental_ParcelUseTS_List;
 }
 
 /**
@@ -5659,7 +5667,136 @@ parsing are ignored (should not happen).
 @param InputStart_DateTime The starting date to process data.
 @param InputEnd_DateTime The ending date to process data.
 */
-protected List<StateDMI_HydroBase_StructureView> readSupplementalStructureIrrigSummaryTSListForWDIDList (
+protected List<StateCU_CropPatternTS> readSupplementalCropPatternTSListForWDIDList (
+	List<StateCU_CropPatternTS> cropPatterns, List<String> wdidList,
+	DateTime InputStart_DateTime, DateTime InputEnd_DateTime,
+	List<StateDMI_HydroBase_StructureView> HydroBase_Supplemental_StructureViewList,
+	CommandStatus status, String command_tag, int warningLevel, int warning_count )
+{	String routine = "StateDMI_Processor.readSupplementalCropPatternTSListForWDIDList";
+	if ( cropPatterns == null ) {
+		cropPatterns = new ArrayList<StateCU_CropPatternTS>();
+	}
+	int cpsize = cropPatterns.size();
+	StateDMI_HydroBase_StructureView sits = null; // Supplemental
+	HydroBase_StructureView sits2 = null; // From HydroBase
+	//StateCU_CropPatternTS cp = null; // Previously read crop pattern data
+	// Get a list of integer WDIDs to process...
+	Message.printStatus ( 2, routine, "Getting supplemental acreage data "+
+		"from setCropPatternTS() commands for:  " + wdidList );
+	int nwdid_list = 0;
+	if ( wdidList != null ) {
+		nwdid_list = wdidList.size();
+	}
+	int sits_wd, sits_id; // The WDID parts for the "sits" object
+	int iwdid; // For looping through WDIDs.
+	boolean found = false; // Used when searching for matching HydroBase and supplemental records.
+	// Size of all supplemental data...
+	int size = HydroBase_Supplemental_StructureViewList.size();
+	for ( int i = 0; i < size; i++ ) {
+		sits = HydroBase_Supplemental_StructureViewList.get(i);
+		// Check to see if the record is in the desired year...
+		if ( (InputStart_DateTime != null) && (InputEnd_DateTime != null)
+			&& ((sits.getCal_year() < InputStart_DateTime.getYear()) ||
+			((sits.getCal_year() > InputEnd_DateTime.getYear())) ) ){
+			// The data record year is outside the requested year.
+			continue;
+		}
+		// Figure out if the record matches a requested location identifier...
+		sits_wd = sits.getWD();
+		sits_id = sits.getID();
+		for ( iwdid = 0; iwdid < nwdid_list; iwdid++ ) {
+			// Now do the lookup on the more generic string ID...
+			if ( !wdidList.get(iwdid).equalsIgnoreCase(sits.getLocationID())) {
+				// Not a match...
+				continue;
+			}
+			// If here, a match was found.  First see if there is
+			// an existing matching record in the full data set.
+			found = false;
+			// TODO SAM 2004-05-18 - this is a major dog.  Need to rework the loops so that the large
+			// vector is only traversed once.
+			// FIXME SAM 2007-05-14 Need to decide with the State whether this should be flagged as an error.
+			for ( int i2 = 0; i2 < cpsize; i2++ ) {
+				//sits2 = cropPatterns.get(i2);
+				boolean todo = true;
+				if ( todo ) {
+					throw new RuntimeException ("Need to fix.");
+				//FIXME cp = cropPatterns.get(i2);
+					/* FIXME
+				if ( (sits2.getWD() == sits_wd) && (sits2.getID() == sits_id) &&
+					(sits2.getCal_year() ==	sits.getCal_year()) &&
+					sits2.getLand_use().equalsIgnoreCase(sits.getLand_use()) ) {
+					// Matching record, replace the old and print a warning...
+					String message = "WD " + sits_wd + " ID " + sits_id +
+					" supplemental data from SetCropPatternTS() matches raw (HydroBase) crop " +
+					"pattern data for " + sits.getCal_year() + " " + sits.getLand_use();
+					Message.printWarning ( warningLevel, 
+				        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+			        status.addToLog ( CommandPhaseType.RUN,
+			            new CommandLogRecord(CommandStatusType.WARNING,
+			                message, "Using data from set command and overriding HydroBase - " +
+			                	"verify the set command." ) );
+					found = true;
+					// This is OK whether previously processed or not, since it is not additive.
+					//FIXME cropPatterns.set ( i2, sits );
+				}
+				*/
+				}
+			}
+			if ( !found ) {
+				// No matching record was found so just add.  Only add if not previously processed.
+				if ( sits.hasBeenProcessed() ) {
+					// This is a warning that is handled internally but should
+					// probably be handled by the modeler.
+					String message = "Location " + sits.getLocationID() +
+						" supplemental acreage data from SetCropPatternTS(): year=" +
+						sits.getCal_year() + " crop=" + sits.getLand_use() + " acres=" +
+						StringUtil.formatString(sits.getAcres_total(),"%.3f") +
+						" has already been processed once and is " +
+						"not being added again.";
+					Message.printWarning ( warningLevel, 
+				        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+			        status.addToLog ( CommandPhaseType.RUN,
+			            new CommandLogRecord(CommandStatusType.FAILURE,
+			                message, "Verify that set commands only specify the data once." ) );
+				}
+				else {
+					// Has not been previously processed so add the data...
+					Message.printStatus ( 2, routine, "Location " + sits.getLocationID() +
+						" supplemental acreage data from SetCropPatternTS(): year=" +
+						sits.getCal_year() + " crop=" + sits.getLand_use() + " acres=" +
+						StringUtil.formatString(sits.getAcres_total(),"%.3f") );
+					boolean todo = true;
+					if ( todo ) {
+						throw new RuntimeException ("Need to fix.");
+					// FIXMEcropPatterns.add ( sits );
+					}
+				}
+			}
+		}
+	}
+	return cropPatterns;
+}
+
+/**
+THIS IS THE OLD VERSION THAT WAS NOT CLEARLY DEALING WITH GENERICS.
+CASTS WERE USED TO CONVERT THE OBJECTS TO PROPER DATA CLASSES.
+Read supplemental HydroBase_StructureIrrigSummaryTS (new is
+HydroBase_StructureView) records.  This does not
+actually read the records but retrieves them from memory in
+StateDMI_HydroBase_ParcelUseTS objects - the records are
+defined in the setCropPatternTS() and setCropPatternTSFromList() commands.
+If a supplemental record is available that conflicts with existing data,
+the supplemental data will be used and a warning is printed.
+@param cropPatterns Vector of HydroBase_StructureIrrigSummaryTS (e.g., as read
+from HydroBase) (new is HydroBase_StructureView).  This Vector will be added to and returned.
+@param wdidList List of WDIDs to be checked.  Each string is parsed into WD
+and ID parts.  It is assumed that only valid WDIDs are passed - any errors
+parsing are ignored (should not happen).
+@param InputStart_DateTime The starting date to process data.
+@param InputEnd_DateTime The ending date to process data.
+*/
+protected List<StateDMI_HydroBase_StructureView> readSupplementalStructureIrrigSummaryTSListForWDIDListOLD (
 	List<StateDMI_HydroBase_StructureView> cropPatterns, List<String> wdidList,
 	DateTime InputStart_DateTime, DateTime InputEnd_DateTime,
 	List<StateDMI_HydroBase_StructureView> HydroBase_Supplemental_StructureIrrigSummaryTSList,

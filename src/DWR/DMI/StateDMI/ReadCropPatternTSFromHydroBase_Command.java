@@ -352,11 +352,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	// Get the supplemental crop pattern data specified with SetCropPatternTS() and
 	// SetCropPatternTSFromList() commands...
 	
-	List<StateDMI_HydroBase_StructureView> hydroBaseSupplementalParcelUseTSList = null;
+	List<StateDMI_HydroBase_ParcelUseTS> hydroBaseSupplementalParcelUseTSList = null;
 	try {
 		@SuppressWarnings("unchecked")
-		List<StateDMI_HydroBase_StructureView> dataList =
-			(List<StateDMI_HydroBase_StructureView>)processor.getPropContents ( "HydroBase_SupplementalParcelUseTS_List");
+		List<StateDMI_HydroBase_ParcelUseTS> dataList =
+			(List<StateDMI_HydroBase_ParcelUseTS>)processor.getPropContents ( "HydroBase_SupplementalParcelUseTS_List");
 		hydroBaseSupplementalParcelUseTSList = dataList;
 	}
 	catch ( Exception e ) {
@@ -446,7 +446,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	}
 	
 	try {
-		// Remove all the elements for the Vector that tracks when identifiers
+		// Remove all the elements for the list that tracks when identifiers
 		// are read from more than one main source (e.g., CDS, HydroBase).
 		// This is used to print a warning.
 		processor.resetDataMatches ( processor.getStateCUCropPatternTSMatchList() );
@@ -499,13 +499,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		}
 		
 		// Convert supplemental ParcelUseTS to StructureIrrigSummaryTS
-		/* smalers 2019-06-01 NEED TO ENABLE
-		List<StateDMI_HydroBase_StructureView> hydroBaseSupplementalStructureIrrigSummaryTSList =
-			processor.convertSupplementalParcelUseTSToStructureIrrigSummaryTS(
-				hydroBaseSupplementalParcelUseTSList);
-			*/
+		// - the supplemental data was read from ReadCropPatternTS and ReadCropPatternTSFromList commands
+		List<StateDMI_HydroBase_StructureView> hydroBaseSupplementalStructureViewList =
+			processor.convertSupplementalParcelUseTSToStructureView(hydroBaseSupplementalParcelUseTSList);
 
-		// Year used when processing groundwater only...
+		// Year is used when processing groundwater only...
 		DateTime year_DateTime = new DateTime(DateTime.PRECISION_YEAR);
 		
 		// Loop through locations...
@@ -572,12 +570,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					}
 					// Add supplemental records (works with WDID or not)...
 					culoc_wdids.add ( culoc_id );
-					/* smalers 2019-06-01 NEED TO ENABLE
-					crop_patterns = processor.readSupplementalStructureIrrigSummaryTSListForWDIDList (
-						crop_patterns, culoc_wdids, InputStart_DateTime, InputEnd_DateTime,
-						hydroBaseSupplementalStructureIrrigSummaryTSList,
-						status, command_tag, warningLevel, warning_count);
-					*/
+					boolean todo = true;
+					if ( todo ) {
+						throw new Exception("Need to fix code.");
+					//crop_patterns = processor.readSupplementalCropPatternTSListForWDIDList (
+					//	crop_patterns, culoc_wdids, InputStart_DateTime, InputEnd_DateTime,
+					//	hydroBaseSupplementalStructureViewList,
+					//	status, command_tag, warningLevel, warning_count);
+					}
 					// The results are processed below...
 					replace_flag = 0;
 				}
@@ -822,7 +822,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					List<HydroBase_Wells> hbWellsList = null; // List of HydroBase vw_CDSS_WellsWellToParcel records for location for all years
 					// Loop through the well identifiers and read the parcels associated with the wells
 					// Get the vw_CDSS_WellsWellToParcel records, which tie well WDID and permit number to parcel.
-					// This will give the list of parcels to process
+					// This will give the list of parcels to process.
 					int iPart = -1;
 					List<Integer> parcelListForYear = new ArrayList<Integer>();
 					int year;
@@ -873,7 +873,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									collection_ids_array[iParcel] = parcelListForYear.get(iParcel);
 								}
 								crop_patterns = hbdmi.readParcelUseTSListForParcelList(
-										-1, // Division is irrelevant in newer HydroBase
+										// Division is irrelevant in newer HydroBase
+										// - irrigation year with parcel_id is unique
+										-1,
 										//culoc.getCollectionDiv(), // Division
 										collection_ids_array, // parcel ids
 										null, // land use

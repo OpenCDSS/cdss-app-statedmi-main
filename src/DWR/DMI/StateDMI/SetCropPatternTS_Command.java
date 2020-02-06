@@ -25,10 +25,11 @@ package DWR.DMI.StateDMI;
 
 import javax.swing.JFrame;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import DWR.StateCU.StateCU_CropPatternTS;
+import DWR.StateCU.StateCU_Location;
 import RTi.TS.YearTS;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
@@ -253,17 +254,17 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List<String> valid_Vector = new Vector<String>(9);
-    valid_Vector.add ( "ID" );
-	valid_Vector.add ( "SetStart" );
-	valid_Vector.add ( "SetEnd" );
-	valid_Vector.add ( "CropPattern" );
-	valid_Vector.add ( "IrrigationMethod" );
-	valid_Vector.add ( "SupplyType" );
-	valid_Vector.add ( "SetToMissing" );
-	valid_Vector.add ( "ProcessWhen" );
-	valid_Vector.add ( "IfNotFound" );
-	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	List<String> validList = new ArrayList<>(9);
+    validList.add ( "ID" );
+	validList.add ( "SetStart" );
+	validList.add ( "SetEnd" );
+	validList.add ( "CropPattern" );
+	validList.add ( "IrrigationMethod" );
+	validList.add ( "SupplyType" );
+	validList.add ( "SetToMissing" );
+	validList.add ( "ProcessWhen" );
+	validList.add ( "IfNotFound" );
+	warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	if ( warning.length() > 0 ) {
 		Message.printWarning ( warning_level,
@@ -357,6 +358,26 @@ CommandWarningException, CommandException
 	}
 	catch ( Exception e ) {
 		message = "Error requesting StateCU_CropPatternTS_List from processor.";
+		Message.printWarning(warning_level,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+	}
+
+	// Get the list of CU locations, used to check the data ...
+	
+	List<StateCU_Location> culocList = null;
+	int culocListSize = 0;
+	try {
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
+		culocListSize = culocList.size();
+	}
+	catch ( Exception e ) {
+		message = "Error requesting StateCU_Location_List from processor.";
 		Message.printWarning(warning_level,
 			MessageUtil.formatMessageTag( command_tag, ++warning_count),
 			routine, message );
@@ -465,7 +486,7 @@ CommandWarningException, CommandException
 		if ( ProcessWhen.equalsIgnoreCase("Now") ) {
 			// Loop through the crop pattern data and try to find matching records...
 			for (int i = 0; i < cdsListSize; i++) {
-				cds = (StateCU_CropPatternTS)cdsList.get(i);
+				cds = cdsList.get(i);
 				cds_id = cds.getID();
 				if ( !cds_id.matches(idpattern_Java) ) {
 					// Identifier does not match...
@@ -485,7 +506,7 @@ CommandWarningException, CommandException
 					ncrop_names = crop_names.size();
 				}
 				for ( int ic = 0; ic < ncrop_names; ic++ ) {
-					ts = cds.getCropPatternTS ( (String)crop_names.get(ic) );
+					ts = cds.getCropPatternTS ( crop_names.get(ic) );
 					missing = ts.getMissing();
 					for ( year = SetStart_int; year <= SetEnd_int; year++ ) {
 						date.setYear(year);
@@ -501,7 +522,7 @@ CommandWarningException, CommandException
 							cds_id, cds_id,
 							year,
 							-1,	// Individual parcel ID not specified
-							(String)crop_names.get(ic),
+							crop_names.get(ic),
 							0.0,
 							OutputStart_DateTime,
 							OutputEnd_DateTime,
@@ -539,8 +560,8 @@ CommandWarningException, CommandException
 		}
 		else {
 			// ProcessWhen=WithParcels
-			// Save the data so that it can be processed later.  Add
-			// a record for each year/crop/structure combination, as if a data
+			// Save the data so that it can be processed later when records are read from HydroBase.
+			// Add a record for each year/crop/structure combination, as if a data
 			// value had been read from HydroBase.  For each combination, print
 			// a warning if an existing record is found.
 			// Initialize the "has been processed" flag to false.  This will be
@@ -549,6 +570,25 @@ CommandWarningException, CommandException
 			//StateDMI_HydroBase_StructureView sits, sits2;
 			StateDMI_HydroBase_ParcelUseTS parcel, parcel2;
 			int i2, size2;	// For loops.
+
+			// Make sure that the identifier that is specified is found in locations or aggregate lists
+			StateCU_Location culoc = null;
+			for (int i = 0; i < culocListSize; i++) {
+				culoc = culocList.get(i);
+				String culoc_id = culoc.getID();
+				if ( culoc_id.equalsIgnoreCase(ID) ) {
+					// Identifier for command data matches a location
+				    ++matchCount;
+				    break;
+				}
+				// Also check if the ID is in a collection
+				if ( culoc.isIdInCollection(ID) ) {
+					// Identifier for command data matches a collection ID
+				    ++matchCount;
+				    break;
+				}
+			}
+
 			for ( int ic = 0; ic < __cropTypes.length; ic++ ) {
 				for ( year = SetStart_int; year <= SetEnd_int; year++ ){
 					parcel = new StateDMI_HydroBase_ParcelUseTS();
@@ -561,7 +601,7 @@ CommandWarningException, CommandException
 					// Check for duplicates and print a warning...
 					size2 =	supplementalParcelList.size();
 					for ( i2 = 0; i2 < size2; i2++ ) {
-						parcel2 = (StateDMI_HydroBase_ParcelUseTS)supplementalParcelList.get(i2);
+						parcel2 = supplementalParcelList.get(i2);
 						if (	
 							parcel2.getLocationID().equalsIgnoreCase(ID) &&
 							(parcel2.getCal_year() == year) &&
