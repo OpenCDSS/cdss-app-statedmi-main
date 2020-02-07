@@ -66,6 +66,7 @@ import java.util.Vector;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.Command;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
@@ -96,7 +97,8 @@ private SimpleJComboBox __FillAverageOrder_JComboBox = null;
 private JTextField __AverageFillFlag_JTextField = null;
 private JTextField __FillUsingCIUFlag_JTextField = null;
 private SimpleJButton __cancel_JButton = null;
-private SimpleJButton __ok_JButton = null;	
+private SimpleJButton __ok_JButton = null;
+private SimpleJButton __help_JButton = null;
 
 private ReadDiversionHistoricalTSMonthlyFromHydroBase_Command __command = null;
 
@@ -121,6 +123,9 @@ public void actionPerformed( ActionEvent event )
 
 	if ( o == __cancel_JButton ) {
 		response ( false );
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", __command.getCommandName());
 	}
 	else if ( o == __ok_JButton ) {
 		refresh ();
@@ -507,6 +512,8 @@ private void initialize (	JFrame parent, Command command )
     button_JPanel.add ( __ok_JButton );
 	__cancel_JButton = new SimpleJButton("Cancel", this);
 	button_JPanel.add (__cancel_JButton);
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	setTitle ( "Edit " + __command.getCommandName() + "() Command" );
 	// JDialogs do not need to be resizable...

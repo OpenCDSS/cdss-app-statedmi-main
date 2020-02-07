@@ -35,7 +35,7 @@ Constructor.
 */
 public WriteDelayTablesDailyToStateMod_Command ()
 {	super();
-	setCommandName ( "WriteDelayTablesDailyToStateMod_Command" );
+	setCommandName ( "WriteDelayTablesDailyToStateMod" );
 }
 	
 }

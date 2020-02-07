@@ -161,7 +161,7 @@ public void actionPerformed(ActionEvent event)
 		response ( false );
 	}
 	else if ( o == __help_JButton ) {
-		HelpViewer.getInstance().showHelp("command", "CompareFiles");
+		HelpViewer.getInstance().showHelp("command", __command.getCommandName());
 	}
 	else if ( o == __ok_JButton ) {
 		refresh ();

@@ -96,6 +96,7 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
@@ -114,33 +115,34 @@ private final String __SprinklerList = "SprinklerList";
 private final String __True = "True";
 private final String __False = "False";
 
-private boolean		__error_wait = false;	// To track errors
-private boolean		__first_time = true;	// Indicate first time display
-private JTextArea	__command_JTextArea=null;// For command
-private JTextField	__InputFile_JTextField = null;// List file
-private JTextField	__ID_JTextField = null;// List file
-private JTextField	__Div_JTextField = null;
-private SimpleJComboBox	__YearCol_JComboBox = null;
-private JTextField	__Year_JTextField = null;
-private JTextField	__ParcelIDYear_JTextField = null;
-private SimpleJComboBox	__ParcelIDCol_JComboBox = null;
-private SimpleJComboBox	__AreaCol_JComboBox = null;
-private JTextField	__AreaUnits_JTextField = null;
-private SimpleJComboBox	__CropTypeCol_JComboBox = null;
-private SimpleJComboBox	__IrrigTypeCol_JComboBox = null;
-private JTextField	__DitchIDCols_JTextField = null;
-private JTextField	__DitchCovCols_JTextField = null;
-private JTextField	__WellIDCols_JTextField = null;
-private SimpleJComboBox	__GWOnlyCol_JComboBox = null;
-private JTextField	__ExcludedCropTypes_JTextField = null;
-private SimpleJComboBox	__ProcessData_JComboBox = null;
-private SimpleJButton	__cancel_JButton = null;
-private SimpleJButton	__ok_JButton = null;	
-private SimpleJButton	__browse_JButton = null;
-private SimpleJButton	__path_JButton = null;
-private String		__working_dir = null;	
-private List<String>		__command_Vector = null;
-private String		__filetype = null;	// "SprinklerList" or
+private boolean __error_wait = false;	// To track errors
+private boolean __first_time = true;	// Indicate first time display
+private JTextArea __command_JTextArea=null;// For command
+private JTextField __InputFile_JTextField = null;// List file
+private JTextField __ID_JTextField = null;// List file
+private JTextField __Div_JTextField = null;
+private SimpleJComboBox __YearCol_JComboBox = null;
+private JTextField __Year_JTextField = null;
+private JTextField __ParcelIDYear_JTextField = null;
+private SimpleJComboBox __ParcelIDCol_JComboBox = null;
+private SimpleJComboBox __AreaCol_JComboBox = null;
+private JTextField __AreaUnits_JTextField = null;
+private SimpleJComboBox __CropTypeCol_JComboBox = null;
+private SimpleJComboBox __IrrigTypeCol_JComboBox = null;
+private JTextField __DitchIDCols_JTextField = null;
+private JTextField __DitchCovCols_JTextField = null;
+private JTextField __WellIDCols_JTextField = null;
+private SimpleJComboBox __GWOnlyCol_JComboBox = null;
+private JTextField __ExcludedCropTypes_JTextField = null;
+private SimpleJComboBox __ProcessData_JComboBox = null;
+private SimpleJButton __cancel_JButton = null;
+private SimpleJButton __ok_JButton = null;	
+private SimpleJButton __help_JButton = null;	
+private SimpleJButton __browse_JButton = null;
+private SimpleJButton __path_JButton = null;
+private String __working_dir = null;	
+private List<String> __command_Vector = null;
+private String __filetype = null;	// "SprinklerList" or
 						// "CropPatternDBF"
 /**
 Command editor constructor
@@ -199,6 +201,9 @@ public void actionPerformed(ActionEvent event)
 	}
 	else if ( o == __cancel_JButton ) {
 		response (0);
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", "ReadCropPatternTSFromDBF");
 	}
 	else if ( o == __ok_JButton ) {
 		refresh ();
@@ -633,16 +638,18 @@ private void initialize (JFrame parent, PropList props, List<String> command, St
 			"Remove Working Directory", this);
 		button_JPanel.add (__path_JButton);
 	}
-	__cancel_JButton = new SimpleJButton("Cancel", this);
-	button_JPanel.add (__cancel_JButton);
 	__ok_JButton = new SimpleJButton("OK", this);
 	button_JPanel.add (__ok_JButton);
+	__cancel_JButton = new SimpleJButton("Cancel", this);
+	button_JPanel.add (__cancel_JButton);
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	if ( filetype.equals(__SprinklerList) ) {
-		setTitle( "Edit " +
-		"readIrrigationPracticeTSSprinklerParcelsFromList() Command");
+		setTitle( "Edit ReadIrrigationPracticeTSSprinklerParcelsFromList() Command");
 	}
-	else {	setTitle ( "Edit readCropPatternTSFromDBF() Command" ); 
+	else {
+		setTitle ( "Edit ReadCropPatternTSFromDBF() Command" ); 
 	}
 	// JDialogs do not need to be resizable...
 	setResizable (false);

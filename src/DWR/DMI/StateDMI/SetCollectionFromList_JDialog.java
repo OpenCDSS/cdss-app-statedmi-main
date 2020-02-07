@@ -697,10 +697,10 @@ private void initialize ( JFrame parent, Command command )
         JGUIUtil.addComponent(main_JPanel, button_JPanel, 
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
-	__cancel_JButton = new SimpleJButton("Cancel", this);
-	button_JPanel.add (__cancel_JButton);
 	__ok_JButton = new SimpleJButton("OK", this);
 	button_JPanel.add (__ok_JButton);
+	__cancel_JButton = new SimpleJButton("Cancel", this);
+	button_JPanel.add (__cancel_JButton);
 	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
 	__help_JButton.setToolTipText("Show command documentation in web browser");
 

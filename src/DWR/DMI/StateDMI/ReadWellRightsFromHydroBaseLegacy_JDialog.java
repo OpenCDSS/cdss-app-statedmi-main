@@ -97,6 +97,7 @@ import java.util.Vector;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
@@ -127,27 +128,28 @@ private final String __StationIDW_NN = "StationIDW.NN";
 private final String __1 = "1";
 private final String __Year = "AppropriationDate";
 
-private boolean		__error_wait = false;
-private boolean		__first_time = true;
-private SimpleJComboBox	__IDFormat_JComboBox = null;
-private JTextField	__ID_JTextField=null;
-private JTextField	__AdminNumClasses_JTextField=null;
-private JTextField	__Year_JTextField = null;
-private JTextField	__InputStart_JTextField = null;
-private JTextField	__InputEnd_JTextField = null;
-private JTextField	__Div_JTextField = null;
-private JTextField	__DefaultAppropriationDate_JTextField = null;
-private SimpleJComboBox	__DefineRightHow_JComboBox = null;
-private SimpleJComboBox	__ReadWellRights_JComboBox = null;
-private SimpleJComboBox	__UseApex_JComboBox = null;
-private SimpleJComboBox	__OnOffDefault_JComboBox = null;
-private JTextArea	__command_JTextArea=null;
-private SimpleJButton	__cancel_JButton = null;
-private SimpleJButton	__ok_JButton = null;	
-private List<String>		__command_Vector = null;
-private String		__command = null;
-private int		__app_type;
-private int		__comp_type;
+private boolean __error_wait = false;
+private boolean __first_time = true;
+private SimpleJComboBox __IDFormat_JComboBox = null;
+private JTextField __ID_JTextField=null;
+private JTextField __AdminNumClasses_JTextField=null;
+private JTextField __Year_JTextField = null;
+private JTextField __InputStart_JTextField = null;
+private JTextField __InputEnd_JTextField = null;
+private JTextField __Div_JTextField = null;
+private JTextField __DefaultAppropriationDate_JTextField = null;
+private SimpleJComboBox __DefineRightHow_JComboBox = null;
+private SimpleJComboBox __ReadWellRights_JComboBox = null;
+private SimpleJComboBox __UseApex_JComboBox = null;
+private SimpleJComboBox __OnOffDefault_JComboBox = null;
+private JTextArea __command_JTextArea=null;
+private SimpleJButton __cancel_JButton = null;
+private SimpleJButton __ok_JButton = null;	
+private SimpleJButton __help_JButton = null;	
+private List<String> __command_Vector = null;
+private String __command = null;
+private int __app_type;
+private int __comp_type;
 
 /**
 Command editor constructor
@@ -175,6 +177,9 @@ public void actionPerformed(ActionEvent event)
 
 	if ( o == __cancel_JButton ) {
 		response (0);
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", "ReadWellRightsFromHydroBaseLegacy");
 	}
 	else if ( o == __ok_JButton ) {
 		refresh ();
@@ -649,6 +654,8 @@ private void initialize (	JFrame parent, PropList props,
 	button_JPanel.add (__ok_JButton);
 	__cancel_JButton = new SimpleJButton("Cancel", this);
 	button_JPanel.add (__cancel_JButton);
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	if (title != null) {
 		setTitle (title);

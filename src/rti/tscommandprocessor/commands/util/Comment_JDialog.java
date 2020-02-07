@@ -22,6 +22,7 @@ import java.util.List;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.String.StringUtil;
 
 /**
@@ -33,6 +34,7 @@ implements ActionListener, KeyListener, WindowListener
 {
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;
+private SimpleJButton __help_JButton = null;
 private List<String> __commandList = null;
 private JTextArea __command_JTextArea = null;
 private boolean __first_time = true;
@@ -58,6 +60,9 @@ public void actionPerformed( ActionEvent event )
 	if ( o == __cancel_JButton ) {
 		__commandList = null;
 		response ( 0 );
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", "Comment");
 	}
 	else if ( o == __ok_JButton ) {
 		refresh();
@@ -184,10 +189,12 @@ private void initialize ( JFrame parent, List<String> comments )
         JGUIUtil.addComponent(main_JPanel, button_JPanel, 
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
-	__cancel_JButton = new SimpleJButton("Cancel", this);
-	button_JPanel.add ( __cancel_JButton );
 	__ok_JButton = new SimpleJButton("OK", this);
 	button_JPanel.add ( __ok_JButton );
+	__cancel_JButton = new SimpleJButton("Cancel", this);
+	button_JPanel.add ( __cancel_JButton );
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	setTitle ( "Edit # Comments" );
 	setResizable ( true );

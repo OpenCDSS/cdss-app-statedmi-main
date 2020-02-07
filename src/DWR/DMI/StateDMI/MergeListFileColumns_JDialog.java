@@ -67,6 +67,7 @@ import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
@@ -79,36 +80,30 @@ implements ActionListener, ItemListener, KeyListener, WindowListener
 
 // Used for button labels...
 
-private final String __AddWorkingDirectoryToListFile =
-			"Add Working Directory To List File";
-private final String __RemoveWorkingDirectoryFromListFile =
-			"Remove Working Directory From List File";
+private final String __AddWorkingDirectoryToListFile = "Add Working Directory To List File";
+private final String __RemoveWorkingDirectoryFromListFile = "Remove Working Directory From List File";
 
-private final String __AddWorkingDirectoryToOutputFile =
-			"Add Working Directory To Output File";
-private final String __RemoveWorkingDirectoryFromOutputFile =
-			"Remove Working Directory From Output File";
+private final String __AddWorkingDirectoryToOutputFile = "Add Working Directory To Output File";
+private final String __RemoveWorkingDirectoryFromOutputFile = "Remove Working Directory From Output File";
 
-private boolean		__error_wait = false;	// To track errors
-private boolean		__first_time = true;	// Indicate first time display
-private JTextArea	__command_JTextArea=null;// For command
-private JTextField	__ListFile_JTextField = null;// List file
-private JTextField	__OutputFile_JTextField = null;// Output list file
-private JTextField	__Columns_JTextField = null;	// Columns to merge 
-private JTextField	__NewColumnName_JTextField = null;// New merged column
-private JTextField	__SimpleMergeFormat_JTextField = null;// Format widths for
-							// parts - integer for
-							// %s or 0N for zero-
-							// padded integers
-private SimpleJButton	__cancel_JButton = null;
-private SimpleJButton	__ok_JButton = null;	
-private SimpleJButton	__browse_JButton = null;
-private SimpleJButton	__browse2_JButton = null;
-private SimpleJButton	__path_JButton = null;
-private SimpleJButton	__path2_JButton = null;
-private String		__working_dir = null;	
-private List<String>		__command_Vector = null;
-private String		__command = null;
+private boolean __error_wait = false;	// To track errors
+private boolean __first_time = true;	// Indicate first time display
+private JTextArea __command_JTextArea = null;// For command
+private JTextField __ListFile_JTextField = null;// List file
+private JTextField __OutputFile_JTextField = null;// Output list file
+private JTextField __Columns_JTextField = null;	// Columns to merge 
+private JTextField __NewColumnName_JTextField = null;// New merged column
+private JTextField __SimpleMergeFormat_JTextField = null;// Format widths for parts - integer for %s or 0N for zero-padded integers
+private SimpleJButton __cancel_JButton = null;
+private SimpleJButton __ok_JButton = null;	
+private SimpleJButton __help_JButton = null;	
+private SimpleJButton __browse_JButton = null;
+private SimpleJButton __browse2_JButton = null;
+private SimpleJButton __path_JButton = null;
+private SimpleJButton __path2_JButton = null;
+private String __working_dir = null;	
+private List<String> __command_Vector = null;
+private String __command = null;
 
 /**
 Command editor constructor
@@ -188,6 +183,9 @@ public void actionPerformed(ActionEvent event)
 	}
 	else if ( o == __cancel_JButton ) {
 		response (0);
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", "MergeListFileColumns");
 	}
 	else if ( o == __ok_JButton ) {
 		refresh ();
@@ -489,20 +487,22 @@ private void initialize ( JFrame parent, PropList props, List<String> command )
 			__RemoveWorkingDirectoryFromOutputFile, this);
 		button_JPanel.add (__path2_JButton);
 	}
-	__cancel_JButton = new SimpleJButton("Cancel", this);
-	button_JPanel.add (__cancel_JButton);
 	__ok_JButton = new SimpleJButton("OK", this);
 	button_JPanel.add (__ok_JButton);
+	__cancel_JButton = new SimpleJButton("Cancel", this);
+	button_JPanel.add (__cancel_JButton);
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	if (title != null) {
 		setTitle (title);
 	}
 	// JDialogs do not need to be resizable...
 	setResizable (false);
-        pack();
-        JGUIUtil.center(this);
+    pack();
+    JGUIUtil.center(this);
 	refresh();	// Sets the __path_JButton status
-        super.setVisible(true);
+    super.setVisible(true);
 }
 
 /**

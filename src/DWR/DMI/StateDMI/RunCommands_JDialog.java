@@ -50,6 +50,7 @@ import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.IOUtil;
@@ -64,20 +65,21 @@ implements ActionListener, KeyListener, WindowListener
 private final String __AddWorkingDirectory = "Add Working Directory";
 private final String __RemoveWorkingDirectory = "Remove Working Directory";
 
-private SimpleJButton	__browse_JButton = null,// File browse button
-			__cancel_JButton = null,// Cancel Button
-			__ok_JButton = null,	// Ok Button
-			__path_JButton = null;	// Convert between relative and absolute paths.
+private SimpleJButton __browse_JButton = null; // File browse button
+private SimpleJButton __cancel_JButton = null; // Cancel Button
+private SimpleJButton __ok_JButton = null; // Ok Button
+private SimpleJButton __help_JButton = null; // Ok Button
+private SimpleJButton __path_JButton = null;	// Convert between relative and absolute paths.
 private RunCommands_Command __command = null;	// Command to edit
-private JTextArea	__command_JTextArea=null;
-private String		__working_dir = null;	// Working directory.
-private JTextField	__InputFile_JTextField = null;
+private JTextArea __command_JTextArea=null;
+private String __working_dir = null;	// Working directory.
+private JTextField __InputFile_JTextField = null;
 private SimpleJComboBox __ExpectedStatus_JComboBox =null;
 // FIXME SAM 2008-07-15 Need to add option to inherit the properties of the calling processor
 //private SimpleJComboBox __InheritParentWorkflowProperties_JComboBox =null;
-private boolean		__error_wait = false;	// Is there an error waiting to be cleared up
-private boolean		__first_time = true;
-private boolean		__ok = false; // Indicates whether OK was pressed when closing the dialog.
+private boolean __error_wait = false;	// Is there an error waiting to be cleared up
+private boolean __first_time = true;
+private boolean __ok = false; // Indicates whether OK was pressed when closing the dialog.
 
 /**
 Command editor dialog constructor.
@@ -125,6 +127,9 @@ public void actionPerformed( ActionEvent event )
 	}
 	else if ( o == __cancel_JButton ) {
 		response ( false );
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", __command.getCommandName());
 	}
 	else if ( o == __ok_JButton ) {
 		refresh ();
@@ -311,8 +316,10 @@ private void initialize ( JFrame parent, Command command )
 		__path_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
 		button_JPanel.add ( __path_JButton );
 	}
-	button_JPanel.add (__cancel_JButton = new SimpleJButton("Cancel",this));
 	button_JPanel.add ( __ok_JButton = new SimpleJButton("OK", this) );
+	button_JPanel.add (__cancel_JButton = new SimpleJButton("Cancel",this));
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	setTitle ( "Edit " + __command.getCommandName() + "() Command" );
 	// Dialogs do not need to be resizable...
