@@ -59,6 +59,7 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PrintUtil;
@@ -86,6 +87,7 @@ private SimpleJButton __path_JButton = null;
 private SimpleJButton __path2_JButton = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;
+private SimpleJButton __help_JButton = null;
 private JTextField __InputFile_JTextField = null;
 private SimpleJComboBox __PageLayout_JComboBox = null;
 private SimpleJComboBox __PrinterName_JComboBox = null;
@@ -192,6 +194,9 @@ public void actionPerformed( ActionEvent event )
 	}
 	else if ( o == __cancel_JButton ) {
 		response ( false );
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", __command.getCommandName());
 	}
 	else if ( o == __ok_JButton ) {
 		refresh ();
@@ -686,8 +691,10 @@ private void initialize ( JFrame parent, PrintNetwork_Command command )
 		__path2_JButton = new SimpleJButton( __RemoveWorkingDirectoryOutput, this);
 		button_JPanel.add (__path2_JButton);
 	}
-	button_JPanel.add(__cancel_JButton = new SimpleJButton("Cancel", this));
 	button_JPanel.add ( __ok_JButton = new SimpleJButton("OK", this) );
+	button_JPanel.add ( __cancel_JButton = new SimpleJButton("Cancel", this) );
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	setTitle ( "Edit " + __command.getCommandName() + "() command" );
 	

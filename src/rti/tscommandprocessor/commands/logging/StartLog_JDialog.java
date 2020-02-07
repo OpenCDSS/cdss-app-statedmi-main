@@ -51,6 +51,7 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.CommandProcessorRequestResultsBean;
 import RTi.Util.IO.IOUtil;
@@ -67,6 +68,7 @@ private final String __RemoveWorkingDirectory = "Remove Working Directory";
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __browse_JButton = null;
 private SimpleJButton __ok_JButton = null;
+private SimpleJButton __help_JButton = null;
 private SimpleJButton __path_JButton = null;
 private JTextField	__LogFile_JTextField = null;
 private SimpleJComboBox	__Suffix_JComboBox = null;
@@ -125,6 +127,9 @@ public void actionPerformed( ActionEvent event )
 	}
 	else if ( o == __cancel_JButton ) {
 		response ( false );
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", __command.getCommandName());
 	}
 	else if (o == __ok_JButton) {
 		// Enforce the ".log" extension if a filename has been entered
@@ -328,8 +333,10 @@ private void initialize ( JFrame parent, StartLog_Command command )
 		button_JPanel.add ( __path_JButton = new SimpleJButton(
 			__RemoveWorkingDirectory, __RemoveWorkingDirectory, this) );
 	}
-	button_JPanel.add(__cancel_JButton = new SimpleJButton("Cancel", this));
 	button_JPanel.add ( __ok_JButton = new SimpleJButton("OK", this) );
+	button_JPanel.add(__cancel_JButton = new SimpleJButton("Cancel", this));
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	setTitle ( "Edit " + __command.getCommandName() + "() command" );
 	

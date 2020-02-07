@@ -5831,7 +5831,7 @@ be edited are when they are in a {# delimited comment block).
 new command or __UPDATE_COMMAND for an existing command).
 */
 private void commandList_EditCommand ( String action, List command_Vector, int mode )
-{	String routine = getClass().getName() + ".editCommand";
+{	String routine = getClass().getSimpleName() + ".editCommand";
 	int dl = 1;		// Debug level
 	
     // Make absolutely sure that warning level 1 messages are shown to the user in a dialog.
@@ -5906,7 +5906,7 @@ private void commandList_EditCommand ( String action, List command_Vector, int m
 				// Get everything before the ) in the command and then re-add the ").
 				// TODO SAM 2007-08-31 Why is this done?
 				// Need to handle:
-				//	1) Traditional commands foo(), may have leading "1: " that needs to be stripped.
+				//	1) Traditional commands foo(), may have leading "1: " or "[Legacy] 1:" that needs to be stripped.
 				//	2) Comments # blocks
 				//  3) Don't allow edit of /* */ comments - just insert/delete
 				String command_string = ui_StripMenuSequencePrefix(StringUtil.getToken(action,")",0,0)+ ")");
@@ -6267,8 +6267,8 @@ Insert comments into the command list, utilizing the selected commands in the di
 list to determine the insert position.
 @param new_comments The comments to insert, as a Vector of String.
 */
-private void commandList_InsertCommentsBasedOnUI ( List new_comments )
-{	String routine = getClass().getName() + ".commandList_InsertCommentsBasedOnUI";
+private void commandList_InsertCommentsBasedOnUI ( List<String> new_comments )
+{	String routine = getClass().getSimpleName() + ".commandList_InsertCommentsBasedOnUI";
 
 	// Get the selected indices from the commands...
 	int selectedIndices[] = ui_GetCommandJList().getSelectedIndices();
@@ -6279,7 +6279,7 @@ private void commandList_InsertCommentsBasedOnUI ( List new_comments )
 	int insert_pos = 0;
 	Command inserted_command = null;	// New comment line as Command
 	for ( int i = 0; i < size; i++ ) {
-		inserted_command = commandList_NewCommand (	(String)new_comments.get(i), true );
+		inserted_command = commandList_NewCommand (	new_comments.get(i), true );
 		if (selectedSize > 0) {
 			// Insert before the first selected item...
 			int insert_pos0 = selectedIndices[0];
@@ -6355,7 +6355,7 @@ commands are recognized by the TSCommandFactory.
 */
 private Command commandList_NewCommand ( String commandString, boolean createUnknownCommandIfNotRecognized )
 {	int dl = 1;
-	String routine = getClass().getName() + ".newCommand";
+	String routine = getClass().getSimpleName() + ".newCommand";
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( dl, routine,
 		"Using command factory to create a new command for \"" + commandString + "\"" );
@@ -13471,22 +13471,29 @@ private void ui_ShowCurrentCommandListStatus ()
 }
 
 /**
-Some menus have prefixes like "1: " to help guide the user in using a group of commands.  The "[Legacy]"
-string may also be used to indicate old commands.  This method
-strips the leading text so that generic command parsing code will only see the normal command name.
+Some menus have prefixes like:
+<ul>
+<li> "1: " to help guide the user in using a group of commands</li>
+<li> The "[Legacy]" string may also be used to indicate old commands.</li>
+<li> The "[Legacy] 3:" string may also be used to indicate both of the above.</li>
+</ul>
+This method strips the leading text so that generic command parsing code will only see the normal command name.
 Normally this is only called in when adding and editing a new command.
 @param menuString a menu label with or without the prefix
 @return the stripped menu label
 */
 private String ui_StripMenuSequencePrefix ( String menuString )
 {
+	// First strip "[Legacy]"
+	if ( menuString.startsWith("[Legacy]") ) {
+		// Strip it
+		menuString = menuString.substring(8).trim();
+	}
+
+	// Next strip number
 	if ( menuString.charAt(1) == ':') {
 		// Strip it
 		return menuString.substring(2).trim();
-	}
-	else if ( menuString.startsWith("[Legacy]") ) {
-		// Strip it
-		return menuString.substring(8).trim();
 	}
 	else {
 		// Just return

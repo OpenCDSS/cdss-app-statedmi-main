@@ -31,6 +31,7 @@ import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
@@ -61,6 +62,7 @@ private JTextField __SimpleMergeFormat_JTextField = null;
 	// Format widths for parts - integer for %s or 0N for zero-padded integers
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
+private SimpleJButton __help_JButton = null;	
 private SimpleJButton __browse_JButton = null;
 private SimpleJButton __browse2_JButton = null;
 private SimpleJButton __path_JButton = null;
@@ -141,6 +143,9 @@ public void actionPerformed(ActionEvent event)
 	}
 	else if ( o == __cancel_JButton ) {
 		response ( false );
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", __command.getCommandName());
 	}
 	else if ( o == __ok_JButton ) {
 		refresh ();
@@ -413,21 +418,23 @@ private void initialize ( JFrame parent, MergeListFileColumns_Command command, b
 		button_JPanel.add (__path2_JButton);
 	}
 	if ( runnable ) {
-		__cancel_JButton = new SimpleJButton("Cancel", this);
-		__cancel_JButton.setToolTipText ("Close window without running tool." );
-		button_JPanel.add (__cancel_JButton);
 		__ok_JButton = new SimpleJButton("Run Tool", this);
 		button_JPanel.add (__ok_JButton);
 		__ok_JButton.setToolTipText ("Run tool and keep window open." );
+		__cancel_JButton = new SimpleJButton("Cancel", this);
+		__cancel_JButton.setToolTipText ("Close window without running tool." );
+		button_JPanel.add (__cancel_JButton);
 	}
 	else {
-	    __cancel_JButton = new SimpleJButton("Cancel", this);
-		button_JPanel.add (__cancel_JButton);
-		__cancel_JButton.setToolTipText ("Close window without saving changes." );
 		__ok_JButton = new SimpleJButton("OK", this);
 		button_JPanel.add (__ok_JButton);
 		__ok_JButton.setToolTipText ("Close window and save changes to command." );
+	    __cancel_JButton = new SimpleJButton("Cancel", this);
+		button_JPanel.add (__cancel_JButton);
+		__cancel_JButton.setToolTipText ("Close window without saving changes." );
 	}
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	if ( runnable ) {
 		setTitle ( "Merge List File Columns");

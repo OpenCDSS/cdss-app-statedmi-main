@@ -79,7 +79,7 @@ private SimpleJComboBox __Optimization_JComboBox = null;
 private JTextArea __command_JTextArea=null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
-private SimpleJButton __help_JButton = null;
+private SimpleJButton __help_JButton = null;	
 private ReadIrrigationPracticeTSFromHydroBase_Command __command = null;
 private StateDMI_Processor __statedmiProcessor = null;
 

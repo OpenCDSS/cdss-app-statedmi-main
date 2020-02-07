@@ -54,6 +54,7 @@ import java.util.Vector;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
@@ -75,7 +76,8 @@ private SimpleJComboBox __BlaneyCriddleMethod_JComboBox = null;
 private JTextArea __Coefficients_JTextArea = null;
 private SimpleJComboBox __IfNotFound_JComboBox = null;
 private SimpleJButton __cancel_JButton = null;
-private SimpleJButton __ok_JButton = null;	
+private SimpleJButton __ok_JButton = null;
+private SimpleJButton __help_JButton = null;
 private SetBlaneyCriddle_Command __command = null;
 private boolean __ok = false;
 
@@ -95,9 +97,13 @@ Responds to ActionEvents.
 */
 public void actionPerformed(ActionEvent event) {
 	String s = event.getActionCommand();
+	Object o = event.getSource();
 
 	if (s.equals("Cancel")) {
 		response (false);
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", __command.getCommandName());
 	}
 	else if (s.equals("OK")) {
 		refresh ();
@@ -340,6 +346,8 @@ private void initialize (JFrame parent, SetBlaneyCriddle_Command command) {
 	button_JPanel.add (__ok_JButton);
 	__cancel_JButton = new SimpleJButton("Cancel", this);
 	button_JPanel.add (__cancel_JButton);
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	setTitle ( "Edit " + __command.getCommandName() + "() Command" );
 	// JDialogs do not need to be resizable...

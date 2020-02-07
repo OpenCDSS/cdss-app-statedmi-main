@@ -68,6 +68,7 @@ import java.util.List;
 
 import RTi.Util.GUI.GUIUtil;
 import RTi.Util.GUI.SimpleJButton;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.PropList;
 import RTi.Util.String.StringUtil;
 
@@ -77,29 +78,30 @@ implements ActionListener, ItemListener, KeyListener, WindowListener {
 /**
 True if there is an error that needs to be cleared up or cancelled.
 */
-private boolean		__errorWait = false;
+private boolean __errorWait = false;
 /**
 Whether it is the first time refreshing the dialog
 */
-private boolean		__firstTime = true;
-
+private boolean __firstTime = true;
 
 /**
 The text field to hold the command.
 */
-private JTextArea	__command_JTextArea=null;
+private JTextArea __command_JTextArea=null;
 
-private JTextField	__region1JTextField = null; 
-private JTextField	__region2JTextField = null; 
+private JTextField __region1JTextField = null; 
+private JTextField __region2JTextField = null; 
 
 /**
 Button to cancel out of the form.
 */
-private SimpleJButton	__cancelJButton = null;
+private SimpleJButton __cancelJButton = null;
 /**
 Button to accept the entries on the form.
 */
-private SimpleJButton	__okJButton = null;	
+private SimpleJButton __okJButton = null;	
+
+private SimpleJButton __helpJButton = null;	
 
 /**
 List containing the command and parameters to be filled in on the form.
@@ -127,9 +129,13 @@ Responds to ActionEvents.
 */
 public void actionPerformed(ActionEvent event) {
 	String s = event.getActionCommand();
+	Object o = event.getSource();
 
 	if (s.equals("Cancel")) {
 		response (0);
+	}
+	else if ( o == __helpJButton ) {
+		HelpViewer.getInstance().showHelp("command", "ReadClimateStationsFromHydroBase");
 	}
 	else if (s.equals("OK")) {
 		refresh ();
@@ -242,10 +248,12 @@ private void initialize (JFrame parent, String title, PropList props, List<Strin
         GUIUtil.addComponent(mainJPanel, buttonJPanel, 
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
-	__cancelJButton = new SimpleJButton("Cancel", "Cancel", this);
-	buttonJPanel.add (__cancelJButton);
 	__okJButton = new SimpleJButton("OK", "OK", this);
 	buttonJPanel.add (__okJButton);
+	__cancelJButton = new SimpleJButton("Cancel", "Cancel", this);
+	buttonJPanel.add (__cancelJButton);
+	buttonJPanel.add ( __helpJButton = new SimpleJButton("Help", this) );
+	__helpJButton.setToolTipText("Show command documentation in web browser");
 
 	setBackground(Color.lightGray);
 	if (title != null) {

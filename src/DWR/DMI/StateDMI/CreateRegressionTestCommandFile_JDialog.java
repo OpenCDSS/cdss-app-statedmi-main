@@ -48,6 +48,7 @@ import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.IOUtil;
@@ -67,24 +68,25 @@ private final String __AddWorkingDirectoryOutputFile = "Add Working Directory to
 private final String __RemoveWorkingDirectorySearchFolder = "Remove Working Directory from Search Folder";
 private final String __RemoveWorkingDirectoryOutputFile = "Remove Working Directory from Output File";
 
-private SimpleJButton	__browseSearchFolder_JButton = null,
-			__browseOutputFile_JButton = null,
-			__pathSearchFolder_JButton = null,
-			__pathOutputFile_JButton = null,
-			__cancel_JButton = null,	// Cancel Button
-			__ok_JButton = null;		// Ok Button
-private JTextField	__SearchFolder_JTextField = null;	// Top folder to start search
-private JTextField	__FilenamePattern_JTextField = null;	// Pattern for file names
-private JTextField	__OutputFile_JTextField = null;	// Resulting commands file
-private SimpleJComboBox	__Append_JComboBox = null;
-private JTextField  __IncludeTestSuite_JTextField = null;
-private JTextField  __IncludeOS_JTextField = null;
-private JTextArea	__command_JTextArea = null;	// Command as JTextField
-private String		__working_dir = null;	// Working directory.
-private boolean		__error_wait = false;
-private boolean		__first_time = true;
+private SimpleJButton __browseSearchFolder_JButton = null;
+private SimpleJButton __browseOutputFile_JButton = null;
+private SimpleJButton __pathSearchFolder_JButton = null;
+private SimpleJButton __pathOutputFile_JButton = null;
+private SimpleJButton __cancel_JButton = null;
+private SimpleJButton __ok_JButton = null;
+private SimpleJButton __help_JButton = null;
+private JTextField __SearchFolder_JTextField = null;	// Top folder to start search
+private JTextField __FilenamePattern_JTextField = null;	// Pattern for file names
+private JTextField __OutputFile_JTextField = null;	// Resulting commands file
+private SimpleJComboBox __Append_JComboBox = null;
+private JTextField __IncludeTestSuite_JTextField = null;
+private JTextField __IncludeOS_JTextField = null;
+private JTextArea __command_JTextArea = null;	// Command as JTextField
+private String __working_dir = null;	// Working directory.
+private boolean __error_wait = false;
+private boolean __first_time = true;
 private CreateRegressionTestCommandFile_Command __command = null;	// Command to edit
-private boolean		__ok = false;		// Indicates whether the user
+private boolean __ok = false;		// Indicates whether the user
 						// has pressed OK to close the
 						// dialog.
 /**
@@ -163,6 +165,9 @@ public void actionPerformed( ActionEvent event )
 	}
 	else if ( o == __cancel_JButton ) {
 		response ( false );
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", __command.getCommandName());
 	}
 	else if ( o == __ok_JButton ) {
 		refresh ();
@@ -422,8 +427,10 @@ private void initialize ( JFrame parent, Command command )
 		__pathOutputFile_JButton = new SimpleJButton( __RemoveWorkingDirectoryOutputFile,this);
 		button_JPanel.add ( __pathOutputFile_JButton );
 	}
-	button_JPanel.add(__cancel_JButton = new SimpleJButton("Cancel", this));
 	button_JPanel.add ( __ok_JButton = new SimpleJButton("OK", this) );
+	button_JPanel.add(__cancel_JButton = new SimpleJButton("Cancel", this));
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	setTitle ( "Edit " + __command.getCommandName() + "() command" );
 

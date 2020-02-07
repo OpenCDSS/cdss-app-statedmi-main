@@ -65,6 +65,7 @@ import java.util.Vector;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
+import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
@@ -81,28 +82,25 @@ private final String __ProratePartsToCropPatternTotal = "ProratePartsToCropPatte
 private final String __SpecificChecks = "SpecificChecks";
 
 private final String __AdjustNone = "AdjustNone";
-private final String __AdjustGWAcreageToCropPatternTotal =
-		"AdjustGWAcreageToCropPatternTotal";
-private final String __AdjustCropPatternTotalToGWAcreage =
-		"AdjustCropPatternTotalToGWAcreage";
+private final String __AdjustGWAcreageToCropPatternTotal = "AdjustGWAcreageToCropPatternTotal";
+private final String __AdjustCropPatternTotalToGWAcreage = "AdjustCropPatternTotalToGWAcreage";
 
-private final String __AdjustGWAcreageDownToCropPatternTotal =
-		"AdjustGWAcreageDownToCropPatternTotal";
+private final String __AdjustGWAcreageDownToCropPatternTotal = "AdjustGWAcreageDownToCropPatternTotal";
 
-private final String __AdjustSprinklerAcreageDownToCropPatternTotal =
-		"AdjustSprinklerAcreageDownToCropPatternTotal";
+private final String __AdjustSprinklerAcreageDownToCropPatternTotal = "AdjustSprinklerAcreageDownToCropPatternTotal";
 
-private boolean		__error_wait = false;
-private boolean		__first_time = true;	
-private JTextField	__ID_JTextField=null;
-private SimpleJComboBox	__SynchronizeMethod_JComboBox = null;
-private SimpleJComboBox	__GWOnlyGWAcreage_JComboBox = null;
-private SimpleJComboBox	__DivAndWellGWAcreage_JComboBox = null;
-private SimpleJComboBox	__SprinklerAcreage_JComboBox = null;
-private JTextArea	__command_JTextArea=null;
-private SimpleJButton	__cancel_JButton = null;
-private SimpleJButton	__ok_JButton = null;	
-private List<String>		__command_Vector = null;
+private boolean __error_wait = false;
+private boolean __first_time = true;	
+private JTextField __ID_JTextField=null;
+private SimpleJComboBox __SynchronizeMethod_JComboBox = null;
+private SimpleJComboBox __GWOnlyGWAcreage_JComboBox = null;
+private SimpleJComboBox __DivAndWellGWAcreage_JComboBox = null;
+private SimpleJComboBox __SprinklerAcreage_JComboBox = null;
+private JTextArea __command_JTextArea=null;
+private SimpleJButton __cancel_JButton = null;
+private SimpleJButton __ok_JButton = null;
+private SimpleJButton __help_JButton = null;
+private List<String> __command_Vector = null;
 
 /**
 Command editor constructor
@@ -127,6 +125,9 @@ public void actionPerformed(ActionEvent event)
 
 	if ( o == __cancel_JButton ) {
 		response (0);
+	}
+	else if ( o == __help_JButton ) {
+		HelpViewer.getInstance().showHelp("command", "SynchronizeIrrigationPracticeAndCropPatternTS");
 	}
 	else if ( o == __ok_JButton ) {
 		refresh ();
@@ -352,6 +353,8 @@ private void initialize (	JFrame parent, String title, PropList props,
 	button_JPanel.add (__ok_JButton);
 	__cancel_JButton = new SimpleJButton("Cancel", this);
 	button_JPanel.add (__cancel_JButton);
+	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
+	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	if (title != null) {
 		setTitle (title);
