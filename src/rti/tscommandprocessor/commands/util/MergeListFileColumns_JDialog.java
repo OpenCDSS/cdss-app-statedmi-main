@@ -6,8 +6,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 
@@ -44,11 +46,8 @@ implements ActionListener, ItemListener, KeyListener, WindowListener
 
 // Used for button labels...
 
-private final String __AddWorkingDirectoryToListFile = "Add Working Directory To List File";
-private final String __RemoveWorkingDirectoryFromListFile = "Remove Working Directory From List File";
-
-private final String __AddWorkingDirectoryToOutputFile = "Add Working Directory To Output File";
-private final String __RemoveWorkingDirectoryFromOutputFile = "Remove Working Directory From Output File";
+private final String __AddWorkingDirectory = "Abs";
+private final String __RemoveWorkingDirectory = "Rel";
 
 private boolean __error_wait = false; // To track errors
 private boolean __first_time = true; // Indicate first time display
@@ -111,9 +110,18 @@ public void actionPerformed(ActionEvent event)
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			String directory = fc.getSelectedFile().getParent();
 			String path = fc.getSelectedFile().getPath();
-			__ListFile_JTextField.setText(path);
-			JGUIUtil.setLastFileDialogDirectory(directory);
-			refresh ();
+
+			if (path != null) {
+				// Convert path to relative path by default.
+				try {
+					__ListFile_JTextField.setText(IOUtil.toRelativePath(__working_dir, path));
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 1,"MergeListFiles_JDialog", "Error converting file to relative path." );
+				}
+				JGUIUtil.setLastFileDialogDirectory(directory);
+				refresh();
+			}
 		}
 	}
 	else if ( o == __browse2_JButton ) {
@@ -136,9 +144,18 @@ public void actionPerformed(ActionEvent event)
 		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 			String directory = fc.getSelectedFile().getParent();
 			String path = fc.getSelectedFile().getPath(); 
-			JGUIUtil.setLastFileDialogDirectory(directory);
-			__OutputFile_JTextField.setText(path);
-			refresh();
+			
+            if (path != null) {
+				// Convert path to relative path by default.
+				try {
+					__OutputFile_JTextField.setText(IOUtil.toRelativePath(__working_dir, path));
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 1,"MergeListFiles_JDialog", "Error converting file to relative path." );
+				}
+                JGUIUtil.setLastFileDialogDirectory(directory);
+                refresh();
+            }
 		}	
 	}
 	else if ( o == __cancel_JButton ) {
@@ -173,11 +190,11 @@ public void actionPerformed(ActionEvent event)
 		}
 	}
 	else if ( o == __path_JButton ) {
-		if (__path_JButton.getText().equals( __AddWorkingDirectoryToListFile)) {
+		if (__path_JButton.getText().equals( __AddWorkingDirectory)) {
 			__ListFile_JTextField.setText (
 			IOUtil.toAbsolutePath(__working_dir, __ListFile_JTextField.getText()));
 		}
-		else if (__path_JButton.getText().equals( __RemoveWorkingDirectoryFromListFile)) {
+		else if (__path_JButton.getText().equals( __RemoveWorkingDirectory)) {
 			try {
 			    __ListFile_JTextField.setText (
 				IOUtil.toRelativePath (__working_dir, __ListFile_JTextField.getText()));
@@ -190,11 +207,11 @@ public void actionPerformed(ActionEvent event)
 		refresh ();
 	}
 	else if ( o == __path2_JButton ) {
-		if (__path2_JButton.getText().equals( __AddWorkingDirectoryToOutputFile)) {
+		if (__path2_JButton.getText().equals( __AddWorkingDirectory)) {
 			__OutputFile_JTextField.setText (
 			IOUtil.toAbsolutePath(__working_dir, __OutputFile_JTextField.getText()));
 		}
-		else if (__path2_JButton.getText().equals( __RemoveWorkingDirectoryFromOutputFile)) {
+		else if (__path2_JButton.getText().equals( __RemoveWorkingDirectory)) {
 			try {
 			    __OutputFile_JTextField.setText (
 				IOUtil.toRelativePath (__working_dir, __OutputFile_JTextField.getText()));
@@ -306,18 +323,18 @@ private void initialize ( JFrame parent, MergeListFileColumns_Command command, b
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
 	getContentPane().add ("North", main_JPanel);
-	int y = 0;
+	int y = -1;
 
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
-	int yy = 0;
+	int yy = -1;
 	String name = "command";
 	if ( runnable ) {
 		name = "tool";
 	}
    	JGUIUtil.addComponent(paragraph, new JLabel (
 	"This " + name+" merges columns in a list file, creating a new column in a new list file."),
-	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 	"This is useful, for example, when station identifiers need to be created from data in multiple columns."),
 	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -339,27 +356,54 @@ private void initialize ( JFrame parent, MergeListFileColumns_Command command, b
 	}
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
-		0, y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+      	0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("List file:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__ListFile_JTextField = new JTextField (35);
 	__ListFile_JTextField.addKeyListener (this);
-    JGUIUtil.addComponent(main_JPanel, __ListFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__browse_JButton = new SimpleJButton ("Browse", this);
-    JGUIUtil.addComponent(main_JPanel, __browse_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+    // Input file layout fights back with other rows so put in its own panel
+	JPanel ListFile_JPanel = new JPanel();
+	ListFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(ListFile_JPanel, __ListFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+	__browse_JButton = new SimpleJButton ( "...", this );
+	__browse_JButton.setToolTipText("Browse for file");
+    JGUIUtil.addComponent(ListFile_JPanel, __browse_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	if ( __working_dir != null ) {
+		// Add the button to allow conversion to/from relative path...
+		__path_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(ListFile_JPanel, __path_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	}
+	JGUIUtil.addComponent(main_JPanel, ListFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Output file:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__OutputFile_JTextField = new JTextField (35);
 	__OutputFile_JTextField.addKeyListener (this);
-    JGUIUtil.addComponent(main_JPanel, __OutputFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__browse2_JButton = new SimpleJButton ("Browse", this);
-    JGUIUtil.addComponent(main_JPanel, __browse2_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+    // Output file layout fights back with other rows so put in its own panel
+	JPanel OutputFile_JPanel = new JPanel();
+	OutputFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(OutputFile_JPanel, __OutputFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+	__browse2_JButton = new SimpleJButton ( "...", this );
+	__browse2_JButton.setToolTipText("Browse for file");
+    JGUIUtil.addComponent(OutputFile_JPanel, __browse2_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	if ( __working_dir != null ) {
+		// Add the button to allow conversion to/from relative path...
+		__path2_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(OutputFile_JPanel, __path2_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	}
+	JGUIUtil.addComponent(main_JPanel, OutputFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Columns:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -410,13 +454,6 @@ private void initialize ( JFrame parent, MergeListFileColumns_Command command, b
     JGUIUtil.addComponent(main_JPanel, button_JPanel, 
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
-	if (__working_dir != null) {
-		// Add the button to allow conversion to/from relative path...
-		__path_JButton = new SimpleJButton(__RemoveWorkingDirectoryFromListFile, this);
-		button_JPanel.add (__path_JButton);
-		__path2_JButton = new SimpleJButton(__RemoveWorkingDirectoryFromOutputFile, this);
-		button_JPanel.add (__path2_JButton);
-	}
 	if ( runnable ) {
 		__ok_JButton = new SimpleJButton("Run Tool", this);
 		button_JPanel.add (__ok_JButton);
@@ -535,25 +572,37 @@ private void refresh ()
 	__command_JTextArea.setText( __command.toString ( props ) );
 	// Check the path and determine what the label on the path button should be...
 	if (__path_JButton != null) {
-		__path_JButton.setEnabled (true);
-		File f = new File (ListFile);
-		if (f.isAbsolute()) {
-			__path_JButton.setText (
-			__RemoveWorkingDirectoryFromListFile);
+		if ( (ListFile != null) && !ListFile.isEmpty() ) {
+			__path_JButton.setEnabled ( true );
+			File f = new File ( ListFile );
+			if ( f.isAbsolute() ) {
+				__path_JButton.setText ( __RemoveWorkingDirectory );
+				__path_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+		    	__path_JButton.setText ( __AddWorkingDirectory );
+		    	__path_JButton.setToolTipText("Change path to absolute");
+			}
 		}
 		else {
-		    __path_JButton.setText (
-			__AddWorkingDirectoryToListFile);
+			__path_JButton.setEnabled(false);
 		}
 	}
 	if (__path2_JButton != null) {
-		__path2_JButton.setEnabled (true);
-		File f = new File (OutputFile);
-		if (f.isAbsolute()) {
-			__path2_JButton.setText ( __RemoveWorkingDirectoryFromOutputFile);
+		if ( (OutputFile != null) && !OutputFile.isEmpty() ) {
+			__path2_JButton.setEnabled ( true );
+			File f = new File ( OutputFile );
+			if ( f.isAbsolute() ) {
+				__path2_JButton.setText ( __RemoveWorkingDirectory );
+				__path2_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+            	__path2_JButton.setText ( __AddWorkingDirectory );
+            	__path2_JButton.setToolTipText("Change path to absolute");
+			}
 		}
 		else {
-		    __path2_JButton.setText ( __AddWorkingDirectoryToOutputFile);
+			__path2_JButton.setEnabled(false);
 		}
 	}
 }

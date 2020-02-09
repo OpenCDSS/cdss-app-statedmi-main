@@ -41,8 +41,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.io.File;
 
@@ -62,8 +64,8 @@ public class RunCommands_JDialog extends JDialog
 implements ActionListener, KeyListener, WindowListener
 {
     
-private final String __AddWorkingDirectory = "Add Working Directory";
-private final String __RemoveWorkingDirectory = "Remove Working Directory";
+private final String __AddWorkingDirectory = "Abs";
+private final String __RemoveWorkingDirectory = "Rel";
 
 private SimpleJButton __browse_JButton = null; // File browse button
 private SimpleJButton __cancel_JButton = null; // Cancel Button
@@ -119,7 +121,13 @@ public void actionPerformed( ActionEvent event )
 			}
 	
 			if (path != null) {
-				__InputFile_JTextField.setText(path );
+				// Convert path to relative path by default.
+				try {
+					__InputFile_JTextField.setText(IOUtil.toRelativePath(__working_dir, path));
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 1, __command.getCommandName() + "_JDialog", "Error converting file to relative path." );
+				}
 				JGUIUtil.setLastFileDialogDirectory(directory);
 				refresh();
 			}
@@ -234,11 +242,11 @@ private void initialize ( JFrame parent, Command command )
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout( new GridBagLayout() );
 	getContentPane().add ( "North", main_JPanel );
-	int y = 0;
+	int y = -1;
 
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Read a command file and run the commands." ),
-		0, y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Results are cleared before processing each command file." ),
 		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -254,15 +262,30 @@ private void initialize ( JFrame parent, Command command )
 		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	}
 
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Command file to run:" ), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__InputFile_JTextField = new JTextField ( 50 );
 	__InputFile_JTextField.addKeyListener ( this );
-        JGUIUtil.addComponent(main_JPanel, __InputFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__browse_JButton = new SimpleJButton ( "Browse", this );
-        JGUIUtil.addComponent(main_JPanel, __browse_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+    // Input file layout fights back with other rows so put in its own panel
+	JPanel InputFile_JPanel = new JPanel();
+	InputFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(InputFile_JPanel, __InputFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+	__browse_JButton = new SimpleJButton ( "...", this );
+	__browse_JButton.setToolTipText("Browse for file");
+    JGUIUtil.addComponent(InputFile_JPanel, __browse_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	if ( __working_dir != null ) {
+		// Add the button to allow conversion to/from relative path...
+		__path_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(InputFile_JPanel, __path_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	}
+	JGUIUtil.addComponent(main_JPanel, InputFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
         
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Expected status:"),
             0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -311,11 +334,6 @@ private void initialize ( JFrame parent, Command command )
         JGUIUtil.addComponent(main_JPanel, button_JPanel, 
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
-	if ( __working_dir != null ) {
-		// Add the button to allow conversion to/from relative path...
-		__path_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
-		button_JPanel.add ( __path_JButton );
-	}
 	button_JPanel.add ( __ok_JButton = new SimpleJButton("OK", this) );
 	button_JPanel.add (__cancel_JButton = new SimpleJButton("Cancel",this));
 	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
@@ -426,13 +444,20 @@ private void refresh ()
 	__command_JTextArea.setText( __command.toString ( props ) );
 	// Check the path and determine what the label on the path button should be...
 	if ( __path_JButton != null ) {
-		__path_JButton.setEnabled ( true );
-		File f = new File ( InputFile );
-		if ( f.isAbsolute() ) {
-			__path_JButton.setText ( __RemoveWorkingDirectory );
+		if ( (InputFile != null) && !InputFile.isEmpty() ) {
+			__path_JButton.setEnabled ( true );
+			File f = new File ( InputFile );
+			if ( f.isAbsolute() ) {
+				__path_JButton.setText ( __RemoveWorkingDirectory );
+				__path_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+		    	__path_JButton.setText ( __AddWorkingDirectory );
+		    	__path_JButton.setToolTipText("Change path to absolute");
+			}
 		}
 		else {
-            __path_JButton.setText ( __AddWorkingDirectory );
+			__path_JButton.setEnabled(false);
 		}
 	}
 }

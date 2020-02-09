@@ -29,8 +29,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -65,7 +67,9 @@ Editor for ReadPatternFile() command.
 public class ReadPatternFile_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
-
+	private final String __AddWorkingDirectory = "Abs";
+	private final String __RemoveWorkingDirectory = "Rel";
+	
 private boolean __error_wait = false;	// To track errors
 private boolean __first_time = true;	// Indicate first time display
 private JTextArea __command_JTextArea=null;// For command
@@ -113,10 +117,24 @@ public void actionPerformed(ActionEvent event)
 
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			String directory = fc.getSelectedFile().getParent();
+			String filename = fc.getSelectedFile().getName();
 			String path = fc.getSelectedFile().getPath();
-			__InputFile_JTextField.setText(path);
-			JGUIUtil.setLastFileDialogDirectory(directory);
-			refresh ();
+			
+			if (filename == null || filename.equals("")) {
+				return;
+			}
+	
+			if (path != null) {
+				// Convert path to relative path by default.
+				try {
+					__InputFile_JTextField.setText(IOUtil.toRelativePath(__working_dir, path));
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 1, __command.getCommandName() + "_JDialog", "Error converting file to relative path." );
+				}
+				JGUIUtil.setLastFileDialogDirectory(directory);
+				refresh();
+			}
 		}
 	}
 	else if ( o == __cancel_JButton ) {
@@ -133,18 +151,15 @@ public void actionPerformed(ActionEvent event)
 		}
 	}
 	else if ( o == __path_JButton ) {
-		if (__path_JButton.getText().equals("Add Working Directory")) {
-			__InputFile_JTextField.setText (
-			IOUtil.toAbsolutePath(__working_dir,__InputFile_JTextField.getText()));
+		if ( __path_JButton.getText().equals(__AddWorkingDirectory) ) {
+			__InputFile_JTextField.setText ( IOUtil.toAbsolutePath(__working_dir, __InputFile_JTextField.getText() ) );
 		}
-		else if (__path_JButton.getText().equals("Remove Working Directory")) {
+		else if ( __path_JButton.getText().equals(__RemoveWorkingDirectory) ) {
 			try {
-				__InputFile_JTextField.setText (
-				IOUtil.toRelativePath (__working_dir,__InputFile_JTextField.getText()));
+			    __InputFile_JTextField.setText ( IOUtil.toRelativePath ( __working_dir, __InputFile_JTextField.getText() ) );
 			}
-			catch (Exception e) {
-				Message.printWarning (1,
-				"ReadPatternFile_JDialog", "Error converting file to relative path.");
+			catch ( Exception e ) {
+				Message.printWarning ( 1, __command.getCommandName() + "_JDialog", "Error converting file to relative path." );
 			}
 		}
 		refresh ();
@@ -222,14 +237,14 @@ private void initialize ( JFrame parent, ReadPatternFile_Command command )
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
 	getContentPane().add ("North", main_JPanel);
-	int y = 0;
+	int y = -1;
 
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
-	int yy = 0;
+	int yy = -1;
    	JGUIUtil.addComponent(paragraph, new JLabel (
 		"A pattern file indicates for every month in a period whether the month was WET, DRY, or AVG."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(paragraph, new JLabel (
 		"These indicators are used with the Fill*TSPattern() commands and allow historical averages to be categorized."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -253,17 +268,32 @@ private void initialize ( JFrame parent, ReadPatternFile_Command command )
 	}
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
-		0, y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Pattern file:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__InputFile_JTextField = new JTextField (35);
 	__InputFile_JTextField.addKeyListener (this);
-    JGUIUtil.addComponent(main_JPanel, __InputFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__browse_JButton = new SimpleJButton ("Browse", this);
-    JGUIUtil.addComponent(main_JPanel, __browse_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+    // Input file layout fights back with other rows so put in its own panel
+	JPanel InputFile_JPanel = new JPanel();
+	InputFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(InputFile_JPanel, __InputFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+	__browse_JButton = new SimpleJButton ( "...", this );
+	__browse_JButton.setToolTipText("Browse for file");
+    JGUIUtil.addComponent(InputFile_JPanel, __browse_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	if ( __working_dir != null ) {
+		// Add the button to allow conversion to/from relative path...
+		__path_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(InputFile_JPanel, __path_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	}
+	JGUIUtil.addComponent(main_JPanel, InputFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -283,11 +313,6 @@ private void initialize ( JFrame parent, ReadPatternFile_Command command )
         JGUIUtil.addComponent(main_JPanel, button_JPanel, 
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
-	if (__working_dir != null) {
-		// Add the button to allow conversion to/from relative path...
-		__path_JButton = new SimpleJButton( "Remove Working Directory", this);
-		button_JPanel.add (__path_JButton);
-	}
 	__ok_JButton = new SimpleJButton("OK", this);
 	button_JPanel.add (__ok_JButton);
 	__cancel_JButton = new SimpleJButton("Cancel", this);
@@ -366,13 +391,20 @@ private void refresh ()
 	__command_JTextArea.setText( __command.toString(props) );
 	// Check the path and determine what the label on the path button should be...
 	if (__path_JButton != null) {
-		__path_JButton.setEnabled (true);
-		File f = new File (InputFile);
-		if (f.isAbsolute()) {
-			__path_JButton.setText ("Remove Working Directory");
+		if ( (InputFile != null) && !InputFile.isEmpty() ) {
+			__path_JButton.setEnabled ( true );
+			File f = new File ( InputFile );
+			if ( f.isAbsolute() ) {
+				__path_JButton.setText ( __RemoveWorkingDirectory );
+				__path_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+		    	__path_JButton.setText ( __AddWorkingDirectory );
+		    	__path_JButton.setToolTipText("Change path to absolute");
+			}
 		}
 		else {
-			__path_JButton.setText ("Add Working Directory");
+			__path_JButton.setEnabled(false);
 		}
 	}
 }

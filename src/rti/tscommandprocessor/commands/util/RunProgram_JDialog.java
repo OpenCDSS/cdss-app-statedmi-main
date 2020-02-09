@@ -68,10 +68,8 @@ import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 public class RunProgram_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
-private final String __AddWorkingDirectoryFileOut = "Abs";
-private final String __AddWorkingDirectoryFileErr = "Abs";
-private final String __RemoveWorkingDirectoryFileOut = "Rel";
-private final String __RemoveWorkingDirectoryFileErr = "Rel";
+private final String __AddWorkingDirectory = "Abs";
+private final String __RemoveWorkingDirectory = "Rel";
 
 private SimpleJButton __browseOut_JButton = null;
 private SimpleJButton __pathOut_JButton = null;
@@ -220,11 +218,11 @@ public void actionPerformed( ActionEvent event )
 		}
 	}
 	else if ( o == __pathOut_JButton ) {
-		if ( __pathOut_JButton.getText().equals(__AddWorkingDirectoryFileOut) ) {
+		if ( __pathOut_JButton.getText().equals(__AddWorkingDirectory) ) {
 			__StdoutFile_JTextField.setText (
 			IOUtil.toAbsolutePath(__working_dir,__StdoutFile_JTextField.getText() ) );
 		}
-		else if ( __pathOut_JButton.getText().equals(__RemoveWorkingDirectoryFileOut) ) {
+		else if ( __pathOut_JButton.getText().equals(__RemoveWorkingDirectory) ) {
 			try {
 			    __StdoutFile_JTextField.setText (
 				IOUtil.toRelativePath ( __working_dir, __StdoutFile_JTextField.getText() ) );
@@ -237,11 +235,11 @@ public void actionPerformed( ActionEvent event )
 		refresh ();
 	}
 	else if ( o == __pathErr_JButton ) {
-		if ( __pathErr_JButton.getText().equals( __AddWorkingDirectoryFileErr) ) {
+		if ( __pathErr_JButton.getText().equals( __AddWorkingDirectory) ) {
 			__StderrFile_JTextField.setText (
 			IOUtil.toAbsolutePath(__working_dir, __StderrFile_JTextField.getText() ) );
 		}
-		else if ( __pathErr_JButton.getText().equals(__RemoveWorkingDirectoryFileErr) ) {
+		else if ( __pathErr_JButton.getText().equals(__RemoveWorkingDirectory) ) {
 			try {
 			    __StderrFile_JTextField.setText (
 				IOUtil.toRelativePath ( __working_dir, __StderrFile_JTextField.getText() ) );
@@ -402,17 +400,19 @@ private void initialize ( JFrame parent, RunProgram_Command command, List<String
 	getContentPane().add ( "North", main_JPanel );
 	int y = -1;
 
+	String appName = IOUtil.getProgramName();
+
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"This command runs another program."),
 		0, ++y, 7, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
-		"In order for TSTool to locate input and output files, one of the following approaches should be used:"),
+		"In order for " + appName + " to locate input and output files, one of the following approaches should be used:"),
 		0, ++y, 7, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
-		"     1) Start TSTool from the folder (directory) where files exist in order to use relative paths."),
+		"     1) Start " + appName + " from the folder (directory) where files exist in order to use relative paths."),
 		0, ++y, 7, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
-        "     2) Start TSTool anywhere and use ${WorkingDir} in the command line to specify files relative to the working directory (folder)."),
+        "     2) Start " + appName + " anywhere and use ${WorkingDir} in the command line to specify files relative to the working directory (folder)."),
         0, ++y, 7, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
         "Specify the program to run using the command line OR separate arguments - the arguments will " +
@@ -581,13 +581,13 @@ private void initialize ( JFrame parent, RunProgram_Command command, List<String
     __main_JTabbedPane.addTab ( "Timeout", timeout_JPanel );
 
     JGUIUtil.addComponent(timeout_JPanel, new JLabel (
-		"TSTool will for the called program to complete before continuing."),
+		appName + " will for the called program to complete before continuing."),
 		0, ++yTimeout, 7, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     JGUIUtil.addComponent(timeout_JPanel, new JLabel (
-		"This allows TSTool to check for errors and process output from the program."),
+		"This allows " + appName + " to check for errors and process output from the program."),
 		0, ++yTimeout, 7, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     JGUIUtil.addComponent(timeout_JPanel, new JLabel (
-		"Specify the timeout to ensure that TSTool does not wait indefinitely for the program to finish."),
+		"Specify the timeout to ensure that " + appName + " does not wait indefinitely for the program to finish."),
 		0, ++yTimeout, 7, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     JGUIUtil.addComponent(timeout_JPanel, new JLabel (
 		"<html><b>May add parameters to control whether timeout is treated as an error.</b></html>"),
@@ -680,36 +680,46 @@ private void initialize ( JFrame parent, RunProgram_Command command, List<String
 	__StdoutFile_JTextField = new JTextField ( 50 );
 	__StdoutFile_JTextField.setToolTipText("Optional - specify the filename for standard output, can use ${Property} notation");
 	__StdoutFile_JTextField.addKeyListener ( this );
-        JGUIUtil.addComponent(out_JPanel, __StdoutFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+    // Output file layout fights back with other rows so put in its own panel
+	JPanel StdoutFile_JPanel = new JPanel();
+	StdoutFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(StdoutFile_JPanel, __StdoutFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	__browseOut_JButton = new SimpleJButton ( "...", this );
 	__browseOut_JButton.setToolTipText("Browse for file");
-    JGUIUtil.addComponent(out_JPanel, __browseOut_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+    JGUIUtil.addComponent(StdoutFile_JPanel, __browseOut_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
 	if ( __working_dir != null ) {
 		// Add the button to allow conversion to/from relative path...
-		__pathOut_JButton = new SimpleJButton(__RemoveWorkingDirectoryFileOut,this);
-	    JGUIUtil.addComponent(out_JPanel, __pathOut_JButton,
-	    	7, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+		__pathOut_JButton = new SimpleJButton(__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(StdoutFile_JPanel, __pathOut_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	}
+	JGUIUtil.addComponent(out_JPanel, StdoutFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(out_JPanel, new JLabel ( "Standard error file:" ), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__StderrFile_JTextField = new JTextField ( 50 );
 	__StderrFile_JTextField.setToolTipText("Optional - specify the filename for standard error, can use ${Property} notation");
 	__StderrFile_JTextField.addKeyListener ( this );
-        JGUIUtil.addComponent(out_JPanel, __StderrFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+    // Output file layout fights back with other rows so put in its own panel
+	JPanel StderrFile_JPanel = new JPanel();
+	StderrFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(StderrFile_JPanel, __StderrFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	__browseErr_JButton = new SimpleJButton ( "...", this );
 	__browseErr_JButton.setToolTipText("Browse for file");
-    JGUIUtil.addComponent(out_JPanel, __browseErr_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+    JGUIUtil.addComponent(StderrFile_JPanel, __browseErr_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
 	if ( __working_dir != null ) {
 		// Add the button to allow conversion to/from relative path...
-		__pathErr_JButton = new SimpleJButton(__RemoveWorkingDirectoryFileErr,this);
-	    JGUIUtil.addComponent(out_JPanel, __pathErr_JButton,
-	    	7, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+		__pathErr_JButton = new SimpleJButton(__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(StderrFile_JPanel, __pathErr_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	}
+	JGUIUtil.addComponent(out_JPanel, StderrFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     
     // Panel for output checks
     int yCheck = -1;
@@ -736,10 +746,10 @@ private void initialize ( JFrame parent, RunProgram_Command command, List<String
 		"  Level - for match, level of message, one of:  Status, Warning, Failure"),
 		0, ++yCheck, 7, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     JGUIUtil.addComponent(check_JPanel, new JLabel (
-		"  Message - message for TSTool command status, use ${file.line:text} to include output line text, can contain ${Property}"),
+		"  Message - message for " + appName + " command status, use ${file.line:text} to include output line text, can contain ${Property}"),
 		0, ++yCheck, 7, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     JGUIUtil.addComponent(check_JPanel, new JLabel (
-		"  Recommendation - recommendation for TSTool command status, can contain ${Property}"),
+		"  Recommendation - recommendation for " + appName + " command status, can contain ${Property}"),
 		0, ++yCheck, 7, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     JGUIUtil.addComponent(check_JPanel, new JSeparator (SwingConstants.HORIZONTAL),
         0, ++yCheck, 7, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
@@ -1015,27 +1025,37 @@ private void refresh ()
     __command_JTextArea.setText( __command.toString(props) );
 	// Check the path and determine what the label on the path button should be...
 	if ( __pathOut_JButton != null ) {
-		__pathOut_JButton.setEnabled ( true );
-		File f = new File ( StdoutFile );
-		if ( f.isAbsolute() ) {
-			__pathOut_JButton.setText (__RemoveWorkingDirectoryFileOut);
-			__pathOut_JButton.setToolTipText("Change path to relative to command file");
+		if ( (StdoutFile != null) && !StdoutFile.isEmpty() ) {
+			__pathOut_JButton.setEnabled ( true );
+			File f = new File ( StdoutFile );
+			if ( f.isAbsolute() ) {
+				__pathOut_JButton.setText ( __RemoveWorkingDirectory );
+				__pathOut_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+            	__pathOut_JButton.setText ( __AddWorkingDirectory );
+            	__pathOut_JButton.setToolTipText("Change path to absolute");
+			}
 		}
 		else {
-		    __pathOut_JButton.setText (__AddWorkingDirectoryFileOut );
-			__pathOut_JButton.setToolTipText("Change path to absolute");
+			__pathOut_JButton.setEnabled(false);
 		}
 	}
 	if ( __pathErr_JButton != null ) {
-		__pathErr_JButton.setEnabled ( true );
-		File f = new File ( StderrFile );
-		if ( f.isAbsolute() ) {
-			__pathErr_JButton.setText (__RemoveWorkingDirectoryFileErr);
-			__pathErr_JButton.setToolTipText("Change path to relative to command file");
+		if ( (StderrFile != null) && !StderrFile.isEmpty() ) {
+			__pathErr_JButton.setEnabled ( true );
+			File f = new File ( StderrFile );
+			if ( f.isAbsolute() ) {
+				__pathErr_JButton.setText ( __RemoveWorkingDirectory );
+				__pathErr_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+            	__pathErr_JButton.setText ( __AddWorkingDirectory );
+            	__pathErr_JButton.setToolTipText("Change path to absolute");
+			}
 		}
 		else {
-		    __pathErr_JButton.setText (__AddWorkingDirectoryFileErr );
-			__pathErr_JButton.setToolTipText("Change path to absolute");
+			__pathErr_JButton.setEnabled(false);
 		}
 	}
 }

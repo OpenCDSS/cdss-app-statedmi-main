@@ -63,10 +63,8 @@ import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 public class CopyFile_JDialog extends JDialog
 implements ActionListener, KeyListener, WindowListener
 {
-private final String __AddWorkingDirectoryFileInput = "Abs";
-private final String __AddWorkingDirectoryFileOutput = "Abs";
-private final String __RemoveWorkingDirectoryFileInput = "Rel";
-private final String __RemoveWorkingDirectoryFileOutput = "Rel";
+private final String __AddWorkingDirectory = "Abs";
+private final String __RemoveWorkingDirectory = "Rel";
 
 private SimpleJButton __browseInput_JButton = null;
 private SimpleJButton __pathInput_JButton = null;
@@ -146,7 +144,7 @@ public void actionPerformed( ActionEvent event )
         }
         fc.setDialogTitle( "Select Output File");
         
-        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+        if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             String directory = fc.getSelectedFile().getParent();
             String filename = fc.getSelectedFile().getName(); 
             String path = fc.getSelectedFile().getPath(); 
@@ -182,10 +180,10 @@ public void actionPerformed( ActionEvent event )
 		}
 	}
 	else if ( o == __pathInput_JButton ) {
-		if ( __pathInput_JButton.getText().equals(__AddWorkingDirectoryFileInput) ) {
+		if ( __pathInput_JButton.getText().equals(__AddWorkingDirectory) ) {
 			__InputFile_JTextField.setText (IOUtil.toAbsolutePath(__working_dir,__InputFile_JTextField.getText() ) );
 		}
-		else if ( __pathInput_JButton.getText().equals(__RemoveWorkingDirectoryFileInput) ) {
+		else if ( __pathInput_JButton.getText().equals(__RemoveWorkingDirectory) ) {
 			try {
                 __InputFile_JTextField.setText ( IOUtil.toRelativePath ( __working_dir,
                         __InputFile_JTextField.getText() ) );
@@ -198,10 +196,10 @@ public void actionPerformed( ActionEvent event )
 		refresh ();
 	}
     else if ( o == __pathOutput_JButton ) {
-        if ( __pathOutput_JButton.getText().equals(__AddWorkingDirectoryFileOutput) ) {
+        if ( __pathOutput_JButton.getText().equals(__AddWorkingDirectory) ) {
             __OutputFile_JTextField.setText (IOUtil.toAbsolutePath(__working_dir,__OutputFile_JTextField.getText() ) );
         }
-        else if ( __pathOutput_JButton.getText().equals(__RemoveWorkingDirectoryFileOutput) ) {
+        else if ( __pathOutput_JButton.getText().equals(__RemoveWorkingDirectory) ) {
             try {
                 __OutputFile_JTextField.setText ( IOUtil.toRelativePath ( __working_dir,
                         __OutputFile_JTextField.getText() ) );
@@ -304,36 +302,46 @@ private void initialize ( JFrame parent, CopyFile_Command command )
 	__InputFile_JTextField = new JTextField ( 50 );
 	__InputFile_JTextField.setToolTipText("Specify the input file to copy, can use ${Property} notation.");
 	__InputFile_JTextField.addKeyListener ( this );
-        JGUIUtil.addComponent(main_JPanel, __InputFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+    // Input file layout fights back with other rows so put in its own panel
+	JPanel InputFile_JPanel = new JPanel();
+	InputFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(InputFile_JPanel, __InputFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	__browseInput_JButton = new SimpleJButton ( "...", this );
 	__browseInput_JButton.setToolTipText("Browse for file");
-    JGUIUtil.addComponent(main_JPanel, __browseInput_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+    JGUIUtil.addComponent(InputFile_JPanel, __browseInput_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
 	if ( __working_dir != null ) {
 		// Add the button to allow conversion to/from relative path...
-		__pathInput_JButton = new SimpleJButton(__RemoveWorkingDirectoryFileInput,this);
-	    JGUIUtil.addComponent(main_JPanel, __pathInput_JButton,
-	    	7, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+		__pathInput_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(InputFile_JPanel, __pathInput_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	}
+	JGUIUtil.addComponent(main_JPanel, InputFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Output file:" ), 
         0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     __OutputFile_JTextField = new JTextField ( 50 );
     __OutputFile_JTextField.setToolTipText("Specify the output file to copy, can use ${Property} notation.");
     __OutputFile_JTextField.addKeyListener ( this );
-        JGUIUtil.addComponent(main_JPanel, __OutputFile_JTextField,
-        1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-    __browseOutput_JButton = new SimpleJButton ( "...", this );
+    // Output file layout fights back with other rows so put in its own panel
+	JPanel OutputFile_JPanel = new JPanel();
+	OutputFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(OutputFile_JPanel, __OutputFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+	__browseOutput_JButton = new SimpleJButton ( "...", this );
 	__browseOutput_JButton.setToolTipText("Browse for file");
-    JGUIUtil.addComponent(main_JPanel, __browseOutput_JButton,
-        6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+    JGUIUtil.addComponent(OutputFile_JPanel, __browseOutput_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
 	if ( __working_dir != null ) {
 		// Add the button to allow conversion to/from relative path...
-		__pathOutput_JButton = new SimpleJButton(__RemoveWorkingDirectoryFileOutput,this);
-	    JGUIUtil.addComponent(main_JPanel, __pathOutput_JButton,
-	    	7, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+		__pathOutput_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(OutputFile_JPanel, __pathOutput_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	}
+	JGUIUtil.addComponent(main_JPanel, OutputFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
    JGUIUtil.addComponent(main_JPanel, new JLabel ( "If input not found?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -460,28 +468,38 @@ private void refresh ()
 	__command_JTextArea.setText( __command.toString(props) );
 	// Check the path and determine what the label on the path button should be...
 	if ( __pathInput_JButton != null ) {
-		__pathInput_JButton.setEnabled ( true );
-		File f = new File ( InputFile );
-		if ( f.isAbsolute() ) {
-			__pathInput_JButton.setText (__RemoveWorkingDirectoryFileInput);
-			__pathInput_JButton.setToolTipText("Change path to relative to command file");
+		if ( (InputFile != null) && !InputFile.isEmpty() ) {
+			__pathInput_JButton.setEnabled ( true );
+			File f = new File ( InputFile );
+			if ( f.isAbsolute() ) {
+				__pathInput_JButton.setText ( __RemoveWorkingDirectory );
+				__pathInput_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+		    	__pathInput_JButton.setText ( __AddWorkingDirectory );
+		    	__pathInput_JButton.setToolTipText("Change path to absolute");
+			}
 		}
 		else {
-            __pathInput_JButton.setText (__AddWorkingDirectoryFileInput );
-            __pathInput_JButton.setToolTipText("Change path to absolute");
+			__pathInput_JButton.setEnabled(false);
 		}
 	}
     if ( __pathOutput_JButton != null ) {
-        __pathOutput_JButton.setEnabled ( true );
-        File f = new File ( OutputFile );
-        if ( f.isAbsolute() ) {
-            __pathOutput_JButton.setText (__RemoveWorkingDirectoryFileOutput);
-            __pathOutput_JButton.setToolTipText("Change path to relative to command file");
-            __pathOutput_JButton.setToolTipText("Change path to absolute");
-        }
-        else {
-            __pathOutput_JButton.setText (__AddWorkingDirectoryFileOutput );
-        }
+		if ( (OutputFile != null) && !OutputFile.isEmpty() ) {
+			__pathOutput_JButton.setEnabled ( true );
+			File f = new File ( OutputFile );
+			if ( f.isAbsolute() ) {
+				__pathOutput_JButton.setText ( __RemoveWorkingDirectory );
+				__pathOutput_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+            	__pathOutput_JButton.setText ( __AddWorkingDirectory );
+            	__pathOutput_JButton.setToolTipText("Change path to absolute");
+			}
+		}
+		else {
+			__pathOutput_JButton.setEnabled(false);
+		}
     }
 }
 

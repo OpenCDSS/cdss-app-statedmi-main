@@ -29,8 +29,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -57,7 +59,6 @@ import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.Help.HelpViewer;
-import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
@@ -72,6 +73,9 @@ and/or editor classes.
 public class ReadFromStateMod_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
+	
+	private final String __AddWorkingDirectory = "Abs";
+	private final String __RemoveWorkingDirectory = "Rel";
 
 private boolean __error_wait = false; // To track errors
 private boolean __first_time = true; // Indicate first time display
@@ -97,7 +101,7 @@ Command editor constructor
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
-public ReadFromStateMod_JDialog ( JFrame parent, Command command )
+public ReadFromStateMod_JDialog ( JFrame parent, ReadFromStateMod_Command command )
 {	super(parent, true);
 	initialize ( parent, command );
 }
@@ -218,10 +222,24 @@ public void actionPerformed(ActionEvent event)
 
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			String directory = fc.getSelectedFile().getParent();
+			String filename = fc.getSelectedFile().getName();
 			String path = fc.getSelectedFile().getPath();
-			__InputFile_JTextField.setText(path);
-			JGUIUtil.setLastFileDialogDirectory(directory);
-			refresh ();
+			
+			if (filename == null || filename.equals("")) {
+				return;
+			}
+	
+			if (path != null) {
+				// Convert path to relative path by default.
+				try {
+					__InputFile_JTextField.setText(IOUtil.toRelativePath(__working_dir, path));
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 1, __command.getCommandName() + "_JDialog", "Error converting file to relative path." );
+				}
+				JGUIUtil.setLastFileDialogDirectory(directory);
+				refresh();
+			}
 		}
 	}
 	else if ( o == __cancel_JButton ) {
@@ -238,17 +256,15 @@ public void actionPerformed(ActionEvent event)
 		}
 	}
 	else if ( o == __path_JButton ) {
-		if (__path_JButton.getText().equals("Add Working Directory")) {
-			__InputFile_JTextField.setText (
-			IOUtil.toAbsolutePath(__working_dir, __InputFile_JTextField.getText()));
+		if ( __path_JButton.getText().equals(__AddWorkingDirectory) ) {
+			__InputFile_JTextField.setText ( IOUtil.toAbsolutePath(__working_dir, __InputFile_JTextField.getText() ) );
 		}
-		else if (__path_JButton.getText().equals( "Remove Working Directory")) {
+		else if ( __path_JButton.getText().equals(__RemoveWorkingDirectory) ) {
 			try {
-				__InputFile_JTextField.setText (
-				IOUtil.toRelativePath (__working_dir, __InputFile_JTextField.getText()));
+			    __InputFile_JTextField.setText ( IOUtil.toRelativePath ( __working_dir, __InputFile_JTextField.getText() ) );
 			}
-			catch (Exception e) {
-				Message.printWarning (1, __command + "_JDialog", "Error converting file to relative path.");
+			catch ( Exception e ) {
+				Message.printWarning ( 1, __command.getCommandName() + "_JDialog", "Error converting file to relative path." );
 			}
 		}
 		refresh ();
@@ -343,31 +359,12 @@ private void commitEdits()
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable {
-	__InputFile_JTextField = null;
-	__IgnoreDWs_JComboBox = null;
-	__IgnoreWells_JComboBox = null;
-	__Append_JComboBox = null;
-	__browse_JButton = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command = null;
-	__ok_JButton = null;
-	__path_JButton = null;
-	__working_dir = null;
-	super.finalize ();
-}
-
-/**
 Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command being edited.
 */
-private void initialize ( JFrame parent, Command command )
-{	__command = (ReadFromStateMod_Command)command;
+private void initialize ( JFrame parent, ReadFromStateMod_Command command )
+{	__command = command;
 	CommandProcessor processor = __command.getCommandProcessor();
 	__working_dir = StateDMICommandProcessorUtil.getWorkingDirForCommand ( processor, __command );
 
@@ -380,16 +377,16 @@ private void initialize ( JFrame parent, Command command )
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
 	getContentPane().add ("North", main_JPanel);
-	int y = 0;
+	int y = -1;
 
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
-	int yy = 0;
+	int yy = -1;
 	if ( __command instanceof ReadCULocationsFromStateMod_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads CU locations from a StateMod direct " +
 			"diversion station file or well station file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	    JGUIUtil.addComponent(paragraph, new JLabel (
 			"A CU Location is a location where water requirement is estimated."),
 			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -408,7 +405,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadStreamGageStationsFromStateMod_Command ) {
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads stream gage stations from a StateMod stream gage station file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
 		"A stream gage is a location where flows have been measured " +
 		"historically and time series are available in the data set."),
@@ -419,12 +416,12 @@ private void initialize ( JFrame parent, Command command )
 		if ( __command instanceof ReadDelayTablesMonthlyFromStateMod_Command) {
 			JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command reads monthly delay tables from a StateMod delay tables file."),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 		}
 		else if ( __command instanceof ReadDelayTablesDailyFromStateMod_Command) {
 			JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command reads daily delay tables from a StateMod delay tables file."),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 		}
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"Delay tables indicate how returns (or depletions) are distributed over time."),
@@ -443,7 +440,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadDiversionStationsFromStateMod_Command ) {
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads diversion stations from a StateMod direct diversion stations file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"Diversion stations indicate locations where water is " +
 		"diverted from a river, lake, or reservoir."),
@@ -452,7 +449,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadDiversionRightsFromStateMod_Command ) {
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads diversion rights from a StateMod direct diversion rights file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"Diversion rights are associated with diversion stations."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -461,7 +458,7 @@ private void initialize ( JFrame parent, Command command )
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads diversion historical time series (monthly)"+
 			" from a StateMod time series file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"Diversion historical time series (monthly) are associated with diversion stations."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -470,7 +467,7 @@ private void initialize ( JFrame parent, Command command )
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads diversion demand time series (monthly)"+
 			" from a StateMod time series file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"Diversion demand time series (monthly) are associated with diversion stations."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -479,7 +476,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadReservoirStationsFromStateMod_Command ) {
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads reservoir stations from a StateMod reservoir stations file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
 		"Reservoir stations indicate locations where water can be stored for use at a later date."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -488,7 +485,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadReservoirRightsFromStateMod_Command ) {
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads reservoir rights from a StateMod reservoir rights file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"Reservoir rights are associated with reservoir stations."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -496,7 +493,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadReservoirReturnFromStateMod_Command ){
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads reservoir return data from a StateMod reservoir return file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"The return data indicates how reservoir seepage is returned to the system."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -504,7 +501,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadInstreamFlowStationsFromStateMod_Command ) {
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads instream flow stations from a StateMod instream flow stations file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"Instream flow stations indicate locations where surface " +
 		"water flow is associated with an instream flow constraint."),
@@ -513,7 +510,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadInstreamFlowRightsFromStateMod_Command ) {
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads instream flow rights from a StateMod instream flow rights file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
 		"Instream flow rights are associated with instream flow stations."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -522,7 +519,7 @@ private void initialize ( JFrame parent, Command command )
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads instream flow demand time series (average monthly)"+
 			" from a StateMod time series file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"Instream flow demand time series (average monthly) are associated with instream flow stations."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -530,7 +527,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadWellStationsFromStateMod_Command ) {
     	JGUIUtil.addComponent(paragraph, new JLabel (
     		"This command reads well stations from a StateMod well stations file."),
-    		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"Well stations indicate locations where ONLY groundwater supply is used to meet demand"),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -545,13 +542,13 @@ private void initialize ( JFrame parent, Command command )
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command reads well rights from a StateMod " +
 		"well rights file.  Well rights are associated with well stations."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof ReadWellHistoricalPumpingTSMonthlyFromStateMod_Command ){
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads well historical pumping time series " +
 			"(monthly) from a StateMod (or StateCU) well pumping time series file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
 		"Well historical pumping time series (monthly) are associated with well stations."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -560,7 +557,7 @@ private void initialize ( JFrame parent, Command command )
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads well demand time series " +
 			"(monthly) from a StateCU (or StateMod) well pumping time series file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"Well demand time series (monthly) are associated with well stations."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -569,7 +566,7 @@ private void initialize ( JFrame parent, Command command )
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads well demand time series " +
 			"(monthly) from a StateMod well demand time series file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"Well demand time series (monthly) are associated with well stations."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -577,7 +574,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadPlanStationsFromStateMod_Command ){
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads plan stations from a StateMod plan stations file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"A plan is an administrative model construct to control the delivery of water, " +
 		"beyond basic allocation and operating rules."),
@@ -586,7 +583,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadPlanWellAugmentationFromStateMod_Command ){
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads well augmentation plan data from a StateMod well augmentation plan data file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"A plan is an administrative model construct to control the delivery of water, " +
 		"beyond basic allocation and operating rules."),
@@ -595,7 +592,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadPlanReturnFromStateMod_Command ){
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads plan return data from a StateMod plan return file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"The return data indicates how canal seepage is returned to the system."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -603,7 +600,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadStreamEstimateStationsFromStateMod_Command ){
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads stream estimate stations from a StateMod stream gage station file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"A stream estimate station is a location where flows are " +
 		"estimated by prorating stream gage time series."),
@@ -613,7 +610,7 @@ private void initialize ( JFrame parent, Command command )
        	JGUIUtil.addComponent(paragraph, new JLabel (
        		"<HTML><B>This command is typically used for testing and minor changes to an existing" +
        		" stream estimate coefficients file.</B></HTML>"),
-       		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+       		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
         	"<HTML><B>Normally, coefficients are calculated by reading stream estimate stations and " +
         	"then using the CalculateStreamEstimateCoefficients() command.</B></HTML>"),
@@ -630,7 +627,7 @@ private void initialize ( JFrame parent, Command command )
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command reads the generalized network from a StateMod " +
 		"network file (old Makenet format or new XML format)."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
 		"The network can then be used, for example, to create the " +
 		"river network specifically needed by StateMod."),
@@ -651,7 +648,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadRiverNetworkFromStateMod_Command ) {
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads the StateMod river network file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"The StateMod river network contains river node identifiers, " +
 		"names, and downstream node identifiers."),
@@ -661,7 +658,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadOperationalRightsFromStateMod_Command ){
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads operational rights from a StateMod operational rights file."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"An operational right (operating rule) defines custom rules to control the delivery of water, " +
 		"beyond basic allocation."),
@@ -670,7 +667,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadResponseFromStateMod_Command ){
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads a StateMod response file, which contains a list of files in the data set."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"<html><b>The command is used to test reading/writing the response file - " +
 			"do not use in full production.</b></html>."),
@@ -679,7 +676,7 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof ReadControlFromStateMod_Command ){
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"This command reads a StateMod control file, which contains data set controlling information."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     	JGUIUtil.addComponent(paragraph, new JLabel (
 			"<html><b>The command is used to test reading/writing the control file - " +
 			"do not use in full production.</b></html>."),
@@ -697,7 +694,10 @@ private void initialize ( JFrame parent, Command command )
 	}
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
-		0, y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	if ( __command instanceof ReadWellHistoricalPumpingTSMonthlyFromStateCU_Command){
 	    JGUIUtil.addComponent(main_JPanel, new JLabel ("StateCU file:"),
@@ -709,11 +709,23 @@ private void initialize ( JFrame parent, Command command )
 	}
 	__InputFile_JTextField = new JTextField (35);
 	__InputFile_JTextField.addKeyListener (this);
-        JGUIUtil.addComponent(main_JPanel, __InputFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__browse_JButton = new SimpleJButton ("Browse", this);
-        JGUIUtil.addComponent(main_JPanel, __browse_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+    // Input file layout fights back with other rows so put in its own panel
+	JPanel InputFile_JPanel = new JPanel();
+	InputFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(InputFile_JPanel, __InputFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+	__browse_JButton = new SimpleJButton ( "...", this );
+	__browse_JButton.setToolTipText("Browse for file");
+    JGUIUtil.addComponent(InputFile_JPanel, __browse_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	if ( __working_dir != null ) {
+		// Add the button to allow conversion to/from relative path...
+		__path_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(InputFile_JPanel, __path_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	}
+	JGUIUtil.addComponent(main_JPanel, InputFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
         
     if ( __command instanceof ReadDelayTablesMonthlyFromStateMod_Command ||
     	__command instanceof ReadDelayTablesDailyFromStateMod_Command) {
@@ -829,11 +841,6 @@ private void initialize ( JFrame parent, Command command )
         JGUIUtil.addComponent(main_JPanel, button_JPanel, 
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
-	if (__working_dir != null) {
-		// Add the button to allow conversion to/from relative path...
-		__path_JButton = new SimpleJButton( "Remove Working Directory", this);
-		button_JPanel.add (__path_JButton);
-	}
 	__ok_JButton = new SimpleJButton("OK", this);
 	button_JPanel.add (__ok_JButton);
 	__cancel_JButton = new SimpleJButton("Cancel", this);
@@ -1046,13 +1053,20 @@ private void refresh ()
 	__command_JTextArea.setText( __command.toString(props) );
 	// Check the path and determine what the label on the path button should be...
 	if (__path_JButton != null) {
-		__path_JButton.setEnabled (true);
-		File f = new File (InputFile);
-		if (f.isAbsolute()) {
-			__path_JButton.setText ("Remove Working Directory");
+		if ( (InputFile != null) && !InputFile.isEmpty() ) {
+			__path_JButton.setEnabled ( true );
+			File f = new File ( InputFile );
+			if ( f.isAbsolute() ) {
+				__path_JButton.setText ( __RemoveWorkingDirectory );
+				__path_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+		    	__path_JButton.setText ( __AddWorkingDirectory );
+		    	__path_JButton.setToolTipText("Change path to absolute");
+			}
 		}
 		else {
-			__path_JButton.setText ("Add Working Directory");
+			__path_JButton.setEnabled(false);
 		}
 	}
 }

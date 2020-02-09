@@ -38,8 +38,8 @@ import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 public class WebGet_JDialog extends JDialog
 implements ActionListener, KeyListener, WindowListener
 {
-private final String __AddWorkingDirectoryFile = "Abs";
-private final String __RemoveWorkingDirectoryFile = "Rel";
+private final String __AddWorkingDirectory = "Abs";
+private final String __RemoveWorkingDirectory = "Rel";
 
 private SimpleJButton __browse_JButton = null;
 private SimpleJButton __path_JButton = null;
@@ -125,10 +125,10 @@ public void actionPerformed( ActionEvent event )
 		}
 	}
 	else if ( o == __path_JButton ) {
-		if ( __path_JButton.getText().equals(__AddWorkingDirectoryFile) ) {
+		if ( __path_JButton.getText().equals(__AddWorkingDirectory) ) {
 			__LocalFile_JTextField.setText (IOUtil.toAbsolutePath(__working_dir,__LocalFile_JTextField.getText() ) );
 		}
-		else if ( __path_JButton.getText().equals(__RemoveWorkingDirectoryFile) ) {
+		else if ( __path_JButton.getText().equals(__RemoveWorkingDirectory) ) {
 			try {
                 __LocalFile_JTextField.setText ( IOUtil.toRelativePath ( __working_dir,
                         __LocalFile_JTextField.getText() ) );
@@ -247,18 +247,23 @@ private void initialize ( JFrame parent, WebGet_Command command )
 	__LocalFile_JTextField = new JTextField ( 50 );
 	__LocalFile_JTextField.setToolTipText("Specify the output file (will have same the contents as retrieved from URL), can use ${Property}.");
 	__LocalFile_JTextField.addKeyListener ( this );
-    JGUIUtil.addComponent(main_JPanel, __LocalFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+    // Output file layout fights back with other rows so put in its own panel
+	JPanel LocalFile_JPanel = new JPanel();
+	LocalFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(LocalFile_JPanel, __LocalFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST );
 	__browse_JButton = new SimpleJButton ( "...", this );
 	__browse_JButton.setToolTipText("Browse for file");
-    JGUIUtil.addComponent(main_JPanel, __browse_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+    JGUIUtil.addComponent(LocalFile_JPanel, __browse_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
 	if ( __working_dir != null ) {
 		// Add the button to allow conversion to/from relative path...
-		__path_JButton = new SimpleJButton(__RemoveWorkingDirectoryFile,this);
-	    JGUIUtil.addComponent(main_JPanel, __path_JButton,
-	    	7, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+		__path_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(LocalFile_JPanel, __path_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
 	}
+	JGUIUtil.addComponent(main_JPanel, LocalFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Output property:"), 
         0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -383,15 +388,20 @@ private void refresh ()
 	__command_JTextArea.setText( __command.toString(props) );
 	// Check the path and determine what the label on the path button should be...
 	if ( __path_JButton != null ) {
-		__path_JButton.setEnabled ( true );
-		File f = new File ( LocalFile );
-		if ( f.isAbsolute() ) {
-			__path_JButton.setText (__RemoveWorkingDirectoryFile);
-			__path_JButton.setToolTipText("Change path to relative to command file");
+		if ( (LocalFile != null) && !LocalFile.isEmpty() ) {
+			__path_JButton.setEnabled ( true );
+			File f = new File ( LocalFile );
+			if ( f.isAbsolute() ) {
+				__path_JButton.setText ( __RemoveWorkingDirectory );
+				__path_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+            	__path_JButton.setText ( __AddWorkingDirectory );
+            	__path_JButton.setToolTipText("Change path to absolute");
+			}
 		}
 		else {
-            __path_JButton.setText (__AddWorkingDirectoryFile );
-            __path_JButton.setToolTipText("Change path to absolute");
+			__path_JButton.setEnabled(false);
 		}
 	}
 }
