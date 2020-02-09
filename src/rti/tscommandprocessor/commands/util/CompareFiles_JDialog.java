@@ -64,10 +64,8 @@ import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 public class CompareFiles_JDialog extends JDialog
 implements ActionListener, KeyListener, WindowListener
 {
-private final String __AddWorkingDirectoryFile1 = "Abs";
-private final String __AddWorkingDirectoryFile2 = "Abs";
-private final String __RemoveWorkingDirectoryFile1 = "Rel";
-private final String __RemoveWorkingDirectoryFile2 = "Rel";
+private final String __AddWorkingDirectory = "Abs";
+private final String __RemoveWorkingDirectory = "Rel";
 
 private final String __VisualDiff = "Visual Diff";
 private final String visualDiffLabel = "Run program to visually compare output files (see TSTool DiffProgram configuration property).";
@@ -195,11 +193,11 @@ public void actionPerformed( ActionEvent event )
 		}
 	}
 	else if ( o == __path1_JButton ) {
-		if ( __path1_JButton.getText().equals(__AddWorkingDirectoryFile1) ) {
+		if ( __path1_JButton.getText().equals(__AddWorkingDirectory) ) {
 			__InputFile1_JTextField.setText (
 			IOUtil.toAbsolutePath(__working_dir,__InputFile1_JTextField.getText() ) );
 		}
-		else if ( __path1_JButton.getText().equals(__RemoveWorkingDirectoryFile1) ) {
+		else if ( __path1_JButton.getText().equals(__RemoveWorkingDirectory) ) {
 			try {
 			    __InputFile1_JTextField.setText (
 				IOUtil.toRelativePath ( __working_dir, __InputFile1_JTextField.getText() ) );
@@ -212,11 +210,11 @@ public void actionPerformed( ActionEvent event )
 		refresh ();
 	}
 	else if ( o == __path2_JButton ) {
-		if ( __path2_JButton.getText().equals( __AddWorkingDirectoryFile2) ) {
+		if ( __path2_JButton.getText().equals( __AddWorkingDirectory) ) {
 			__InputFile2_JTextField.setText (
 			IOUtil.toAbsolutePath(__working_dir, __InputFile2_JTextField.getText() ) );
 		}
-		else if ( __path2_JButton.getText().equals(__RemoveWorkingDirectoryFile2) ) {
+		else if ( __path2_JButton.getText().equals(__RemoveWorkingDirectory) ) {
 			try {
 			    __InputFile2_JTextField.setText (
 				IOUtil.toRelativePath ( __working_dir, __InputFile2_JTextField.getText() ) );
@@ -376,36 +374,46 @@ private void initialize ( JFrame parent, CompareFiles_Command command, String di
 	__InputFile1_JTextField = new JTextField ( 50 );
 	__InputFile1_JTextField.setToolTipText("Specify the filename for the first file, can use ${Property} notation");
 	__InputFile1_JTextField.addKeyListener ( this );
-        JGUIUtil.addComponent(main_JPanel, __InputFile1_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+    // Input file layout fights back with other rows so put in its own panel
+	JPanel InputFile1_JPanel = new JPanel();
+	InputFile1_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(InputFile1_JPanel, __InputFile1_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	__browse1_JButton = new SimpleJButton ( "...", this );
 	__browse1_JButton.setToolTipText("Browse for file");
-    JGUIUtil.addComponent(main_JPanel, __browse1_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+    JGUIUtil.addComponent(InputFile1_JPanel, __browse1_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
 	if ( __working_dir != null ) {
 		// Add the button to allow conversion to/from relative path...
-		__path1_JButton = new SimpleJButton(__RemoveWorkingDirectoryFile1,this);
-	    JGUIUtil.addComponent(main_JPanel, __path1_JButton,
-	    	7, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+		__path1_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(InputFile1_JPanel, __path1_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	}
+	JGUIUtil.addComponent(main_JPanel, InputFile1_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Second file to compare:" ), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__InputFile2_JTextField = new JTextField ( 50 );
 	__InputFile2_JTextField.setToolTipText("Specify the filename for the second file, can use ${Property} notation");
 	__InputFile2_JTextField.addKeyListener ( this );
-        JGUIUtil.addComponent(main_JPanel, __InputFile2_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+    // Input file layout fights back with other rows so put in its own panel
+	JPanel InputFile2_JPanel = new JPanel();
+	InputFile2_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(InputFile2_JPanel, __InputFile2_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	__browse2_JButton = new SimpleJButton ( "...", this );
 	__browse2_JButton.setToolTipText("Browse for file");
-    JGUIUtil.addComponent(main_JPanel, __browse2_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+    JGUIUtil.addComponent(InputFile2_JPanel, __browse2_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
 	if ( __working_dir != null ) {
 		// Add the button to allow conversion to/from relative path...
-		__path2_JButton = new SimpleJButton(__RemoveWorkingDirectoryFile2,this);
-	    JGUIUtil.addComponent(main_JPanel, __path2_JButton,
-	    	7, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+		__path2_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(InputFile2_JPanel, __path2_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	}
+	JGUIUtil.addComponent(main_JPanel, InputFile2_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
         
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Comment line character:"),
         0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -687,27 +695,37 @@ private void refresh ()
 	__command_JTextArea.setText( __command.toString(props) );
 	// Check the path and determine what the label on the path button should be...
 	if ( __path1_JButton != null ) {
-		__path1_JButton.setEnabled ( true );
-		File f = new File ( InputFile1 );
-		if ( f.isAbsolute() ) {
-			__path1_JButton.setText (__RemoveWorkingDirectoryFile1);
-			__path1_JButton.setToolTipText("Change path to relative to command file");
+		if ( (InputFile1 != null) && !InputFile1.isEmpty() ) {
+			__path1_JButton.setEnabled ( true );
+			File f = new File ( InputFile1 );
+			if ( f.isAbsolute() ) {
+				__path1_JButton.setText ( __RemoveWorkingDirectory );
+				__path1_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+		    	__path1_JButton.setText ( __AddWorkingDirectory );
+		    	__path1_JButton.setToolTipText("Change path to absolute");
+			}
 		}
 		else {
-		    __path1_JButton.setText (__AddWorkingDirectoryFile1 );
-			__path1_JButton.setToolTipText("Change path to absolute");
+			__path1_JButton.setEnabled(false);
 		}
 	}
 	if ( __path2_JButton != null ) {
-		__path2_JButton.setEnabled ( true );
-		File f = new File ( InputFile2 );
-		if ( f.isAbsolute() ) {
-			__path2_JButton.setText (__RemoveWorkingDirectoryFile2);
-			__path2_JButton.setToolTipText("Change path to relative to command file");
+		if ( (InputFile2 != null) && !InputFile2.isEmpty() ) {
+			__path2_JButton.setEnabled ( true );
+			File f = new File ( InputFile2 );
+			if ( f.isAbsolute() ) {
+				__path2_JButton.setText ( __RemoveWorkingDirectory );
+				__path2_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+		    	__path2_JButton.setText ( __AddWorkingDirectory );
+		    	__path2_JButton.setToolTipText("Change path to absolute");
+			}
 		}
 		else {
-		    __path2_JButton.setText (__AddWorkingDirectoryFile2 );
-			__path2_JButton.setToolTipText("Change path to absolute");
+			__path2_JButton.setEnabled(false);
 		}
 	}
 	// Disable the Visual Diff button if the program file does not exist or

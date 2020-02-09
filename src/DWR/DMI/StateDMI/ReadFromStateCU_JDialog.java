@@ -29,8 +29,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -69,6 +71,9 @@ Command editor dialog for simple Read*FromStateCU() commands, which share the sa
 public class ReadFromStateCU_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
+	
+	private final String __AddWorkingDirectory = "Abs";
+	private final String __RemoveWorkingDirectory = "Rel";
 
 private boolean __error_wait = false;
 private boolean __first_time = true;
@@ -150,10 +155,25 @@ public void actionPerformed(ActionEvent event)
 
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			String directory = fc.getSelectedFile().getParent();
+			String filename = fc.getSelectedFile().getName(); 
 			String path = fc.getSelectedFile().getPath(); 
 			JGUIUtil.setLastFileDialogDirectory(directory);
-			__InputFile_JTextField.setText(path);
-			refresh();
+			
+			if (filename == null || filename.equals("")) {
+				return;
+			}
+			
+			if (path != null) {
+				// Convert path to relative path by default.
+				try {
+					__InputFile_JTextField.setText(IOUtil.toRelativePath(__working_dir, path));
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 1,"ReadFromStateCU_JDialog", "Error converting file to relative path." );
+				}
+				JGUIUtil.setLastFileDialogDirectory(directory);
+				refresh();
+			}
 		}	
 	}
 	else if ( o == __cancel_JButton ) {
@@ -169,19 +189,16 @@ public void actionPerformed(ActionEvent event)
 			response (true);
 		}
 	}
-	else if ( o == __path_JButton) {
-		if (__path_JButton.getText().equals("Add Working Directory")) {
-			__InputFile_JTextField.setText (
-			IOUtil.toAbsolutePath(__working_dir, __InputFile_JTextField.getText()));
+	else if ( o == __path_JButton ) {
+		if ( __path_JButton.getText().equals(__AddWorkingDirectory) ) {
+			__InputFile_JTextField.setText ( IOUtil.toAbsolutePath(__working_dir, __InputFile_JTextField.getText() ) );
 		}
-		else if (__path_JButton.getText().equals("Remove Working Directory")) {
+		else if ( __path_JButton.getText().equals(__RemoveWorkingDirectory) ) {
 			try {
-				__InputFile_JTextField.setText (
-				IOUtil.toRelativePath (__working_dir, __InputFile_JTextField.getText()));
+			    __InputFile_JTextField.setText ( IOUtil.toRelativePath ( __working_dir, __InputFile_JTextField.getText() ) );
 			}
-			catch (Exception e) {
-				Message.printWarning (1, __command + "_JDialog",
-				"Error converting file to relative path.");
+			catch ( Exception e ) {
+				Message.printWarning ( 1,__command + "_JDialog", "Error converting file to relative path." );
 			}
 		}
 		refresh ();
@@ -246,23 +263,6 @@ private void commitEdits()
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable {
-	__InputFile_JTextField = null;
-	__Version_JComboBox = null;
-	__browse_JButton = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command = null;
-	__ok_JButton = null;
-	__path_JButton = null;
-	__working_dir = null;
-	super.finalize ();
-}
-
-/**
 Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
@@ -281,21 +281,21 @@ private void initialize (JFrame parent, Command command )
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
 	getContentPane().add ("Center", main_JPanel);
-	int y = 0;
+	int y = -1;
 
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
-	int yy = 0;
+	int yy = -1;
 	
 	if ( __command instanceof ReadClimateStationsFromStateCU_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command reads the StateCU climate station data from a StateCU climate stations file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
 	}
 	else if ( __command instanceof ReadCropCharacteristicsFromStateCU_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
        		"This command reads crop characteristics from a StateCU crop characteristics file."),
-       		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+       		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	    JGUIUtil.addComponent(paragraph, new JLabel (
     		"Crop characteristics define general parameters for a crop (e.g., growing season, root depth)."),
     		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -304,7 +304,7 @@ private void initialize (JFrame parent, Command command )
         JGUIUtil.addComponent(paragraph, new JLabel (
     		"This command reads Blaney-Criddle crop coefficients from " +
     		"a StateCU Blaney-Criddle crop coefficients file."),
-    		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
     		"Blaney-Criddle crop coefficents estimate crop water" +
     		" requirements for each crop during the year, for standard conditions."),
@@ -314,7 +314,7 @@ private void initialize (JFrame parent, Command command )
         JGUIUtil.addComponent(paragraph, new JLabel (
     		"This command reads Penman-Monteith crop coefficients from " +
     		"a StateCU Penman-Monteith crop coefficients file."),
-    		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
     		"Penman-Monteith crop coefficents estimate crop water" +
     		" requirements for each crop during the year, for standard conditions."),
@@ -326,13 +326,13 @@ private void initialize (JFrame parent, Command command )
 	else if ( __command instanceof ReadCULocationsFromStateCU_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command reads the StateCU CU locations data from a StateCU \"structure\" file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
 	}
 	else if ( __command instanceof ReadCropPatternTSFromStateCU_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
     		"This command reads crop pattern time series" +
     		" from a StateCU crop pattern time series file."),
-    		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 		JGUIUtil.addComponent(paragraph, new JLabel (
     		"Crop pattern time series for a CU Location are defined by " +
     		"year, crop type, and irrigated area."),
@@ -350,7 +350,7 @@ private void initialize (JFrame parent, Command command )
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command reads CU irrigation practice time series" +
         	" from a StateCU irrigation practice time series file."),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"StateCU irrigation practice time series are defined for each CU Location."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -366,7 +366,7 @@ private void initialize (JFrame parent, Command command )
         JGUIUtil.addComponent(paragraph, new JLabel (
     		"This command reads IWR or CU requirement time series " +
     		"(monthly) from a StateCU/StateMod time series file."),
-    		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
 		"Consumptive water requirement time series (monthly) are " +
 		"associated with diversion and well stations."),
@@ -387,17 +387,32 @@ private void initialize (JFrame parent, Command command )
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	}
 	JGUIUtil.addComponent(main_JPanel, paragraph,
-		0, y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Input file:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__InputFile_JTextField = new JTextField (35);
 	__InputFile_JTextField.addKeyListener (this);
-        JGUIUtil.addComponent(main_JPanel, __InputFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__browse_JButton = new SimpleJButton ("Browse", this);
-        JGUIUtil.addComponent(main_JPanel, __browse_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+    // Input file layout fights back with other rows so put in its own panel
+	JPanel InputFile_JPanel = new JPanel();
+	InputFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(InputFile_JPanel, __InputFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+	__browse_JButton = new SimpleJButton ( "...", this );
+	__browse_JButton.setToolTipText("Browse for file");
+    JGUIUtil.addComponent(InputFile_JPanel, __browse_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	if ( __working_dir != null ) {
+		// Add the button to allow conversion to/from relative path...
+		__path_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(InputFile_JPanel, __path_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	}
+	JGUIUtil.addComponent(main_JPanel, InputFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     if ( __command instanceof ReadCropPatternTSFromStateCU_Command ||
     	__command instanceof ReadIrrigationPracticeTSFromStateCU_Command) {
@@ -451,11 +466,6 @@ private void initialize (JFrame parent, Command command )
         JGUIUtil.addComponent(main_JPanel, button_JPanel, 
 		0, ++y, 7, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
-	if (__working_dir != null) {
-		// Add the button to allow conversion to/from relative path...
-		__path_JButton = new SimpleJButton( "Remove Working Directory", this);
-		button_JPanel.add (__path_JButton);
-	}
 	__ok_JButton = new SimpleJButton("OK", this);
 	button_JPanel.add (__ok_JButton);
 	__cancel_JButton = new SimpleJButton("Cancel", this);
@@ -581,15 +591,22 @@ private void refresh ()
 	}
 	__command_JTextArea.setText( __command.toString(props) );
 	// Check the path and determine what the label on the path button should be...
-	if (__path_JButton != null) {
-		__path_JButton.setEnabled (true);
-		File f = new File (InputFile);
-		if (f.isAbsolute()) {
-			__path_JButton.setText ("Remove Working Directory");
+	if ( __path_JButton != null ) {
+		if ( (InputFile != null) && !InputFile.isEmpty() ) {
+			__path_JButton.setEnabled ( true );
+			File f = new File ( InputFile );
+			if ( f.isAbsolute() ) {
+				__path_JButton.setText ( __RemoveWorkingDirectory );
+				__path_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+		    	__path_JButton.setText ( __AddWorkingDirectory );
+		    	__path_JButton.setToolTipText("Change path to absolute");
+			}
 		}
 		else {
-			__path_JButton.setText ("Add Working Directory");
-		}
+			__path_JButton.setEnabled(false);
+		}	
 	}
 }
 

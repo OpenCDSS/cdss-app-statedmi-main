@@ -258,12 +258,14 @@ private void initialize ( JFrame parent, Command command )
 	main_JPanel.setLayout( new GridBagLayout() );
 	getContentPane().add ( "North", main_JPanel );
 	int y = -1;
+	String appName = IOUtil.getProgramName();
 
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Run an R script, by running an R program.  The Rscript program will be run by default if not specified." ),
 		0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
-        "R scripts are useful for manipulating data outside of TSTool's capabilities or as a cross-check for TSTool calculations."),
+        "R scripts are useful for manipulating data outside of " + appName +
+        "'s capabilities or as a cross-check for " + appName + " calculations."),
         0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Specify a full or relative path to the script file (relative to working directory)." ), 
@@ -275,7 +277,7 @@ private void initialize ( JFrame parent, Command command )
         "   \\\" - literal quote, needed to surround arguments that include spaces" ), 
         0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
-        "   ${InstallDirPortable} - the TSTool software installation directory, using all forward slashes" ), 
+        "   ${InstallDirPortable} - the " + appName + " software installation directory, using all forward slashes" ), 
         0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
         "   ${WorkingDirPortable} - the working directory (location of command file), using all forward slashes" ), 
@@ -336,18 +338,23 @@ private void initialize ( JFrame parent, Command command )
 	__ScriptFile_JTextField = new JTextField ( 40 );
 	__ScriptFile_JTextField.setToolTipText("Specify the R script to run, can use ${Property}");
 	__ScriptFile_JTextField.addKeyListener ( this );
-        JGUIUtil.addComponent(main_JPanel, __ScriptFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+    // Input file layout fights back with other rows so put in its own panel
+	JPanel ScriptFile_JPanel = new JPanel();
+	ScriptFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(ScriptFile_JPanel, __ScriptFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	__browse_JButton = new SimpleJButton ( "...", this );
 	__browse_JButton.setToolTipText("Browse for file");
-    JGUIUtil.addComponent(main_JPanel, __browse_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+    JGUIUtil.addComponent(ScriptFile_JPanel, __browse_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
 	if ( __working_dir != null ) {
 		// Add the button to allow conversion to/from relative path...
-		__path_JButton = new SimpleJButton(__RemoveWorkingDirectory,this);
-	    JGUIUtil.addComponent(main_JPanel, __path_JButton,
-	    	7, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+		__path_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(ScriptFile_JPanel, __path_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	}
+	JGUIUtil.addComponent(main_JPanel, ScriptFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "R script arguments:"),
         0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -495,15 +502,20 @@ private void refresh ()
 	__command_JTextArea.setText( __command.toString ( props ) );
 	// Check the path and determine what the label on the path button should be...
 	if ( __path_JButton != null ) {
-		__path_JButton.setEnabled ( true );
-		File f = new File ( ScriptFile );
-		if ( f.isAbsolute() ) {
-			__path_JButton.setText ( __RemoveWorkingDirectory );
-			__path_JButton.setToolTipText("Change path to relative to command file");
+		if ( (ScriptFile != null) && !ScriptFile.isEmpty() ) {
+			__path_JButton.setEnabled ( true );
+			File f = new File ( ScriptFile );
+			if ( f.isAbsolute() ) {
+				__path_JButton.setText ( __RemoveWorkingDirectory );
+				__path_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+		    	__path_JButton.setText ( __AddWorkingDirectory );
+		    	__path_JButton.setToolTipText("Change path to absolute");
+			}
 		}
 		else {
-            __path_JButton.setText ( __AddWorkingDirectory );
-            __path_JButton.setToolTipText("Change path to absolute");
+			__path_JButton.setEnabled(false);
 		}
 	}
 }

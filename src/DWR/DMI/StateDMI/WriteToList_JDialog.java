@@ -29,8 +29,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -56,7 +58,6 @@ import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.Help.HelpViewer;
-import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
@@ -69,6 +70,8 @@ Command editor dialog for simple Write*ToList() commands, which share the same p
 public class WriteToList_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
+	private final String __AddWorkingDirectory = "Abs";
+	private final String __RemoveWorkingDirectory = "Rel";
 
 private boolean __error_wait = false;
 private boolean __first_time = true;
@@ -90,7 +93,7 @@ Command editor constructor.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
-public WriteToList_JDialog (JFrame parent, Command command )
+public WriteToList_JDialog (JFrame parent, WriteToList_Command command )
 {	super(parent, true);
 	initialize (parent, command );
 }
@@ -121,10 +124,24 @@ public void actionPerformed(ActionEvent event)
 
 		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 			String directory = fc.getSelectedFile().getParent();
+			String filename = fc.getSelectedFile().getName(); 
 			String path = fc.getSelectedFile().getPath(); 
-			JGUIUtil.setLastFileDialogDirectory(directory);
-			__OutputFile_JTextField.setText(path);
-			refresh();
+			
+			if (filename == null || filename.equals("")) {
+				return;
+			}
+	
+			if (path != null) {
+				// Convert path to relative path by default.
+				try {
+					__OutputFile_JTextField.setText(IOUtil.toRelativePath(__working_dir, path));
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 1, __command.getCommandName() + "_JDialog", "Error converting file to relative path." );
+				}
+				JGUIUtil.setLastFileDialogDirectory(directory );
+				refresh();
+			}
 		}	
 	}
 	else if ( o == __cancel_JButton ) {
@@ -141,18 +158,16 @@ public void actionPerformed(ActionEvent event)
 		}
 	}
 	else if ( o == __path_JButton) {
-		if (__path_JButton.getText().equals("Add Working Directory")) {
-			__OutputFile_JTextField.setText (
-			IOUtil.toAbsolutePath(__working_dir, __OutputFile_JTextField.getText()));
+		if ( __path_JButton.getText().equals(__AddWorkingDirectory) ) {
+			__OutputFile_JTextField.setText ( IOUtil.toAbsolutePath(__working_dir, __OutputFile_JTextField.getText() ) );
 		}
-		else if (__path_JButton.getText().equals("Remove Working Directory")) {
+		else if ( __path_JButton.getText().equals( __RemoveWorkingDirectory) ) {
 			try {
-				__OutputFile_JTextField.setText (
-				IOUtil.toRelativePath (__working_dir, __OutputFile_JTextField.getText()));
+                __OutputFile_JTextField.setText ( IOUtil.toRelativePath ( __working_dir,
+				__OutputFile_JTextField.getText() ) );
 			}
-			catch (Exception e) {
-				Message.printWarning (1, __command + "_JDialog",
-				"Error converting file to relative path.");
+			catch ( Exception e ) {
+				Message.printWarning ( 1, __command.getCommandName() + "_JDialog", "Error converting file to relative path." );
 			}
 		}
 		refresh ();
@@ -231,8 +246,8 @@ Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
-private void initialize (JFrame parent, Command command )
-{	__command = (WriteToList_Command)command;
+private void initialize (JFrame parent, WriteToList_Command command )
+{	__command = command;
 	CommandProcessor processor = __command.getCommandProcessor();
 	__working_dir = StateDMICommandProcessorUtil.getWorkingDirForCommand ( processor, __command );
 
@@ -245,127 +260,127 @@ private void initialize (JFrame parent, Command command )
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
 	getContentPane().add ("Center", main_JPanel);
-	int y = 0;
+	int y = -1;
 
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
-	int yy = 0;
+	int yy = -1;
 	
 	// StateMod components/commands...
 
 	if ( __command instanceof WriteStreamGageStationsToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes stream gage stations data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 	else if ( __command instanceof WriteDelayTablesDailyToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes delay table (daily) data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 	else if ( __command instanceof WriteDelayTablesMonthlyToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes delay table (monthly) data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 	else if ( __command instanceof WriteDiversionStationsToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes diversion stations data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 	else if ( __command instanceof WriteDiversionRightsToList_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes diversion rights data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 	else if ( __command instanceof WriteReservoirStationsToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes reservoir stations data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 	else if ( __command instanceof WriteReservoirRightsToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes reservoir rights data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 	else if ( __command instanceof WriteInstreamFlowStationsToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes instream flow stations data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 	else if ( __command instanceof WriteInstreamFlowRightsToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes instream flow rights data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 	else if ( __command instanceof WriteWellStationsToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes well stations data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 	else if ( __command instanceof WriteWellRightsToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes well rights data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 	else if ( __command instanceof WriteStreamEstimateStationsToList_Command ){
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes stream estimate stations data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 	else if ( __command instanceof WriteStreamEstimateCoefficientsToList_Command ){
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes stream estimate coefficients data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 	else if ( __command instanceof WriteNetworkToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes the generalized network data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 	else if ( __command instanceof WriteRiverNetworkToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes the StateMod river network data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 	else if ( __command instanceof WriteDelayTablesMonthlyToList_Command ) {
 		JGUIUtil.addComponent(paragraph, new JLabel(
 		"This command writes the StateMod delay table data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 
 	// StateCU components/commands...
 
-	if ( __command instanceof WriteClimateStationsToList_Command ) {
+	else if ( __command instanceof WriteClimateStationsToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes the StateCU climate station data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
 	}
 	else if ( __command instanceof WriteCropCharacteristicsToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes the StateCU crop characteristics data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
 	}
 	else if ( __command instanceof WriteBlaneyCriddleToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes the StateCU Blaney-Criddle data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
 	}
 	else if ( __command instanceof WritePenmanMonteithToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes the StateCU Penman-Monteith data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
 	}
 	else if ( __command instanceof WriteCULocationsToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes the StateCU CU locations data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
 	}
 	else if ( __command instanceof WriteCULocationDelayTableAssignmentsToList_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes the StateCU location monthly delay table "
 		+ "assignment data to a delimited list file."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
 	}
 
     JGUIUtil.addComponent(paragraph, new JLabel (
@@ -378,17 +393,32 @@ private void initialize (JFrame parent, Command command )
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	}
 	JGUIUtil.addComponent(main_JPanel, paragraph,
-		0, y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Output file:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__OutputFile_JTextField = new JTextField (35);
 	__OutputFile_JTextField.addKeyListener (this);
-        JGUIUtil.addComponent(main_JPanel, __OutputFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__browse_JButton = new SimpleJButton ("Browse", this);
-        JGUIUtil.addComponent(main_JPanel, __browse_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+    // Output file layout fights back with other rows so put in its own panel
+	JPanel OutputFile_JPanel = new JPanel();
+	OutputFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(OutputFile_JPanel, __OutputFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST );
+	__browse_JButton = new SimpleJButton ( "...", this );
+	__browse_JButton.setToolTipText("Browse for file");
+    JGUIUtil.addComponent(OutputFile_JPanel, __browse_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	if ( __working_dir != null ) {
+		// Add the button to allow conversion to/from relative path...
+		__path_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(OutputFile_JPanel, __path_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	}
+	JGUIUtil.addComponent(main_JPanel, OutputFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Write how:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -439,11 +469,6 @@ private void initialize (JFrame parent, Command command )
         JGUIUtil.addComponent(main_JPanel, button_JPanel, 
 		0, ++y, 7, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
-	if (__working_dir != null) {
-		// Add the button to allow conversion to/from relative path...
-		__path_JButton = new SimpleJButton( "Remove Working Directory", this);
-		button_JPanel.add (__path_JButton);
-	}
 	__ok_JButton = new SimpleJButton("OK", this);
 	button_JPanel.add (__ok_JButton);
 	__cancel_JButton = new SimpleJButton("Cancel", this);
@@ -563,13 +588,20 @@ private void refresh ()
 	__command_JTextArea.setText( __command.toString(props) );
 	// Check the path and determine what the label on the path button should be...
 	if (__path_JButton != null) {
-		__path_JButton.setEnabled (true);
-		File f = new File (OutputFile);
-		if (f.isAbsolute()) {
-			__path_JButton.setText ("Remove Working Directory");
+		if ( (OutputFile != null) && !OutputFile.isEmpty() ) {
+			__path_JButton.setEnabled ( true );
+			File f = new File ( OutputFile );
+			if ( f.isAbsolute() ) {
+				__path_JButton.setText ( __RemoveWorkingDirectory );
+				__path_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+            	__path_JButton.setText ( __AddWorkingDirectory );
+            	__path_JButton.setToolTipText("Change path to absolute");
+			}
 		}
 		else {
-			__path_JButton.setText ("Add Working Directory");
+			__path_JButton.setEnabled(false);
 		}
 	}
 }

@@ -62,8 +62,8 @@ import RTi.Util.Message.Message;
 public class StartLog_JDialog extends JDialog
 implements ActionListener, KeyListener, WindowListener
 {
-private final String __AddWorkingDirectory = "Add Working Directory";
-private final String __RemoveWorkingDirectory = "Remove Working Directory";
+private final String __AddWorkingDirectory = "Abs";
+private final String __RemoveWorkingDirectory = "Rel";
 
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __browse_JButton = null;
@@ -119,8 +119,14 @@ public void actionPerformed( ActionEvent event )
 			}
 	
 			if (path != null) {
-				__LogFile_JTextField.setText(path );
-				JGUIUtil.setLastFileDialogDirectory(directory );
+				// Convert path to relative path by default.
+				try {
+					__LogFile_JTextField.setText(IOUtil.toRelativePath(__working_dir, path));
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 1, __command.getCommandName() + "_JDialog", "Error converting file to relative path." );
+				}
+				JGUIUtil.setLastFileDialogDirectory(directory);
 				refresh();
 			}
 		}
@@ -204,20 +210,6 @@ private void commitEdits ()
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	__cancel_JButton = null;
-	__browse_JButton = null;
-	__path_JButton = null;
-	__command_JTextArea = null;
-	__LogFile_JTextField = null;
-	__Suffix_JComboBox = null;
-	__ok_JButton = null;
-	super.finalize ();
-}
-/**
 Get the working directory for a command (e.g., for editing).
 @param processor the TSCommandProcessor to use to get data.
 @param command Command for which to get the working directory.
@@ -294,11 +286,23 @@ private void initialize ( JFrame parent, StartLog_Command command )
 	__LogFile_JTextField = new JTextField ( 50 );
 	__LogFile_JTextField.setToolTipText("Specify the path to the log file to write, can use ${Property} notation");
 	__LogFile_JTextField.addKeyListener ( this );
-        JGUIUtil.addComponent(main_JPanel, __LogFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__browse_JButton = new SimpleJButton ( "Browse", this );
-        JGUIUtil.addComponent(main_JPanel, __browse_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+    // Log file layout fights back with other rows so put in its own panel
+	JPanel LogFile_JPanel = new JPanel();
+	LogFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(LogFile_JPanel, __LogFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST );
+	__browse_JButton = new SimpleJButton ( "...", this );
+	__browse_JButton.setToolTipText("Browse for file");
+    JGUIUtil.addComponent(LogFile_JPanel, __browse_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	if ( __working_dir != null ) {
+		// Add the button to allow conversion to/from relative path...
+		__path_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(LogFile_JPanel, __path_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	}
+	JGUIUtil.addComponent(main_JPanel, LogFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Suffix:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -328,11 +332,6 @@ private void initialize ( JFrame parent, StartLog_Command command )
         JGUIUtil.addComponent(main_JPanel, button_JPanel, 
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
-	if ( __working_dir != null ) {
-		// Add the button to allow conversion to/from relative path...
-		button_JPanel.add ( __path_JButton = new SimpleJButton(
-			__RemoveWorkingDirectory, __RemoveWorkingDirectory, this) );
-	}
 	button_JPanel.add ( __ok_JButton = new SimpleJButton("OK", this) );
 	button_JPanel.add(__cancel_JButton = new SimpleJButton("Cancel", this));
 	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
@@ -417,19 +416,21 @@ private void refresh ()
 	props.add ( "Suffix=" + Suffix );
 	__command_JTextArea.setText( __command.toString(props) );
 	// Check the path and determine what the label on the path button should be...
-	if ( (LogFile == null) || (LogFile.length() == 0) ) {
-		if ( __path_JButton != null ) {
-			__path_JButton.setEnabled ( false );
-		}
-	}
 	if ( __path_JButton != null ) {
-		__path_JButton.setEnabled ( true );
-		File f = new File ( LogFile );
-		if ( f.isAbsolute() ) {
-			__path_JButton.setText ( __RemoveWorkingDirectory );
+		if ( (LogFile != null) && !LogFile.isEmpty() ) {
+			__path_JButton.setEnabled ( true );
+			File f = new File ( LogFile );
+			if ( f.isAbsolute() ) {
+				__path_JButton.setText ( __RemoveWorkingDirectory );
+				__path_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+            	__path_JButton.setText ( __AddWorkingDirectory );
+            	__path_JButton.setToolTipText("Change path to absolute");
+			}
 		}
 		else {
-		    __path_JButton.setText ( __AddWorkingDirectory );
+			__path_JButton.setEnabled(false);
 		}
 	}
 }
