@@ -46,8 +46,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -67,6 +69,7 @@ import java.awt.event.WindowListener;
 import java.util.List;
 
 import RTi.Util.GUI.GUIUtil;
+import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.PropList;
@@ -146,18 +149,6 @@ public void actionPerformed(ActionEvent event) {
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable {
-	__cancelJButton = null;
-	__command_JTextArea = null;
-	__commandVector = null;
-	__okJButton = null;
-	super.finalize ();
-}
-
-/**
 Return the text for the command.
 @return the text for the command or null if there is a problem with the 
 command.
@@ -189,15 +180,15 @@ private void initialize (JFrame parent, String title, PropList props, List<Strin
 	JPanel mainJPanel = new JPanel();
 	mainJPanel.setLayout(new GridBagLayout());
 	getContentPane().add ("North", mainJPanel);
-	int y = 0;
+	int y = -1;
 
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
-	int yy = 0;
+	int yy = -1;
         GUIUtil.addComponent(paragraph, new JLabel (
 		"This command reads the climate stations for CU " +
 		"regions from HydroBase.  The regions should be consistent"),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         GUIUtil.addComponent(paragraph, new JLabel (
 		"with those used in the CU Locations file."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -214,7 +205,10 @@ private void initialize (JFrame parent, String title, PropList props, List<Strin
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 
 	GUIUtil.addComponent(mainJPanel, paragraph,
-		0, y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+    JGUIUtil.addComponent(mainJPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
         GUIUtil.addComponent(mainJPanel, new JLabel ("Region 1:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);

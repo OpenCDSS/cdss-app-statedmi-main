@@ -28,7 +28,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -159,20 +161,6 @@ private void commitEdits()
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__Order_JComboBox = null;
-	__Order2_JComboBox = null;
-	__command = null;
-	__ok_JButton = null;
-	super.finalize ();
-}
-
-/**
 Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
@@ -189,83 +177,83 @@ private void initialize ( JFrame parent, Command command )
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
 	getContentPane().add ("North", main_JPanel);
-	int y = 0;
+	int y = -1;
 
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
-	int yy = 0;
+	int yy = -1;
 	
 	// StateMod data components...
 	
 	if ( __command instanceof SortStreamGageStations_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts stream gage stations by station identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortDiversionStations_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts diversion stations by station identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortDiversionRights_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts diversion rights by right identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortDiversionHistoricalTSMonthly_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts diversion historical time series (monthly) by station identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortDiversionDemandTSMonthly_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts diversion demand time series (monthly) by station identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortReservoirStations_Command ) {
       	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts reservoir stations by station identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortReservoirRights_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts reservoir rights by right identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortInstreamFlowStations_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts instream flow stations by station identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortInstreamFlowRights_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts instream flow rights by right identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortWellStations_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts well stations by station identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortWellRights_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts well rights by right and/or location identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortWellHistoricalPumpingTSMonthly_Command ){
       	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts well historical pumping time series (monthly) by station identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortWellDemandTSMonthly_Command){
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts well demand time series (monthly) by station identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortStreamEstimateStations_Command ){
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts stream estimate stations by station identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	
 	// StateCU data components...
@@ -273,44 +261,47 @@ private void initialize ( JFrame parent, Command command )
 	else if ( __command instanceof SortClimateStations_Command ){
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts CU climate stations by station identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortCropPatternTS_Command ){
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts crop pattern time series by CU location identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortIrrigationPracticeTS_Command ){
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts irrigation practice time series by CU location identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortCULocations_Command ){
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts CU locations by station identifier."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortBlaneyCriddle_Command ){
       	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts Blaney-Criddle data by crop name."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortPenmanMonteith_Command ){
       	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts Penman-Monteith data by crop name."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SortCropCharacteristics_Command){
 	   	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sorts Crop Characteristic data by crop name."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"Sorting identifiers makes the order of data consistent in related files."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
-		0, y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(main_JPanel, new JLabel ("Order:"), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);

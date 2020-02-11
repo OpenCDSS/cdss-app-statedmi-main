@@ -28,8 +28,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -163,24 +165,6 @@ private void commitEdits ()
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	__ID_JTextField = null;
-	__TSID_JTextField = null;
-	//__SetStart_JTextField = null;
-	//__SetEnd_JTextField = null;
-	__LEZeroInAverage_JComboBox = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command = null;
-	__ok_JButton = null;
-	__working_dir = null;
-	super.finalize ();
-}
-
-/**
 Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
@@ -199,7 +183,7 @@ private void initialize ( JFrame parent, SetTS_Command command )
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
 	getContentPane().add ("Center", main_JPanel);
-	int y = 0;
+	int y = -1;
 
 	// Main contents...
 
@@ -207,14 +191,14 @@ private void initialize ( JFrame parent, SetTS_Command command )
 
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
-	int yy = 0;
+	int yy = -1;
 
 	String dataType = "DivTotal";
 	if ( (__command instanceof SetDiversionHistoricalTSMonthly_Command) ){
     	JGUIUtil.addComponent(paragraph, new JLabel (
     		"This command sets a diversion historical time series " +
     		"(monthly) by reading the data from a file or HydroBase."),
-    		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+    		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
     	JGUIUtil.addComponent(paragraph, new JLabel (
     		"The diversion station identifier is used to match the time series that is read."),
     		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -224,7 +208,7 @@ private void initialize ( JFrame parent, SetTS_Command command )
     	JGUIUtil.addComponent(paragraph, new JLabel (
     		"This command sets a diversion demand time series (monthly) "+
     		"by reading the data from a file or HydroBase."),
-    		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+    		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
     	JGUIUtil.addComponent(paragraph, new JLabel (
     		"The diversion station identifier is used to match the time series that is read."),
     		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -234,7 +218,7 @@ private void initialize ( JFrame parent, SetTS_Command command )
     	JGUIUtil.addComponent(paragraph, new JLabel (
     		"This command sets a well historical pumping time series " +
 			"(monthly) by reading the data from a file or HydroBase."),
-			0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
     	JGUIUtil.addComponent(paragraph, new JLabel (
     		"The well station identifier is used to match the time series that is read."),
     		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -244,7 +228,7 @@ private void initialize ( JFrame parent, SetTS_Command command )
     	JGUIUtil.addComponent(paragraph, new JLabel (
     		"This command sets a well demand time series (monthly) by reading the data from a file" +
     		" or HydroBase."),
-    		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+    		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
     	JGUIUtil.addComponent(paragraph, new JLabel (
     		"The well station identifier is used to match the time series that is read."),
     		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -285,7 +269,10 @@ private void initialize ( JFrame parent, SetTS_Command command )
 
 	// Add the notes...
 	JGUIUtil.addComponent(main_JPanel, paragraph,
-		0, y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	if ( (__command instanceof SetDiversionHistoricalTSMonthly_Command) ||
 		(__command instanceof SetDiversionDemandTSMonthly_Command) ) {

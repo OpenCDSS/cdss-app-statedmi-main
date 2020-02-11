@@ -666,18 +666,23 @@ private void initialize ( JFrame parent, ReadTableFromDataStore_Command command 
     __SqlFile_JTextField = new JTextField ( 50 );
     __SqlFile_JTextField.setToolTipText("Specify the SQL file or use ${Property} notation");
     __SqlFile_JTextField.addKeyListener ( this );
-        JGUIUtil.addComponent(file_JPanel, __SqlFile_JTextField,
-        1, yFile, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-    __browse_JButton = new SimpleJButton ( "...", this );
+    // Input file layout fights back with other rows so put in its own panel
+	JPanel SqlFile_JPanel = new JPanel();
+	SqlFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(SqlFile_JPanel, __SqlFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+	__browse_JButton = new SimpleJButton ( "...", this );
 	__browse_JButton.setToolTipText("Browse for file");
-    JGUIUtil.addComponent(file_JPanel, __browse_JButton,
-        6, yFile, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+    JGUIUtil.addComponent(SqlFile_JPanel, __browse_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
 	if ( __working_dir != null ) {
 		// Add the button to allow conversion to/from relative path...
-		__path_JButton = new SimpleJButton(__RemoveWorkingDirectory,this);
-	    JGUIUtil.addComponent(file_JPanel, __path_JButton,
-	    	7, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+		__path_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(SqlFile_JPanel, __path_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	}
+	JGUIUtil.addComponent(file_JPanel, SqlFile_JPanel,
+		1, yFile, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
         
     // Panel for procedure
     int yProc = -1;
@@ -1237,40 +1242,28 @@ try{
 	props.add ( "RowCountProperty=" + RowCountProperty );
     
 	__command_JTextArea.setText( __command.toString ( props ) );
-	// Refresh the Path text.
-    refreshPathControl();
+	// Check the path and determine what the label on the path button should be...
+	if ( __path_JButton != null ) {
+		if ( (SqlFile != null) && !SqlFile.isEmpty() ) {
+			__path_JButton.setEnabled ( true );
+			File f = new File ( SqlFile );
+			if ( f.isAbsolute() ) {
+				__path_JButton.setText ( __RemoveWorkingDirectory );
+				__path_JButton.setToolTipText("Change path to relative to command file");
+			}
+			else {
+		    	__path_JButton.setText ( __AddWorkingDirectory );
+		    	__path_JButton.setToolTipText("Change path to absolute");
+			}
+		}
+		else {
+			__path_JButton.setEnabled(false);
+		}
+	}
 }
 catch ( Exception e ) {
     Message.printWarning ( 3, routine, e );
 }
-}
-
-/**
-Refresh the PathControl text based on the contents of the input text field contents.
-*/
-private void refreshPathControl()
-{
-    String SqlFile = __SqlFile_JTextField.getText().trim();
-    if ( (SqlFile == null) || (SqlFile.trim().length() == 0) ) {
-        if ( __path_JButton != null ) {
-            __path_JButton.setEnabled ( false );
-        }
-        return;
-    }
-
-    // Check the path and determine what the label on the path button should be...
-    if ( __path_JButton != null ) {
-        __path_JButton.setEnabled ( true );
-        File f = new File ( SqlFile );
-        if ( f.isAbsolute() ) {
-            __path_JButton.setText( __RemoveWorkingDirectory );
-			__path_JButton.setToolTipText("Change path to relative to command file");
-        }
-        else {
-            __path_JButton.setText( __AddWorkingDirectory );
-			__path_JButton.setToolTipText("Change path to absolute");
-        }
-    }
 }
 
 /**

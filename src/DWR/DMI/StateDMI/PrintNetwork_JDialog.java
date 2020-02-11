@@ -50,8 +50,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import DWR.StateMod.StateMod_NodeNetwork;
 import RTi.Util.GUI.JFileChooserFactory;
@@ -75,11 +77,8 @@ Editor for PrintTextFile command.
 public class PrintNetwork_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
-private final String __AddWorkingDirectoryInput = "Add Working Directory (Input)";
-private final String __RemoveWorkingDirectoryInput = "Remove Working Directory (Input)";
-
-private final String __AddWorkingDirectoryOutput = "Add Working Directory (Output)";
-private final String __RemoveWorkingDirectoryOutput = "Remove Working Directory (Output)";
+private final String __AddWorkingDirectory = "Abs";
+private final String __RemoveWorkingDirectory = "Rel";
 
 private SimpleJButton __browse_JButton = null; // input file
 private SimpleJButton __browse2_JButton = null; // output file
@@ -156,8 +155,19 @@ public void actionPerformed( ActionEvent event )
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			String directory = fc.getSelectedFile().getParent();
 			String path = fc.getSelectedFile().getPath();
-			__InputFile_JTextField.setText(path);
-			JGUIUtil.setLastFileDialogDirectory(directory);
+			if (path != null) {
+				// Convert path to relative path by default.
+				try {
+					__InputFile_JTextField.setText(IOUtil.toRelativePath(__working_dir, path));
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 1, __command.getCommandName() + "_JDialog", "Error converting file to relative path." );
+				}
+		        checkGUIState(); // To enable/disable parameters
+				JGUIUtil.setLastFileDialogDirectory(directory);
+				refresh();
+			}
+
 	        try {
 	            // fill Page Layout options
 	            readLayouts();
@@ -166,7 +176,6 @@ public void actionPerformed( ActionEvent event )
 	        catch (Exception ex) {
 	            Message.printWarning (1, "PrintNetwork_JDialog", "Error processing network file " + path );
 	        }
-			refresh ();
 		}
 	}
 	else if ( o == __browse2_JButton ) {
@@ -187,9 +196,18 @@ public void actionPerformed( ActionEvent event )
 		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 			String directory = fc.getSelectedFile().getParent();
 			String path = fc.getSelectedFile().getPath(); 
-			JGUIUtil.setLastFileDialogDirectory(directory);
-			__OutputFile_JTextField.setText(path);
-			refresh();
+
+			if (path != null) {
+				// Convert path to relative path by default.
+				try {
+					__OutputFile_JTextField.setText(IOUtil.toRelativePath(__working_dir, path));
+				}
+				catch ( Exception e ) {
+					Message.printWarning ( 1, __command.getCommandName() + "_JDialog", "Error converting file to relative path." );
+				}
+				JGUIUtil.setLastFileDialogDirectory(directory );
+				refresh();
+			}
 		}	
 	}
 	else if ( o == __cancel_JButton ) {
@@ -206,10 +224,10 @@ public void actionPerformed( ActionEvent event )
 		}
 	}
 	else if ( o == __path_JButton ) {
-		if ( __path_JButton.getText().equals(__AddWorkingDirectoryInput) ) {
+		if ( __path_JButton.getText().equals(__AddWorkingDirectory) ) {
 			__InputFile_JTextField.setText (IOUtil.toAbsolutePath(__working_dir,__InputFile_JTextField.getText() ) );
 		}
-		else if ( __path_JButton.getText().equals(__RemoveWorkingDirectoryInput) ) {
+		else if ( __path_JButton.getText().equals(__RemoveWorkingDirectory) ) {
 			try {
                 __InputFile_JTextField.setText ( IOUtil.toRelativePath ( __working_dir,
                         __InputFile_JTextField.getText() ) );
@@ -222,11 +240,11 @@ public void actionPerformed( ActionEvent event )
 		refresh ();
 	}
 	else if ( o == __path2_JButton ) {
-		if (__path2_JButton.getText().equals(__AddWorkingDirectoryOutput)) {
+		if (__path2_JButton.getText().equals(__AddWorkingDirectory)) {
 			__OutputFile_JTextField.setText (
 			IOUtil.toAbsolutePath(__working_dir, __OutputFile_JTextField.getText()));
 		}
-		else if (__path2_JButton.getText().equals(__RemoveWorkingDirectoryOutput)) {
+		else if (__path2_JButton.getText().equals(__RemoveWorkingDirectory)) {
 			try {
 				__OutputFile_JTextField.setText (
 				IOUtil.toRelativePath (__working_dir, __OutputFile_JTextField.getText()));
@@ -428,8 +446,11 @@ private void initialize ( JFrame parent, PrintNetwork_Command command )
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout( new GridBagLayout() );
 	getContentPane().add ( "North", main_JPanel );
-	int y = 0;
+	int y = -1;
 
+   	JGUIUtil.addComponent(main_JPanel, new JLabel (
+		"<html><b>This command was developed to help with testing and automation.</b></html>"),
+		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"This command prints a StateMod XML network file.  If the network file is not specified, " +
 		"the network read from previous commands will be processed."),
@@ -463,16 +484,31 @@ private void initialize ( JFrame parent, PrintNetwork_Command command )
 		"    " + __working_dir),
 		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     }
+    
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Network (input) file:" ), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__InputFile_JTextField = new JTextField ( 50 );
 	__InputFile_JTextField.addKeyListener ( this );
-        JGUIUtil.addComponent(main_JPanel, __InputFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__browse_JButton = new SimpleJButton ( "Browse", this );
-    JGUIUtil.addComponent(main_JPanel, __browse_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+    // Input file layout fights back with other rows so put in its own panel
+	JPanel InputFile_JPanel = new JPanel();
+	InputFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(InputFile_JPanel, __InputFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+	__browse_JButton = new SimpleJButton ( "...", this );
+	__browse_JButton.setToolTipText("Browse for file");
+    JGUIUtil.addComponent(InputFile_JPanel, __browse_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	if ( __working_dir != null ) {
+		// Add the button to allow conversion to/from relative path...
+		__path_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(InputFile_JPanel, __path_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	}
+	JGUIUtil.addComponent(main_JPanel, InputFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Page layout:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -597,14 +633,23 @@ private void initialize ( JFrame parent, PrintNetwork_Command command )
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__OutputFile_JTextField = new JTextField (35);
 	__OutputFile_JTextField.addKeyListener (this);
-    JGUIUtil.addComponent(main_JPanel, __OutputFile_JTextField,
-		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-	__browse2_JButton = new SimpleJButton ("Browse", this);
-    JGUIUtil.addComponent(main_JPanel, __browse2_JButton,
-		6, y, 1, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
-    JGUIUtil.addComponent(main_JPanel, new JLabel(
-	    "Optional - can use when printing to PDF or another file format."), 
-	    3, y, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    // Output file layout fights back with other rows so put in its own panel
+	JPanel OutputFile_JPanel = new JPanel();
+	OutputFile_JPanel.setLayout(new GridBagLayout());
+    JGUIUtil.addComponent(OutputFile_JPanel, __OutputFile_JTextField,
+		0, 0, 1, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST );
+	__browse2_JButton = new SimpleJButton ( "...", this );
+	__browse2_JButton.setToolTipText("Browse for file");
+    JGUIUtil.addComponent(OutputFile_JPanel, __browse2_JButton,
+		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	if ( __working_dir != null ) {
+		// Add the button to allow conversion to/from relative path...
+		__path2_JButton = new SimpleJButton( __RemoveWorkingDirectory,this);
+		JGUIUtil.addComponent(OutputFile_JPanel, __path2_JButton,
+			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
+	}
+	JGUIUtil.addComponent(main_JPanel, OutputFile_JPanel,
+		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Show dialog?:"),
         0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -684,13 +729,6 @@ private void initialize ( JFrame parent, PrintNetwork_Command command )
         JGUIUtil.addComponent(main_JPanel, button_JPanel, 
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
-	if ( __working_dir != null ) {
-		// Add the buttons to allow conversion to/from relative path...
-		__path_JButton = new SimpleJButton( __RemoveWorkingDirectoryInput,this);
-		button_JPanel.add ( __path_JButton );
-		__path2_JButton = new SimpleJButton( __RemoveWorkingDirectoryOutput, this);
-		button_JPanel.add (__path2_JButton);
-	}
 	button_JPanel.add ( __ok_JButton = new SimpleJButton("OK", this) );
 	button_JPanel.add ( __cancel_JButton = new SimpleJButton("Cancel", this) );
 	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
@@ -980,23 +1018,43 @@ private void refresh ()
 	__command_JTextArea.setText( __command.toString(props) );
 	// Check the path and determine what the label on the path button should be...
 	if ( __path_JButton != null ) {
-		__path_JButton.setEnabled ( true );
-		File f = new File ( InputFile );
-		if ( f.isAbsolute() ) {
-			__path_JButton.setText (__RemoveWorkingDirectoryInput);
-		}
-		else {
-            __path_JButton.setText (__AddWorkingDirectoryInput );
+		// Check the path and determine what the label on the path button should be...
+		if ( __path_JButton != null ) {
+			if ( (InputFile != null) && !InputFile.isEmpty() ) {
+				__path_JButton.setEnabled ( true );
+				File f = new File ( InputFile );
+				if ( f.isAbsolute() ) {
+					__path_JButton.setText ( __RemoveWorkingDirectory );
+					__path_JButton.setToolTipText("Change path to relative to command file");
+				}
+				else {
+			    	__path_JButton.setText ( __AddWorkingDirectory );
+			    	__path_JButton.setToolTipText("Change path to absolute");
+				}
+			}
+			else {
+				__path_JButton.setEnabled(false);
+			}
 		}
 	}
 	if ( __path2_JButton != null ) {
-		__path2_JButton.setEnabled ( true );
-		File f = new File ( OutputFile );
-		if ( f.isAbsolute() ) {
-			__path2_JButton.setText (__RemoveWorkingDirectoryOutput);
-		}
-		else {
-            __path2_JButton.setText (__AddWorkingDirectoryOutput );
+		// Check the path and determine what the label on the path button should be...
+		if ( __path2_JButton != null ) {
+			if ( (OutputFile != null) && !OutputFile.isEmpty() ) {
+				__path2_JButton.setEnabled ( true );
+				File f = new File ( OutputFile );
+				if ( f.isAbsolute() ) {
+					__path2_JButton.setText ( __RemoveWorkingDirectory );
+					__path2_JButton.setToolTipText("Change path to relative to command file");
+				}
+				else {
+	            	__path2_JButton.setText ( __AddWorkingDirectory );
+	            	__path2_JButton.setToolTipText("Change path to absolute");
+				}
+			}
+			else {
+				__path2_JButton.setEnabled(false);
+			}
 		}
 	}
 }
