@@ -24,9 +24,7 @@ NoticeEnd */
 package DWR.DMI.StateDMI;
 
 /**
-<p>
-This class initializes, checks, and runs the FillDiversionStationsFromNetwork() command.
-</p>
+This class initializes, checks, and runs the FillDiversionStationsFromNetwork() and similar commands.
 */
 public class FillDiversionStationsFromNetwork_Command extends FillStationsFromNetwork_Command
 {

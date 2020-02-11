@@ -28,8 +28,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -153,19 +155,6 @@ public void stateChanged(ChangeEvent e) {
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	__ID_JTextField = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command = null;
-	__ok_JButton = null;
-	super.finalize ();
-}
-
-/**
 Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
@@ -182,17 +171,17 @@ private void initialize ( JFrame parent, CheckStateCU_Command command )
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
 	getContentPane().add ("North", main_JPanel);
-	int y = 0;
+	int y = -1;
 
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
-	int yy = 0;
+	int yy = -1;
 	String idLabel = "ID";
 	String note = "identifiers";
 	if ( __command instanceof CheckBlaneyCriddle_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks StateCU Blaney-Criddle crop coefficients."),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
 			"Currently no cross-checks are done with other StateCU components."),
 	    	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -208,7 +197,7 @@ private void initialize ( JFrame parent, CheckStateCU_Command command )
 	else if ( __command instanceof CheckPenmanMonteith_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks StateCU Penman-Monteith crop coefficients."),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
 			"Currently no cross-checks are done with other StateCU components."),
 	    	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -224,7 +213,7 @@ private void initialize ( JFrame parent, CheckStateCU_Command command )
 	else if ( __command instanceof CheckClimateStations_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks StateCU climate station data."),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
     		"Currently no cross-checks are done with other StateCU components."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -240,7 +229,7 @@ private void initialize ( JFrame parent, CheckStateCU_Command command )
 	else if ( __command instanceof CheckCropCharacteristics_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks StateCU crop characteristics."),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
 			"Currently no cross-checks are done with other StateCU components."),
 	    	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -256,7 +245,7 @@ private void initialize ( JFrame parent, CheckStateCU_Command command )
 	else if ( __command instanceof CheckCropPatternTS_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks StateCU crop pattern time series at CU locations."),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
     		"Currently no cross-checks are done with other StateCU components."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -276,7 +265,7 @@ private void initialize ( JFrame parent, CheckStateCU_Command command )
 	else if ( __command instanceof CheckCULocations_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks CU Locations, generating warnings for the follow conditions:"),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   1) Missing (undefined) required values."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
@@ -288,7 +277,7 @@ private void initialize ( JFrame parent, CheckStateCU_Command command )
 	else if ( __command instanceof CheckIrrigationPracticeTS_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"This command checks StateCU irrigation practice time series at CU locations."),
-        	0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
     		"The total acreage is cross-checked with the crop pattern time series total if available."),
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -308,7 +297,10 @@ private void initialize ( JFrame parent, CheckStateCU_Command command )
 	}
        
 	JGUIUtil.addComponent(main_JPanel, paragraph,
-		0, y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 	
     JGUIUtil.addComponent(main_JPanel, new JLabel (idLabel),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);

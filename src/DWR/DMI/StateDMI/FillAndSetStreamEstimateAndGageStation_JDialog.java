@@ -29,8 +29,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -171,23 +173,6 @@ private void commitEdits ()
 }
 	
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable {
-	__ID_JTextField = null;
-	__Name_JTextField = null;
-	__RiverNodeID_JTextField = null;
-	__DailyID_JTextField = null;
-	__IfNotFound_JComboBox = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command = null;
-	__ok_JButton = null;
-	super.finalize ();
-}
-
-/**
 Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command command to edit.
@@ -204,34 +189,34 @@ private void initialize (JFrame parent, FillAndSetStreamEstimateAndGageStation_C
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
 	getContentPane().add ("North", main_JPanel);
-	int y = 0;
+	int y = -1;
 
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
-	int yy = 0;
+	int yy = -1;
 	if ( __command instanceof FillStreamGageStation_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command fills missing data in stream gage stations," + 
 		" using the station ID to look up the location."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof FillStreamEstimateStation_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command fills missing data in stream estimate stations," + 
 		" using the station ID to look up the location."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SetStreamGageStation_Command ) {
 		JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sets (edits) data in stream gage stations," + 
 		" using the station ID to look up the location."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof SetStreamEstimateStation_Command ) {
 		JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sets (edits) data in stream estimate stations," + 
 		" using the station ID to look up the location."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"The station ID can contain a * wildcard pattern to match one or more locations."),
@@ -250,7 +235,10 @@ private void initialize (JFrame parent, FillAndSetStreamEstimateAndGageStation_C
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
-		0, y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Station ID:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);

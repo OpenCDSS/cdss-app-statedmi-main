@@ -28,8 +28,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -232,27 +234,6 @@ public void stateChanged(ChangeEvent e)
 }
 
 /**
-Free memory for garbage collection.
-@exception Throwable if there is an error.
-*/
-protected void finalize ()
-throws Throwable
-{	__ID_JTextField = null;
-	__IncludeCollections_JComboBox = null;
-	__Constant_JTextField = null;
-	__FillStart_JTextField = null;
-	__FillEnd_JTextField = null;
-	__PatternID_JTextField = null;
-	__LEZeroInAverage_JComboBox = null;
-	__FillFlag_JTextField = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command = null;
-	__ok_JButton = null;
-	super.finalize ();
-}
-
-/**
 Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
@@ -268,18 +249,18 @@ private void initialize ( JFrame parent, FillTS_Command command )
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
 	getContentPane().add ("North", main_JPanel);
-	int y = 0;
+	int y = -1;
 
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
-	int yy = 0;
+	int yy = -1;
 	int compType = StateMod_DataSet.COMP_UNKNOWN; // Simplify logic below
 	if ( (__command instanceof FillDiversionHistoricalTSMonthlyAverage_Command) ||
 		(__command instanceof FillDiversionHistoricalTSMonthlyConstant_Command) ||
 		(__command instanceof FillDiversionHistoricalTSMonthlyPattern_Command)) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command fills missing data in monthly diversion historical time series."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        	compType = StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY;
 	}
 	/* FIXME SAM 2009-02-08 Enable later
@@ -295,7 +276,7 @@ private void initialize ( JFrame parent, FillTS_Command command )
 		(__command instanceof FillDiversionDemandTSMonthlyPattern_Command) ) {
    		JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command fills missing data in monthly diversion demand time series."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    		compType = StateMod_DataSet.COMP_DEMAND_TS_MONTHLY;
 	}
 	else if ( (__command instanceof FillWellHistoricalPumpingTSMonthlyAverage_Command) ||
@@ -303,7 +284,7 @@ private void initialize ( JFrame parent, FillTS_Command command )
 		(__command instanceof FillWellHistoricalPumpingTSMonthlyPattern_Command)){
    		JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command fills missing data in well historical pumping (monthly) time series."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    		compType = StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY;
 	}
 	else if ( (__command instanceof FillWellDemandTSMonthlyAverage_Command) ||
@@ -311,7 +292,7 @@ private void initialize ( JFrame parent, FillTS_Command command )
 		(__command instanceof FillWellDemandTSMonthlyPattern_Command) ){
    		JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command fills missing data in monthly well demand time series."),
-		0, yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    		compType = StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY;
 	}
 	if ( (__command instanceof FillDiversionHistoricalTSMonthlyAverage_Command) ||
@@ -369,7 +350,10 @@ private void initialize ( JFrame parent, FillTS_Command command )
 	*/
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
-		0, y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		0, ++y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	if ( (compType == StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY) ||
 		(compType == StateMod_DataSet.COMP_DEMAND_TS_MONTHLY) ) {

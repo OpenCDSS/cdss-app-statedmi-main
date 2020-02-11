@@ -24,9 +24,8 @@ NoticeEnd */
 package DWR.DMI.StateDMI;
 
 /**
-<p>
-This class initializes, checks, and runs the FillDiversionDemandTSMonthlyAverage() command.
-</p>
+This class initializes, checks, and runs the FillDiversionDemandTSMonthlyAverage()
+and similar commands.
 */
 public class FillDiversionDemandTSMonthlyAverage_Command extends FillTS_Command
 {
