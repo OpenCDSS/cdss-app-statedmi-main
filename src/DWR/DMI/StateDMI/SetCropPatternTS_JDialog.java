@@ -75,7 +75,7 @@ private JTextField __SetEnd_JTextField = null;
 private SimpleJComboBox __ProcessWhen_JComboBox = null;
 private JTextField __CropPattern_JTextField = null;
 private SimpleJComboBox __IrrigationMethod_JComboBox = null;
-private SimpleJComboBox __SupplyType_JComboBox = null;
+private SimpleJComboBox __SupplyType_JComboBox = null; // Only enabled if enableStateDMIPre050000=true
 private SimpleJComboBox __SetToMissing_JComboBox = null;
 private SimpleJComboBox	__IfNotFound_JComboBox = null;
 private SimpleJButton __cancel_JButton = null;
@@ -83,6 +83,7 @@ private SimpleJButton __ok_JButton = null;
 private SimpleJButton __help_JButton = null;	
 private SetCropPatternTS_Command __command = null;
 private boolean __ok = false;
+private boolean enableStateDMIPre050000 = false; // Set to true for features < StateDMI 5.00.00
 
 /**
 Command editor constructor.
@@ -128,7 +129,6 @@ private void checkInput ()
 	String SetEnd = __SetEnd_JTextField.getText().trim();
 	String CropPattern = __CropPattern_JTextField.getText().trim();
 	String IrrigationMethod = __IrrigationMethod_JComboBox.getSelected();
-	String SupplyType = __SupplyType_JComboBox.getSelected();
 	String SetToMissing = __SetToMissing_JComboBox.getSelected();
 	String ProcessWhen = __ProcessWhen_JComboBox.getSelected();
 	String IfNotFound = __IfNotFound_JComboBox.getSelected();
@@ -150,8 +150,11 @@ private void checkInput ()
 	if ( IrrigationMethod.length() > 0 ) {
 		parameters.set ( "IrrigationMethod", IrrigationMethod );
 	}
-	if ( SupplyType.length() > 0 ) {
-		parameters.set ( "SupplyType", SupplyType );
+	if ( this.enableStateDMIPre050000 ) {
+		String SupplyType = __SupplyType_JComboBox.getSelected();
+		if ( SupplyType.length() > 0 ) {
+			parameters.set ( "SupplyType", SupplyType );
+		}
 	}
 	if ( SetToMissing.length() > 0 ) {
 		parameters.set ( "SetToMissing", SetToMissing );
@@ -183,7 +186,6 @@ private void commitEdits ()
 	String SetEnd = __SetEnd_JTextField.getText().trim();
 	String CropPattern = __CropPattern_JTextField.getText().trim();
 	String IrrigationMethod = __IrrigationMethod_JComboBox.getSelected();
-	String SupplyType = __SupplyType_JComboBox.getSelected();
 	String SetToMissing = __SetToMissing_JComboBox.getSelected();
 	String ProcessWhen = __ProcessWhen_JComboBox.getSelected();
 	String IfNotFound = __IfNotFound_JComboBox.getSelected();
@@ -192,7 +194,10 @@ private void commitEdits ()
 	__command.setCommandParameter ( "SetEnd", SetEnd );
 	__command.setCommandParameter ( "CropPattern", CropPattern );
 	__command.setCommandParameter ( "IrrigationMethod", IrrigationMethod );
-	__command.setCommandParameter ( "SupplyType", SupplyType );
+	if ( this.enableStateDMIPre050000 ) {
+		String SupplyType = __SupplyType_JComboBox.getSelected();
+		__command.setCommandParameter ( "SupplyType", SupplyType );
+	}
 	__command.setCommandParameter ( "SetToMissing", SetToMissing );
 	__command.setCommandParameter ( "ProcessWhen", ProcessWhen );
     __command.setCommandParameter ( "IfNotFound", IfNotFound );
@@ -221,11 +226,10 @@ private void initialize (JFrame parent, Command command )
 	paragraph.setLayout(new GridBagLayout());
 	int yy = -1;
    	JGUIUtil.addComponent(paragraph, new JLabel (
-	"This command edits crop pattern time series data," + 
-	" using the CU Location ID to look up the location."),
-	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+   		"This command edits crop pattern time series data using the CU Location ID to look up the location."),
+   		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"Crop patterns should be specified using the format:"),
+		"Crop patterns should be specified separated by commans using the format:"),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"     Crop1,Area1,Crop2,Area2"),
@@ -236,8 +240,10 @@ private void initialize (JFrame parent, Command command )
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"     ALFALFA,300,POTATOES,150"),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel ("If ProcessWhen=Now:"),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"If ProcessWhen=Now, previous crop patterns for matching CU " +
+		"    Previous crop patterns for matching CU " +
 		"locations (created with CreateCropPatternTSForCULocations()) are reset when the command is processed."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
@@ -249,28 +255,28 @@ private void initialize (JFrame parent, Command command )
 		"pattern for a location at a point in time."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"    Used in this way, the command usually comes AFTER " +
+		"    Used in this way, the command is usually used AFTER " +
 		"commands that process crop patterns from parcels,"),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"    and changes are made to final CU Locations (not parts" +
 		" in an aggregate/system)."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel ("If ProcessWhen=WithParcels:"),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"If ProcessWhen=WithParcels, the crop patterns are processed " +
-		"with HydroBase irrigated parcels data."),
+		"    The crop patterns are processed by ReadCropPatternTSFromHydroBase() command as additional irrigated parcels data."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"    Each crop/area/year triplet is treated as if it were" +
 		" determined from parcels, to supplement later processing."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"    Used in this way, the commands should come BEFORE" +
+		"    Used in this way, the commands should be used BEFORE" +
 		" commands that process crop patterns from parcels,"),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"    and data can be defined for parts of an " +
-		"aggregate/system."),
+		"    and data can be defined for parts of an aggregate/system."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
@@ -330,20 +336,23 @@ private void initialize (JFrame parent, Command command )
         "Required - irrigation method for crops."),
         3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
     
-    JGUIUtil.addComponent(main_JPanel, new JLabel ("Supply type:"),
-       	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List<String> SupplyType_Vector = new Vector<String>(2);
-    SupplyType_Vector.add ( __command._Ground );
-    SupplyType_Vector.add ( __command._Surface );
-    __SupplyType_JComboBox = new SimpleJComboBox(false);
-    __SupplyType_JComboBox.setData ( SupplyType_Vector );
-    __SupplyType_JComboBox.addItemListener (this);
-    JGUIUtil.addComponent(main_JPanel, __SupplyType_JComboBox,
-    	1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(main_JPanel, new JLabel (
-        "Required - supply type for crops."),
-        3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
-    
+    if ( this.enableStateDMIPre050000 ) {
+    	// This does not appear to be needed for crop pattern TS so remove.
+    	JGUIUtil.addComponent(main_JPanel, new JLabel ("Supply type:"),
+       		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    	List<String> SupplyType_Vector = new Vector<String>(2);
+    	SupplyType_Vector.add ( __command._Ground );
+    	SupplyType_Vector.add ( __command._Surface );
+    	__SupplyType_JComboBox = new SimpleJComboBox(false);
+    	__SupplyType_JComboBox.setData ( SupplyType_Vector );
+    	__SupplyType_JComboBox.addItemListener (this);
+    	JGUIUtil.addComponent(main_JPanel, __SupplyType_JComboBox,
+    		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    	JGUIUtil.addComponent(main_JPanel, new JLabel (
+        	"Required - supply type for crops."),
+        	3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+    }
+ 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Set to missing:"),
    		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     List<String> SetToMissing_Vector = new Vector<String>(3);
@@ -520,20 +529,22 @@ private void refresh ()
 				__error_wait = true;
 			}
 		}
-		if ( SupplyType == null ) {
-			// Select default...
-			__SupplyType_JComboBox.select ( 0 );
-		}
-		else {
-			if ( JGUIUtil.isSimpleJComboBoxItem(
-				__SupplyType_JComboBox, SupplyType, JGUIUtil.NONE, null, null ) ) {
-				__SupplyType_JComboBox.select ( SupplyType );
+		if ( this.enableStateDMIPre050000 ) {
+			if ( SupplyType == null ) {
+				// Select default...
+				__SupplyType_JComboBox.select ( 0 );
 			}
 			else {
-				Message.printWarning ( 1, routine,
-				"Existing command references an invalid\nSupplyType value \"" +
-				SupplyType + "\".  Select a different value or Cancel.");
-				__error_wait = true;
+				if ( JGUIUtil.isSimpleJComboBoxItem(
+					__SupplyType_JComboBox, SupplyType, JGUIUtil.NONE, null, null ) ) {
+					__SupplyType_JComboBox.select ( SupplyType );
+				}
+				else {
+					Message.printWarning ( 1, routine,
+					"Existing command references an invalid\nSupplyType value \"" +
+					SupplyType + "\".  Select a different value or Cancel.");
+					__error_wait = true;
+				}
 			}
 		}
 		if ( SetToMissing == null ) {
@@ -591,7 +602,6 @@ private void refresh ()
 	SetEnd = __SetEnd_JTextField.getText().trim();
 	CropPattern = __CropPattern_JTextField.getText().trim();
 	IrrigationMethod = __IrrigationMethod_JComboBox.getSelected();
-	SupplyType = __SupplyType_JComboBox.getSelected();
 	SetToMissing = __SetToMissing_JComboBox.getSelected();
 	ProcessWhen = __ProcessWhen_JComboBox.getSelected();
 	IfNotFound = __IfNotFound_JComboBox.getSelected();
@@ -602,7 +612,10 @@ private void refresh ()
 	props.add("SetEnd=" + SetEnd);
 	props.add("CropPattern=" + CropPattern);
 	props.add("IrrigationMethod=" + IrrigationMethod);
-	props.add("SupplyType=" + SupplyType);
+	if ( this.enableStateDMIPre050000 ) {
+		SupplyType = __SupplyType_JComboBox.getSelected();
+		props.add("SupplyType=" + SupplyType);
+	}
 	props.add("SetToMissing=" + SetToMissing);
 	props.add("ProcessWhen=" + ProcessWhen);
 	props.add("IfNotFound=" + IfNotFound );

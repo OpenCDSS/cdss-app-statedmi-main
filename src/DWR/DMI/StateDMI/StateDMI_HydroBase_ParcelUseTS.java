@@ -27,6 +27,8 @@ package DWR.DMI.StateDMI;
 import DWR.DMI.HydroBaseDMI.HydroBase_ParcelUseTS;
 import RTi.DMI.DMIUtil;
 
+// TODO smalers 2020-02-15 This code was used for irrigation practice time series.
+// The code is being cleaned up in StateDMI 5.00.00.
 /**
 Class to store data from the HydroBase parcel_use_ts table, but with added
 data for StateDMI, in particular whether the source is ground or surface water.
@@ -46,6 +48,8 @@ Constructor.
 */
 public StateDMI_HydroBase_ParcelUseTS() {
 	super();
+	throw new RuntimeException(
+		"Class StateDMI_HydroBase_ParcelUseTS should not be used.  Use HydroBase_ParcelUseTS_FromSet instead.  Need to fix code.");
 }
 
 /**

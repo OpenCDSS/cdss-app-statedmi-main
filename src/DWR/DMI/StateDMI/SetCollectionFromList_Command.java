@@ -603,16 +603,18 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     // Try to warn in case where SetDiversion*FromList() is being used with well stations.
     // If no CU Locations and no well stations are found, then assume that the command is being used in error.
-    if ( nodeTypeFromCommand.equals(_Diversion) &&
-    	((culocList == null) || (culocList.size() == 0)) && ((divList == null) || (divList.size() == 0))) {
-        message = "The " + getCommandName() + "() command is being used but no diversion stations have been read.";
-        Message.printWarning ( warning_level, 
-        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-        status.addToLog ( commandPhase,
-            new CommandLogRecord(CommandStatusType.FAILURE,
-                message, "Use a SetWell" + collectionType +
-                "FromList() command instead if D&W nodes are being processed, " +
-                "or make sure to read diversion stations before this command." ) );
+    if ( commandPhase == CommandPhaseType.RUN ) {
+    	if ( nodeTypeFromCommand.equals(_Diversion) &&
+    		((culocList == null) || (culocList.size() == 0)) && ((divList == null) || (divList.size() == 0))) {
+        	message = "The " + getCommandName() + "() command is being used but no diversion stations have been read.";
+        	Message.printWarning ( warning_level, 
+        	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+        	status.addToLog ( commandPhase,
+            	new CommandLogRecord(CommandStatusType.FAILURE,
+                	message, "Use a SetWell" + collectionType +
+                	"FromList() command instead if D&W nodes are being processed, " +
+                	"or make sure to read diversion stations before this command." ) );
+    	}
     }
     
     String ListFile_full = IOUtil.verifyPathForOS(

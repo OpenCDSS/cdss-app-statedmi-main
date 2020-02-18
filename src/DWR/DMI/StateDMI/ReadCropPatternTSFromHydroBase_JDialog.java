@@ -67,9 +67,10 @@ private boolean __first_time = true;
 private JTextField __ID_JTextField=null;
 private JTextField __InputStart_JTextField = null;
 private JTextField __InputEnd_JTextField = null;
+private JTextField __Div_JTextField = null;
 private JTextArea __command_JTextArea=null;
-private SimpleJComboBox __DataFrom_JComboBox = null;
-private JTextField __AreaPrecision_JTextField=null;
+private SimpleJComboBox __DataFrom_JComboBox = null;  // Display this so people undersand data source, but don't enable
+private JTextField __AreaPrecision_JTextField=null;  // May enable this later
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
 private SimpleJButton __help_JButton = null;
@@ -118,6 +119,7 @@ private void checkInput ()
 	String ID = __ID_JTextField.getText().trim();
 	String InputStart = __InputStart_JTextField.getText().trim();
 	String InputEnd = __InputEnd_JTextField.getText().trim();
+	String Div = __Div_JTextField.getText().trim();
 	
 	// Put together a list of parameters to check...
 	PropList props = new PropList ( "" );
@@ -130,6 +132,9 @@ private void checkInput ()
 	}
 	if (InputEnd.length() > 0 ) {
 		props.set("InputEnd", InputEnd);
+	}
+	if ( Div.length() > 0 ) {
+		props.set ( "Div", Div );
 	}
 	if ( __DataFrom_JComboBox != null ) {
 		String DataFrom = __DataFrom_JComboBox.getSelected();
@@ -165,9 +170,11 @@ private void commitEdits()
 	String ID = __ID_JTextField.getText().trim();
 	String InputStart = __InputStart_JTextField.getText().trim();
 	String InputEnd = __InputEnd_JTextField.getText().trim();
+	String Div = __Div_JTextField.getText().trim();
 	__command.setCommandParameter("ID", ID);
 	__command.setCommandParameter("InputStart", InputStart);
 	__command.setCommandParameter("InputEnd", InputEnd);
+	__command.setCommandParameter ( "Div", Div );
 	if ( __DataFrom_JComboBox != null ) {
 		String DataFrom = __DataFrom_JComboBox.getSelected();
 		__command.setCommandParameter("DataFrom", DataFrom);
@@ -253,20 +260,35 @@ private void initialize ( JFrame parent, ReadCropPatternTSFromHydroBase_Command 
        	"Optional - ending year to read data (blank for full period)."),
        	3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
-    // FIXME SAM 2009-02-11 Evaluate whether needed
-	if ( IOUtil.testing() ) {
-       	JGUIUtil.addComponent(main_JPanel, new JLabel ("Data from:"),
+    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Water division(s):"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-		__DataFrom_JComboBox = new SimpleJComboBox(false);
-		__DataFrom_JComboBox.add ( "" );
-		__DataFrom_JComboBox.add ( __command._Parcels );
-		__DataFrom_JComboBox.add ( __command._Summary );
-		__DataFrom_JComboBox.addItemListener (this);
-		JGUIUtil.addComponent(main_JPanel, __DataFrom_JComboBox,
-			1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-       	JGUIUtil.addComponent(main_JPanel, new JLabel ("Optional - use parcels to check HydroBase load."),
-			3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+	__Div_JTextField = new JTextField(10);
+	__Div_JTextField.setToolTipText("Divisions for irrigated acreage, separated by commas, "
+		+ "used to determine years for data (default is to determine from location WDIDs).");
+	__Div_JTextField.addKeyListener (this);
+   	JGUIUtil.addComponent(main_JPanel, __Div_JTextField,
+   		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(main_JPanel, new JLabel (	"Optional - water division(s) for the data."),
+		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
+    // TODO SAM 2009-02-11 Evaluate whether needed in production software
+   	
+   	JGUIUtil.addComponent(main_JPanel, new JLabel ("Data from:"),
+   		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__DataFrom_JComboBox = new SimpleJComboBox(false);
+	__DataFrom_JComboBox.setToolTipText("Source of data in HydroBase - see command documentation.");
+	__DataFrom_JComboBox.setEnabled ( false ); // Disable because only defaultw are currently used
+	__DataFrom_JComboBox.add ( "" );
+	__DataFrom_JComboBox.add ( __command._Parcels );
+	__DataFrom_JComboBox.add ( __command._Summary );
+	__DataFrom_JComboBox.select ( "" );
+	__DataFrom_JComboBox.addItemListener (this);
+	JGUIUtil.addComponent(main_JPanel, __DataFrom_JComboBox,
+		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(main_JPanel, new JLabel ("Optional - use parcels to check HydroBase load."),
+		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+
+	if ( IOUtil.testing() ) {
        	JGUIUtil.addComponent(main_JPanel, new JLabel ("Area precision:"),
 			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 		__AreaPrecision_JTextField = new JTextField("",10);
@@ -358,6 +380,7 @@ private void refresh ()
 	String ID="";
 	String InputStart = "";
 	String InputEnd = "";
+	String Div = "";
 	String DataFrom="";
 	String AreaPrecision="";
 	PropList props = null;
@@ -370,6 +393,7 @@ private void refresh ()
 		ID = props.getValue ( "ID" );
 		InputStart = props.getValue ( "InputStart" );
 		InputEnd = props.getValue ( "InputEnd" );
+		Div = props.getValue ( "Div" );
 		DataFrom = props.getValue ( "DataFrom" );
 		AreaPrecision = props.getValue ( "AreaPrecision" );
 		if ( ID != null ) {
@@ -381,24 +405,27 @@ private void refresh ()
 		if ( InputEnd != null ) {
 			__InputEnd_JTextField.setText(InputEnd);
 		}
+		if ( Div != null ) {
+			__Div_JTextField.setText(Div);
+		}
+		if ( DataFrom == null ) {
+			// Select default...
+			__DataFrom_JComboBox.select ( 0 );
+		}
+		else {	if (	JGUIUtil.isSimpleJComboBoxItem(
+			__DataFrom_JComboBox,
+			DataFrom, JGUIUtil.NONE, null, null ) ) {
+			__DataFrom_JComboBox.select ( DataFrom);
+		}
+		else {
+			Message.printWarning ( 1, routine,
+				"Existing readCropPatternTSFromHydroBase() " +
+				"references an invalid DataFrom value \"" +
+				DataFrom + "\".  Select a different value or Cancel.");
+				__error_wait = true;
+			}
+		}
 		if ( IOUtil.testing() ) {
-			if ( DataFrom == null ) {
-				// Select default...
-				__DataFrom_JComboBox.select ( 0 );
-			}
-			else {	if (	JGUIUtil.isSimpleJComboBoxItem(
-					__DataFrom_JComboBox,
-					DataFrom, JGUIUtil.NONE, null, null ) ) {
-					__DataFrom_JComboBox.select ( DataFrom);
-				}
-				else {	Message.printWarning ( 1, routine,
-					"Existing readCropPatternTSFromHydroBase() " +
-					"references an invalid DataFrom value \"" +
-					DataFrom +
-					"\".  Select a different value or Cancel.");
-					__error_wait = true;
-				}
-			}
 			if ( AreaPrecision != null ) {
 				__AreaPrecision_JTextField.setText(ID);
 			}
@@ -411,13 +438,15 @@ private void refresh ()
 	ID = __ID_JTextField.getText().trim();
 	InputStart = __InputStart_JTextField.getText().trim();
 	InputEnd = __InputEnd_JTextField.getText().trim();
+	Div = __Div_JTextField.getText().trim();
 	props.add("ID=" + ID);
 	props.add("InputStart=" + InputStart);
 	props.add("InputEnd=" + InputEnd);
+	props.add("Div=" + Div);
+	DataFrom = __DataFrom_JComboBox.getSelected();
+	props.add("DataFrom=" + DataFrom);
 	if ( IOUtil.testing() ) {
-		DataFrom = __DataFrom_JComboBox.getSelected();
 		AreaPrecision = __AreaPrecision_JTextField.getText().trim();
-		props.add("DataFrom=" + DataFrom);
 		props.add("AreaPrecision=" + AreaPrecision);
 	}
 	__command_JTextArea.setText( __command.toString(props) );

@@ -589,6 +589,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadCropPatternTSFromHydroBase")) {
 		return new ReadCropPatternTSFromHydroBase_Command();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadCULocationParcelsFromHydroBase")) {
+		return new ReadCULocationParcelsFromHydroBase_Command();
+	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadCULocationsFromList")) {
 		return new ReadCULocationsFromList_Command();
 	}
@@ -1169,11 +1172,17 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteCropCharacteristicsToStateCU")) {
 		return new WriteCropCharacteristicsToStateCU_Command();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteCropPatternTSParcelsToFile")) {
+		return new WriteCropPatternTSParcelsToFile_Command();
+	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteCropPatternTSToDateValue")) {
 		return new WriteCropPatternTSToDateValue_Command();
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteCropPatternTSToStateCU")) {
 		return new WriteCropPatternTSToStateCU_Command();
+	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteCULocationParcelsToFile")) {
+		return new WriteCULocationParcelsToFile_Command();
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteCULocationsToList")) {
 		return new WriteCULocationsToList_Command();

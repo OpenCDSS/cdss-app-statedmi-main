@@ -44,7 +44,10 @@ protected String _location_id = DMIUtil.MISSING_STRING;
 Constructor.
 */
 public StateDMI_HydroBase_StructureView ()
-{	super();
+{
+	super();
+	throw new RuntimeException(
+		"Class StateDMI_HydroBase_StructureView should not be used.  Use HydroBase_StructureView_FromSet instead.  Need to fix code.");
 }
 
 /**

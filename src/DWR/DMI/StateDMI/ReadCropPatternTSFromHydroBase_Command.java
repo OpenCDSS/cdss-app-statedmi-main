@@ -27,7 +27,6 @@ import javax.swing.JFrame;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
 import DWR.DMI.HydroBaseDMI.HydroBase_ParcelUseTS;
@@ -136,6 +135,7 @@ throws InvalidCommandParameterException
 	String ID = parameters.getValue ( "ID" );
 	String InputStart = parameters.getValue ( "InputStart" );
 	String InputEnd = parameters.getValue( "InputEnd" );
+	String Div = parameters.getValue( "Div" );
 	String DataFrom = parameters.getValue( "DataFrom" ); // Experimental
 	String AreaPrecision = parameters.getValue( "AreaPrecision" ); // Experimental
 	String message;
@@ -167,6 +167,27 @@ throws InvalidCommandParameterException
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Specify the input end as an integer YYYY." ) );
 	}
+
+	if ( (Div != null) && !Div.isEmpty() ) {
+		String [] parts = Div.trim().split(",");
+		StringBuilder b = new StringBuilder();
+		for ( int i = 0; i < parts.length; i++ ) {
+			if ( !StringUtil.isInteger(parts[i]) ) {
+				if ( b.length() == 0 ) {
+						b.append("The following division(s) are not valid: " + parts[i] );
+				}
+				else {
+					b.append ( ", " + parts[i] );
+				}
+			}
+		}
+		if ( b.length() > 0 ) {
+			warning += "\n" + b;
+			status.addToLog ( CommandPhaseType.INITIALIZATION,
+				new CommandLogRecord(CommandStatusType.FAILURE,
+					b.toString(), "Specify the input end as an integer YYYY." ) );
+		}
+	}
 	
 	if ( (AreaPrecision != null) && (AreaPrecision.length() != 0) && !StringUtil.isInteger(AreaPrecision) ) {
 		message = "The area precision is invalid.";
@@ -186,13 +207,14 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List<String> valid_Vector = new ArrayList<>(5);
-    valid_Vector.add ( "ID" );
-    valid_Vector.add ( "InputStart" );
-    valid_Vector.add ( "InputEnd" );
-    valid_Vector.add ( "DataFrom" );
-    valid_Vector.add ( "AreaPrecision" );
-	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	List<String> validList = new ArrayList<>(6);
+    validList.add ( "ID" );
+    validList.add ( "InputStart" );
+    validList.add ( "InputEnd" );
+    validList.add ( "Div" );
+    validList.add ( "DataFrom" );
+    validList.add ( "AreaPrecision" );
+	warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	if ( warning.length() > 0 ) {
 		Message.printWarning ( warning_level,
@@ -300,6 +322,23 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	if ( InputEnd != null ) {
 		InputEnd_int = Integer.parseInt(InputEnd);
 	}
+	String Div = parameters.getValue( "Div" );
+	int [] Div_array = null;
+	if ( (Div != null) && !Div.isEmpty() ) {
+		if ( Div.indexOf(",") < 0 ) {
+			Div_array = new int[1];
+			Div_array[0] = Integer.parseInt(Div);
+			Message.printStatus(2, routine, "Will process division " + Div_array[0] + " for irrigated acreage.");
+		}
+		else {
+			String [] parts = Div.split(",");
+			Div_array = new int[parts.length];
+			for ( int i = 0; i < parts.length; i++ ) {
+				Div_array[i] = Integer.parseInt(parts[i].trim());
+				Message.printStatus(2, routine, "Will process division " + Div_array[i] + " for irrigated acreage.");
+			}
+		}
+	}
 
 	// Get the list of well stations...
 	
@@ -352,12 +391,31 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	// Get the supplemental crop pattern data specified with SetCropPatternTS() and
 	// SetCropPatternTSFromList() commands...
 	
+	/* TODO smalers 2020
 	List<StateDMI_HydroBase_ParcelUseTS> hydroBaseSupplementalParcelUseTSList = null;
 	try {
 		@SuppressWarnings("unchecked")
 		List<StateDMI_HydroBase_ParcelUseTS> dataList =
 			(List<StateDMI_HydroBase_ParcelUseTS>)processor.getPropContents ( "HydroBase_SupplementalParcelUseTS_List");
 		hydroBaseSupplementalParcelUseTSList = dataList;
+	}
+	catch ( Exception e ) {
+		message = "Error requesting supplemental parcel use data from processor.";
+		Message.printWarning(warningLevel,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+	}
+	*/
+
+	List<HydroBase_ParcelUseTS_FromSet> hydroBaseParcelUseTSFromSetList = null;
+	try {
+		@SuppressWarnings("unchecked")
+		List<HydroBase_ParcelUseTS_FromSet> dataList =
+			(List<HydroBase_ParcelUseTS_FromSet>)processor.getPropContents ( "HydroBase_ParcelUseTS_FromSet_List");
+		hydroBaseParcelUseTSFromSetList = dataList;
 	}
 	catch ( Exception e ) {
 		message = "Error requesting supplemental parcel use data from processor.";
@@ -478,8 +536,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		String irrig_type; // Irrigation type
 		List<String> culoc_wdids = new ArrayList<String>(100);
 		String culoc_id = null;
+		List<HydroBase_ParcelUseTS> crop_patterns;
 		List<HydroBase_StructureView> crop_patterns_sv = null; // Crop pattern records from HydroBase for parcels
-		List<HydroBase_ParcelUseTS> crop_patterns = null; // Crop pattern records from HydroBase for parcels
 		List<HydroBase_StructureView> crop_patterns2 = null; // Crop pattern records for individual parts of aggregates.
 		int ih, hsize; // Counter and size for HydroBase records.
 		String units = "ACRE"; // Units for area
@@ -500,18 +558,89 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		
 		// Convert supplemental ParcelUseTS to StructureIrrigSummaryTS
 		// - the supplemental data was read from ReadCropPatternTS and ReadCropPatternTSFromList commands
-		List<StateDMI_HydroBase_StructureView> hydroBaseSupplementalStructureViewList =
-			processor.convertSupplementalParcelUseTSToStructureView(hydroBaseSupplementalParcelUseTSList);
+
+		List<HydroBase_StructureView_FromSet> hydroBaseStructureViewFromSetList =
+			processor.convertHydroBaseParcelUseTSFromSetToHydroBaseStructureViewFromSet(hydroBaseParcelUseTSFromSetList);
 
 		// Year is used when processing groundwater only...
 		DateTime year_DateTime = new DateTime(DateTime.PRECISION_YEAR);
+
+		// The divisions are needed for well collections specified with WDIDS and receipts.
+		if ( (Div_array == null) || (Div_array.length == 0) ) {
+			// Get the divisions from the list of structures
+			// - split WDIDs and then lookup division from WD
+			Message.printStatus(2, routine, "Determining division list from CU location identifiers.");
+			int [] wdidParts;
+			List<Integer> divList = new ArrayList<>(); // List of divisions determined from WDID list
+			List<HydroBase_WaterDistrict> wdList = hbdmi.getWaterDistricts(); // All water districts
+			for ( StateCU_Location culoc0 : culocList ) {
+				String culocId = culoc0.getID();
+				if ( HydroBase_WaterDistrict.isWDID(culocId)) {
+					// CU Location is a WDID so split it into parts
+					wdidParts = HydroBase_WaterDistrict.parseWDID(culocId);
+					// Get the water district object and the corresponding division 
+					HydroBase_WaterDistrict wd = HydroBase_WaterDistrict.lookupWaterDistrict(wdList, wdidParts[0]);
+					int wdDiv = wd.getDiv();
+					// If not found in the division list, add it
+					boolean found = false;
+					for ( Integer idiv : divList ) {
+						if ( idiv.equals(wdDiv) ) {
+							found = true;
+							break;
+						}
+					}
+					if ( !found ) {
+						divList.add(new Integer(wdDiv));
+					}
+				}
+			}
+			// Now convert to an array for use in following code
+			Div_array = new int[divList.size()];
+			for ( int i = 0; i < Div_array.length; i++ ) {
+				Div_array[i] = divList.get(i).intValue();
+				Message.printStatus(2, routine, "Will process division " + Div_array[i] + " for irrigated acreage.");
+			}
+		}
+		String divListString = "";
+		for ( int i = 0; i < Div_array.length; i++ ) {
+			if ( i == 0 ) {
+				divListString += ", ";
+			}
+			divListString += Div_array[i];
+		}
+		
+		// Get the parcel years that are available for the divisions of interest
+
+		// Use the divisions that have been provided
+		int [] parcelYearsForDiv = null;
+		try {
+			Message.printStatus(2, routine, "Determining parcel years for divisions: " + divListString );
+			parcelYearsForDiv = StateDMI_Util.readParcelYearListFromHydroBase ( hbdmi, Div_array );
+			for ( int i = 0; i < parcelYearsForDiv.length; i++ ) {
+				Message.printStatus(2, routine, "Will process parcel year: " + parcelYearsForDiv[i] );
+			}
+		}
+		catch ( Exception e ) {
+			parcelYearsForDiv = null;
+		}
+		if ( parcelYearsForDiv == null ) {
+			message = "Cannot determine years of parcel data from HydroBase for divisions: " + divListString;
+	 		Message.printWarning ( warningLevel,
+        		MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+        		status.addToLog ( commandPhase,
+           			new CommandLogRecord(CommandStatusType.FAILURE,
+               			message, "Report to software support." ) );
+					throw new CommandException ( message );
+		}
 		
 		// Loop through locations...
 		int matchCount = 0;
 		List<String> partIdList = null; // List of aggregate/system parts
-		List<StateCU_Location_CollectionPartIdType> partIdTypeList = null; // List of aggregate/system parts ID types (will contain "WDID" or "Receipt")
+		// List of aggregate/system parts ID types (will contain "WDID" or "Receipt")
+		List<StateCU_Location_CollectionPartIdType> partIdTypeList = null;
 		//String collectionType = null;
-		StateCU_Location_CollectionPartType collectionPartType = null; // Parts used for collection.  Mainly need to key on StateMod_WellStation.
+		// Parts used for collection.  Mainly need to key on StateMod_WellStation.
+		StateCU_Location_CollectionPartType collectionPartType = null;
 		boolean isCollection = false;
 		for ( int i = 0; i < culocListSize; i++ ) {
 			culoc = culocList.get(i);
@@ -544,8 +673,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					// TODO SAM 2016-10-03 This will be an issue if an explicit well because don't have a way to indicate whether a ditch or well
 					// If single diversion...
 					processing_ditches = true;
-					Message.printStatus ( 2, routine, "Processing single diversion \"" + culoc_id + "\"" );
-					culoc_wdids.clear();
+					Message.printStatus ( 2, routine, "Processing single diversion or well \"" + culoc_id +
+						"\" using data from HydroBase vw_CDSS_StructureIrrigSummaryTS (parcels are not processed)." );
 					if ( HydroBase_WaterDistrict.isWDID(culoc_id)) {
 						// Read the data from summary time series...
 						try {
@@ -568,16 +697,26 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							InputEnd_DateTime, // Year 2
 							false ); // Distinct
 					}
-					// Add supplemental records (works with WDID or not)...
+					// Add supplemental records (works with WDID or not so can add data for single well)...
+					// - only the single location ID is used in the list
+					culoc_wdids.clear();
 					culoc_wdids.add ( culoc_id );
-					boolean todo = true;
-					if ( todo ) {
-						throw new Exception("Need to fix code.");
-					//crop_patterns = processor.readSupplementalCropPatternTSListForWDIDList (
-					//	crop_patterns, culoc_wdids, InputStart_DateTime, InputEnd_DateTime,
-					//	hydroBaseSupplementalStructureViewList,
-					//	status, command_tag, warningLevel, warning_count);
+					//boolean todo = true;
+					//if ( todo ) {
+					//	throw new Exception("Need to fix code.");
+					crop_patterns_sv = processor.readCropPatternTSFromSetForWDIDList (
+						crop_patterns_sv, culoc_wdids, InputStart_DateTime, InputEnd_DateTime,
+						hydroBaseStructureViewFromSetList,
+						status, command_tag, warningLevel, warning_count);
+					if ( crop_patterns_sv.size() == 0 ) {
+						message = "CU location \"" + culoc_id + "\" had no crop pattern data from HydroBase or set commands.";
+						Message.printWarning ( warningLevel, 
+					        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+					       status.addToLog ( commandPhase,
+					           new CommandLogRecord(CommandStatusType.WARNING,
+					            message, "May be OK if period is short, but likely an issue if full period has been specified." ) );
 					}
+					//}
 					// The results are processed below...
 					replace_flag = 0;
 				}
@@ -597,7 +736,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					}
 					culoc_wdids.clear();
 					// This will contain the records for all the collection parts...
-					crop_patterns = new Vector<HydroBase_ParcelUseTS>();
+					crop_patterns_sv = new ArrayList<>();
 					for ( int j = 0; j < collection_size; j++ ) {
 						part_id = collection_ids.get(j);
 						try {
@@ -630,37 +769,46 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
 						// Add to the list...
 						if ( crop_patterns2 != null ) {
-							/* TODO smalers 2019-06-01 NEED TO ENABLE
-							crop_patterns.addAll ( crop_patterns2 );
-							*/
+							crop_patterns_sv.addAll ( crop_patterns2 );
 						}
+						
+						// Add to the list of WDIDs for supplemental data
 						culoc_wdids.add ( part_id );
 					}
+
 					// Add supplemental records...
-					/* TODO smalers 2019-06-01 NEED TO ENABLE
-					crop_patterns = processor.readSupplementalStructureIrrigSummaryTSListForWDIDList (
-						crop_patterns, culoc_wdids, InputStart_DateTime,
-						InputEnd_DateTime, hydroBaseSupplementalStructureIrrigSummaryTSList,
+					crop_patterns_sv = processor.readCropPatternTSFromSetForWDIDList (
+						crop_patterns_sv, culoc_wdids,
+						InputStart_DateTime, InputEnd_DateTime,
+						hydroBaseStructureViewFromSetList,
 						status, command_tag, warningLevel, warning_count );
-					*/
 	
 					// First find the matching CropPatternTS and clear out the existing contents.
 					/*
 					TODO - SAM 2004-05-18 - why is this done?
 					Comment out for now.
 	
-					pos = StateCU_Util.indexOf (__CUCropPatternTS_Vector,
-						culoc_id);
+					pos = StateCU_Util.indexOf (__CUCropPatternTS_List, culoc_id);
 					if ( pos >= 0 ) {
-						__CUCropPatternTS_Vector.get(pos).removeAllTS();
+						__CUCropPatternTS_List.get(pos).removeAllTS();
 					}
 					*/
+
+					if ( crop_patterns_sv.size() == 0 ) {
+						message = "CU location \"" + culoc_id + "\" had no crop pattern data from HydroBase or set commands.";
+						Message.printWarning ( warningLevel, 
+					        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+					       status.addToLog ( commandPhase,
+					           new CommandLogRecord(CommandStatusType.WARNING,
+					            message, "May be OK if period is short, but likely an issue if full period has been specified." ) );
+					}
 	
 					// Process the records below into the collection ID...
 	
 					replace_flag = 1;	// 1 means add
 				}
-				else if ( isCollection && (collectionPartType == StateCU_Location_CollectionPartType.PARCEL)) {
+
+				else if ( isCollection && (collectionPartType == StateCU_Location_CollectionPartType.PARCEL) ) {
 					// Well aggregate/system (read the individual parcels)...
 					processing_ditches = false;
 					Message.printStatus ( 2, routine, "Processing well aggregate/system \"" + culoc_id + "\"" );
@@ -677,10 +825,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					TODO - SAM 2004-05-18 - why is this done?
 					Comment out for now
 	
-					pos = StateCU_Util.indexOf (__CUCropPatternTS_Vector,
-						culoc_id);
+					pos = StateCU_Util.indexOf (__CUCropPatternTS_List, culoc_id);
 					if ( pos >= 0 ) {
-						__CUCropPatternTS_Vector.get(pos).removeAllTS();
+						__CUCropPatternTS_List.get(pos).removeAllTS();
 					}
 					*/
 	
@@ -770,7 +917,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							year_DateTime.getYear() + ", processing " + hsize + " well/parcel records" );
 	
 						for ( ih = 0; ih < hsize; ih++) {
-							h_parcel = (HydroBase_ParcelUseTS)crop_patterns.get(ih);
+							h_parcel = crop_patterns.get(ih);
 							// Filter out lands that are not irrigated...
 							irrig_type = h_parcel.getIrrig_type();
 							// TODO SAM 2004-03-01 - don't want to hard-code strings but need to handle
@@ -809,132 +956,147 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						}
 					}
 				}
+
 				else if ( isCollection && (collectionPartType == StateCU_Location_CollectionPartType.WELL) ) {
 					processing_ditches = false;
-					Message.printStatus ( 2, routine, "Processing well aggregate/system \"" + culoc_id + "\" using list of WDID/permit receipt for parts." );
-					// First get the parcels that are associated with the wells and then use the same logic as if processing parcels
+					Message.printStatus ( 2, routine, "Processing well aggregate/system \"" + culoc_id +
+						"\" using list of WDID/permit receipt for parts." );
+					// The collection definitions are the same each year (same list of wells throughout the period).
+					// If the period is provided then the start and end are known.
+					// However, don't want to requery data every year because that will be slow.
+					// Therefore, determine the unique calendar years available from parcel data
+					//in the requested period and process those years.
+					
 					// The aggregate/system information spans all years whereas the parcel associations are by year.
-					// Therefore need to generate internally part lists as if processing parcels like above.
+					// Get the list of parts.
 					int parcelYear = -1; // Parcel year is irrelevant
 					partIdList = culoc.getCollectionPartIDsForYear(parcelYear);
 					partIdTypeList = culoc.getCollectionPartIDTypes(); // Will not vary by year
-					// Loop through the output period
-					List<HydroBase_Wells> hbWellsList = null; // List of HydroBase vw_CDSS_WellsWellToParcel records for location for all years
-					// Loop through the well identifiers and read the parcels associated with the wells
-					// Get the vw_CDSS_WellsWellToParcel records, which tie well WDID and permit number to parcel.
-					// This will give the list of parcels to process.
-					int iPart = -1;
-					List<Integer> parcelListForYear = new ArrayList<Integer>();
-					int year;
-					int [] parcelYearArray = new int[1]; // For one year
-					for ( String partId : partIdList ) {
-						++iPart;
-						StateCU_Location_CollectionPartIdType partIdType = partIdTypeList.get(iPart);
-						Message.printStatus ( 2, routine, "  Processing part ID \"" + partId + "\" part type " + partIdType + "." );
-						// Get the well 
-						if ( partIdType == StateCU_Location_CollectionPartIdType.WDID ) {
-							// Read well to parcel data for WDID
-							// Split the WDID into parts in case it is not always 7 digits
-							int [] wdidParts = HydroBase_WaterDistrict.parseWDID(partId,null);
-							hbWellsList = hbdmi.readWellsWellToParcelList(-1, -1, -1, null, wdidParts[0], wdidParts[1]);
-						}
-						else if ( partIdType == StateCU_Location_CollectionPartIdType.RECEIPT ) {
-							// Read well to parcel data for permit receipt
-							hbWellsList = hbdmi.readWellsWellToParcelList(-1, -1, -1, partId, -1, -1);
-						}
-						Message.printStatus ( 2, routine, "    Found " + hbWellsList.size() + " matching well/parcel records for all years." );
-						// Loop through the output period and extract the parcel lists from the previously read list, ensuring unique parcel list
-						for ( DateTime dt = new DateTime(InputStart_DateTime); dt.lessThanOrEqualTo(InputEnd_DateTime); dt.addYear(1) ) {
-							crop_set_count = 0; // Number of sets in the period.
-							year = dt.getYear();
-							parcelYearArray[0] = year;
-							parcelListForYear.clear();
-							for ( HydroBase_Wells hbwell: hbWellsList ) {
-								if ( hbwell.getCal_year() == year ) {
-									// Make sure that the parcel was not already added to the parcel list
-									boolean found = false;
-									for ( Integer parcelForYear: parcelListForYear ) {
-										if ( parcelForYear.equals(hbwell.getParcel_id()) ) {
-											found = true;
-											break;
+					// Loop through the parcel years determined for divisions of interest
+					for ( int iy = 0; iy < parcelYearsForDiv.length; iy++ ) {
+						if ( ((InputStart_DateTime == null) ||(parcelYearsForDiv[iy] >= InputStart_DateTime.getYear())) &&
+							((InputEnd_DateTime == null) || (parcelYearsForDiv[iy] <= InputEnd_DateTime.getYear()))) {
+							// Get the parcels that are associated with the wells and then use the same logic as if processing parcels
+							List<HydroBase_Wells> hbWellsList = null; // List of HydroBase vw_CDSS_WellsWellToParcel records for location for all years
+							List<Integer> parcelListForYear = new ArrayList<>();
+							int year = parcelYearsForDiv[iy];
+							int [] parcelYearArray = new int[1]; // For one year
+							// Loop through the well identifiers and read the parcels associated with the wells
+							// Get the vw_CDSS_WellsWellToParcel records, which tie well WDID and permit number to parcel.
+							// This will give the list of parcels to process.
+							int iPart = -1;
+							StateCU_Location_CollectionPartIdType partIdType; // Part type for specifid ID, idicates whether WDID or receipt
+							for ( String partId : partIdList ) {
+								++iPart;
+								partIdType = partIdTypeList.get(iPart);
+								Message.printStatus ( 2, routine, "  Processing part ID \"" + partId + "\" part type " + partIdType + "." );
+								// Get the well 
+								if ( partIdType == StateCU_Location_CollectionPartIdType.WDID ) {
+									// Read well to parcel data for WDID
+									// Split the WDID into parts in case it is not always 7 digits
+									int [] wdidParts = HydroBase_WaterDistrict.parseWDID(partId,null);
+									hbWellsList = hbdmi.readWellsWellToParcelList(-1, year, -1, null, wdidParts[0], wdidParts[1]);
+								}
+								else if ( partIdType == StateCU_Location_CollectionPartIdType.RECEIPT ) {
+									// Read well to parcel data for permit receipt
+									hbWellsList = hbdmi.readWellsWellToParcelList(-1, year, -1, partId, -1, -1);
+								}
+								Message.printStatus ( 2, routine, "    Found " + hbWellsList.size() + " matching well/parcel records for year " + year );
+								// Loop through the output period and extract the parcel lists from the previously read list, ensuring unique parcel list
+								for ( DateTime dt = new DateTime(InputStart_DateTime); dt.lessThanOrEqualTo(InputEnd_DateTime); dt.addYear(1) ) {
+									crop_set_count = 0; // Number of sets in the period.
+									year = dt.getYear();
+									parcelYearArray[0] = year;
+									parcelListForYear.clear();
+									for ( HydroBase_Wells hbwell: hbWellsList ) {
+										if ( hbwell.getCal_year() == year ) {
+											// Make sure that the parcel was not already added to the parcel list
+											boolean found = false;
+											for ( Integer parcelForYear: parcelListForYear ) {
+												if ( parcelForYear.equals(hbwell.getParcel_id()) ) {
+													found = true;
+													break;
+												}
+											}
+											if ( !found ) {
+												parcelListForYear.add(hbwell.getParcel_id());
+											}
 										}
 									}
-									if ( !found ) {
-										parcelListForYear.add(hbwell.getParcel_id());
+									//Message.printStatus ( 2, routine, "      Found " + parcelListForYear.size() + " matching well/parcel records for year " + year + "." );
+									// The following logic is copied from above when processing a parcel list for collection.
+									if ( parcelListForYear.size() > 0 ) {
+										Message.printStatus ( 2, routine, "      Found " + parcelListForYear.size() + " matching well/parcel records for year " + year + "." );
+										collection_ids_array = new int[parcelListForYear.size()];
+										for ( int iParcel = 0; iParcel < parcelListForYear.size(); iParcel++ ) {
+											collection_ids_array[iParcel] = parcelListForYear.get(iParcel);
+										}
+										crop_patterns = hbdmi.readParcelUseTSListForParcelList(
+												// Division is irrelevant in newer HydroBase
+												// - irrigation year with parcel_id is unique
+												-1,
+												//culoc.getCollectionDiv(), // Division
+												collection_ids_array, // parcel ids
+												null, // land use
+												null, // irrig type
+												dt, // Collection year
+												dt );
+									}
+									// Process the records below into the collection ID...
+									
+									replace_flag = 1; // 1 means add
+									hsize = 0;
+									if ( crop_patterns != null ) {
+										hsize = crop_patterns.size();
+									}
+									if ( hsize > 0 ) {
+										Message.printStatus ( 2, routine, "        For location " + culoc_id + " year=" +
+											year + ", processing " + hsize + " well/parcel records" );
+									}
+									for ( ih = 0; ih < hsize; ih++) {
+										h_parcel = crop_patterns.get(ih);
+										// Filter out lands that are not irrigated...
+										irrig_type = h_parcel.getIrrig_type();
+										// TODO SAM 2004-03-01 - don't want to hard-code strings but need to handle
+										// revisions in HydroBaseDMI - ref_irrig_type should indicate whether irrigated
+										if ( irrig_type.equalsIgnoreCase("NA") ) {
+											// Does not irrigate...
+											continue;
+										}
+										// Need the following when one read command, then filling, then another read.
+										if ( crop_set_count == 0 ) {
+											// Reset all crops to missing for the year to prevent double-counting...
+											resetCropPatternTS ( processor, cdsList, OutputStart_DateTime, OutputEnd_DateTime,
+												culoc_id, h_parcel.getCal_year(), h_parcel.getCal_year() );
+										}
+										// Replace or add in the list.  Pass individual fields because may or may not
+										// need to add a new StateCU_CropPatternTS or a time series in the object...
+										StateCU_CropPatternTS cds = processor.findAndAddCUCropPatternTSValue (
+												culoc_id, "" +
+												h_parcel.getParcel_id(),
+												h_parcel.getCal_year(),
+												h_parcel.getParcel_id(),
+												h_parcel.getLand_use(),
+												h_parcel.getArea(),
+												OutputStart_DateTime, // Output in case
+												OutputEnd_DateTime,	// new TS is needed
+												units, replace_flag );
+										addToParcelYears ( h_parcel.getCal_year(), parcelYearArray );
+										// Save the data for checks and filling based on parcel information
+										addParcelToCropPatternTS ( cds,
+												"" + h_parcel.getParcel_id(),
+												h_parcel.getCal_year(),
+												h_parcel.getLand_use(),
+												h_parcel.getArea(),
+												units );
+										++crop_set_count;
 									}
 								}
-							}
-							//Message.printStatus ( 2, routine, "      Found " + parcelListForYear.size() + " matching well/parcel records for year " + year + "." );
-							// The following logic is copied from above when processing a parcel list for collection.
-							if ( parcelListForYear.size() > 0 ) {
-								Message.printStatus ( 2, routine, "      Found " + parcelListForYear.size() + " matching well/parcel records for year " + year + "." );
-								collection_ids_array = new int[parcelListForYear.size()];
-								for ( int iParcel = 0; iParcel < parcelListForYear.size(); iParcel++ ) {
-									collection_ids_array[iParcel] = parcelListForYear.get(iParcel);
-								}
-								crop_patterns = hbdmi.readParcelUseTSListForParcelList(
-										// Division is irrelevant in newer HydroBase
-										// - irrigation year with parcel_id is unique
-										-1,
-										//culoc.getCollectionDiv(), // Division
-										collection_ids_array, // parcel ids
-										null, // land use
-										null, // irrig type
-										dt, // Collection year
-										dt );
-							}
-							// Process the records below into the collection ID...
-							
-							replace_flag = 1; // 1 means add
-							hsize = 0;
-							if ( crop_patterns != null ) {
-								hsize = crop_patterns.size();
-							}
-							if ( hsize > 0 ) {
-								Message.printStatus ( 2, routine, "        For location " + culoc_id + " year=" +
-									year + ", processing " + hsize + " well/parcel records" );
-							}
-							for ( ih = 0; ih < hsize; ih++) {
-								h_parcel = (HydroBase_ParcelUseTS)crop_patterns.get(ih);
-								// Filter out lands that are not irrigated...
-								irrig_type = h_parcel.getIrrig_type();
-								// TODO SAM 2004-03-01 - don't want to hard-code strings but need to handle
-								// revisions in HydroBaseDMI - ref_irrig_type should indicate whether irrigated
-								if ( irrig_type.equalsIgnoreCase("NA") ) {
-									// Does not irrigate...
-									continue;
-								}
-								// Need the following when one read command, then filling, then another read.
-								if ( crop_set_count == 0 ) {
-									// Reset all crops to missing for the year to prevent double-counting...
-									resetCropPatternTS ( processor, cdsList, OutputStart_DateTime, OutputEnd_DateTime,
-										culoc_id, h_parcel.getCal_year(), h_parcel.getCal_year() );
-								}
-								// Replace or add in the list.  Pass individual fields because may or may not
-								// need to add a new StateCU_CropPatternTS or a time series in the object...
-								StateCU_CropPatternTS cds = processor.findAndAddCUCropPatternTSValue (
-										culoc_id, "" +
-										h_parcel.getParcel_id(),
-										h_parcel.getCal_year(),
-										h_parcel.getParcel_id(),
-										h_parcel.getLand_use(),
-										h_parcel.getArea(),
-										OutputStart_DateTime, // Output in case
-										OutputEnd_DateTime,	// new TS is needed
-										units, replace_flag );
-								addToParcelYears ( h_parcel.getCal_year(), parcelYearArray );
-								// Save the data for checks and filling based on parcel information
-								addParcelToCropPatternTS ( cds,
-										"" + h_parcel.getParcel_id(),
-										h_parcel.getCal_year(),
-										h_parcel.getLand_use(),
-										h_parcel.getArea(),
-										units );
-								++crop_set_count;
 							}
 						}
 					}
 				}
+
 				else if ( isCollection ) {
 					message = "CU Location \"" + culoc_id + "\" collection type \"" + culoc.getCollectionType() + " - software does not yet handle.";
 					Message.printWarning ( warningLevel, 
@@ -944,7 +1106,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			            	"Check the log file - report to software support if necessary." ) );
 				}
 	
-				// If here, a list of HydroBase objects is defined for the CU
+				// If here, a list of HydroBase_StructureView objects is defined for the CU
 				// Location and can be added to the StateCU_CropPatternTS data.
 				// If an aggregate, the aggregation is done above.
 	
@@ -952,8 +1114,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				// instances for each instance...
 	
 				hsize = 0;
-				if ( crop_patterns != null ) {
-					hsize = crop_patterns.size();
+				if ( crop_patterns_sv != null ) {
+					hsize = crop_patterns_sv.size();
 				}
 				Message.printStatus ( 2, routine, "Processing " + hsize + " records" );
 	
@@ -966,15 +1128,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							resetCropPatternTS ( processor, cdsList, OutputStart_DateTime, OutputEnd_DateTime,
 								culoc_id, h_cds.getCal_year(), h_cds.getCal_year() );
 						}
-						// Replace or add in the list.  Pass individual fields because we may or may
+						// Replace or add in the list.  Pass individual fields because may or may
 						// not need to add a new StateCU_CropPatternTS or a time series in the object...
 						StateCU_CropPatternTS cds = processor.findAndAddCUCropPatternTSValue (
 							culoc_id, "" +
 							//h_cds.getStructure_id(),
 							// TODO SAM 2005-05-26 what
 							// width on the WDID?
-							HydroBase_WaterDistrict.
-							formWDID(h_cds.getWD(),
+							HydroBase_WaterDistrict.formWDID(h_cds.getWD(),
 							h_cds.getID()),
 							h_cds.getCal_year(),
 							-1,		// No individual parcel IDs for ditches
@@ -1026,7 +1187,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		Message.printStatus( 2, routine,
 			"Crop data years that were processed are:  " + parcel_years_string.toString() );
 		for (int i = 0; i < size; i++) {
-			cds2 = (StateCU_CropPatternTS)cdsList.get(i);
+			cds2 = cdsList.get(i);
 			Message.printStatus( 2, routine,
 				"Setting missing data to zero in data years for \"" + cds2.getID() + "\"." );
 			// Finally, if a crop pattern value is set in any year, assume
@@ -1048,7 +1209,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		}
 		
 		// Warn about identifiers that have been replaced in the
-		// __CUCropPatternTS_Vector...
+		// __CUCropPatternTS_List...
 
 		processor.warnAboutDataMatches ( this, true,
 			processor.getStateCUCropPatternTSMatchList(), "CU Crop Pattern TS values" );
@@ -1061,7 +1222,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		// Save the list of parcel use time series in case they are needed to
 		// process wells, etc...
 
-		__CUParcelUseTS_Vector = parcelusets_Vector();
+		__CUParcelUseTS_List = parcelusets_List();
 		*/
 	}
     catch ( Exception e ) {
@@ -1098,6 +1259,7 @@ public String toString ( PropList parameters )
 	String ID = parameters.getValue ( "ID" );
 	String InputStart = parameters.getValue ( "InputStart" );
 	String InputEnd = parameters.getValue( "InputEnd" );
+	String Div = parameters.getValue( "Div" );
 	String DataFrom = parameters.getValue( "DataFrom" ); // Experimental
 	String AreaPrecision = parameters.getValue( "AreaPrecision" ); // Experimental
 	
@@ -1117,6 +1279,12 @@ public String toString ( PropList parameters )
 			b.append ( "," );
 		}
 		b.append ( "InputEnd=\"" + InputEnd + "\"" );
+	}
+	if ( Div != null && Div.length() > 0 ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "Div=\"" + Div + "\"" );
 	}
 	if ( DataFrom != null && DataFrom.length() > 0 ) {
 		if ( b.length() > 0 ) {
