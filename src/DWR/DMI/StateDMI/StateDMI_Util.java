@@ -23,6 +23,7 @@ NoticeEnd */
 
 package DWR.DMI.StateDMI;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -972,52 +973,37 @@ Read the list of parcel years from HydroBase.
 @param Div_int integer division to process.
 @return an array of integer years for which parcel data exist in HydroBase.
 */
-public static int [] readParcelYearListFromHydroBase ( HydroBaseDMI hdmi, int Div_int )
+public static int [] readParcelYearListFromHydroBase ( HydroBaseDMI hdmi, int div )
+throws Exception
+{
+	int [] divs = { div };
+	return readParcelYearListFromHydroBase(hdmi, divs);
+}
+
+/**
+Read the list of parcel years from HydroBase.
+@param hdmi HydroBaseDMI instance for queries.
+@param Div_int integer division to process.
+@return an array of integer years for which parcel data exist in HydroBase.
+*/
+public static int [] readParcelYearListFromHydroBase ( HydroBaseDMI hdmi, int [] divs )
 throws Exception
 {	// TODO SAM 2007-05-25 Check HydroBase version for the following
-	// If not found, read all and filter out the parcel year of interest
-	List<Integer> v = hdmi.readParcelUseTSDistinctCalYearsList(Div_int);
-	if ( (v == null) || (v.size() == 0) ) {
-		return null;
-	}
-	int [] years = new int[v.size()];
-	for ( int i = 0; i < years.length; i++ ) {
-		years[i] = v.get(i).intValue();
-	}
-	
-	/* TODO SAM 2007-05-23 Code should not be needed with current HydroBase
-	 * but is needed with old HydroBase.
 
-					// FIXME SAM 2007-03-23 This is a performance hit - need to fix.
-					// TODO SAM 2004-09-21 - could do this
-					// with new database queries but we have already
-					// given Doug Stenzel a list of stored
-					// procedures so do a little more work here
-					// using the existing methods.
-					// For each parcel, get the associated wells.
-					// Before doing so, throw out duplicate parcels
-					// and those not for the requested year...
-					nparcel = 0;
-					if ( hbparcel_structure_Vector != null ) {
-						nparcel =
-							hbparcel_structure_Vector.size();
-					}
-					for( iparcel = 0; iparcel < nparcel; iparcel++){
-						hbparcel_structure =
-							(HydroBase_ParcelUseTSStructureToParcel)
-							hbparcel_structure_Vector.elementAt (
-									iparcel );
-						if ( hbparcel_structure.getCal_year() !=
-							parcel_year ) {
-							hbparcel_structure_Vector.
-							removeElementAt(iparcel--);
-							--nparcel;
-						}
-					}
-					
-					*/
+	List<Integer> years = new ArrayList<>();
+	for ( int idivs = 0; idivs < divs.length; idivs++ ) {
+		List<Integer> v = hdmi.readParcelUseTSDistinctCalYearsList(divs[idivs]);
+		if ( v != null ) {
+			years.addAll(v);
+		}
+	}
+
+	int [] yearsArray = new int[years.size()];
+	for ( int i = 0; i < years.size(); i++ ) {
+		yearsArray[i] = years.get(i).intValue();
+	}
 	
-	return years;
+	return yearsArray;
 }
 	
 /**

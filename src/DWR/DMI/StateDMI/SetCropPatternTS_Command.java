@@ -47,9 +47,7 @@ import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 
 /**
-<p>
 This class initializes, checks, and runs the SetCropPatternTS() command.
-</p>
 */
 public class SetCropPatternTS_Command extends AbstractCommand implements Command
 {
@@ -78,7 +76,7 @@ protected final String _Fail = "Fail";
 
 private String [] __cropTypes = null;
 private  double [] __areas = null;
-	
+
 /**
 Constructor.
 */
@@ -103,7 +101,6 @@ throws InvalidCommandParameterException
 	String SetEnd = parameters.getValue ( "SetEnd" );
 	String CropPattern = parameters.getValue ( "CropPattern" );
 	String IrrigationMethod = parameters.getValue ( "IrrigationMethod" );
-	String SupplyType = parameters.getValue ( "SupplyType" );
 	String SetToMissing = parameters.getValue ( "SetToMissing" );
 	String ProcessWhen = parameters.getValue ( "ProcessWhen" );
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
@@ -207,6 +204,8 @@ throws InvalidCommandParameterException
 				message, "Specify the irrigation method as " + _Flood + " or " + _Sprinkler + ".") );
 	}
 	
+	/* TODO smalers 2020-02-15 Only if StateDMI before 5.00.00
+	String SupplyType = parameters.getValue ( "SupplyType" );
 	if ( (SupplyType != null) && !SupplyType.equalsIgnoreCase(_Ground) &&
 		!SupplyType.equalsIgnoreCase(_Surface) ) {
 		message = "The supply type (" + SupplyType + ") is invalid.";
@@ -214,6 +213,16 @@ throws InvalidCommandParameterException
 		status.addToLog ( CommandPhaseType.INITIALIZATION,
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Specify the supply type as " + _Ground + " or " + _Surface + ".") );
+	}
+	*/
+
+	String SupplyType = parameters.getValue ( "SupplyType" );
+	if ( (SupplyType != null) && !SupplyType.isEmpty() ) {
+		message = "The SupplyType parameter (" + SupplyType + ") is not used for StateDMI version >= 5.00.00 - ignoring.";
+		warning += "\n" + message;
+		status.addToLog ( CommandPhaseType.INITIALIZATION,
+			new CommandLogRecord(CommandStatusType.WARNING,
+				message, "Supply type is used with SetIrrigationPracticeTS* commands.") );
 	}
 	
 	if ( (SetToMissing != null) && (SetToMissing.length() > 0) &&
@@ -260,6 +269,7 @@ throws InvalidCommandParameterException
 	validList.add ( "SetEnd" );
 	validList.add ( "CropPattern" );
 	validList.add ( "IrrigationMethod" );
+	// TODO smalers 2020-02-15 Only if before StateDMI 5.00.00 - allow as valid but print warning above
 	validList.add ( "SupplyType" );
 	validList.add ( "SetToMissing" );
 	validList.add ( "ProcessWhen" );
@@ -288,10 +298,432 @@ public boolean editCommand ( JFrame parent )
 // Parse command is in the base class
 
 /**
-Method to execute the setIrrigationPracticeTSPumpingMaxUsingWellRights() command.
+Method to execute the command.
 @param command_number Number of command in sequence.
 @exception Exception if there is an error processing the command.
 */
+public void runCommand ( int command_number )
+throws InvalidCommandParameterException,
+CommandWarningException, CommandException
+{	String message, routine = getCommandName() + "_Command.runCommand";
+	int warning_level = 2;
+	String command_tag = "" + command_number;
+	int warning_count = 0;
+	
+	StateDMI_Processor processor = (StateDMI_Processor)getCommandProcessor();
+	CommandStatus status = getCommandStatus();
+	status.clearLog(CommandPhaseType.RUN);
+	
+	// Get the input parameters...
+	
+	PropList parameters = getCommandParameters();
+	String ID = parameters.getValue ( "ID" );
+	if ( ID == null ) {
+		ID = "*"; // Default
+	}
+	String idpattern_Java = StringUtil.replaceString(ID,"*",".*");
+	String Units = parameters.getValue ( "Units" );
+	if ( (Units == null) || Units.equals("") ) {
+		Units = "ACFT"; // Default
+	}
+	String SetStart = parameters.getValue ( "SetStart" );
+	int SetStart_int = -1;
+	if ( StringUtil.isInteger(SetStart)) {
+		SetStart_int = StringUtil.atoi(SetStart);
+	}
+	String SetEnd = parameters.getValue ( "SetEnd" );
+	int SetEnd_int = -1;
+	if ( StringUtil.isInteger(SetEnd)) {
+		SetEnd_int = StringUtil.atoi(SetEnd);
+	}
+	//String CropPattern = parameters.getValue ( "CropPattern" ); parsed in checkCommandParameters
+	String IrrigationMethod = parameters.getValue ( "IrrigationMethod" );
+	// TODO smalers 2020-02-15 Only if before StateDMI 5.00.00
+	//String SupplyType = parameters.getValue ( "SupplyType" );
+	String SetToMissing = parameters.getValue ( "SetToMissing" );
+	boolean SetToMissing_boolean = false;
+	if ( (SetToMissing == null) || SetToMissing.equals("") ) {
+		SetToMissing = _False; // Default
+	}
+	else if ( SetToMissing.equalsIgnoreCase(_True) ) {
+		SetToMissing_boolean = true;
+	}
+	String ProcessWhen = parameters.getValue ( "ProcessWhen" );
+	if ( (ProcessWhen == null) || ProcessWhen.equals("") ) {
+		ProcessWhen = _Now; // Default
+	}
+	String IfNotFound = parameters.getValue ( "IfNotFound" );
+	if ( IfNotFound == null ) {
+		IfNotFound = _Warn; // Default
+	}
+		
+	// Get the list of crop pattern time series...
+	
+	List<StateCU_CropPatternTS> cdsList = null;
+	int cdsListSize = 0;
+	try {
+		@SuppressWarnings("unchecked")
+		List<StateCU_CropPatternTS> dataList = (List<StateCU_CropPatternTS>)processor.getPropContents( "StateCU_CropPatternTS_List");
+		cdsList = dataList;
+		cdsListSize = cdsList.size();
+	}
+	catch ( Exception e ) {
+		message = "Error requesting StateCU_CropPatternTS_List from processor.";
+		Message.printWarning(warning_level,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+	}
+
+	// Get the list of CU locations, used to check the data ...
+	
+	List<StateCU_Location> culocList = null;
+	int culocListSize = 0;
+	try {
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
+		culocListSize = culocList.size();
+	}
+	catch ( Exception e ) {
+		message = "Error requesting StateCU_Location_List from processor.";
+		Message.printWarning(warning_level,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+	}
+	
+	// Get the list of additional parcel data, in order to append to that list...
+	
+	/* TODO smalers 2020-02-15 the following is from StateDMI < 5.00.00
+	List<StateDMI_HydroBase_ParcelUseTS> supplementalParcelList = null;
+	try {
+		@SuppressWarnings("unchecked")
+		List<StateDMI_HydroBase_ParcelUseTS> dataList = (List<StateDMI_HydroBase_ParcelUseTS>)processor.getPropContents( "ParcelUseTS_FromSet_List");
+		supplementalParcelList = dataList;
+	}
+	catch ( Exception e ) {
+		message = "Error requesting ParcelUseTS_FromSet_List from processor (" + e + ").";
+		Message.printWarning(warning_level,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+	}
+	*/
+
+	List<HydroBase_ParcelUseTS_FromSet> supplementalParcelList = null;
+	try {
+		@SuppressWarnings("unchecked")
+		List<HydroBase_ParcelUseTS_FromSet> dataList =
+		    (List<HydroBase_ParcelUseTS_FromSet>)processor.getPropContents( "HydroBase_ParcelUseTS_FromSet_List");
+		supplementalParcelList = dataList;
+	}
+	catch ( Exception e ) {
+		message = "Error requesting ParcelUseTS_FromSet_List from processor (" + e + ").";
+		Message.printWarning(warning_level,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+	}
+	
+	// Get the output period
+
+	DateTime OutputStart_DateTime = null;
+	DateTime OutputEnd_DateTime = null;
+	try {
+		OutputStart_DateTime = (DateTime)processor.getPropContents("OutputStart");
+	}
+	catch ( Exception e ) {
+		message = "Error requesting OutputStart from processor.";
+		Message.printWarning(warning_level,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+	}
+	try {
+		OutputEnd_DateTime = (DateTime)processor.getPropContents("OutputEnd");
+	}
+	catch ( Exception e ) {
+		message = "Error requesting OutputEnd from processor.";
+		Message.printWarning(warning_level,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+	}
+	
+	// Set start and end are specified by user or come from output period
+	if ( (SetStart_int < 0) && (OutputStart_DateTime != null) ) {
+		SetStart_int = OutputStart_DateTime.getYear();
+	}
+	if ( (SetEnd_int < 0) && (OutputEnd_DateTime != null) ) {
+		SetEnd_int = OutputEnd_DateTime.getYear();
+	}
+	
+	// Make sure that the set start/end are not still missing
+	
+	if ( SetStart_int < 0 ) {
+		message = "Set start (and output period) has not been specified - cannot set crop pattern time series.";
+		Message.printWarning(warning_level,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Use the SetOutputPeriod() command prior to this command or specify set start." ) );
+	}
+	if ( SetEnd_int < 0 ) {
+		message = "Set end (and output period) has not been specified - cannot set crop pattern time series.";
+		Message.printWarning(warning_level,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Use the SetOutputPeriod() command prior to this command or specify set end." ) );
+	}
+	
+	if ( warning_count > 0 ) {
+		// Input error...
+		message = "Insufficient data to run command.";
+        status.addToLog ( CommandPhaseType.RUN,
+        		new CommandLogRecord(CommandStatusType.FAILURE,message, "Check input to command." ) );
+		Message.printWarning(3, routine, message );
+		throw new CommandException ( message );
+	}
+	
+	// Now process...
+	
+	int matchCount = 0;
+	try {
+		StateCU_CropPatternTS cds = null;
+		String cds_id;
+		int year = 0;
+		List<String> crop_names;	// From an existing CropPatternTS
+		int ncrop_names = 0;
+		double missing;	// Used to set data to missing
+		YearTS ts = null;	// Crop time series to process.
+		DateTime date = new DateTime(DateTime.PRECISION_YEAR);
+		if ( ProcessWhen.equalsIgnoreCase("Now") ) {
+			// Loop through the crop pattern data and try to find matching records...
+			for (int i = 0; i < cdsListSize; i++) {
+				cds = cdsList.get(i);
+				cds_id = cds.getID();
+				if ( !cds_id.matches(idpattern_Java) ) {
+					// Identifier does not match...
+					continue;
+				}
+				++matchCount;
+
+				// Have a match so reset or save the data.
+
+				// Reset the data.  First set the existing crop patterns for the location to zero.
+				// This will ensure that any crops not mentioned in the command are set to zero for the
+				// given years...
+
+				crop_names = cds.getCropNames();
+				ncrop_names = 0;
+				if ( crop_names != null ) {
+					ncrop_names = crop_names.size();
+				}
+				for ( int ic = 0; ic < ncrop_names; ic++ ) {
+					ts = cds.getCropPatternTS ( crop_names.get(ic) );
+					missing = ts.getMissing();
+					for ( year = SetStart_int; year <= SetEnd_int; year++ ) {
+						date.setYear(year);
+						if ( SetToMissing_boolean ) {
+							// Set the crop value to missing...
+							ts.setDataValue ( date, missing );
+						}
+						else {
+							// Replace or add in the crop pattern list.  Pass
+							// individual fields because we may or may not need to add a new
+							// StateCU_CropPatternTS or a time series in the object...
+							processor.findAndAddCUCropPatternTSValue (
+							cds_id, cds_id,
+							year,
+							-1,	// Individual parcel ID not specified
+							crop_names.get(ic),
+							0.0,
+							OutputStart_DateTime,
+							OutputEnd_DateTime,
+							Units, 0 );
+						}
+					}
+				}
+
+				// Now reset to new data.  The number of crops does not
+				// need to match the original...
+
+				if ( !SetToMissing_boolean ) {
+					for ( int ic = 0; ic < __cropTypes.length; ic++ ) {
+						for ( year = SetStart_int; year <= SetEnd_int; year++){
+							// Replace or add in crop pattern time series list.  Pass
+							// individual fields because we may or may not need to add a new
+							// StateCU_CropPatternTS or a time series in the object...
+							processor.findAndAddCUCropPatternTSValue (
+							cds_id, cds_id,
+							year,
+							-1,	// Individual parcel ID not specified.
+							__cropTypes[ic],
+							__areas[ic],
+							OutputStart_DateTime,
+							OutputEnd_DateTime,
+							Units, 0 );
+						}
+					}
+				}
+
+				// Refresh the contents to calculate total area.  If all time
+				// series are missing, this will result in missing in the total.
+				cds.refresh();
+			}
+		}
+		else {
+			// ProcessWhen=WithParcels
+			// Save the data so that it can be processed later when records are read from HydroBase.
+			// Add a record for each year/crop/structure combination, as if a data
+			// value had been read from HydroBase.  For each combination, print
+			// a warning if an existing record is found.
+			// Initialize the "has been processed" flag to false.  This will be
+			// checked later to make sure the data are not used more than once.
+			//int [] wdid_parts = new int[2];
+			// TODO smalers 2020-02-15 Code before StateDMI 5.00.00 and generics mixed types unnecessarily
+			//StateDMI_HydroBase_StructureView sits, sits2;
+			//StateDMI_HydroBase_ParcelUseTS parcel, parcel2;
+			HydroBase_ParcelUseTS_FromSet parcel, parcel2;
+			int i2, size2;	// For loops.
+
+			// Make sure that the identifier that is specified is found in locations or aggregate lists
+			StateCU_Location culoc = null;
+			for (int i = 0; i < culocListSize; i++) {
+				culoc = culocList.get(i);
+				String culoc_id = culoc.getID();
+				if ( culoc_id.equalsIgnoreCase(ID) ) {
+					// Identifier for command data matches a location
+				    ++matchCount;
+				    break;
+				}
+				// Also check if the ID is in a collection
+				if ( culoc.isIdInCollection(ID) ) {
+					// Identifier for command data matches a collection ID
+				    ++matchCount;
+				    break;
+				}
+			}
+
+			for ( int ic = 0; ic < __cropTypes.length; ic++ ) {
+				for ( year = SetStart_int; year <= SetEnd_int; year++ ){
+					parcel = new HydroBase_ParcelUseTS_FromSet();
+					parcel.setLocationID ( ID );
+					parcel.setCal_year ( year );
+					parcel.setLand_use ( __cropTypes[ic] );
+					parcel.setArea ( __areas[ic] );
+					parcel.setIrrig_type ( IrrigationMethod );
+					// TODO smalers 2020-02-15 SupplyType not used for StateDMI >= 5.00.00
+					//parcel.setSupply_type ( SupplyType );
+					// Check for duplicates and print a warning...
+					size2 =	supplementalParcelList.size();
+					for ( i2 = 0; i2 < size2; i2++ ) {
+						parcel2 = supplementalParcelList.get(i2);
+						if (	
+							parcel2.getLocationID().equalsIgnoreCase(ID)
+							&& (parcel2.getCal_year() == year)
+							&& parcel2.getLand_use().equalsIgnoreCase(__cropTypes[ic])
+							&& parcel2.getIrrig_type().equalsIgnoreCase(IrrigationMethod)
+							) {
+							// TODO smalers 2020-02-15 The following was used with StateDMI < 5.00.00
+							//&& parcel2.getSupply_type().equalsIgnoreCase(SupplyType) ) {
+							// Matching record, print warning...
+							message = "Crop pattern matches existing user-supplied data.  Using again but needs checked.";
+							Message.printWarning(warning_level,
+								MessageUtil.formatMessageTag( command_tag, ++warning_count),
+								routine, message );
+							status.addToLog ( CommandPhaseType.RUN,
+								new CommandLogRecord(CommandStatusType.FAILURE,
+									message, "Check user-supplied data for duplicates." ) );
+						}
+					}
+					// In any case, add to the list for later use...
+					supplementalParcelList.add ( parcel );
+					Message.printStatus ( 2, routine,
+					"Location " + ID + " saving supplemental acreage data to use " +
+					"later with ReadCropPatternTSFromHydroBase() for: year=" + parcel.getCal_year() +
+					" crop=" + parcel.getLand_use() + " IrrigationMethod=" + parcel.getIrrig_type() +
+					// TODO smalers 2020-02-15 the following was used for StateDMI < 5.00.00
+					//" SupplyType=" + parcel.getSupply_type() +
+					" acres=" +	StringUtil.formatString(parcel.getArea(),"%.3f") );
+				}
+			}
+		}
+
+		// If nothing was matched, take further action...
+
+		if ( matchCount == 0 ) {
+			if ( IfNotFound.equalsIgnoreCase(_Warn) ) {
+				message = "Crop pattern time series \"" + ID +
+				"\" was not matched: warning and not setting crop pattern time series.";
+				Message.printWarning(warning_level,
+					MessageUtil.formatMessageTag( command_tag, ++warning_count),
+					routine, message );
+				status.addToLog ( CommandPhaseType.RUN,
+					new CommandLogRecord(CommandStatusType.WARNING,
+						message, "Verify that the identifier is correct." +
+								"  The time series must be created before setting any data." ) );
+			}
+			else if ( IfNotFound.equalsIgnoreCase(_Fail) ) {
+				message = "Crop pattern time series \"" + ID +
+				"\" was not matched: failing and not setting crop pattern time series.";
+				Message.printWarning(warning_level,
+					MessageUtil.formatMessageTag( command_tag, ++warning_count),
+					routine, message );
+				status.addToLog ( CommandPhaseType.RUN,
+					new CommandLogRecord(CommandStatusType.FAILURE,
+						message, "Verify that the identifier is correct." +
+								"  The time series must be created before setting any data." ) );
+			}
+		}
+	}
+    catch ( Exception e ) {
+        message = "Unexpected error setting crop pattern time series (" + e + ").";
+        Message.printWarning ( warning_level, 
+                MessageUtil.formatMessageTag(command_tag, ++warning_count),routine, message );
+        Message.printWarning ( 3, routine, e );
+        status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+					message, "Check log file for details." ) );
+        throw new CommandException ( message );
+    }
+	
+    if ( warning_count > 0 ) {
+        message = "There were " + warning_count + " warnings processing the command.";
+        Message.printWarning ( warning_level,
+            MessageUtil.formatMessageTag(
+            command_tag, ++warning_count),
+            routine,message);
+        throw new CommandWarningException ( message );
+    }
+	
+	status.refreshPhaseSeverity(CommandPhaseType.RUN,CommandStatusType.SUCCESS);
+}
+
+// TODO smalers 2020-02-15 This version is used for StateDMI pre-5.00.00
+/**
+Method to execute the setIrrigationPracticeTSPumpingMaxUsingWellRights() command.
+This version is for StateDMI older than 5.00.00 - implementing generics pointed out some confusing old code.
+@param command_number Number of command in sequence.
+@exception Exception if there is an error processing the command.
+*/
+/*
 public void runCommand ( int command_number )
 throws InvalidCommandParameterException,
 CommandWarningException, CommandException
@@ -386,16 +818,16 @@ CommandWarningException, CommandException
 				message, "Report problem to software support." ) );
 	}
 	
-	// Get the list of supplemental parcel data...
+	// Get the list of additional parcel data, in order to append to that list...
 	
 	List<StateDMI_HydroBase_ParcelUseTS> supplementalParcelList = null;
 	try {
 		@SuppressWarnings("unchecked")
-		List<StateDMI_HydroBase_ParcelUseTS> dataList = (List<StateDMI_HydroBase_ParcelUseTS>)processor.getPropContents( "HydroBase_Supplemental_ParcelUseTS_List");
+		List<StateDMI_HydroBase_ParcelUseTS> dataList = (List<StateDMI_HydroBase_ParcelUseTS>)processor.getPropContents( "ParcelUseTS_FromSet_List");
 		supplementalParcelList = dataList;
 	}
 	catch ( Exception e ) {
-		message = "Error requesting HydroBase_Supplemental_ParcelUseTS_List from processor.";
+		message = "Error requesting ParcelUseTS_FromSet_List from processor (" + e + ").";
 		Message.printWarning(warning_level,
 			MessageUtil.formatMessageTag( command_tag, ++warning_count),
 			routine, message );
@@ -679,6 +1111,7 @@ CommandWarningException, CommandException
 	
 	status.refreshPhaseSeverity(CommandPhaseType.RUN,CommandStatusType.SUCCESS);
 }
+*/
 
 /**
 Return the string representation of the command.

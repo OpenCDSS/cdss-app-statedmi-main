@@ -41,7 +41,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Vector;
 
 import RTi.DMI.DMI;
 import RTi.DMI.DatabaseDataStore;
@@ -158,7 +157,7 @@ private final int __FYI_warning_level = StateDMI_Util._FYI_warning_level;
 /**
 The list of commands managed by this command processor, guaranteed to be non-null.
 */
-private List<Command> __commandList = new Vector<Command>();
+private List<Command> __commandList = new ArrayList<>();
 
 /**
 The name of the file to read for commands.
@@ -230,7 +229,7 @@ private volatile boolean __cancel_processing_requested = false;
 /**
 List of DataTable objects maintained by the processor.
 */
-List<DataTable> __TableList = new Vector<DataTable>();
+List<DataTable> __TableList = new ArrayList<DataTable>();
 
 /**
 Special flag to handle limitDiversionHistoricalTSMonthlyToRights() command,
@@ -256,57 +255,54 @@ private YearType __OutputYearType = YearType.CALENDAR; // Default
 /**
 The internal list of StateCU_BlaneyCriddle being processed.
 */
-private List<StateCU_BlaneyCriddle> __CUBlaneyCriddle_Vector = new Vector<StateCU_BlaneyCriddle>();
+private List<StateCU_BlaneyCriddle> __CUBlaneyCriddle_List = new ArrayList<>();
 
 /**
 The internal list of StateCU_ClimateStation being processed.
 */
-private List<StateCU_ClimateStation> __CUClimateStation_Vector = new Vector<StateCU_ClimateStation>();
+private List<StateCU_ClimateStation> __CUClimateStation_List = new ArrayList<>();
 
 /**
 The internal list of StateCU_CropCharacteristics being processed.
 */
-private List<StateCU_CropCharacteristics> __CUCropCharacteristics_Vector = new Vector<StateCU_CropCharacteristics>();
+private List<StateCU_CropCharacteristics> __CUCropCharacteristics_List = new ArrayList<>();
 
 /**
 The internal list of StateCU_CropPatternTS being processed.
-See also supplemental data __HydroBase_Supplemental_ParcelUseTS.
+See also supplemental data __ParcelUseTS_FromSet_List.
 */
-private List<StateCU_CropPatternTS> __CUCropPatternTS_Vector = new Vector<>();
+private List<StateCU_CropPatternTS> __CUCropPatternTS_List = new ArrayList<>();
 
 /**
-The supplemental data are filled by the SetCropPatternTS() and SetCropPatternTSFromList() commands.
-The supplemental data are stored as raw parcel data and provide data when
+Additional HydroBase_ParcelUseTS data provided by the SetCropPatternTS() and SetCropPatternTSFromList() commands.
+The additional data are stored as raw parcel data as if from HydroBase and provide data when
 ReadCropPatternTSFromHydroBase is called.
  */
-// TODO smalers 2019-11-13 remove the following once tested out
-// - old code that was problematic because it was casted and shared with multiple commands
-//private List __HydroBase_Supplemental_StructureIrrigSummaryTS_Vector = new Vector();
-private List<StateDMI_HydroBase_ParcelUseTS> __HydroBase_Supplemental_ParcelUseTS_List = new ArrayList<>();
+private List<HydroBase_ParcelUseTS_FromSet> __HydroBase_ParcelUseTS_FromSet_List = new ArrayList<>();
 
 /**
 The internal list of StateCU_Location being processed.
 */
-private List<StateCU_Location> __CULocation_Vector = new Vector<StateCU_Location>();
+private List<StateCU_Location> __CULocation_List = new ArrayList<>();
 
 /**
 The internal list of StateCU_Location being processed.
 */
-private List<StateCU_PenmanMonteith> __CUPenmanMonteith_Vector = new Vector<StateCU_PenmanMonteith>();
+private List<StateCU_PenmanMonteith> __CUPenmanMonteith_List = new ArrayList<>();
 
 /**
 The internal list of StateCU_IrrigationPracticeTS being processed.
 The supplemental data are supplied with readIrrigationPracticeTSFromList and
 are used by readIrrigationPracticeTSFromHyroBase().
 */
-private List<StateCU_IrrigationPracticeTS> __CUIrrigationPracticeTS_Vector = new Vector<StateCU_IrrigationPracticeTS>();
+private List<StateCU_IrrigationPracticeTS> __CUIrrigationPracticeTS_List = new ArrayList<>();
 // TODO smalers 2019-11-13 need to fix the following to not interfere with __HydroBase_Supplemental_ParcelUseTS_List
-private List<StateDMI_HydroBase_StructureView> __HydroBase_Supplemental_ParcelUseTS_Vector = new Vector<StateDMI_HydroBase_StructureView>();
+private List<StateDMI_HydroBase_StructureView> __HydroBase_Supplemental_ParcelUseTS_List = new ArrayList<>();
 
 /**
 The internal list of TS contain Agricultural Statistics (AgStats)...
 */
-private List<TS> __CUAgStatsTS_Vector = new Vector<TS>();
+private List<YearTS> __CUAgStatsTS_List = new ArrayList<>();
 
 /**
 The internal list of HydroBase_ParcelUseTS records that can be examined.  These
@@ -314,7 +310,7 @@ are either read from one or more DBF files or from HydroBase.   These data are
 mainly used when processing well to parcel relationships.
 */
 // TODO SAM 2007-02-18 Evaluate if needed
-//private List __CUParcelUseTS_Vector = new Vector();
+//private List __CUParcelUseTS_List = new ArrayList();
 
 /**
 The internal list of HydroBase_StructureToParcel records that can be examined.
@@ -322,7 +318,7 @@ These are either read from one or more DBF files or from HydroBase.   These data
 are mainly used when processing well to parcel relationships.
 */
 // TODO SAM 2007-02-18 Evaluate if needed
-//private Vector __CUStructureToParcel_Vector = new Vector();
+//private List __CUStructureToParcel_List = new ArrayList();
 
 /**
 The StateMod data set that is used to track processing when commands are run.
@@ -339,160 +335,160 @@ private StateCU_DataSet __StateCU_DataSet = null;
 /**
 The internal list of StateMod_StreamGage being processed.
 */
-private List<StateMod_StreamGage> __SMStreamGageStationList = new Vector<StateMod_StreamGage>();
+private List<StateMod_StreamGage> __SMStreamGageStationList = new ArrayList<>();
 
 /**
 The internal list of StateMod_DelayTable (monthly) being processed.
 */
-private List<StateMod_DelayTable> __SMDelayTableMonthlyList = new Vector<StateMod_DelayTable>();
+private List<StateMod_DelayTable> __SMDelayTableMonthlyList = new ArrayList<>();
 
 /**
 The internal list of StateMod_DelayTable (daily) being processed.
 */
-private List<StateMod_DelayTable> __SMDelayTableDailyList = new Vector<StateMod_DelayTable>();
+private List<StateMod_DelayTable> __SMDelayTableDailyList = new ArrayList<>();
 
 /**
 The internal list of StateMod_Diversion being processed.
 */
-private List<StateMod_Diversion> __SMDiversionStationList = new Vector<StateMod_Diversion>();
+private List<StateMod_Diversion> __SMDiversionStationList = new ArrayList<>();
 
 /**
 The internal list of StateMod_DiversionRight being processed.
 */
-private List<StateMod_DiversionRight> __SMDiversionRightList = new Vector<StateMod_DiversionRight>();
+private List<StateMod_DiversionRight> __SMDiversionRightList = new ArrayList<>();
 
 /**
 The internal list of StateMod diversion time series (monthly) being processed.
 */
-private List<MonthTS> __SMDiversionTSMonthlyList = new Vector<MonthTS>();
+private List<MonthTS> __SMDiversionTSMonthlyList = new ArrayList<>();
 
 /**
 The internal list of StateMod diversion time series (monthly) being processed.
 This is a saved version to be used to check for observations when using the
 LimitDiversionHistoricalTSMonthlyToRights() command.
 */
-private List<MonthTS> __SMDiversionTSMonthly2List = new Vector<MonthTS>();
+private List<MonthTS> __SMDiversionTSMonthly2List = new ArrayList<>();
 
 /**
 The internal list of monthly pattern time series used for data filling.
 */
-private List<StringMonthTS> __SMPatternTSMonthlyList = new Vector<StringMonthTS>();
+private List<StringMonthTS> __SMPatternTSMonthlyList = new ArrayList<>();
 
 /**
 Data store list, to generically manage database connections.  This list is guaranteed to be
 non-null, although the individual data stores may not be opened and need to be handled appropriately.
 */
-private List<DataStore> __dataStoreList = new Vector<DataStore>();
+private List<DataStore> __dataStoreList = new ArrayList<>();
 
 /**
 The internal list of StateMod daily historical TS being processed.
 */
-private List<DayTS> __SMDiversionTSDailyList = new Vector<DayTS>();
+private List<DayTS> __SMDiversionTSDailyList = new ArrayList<>();
 
 /**
 The internal list of StateMod demand time series (monthly) being processed.
 */
-private List<MonthTS> __SMDemandTSMonthlyList = new Vector<MonthTS>();
+private List<MonthTS> __SMDemandTSMonthlyList = new ArrayList<>();
 
 /**
 The internal list of StateMod demand time series (daily) being processed.
 */
-private List<DayTS> __SMDemandTSDailyList = new Vector<DayTS>();
+private List<DayTS> __SMDemandTSDailyList = new ArrayList<>();
 
 /**
 The internal list of StateMod consumptive water requirement time series (monthly) being processed.
 */
-private List<MonthTS> __SMConsumptiveWaterRequirementTSMonthlyList = new Vector<MonthTS>();
+private List<MonthTS> __SMConsumptiveWaterRequirementTSMonthlyList = new ArrayList<>();
 
 /**
 The internal list of StateMod_Reservoir being processed.
 */
-private List<StateMod_Reservoir> __SMReservoirStationList = new Vector<StateMod_Reservoir>();
+private List<StateMod_Reservoir> __SMReservoirStationList = new ArrayList<>();
 
 /**
 The internal list of StateMod_ReservoirRight being processed.
 */
-private List<StateMod_ReservoirRight> __SMReservoirRightList = new Vector<StateMod_ReservoirRight>();
+private List<StateMod_ReservoirRight> __SMReservoirRightList = new ArrayList<>();
 
 /**
 The internal list of reservoir StateMod_ReturnFlow being processed.
 */
-private List<StateMod_ReturnFlow> __SMReservoirReturnList = new Vector<StateMod_ReturnFlow>();
+private List<StateMod_ReturnFlow> __SMReservoirReturnList = new ArrayList<>();
 
 /**
 The internal list of StateMod_InstreamFlow being processed.
 */
-private List<StateMod_InstreamFlow> __SMInstreamFlowStationList = new Vector<StateMod_InstreamFlow>();
+private List<StateMod_InstreamFlow> __SMInstreamFlowStationList = new ArrayList<>();
 
 /**
 The internal list of StateMod_InstreamFlowRight being processed.
 */
-private List<StateMod_InstreamFlowRight> __SMInstreamFlowRightList = new Vector<StateMod_InstreamFlowRight>();
+private List<StateMod_InstreamFlowRight> __SMInstreamFlowRightList = new ArrayList<>();
 
 /**
 The internal list of StateMod instream flow demand TS (average monthly) being processed.
 */
-private List<MonthTS> __SMInstreamFlowDemandTSAverageMonthlyList = new Vector<MonthTS>();
+private List<MonthTS> __SMInstreamFlowDemandTSAverageMonthlyList = new ArrayList<>();
 
 /**
 The internal list of StateMod_Well being processed.
 */
-private List<StateMod_Well> __SMWellList = new Vector<StateMod_Well>();
+private List<StateMod_Well> __SMWellList = new ArrayList<>();
 
 /**
 The internal list of StateMod_WellRight being processed.
 */
-private List<StateMod_WellRight> __SMWellRightList = new Vector<StateMod_WellRight>();
+private List<StateMod_WellRight> __SMWellRightList = new ArrayList<>();
 
 /**
 The internal list of StateMod well historical pumping time series (monthly) being processed.
 */
-private List<MonthTS> __SMWellHistoricalPumpingTSMonthlyList = new Vector<MonthTS>();
+private List<MonthTS> __SMWellHistoricalPumpingTSMonthlyList = new ArrayList<>();
 
 /**
 The internal list of StateMod well demand time series (monthly) being processed.
 */
-private List<MonthTS> __SMWellDemandTSMonthlyList = new Vector<MonthTS>();
+private List<MonthTS> __SMWellDemandTSMonthlyList = new ArrayList<>();
 
 /**
 The internal list of StateMod_Plan being processed.
 */
-private List<StateMod_Plan> __SMPlanList = new Vector<StateMod_Plan>();
+private List<StateMod_Plan> __SMPlanList = new ArrayList<>();
 
 /**
 The internal list of StateMod_Plan_WellAugmentation being processed.
 */
-private List<StateMod_Plan_WellAugmentation> __SMPlanWellAugmentationList = new Vector<StateMod_Plan_WellAugmentation>();
+private List<StateMod_Plan_WellAugmentation> __SMPlanWellAugmentationList = new ArrayList<>();
 
 /**
 The internal list of StateMod_ReturnFlow being processed.
 */
-private List<StateMod_ReturnFlow> __SMPlanReturnList = new Vector<StateMod_ReturnFlow>();
+private List<StateMod_ReturnFlow> __SMPlanReturnList = new ArrayList<>();
 
 /**
 The internal list of StateMod_StreamEstimate being processed.
 */
-private List<StateMod_StreamEstimate> __SMStreamEstimateStationList = new Vector<StateMod_StreamEstimate>();
+private List<StateMod_StreamEstimate> __SMStreamEstimateStationList = new ArrayList<>();
 
 /**
 The internal list of StateMod_StreamEstimate_Coefficients being processed.
 */
-private List<StateMod_StreamEstimate_Coefficients> __SMStreamEstimateCoefficients_Vector = new Vector<StateMod_StreamEstimate_Coefficients>();
+private List<StateMod_StreamEstimate_Coefficients> __SMStreamEstimateCoefficients_List = new ArrayList<>();
 
 /**
 The internal list of StateMod_PrfGageData used when processing stream estimate coefficients.
 */
-private List<StateMod_PrfGageData> __SMPrfGageData_Vector = new Vector<StateMod_PrfGageData>();
+private List<StateMod_PrfGageData> __SMPrfGageData_List = new ArrayList<>();
 
 /**
 The internal list of StateMod_RiverNetworkNode being processed.
 */
-private List<StateMod_RiverNetworkNode> __SMRiverNetworkNode_Vector = new Vector<StateMod_RiverNetworkNode>();
+private List<StateMod_RiverNetworkNode> __SMRiverNetworkNode_List = new ArrayList<>();
 
 /**
 The internal list of StateMod_OperationalRight being processed.
 */
-private List<StateMod_OperationalRight> __SMOperationalRightList = new Vector<StateMod_OperationalRight>();
+private List<StateMod_OperationalRight> __SMOperationalRightList = new ArrayList<>();
 
 /**
 The internal StateMod_Network that defines the StateMod model network (not
@@ -503,45 +499,45 @@ private StateMod_NodeNetwork __SM_network = null;
 // Dynamic memory to keep track of data objects that are matched during
 // processing, resulting in updates...
 
-private List<String> __CUBlaneyCriddle_match_Vector = new Vector<String>();
-private List<String> __CUClimateStation_match_Vector = new Vector<String>();
-private List<String> __CUCropCharacteristics_match_Vector = new Vector<String>();
-private List<String> __CUCropPatternTS_match_Vector = new Vector<String>();
-//private List<String> __CUDelayTableAssignment_match_Vector = new Vector<String>();
-private List<String> __CULocation_match_Vector = new Vector<String>();
-private List<String> __CUIrrigationPracticeTS_match_Vector = new Vector<String>();
-//private List<String> __CUDelayTableDaily_match_Vector = new Vector<String>();
-//private List<String> __CUDelayTableMonthly_match_Vector = new Vector<String>();
-private List<String> __CUPenmanMonteith_match_Vector = new Vector<String>();
+private List<String> __CUBlaneyCriddle_match_List = new ArrayList<>();
+private List<String> __CUClimateStation_match_List = new ArrayList<>();
+private List<String> __CUCropCharacteristics_match_List = new ArrayList<>();
+private List<String> __CUCropPatternTS_match_List = new ArrayList<String>();
+//private List<String> __CUDelayTableAssignment_match_List = new ArrayList<>();
+private List<String> __CULocation_match_List = new ArrayList<>();
+private List<String> __CUIrrigationPracticeTS_match_List = new ArrayList<>();
+//private List<String> __CUDelayTableDaily_match_List = new ArrayList<String>();
+//private List<String> __CUDelayTableMonthly_match_List = new ArrayList<String>();
+private List<String> __CUPenmanMonteith_match_List = new ArrayList<>();
 
-private List<String> __SMStreamGage_match_Vector = new Vector<String>();
-private List<String> __SMDelayTableMonthly_match_Vector = new Vector<String>();
-private List<String> __SMDelayTableDaily_match_Vector = new Vector<String>();
-private List<String> __SMDiversion_match_Vector = new Vector<String>();
-private List<String> __SMDiversionRight_match_Vector = new Vector<String>();
-private List<String> __SMDiversionTSMonthly_match_Vector = new Vector<String>();
+private List<String> __SMStreamGage_match_List = new ArrayList<>();
+private List<String> __SMDelayTableMonthly_match_List = new ArrayList<>();
+private List<String> __SMDelayTableDaily_match_List = new ArrayList<>();
+private List<String> __SMDiversion_match_List = new ArrayList<>();
+private List<String> __SMDiversionRight_match_List = new ArrayList<>();
+private List<String> __SMDiversionTSMonthly_match_List = new ArrayList<>();
 // TODO SAM 2007-02-18 Enable if needed
-//private List __SMDiversionTSDaily_match_Vector = new Vector();
-private List<String> __SMConsumptiveWaterRequirementTSMonthly_match_Vector = new Vector<String>();
-private List<String> __SMDemandTSMonthly_match_Vector = new Vector<String>();
-private List<String> __SMReservoir_match_Vector = new Vector<String>();
-private List<String> __SMReservoirRight_match_Vector = new Vector<String>();
-private List<String> __SMReservoirReturn_match_Vector = new Vector<String>();
-private List<String> __SMInstreamFlow_match_Vector = new Vector<String>();
-private List<String> __SMInstreamFlowRight_match_Vector = new Vector<String>();
-private List<String> __SMInstreamFlowDemandTSAverageMonthly_match_Vector = new Vector<String>();
-private List<String> __SMWell_match_Vector = new Vector<String>();
-private List<String> __SMWellRight_match_Vector = new Vector<String>();
-private List<String> __SMWellHistoricalPumpingTSMonthly_match_Vector = new Vector<String>();
-private List<String> __SMWellDemandTSMonthly_match_Vector = new Vector<String>();
-private List<String> __SMPlan_match_Vector = new Vector<String>();
-private List<String> __SMPlanReturn_match_Vector = new Vector<String>();
-private List<String> __SMPlanWellAugmentation_match_Vector = new Vector<String>();
-private List<String> __SMStreamEstimate_match_Vector = new Vector<String>();
-private List<String> __SMStreamEstimateCoefficients_match_Vector = new Vector<String>();
-private List<String> __SMPrfGageData_match_Vector = new Vector<String>();
-private List<String> __SMRiverNetworkNode_match_Vector = new Vector<String>();
-private List<String> __SMOperationalRight_match_Vector = new Vector<String>();
+//private List __SMDiversionTSDaily_match_List = new ArrayList();
+private List<String> __SMConsumptiveWaterRequirementTSMonthly_match_List = new ArrayList<>();
+private List<String> __SMDemandTSMonthly_match_List = new ArrayList<>();
+private List<String> __SMReservoir_match_List = new ArrayList<>();
+private List<String> __SMReservoirRight_match_List = new ArrayList<>();
+private List<String> __SMReservoirReturn_match_List = new ArrayList<>();
+private List<String> __SMInstreamFlow_match_List = new ArrayList<>();
+private List<String> __SMInstreamFlowRight_match_List = new ArrayList<>();
+private List<String> __SMInstreamFlowDemandTSAverageMonthly_match_List = new ArrayList<>();
+private List<String> __SMWell_match_List = new ArrayList<>();
+private List<String> __SMWellRight_match_List = new ArrayList<>();
+private List<String> __SMWellHistoricalPumpingTSMonthly_match_List = new ArrayList<>();
+private List<String> __SMWellDemandTSMonthly_match_List = new ArrayList<>();
+private List<String> __SMPlan_match_List = new ArrayList<>();
+private List<String> __SMPlanReturn_match_List = new ArrayList<>();
+private List<String> __SMPlanWellAugmentation_match_List = new ArrayList<>();
+private List<String> __SMStreamEstimate_match_List = new ArrayList<>();
+private List<String> __SMStreamEstimateCoefficients_match_List = new ArrayList<>();
+private List<String> __SMPrfGageData_match_List = new ArrayList<>();
+private List<String> __SMRiverNetworkNode_match_List = new ArrayList<>();
+private List<String> __SMOperationalRight_match_List = new ArrayList<>();
 
 /**
 The HydroBase DMI instance that is used for database queries.
@@ -661,7 +657,7 @@ the list in the original order.
 */
 public void addCommandListListener ( CommandListListener listener )
 {
-	// Use arrays to make a little simpler than Vectors to use later...
+	// Use arrays to make a little simpler than lists to use later...
 	if ( listener == null ) {
 		return;
 	}
@@ -703,7 +699,7 @@ the events.
 */
 private void addCommandProcessorEventListener ( CommandProcessorEventListener listener )
 {
-    // Use arrays to make a little simpler than Vectors to use later...
+    // Use arrays to make a little simpler than lists to use later...
     if ( listener == null ) {
         return;
     }
@@ -742,7 +738,7 @@ the list in the original order.
 */
 public void addCommandProcessorListener ( CommandProcessorListener listener )
 {
-	// Use arrays to make a little simpler than Vectors to use later...
+	// Use arrays to make a little simpler than lists to use later...
 	if ( listener == null ) {
 		return;
 	}
@@ -779,7 +775,7 @@ once, the later attempt is ignored.
 @param listener ProcessListener to add.
 */
 public void addProcessListener ( ProcessListener listener )
-{	// Use arrays to make a little simpler than Vectors to use later...
+{	// Use arrays to make a little simpler than lists to use later...
 	if ( listener == null ) {
 		return;
 	}
@@ -1141,7 +1137,7 @@ private int checkDataSet ()
 		// station...
 
 		size = __SMWell_Vector.size();
-		message_list = new Vector();
+		message_list = new ArrayList();
 		for ( int i = 0; i < size; i++ ) {
 			wes_i = (StateMod_Well)
 				__SMWell_Vector.get(i);
@@ -1191,17 +1187,17 @@ Clear the results of processing.  This resets the lists of data objects to empty
 */
 public void clearResults()
 {
-	__CUBlaneyCriddle_Vector.clear();
-	__CUClimateStation_Vector.clear();
-	__CUCropCharacteristics_Vector.clear();
-	__CUCropPatternTS_Vector.clear();
-	__CULocation_Vector.clear();
-	__CUIrrigationPracticeTS_Vector.clear();
-	__CUPenmanMonteith_Vector.clear();
+	__CUBlaneyCriddle_List.clear();
+	__CUClimateStation_List.clear();
+	__CUCropCharacteristics_List.clear();
+	__CUCropPatternTS_List.clear();
+	__CULocation_List.clear();
+	__CUIrrigationPracticeTS_List.clear();
+	__CUPenmanMonteith_List.clear();
 
 	// TODO SAM 2007-06-15 Remove after using parcels only is verified
-	//__HydroBase_Supplemental_StructureIrrigSummaryTS_Vector.clear();
-	__HydroBase_Supplemental_ParcelUseTS_Vector.clear();
+	//__HydroBase_Supplemental_StructureIrrigSummaryTS_List.clear();
+	__HydroBase_Supplemental_ParcelUseTS_List.clear();
 
 	__SMDelayTableMonthlyList.clear();
 	__SMDelayTableDailyList.clear();
@@ -1221,14 +1217,14 @@ public void clearResults()
 	__SMReservoirReturnList.clear();
 	__SMReservoirStationList.clear();
 	__SMReservoirRightList.clear();
-	__SMRiverNetworkNode_Vector.clear();
+	__SMRiverNetworkNode_List.clear();
 	__SMInstreamFlowStationList.clear();
 	__SMInstreamFlowRightList.clear();
 	__SMInstreamFlowDemandTSAverageMonthlyList.clear();
 	__SMStreamGageStationList.clear();
 	__SMStreamEstimateStationList.clear();
-	__SMStreamEstimateCoefficients_Vector.clear();
-	__SMPrfGageData_Vector.clear();
+	__SMStreamEstimateCoefficients_List.clear();
+	__SMPrfGageData_List.clear();
 	__SMWellList.clear();
 	__SMWellRightList.clear();
 	__SMWellHistoricalPumpingTSMonthlyList.clear();
@@ -1240,8 +1236,79 @@ public void clearResults()
 }
 
 /**
+Convert the supplemental HydroBase_ParcelUseTS_FromSet data (raw data specified by set commands)
+to StateDMI_HydroBase_StructureView records (used for ditch processing).
+Data records are set with SetCropPatternTS() and SetCropPatternTSFromList() commands and
+are then used to create crop patterns when ReadCropPatternTSFromHydroBase() is called.
+*/
+protected List<HydroBase_StructureView_FromSet> convertHydroBaseParcelUseTSFromSetToHydroBaseStructureViewFromSet (
+	List<HydroBase_ParcelUseTS_FromSet> hydroBaseParcelUseTSFromSetList )
+{	String routine = "StateDMI_Processor.convertParcelUseTSFromSetToStructureViewFromSet";
+	List<HydroBase_StructureView_FromSet> hydroBaseStructureViewFromSet_List = new ArrayList<>();
+	int size_parcels = hydroBaseParcelUseTSFromSetList.size();
+	HydroBase_ParcelUseTS_FromSet parcel = null;
+	HydroBase_StructureView_FromSet sits = null;
+	boolean found = false; // Whether a matching summary is found
+	// Loop through the raw parcel data...
+	for ( int iparcel = 0; iparcel < size_parcels; iparcel++ ){
+		parcel = hydroBaseParcelUseTSFromSetList.get(iparcel);
+		// Find a matching location in irrig summary data and add to it...
+		found = false;
+		/* TODO SAM 2007-06-17 Evaluate whether needed - old code does
+		not have true irrig summary ts but simple records.
+		for ( int isummary = 0; isummary < size_summary; isummary++ ) {
+			summary = (StateDMI_HydroBase_StructureView)HydroBase_Supplemental_StructureIrrigSummaryTS_List.get(isummary);
+			if ( parcel.getLocationID().equalsIgnoreCase(summary.getLocationID()) {
+				found = true;
+				break;
+			}
+		}
+		*/
+		if ( !found ) {
+			// Create a new summary to add to
+			sits = new HydroBase_StructureView_FromSet();
+		}
+		sits.setLocationID ( parcel.getLocationID() );
+		if ( HydroBase_WaterDistrict.isWDID(parcel.getLocationID())) {
+			try {
+				int [] wdid_parts = new int[2];
+				HydroBase_WaterDistrict.parseWDID(parcel.getLocationID());
+				sits.setWD ( wdid_parts[0] );
+				sits.setID ( wdid_parts[1] );
+			}
+			catch ( Exception e ) {
+				//Absorb - just use the LocationID
+			}
+		}
+		// Set the IrrigSummaryTS information using only the total area...
+		sits.setCal_year ( parcel.getCal_year() );
+		sits.setLand_use ( parcel.getLand_use() );
+		sits.setAcres_total ( parcel.getArea() );
+		hydroBaseStructureViewFromSet_List.add(sits);
+	}
+	if ( hydroBaseStructureViewFromSet_List.size() == 0 ) {
+		Message.printStatus ( 2, routine, "No additional crop pattern time series records have been provided." );
+	}
+	else {
+		Message.printStatus ( 2, routine,
+			"Created " + hydroBaseStructureViewFromSet_List.size() +
+			" structure view/irrig_summary_ts records from " + hydroBaseParcelUseTSFromSetList.size() +
+			" parcel use records:" );
+		for ( int i = 0; i < hydroBaseStructureViewFromSet_List.size(); i++ ) {
+			sits = hydroBaseStructureViewFromSet_List.get(i);
+			Message.printStatus ( 2, routine, "Location=" + sits.getLocationID() +
+				" Year=" + sits.getCal_year() +
+				" Crop=" + sits.getLand_use() +
+				" Area=" + StringUtil.formatString(sits.getAcres_total(),"%.3f") );
+		}
+	}
+	return hydroBaseStructureViewFromSet_List;
+}
+
+// TODO smalers 2020-02-15 This is used with StateDMI version < 5.00.00
+/**
 Convert the supplemental StateDMI_HydroBase_ParcelUseTS data (raw data specified by set commands)
-to StateDMI_HydroBase_StructureView records (used for ditched processing).
+to StateDMI_HydroBase_StructureView records (used for ditch processing).
 This method is called from a couple of commands.  Data records are set with SetCropPatternTS() and
 SetCropPatternTSFromList() commands and are later used to create crop patterns when
 ReadCropPatternTSFromHydroBase() is called.
@@ -1249,8 +1316,7 @@ ReadCropPatternTSFromHydroBase() is called.
 protected List<StateDMI_HydroBase_StructureView> convertSupplementalParcelUseTSToStructureView (
 	List<StateDMI_HydroBase_ParcelUseTS> supplementalParcelUseTSList )
 {	String routine = "StateDMI_Processor.convertSupplementalParcelUseTSToStructureIrrigSummaryTS";
-	List<StateDMI_HydroBase_StructureView> HydroBase_Supplemental_StructureIrrigSummaryTS_Vector =
-		new Vector<StateDMI_HydroBase_StructureView>();
+	List<StateDMI_HydroBase_StructureView> HydroBase_Supplemental_StructureIrrigSummaryTS_List = new ArrayList<>();
 	int size_parcels = supplementalParcelUseTSList.size();
 	StateDMI_HydroBase_ParcelUseTS parcel = null;
 	StateDMI_HydroBase_StructureView sits = null;
@@ -1263,7 +1329,7 @@ protected List<StateDMI_HydroBase_StructureView> convertSupplementalParcelUseTST
 		/* TODO SAM 2007-06-17 Evaluate whether needed - old code does
 		not have true irrig summary ts but simple records.
 		for ( int isummary = 0; isummary < size_summary; isummary++ ) {
-			summary = (StateDMI_HydroBase_StructureView)HydroBase_Supplemental_StructureIrrigSummaryTS_Vector.get(isummary);
+			summary = (StateDMI_HydroBase_StructureView)HydroBase_Supplemental_StructureIrrigSummaryTS_List.get(isummary);
 			if ( parcel.getLocationID().equalsIgnoreCase(summary.getLocationID()) {
 				found = true;
 				break;
@@ -1290,20 +1356,20 @@ protected List<StateDMI_HydroBase_StructureView> convertSupplementalParcelUseTST
 		sits.setCal_year ( parcel.getCal_year() );
 		sits.setLand_use ( parcel.getLand_use() );
 		sits.setAcres_total ( parcel.getArea() );
-		HydroBase_Supplemental_StructureIrrigSummaryTS_Vector.add(sits);
+		HydroBase_Supplemental_StructureIrrigSummaryTS_List.add(sits);
 	}
 	Message.printStatus ( 2, routine,
-		"Created " + HydroBase_Supplemental_StructureIrrigSummaryTS_Vector.size() +
+		"Created " + HydroBase_Supplemental_StructureIrrigSummaryTS_List.size() +
 		" structure view/irrig_summary_ts records from " + supplementalParcelUseTSList.size() +
 		" supplemental parcel records:" );
-	for ( int i = 0; i < HydroBase_Supplemental_StructureIrrigSummaryTS_Vector.size(); i++ ) {
-		sits = (StateDMI_HydroBase_StructureView)HydroBase_Supplemental_StructureIrrigSummaryTS_Vector.get(i);
+	for ( int i = 0; i < HydroBase_Supplemental_StructureIrrigSummaryTS_List.size(); i++ ) {
+		sits = (StateDMI_HydroBase_StructureView)HydroBase_Supplemental_StructureIrrigSummaryTS_List.get(i);
 		Message.printStatus ( 2, routine, "Location=" + sits.getLocationID() +
 			" Year=" + sits.getCal_year() +
 			" Crop=" + sits.getLand_use() +
 			" Area=" + StringUtil.formatString(sits.getAcres_total(),"%.3f") );
 	}
-	return HydroBase_Supplemental_StructureIrrigSummaryTS_Vector;
+	return HydroBase_Supplemental_StructureIrrigSummaryTS_List;
 }
 
 /**
@@ -1433,12 +1499,12 @@ Find an AgStats time series using the location (county) and data type (crop).
 */
 protected YearTS findAgStatsTS ( String county, String crop_type )
 {	int size = 0;
-	if ( __CUAgStatsTS_Vector != null ) {
-		size = __CUAgStatsTS_Vector.size();
+	if ( __CUAgStatsTS_List != null ) {
+		size = __CUAgStatsTS_List.size();
 	}
 	YearTS ts;
 	for ( int i = 0; i < size; i++ ) {
-		ts = (YearTS)__CUAgStatsTS_Vector.get(i);
+		ts = (YearTS)__CUAgStatsTS_List.get(i);
 		if ( ts.getLocation().equalsIgnoreCase(county) && ts.getDataType().equalsIgnoreCase(crop_type) ) {
 			return ts;
 		}
@@ -1447,8 +1513,8 @@ protected YearTS findAgStatsTS ( String county, String crop_type )
 }
 
 /**
-Add a StateCU_BlaneyCriddle instance to the __CUBlaneyCriddle_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __CUBlaneyCriddle_match_Vector
+Add a StateCU_BlaneyCriddle instance to the __CUBlaneyCriddle_List.  If
+an existing instance is found, it is optionally replaced and added to the __CUBlaneyCriddle_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param kbc StateCU_BlaneyCriddle instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -1456,46 +1522,46 @@ so that a warning can be printed using warnAboutDataMatches().
 protected void findAndAddCUBlaneyCriddle ( StateCU_BlaneyCriddle kbc, boolean replace )
 {	String id = kbc.getName();
 
-	int pos = StateCU_Util.indexOfName ( __CUBlaneyCriddle_Vector, kbc.getName() );
+	int pos = StateCU_Util.indexOfName ( __CUBlaneyCriddle_List, kbc.getName() );
 	if ( pos >= 0 ) {
 		// The StateCU_BlaneyCriddle is already in the list...
-		__CUBlaneyCriddle_match_Vector.add(id);
+		__CUBlaneyCriddle_match_List.add(id);
 		if ( replace ) {
-			__CUBlaneyCriddle_Vector.set ( pos, kbc );
+			__CUBlaneyCriddle_List.set ( pos, kbc );
 		}
 	}
 	else {
 		// Add at the end of the list...
-		__CUBlaneyCriddle_Vector.add ( kbc );
+		__CUBlaneyCriddle_List.add ( kbc );
 	}
 }
 
 /**
-Add a StateCU_ClimateStation instance to the __CUClimateStations_Vector.  If an
+Add a StateCU_ClimateStation instance to the __CUClimateStations_List.  If an
 existing instance is found, it is optionally replaced and added to the
-__CUClimateStations_match_Vector so that a warning can be printed using warnAboutDataMatches().
+__CUClimateStations_match_List so that a warning can be printed using warnAboutDataMatches().
 @param cli CUClimateStation instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
 */
 protected void findAndAddCUClimateStation ( StateCU_ClimateStation cli, boolean replace )
 {	String id = cli.getID();
-	int pos = StateCU_Util.indexOf(__CUClimateStation_Vector,id);
+	int pos = StateCU_Util.indexOf(__CUClimateStation_List,id);
 	if ( pos >= 0 ) {
 		// The StateCU_ClimateStation is already in the list...
-		__CUClimateStation_match_Vector.add(id);
+		__CUClimateStation_match_List.add(id);
 		if ( replace ) {
-			__CUClimateStation_Vector.set ( pos, cli );
+			__CUClimateStation_List.set ( pos, cli );
 		}
 	}
 	else {
 		// Add at the end of the list...
-		__CUClimateStation_Vector.add ( cli );
+		__CUClimateStation_List.add ( cli );
 	}
 }
 
 /**
-Add a StateCU_CropCharacteristics instance to the __CUCropCharacteristics_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __CUCropCharacteristics_match_Vector
+Add a StateCU_CropCharacteristics instance to the __CUCropCharacteristics_List.  If
+an existing instance is found, it is optionally replaced and added to the __CUCropCharacteristics_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param cch StateCU_CropCharacteristics instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -1503,24 +1569,24 @@ so that a warning can be printed using warnAboutDataMatches().
 protected void findAndAddCUCropCharacteristics ( StateCU_CropCharacteristics cch, boolean replace )
 {	String id = cch.getName();	// Name is used because ID is the numeridal crop ID that is no longer used.
 
-	int pos = StateCU_Util.indexOfName(__CUCropCharacteristics_Vector, id );
+	int pos = StateCU_Util.indexOfName(__CUCropCharacteristics_List, id );
 	if ( pos >= 0 ) {
 		// The StateCU_CropCharacteristics is already in the list...
-		__CUCropCharacteristics_match_Vector.add(id);
+		__CUCropCharacteristics_match_List.add(id);
 		if ( replace ) {
-			__CUCropCharacteristics_Vector.set ( pos, cch );
+			__CUCropCharacteristics_List.set ( pos, cch );
 		}
 	}
 	else {
 		// Add at the end of the list...
-		__CUCropCharacteristics_Vector.add ( cch );
+		__CUCropCharacteristics_List.add ( cch );
 	}
 }
 
 /**
-Add StateCU_CropPatternTS data to the __CUCropPatternTS_Vector.  If
+Add StateCU_CropPatternTS data to the __CUCropPatternTS_List.  If
 an existing instance is found, it is optionally replaced and added to the
-__CUCropPatternTS_match_Vector so that a warning can be printed using
+__CUCropPatternTS_match_List so that a warning can be printed using
 warnAboutDataMatches().  This version is used when reading individual ID/Crop/Year
 data from HydroBase or other sources, where single values are found.
 The parcel data are also stored with the time series, for later data filling.
@@ -1541,7 +1607,7 @@ protected StateCU_CropPatternTS findAndAddCUCropPatternTSValue ( String id, Stri
 	int parcel_id, String crop_name, double total_acres, DateTime datetime1, DateTime datetime2,
 	String units, int replace ) // TODO SAM 2009-02-12 Evaluate , String irrigationMethod, String supplyType )
 {	// First see if there is a matching instance for the CU location...
-	int pos = StateCU_Util.indexOf ( __CUCropPatternTS_Vector, id);
+	int pos = StateCU_Util.indexOf ( __CUCropPatternTS_List, id);
 	int dl = 1;
 	StateCU_CropPatternTS cds = null;
 	YearTS yts = null;
@@ -1555,10 +1621,10 @@ protected StateCU_CropPatternTS findAndAddCUCropPatternTSValue ( String id, Stri
 	if ( pos < 0 ) {
 		// Add at the end of the list...
 		cds = new StateCU_CropPatternTS ( id, datetime1, datetime2, units );
-		__CUCropPatternTS_Vector.add ( cds );
+		__CUCropPatternTS_List.add ( cds );
 	}
 	else {
-		cds = (StateCU_CropPatternTS)__CUCropPatternTS_Vector.get(pos);
+		cds = (StateCU_CropPatternTS)__CUCropPatternTS_List.get(pos);
 	}
 	// The StateCU_CropPatternTS is in the list.  Now check to see if the
 	// crop is in the list of time series...
@@ -1581,7 +1647,7 @@ protected StateCU_CropPatternTS findAndAddCUCropPatternTSValue ( String id, Stri
 	}
 	else {
 		// Value is not missing.  Need to either set or add to it...
-		__CUCropPatternTS_match_Vector.add ( id + "-" + cal_year + "-" + crop_name );
+		__CUCropPatternTS_match_List.add ( id + "-" + cal_year + "-" + crop_name );
 		if ( replace == 0 ) {
 			if ( Message.isDebugOn ) {
 				Message.printDebug ( dl, "", "Replacing " + id + " from " + part_id + " " +
@@ -1622,8 +1688,8 @@ protected StateCU_CropPatternTS findAndAddCUCropPatternTSValue ( String id, Stri
 }
 
 /**
-Add a StateCU_CropPatternTS instance to the __CUCropPatternTS_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __CUCropPatternTS_match_Vector
+Add a StateCU_CropPatternTS instance to the __CUCropPatternTS_List.  If
+an existing instance is found, it is optionally replaced and added to the __CUCropPatternTS_match_List
 so that a warning can be printed using warnAboutDataMatches().
 This version is used when reading data from StateCU files, where entire periods of crop data are found.
 @param cch StateCU_CropPatternTS instance to be added.
@@ -1632,24 +1698,24 @@ This version is used when reading data from StateCU files, where entire periods 
 protected void findAndAddCUCropPatternTS ( StateCU_CropPatternTS cds, boolean replace )
 {	String id = cds.getID();
 
-	int pos = StateCU_Util.indexOf ( __CUCropPatternTS_Vector, id);
+	int pos = StateCU_Util.indexOf ( __CUCropPatternTS_List, id);
 	if ( pos >= 0 ) {
 		// The StateCU_CropPatternTS is already in the list...
-		__CUCropPatternTS_match_Vector.add(id);
+		__CUCropPatternTS_match_List.add(id);
 		if ( replace ) {
-			__CUCropPatternTS_Vector.set ( pos, cds );
+			__CUCropPatternTS_List.set ( pos, cds );
 		}
 	}
 	else {
 		// Add at the end of the list...
-		__CUCropPatternTS_Vector.add ( cds );
+		__CUCropPatternTS_List.add ( cds );
 	}
 }
 
 /**
-Add a StateCU_IrrigationPracticeTS instance to the __CUIrrigationPracticeTS_Vector.  If
+Add a StateCU_IrrigationPracticeTS instance to the __CUIrrigationPracticeTS_List.  If
 an existing instance is found, it is optionally replaced and added to the
-__CUIrrigationPracticeTS_match_Vector
+__CUIrrigationPracticeTS_match_List
 so that a warning can be printed using warnAboutDataMatches().
 This version is used when reading data from StateCU files, where entire periods of parameter data are found.
 @param ipy StateCU_IrrigationPracticeTS instance to be added.
@@ -1658,48 +1724,48 @@ This version is used when reading data from StateCU files, where entire periods 
 protected void findAndAddCUIrrigationPracticeTS ( StateCU_IrrigationPracticeTS ipy, boolean replace )
 {	String id = ipy.getID();
 
-	int pos = StateCU_Util.indexOf ( __CUIrrigationPracticeTS_Vector, id );
+	int pos = StateCU_Util.indexOf ( __CUIrrigationPracticeTS_List, id );
 	if ( pos >= 0 ) {
 		// The StateCU_IrrigationPracticeTS is already in the list...
-		__CUIrrigationPracticeTS_match_Vector.add(id);
+		__CUIrrigationPracticeTS_match_List.add(id);
 		if ( replace ) {
-			__CUIrrigationPracticeTS_Vector.set ( pos, ipy );
+			__CUIrrigationPracticeTS_List.set ( pos, ipy );
 		}
 	}
 	else {
 		// Add at the end of the list...
-		__CUIrrigationPracticeTS_Vector.add ( ipy );
+		__CUIrrigationPracticeTS_List.add ( ipy );
 	}
 }
 
 /**
-Add a StateCU_Location instance to the __CULocation_Vector.  If an existing
+Add a StateCU_Location instance to the __CULocation_List.  If an existing
 instance is found, it is optionally replaced and added to the
-__CULocation_match_Vector so that a warning can be printed using warnAboutDataMatches().
+__CULocation_match_List so that a warning can be printed using warnAboutDataMatches().
 @param cu_loc CULocation instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
 */
 protected void findAndAddCULocation ( StateCU_Location cu_loc, boolean replace )
 {	String id = cu_loc.getID();
 
-	int pos = StateCU_Util.indexOf(__CULocation_Vector, cu_loc.getID());
+	int pos = StateCU_Util.indexOf(__CULocation_List, cu_loc.getID());
 	if ( pos >= 0 ) {
 		// The StateCU_Location is already in the list...
-		__CULocation_match_Vector.add(id);
+		__CULocation_match_List.add(id);
 		if ( replace ) {
-			__CULocation_Vector.set ( pos, cu_loc );
+			__CULocation_List.set ( pos, cu_loc );
 		}
 	}
 	else {
 		// Add at the end of the list...
-		__CULocation_Vector.add ( cu_loc );
+		__CULocation_List.add ( cu_loc );
 	}
 }
 
 /**
-Add a time series instance to the __SMConsumptiveWaterRequirementTSMonthly_Vector.  If
+Add a time series instance to the __SMConsumptiveWaterRequirementTSMonthly_List.  If
 an existing instance is found, it is optionally replaced and added to the
-__SMConsumptiveWaterRequirementTSMonthly_match_Vector
+__SMConsumptiveWaterRequirementTSMonthly_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param ts TS instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -1710,7 +1776,7 @@ protected void findAndAddSMConsumptiveWaterRequirementTSMonthly ( MonthTS ts, bo
 	int pos = TSUtil.indexOf( __SMConsumptiveWaterRequirementTSMonthlyList, id, "Location", null, 1 );
 	if ( pos >= 0 ) {
 		// The ts is already in the list...
-		__SMConsumptiveWaterRequirementTSMonthly_match_Vector.add(id);
+		__SMConsumptiveWaterRequirementTSMonthly_match_List.add(id);
 		if ( replace ) {
 			__SMConsumptiveWaterRequirementTSMonthlyList.set ( pos, ts );
 		}
@@ -1722,8 +1788,8 @@ protected void findAndAddSMConsumptiveWaterRequirementTSMonthly ( MonthTS ts, bo
 }
 
 /**
-Add a StateCU_PenmanMonteith instance to the __CUPenmanMonteith_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __CUPenmanMonteith_match_Vector
+Add a StateCU_PenmanMonteith instance to the __CUPenmanMonteith_List.  If
+an existing instance is found, it is optionally replaced and added to the __CUPenmanMonteith_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param kpm StateCU_PenmanMonteith instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -1731,23 +1797,23 @@ so that a warning can be printed using warnAboutDataMatches().
 protected void findAndAddCUPenmanMonteith ( StateCU_PenmanMonteith kpm, boolean replace )
 {	String id = kpm.getName();
 
-	int pos = StateCU_Util.indexOfName ( __CUPenmanMonteith_Vector, kpm.getName() );
+	int pos = StateCU_Util.indexOfName ( __CUPenmanMonteith_List, kpm.getName() );
 	if ( pos >= 0 ) {
 		// The StateCU_PenmanMonteith is already in the list...
-		__CUPenmanMonteith_match_Vector.add(id);
+		__CUPenmanMonteith_match_List.add(id);
 		if ( replace ) {
-			__CUPenmanMonteith_Vector.set ( pos, kpm );
+			__CUPenmanMonteith_List.set ( pos, kpm );
 		}
 	}
 	else {
 		// Add at the end of the list...
-		__CUPenmanMonteith_Vector.add ( kpm );
+		__CUPenmanMonteith_List.add ( kpm );
 	}
 }
 
 /**
-Add a StateMod_DelayTable instance to the __SMDelayTable_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __SMDelayTable_match_Vector
+Add a StateMod_DelayTable instance to the __SMDelayTable_List.  If
+an existing instance is found, it is optionally replaced and added to the __SMDelayTable_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param dly StateMod_DelayTable instance to be added.
 @param interval TimeInterval.MONTH or TimeInterval.DAY.
@@ -1756,28 +1822,28 @@ so that a warning can be printed using warnAboutDataMatches().
 protected void findAndAddSMDelayTable ( StateMod_DelayTable dly, int interval, boolean replace )
 {	String id = dly.getID();
 
-	List<StateMod_DelayTable> delay_Vector = __SMDelayTableMonthlyList;
-	List<String> match_Vector = __SMDelayTableMonthly_match_Vector;
+	List<StateMod_DelayTable> delay_List = __SMDelayTableMonthlyList;
+	List<String> match_List = __SMDelayTableMonthly_match_List;
 	if ( interval == TimeInterval.DAY ) {
-		delay_Vector = __SMDelayTableDailyList;
+		delay_List = __SMDelayTableDailyList;
 	}
-	int pos = StateMod_Util.indexOf( delay_Vector, id );
+	int pos = StateMod_Util.indexOf( delay_List, id );
 	if ( pos >= 0 ) {
 		// The StateMod_DelayTable is already in the list...
-		match_Vector.add(id);
+		match_List.add(id);
 		if ( replace ) {
-			delay_Vector.set ( pos, dly );
+			delay_List.set ( pos, dly );
 		}
 	}
 	else {
 		// Add at the end of the list...
-		delay_Vector.add ( dly );
+		delay_List.add ( dly );
 	}
 }
 
 /**
-Add a StateMod demand time series (monthly) instance to the __SMDemandTSMonthly_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __SMDemandTSMonthly_match_Vector
+Add a StateMod demand time series (monthly) instance to the __SMDemandTSMonthly_List.  If
+an existing instance is found, it is optionally replaced and added to the __SMDemandTSMonthly_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param ts TS instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -1788,7 +1854,7 @@ protected void findAndAddSMDemandTSMonthly ( MonthTS ts, boolean replace )
 	int pos = TSUtil.indexOf( __SMDemandTSMonthlyList, id, "Location", null, 1 );
 	if ( pos >= 0 ) {
 		// The ts is already in the list...
-		__SMDemandTSMonthly_match_Vector.add(id);
+		__SMDemandTSMonthly_match_List.add(id);
 		if ( replace ) {
 			__SMDemandTSMonthlyList.set ( pos, ts );
 		}
@@ -1800,8 +1866,8 @@ protected void findAndAddSMDemandTSMonthly ( MonthTS ts, boolean replace )
 }
 
 /**
-Add a StateMod_Diversion instance to the __SMDiversion_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __SMDiversion_match_Vector
+Add a StateMod_Diversion instance to the __SMDiversion_List.  If
+an existing instance is found, it is optionally replaced and added to the __SMDiversion_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param div StateMod_Diversion instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -1812,7 +1878,7 @@ protected void findAndAddSMDiversion ( StateMod_Diversion div, boolean replace )
 	int pos = StateMod_Util.indexOf( __SMDiversionStationList, id );
 	if ( pos >= 0 ) {
 		// The StateMod_Diversion is already in the list...
-		__SMDiversion_match_Vector.add(id);
+		__SMDiversion_match_List.add(id);
 		if ( replace ) {
 			__SMDiversionStationList.set ( pos, div );
 		}
@@ -1824,8 +1890,8 @@ protected void findAndAddSMDiversion ( StateMod_Diversion div, boolean replace )
 }
 
 /**
-Add a StateMod_DiversionRight instance to the __SMDiversionRight_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __SMDiversionRight_match_Vector
+Add a StateMod_DiversionRight instance to the __SMDiversionRight_List.  If
+an existing instance is found, it is optionally replaced and added to the __SMDiversionRight_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param divr StateMod_DiversionRight instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -1836,7 +1902,7 @@ protected void findAndAddSMDiversionRight ( StateMod_DiversionRight divr, boolea
 	int pos = StateMod_Util.indexOf( __SMDiversionRightList, id );
 	if ( pos >= 0 ) {
 		// The StateMod_DiversionRight is already in the list...
-		__SMDiversionRight_match_Vector.add(id);
+		__SMDiversionRight_match_List.add(id);
 		if ( replace ) {
 			__SMDiversionRightList.set ( pos, divr );
 		}
@@ -1858,9 +1924,9 @@ protected void findAndAddSMDiversionRight ( StateMod_DiversionRight divr, boolea
 }
 
 /**
-Add a StateMod diversion time series (monthly) instance to the __SMDiversionTSMonthly_Vector.  If
+Add a StateMod diversion time series (monthly) instance to the __SMDiversionTSMonthly_List.  If
 an existing instance is found, it is optionally replaced and added to the
-__SMDiversionTSMonthly_match_Vector
+__SMDiversionTSMonthly_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param ts TS instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -1875,7 +1941,7 @@ protected void findAndAddSMDiversionTSMonthly ( MonthTS ts, boolean replace )
 	int pos = TSUtil.indexOf( __SMDiversionTSMonthlyList, id, "Location", null, 1 );
 	if ( pos >= 0 ) {
 		// The ts is already in the list...
-		__SMDiversionTSMonthly_match_Vector.add(id);
+		__SMDiversionTSMonthly_match_List.add(id);
 		if ( replace ) {
 			__SMDiversionTSMonthlyList.set ( pos, ts );
 		}
@@ -1888,7 +1954,7 @@ protected void findAndAddSMDiversionTSMonthly ( MonthTS ts, boolean replace )
 
 /**
 Add a StateMod diversion time series (monthly) instance to the
-__SMDiversionTSMonthly2_Vector.  The copy (clone) of the time series should be made before calling this method.
+__SMDiversionTSMonthly2_List.  The copy (clone) of the time series should be made before calling this method.
 @param ts TS instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
 */
@@ -1913,8 +1979,8 @@ protected void findAndAddSMDiversionTSMonthly2 ( MonthTS ts, boolean replace )
 }
 
 /**
-Add a StateMod_InstreamFlow instance to the __SMInstreamFlow_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __SMInstreamFlow_match_Vector
+Add a StateMod_InstreamFlow instance to the __SMInstreamFlow_List.  If
+an existing instance is found, it is optionally replaced and added to the __SMInstreamFlow_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param ifs StateMod_InstreamFlow instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -1925,7 +1991,7 @@ protected void findAndAddSMInstreamFlow ( StateMod_InstreamFlow ifs, boolean rep
 	int pos = StateMod_Util.indexOf( __SMInstreamFlowStationList, id );
 	if ( pos >= 0 ) {
 		// The StateMod_InstreamFlow is already in the list...
-		__SMInstreamFlow_match_Vector.add(id);
+		__SMInstreamFlow_match_List.add(id);
 		if ( replace ) {
 			__SMInstreamFlowStationList.set ( pos, ifs );
 		}
@@ -1938,7 +2004,7 @@ protected void findAndAddSMInstreamFlow ( StateMod_InstreamFlow ifs, boolean rep
 
 /**
 Add a StateMod instream flow demand time series (average monthly) instance to the
-__SMInstreamFlowDemandTSAverageMonthly_Vector.  If
+__SMInstreamFlowDemandTSAverageMonthly_List.  If
 an existing instance is found, it is optionally replaced and added to the list
 so that a warning can be printed using warnAboutDataMatches().
 @param ts TS instance to be added.
@@ -1950,7 +2016,7 @@ protected void findAndAddSMInstreamFlowDemandTSAverageMonthly ( MonthTS ts, bool
 	int pos = TSUtil.indexOf( __SMInstreamFlowDemandTSAverageMonthlyList, id, "Location", null, 1 );
 	if ( pos >= 0 ) {
 		// The ts is already in the list...
-		__SMInstreamFlowDemandTSAverageMonthly_match_Vector.add(id);
+		__SMInstreamFlowDemandTSAverageMonthly_match_List.add(id);
 		if ( replace ) {
 			__SMInstreamFlowDemandTSAverageMonthlyList.set ( pos, ts );
 		}
@@ -1962,8 +2028,8 @@ protected void findAndAddSMInstreamFlowDemandTSAverageMonthly ( MonthTS ts, bool
 }
 
 /**
-Add a StateMod_InstreamFlowRight instance to the __SMInstreamFlowRight_Vector.
-If an existing instance is found, it is optionally replaced and added to the __SMInstreamFlowRight_match_Vector
+Add a StateMod_InstreamFlowRight instance to the __SMInstreamFlowRight_List.
+If an existing instance is found, it is optionally replaced and added to the __SMInstreamFlowRight_match_List
 so that a warning can be printed using warnAboutDataMatches().
 If the right is not found, it is added in alphabetical order.
 @param ifr StateMod_InstreamFlowRight instance to be added.
@@ -1976,7 +2042,7 @@ protected void findAndAddSMInstreamFlowRight ( StateMod_InstreamFlowRight ifr, b
 	int pos = StateMod_Util.indexOf( __SMInstreamFlowRightList, id );
 	if ( pos >= 0 ) {
 		// The StateMod_InstreamFlowRight is already in the list...
-		__SMInstreamFlowRight_match_Vector.add(id);
+		__SMInstreamFlowRight_match_List.add(id);
 		if ( replace ) {
 			__SMInstreamFlowRightList.set ( pos, ifr );
 		}
@@ -1998,8 +2064,8 @@ protected void findAndAddSMInstreamFlowRight ( StateMod_InstreamFlowRight ifr, b
 }
 
 /**
-Add a StateMod_OperationalRight instance to the __SMOperationalRight_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __SMOperationalRight_match_Vector
+Add a StateMod_OperationalRight instance to the __SMOperationalRight_List.  If
+an existing instance is found, it is optionally replaced and added to the __SMOperationalRight_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param opr StateMod_OperationalRight instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -2011,7 +2077,7 @@ protected void findAndAddSMOperationalRight ( StateMod_OperationalRight opr, boo
 	int pos = StateMod_Util.indexOf( __SMOperationalRightList, id );
 	if ( pos >= 0 ) {
 		// The StateMod_OperationalRight is already in the list...
-		__SMOperationalRight_match_Vector.add(id);
+		__SMOperationalRight_match_List.add(id);
 		if ( replace ) {
 			__SMOperationalRightList.set ( pos, opr );
 		}
@@ -2034,8 +2100,8 @@ protected void findAndAddSMOperationalRight ( StateMod_OperationalRight opr, boo
 }
 
 /**
-Add a StateMod_Plan instance to the __SMPlan_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __SMPlan_match_Vector
+Add a StateMod_Plan instance to the __SMPlan_List.  If
+an existing instance is found, it is optionally replaced and added to the __SMPlan_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param plan StateMod_Well instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -2046,7 +2112,7 @@ protected void findAndAddSMPlan ( StateMod_Plan plan, boolean replace )
 	int pos = StateMod_Util.indexOf( __SMPlanList, id );
 	if ( pos >= 0 ) {
 		// The StateMod_Plan is already in the list...
-		__SMPlan_match_Vector.add(id);
+		__SMPlan_match_List.add(id);
 		if ( replace ) {
 			__SMPlanList.set ( pos, plan );
 		}
@@ -2059,7 +2125,7 @@ protected void findAndAddSMPlan ( StateMod_Plan plan, boolean replace )
 
 // TODO SAM 2011-01-02 Add based on multiple identifiers
 /**
-Add a StateMod_Plan_WellAugmentation instance to the __SMPlanWellAugmentation_Vector.  Currently this always
+Add a StateMod_Plan_WellAugmentation instance to the __SMPlanWellAugmentation_List.  Currently this always
 adds at the end.
 @param wellAug StateMod_Plan_WellAugmentation instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -2071,7 +2137,7 @@ protected void findAndAddSMPlanWellAugmentation ( StateMod_Plan_WellAugmentation
 	int pos = StateMod_Util.indexOf( __SMPlanList, id );
 	if ( pos >= 0 ) {
 		// The StateMod_Plan is already in the list...
-		__SMPlan_match_Vector.add(id);
+		__SMPlan_match_List.add(id);
 		if ( replace ) {
 			__SMPlanList.set ( pos, wellAug );
 		}
@@ -2084,7 +2150,7 @@ protected void findAndAddSMPlanWellAugmentation ( StateMod_Plan_WellAugmentation
 
 //TODO SAM 2011-01-02 Add based on multiple identifiers
 /**
-Add a StateMod_ReturnFlow instance to the __SMPlanReturn_Vector.  Currently this always
+Add a StateMod_ReturnFlow instance to the __SMPlanReturn_List.  Currently this always
 adds at the end.
 @param planReturn StateMod_ReturnFlow instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -2096,7 +2162,7 @@ protected void findAndAddSMPlanReturn ( StateMod_ReturnFlow planReturn, boolean 
 	int pos = StateMod_Util.indexOf( __SMPlanList, id );
 	if ( pos >= 0 ) {
 		// The StateMod_Plan is already in the list...
-		__SMPlan_match_Vector.add(id);
+		__SMPlan_match_List.add(id);
 		if ( replace ) {
 			__SMPlanList.set ( pos, wellAug );
 		}
@@ -2108,9 +2174,9 @@ protected void findAndAddSMPlanReturn ( StateMod_ReturnFlow planReturn, boolean 
 }
 
 /**
-Add a StateMod_PrfGageData instance to the __SMPrfGageData_Vector.  If an
+Add a StateMod_PrfGageData instance to the __SMPrfGageData_List.  If an
 existing instance is found, it is optionally replaced and added to the
-__SMPrfGageData_match_Vector so that a warning can be printed using warnAboutDataMatches().
+__SMPrfGageData_match_List so that a warning can be printed using warnAboutDataMatches().
 @param prf StateMod_PrfGageData instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
 @return true if the location was matched, false if not.
@@ -2118,25 +2184,25 @@ __SMPrfGageData_match_Vector so that a warning can be printed using warnAboutDat
 protected boolean findAndAddSMPrfGageData ( StateMod_PrfGageData prf, boolean replace )
 {	String id = prf.getID();
 
-	int pos=StateMod_Util.indexOf(__SMPrfGageData_Vector,id);
+	int pos=StateMod_Util.indexOf(__SMPrfGageData_List,id);
 	if ( pos >= 0 ) {
 		// The StateMod_PrfGageData is already in the list...
-		__SMPrfGageData_match_Vector.add(id);
+		__SMPrfGageData_match_List.add(id);
 		if ( replace ) {
-			__SMPrfGageData_Vector.set ( pos, prf );
+			__SMPrfGageData_List.set ( pos, prf );
 		}
 		return true;
 	}
 	else {
 		// Add at the end of the list...
-		__SMPrfGageData_Vector.add ( prf );
+		__SMPrfGageData_List.add ( prf );
 		return false;
 	}
 }
 
 /**
-Add a StateMod_Reservoir instance to the __SMReservoir_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __SMReservoir_match_Vector
+Add a StateMod_Reservoir instance to the __SMReservoir_List.  If
+an existing instance is found, it is optionally replaced and added to the __SMReservoir_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param div StateMod_Reservoir instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -2147,7 +2213,7 @@ protected void findAndAddSMReservoir ( StateMod_Reservoir res, boolean replace )
 	int pos = StateMod_Util.indexOf( __SMReservoirStationList, id );
 	if ( pos >= 0 ) {
 		// The StateMod_Reservoir is already in the list...
-		__SMReservoir_match_Vector.add(id);
+		__SMReservoir_match_List.add(id);
 		if ( replace ) {
 			__SMReservoirStationList.set ( pos, res );
 		}
@@ -2160,7 +2226,7 @@ protected void findAndAddSMReservoir ( StateMod_Reservoir res, boolean replace )
 
 //TODO SAM 2011-01-02 Add based on multiple identifiers
 /**
-Add a StateMod_ReturnFlow instance to the __SMReservoirReturn_Vector.  Currently this always
+Add a StateMod_ReturnFlow instance to the __SMReservoirReturn_List.  Currently this always
 adds at the end.
 @param resReturn StateMod_ReturnFlow instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -2172,7 +2238,7 @@ protected void findAndAddSMReservoirReturn ( StateMod_ReturnFlow resReturn, bool
 	int pos = StateMod_Util.indexOf( __SMPlanList, id );
 	if ( pos >= 0 ) {
 		// The StateMod_Plan is already in the list...
-		__SMPlan_match_Vector.add(id);
+		__SMPlan_match_List.add(id);
 		if ( replace ) {
 			__SMPlanList.set ( pos, wellAug );
 		}
@@ -2184,8 +2250,8 @@ protected void findAndAddSMReservoirReturn ( StateMod_ReturnFlow resReturn, bool
 }
 
 /**
-Add a StateMod_ReservoirRight instance to the __SMReservoirRight_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __SMReservoirRight_match_Vector
+Add a StateMod_ReservoirRight instance to the __SMReservoirRight_List.  If
+an existing instance is found, it is optionally replaced and added to the __SMReservoirRight_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param resr StateMod_ReservoirRight instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -2196,7 +2262,7 @@ protected void findAndAddSMReservoirRight ( StateMod_ReservoirRight resr, boolea
 	int pos = StateMod_Util.indexOf( __SMReservoirRightList, id );
 	if ( pos >= 0 ) {
 		// The StateMod_ReservoirRight is already in the list...
-		__SMReservoirRight_match_Vector.add(id);
+		__SMReservoirRight_match_List.add(id);
 		if ( replace ) {
 			__SMReservoirRightList.set ( pos, resr );
 		}
@@ -2218,8 +2284,8 @@ protected void findAndAddSMReservoirRight ( StateMod_ReservoirRight resr, boolea
 }
 
 /**
-Add a StateMod_RiverNetworkNode instance to the __SMRiverNetworkNode_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __SMRiverNetworkNode_match_Vector
+Add a StateMod_RiverNetworkNode instance to the __SMRiverNetworkNode_List.  If
+an existing instance is found, it is optionally replaced and added to the __SMRiverNetworkNode_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param rin StateMod_RiverNetworkNode instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -2227,23 +2293,23 @@ so that a warning can be printed using warnAboutDataMatches().
 protected void findAndAddSMRiverNetworkNode (	StateMod_RiverNetworkNode rin, boolean replace )
 {	String id = rin.getID();
 
-	int pos = StateMod_Util.indexOf( __SMRiverNetworkNode_Vector, id );
+	int pos = StateMod_Util.indexOf( __SMRiverNetworkNode_List, id );
 	if ( pos >= 0 ) {
 		// The StateMod_RiverNetworkNode is already in the list...
-		__SMRiverNetworkNode_match_Vector.add(id);
+		__SMRiverNetworkNode_match_List.add(id);
 		if ( replace ) {
-			__SMRiverNetworkNode_Vector.set ( pos, rin );
+			__SMRiverNetworkNode_List.set ( pos, rin );
 		}
 	}
 	else {
 		// Add at the end of the list...
-		__SMRiverNetworkNode_Vector.add ( rin );
+		__SMRiverNetworkNode_List.add ( rin );
 	}
 }
 
 /**
-Add a StateMod_StreamEstimate instance to the __SMStreamEstimate_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __SMStreamEstimate_match_Vector
+Add a StateMod_StreamEstimate instance to the __SMStreamEstimate_List.  If
+an existing instance is found, it is optionally replaced and added to the __SMStreamEstimate_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param estimate StateMod_StreamEstimate instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -2254,7 +2320,7 @@ protected void findAndAddSMStreamEstimate (	StateMod_StreamEstimate estimate, bo
 	int pos = StateMod_Util.indexOf( __SMStreamEstimateStationList, id );
 	if ( pos >= 0 ) {
 		// The StateMod_StreamEstimate is already in the list...
-		__SMStreamEstimate_match_Vector.add(id);
+		__SMStreamEstimate_match_List.add(id);
 		if ( replace ) {
 			__SMStreamEstimateStationList.set ( pos, estimate );
 		}
@@ -2267,8 +2333,8 @@ protected void findAndAddSMStreamEstimate (	StateMod_StreamEstimate estimate, bo
 
 /**
 Add a StateMod_StreamEstimate_Coefficients instance to the
-__SMStreamEstimateCoefficients_Vector.  If an existing instance is found, it is
-optionally replaced and added to the __SMStreamEstimateCoefficients_match_Vector
+__SMStreamEstimateCoefficients_List.  If an existing instance is found, it is
+optionally replaced and added to the __SMStreamEstimateCoefficients_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param rib StateMod_StreamEstimate_Coefficients instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -2276,23 +2342,23 @@ so that a warning can be printed using warnAboutDataMatches().
 protected void findAndAddSMStreamEstimateCoefficients ( StateMod_StreamEstimate_Coefficients rib, boolean replace )
 {	String id = rib.getID();
 
-	int pos=StateMod_Util.indexOf(__SMStreamEstimateCoefficients_Vector,id);
+	int pos=StateMod_Util.indexOf(__SMStreamEstimateCoefficients_List,id);
 	if ( pos >= 0 ) {
 		// The StateMod_StreamEstimate_Coefficients is already in the list...
-		__SMStreamEstimateCoefficients_match_Vector.add(id);
+		__SMStreamEstimateCoefficients_match_List.add(id);
 		if ( replace ) {
-			__SMStreamEstimateCoefficients_Vector.set ( pos, rib );
+			__SMStreamEstimateCoefficients_List.set ( pos, rib );
 		}
 	}
 	else {
 		// Add at the end of the list...
-		__SMStreamEstimateCoefficients_Vector.add ( rib );
+		__SMStreamEstimateCoefficients_List.add ( rib );
 	}
 }
 
 /**
-Add a StateMod_StreamGage instance to the __SMStreamGage_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __SMStreamGage_match_Vector
+Add a StateMod_StreamGage instance to the __SMStreamGage_List.  If
+an existing instance is found, it is optionally replaced and added to the __SMStreamGage_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param gage StateMod_StreamGage instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -2303,7 +2369,7 @@ protected void findAndAddSMStreamGage (StateMod_StreamGage gage, boolean replace
 	int pos = StateMod_Util.indexOf( __SMStreamGageStationList, id );
 	if ( pos >= 0 ) {
 		// The StateMod_StreamGage is already in the list...
-		__SMStreamGage_match_Vector.add(id);
+		__SMStreamGage_match_List.add(id);
 		if ( replace ) {
 			__SMStreamGageStationList.set ( pos, gage );
 		}
@@ -2315,8 +2381,8 @@ protected void findAndAddSMStreamGage (StateMod_StreamGage gage, boolean replace
 }
 
 /**
-Add a StateMod_Well instance to the __SMWell_Vector.  If
-an existing instance is found, it is optionally replaced and added to the __SMWell_match_Vector
+Add a StateMod_Well instance to the __SMWell_List.  If
+an existing instance is found, it is optionally replaced and added to the __SMWell_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param well StateMod_Well instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -2327,7 +2393,7 @@ protected void findAndAddSMWell ( StateMod_Well well, boolean replace )
 	int pos = StateMod_Util.indexOf( __SMWellList, id );
 	if ( pos >= 0 ) {
 		// The StateMod_Well is already in the list...
-		__SMWell_match_Vector.add(id);
+		__SMWell_match_List.add(id);
 		if ( replace ) {
 			__SMWellList.set ( pos, well );
 		}
@@ -2339,9 +2405,9 @@ protected void findAndAddSMWell ( StateMod_Well well, boolean replace )
 }
 
 /**
-Add a StateMod well demand time series (monthly) instance to the __SMWellDemandTSMonthly_Vector.  If
+Add a StateMod well demand time series (monthly) instance to the __SMWellDemandTSMonthly_List.  If
 an existing instance is found, it is optionally replaced and added to the
-__SMWellDemandTSMonthly_match_Vector
+__SMWellDemandTSMonthly_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param ts TS instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -2352,7 +2418,7 @@ protected void findAndAddSMWellDemandTSMonthly ( MonthTS ts, boolean replace )
 	int pos = TSUtil.indexOf( __SMWellDemandTSMonthlyList, id, "Location", null, 1 );
 	if ( pos >= 0 ) {
 		// The ts is already in the list...
-		__SMWellDemandTSMonthly_match_Vector.add(id);
+		__SMWellDemandTSMonthly_match_List.add(id);
 		if ( replace ) {
 			__SMWellDemandTSMonthlyList.set ( pos, ts );
 		}
@@ -2365,9 +2431,9 @@ protected void findAndAddSMWellDemandTSMonthly ( MonthTS ts, boolean replace )
 
 /**
 Add a StateMod well historical pumping time series (monthly) instance to the
-__SMWellHistoricalPumpingTSMonthly_Vector.  If
+__SMWellHistoricalPumpingTSMonthly_List.  If
 an existing instance is found, it is optionally replaced and added to the
-__SMWellHistoricalPumpingTSMonthly_match_Vector
+__SMWellHistoricalPumpingTSMonthly_match_List
 so that a warning can be printed using warnAboutDataMatches().
 @param ts TS instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
@@ -2378,7 +2444,7 @@ protected void findAndAddSMWellHistoricalPumpingTSMonthly(MonthTS ts, boolean re
 	int pos = TSUtil.indexOf( __SMWellHistoricalPumpingTSMonthlyList, id, "Location", null, 1 );
 	if ( pos >= 0 ) {
 		// The ts is already in the list...
-		__SMWellHistoricalPumpingTSMonthly_match_Vector.add(id);
+		__SMWellHistoricalPumpingTSMonthly_match_List.add(id);
 		if ( replace ) {
 			__SMWellHistoricalPumpingTSMonthlyList.set( pos, ts );
 		}
@@ -2395,7 +2461,7 @@ a well-only CU Location.  Do not combine this with findCULocationForParcel()
 because the parcel_id could conceivably conflict with the ditch ID!
 @return the StateCU_Location that is a collection that includes the parcel.
 @param ditch_id the Ditch id to match, fully expanded WDID.
-@param CULocations_Vector the Vector of StateCU_Location to search.
+@param CULocations_List the list of StateCU_Location to search.
 */
 // TODO SAM 2007-02-18 Evaluate whether needed
 /*
@@ -2517,7 +2583,7 @@ Find parcel from a Vector of HydroBase_ParcelUseTS.
 /**
 Find parcels from a list of HydroBase_ParcelUseTS.
 @return parcels from a list of HydroBase_ParcelUseTS.
-@param parcelusets_Vector list of HydroBase_ParcelUseTS to search.
+@param parcelusets_List list of HydroBase_ParcelUseTS to search.
 @param div Division for data.
 @param ids_array Array of parcel identifiers to search for.
 @param datetime1 Start for query.
@@ -2525,12 +2591,12 @@ Find parcels from a list of HydroBase_ParcelUseTS.
 */
 @SuppressWarnings("unused")
 private List<HydroBase_ParcelUseTS> findParcelUseTSListForParcelList(
-		List<HydroBase_ParcelUseTS> parcelusets_Vector, int div,
+		List<HydroBase_ParcelUseTS> parcelusets_List, int div,
 		int [] ids_array, DateTime datetime1, DateTime datetime2 )
-{	List<HydroBase_ParcelUseTS> crop_patterns = new Vector<HydroBase_ParcelUseTS>();
+{	List<HydroBase_ParcelUseTS> crop_patterns = new ArrayList<HydroBase_ParcelUseTS>();
 	// For debugging...
 	/*
-	Vector ids_Vector = new Vector();
+	List ids_Vector = new ArrayList();
 	if ( ids_array != null ) {
 		for ( int i = 0; i < ids_array.length; i++ ) {
 			ids_Vector.add ( "" + ids_array[i] );
@@ -2540,8 +2606,8 @@ private List<HydroBase_ParcelUseTS> findParcelUseTSListForParcelList(
 			ids_Vector );
 	*/
 	int size = 0;
-	if ( parcelusets_Vector != null ) {
-		size = parcelusets_Vector.size();
+	if ( parcelusets_List != null ) {
+		size = parcelusets_List.size();
 	}
 	HydroBase_ParcelUseTS pts;
 	int iid;
@@ -2556,7 +2622,7 @@ private List<HydroBase_ParcelUseTS> findParcelUseTSListForParcelList(
 	}
 	int pts_year;
 	for ( int i = 0; i < size; i++ ) {
-		pts = parcelusets_Vector.get(i);
+		pts = parcelusets_List.get(i);
 		if ( div != pts.getDiv() ) {
 			continue;
 		}
@@ -2579,24 +2645,24 @@ private List<HydroBase_ParcelUseTS> findParcelUseTSListForParcelList(
 
 // TODO smalers 2019-05-29 need to evaluate whether to use function
 /**
-Find crop patterns from a Vector of HydroBase_StructureIrrigSummaryTS (new
+Find crop patterns from a list of HydroBase_StructureIrrigSummaryTS (new
 is HydroBase_StructureView).
-@return crop patterns from a Vector of HydroBase_StructureIrrigSummaryTS (new
+@return crop patterns from a list of HydroBase_StructureIrrigSummaryTS (new
 is HydroBase_StructureView).
-@param irrigsummaryts_Vector A Vector of HydroBase_StructureIrrigSummaryTS (new
+@param irrigsummaryts_List A list of HydroBase_StructureIrrigSummaryTS (new
 is HydroBase_StructureView) to search.
-@param culoc_wdids A Vector of identifiers for locations to match.
+@param culoc_wdids A list of identifiers for locations to match.
 @param datetime1 First year to query.
 @param datetime2 Last year to query.
 */
 @SuppressWarnings("unused")
 private List<HydroBase_StructureView> findStructureIrrigSummaryTSListForWDIDListLand_usePeriod (
-	List<HydroBase_StructureView> irrigsummaryts_Vector, List<String> culoc_wdids,
+	List<HydroBase_StructureView> irrigsummaryts_List, List<String> culoc_wdids,
 	DateTime datetime1, DateTime datetime2 )
-{	List<HydroBase_StructureView> crop_patterns = new Vector<HydroBase_StructureView>();
+{	List<HydroBase_StructureView> crop_patterns = new ArrayList<>();
 	int size = 0;
-	if ( irrigsummaryts_Vector != null ) {
-		size = irrigsummaryts_Vector.size();
+	if ( irrigsummaryts_List != null ) {
+		size = irrigsummaryts_List.size();
 	}
 	HydroBase_StructureView sits;
 	int iid;
@@ -2616,7 +2682,7 @@ private List<HydroBase_StructureView> findStructureIrrigSummaryTSListForWDIDList
 	String sits_id;
 	String culoc_wdid;
 	for ( int i = 0; i < size; i++ ) {
-		sits = irrigsummaryts_Vector.get(i);
+		sits = irrigsummaryts_List.get(i);
 		sits_year = sits.getCal_year();
 		if ( (sits_year < year1) || (sits_year > year2) ) {
 			continue;
@@ -2633,38 +2699,37 @@ private List<HydroBase_StructureView> findStructureIrrigSummaryTSListForWDIDList
 }
 
 /**
-Find parcel from a Vector of HydroBase_ParcelUseTS.
-@return parcel from a Vector of HydroBase_ParcelUseTS, or null if not found.
-@param struct2parcel_Vector Vector of HydroBase_StructureToParcel to search.
+Find parcel from a list of HydroBase_ParcelUseTS.
+@return parcel from a list of HydroBase_ParcelUseTS, or null if not found.
+@param struct2parcel_List List of HydroBase_StructureToParcel to search.
 @param parcel_id Parcel id to search for.
 @param div Division for data.
 @param year Year to search for.
 */
 // TODO SAM 2007-02-18 Evaluate if needed
 /*
-private Vector findStructureToParcelListForParcel (
-				Vector struct2parcel_Vector,
+private List findStructureToParcelListForParcel (
+				List struct2parcel_List,
 				int parcel_id,
 				int div, int year )
-{	if ( struct2parcel_Vector == null ) {
+{	if ( struct2parcel_List == null ) {
 		return null;
 	}
-	int size = struct2parcel_Vector.size();
+	int size = struct2parcel_List.size();
 	HydroBase_StructureToParcel stp = null;
-	Vector stp_Vector = new Vector();
+	List stp_Vector = new ArrayList();
 	for ( int i = 0; i < size; i++ ) {
-		stp = (HydroBase_StructureToParcel)
-			struct2parcel_Vector.get(i);
-		if (	(stp.getParcel_id() == parcel_id) &&
+		stp = struct2parcel_Vector.get(i);
+		if ( (stp.getParcel_id() == parcel_id) &&
 			(stp.getDiv() == div) &&
 			(stp.getCal_year() == year) ) {
-			stp_Vector.add(stp);
+			stp_List.add(stp);
 		}
 	}
-	if ( stp_Vector.size() == 0 ) {
+	if ( stp_List.size() == 0 ) {
 		return null;
 	}
-	else {	return stp_Vector;
+	else {	return stp_List;
 	}
 }
 */
@@ -2902,12 +2967,12 @@ public HydroBaseDMI getHydroBaseDMIConnection()
 }
 
 /**
-Returns user-specified supplemental parcel use data to add to HydroBase data.
-@return user-specified supplemental parcel use data to add to HydroBase data.
+Returns additional parcel use data from SetParcelUseTS and SetParcelUseTSFromList commands to add to HydroBase data.
+@return additional parcel use data to add to HydroBase data.
 */
-private List<StateDMI_HydroBase_ParcelUseTS> getHydroBaseSupplementalParcelUseTSList ()
+private List<HydroBase_ParcelUseTS_FromSet> getHydroBaseParcelUseTSFromSetList ()
 {
-	return __HydroBase_Supplemental_ParcelUseTS_List;
+	return __HydroBase_ParcelUseTS_FromSet_List;
 }
 
 /**
@@ -2954,8 +3019,8 @@ public Prop getProp ( String prop ) throws Exception
 	if ( o == null ) {
 		return null;
 	}
-	else {	// Contents will be a Vector, etc., so convert to a full
-		// property.
+	else {
+		// Contents will be a list, etc., so convert to a full property.
 		// TODO SAM 2005-05-13 This will work seamlessly for strings
 		// but may have a side-effects (conversions) for non-strings...
 		Prop p = new Prop ( prop, o, o.toString() );
@@ -2981,7 +3046,7 @@ speed performance during initial testing.
 
 <tr>
 <td><b>HydroBaseDMIList</b></td>
-<td>A Vector of open HydroBaseDMI, available for reading.
+<td>A list of open HydroBaseDMI, available for reading.
 Currently only one object at most will be returned.
 </td>
 </tr>
@@ -3028,7 +3093,7 @@ public Object getPropContents ( String prop ) throws Exception
 	}
 	else if ( prop.equalsIgnoreCase("CountyList") ) {
 		// Get the list of counties, for use in dialogs
-		List<String> countyList = new Vector<String>();
+		List<String> countyList = new ArrayList<>();
 		if ( __hdmi != null ) {
 			List<HydroBase_CountyRef> countyRefList = __hdmi.getCountyRef();
 			for( int i = 0; i < countyRefList.size(); i++ ) {
@@ -3039,7 +3104,7 @@ public Object getPropContents ( String prop ) throws Exception
 	}
 	else if ( prop.equalsIgnoreCase("CUMethod_List") ) {
 		// Get the list of CU methods, for use in crop characteristics
-		List<String> cuMethodList = new Vector<String>();
+		List<String> cuMethodList = new ArrayList<>();
 		if ( __hdmi != null ) {
 			List<HydroBase_CUMethod> hbList = __hdmi.readCUMethodList(true);
 			HydroBase_CUMethod m;
@@ -3052,7 +3117,7 @@ public Object getPropContents ( String prop ) throws Exception
 	}
 	else if ( prop.equalsIgnoreCase("CUPenmanMonteithMethod_List") ) {
 		// Get the list of distinct CU methods used with Penman-Montieth
-		List<String> cuPenmanMonteithMethodList = new Vector<String>();
+		List<String> cuPenmanMonteithMethodList = new ArrayList<>();
 		if ( __hdmi != null ) {
 			List<HydroBase_CUPenmanMonteith> hbList = __hdmi.getPenmanMonteithCUMethod();
 			for ( HydroBase_CUPenmanMonteith pm: hbList ) {
@@ -3079,13 +3144,18 @@ public Object getPropContents ( String prop ) throws Exception
 		return __hdmi;
 	}
 	else if ( prop.equalsIgnoreCase("HydroBaseDMIList") ) {
-		List<HydroBaseDMI> v = new Vector<HydroBaseDMI>();
+		List<HydroBaseDMI> v = new ArrayList<>();
 		v.add ( __hdmi );
 		return v;
 	}
+	else if ( prop.equalsIgnoreCase("HydroBase_ParcelUseTS_FromSet_List") ) {
+		return getHydroBaseParcelUseTSFromSetList();
+	}
 	else if ( prop.equalsIgnoreCase("HydroBase_SupplementalParcelUseTS_List") ||
-		prop.equalsIgnoreCase("HydroBase_Supplemental_ParcelUseTS_List") ) { // TODO SAM 2009-02-11 remove
-		return getHydroBaseSupplementalParcelUseTSList();
+		prop.equalsIgnoreCase("HydroBase_Supplemental_ParcelUseTS_List") ) {
+		//return getHydroBaseSupplementalParcelUseTSList();
+		throw new RuntimeException("Need to update code to use \"HydroBase_ParcelUseTS_FromSet_List\" instead of " +
+		"\"HydroBase_SupplementalParcelUseTS_List\" or \"HydroBase_Supplemental_ParcelUseTS_List\"" );
 	}
 	else if ( prop.equalsIgnoreCase("InitialWorkingDir") ) {
 		return getInitialWorkingDir();
@@ -3260,7 +3330,7 @@ data available for a command.
 */
 private List<String> getPropContents_OutputComments()
 {
-	List<String> comments = new Vector<String>();
+	List<String> comments = new ArrayList<>();
 	// Commands.  Show the file name but all commands may be in memory.
 	comments.add ( "-----------------------------------------------------------------------" );
 	String commands_filename = getCommandFileName();
@@ -3278,7 +3348,7 @@ private List<String> getPropContents_OutputComments()
 	}
 	// Save information about data sources.
 	HydroBaseDMI hbdmi = getHydroBaseDMIConnection();
-	List<HydroBaseDMI> hbdmiList = new Vector<HydroBaseDMI>();
+	List<HydroBaseDMI> hbdmiList = new ArrayList<>();
 	if ( hbdmi != null ) {
 		hbdmiList.add ( hbdmi );
 	}
@@ -3300,7 +3370,7 @@ private List<String> getPropContents_OutputComments()
 			}
 		}
 	}
-	return new Vector<String>(comments);
+	return new ArrayList<>(comments);
 }
 
 /**
@@ -3399,7 +3469,7 @@ Return the list of StateCU_BlaneyCriddle being maintained by this StateDMI_Proce
 @return the list of StateCU_BlaneyCriddle being maintained by this StateDMI_Processor.
 */
 public List<StateCU_BlaneyCriddle> getStateCUBlaneyCriddleList()
-{	return __CUBlaneyCriddle_Vector;
+{	return __CUBlaneyCriddle_List;
 }
 
 /**
@@ -3407,7 +3477,7 @@ Return the list of StateCU_BlaneyCriddle matches being maintained by this StateD
 @return the list of StateCU_BlaneyCriddle matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateCUBlaneyCriddleMatchList()
-{	return __CUBlaneyCriddle_match_Vector;
+{	return __CUBlaneyCriddle_match_List;
 }
 
 /**
@@ -3415,7 +3485,7 @@ Return the list of StateCU_ClimateStation being maintained by this StateDMI_Proc
 @return the list of StateCU_ClimateStation being maintained by this StateDMI_Processor.
 */
 public List<StateCU_ClimateStation> getStateCUClimateStationList()
-{	return __CUClimateStation_Vector;
+{	return __CUClimateStation_List;
 }
 
 /**
@@ -3423,7 +3493,7 @@ Return the list of StateCU_ClimateStation matches being maintained by this State
 @return the list of StateCU_ClimateStation matches being maintained by this StateDMI_Processor.
 */
 protected List<String> getStateCUClimateStationMatchList()
-{	return __CUClimateStation_match_Vector;
+{	return __CUClimateStation_match_List;
 }
 
 /**
@@ -3431,7 +3501,7 @@ Return the list of StateCU_CropCharacteristics being maintained by this StateDMI
 @return the list of StateCU_CropCharacteristics being maintained by this StateDMI_Processor.
 */
 public List<StateCU_CropCharacteristics> getStateCUCropCharacteristicsList()
-{	return __CUCropCharacteristics_Vector;
+{	return __CUCropCharacteristics_List;
 }
 
 /**
@@ -3439,7 +3509,7 @@ Return the list of StateCU_CropCharacteristics matches being maintained by this 
 @return the list of StateCU_CropCharacteristics matches being maintained by this StateDMI_Processor.
 */
 protected List<String> getStateCUCropCharacteristicsMatchList()
-{	return __CUCropCharacteristics_match_Vector;
+{	return __CUCropCharacteristics_match_List;
 }
 
 
@@ -3448,7 +3518,7 @@ Return the list of StateCU_CropPatternTS being maintained by this StateDMI_Proce
 @return the list of StateCU_CropPatternTS being maintained by this StateDMI_Processor.
 */
 public List<StateCU_CropPatternTS> getStateCUCropPatternTSList()
-{	return __CUCropPatternTS_Vector;
+{	return __CUCropPatternTS_List;
 }
 
 /**
@@ -3456,7 +3526,7 @@ Return the list of StateCU_CropPatternTS matches being maintained by this StateD
 @return the list of StateCU_CropPatternTS matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateCUCropPatternTSMatchList()
-{	return __CUCropPatternTS_match_Vector;
+{	return __CUCropPatternTS_match_List;
 }
 
 /**
@@ -3464,7 +3534,7 @@ Return the list of StateCU_IrrigationPracticeTS being maintained by this StateDM
 @return the list of StateCU_IrrigationPracticeTS being maintained by this StateDMI_Processor.
 */
 public List<StateCU_IrrigationPracticeTS> getStateCUIrrigationPracticeTSList()
-{	return __CUIrrigationPracticeTS_Vector;
+{	return __CUIrrigationPracticeTS_List;
 }
 
 /**
@@ -3472,7 +3542,7 @@ Return the list of StateCU_IrrigationPracticeTS matches being maintained by this
 @return the list of StateCU_IrrigationPracticeTS matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateCUIrrigationPracticeTSMatchList()
-{	return __CUIrrigationPracticeTS_match_Vector;
+{	return __CUIrrigationPracticeTS_match_List;
 }
 
 /**
@@ -3480,7 +3550,7 @@ Return the list of StateCU_Location being maintained by this StateDMI_Processor.
 @return the list of StateCU_Location being maintained by this StateDMI_Processor.
 */
 public List<StateCU_Location> getStateCULocationList()
-{	return __CULocation_Vector;
+{	return __CULocation_List;
 }
 
 /**
@@ -3488,7 +3558,7 @@ Return the list of StateCU_Location matches being maintained by this StateDMI_Pr
 @return the list of StateCU_Location matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateCULocationMatchList()
-{	return __CULocation_match_Vector;
+{	return __CULocation_match_List;
 }
 
 /**
@@ -3496,7 +3566,7 @@ Return the list of StateCU_PenmanMonteith being maintained by this StateDMI_Proc
 @return the list of StateCU_PenmanMonteith being maintained by this StateDMI_Processor.
 */
 public List<StateCU_PenmanMonteith> getStateCUPenmanMonteithList()
-{	return __CUPenmanMonteith_Vector;
+{	return __CUPenmanMonteith_List;
 }
 
 /**
@@ -3504,7 +3574,7 @@ Return the list of StateCU_BlaneyCriddle matches being maintained by this StateD
 @return the list of StateCU_BlaneyCriddle matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateCUPenmanMonteithMatchList()
-{	return __CUPenmanMonteith_match_Vector;
+{	return __CUPenmanMonteith_match_List;
 }
 
 /**
@@ -3536,7 +3606,7 @@ Return the list of consumptive water requirement monthly TS matches being mainta
 @return the list of consumptive water requirement monthly TS matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateModConsumptiveWaterRequirementTSMonthlyMatchList ()
-{	return __SMConsumptiveWaterRequirementTSMonthly_match_Vector;
+{	return __SMConsumptiveWaterRequirementTSMonthly_match_List;
 }
 
 /**
@@ -3565,10 +3635,10 @@ These are used by both StateCU and StateMod data sets.
 */
 public List<String> getStateModDelayTableMatchList ( int interval )
 {	if ( interval == TimeInterval.MONTH ) {
-		return __SMDelayTableMonthly_match_Vector;
+		return __SMDelayTableMonthly_match_List;
 	}
 	else if ( interval == TimeInterval.DAY ) {
-		return __SMDelayTableDaily_match_Vector;
+		return __SMDelayTableDaily_match_List;
 	}
 	else {
 		return null;
@@ -3596,7 +3666,7 @@ Return the list of diversion demand monthly TS matches being maintained by this 
 @return the list of diversion demand monthly TS matches being maintained by this StateDMI_Processor.
 */
 protected List<String> getStateModDiversionDemandTSMonthlyMatchList ()
-{	return __SMDemandTSMonthly_match_Vector;
+{	return __SMDemandTSMonthly_match_List;
 }
 
 /**
@@ -3628,7 +3698,7 @@ Return the list of diversion historical monthly TS matches being maintained by t
 @return the list of diversion historical monthly TS matches being maintained by this StateDMI_Processor.
 */
 protected List<String> getStateModDiversionHistoricalTSMonthlyMatchList ()
-{	return __SMDiversionTSMonthly_match_Vector;
+{	return __SMDiversionTSMonthly_match_List;
 }
 
 /**
@@ -3644,7 +3714,7 @@ Return the list of StateMod_DiversionRight matches being maintained by this Stat
 @return the list of StateMod_DiversionRight matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateModDiversionRightMatchList ()
-{	return __SMDiversionRight_match_Vector;
+{	return __SMDiversionRight_match_List;
 }
 
 /**
@@ -3660,7 +3730,7 @@ Return the list of StateMod_Diversion matches being maintained by this StateDMI_
 @return the list of StateMod_Diversion matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateModDiversionStationMatchList ()
-{	return __SMDiversion_match_Vector;
+{	return __SMDiversion_match_List;
 }
 
 /**
@@ -3680,7 +3750,7 @@ being maintained by the StateDMI processor.
 being maintained by the StateDMI processor.
 */
 public List<String> getStateModInstreamFlowDemandTSAverageMonthlyMatchList()
-{	return __SMInstreamFlowDemandTSAverageMonthly_match_Vector;
+{	return __SMInstreamFlowDemandTSAverageMonthly_match_List;
 }
 
 /**
@@ -3696,7 +3766,7 @@ Returns the list of StateMod_InstreamFlowRight matches being maintained by the S
 @return the list of StateMod_InstreamFlowRight matches being maintained by the StateDMI processor.
 */
 public List<String> getStateModInstreamFlowRightMatchList()
-{	return __SMInstreamFlowRight_match_Vector;
+{	return __SMInstreamFlowRight_match_List;
 }
 
 /**
@@ -3712,7 +3782,7 @@ Returns the list of StateMod_InstreamFlow matches being maintained by the StateD
 @return the list of StateMod_InstreamFlow matches being maintained by the StateDMI processor.
 */
 public List<String> getStateModInstreamFlowStationMatchList()
-{	return __SMInstreamFlow_match_Vector;
+{	return __SMInstreamFlow_match_List;
 }
 
 /**
@@ -3736,7 +3806,7 @@ Return the list of StateMod_OperationalRight matches being maintained by this St
 @return the list of StateMod_OperationalRight matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateModOperationalRightMatchList ()
-{	return __SMOperationalRight_match_Vector;
+{	return __SMOperationalRight_match_List;
 }
 
 /**
@@ -3777,7 +3847,7 @@ Return the list of StateMod_Plan_Return matches being maintained by this StateDM
 @return the list of StateMod_Plan_Return matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateModPlanReturnMatchList ()
-{	return __SMPlanReturn_match_Vector;
+{	return __SMPlanReturn_match_List;
 }
 
 /**
@@ -3785,7 +3855,7 @@ Return the list of StateMod_Plan matches being maintained by this StateDMI_Proce
 @return the list of StateMod_Plan matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateModPlanStationMatchList ()
-{	return __SMPlan_match_Vector;
+{	return __SMPlan_match_List;
 }
 
 /**
@@ -3793,7 +3863,7 @@ Return the list of StateMod_Plan_WellAugmentation matches being maintained by th
 @return the list of StateMod_Plan_WellAugmentation matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateModPlanWellAugmentationMatchList ()
-{	return __SMPlanWellAugmentation_match_Vector;
+{	return __SMPlanWellAugmentation_match_List;
 }
 
 /**
@@ -3801,7 +3871,7 @@ Return the list of StateMod_PrfGageData being maintained by this StateDMI_Proces
 @return the list of StateMod_PrfGageData being maintained by this StateDMI_Processor.
 */
 public List<StateMod_PrfGageData> getStateModPrfGageDataList()
-{	return __SMPrfGageData_Vector;
+{	return __SMPrfGageData_List;
 }
 
 /**
@@ -3817,7 +3887,7 @@ Return the list of StateMod_Reservoir_Return matches being maintained by this St
 @return the list of StateMod_Reservoir_Return matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateModReservoirReturnMatchList ()
-{	return __SMReservoirReturn_match_Vector;
+{	return __SMReservoirReturn_match_List;
 }
 
 /**
@@ -3833,7 +3903,7 @@ Return the list of StateMod_ReservoirRight matches being maintained by this Stat
 @return the list of StateMod_ReservoirRight matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateModReservoirRightMatchList()
-{	return __SMReservoirRight_match_Vector;
+{	return __SMReservoirRight_match_List;
 }
 
 /**
@@ -3849,7 +3919,7 @@ Return the list of StateMod_Reservoir matches being maintained by this StateDMI_
 @return the list of StateMod_Reservoir matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateModReservoirStationMatchList ()
-{	return __SMReservoir_match_Vector;
+{	return __SMReservoir_match_List;
 }
 
 /**
@@ -3857,7 +3927,7 @@ Return the list of StateMod_RiverNetworkNode being maintained by this StateDMI_P
 @return the list of StateMod_RiverNetworkNode being maintained by this StateDMI_Processor.
 */
 public List<StateMod_RiverNetworkNode> getStateModRiverNetworkNodeList ()
-{	return __SMRiverNetworkNode_Vector;
+{	return __SMRiverNetworkNode_List;
 }
 
 /**
@@ -3865,7 +3935,7 @@ Return the list of StateMod_RiverNetworkNode matches being maintained by this St
 @return the list of StateMod_RiverNetworkNode matches being maintained by this StateDMI_Processor.
 */
 protected List<String> getStateModRiverNetworkNodeMatchList ()
-{	return __SMRiverNetworkNode_match_Vector;
+{	return __SMRiverNetworkNode_match_List;
 }
 
 /**
@@ -3881,7 +3951,7 @@ Return the list of StateMod_StreamEstimate matches being maintained by this Stat
 @return the list of StateMod_StreamEstimate matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateModStreamEstimateStationMatchList ()
-{	return __SMStreamEstimate_match_Vector;
+{	return __SMStreamEstimate_match_List;
 }
 
 /**
@@ -3889,7 +3959,7 @@ Return the list of StateMod_StreamEstimateCoefficients being maintained by this 
 @return the list of StateMod_StreamEstimateCoefficients being maintained by this StateDMI_Processor.
 */
 public List<StateMod_StreamEstimate_Coefficients> getStateModStreamEstimateCoefficientsList()
-{	return __SMStreamEstimateCoefficients_Vector;
+{	return __SMStreamEstimateCoefficients_List;
 }
 
 /**
@@ -3897,7 +3967,7 @@ Return the list of StateMod_StreamEstimate_Coefficients matches being maintained
 @return the list of StateMod_StreamEstimate_Coefficients matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateModStreamEstimateCoefficientsMatchList ()
-{	return __SMStreamEstimateCoefficients_match_Vector;
+{	return __SMStreamEstimateCoefficients_match_List;
 }
 
 /**
@@ -3913,7 +3983,7 @@ Return the list of StateMod_StreamGage matches being maintained by this StateDMI
 @return the list of StateMod_StreamGage matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateModStreamGageStationMatchList ()
-{	return __SMStreamGage_match_Vector;
+{	return __SMStreamGage_match_List;
 }
 
 /**
@@ -3929,7 +3999,7 @@ Return the list of well demand monthly TS matches being maintained by this State
 @return the list of well demand monthly TS matches being maintained by this StateDMI_Processor.
 */
 protected List<String> getStateModWellDemandTSMonthlyMatchList ()
-{	return __SMWellDemandTSMonthly_match_Vector;
+{	return __SMWellDemandTSMonthly_match_List;
 }
 
 /**
@@ -3945,7 +4015,7 @@ Return the list of well historical pumping monthly TS matches being maintained b
 @return the list of well historical pumping monthly TS matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateModWellHistoricalPumpingTSMonthlyMatchList ()
-{	return __SMWellHistoricalPumpingTSMonthly_match_Vector;
+{	return __SMWellHistoricalPumpingTSMonthly_match_List;
 }
 
 /**
@@ -3969,7 +4039,7 @@ Return the list of StateMod_WellRight matches being maintained by this StateDMI_
 @return the list of StateMod_WellRight matches being maintained by this StateDMI_Processor.
 */
 protected List<String> getStateModWellRightMatchList()
-{	return __SMWellRight_match_Vector;
+{	return __SMWellRight_match_List;
 }
 
 /**
@@ -3977,7 +4047,7 @@ Return the list of StateMod_Well matches being maintained by this StateDMI_Proce
 @return the list of StateMod_Well matches being maintained by this StateDMI_Processor.
 */
 public List<String> getStateModWellStationMatchList ()
-{	return __SMWell_match_Vector;
+{	return __SMWell_match_List;
 }
 
 /**
@@ -4268,7 +4338,7 @@ Process a list of commands, resulting in lists of data set objects and propertie
 objects can be displayed in the GUI.
 <b>Filling with historical averages is handled for monthly time series
 so that original data averages are used.</b>
-@param commandList The Vector of Command from the this instance of StateDMI_Processor,
+@param commandList The list of Command from the this instance of StateDMI_Processor,
 to be processed.  If null, process all.  Non-null is typically only used, for example,
 if a user has selected commands in a GUI.
 @param app_PropList if not null, then properties are set as the commands are
@@ -4776,7 +4846,7 @@ throws Exception
 	// This may allow the list of output files to be removed at some point.
 	// However, there are output files (e.g., efficiency reports) that are
 	// not currently data components.  Some things that could use further study:
-	// 1)	Should the data set components be used instead of the separate Vectors?
+	// 1)	Should the data set components be used instead of the separate lists?
 	// 2)	Should the data sets be integrated with the StateDMI_JFrame so
 	//	that results can be taken from the data set?
 
@@ -4807,11 +4877,11 @@ throws Exception
 //		// Delay Table Monthly
 //		comp = __StateMod_DataSet.getComponentForComponentType (
 //			StateMod_DataSet.COMP_DELAY_TABLES_MONTHLY);
-//		comp.setData ( __SMDelayTableMonthly_Vector );
+//		comp.setData ( __SMDelayTableMonthly_List );
 //		// Delay Table Daily
 //		comp = __StateMod_DataSet.getComponentForComponentType (
 //			StateMod_DataSet.COMP_DELAY_TABLES_DAILY);
-//		comp.setData ( __SMDelayTableDaily_Vector );
+//		comp.setData ( __SMDelayTableDaily_List );
 	// Reservoir Components
 	comp = __StateMod_DataSet.getComponentForComponentType ( StateMod_DataSet.COMP_RESERVOIR_STATIONS);
 	comp.setData ( __SMReservoirStationList );
@@ -4826,10 +4896,10 @@ throws Exception
 	comp = __StateMod_DataSet.getComponentForComponentType ( StateMod_DataSet.COMP_STREAMESTIMATE_STATIONS);
 	comp.setData ( __SMStreamEstimateStationList );
 	comp = __StateMod_DataSet.getComponentForComponentType ( StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS);
-	comp.setData ( __SMStreamEstimateCoefficients_Vector );
+	comp.setData ( __SMStreamEstimateCoefficients_List );
 	// River Network Components
 	comp = __StateMod_DataSet.getComponentForComponentType ( StateMod_DataSet.COMP_RIVER_NETWORK);
-	comp.setData ( __SMRiverNetworkNode_Vector );
+	comp.setData ( __SMRiverNetworkNode_List );
 	
 	////// StateCU data //////
 	// TODO KAT 2007-04-16
@@ -4837,26 +4907,26 @@ throws Exception
 	// Crop Pattern TS Data
 //		comp = __StateCU_DataSet.getComponentForComponentType(
 //			StateCU_DataSet.COMP_CROP_PATTERN_TS_YEARLY );
-//		comp.setData ( __CUCropPatternTS_Vector );
+//		comp.setData ( __CUCropPatternTS_List );
 //		// Irrigation Practice TS Yearly Data
 //		comp = __StateCU_DataSet.getComponentForComponentType(
 //			StateCU_DataSet.COMP_IRRIGATION_PRACTICE_TS_YEARLY );
-//		comp.setData ( __CUIrrigationPracticeTS_Vector );
+//		comp.setData ( __CUIrrigationPracticeTS_List );
 	// Blaney-Criddle Data
 	comp = __StateCU_DataSet.getComponentForComponentType( StateCU_DataSet.COMP_BLANEY_CRIDDLE );
-	comp.setData ( __CUBlaneyCriddle_Vector );
+	comp.setData ( __CUBlaneyCriddle_List );
 	// Penman-Monteith Data
 	comp = __StateCU_DataSet.getComponentForComponentType( StateCU_DataSet.COMP_PENMAN_MONTEITH );
-	comp.setData ( __CUPenmanMonteith_Vector );
+	comp.setData ( __CUPenmanMonteith_List );
 	// Climate Station Data
 	comp = __StateCU_DataSet.getComponentForComponentType( StateCU_DataSet.COMP_CLIMATE_STATIONS );
-	comp.setData ( __CUClimateStation_Vector );
+	comp.setData ( __CUClimateStation_List );
 	// Crop Characteristics Data
 	comp = __StateCU_DataSet.getComponentForComponentType( StateCU_DataSet.COMP_CROP_CHARACTERISTICS );
-	comp.setData ( __CUCropCharacteristics_Vector );
+	comp.setData ( __CUCropCharacteristics_List );
 	// Location Data
 	comp = __StateCU_DataSet.getComponentForComponentType( StateCU_DataSet.COMP_CU_LOCATIONS );
-	comp.setData ( __CULocation_Vector );
+	comp.setData ( __CULocation_List );
 }
 
 /**
@@ -4892,7 +4962,7 @@ Returned values from this request are:
 <td><b>RunCommands</b></td>
 <td>Run commands to create the results:
 <ol>
-<li>	<b>CommandList</b> A Vector of Command instances to run.</li>
+<li>	<b>CommandList</b> A list of Command instances to run.</li>
 <li>	<b>InitialWorkingDir</b> The initial working directory as a String, to initialize paths.</li>
 </ol>
 Returned values from this request are:
@@ -5132,9 +5202,9 @@ throws Exception
 	// Get the index of the requested command...
 	int index = indexOf ( command );
 	// Get the setWorkingDir() commands...
-	List<String> neededCommandsList = new Vector<String>();
+	List<String> neededCommandsList = new ArrayList<>();
 	neededCommandsList.add ( "SetWorkingDir" );
-	List<Command> setWorkingDir_CommandVector = StateDMI_Processor_Util.getCommandsBeforeIndex (
+	List<Command> setWorkingDir_CommandList = StateDMI_Processor_Util.getCommandsBeforeIndex (
 			index,
 			this,
 			neededCommandsList,
@@ -5145,10 +5215,10 @@ throws Exception
 		// Create a local command processor
 		StateDMI_Processor statedmi_processor = new StateDMI_Processor();
 		statedmi_processor.setInitialWorkingDir ( getInitialWorkingDir() );
-		int size = setWorkingDir_CommandVector.size();
+		int size = setWorkingDir_CommandList.size();
 		// Add all the commands (currently no method to add all because this is normally not done).
 		for ( int i = 0; i < size; i++ ) {
-			statedmi_processor.addCommand ( setWorkingDir_CommandVector.get(i));
+			statedmi_processor.addCommand ( setWorkingDir_CommandList.get(i));
 		}
 		// Run the commands to set the working directory in the temporary processor...
 		try {
@@ -5652,37 +5722,44 @@ private void readCommandFile_RunDiscoveryOnCommand ( Command command_read )
 }
 
 /**
-Read supplemental HydroBase_StructureIrrigSummaryTS (new is
-HydroBase_StructureView) records.  This does not
-actually read the records but retrieves them from memory in
-StateDMI_HydroBase_ParcelUseTS objects - the records are
-defined in the setCropPatternTS() and setCropPatternTSFromList() commands.
+Read supplemental HydroBase_StructureView records (old was HydroBase_StructureIrrigSummaryTS)
+records.  This does not actually read the records but retrieves them from memory in
+HydroBase_StructureView_FromSet objects, created from HydroBase_ParcelUseTS_FromSet records
+defined in the SetCropPatternTS() and SetCropPatternTSFromList() commands.
 If a supplemental record is available that conflicts with existing data,
 the supplemental data will be used and a warning is printed.
-@param cropPatterns Vector of HydroBase_StructureIrrigSummaryTS (e.g., as read
-from HydroBase) (new is HydroBase_StructureView).  This Vector will be added to and returned.
+@param cropPatterns list of HydroBase_StructureView (old was HydroBase_StructureIrrigSummaryTS) as if read
+from HydroBase.  This list will be added to and returned.
 @param wdidList List of WDIDs to be checked.  Each string is parsed into WD
 and ID parts.  It is assumed that only valid WDIDs are passed - any errors
 parsing are ignored (should not happen).
 @param InputStart_DateTime The starting date to process data.
 @param InputEnd_DateTime The ending date to process data.
+@param hydroBaseStructureViewFromSetList HydroBase_StructurView_FromSet instances
+created from HydroBase_ParcelUseTS_FromSet records.
+@param status used to add to command log
+@param command_tag used to add to command log
+@param warningLevel used to add to command log
+@param warning_count used to add to command log
+@return the list of HydroBase_StructureView (see cropPatterns).
 */
-protected List<StateCU_CropPatternTS> readSupplementalCropPatternTSListForWDIDList (
-	List<StateCU_CropPatternTS> cropPatterns, List<String> wdidList,
+protected List<HydroBase_StructureView> readCropPatternTSFromSetForWDIDList (
+	List<HydroBase_StructureView> cropPatterns, List<String> wdidList,
 	DateTime InputStart_DateTime, DateTime InputEnd_DateTime,
-	List<StateDMI_HydroBase_StructureView> HydroBase_Supplemental_StructureViewList,
+	List<HydroBase_StructureView_FromSet> hydroBaseStructureViewFromSetList,
 	CommandStatus status, String command_tag, int warningLevel, int warning_count )
-{	String routine = "StateDMI_Processor.readSupplementalCropPatternTSListForWDIDList";
+{	String routine = "StateDMI_Processor.readCropPatternTSFromSetForWDIDList";
 	if ( cropPatterns == null ) {
-		cropPatterns = new ArrayList<StateCU_CropPatternTS>();
+		cropPatterns = new ArrayList<>();
 	}
 	int cpsize = cropPatterns.size();
-	StateDMI_HydroBase_StructureView sits = null; // Supplemental
+	HydroBase_StructureView_FromSet sits = null; // Supplemental
 	HydroBase_StructureView sits2 = null; // From HydroBase
 	//StateCU_CropPatternTS cp = null; // Previously read crop pattern data
+	HydroBase_StructureView cp = null; // Previously read crop pattern data
 	// Get a list of integer WDIDs to process...
 	Message.printStatus ( 2, routine, "Getting supplemental acreage data "+
-		"from setCropPatternTS() commands for:  " + wdidList );
+		"from SetCropPatternTS() commands for:  " + wdidList );
 	int nwdid_list = 0;
 	if ( wdidList != null ) {
 		nwdid_list = wdidList.size();
@@ -5691,9 +5768,9 @@ protected List<StateCU_CropPatternTS> readSupplementalCropPatternTSListForWDIDLi
 	int iwdid; // For looping through WDIDs.
 	boolean found = false; // Used when searching for matching HydroBase and supplemental records.
 	// Size of all supplemental data...
-	int size = HydroBase_Supplemental_StructureViewList.size();
+	int size = hydroBaseStructureViewFromSetList.size();
 	for ( int i = 0; i < size; i++ ) {
-		sits = HydroBase_Supplemental_StructureViewList.get(i);
+		sits = hydroBaseStructureViewFromSetList.get(i);
 		// Check to see if the record is in the desired year...
 		if ( (InputStart_DateTime != null) && (InputEnd_DateTime != null)
 			&& ((sits.getCal_year() < InputStart_DateTime.getYear()) ||
@@ -5717,12 +5794,11 @@ protected List<StateCU_CropPatternTS> readSupplementalCropPatternTSListForWDIDLi
 			// vector is only traversed once.
 			// FIXME SAM 2007-05-14 Need to decide with the State whether this should be flagged as an error.
 			for ( int i2 = 0; i2 < cpsize; i2++ ) {
-				//sits2 = cropPatterns.get(i2);
-				boolean todo = true;
-				if ( todo ) {
-					throw new RuntimeException ("Need to fix.");
-				//FIXME cp = cropPatterns.get(i2);
-					/* FIXME
+				sits2 = cropPatterns.get(i2);
+				//boolean todo = true;
+				//if ( todo ) {
+				//throw new RuntimeException ("Need to fix.");
+				cp = cropPatterns.get(i2);
 				if ( (sits2.getWD() == sits_wd) && (sits2.getID() == sits_id) &&
 					(sits2.getCal_year() ==	sits.getCal_year()) &&
 					sits2.getLand_use().equalsIgnoreCase(sits.getLand_use()) ) {
@@ -5738,10 +5814,9 @@ protected List<StateCU_CropPatternTS> readSupplementalCropPatternTSListForWDIDLi
 			                	"verify the set command." ) );
 					found = true;
 					// This is OK whether previously processed or not, since it is not additive.
-					//FIXME cropPatterns.set ( i2, sits );
+					cropPatterns.set ( i2, sits );
 				}
-				*/
-				}
+				//}
 			}
 			if ( !found ) {
 				// No matching record was found so just add.  Only add if not previously processed.
@@ -5766,11 +5841,11 @@ protected List<StateCU_CropPatternTS> readSupplementalCropPatternTSListForWDIDLi
 						" supplemental acreage data from SetCropPatternTS(): year=" +
 						sits.getCal_year() + " crop=" + sits.getLand_use() + " acres=" +
 						StringUtil.formatString(sits.getAcres_total(),"%.3f") );
-					boolean todo = true;
-					if ( todo ) {
-						throw new RuntimeException ("Need to fix.");
-					// FIXMEcropPatterns.add ( sits );
-					}
+					//boolean todo = true;
+					//if ( todo ) {
+					//	throw new RuntimeException ("Need to fix.");
+					cropPatterns.add ( sits );
+					//}
 				}
 			}
 		}
@@ -5788,8 +5863,8 @@ StateDMI_HydroBase_ParcelUseTS objects - the records are
 defined in the setCropPatternTS() and setCropPatternTSFromList() commands.
 If a supplemental record is available that conflicts with existing data,
 the supplemental data will be used and a warning is printed.
-@param cropPatterns Vector of HydroBase_StructureIrrigSummaryTS (e.g., as read
-from HydroBase) (new is HydroBase_StructureView).  This Vector will be added to and returned.
+@param cropPatterns list of HydroBase_StructureIrrigSummaryTS (e.g., as read
+from HydroBase) (new is HydroBase_StructureView).  This list will be added to and returned.
 @param wdidList List of WDIDs to be checked.  Each string is parsed into WD
 and ID parts.  It is assumed that only valid WDIDs are passed - any errors
 parsing are ignored (should not happen).
@@ -5803,7 +5878,7 @@ protected List<StateDMI_HydroBase_StructureView> readSupplementalStructureIrrigS
 	CommandStatus status, String command_tag, int warningLevel, int warning_count )
 {	String routine = "StateDMI_Processor.readSupplementalStructureIrrigSummaryTSListForWDIDList";
 	if ( cropPatterns == null ) {
-		cropPatterns = new Vector<StateDMI_HydroBase_StructureView>();
+		cropPatterns = new ArrayList<>();
 	}
 	int cpsize = cropPatterns.size();
 	StateDMI_HydroBase_StructureView sits = null; // Supplemental
@@ -5976,7 +6051,7 @@ The specified period is read.  The data are converted to the requested units.
 empty string the units will not be converted.
 @param read_data if true, the data will be read.  If false, only the time series
 header will be read.
-@return Vector of time series of appropriate type (e.g., MonthTS, HourTS).
+@return list of time series of appropriate type (e.g., MonthTS, HourTS).
 @exception Exception if an error occurs during the read.
 */
 public List<TS> readTimeSeriesList ( String fname,
@@ -6001,7 +6076,7 @@ If set to a literal string, the identifier field must match exactly to be select
 empty string the units will not be converted.
 @param read_data if true, the data will be read.  If false, only the time series
 header will be read.
-@return Vector of time series of appropriate type (e.g., MonthTS, HourTS).
+@return list of time series of appropriate type (e.g., MonthTS, HourTS).
 @exception Exception if an error occurs during the read.
 */
 public List<TS> readTimeSeriesList ( TSIdent tsident, String fname,
@@ -6114,7 +6189,7 @@ public void removeProcessListener ( ProcessListener listener )
 }
 
 /**
-Reset a __CU*_match_Vector to empty.
+Reset a __CU*_match_List to empty.
 @param matchList List of matching identifiers/names to reset to empty.
 */
 protected void resetDataMatches ( List<String> matchList )
@@ -6206,7 +6281,7 @@ throws Exception
 
 /**
 Run the specified commands.  If no commands are specified, run all that are being managed.
-@param commands Vector of Command to process.
+@param commands list of Command to process.
 @param props Properties to control run. This method only acts on the properties shown below.
 <td><b>Property</b></td>    <td><b>Description</b></td>
 </tr>
@@ -6299,7 +6374,7 @@ protected void runStateModDataCheck( int type )
 	// products so override and add the data here
 	if ( type == StateMod_DataSet.COMP_RIVER_NETWORK ) {
 		DataSetComponent comp = __StateMod_DataSet.getComponentForComponentType( type );
-		comp.setData( __SMRiverNetworkNode_Vector );
+		comp.setData( __SMRiverNetworkNode_List );
 	}
 	// If there is no commands file then use the component and program name for the file name
 	if ( fname == null || fname.length() == 0 ) {
@@ -6540,12 +6615,12 @@ public void setPropContents ( String prop, Object contents ) throws Exception
 	else if ( prop.equalsIgnoreCase("StateCU_IrrigationPracticeTS_List") ) {
 		@SuppressWarnings("unchecked")
 		List<StateCU_IrrigationPracticeTS> objectList = (List<StateCU_IrrigationPracticeTS>)contents;
-		__CUIrrigationPracticeTS_Vector = objectList;
+		__CUIrrigationPracticeTS_List = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("StateCU_Location_List") ) {
 		@SuppressWarnings("unchecked")
 		List<StateCU_Location> objectList = (List<StateCU_Location>)contents;
-		__CULocation_Vector = objectList;
+		__CULocation_List = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("StateMod_DiversionDemandTSMonthly_List") ) {
 		@SuppressWarnings("unchecked")
@@ -6578,7 +6653,7 @@ public void setPropContents ( String prop, Object contents ) throws Exception
 	else if ( prop.equalsIgnoreCase("StateMod_RiverNetworkNode_List") ) {
 		@SuppressWarnings("unchecked")
 		List<StateMod_RiverNetworkNode> objectList = (List<StateMod_RiverNetworkNode>)contents;
-		__SMRiverNetworkNode_Vector = objectList;
+		__SMRiverNetworkNode_List = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("StateMod_WellDemandTSMonthly_List") ) {
 		@SuppressWarnings("unchecked")

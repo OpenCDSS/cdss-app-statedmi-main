@@ -59,7 +59,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -472,14 +471,16 @@ Command font - looks better than courier
 private final String __COMMANDS_FONT = "Lucida Console";
 
 /**
+TODO smalers 2020-02-16 need to parameterize generics.
 List model that maps the TSCommandProcessor Command data to the command JList.
 */
 private StateDMI_Processor_ListModel __commands_JListModel;
+
 /**
 Buffer to hold commands manipulated by cut/copy/paste - note that this is
 maintained internally and is not the same as the operating system cut/copy/paste buffer.
 */
-private List<Command> __commandsCutBuffer = new Vector<Command>(100,100);
+private List<Command> __commandsCutBuffer = new ArrayList<>();
 
 // Results-related...
 
@@ -506,7 +507,7 @@ StateMod files (unlike data components, which are listed by model).
 */
 private JList<String> __resultsOutputFiles_JList = null;
 /**
-JList data model for final time series (basically a Vector of
+JList data model for final time series (basically a list of
 filenames associated with __resultsOutputFiles_JList).
 */
 private DefaultListModel<String> __resultsOutputFiles_JListModel = null;
@@ -521,7 +522,7 @@ List of results components for viewing with JWorksheets, for StateCU components.
 */
 private JList<String> __resultsStateCUComponents_JList = null;
 /**
-JList data model for StateCU components (basically a Vector of
+JList data model for StateCU components (basically a list of
 component names associated with __resultsStateCUComponents_JList).
 */
 private DefaultListModel<String> __resultsStateCUComponents_JListModel = null;
@@ -531,7 +532,7 @@ List of results components for viewing with JWorksheets, for StateMod components
 */
 private JList<String> __resultsStateModComponents_JList = null;
 /**
-JList data model for StateCU components (basically a Vector of
+JList data model for StateCU components (basically a list of
 component names associated with __resultsStateModComponents_JList).
 */
 private DefaultListModel<String> __resultsStateModComponents_JListModel = null;
@@ -555,9 +556,9 @@ private DefaultListModel<String> __resultsTables_JListModel;
 List of time series selectors and associated component types, maintained
 to look up graph properties.
 */
-List<TS_ListSelector_JFrame>  TS_ListSelector_JFrame_Vector = new Vector<TS_ListSelector_JFrame>();
-List<Integer> TS_ListSelector_JFrame_app_type_Vector = new Vector<Integer>();
-List<Integer> TS_ListSelector_JFrame_comp_type_Vector = new Vector<Integer>();
+List<TS_ListSelector_JFrame>  TS_ListSelector_JFrame_List = new ArrayList<>();
+List<Integer> TS_ListSelector_JFrame_app_type_List = new ArrayList<>();
+List<Integer> TS_ListSelector_JFrame_comp_type_List = new ArrayList<>();
 
 /**
 Worksheet that contains a list of processor properties.
@@ -883,8 +884,10 @@ private JMenuItem
 	__Commands_StateCU_PenmanMonteith_SortPenmanMonteith_JMenuItem,
 	__Commands_StateCU_PenmanMonteith_WritePenmanMonteithToList_JMenuItem,
 	__Commands_StateCU_PenmanMonteith_WritePenmanMonteithToStateCU_JMenuItem;
+
 private JMenuItem
 	__Commands_StateCU_CULocationsData_JMenuItem;
+
 private JMenu
 	__Commands_StateCU_CULocations_JMenu;
 private JMenuItem
@@ -911,6 +914,13 @@ private JMenuItem
 	__Commands_StateCU_CULocations_FillCULocationClimateStationWeights_JMenuItem,
 	__Commands_StateCU_CULocations_WriteCULocationsToList_JMenuItem,
 	__Commands_StateCU_CULocations_WriteCULocationsToStateCU_JMenuItem;
+
+private JMenu
+	__Commands_StateCU_Parcels_JMenu;
+private JMenuItem
+	__Commands_StateCU_Parcels_ReadCULocationParcelsFromHydroBase_JMenuItem,
+	__Commands_StateCU_Parcels_WriteCULocationParcelsToFile_JMenuItem;
+
 private JMenu
 	__Commands_StateCU_CropPatternTS_JMenu;
 private JMenuItem
@@ -941,7 +951,8 @@ private JMenuItem
 	__Commands_StateCU_CropPatternTS_FillCropPatternTSRepeat_JMenuItem,
 	__Commands_StateCU_CropPatternTS_SortCropPatternTS_JMenuItem,
 	__Commands_StateCU_CropPatternTS_WriteCropPatternTSToStateCU_JMenuItem,
-	__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_JMenuItem;
+	__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_JMenuItem,
+	__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_JMenuItem;
 private JMenu
 	__Commands_StateCU_IrrigationPracticeTS_JMenu;
 private JMenuItem
@@ -1660,25 +1671,25 @@ Region1 strings for use with StateCU.  These are initialized in editCommand()
 and are therefore only used when editing - later need to possibly initialize based on
 a command.  For now default region1 to County and region2 to HUC from HydroBase.
 */
-private List<String> __region1_Vector = null;
-private List<Integer> __region2_Vector = null;		
+private List<String> __region1_List = null;
+private List<Integer> __region2_List = null;		
 						
 /**
 Valid Cropchar CU methods from HydroBase.  These are used when selecting data for the StateCU CCH file.
 */		
-private List<String> __cropcharCuMethod_Vector = null;
+private List<String> __cropcharCuMethod_List = null;
 
 /**
 Valid BlaneyCriddle CU methods from HydroBase.  These are used when selecting
 data for the StateCU KBC files.
 */
-private List<String> __blaneyCriddleCuMethod_Vector = null;
+private List<String> __blaneyCriddleCuMethod_List = null;
 
 /**
 Valid PenManMontieth CU methods from HydroBase.  These are used when selecting
 data for the StateCU KPM files.
 */
-private List<String> __penmanMonteithCuMethod_Vector = null;
+private List<String> __penmanMonteithCuMethod_List = null;
 
 // Strings representing commands and options in the various menus and buttons,
 // listed from left to right and top to bottom as they appear in the interface.
@@ -1704,7 +1715,7 @@ private String
 	__File_Open_CommandFile_String = "Command File ...",
 	__File_Open_DataSet_String = "Data Set (Under Development)...",
 	__File_Open_DataSetComponent_String = "Data Set Component (Under Development)",
-	__File_Open_DataSetComponent_StateCU_Locations_String =	"CU Locations ...",
+	__File_Open_DataSetComponent_StateCU_Locations_String =	"CU Locations...",
 	__File_Open_DataSetComponent_StateCU_CropCharacteristics_String = "Crop Characteristics ...",
 	__File_Open_DataSetComponent_StateCU_BlaneyCriddle_String =	"Blaney-Criddle Crop Coefficients ...",
 	__File_Open_DataSetComponent_StateCU_ClimateStations_String = "Climate Stations ...",
@@ -1875,7 +1886,15 @@ private String
 	__Commands_StateCU_CULocations_WriteCULocationsToList_String = "WriteCULocationsToList() ...",
 	__Commands_StateCU_CULocations_WriteCULocationsToStateCU_String = "WriteCULocationsToStateCU() ...",
 	__Commands_StateCU_CULocations_CheckCULocations_String = "CheckCULocations() ...",
+	
+	// Parcels
 
+	__Commands_StateCU_Parcels_String = "Parcels",
+	__Commands_StateCU_Parcels_ReadCULocationParcelsFromHydroBase_String = "ReadCULocationParcelsFromHydroBase",
+	__Commands_StateCU_Parcels_WriteCULocationParcelsToFile_String = "WriteCULocationParcelsToFile",
+
+	// CDS - crop pattern time series
+	
 	__Commands_StateCU_CropPatternTS_String = "Crop Pattern TS (Yearly)",
 		// Also has a SetOutputPeriod() here
 		// Also has a SetOutputAnnualAverage() here
@@ -1909,6 +1928,7 @@ private String
 	__Commands_StateCU_CropPatternTS_SortCropPatternTS_String = "SortCropPatternTS() ...",
 	__Commands_StateCU_CropPatternTS_WriteCropPatternTSToStateCU_String = "WriteCropPatternTSToStateCU() ...",
 	__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_String = "WriteCropPatternTSToDateValue() ...",
+	__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_String = "WriteCropPatternParcelsToFile() ...",
 	__Commands_StateCU_CropPatternTS_CheckCropPatternTS_String = "CheckCropPatternTS() ...",
 
 	__Commands_StateCU_IrrigationPracticeTS_String = "Irrigation Practice TS (Yearly)",
@@ -2993,9 +3013,9 @@ public void actionPerformed ( ActionEvent event )
 		reportProp.set ( "PrintSize", "7" );
 		reportProp.set ( "Title", "HydroBase Properties" );
 		reportProp.setUsingObject ( "ParentUIComponent", this );
-		List v = null;
+		List<String> v = null;
 		if ( __hbdmi == null ) {
-			v = new Vector();
+			v = new ArrayList();
 			v.add ( "StateDMI HydroBase Properties" );
 			v.add ( "" );
 			v.add ( "No HydroBase database is available." );
@@ -3322,7 +3342,7 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// StateCU STR commands...
+	// StateCU CU Locations (STR) commands...
 
 	// Compare string because several menus use the same action command...
 	else if ( action.equals( __Commands_StateCU_CULocations_ReadCULocationsFromList_String)){
@@ -3503,6 +3523,19 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_StateCU_CULocations_CheckCULocations_String,
 			null, __INSERT_COMMAND);
 	}
+    
+    // StateCU Parcels (experimental - as input to CDS and IPY)
+
+	else if ( action.equals( __Commands_StateCU_Parcels_ReadCULocationParcelsFromHydroBase_String) ) {
+		// Read parcels associated with CU Locations from HydroBase...
+		commandList_EditCommand ( __Commands_StateCU_Parcels_ReadCULocationParcelsFromHydroBase_String,
+		null, __INSERT_COMMAND);
+	}
+	else if ( action.equals( __Commands_StateCU_Parcels_WriteCULocationParcelsToFile_String) ) {
+		// Write parcels associated with CU Locations to a file...
+		commandList_EditCommand ( __Commands_StateCU_Parcels_WriteCULocationParcelsToFile_String,
+		null, __INSERT_COMMAND);
+	}
 
 	// StateCU CDS commands...
 
@@ -3595,6 +3628,11 @@ public void actionPerformed ( ActionEvent event )
 	else if (o ==__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_JMenuItem) {
 		// Write CU crop patterns to a DateValue time series file...
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_String,
+		null, __INSERT_COMMAND);
+	}
+	else if (o ==__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_JMenuItem) {
+		// Write CU crop pattern parcel data to file...
+		commandList_EditCommand (__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( action.equals(__Commands_StateCU_CropPatternTS_CheckCropPatternTS_String)) {
@@ -3738,7 +3776,7 @@ public void actionPerformed ( ActionEvent event )
         // Most inserts let the editor format the command.  However, in this case the specific
         // comment needs to be supplied.  Otherwise, the comment will be blank or the string from
         // the menu, which has too much verbage.
-    	List comments = new Vector(1);
+    	List<Command> comments = new ArrayList<>(1);
         comments.add ( commandList_NewCommand("#@readOnly",true) );
         commandList_EditCommand ( __Commands_General_Comments_ReadOnlyComment_String, comments, __INSERT_COMMAND );
     }
@@ -5514,13 +5552,13 @@ public void actionPerformed ( ActionEvent event )
 		// the well stations, print a message to the lof file.
 		String id;
 		StateMod_Diversion div;
-		List div_Vector = __statedmiProcessor.getStateModDiversionStationList();
-		int size = div_Vector.size();
-		List well_Vector = __statedmiProcessor.getStateModWellStationList();
+		List div_List = __statedmiProcessor.getStateModDiversionStationList();
+		int size = div_List.size();
+		List well_List = __statedmiProcessor.getStateModWellStationList();
 		for ( int i = 0; i < size; i++ ) {
-			div = (StateMod_Diversion)div_Vector.get(i);
+			div = (StateMod_Diversion)div_List.get(i);
 			id = div.getID();
-			if ( StateMod_Util.indexOf(well_Vector,id)< 0) {
+			if ( StateMod_Util.indexOf(well_List,id)< 0) {
 				Message.printStatus ( 2, routine, "Surface supply only diversion:  " + id + " " + div.getName() );
 			}
 		}
@@ -5616,9 +5654,9 @@ save specific data set component information.
 */
 private void addTS_ListSelector_JFrame ( TS_ListSelector_JFrame selector, int app_type, int comp_type )
 {	// Add to the list being maintained...
-	TS_ListSelector_JFrame_Vector.add ( selector );
-	TS_ListSelector_JFrame_app_type_Vector.add ( new Integer(app_type) );
-	TS_ListSelector_JFrame_comp_type_Vector.add ( new Integer(comp_type) );
+	TS_ListSelector_JFrame_List.add ( selector );
+	TS_ListSelector_JFrame_app_type_List.add ( new Integer(app_type) );
+	TS_ListSelector_JFrame_comp_type_List.add ( new Integer(comp_type) );
 	// Listen for selector events...
 	selector.addTSListSelectorListener ( this );
 }
@@ -5685,9 +5723,9 @@ public void commandCompleted ( int icommand, int ncommand, Command command,
 
 /**
 Determine whether commands are equal.  To allow for multi-line commands, each
-command is stored in a Vector (but typically only the first String is used.
-@param original_command Original command as a Vector of String or Command.
-@param edited_command Edited command as a Vector of String or Command.
+command is stored in a list (but typically only the first String is used.
+@param original_command Original command as a list of String or Command.
+@param edited_command Edited command as a list of String or Command.
 */
 private boolean commandList_CommandsAreEqual(List original_command, List edited_command)
 {	if ( (original_command == null) && (edited_command != null) ) {
@@ -5741,96 +5779,19 @@ private boolean commandList_CommandsAreEqual(List original_command, List edited_
 }
 
 /**
-Return the command(s) that are currently selected in the final list.
-If the command contains only comments, they are all returned.  If it contains
-commands and time series identifiers, only the first command (or time series identifier) is returned.
-@return selected commands in final list or null if none are selected.
-Also return null if more than one command is selected.
-*/
-/*
-private Vector commandList_GetCommand ()
-{	// First get the list...
-	Vector command = getCommands();
-	// Now make sure there is only one command, allowing comments in
-	// front...
-	if ( command == null ) {
-		return null;
-	}
-	int size = command.size();
-	boolean comment_found = false;
-	String string = null;
-
-	// First check to see if all comments.  If so, then return all of them
-	// (an editor only for the comments will be used)...
-	// Initialize
-	comment_found = true;
-	for ( int i = 0; i < size; i++ ) {
-		string = (String)command.elementAt(i);
-		if ( !isCommentLine(string) ) {
-			comment_found = false;
-		}
-	}
-	if ( comment_found ) {
-		// All we had was comments so return...
-		return command;
-	}
-	// Else may have mixed comments.  Want to pull out only the
-	// first non-comments and assume it is an command.
-	for ( int i = 0; i < size; i++ ) {
-		string = (String)command.elementAt(i);
-		if ( !isCommentLine(string) ) {
-			Vector v = new Vector ( 1 );
-			v.addElement ( string );
-			command = null;
-			return v;
-		}
-	}
-/ * FIXME when method reenabled.
-	// Else may have mixed comments.  Want to pull out only the
-	// non-comments after an optional set of commments...
-	for ( int i = 0; i < size; i++ ) {
-		string = (String)command.elementAt(i);
-		if (	(i == 0) && !isCommentLine(string) ) {
-			// First line is not a comment so set like it is
-			// so we know to quit when the next comment is found...
-			comment_found = true;
-		}
-		else if ( comment_found && isCommentLine(string) ) {
-			// Found a new comment so delete the remaining
-			// strings and return what we have so far...
-			for ( int j = (size - 1); j <= i; j-- ) {
-				command.removeElementAt(j);
-			}
-			return command;
-		}
-		else if ( isCommentLine(string) ) {
-			// Found a comment so ignore it and indicate that we
-			// have found comments.
-			comment_found = true;
-			command.removeElementAt(i);
-			--i;
-		}
-	}
-* /
-
-	return command;
-}
-*/
-
-/**
 Edit a command in the command list.
 @param action the string containing the event's action value.  This is checked
-for new commands.  When editing existing commands, command_Vector will contain
+for new commands.  When editing existing commands, command_List will contain
 a list of Command class instances.  Normally only the first command will be edited as
 a single-line command.  However, multiple # comment lines can be selected and edited at once.
-@param command_Vector If an update, this contains the current Command instances
+@param command_List If an update, this contains the current Command instances
 to edit.  If a new command, this is null and the action string will be consulted
 to construct the appropriate command.  The only time that multiple commands will
 be edited are when they are in a {# delimited comment block).
 @param mode the action to take when editing the command (__INSERT_COMMAND for a
 new command or __UPDATE_COMMAND for an existing command).
 */
-private void commandList_EditCommand ( String action, List command_Vector, int mode )
+private void commandList_EditCommand ( String action, List<Command> command_List, int mode )
 {	String routine = getClass().getSimpleName() + ".editCommand";
 	int dl = 1;		// Debug level
 	
@@ -5844,7 +5805,7 @@ private void commandList_EditCommand ( String action, List command_Vector, int m
 	boolean is_comment_block = false;
 	if ( mode == __UPDATE_COMMAND ) {
 		is_comment_block = commandList_IsCommentBlock ( __statedmiProcessor,
-			command_Vector,
+			command_List,
 			true,	// All must be comments
 			true );	// Comments must be contiguous
 	}
@@ -5883,7 +5844,7 @@ private void commandList_EditCommand ( String action, List command_Vector, int m
 			}
 			else {
 				// Get the original command...
-				command_to_edit_original = (Command)command_Vector.get(0);
+				command_to_edit_original = command_List.get(0);
 				// Clone it so that the edit occurs on the copy...
 				command_to_edit = (Command)command_to_edit_original.clone();
 				Message.printStatus(2, routine, "Cloned command to edit: \"" + command_to_edit + "\"" );
@@ -5928,10 +5889,10 @@ private void commandList_EditCommand ( String action, List command_Vector, int m
 		// Second, edit the command, whether an update or an insert...
 	
 		boolean edit_completed = false;
-		List new_comments = new Vector();	// Used if comments are edited.
+		List<String> new_comments = new ArrayList<>();	// Used if comments are edited.
 		if ( is_comment_block ) {
 			// Edit using the old-style editor...
-			edit_completed = commandList_EditCommandOldStyleComments ( mode, action, command_Vector, new_comments );
+			edit_completed = commandList_EditCommandOldStyleComments ( mode, action, command_List, new_comments );
 		}
 		else {
 		    // Editing a single one-line command...
@@ -5976,8 +5937,8 @@ private void commandList_EditCommand ( String action, List command_Vector, int m
 				// The command was updated.
 				if ( is_comment_block ) {
 					// Remove the commands that were selected and insert the new ones.
-					commandList_ReplaceComments ( command_Vector, new_comments );
-					if ( !commandList_CommandsAreEqual(command_Vector,new_comments)) {
+					commandList_ReplaceComments ( command_List, new_comments );
+					if ( !commandList_CommandsAreEqual(command_List,new_comments)) {
 						commandList_SetDirty(true);
 					}
 				}
@@ -6064,22 +6025,22 @@ private boolean commandList_EditCommandNewStyle ( Command command_to_edit )
 Edit comments using an old-style editor.
 @param mode Mode of editing, whether updating or inserting.
 @param action If not null, then the comments are new (insert).
-@param command_Vector Comments being edited as a Vector of GenericCommand, as passed from the legacy code.
-@param new_comments The new comments as a Vector of String, to be inserted into the command list.
+@param command_List Comments being edited as a list of GenericCommand, as passed from the legacy code.
+@param new_comments The new comments as a list of String, to be inserted into the command list.
 @return true if the command edits were committed, false if canceled.
 */
 private boolean commandList_EditCommandOldStyleComments (
-		int mode, String action, List command_Vector, List new_comments )
+		int mode, String action, List<Command> command_List, List new_comments )
 {	//else if ( action.equals(__Commands_General_Comment_String) ||
 	//	command.startsWith("#") ) {
-	List cv = new Vector();
+	List<String> cv = new ArrayList<>();
 	int size = 0;
-	if ( command_Vector != null ) {
-		size = command_Vector.size();
+	if ( command_List != null ) {
+		size = command_List.size();
 	}
 	Command command = null;
 	for ( int i = 0; i < size; i++ ) {
-		command = (Command)command_Vector.get(i);
+		command = command_List.get(i);
 		cv.add( command.toString() );
 	}
 	List edited_cv = new Comment_JDialog ( this, cv ).getText();
@@ -6087,7 +6048,7 @@ private boolean commandList_EditCommandOldStyleComments (
 		return false;
 	}
 	else {
-		// Transfer to the Vector that was passed in...
+		// Transfer to the list that was passed in...
 		int size2 = edited_cv.size();
 		for ( int i = 0; i < size2; i++ ) {
 			new_comments.add ( edited_cv.get(i) );
@@ -6097,16 +6058,16 @@ private boolean commandList_EditCommandOldStyleComments (
 }
 
 /**
-Get the list of commands to process, as a Vector of Command, guaranteed
+Get the list of commands to process, as a list of Command, guaranteed
 to be non-null but may be zero length.
-@return the commands as a Vector of Command.
+@return the commands as a list of Command.
 @param get_all If false, return those that are selected
 unless none are selected, in which case all are returned.  If true, all are
 returned, regardless of which are selected.
 */
-private List commandList_GetCommands ( boolean get_all )
+private List<Command> commandList_GetCommands ( boolean get_all )
 {	if ( __commands_JListModel.size() == 0 ) {
-		return new Vector();
+		return new ArrayList<Command>();
 	}
 
 	int [] selected = ui_GetCommandJList().getSelectedIndices();
@@ -6118,33 +6079,33 @@ private List commandList_GetCommands ( boolean get_all )
 	if ( (selected_size == 0) || get_all ) {
 		// Nothing selected or want to get all, get all...
 		selected_size = __commands_JListModel.size();
-		List itemVector = new Vector(selected_size);
+		List<Command> itemList = new ArrayList<>(selected_size);
 		for ( int i = 0; i < selected_size; i++ ) {
-			itemVector.add ( __commands_JListModel.get(i) );
+			itemList.add ( (Command)__commands_JListModel.get(i) );
 		}
-		return itemVector;
+		return itemList;
 	}
 	else {
 		// Else something selected so get them...
-		List itemVector = new Vector(selected_size);
+		List<Command> itemList = new ArrayList<>(selected_size);
 		for ( int i = 0; i < selected_size; i++ ) {
-			itemVector.add ( __commands_JListModel.get(selected[i]) );
+			itemList.add ( (Command)__commands_JListModel.get(selected[i]) );
 		}
-		return itemVector;
+		return itemList;
 	}
 }
 
 /**
 Get the list of commands to process.  If any are selected, only they will be
 returned.  If none are selected, all will be returned.
-@return the commands as a Vector of String.
+@return the commands as a list of Command.
 */
-private List commandList_GetCommandsBasedOnUI ( )
+private List<Command> commandList_GetCommandsBasedOnUI ( )
 {	return commandList_GetCommands ( false );
 }
 
 /**
-Get the list of commands to process, as a Vector of String.
+Get the list of commands to process, as a list of String.
 @return the commands as a list of String.
 @param getAll If false, return those that are selected
 unless none are selected, in which case all are returned.  If true, all are
@@ -6155,7 +6116,7 @@ private List<String> commandList_GetCommandStrings ( boolean getAll )
     List<Command> commands = commandList_GetCommands ( getAll );
 	// Convert to String instances
 	int size = commands.size();
-	List<String> strings = new Vector(size);
+	List<String> strings = new ArrayList<>(size);
 	for ( int i = 0; i < size; i++ ) {
 		strings.add ( "" + commands.get(i) );
 	}
@@ -6235,7 +6196,7 @@ is coded to respond to changes in the data model.
 @param inserted_command The command to insert.
 */
 private void commandList_InsertCommandBasedOnUI ( Command inserted_command )
-{	String routine = getClass().getName() + ".insertCommand";
+{	String routine = getClass().getSimpleName() + ".insertCommand";
 
 	// Get the selected indices from the commands...
 	int selectedIndices[] = ui_GetCommandJList().getSelectedIndices();
@@ -6265,7 +6226,7 @@ private void commandList_InsertCommandBasedOnUI ( Command inserted_command )
 /**
 Insert comments into the command list, utilizing the selected commands in the displayed
 list to determine the insert position.
-@param new_comments The comments to insert, as a Vector of String.
+@param new_comments The comments to insert, as a list of String.
 */
 private void commandList_InsertCommentsBasedOnUI ( List<String> new_comments )
 {	String routine = getClass().getSimpleName() + ".commandList_InsertCommentsBasedOnUI";
@@ -6306,7 +6267,7 @@ private void commandList_InsertCommentsBasedOnUI ( List<String> new_comments )
 Determine whether a list of commands is a comment block consisting of multiple # comments.
 @param processor The TSCommandProcessor that is processing the results,
 used to check for positions of commands.
-@param commands Vector of Command instances to check.
+@param commands list of Command instances to check.
 @param allMustBeComments If true then all must be comment lines
 for true to be returned.  If false, then only one must be a comment.
 This allows a warning to be printed that only a block of ALL comments can be edited at once.
@@ -6420,7 +6381,7 @@ private void commandList_RemoveCommand ( Command command )
 Remove selected command list, using the data model.  If any items are selected,
 then only those are selected.  If none are selected, then all are cleared, asking
 the user to confirm.  Items from the command list (or all if none are selected).
-Save what was cleared in the __command_cut_buffer Vector so that it can be used with Paste.
+Save what was cleared in the __command_cut_buffer list so that it can be used with Paste.
 */
 private void commandList_RemoveCommandsBasedOnUI ()
 {	int size = 0;
@@ -6497,8 +6458,8 @@ private void commandList_ReplaceCommand ( Command old_command, Command new_comma
 
 /**
 Replace a contiguous block of # comments with another block.
-@param old_comments Vector of old comments (as Command) to remove.
-@param new_comments Vector of new comments (as String) to insert in its place.
+@param old_comments list of old comments (as Command) to remove.
+@param new_comments list of new comments (as String) to insert in its place.
 */
 private void commandList_ReplaceComments ( List old_comments, List new_comments )
 {	//String routine = getClass().getName() + ".commandList_ReplaceComments";
@@ -7111,18 +7072,19 @@ protected int getAppType()
 Get the commands above a command insert position.  Only the requested commands
 are returned.  Use this, for example, to get the setWorkingDir() commands above
 the insert position for a readXXX() command, so the working directory can be
-defined and used in the readXXX_Dialog.  The returned Vector can be processed
+defined and used in the readXXX_Dialog.  The returned list can be processed
 by the StateDMI_Processor() constructor.
 @return List of commands above the insert point that match the commands in
-the needed_commands_Vector.  This will always return a non-null Vector, even if
-no commands are in the Vector.
-@param needed_commands_Vector Vector of commands that need to be processed
+the needed_commands_List.  This will always return a non-null list, even if
+no commands are in the list.
+@param needed_commands_List list of commands that need to be processed
 (e.g., "setWorkingDir").  Only the main command name should be defined.
 @param get_all if false, only the first found item above the insert point
 is returned.  If true, all matching commands above the point are returned in
 the order from top to bottom.
 */
-public List getCommandsAboveInsertPosition ( List needed_commands_Vector, boolean get_all )
+/* TODO smalers 2020-02-16 no longer used?
+public List<String> getCommandsAboveInsertPosition ( List<String> needed_commands_List, boolean get_all )
 {	// Determine the insert position, which will be the first selected
 	// command (or the end of the list if none are selected)...
 	int selectedsize = 0;
@@ -7140,15 +7102,15 @@ public List getCommandsAboveInsertPosition ( List needed_commands_Vector, boolea
 	}
 	// Now search backwards matching commands for each of the requested commands...
 	int size = 0;
-	if ( needed_commands_Vector != null ) {
-		size = needed_commands_Vector.size();
+	if ( needed_commands_List != null ) {
+		size = needed_commands_List.size();
 	}
 	String command;
-	List found_commands = new Vector();
+	List<String> found_commands = new ArrayList<>();
 	// Now loop up through the command list...
 	for ( int ic = (insert_pos - 1); ic >= 0; ic-- ) {
 		for ( int i = 0; i < size; i++ ) {
-			command = (String)needed_commands_Vector.get(i);
+			command = needed_commands_List.get(i);
 			//((String)_command_List.getItem(ic)).trim() );
 			if ( command.regionMatches(true,0,((String)__commands_JListModel.get(ic)).trim(),0,command.length() ) ) {
 				found_commands.add ( (String)__commands_JListModel.get(ic) );
@@ -7165,22 +7127,23 @@ public List getCommandsAboveInsertPosition ( List needed_commands_Vector, boolea
 	if ( size <= 1 ) {
 		return found_commands;
 	}
-	List found_commands_sorted = new Vector(size);
+	List<String> found_commands_sorted = new ArrayList<>(size);
 	for ( int i = size - 1; i >= 0; i-- ) {
 		found_commands_sorted.add ( found_commands.get(i));
 	}
 	return found_commands_sorted;
 }
+*/
 
 /**
 Get the commands above the first selected row in the final list.
 If nothing is selected, return all the items.
 @return final list items above first selected item or all if
-nothing selected.  Return empty non-null Vector if first item is selected.
+nothing selected.  Return empty non-null list if first item is selected.
 */
-public List getCommandsAboveSelected ()
+public List<Command> getCommandsAboveSelected ()
 {	if ( __commands_JListModel.size() == 0) {
-		return new Vector();
+		return new ArrayList<Command>();
 	}
 
 	int selectedIndices[] = ui_GetCommandJList().getSelectedIndices();
@@ -7188,23 +7151,23 @@ public List getCommandsAboveSelected ()
 
 	if ( selectedSize == 0 ) {
 		// Return all...
-		List v = new Vector();
+		List<Command> v = new ArrayList<>();
 		int size = __commands_JListModel.size();
 		for (int i = 0; i < size; i++) {
-			v.add (__commands_JListModel.get(i));
+			v.add ( (Command)__commands_JListModel.get(i));
 		}
 		return v;
 	}
 	if ( selectedIndices[0] == 0 ) {
 		// Nothing above.
 		selectedIndices = null;
-		return new Vector();
+		return new ArrayList<Command>();
 	}
 	else {
 		// Return above first selected...
-		List v = new Vector(selectedIndices[0] + 1);
+		List<Command> v = new ArrayList<>(selectedIndices[0] + 1);
 		for (int i = 0; i < selectedIndices[0]; i++) {
-			v.add (__commands_JListModel.get(i));
+			v.add ((Command)__commands_JListModel.get(i));
 		}
 		selectedIndices = null;
 		return v;
@@ -7493,7 +7456,7 @@ public void mouseReleased(MouseEvent event) {
 /**
  * Used for batch processing of a command file.  Checks for existence of
  * the input file and returns if no file is found.  Otherwise, all commands
- * are stored in a Vector and the runCommands method is run.  RunCommands will
+ * are stored in a list and the runCommands method is run.  RunCommands will
  * run all the commands and write any output.  Returns true if successful and false
  * otherwise.
  *
@@ -7548,11 +7511,11 @@ information for the total time series.
 @param dataset_location the description to use for the total time series.
 @exception Exception if an error occurs creating the total time series.
 */
-private <T extends TS> List<T> results_CopyTSVectorAndAddTotal ( List<T> tslist, int app_type, int comp_type,
+private <T extends TS> List<T> results_CopyTSListAndAddTotal ( List<T> tslist, int app_type, int comp_type,
 	String dataset_location, String dataset_datasource, String dataset_description )
 throws Exception
 {	int vsize = tslist.size();
-	List<T> v = new Vector<T> ( vsize );
+	List<T> v = new ArrayList<T> ( vsize );
 	for ( int i = 0; i < vsize; i++ ) {
 		v.add ( tslist.get(i) );
 	}
@@ -7869,7 +7832,7 @@ Display the StateCU locations (this is currently a demo of a combination plot).
 */
 /* TODO SAM 2007-06-26 Evaluate why not used
 private void results_ShowStateCULocationsSAM ()
-{	// Create a Vector of TS and PropList for a TSProduct...
+{	// Create a list of TS and PropList for a TSProduct...
 	PropList props = new PropList ( "CU Locations" );
 	Vector tslist = new Vector();
 
@@ -8306,21 +8269,21 @@ private void results_Tables_Clear()
 /**
 Handle TS_ListSelector_JFrame events.
 @param selector TS_ListSelector_JFrame instance from which the time series were selected.
-@param tslist The Vector of TS that were selected.
+@param tslist The list of TS that were selected.
 @param action Action string that indicates which button was pressed on the
 selector ("Summary", "Table", or "Graph").
 */
 public void timeSeriesSelected ( TS_ListSelector_JFrame selector, List<TS> tslist, String action )
 {	// Determine the component type for the time series.
-	int vsize = TS_ListSelector_JFrame_Vector.size();
+	int vsize = TS_ListSelector_JFrame_List.size();
 	TS_ListSelector_JFrame selector_saved;
 	for ( int i = 0; i < vsize; i++ ) {
-		selector_saved = TS_ListSelector_JFrame_Vector.get(i);
+		selector_saved = TS_ListSelector_JFrame_List.get(i);
 		if ( selector_saved == selector ) {
 			// Display the time series...
 			results_DisplayTimeSeries ( tslist, action,
-			TS_ListSelector_JFrame_app_type_Vector.get(i).intValue(),
-			TS_ListSelector_JFrame_comp_type_Vector.get(i).intValue() );
+			TS_ListSelector_JFrame_app_type_List.get(i).intValue(),
+			TS_ListSelector_JFrame_comp_type_List.get(i).intValue() );
 			return;
 		}
 	}
@@ -8331,9 +8294,9 @@ Check to make sure necessary input is available for dialogs, including lists
 of available region1 and region2 for StateCu.
 */
 private void ui_CheckDialogInput ()
-{	if ( __region1_Vector == null ) {
+{	if ( __region1_List == null ) {
 		// Get the counties from HydroBase...
-		__region1_Vector = new Vector<String>();
+		__region1_List = new ArrayList<>();
 		if ( __hbdmi != null ) {
 			List<HydroBase_CountyRef> v = __hbdmi.getCountyRef();
 			int size = 0;
@@ -8343,20 +8306,20 @@ private void ui_CheckDialogInput ()
 			HydroBase_CountyRef county = null;
 			for ( int i = 0; i < size; i++ ) {
 				county = v.get(i);
-				__region1_Vector.add ( county.getCounty() );
+				__region1_List.add ( county.getCounty() );
 			}
 		}
 	}
-	if ( __region2_Vector == null ) {
+	if ( __region2_List == null ) {
 		// Get the HUC from HydroBase...
-		__region2_Vector = new Vector();
+		__region2_List = new ArrayList<>();
 		if ( __hbdmi != null ) {
-			__region2_Vector = __hbdmi.getHUC();
+			__region2_List = __hbdmi.getHUC();
 		}
 	}
-	if ( __cropcharCuMethod_Vector == null ) {
+	if ( __cropcharCuMethod_List == null ) {
 		// Get the Cropchar CU methods from HydroBase...
-		__cropcharCuMethod_Vector = new Vector();
+		__cropcharCuMethod_List = new ArrayList<>();
 		if ( __hbdmi != null ) {
 			List<HydroBase_Cropchar> v = __hbdmi.getCropcharCUMethod();
 			int size = 0;
@@ -8366,13 +8329,13 @@ private void ui_CheckDialogInput ()
 			HydroBase_Cropchar cropchar = null;
 			for ( int i = 0; i < size; i++ ) {
 				cropchar = v.get(i);
-				__cropcharCuMethod_Vector.add ( cropchar.getMethod_desc() );
+				__cropcharCuMethod_List.add ( cropchar.getMethod_desc() );
 			}
 		}
 	}
-	if ( __blaneyCriddleCuMethod_Vector == null ) {
+	if ( __blaneyCriddleCuMethod_List == null ) {
 		// Get the CU methods from HydroBase...
-		__blaneyCriddleCuMethod_Vector = new Vector();
+		__blaneyCriddleCuMethod_List = new ArrayList<>();
 		if ( __hbdmi != null ) {
 			List<HydroBase_CUBlaneyCriddle> v = __hbdmi.getBlaneyCriddleCUMethod();
 			int size = 0;
@@ -8382,13 +8345,13 @@ private void ui_CheckDialogInput ()
 			HydroBase_CUBlaneyCriddle cubc = null;
 			for ( int i = 0; i < size; i++ ) {
 				cubc = v.get(i);
-				__blaneyCriddleCuMethod_Vector.add ( cubc.getMethod_desc() );
+				__blaneyCriddleCuMethod_List.add ( cubc.getMethod_desc() );
 			}
 		}
 	}
-	if ( __penmanMonteithCuMethod_Vector == null ) {
+	if ( __penmanMonteithCuMethod_List == null ) {
 		// Get the CU methods from HydroBase...
-		__penmanMonteithCuMethod_Vector = new Vector();
+		__penmanMonteithCuMethod_List = new ArrayList<>();
 		if ( __hbdmi != null ) {
 			List<HydroBase_CUPenmanMonteith> v = __hbdmi.getPenmanMonteithCUMethod();
 			int size = 0;
@@ -8398,7 +8361,7 @@ private void ui_CheckDialogInput ()
 			HydroBase_CUPenmanMonteith cupm = null;
 			for ( int i = 0; i < size; i++ ) {
 				cupm = v.get(i);
-				__penmanMonteithCuMethod_Vector.add ( cupm.getMethod_desc() );
+				__penmanMonteithCuMethod_List.add ( cupm.getMethod_desc() );
 			}
 		}
 	}
@@ -9328,7 +9291,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY))) {
 		TS_ListSelector_JFrame selector = new TS_ListSelector_JFrame (
-			results_CopyTSVectorAndAddTotal (
+			results_CopyTSListAndAddTotal (
 				__statedmiProcessor.getStateModDiversionHistoricalTSMonthlyList(),
 				StateDMI.APP_TYPE_STATEMOD,
 				StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY,
@@ -9342,7 +9305,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_DIVERSION_TS_DAILY))) {
 		TS_ListSelector_JFrame selector = new TS_ListSelector_JFrame (
-			results_CopyTSVectorAndAddTotal (
+			results_CopyTSListAndAddTotal (
 				__statedmiProcessor.getStateModDiversionHistoricalTSDailyList(),
 				StateDMI.APP_TYPE_STATEMOD,
 				StateMod_DataSet.COMP_DIVERSION_TS_DAILY,
@@ -9357,7 +9320,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_DEMAND_TS_MONTHLY))) {
 		// TODO SAM 2005-03-29 This does not include a total time series.  Need to enable.
 		TS_ListSelector_JFrame selector = new TS_ListSelector_JFrame (
-			results_CopyTSVectorAndAddTotal (
+			results_CopyTSListAndAddTotal (
 				__statedmiProcessor.getStateModDiversionDemandTSMonthlyList(),
 				StateDMI.APP_TYPE_STATEMOD,
 				StateMod_DataSet.COMP_DEMAND_TS_MONTHLY,
@@ -9371,7 +9334,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_DEMAND_TS_DAILY))) {
 		TS_ListSelector_JFrame selector = new TS_ListSelector_JFrame (
-			results_CopyTSVectorAndAddTotal (
+			results_CopyTSListAndAddTotal (
 				__statedmiProcessor.getStateModDiversionDemandTSDailyList(),
 				StateDMI.APP_TYPE_STATEMOD,
 				StateMod_DataSet.COMP_DEMAND_TS_DAILY,
@@ -9502,7 +9465,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY))) {
 		TS_ListSelector_JFrame selector = new TS_ListSelector_JFrame (
-			results_CopyTSVectorAndAddTotal (
+			results_CopyTSListAndAddTotal (
 				__statedmiProcessor.getStateModWellHistoricalPumpingTSMonthlyList(),
 				StateDMI.APP_TYPE_STATEMOD,
 				StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY,
@@ -9516,7 +9479,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY))) {
 		TS_ListSelector_JFrame selector = new TS_ListSelector_JFrame (
-			results_CopyTSVectorAndAddTotal (
+			results_CopyTSListAndAddTotal (
 				__statedmiProcessor.getStateModWellDemandTSMonthlyList(),
 				StateDMI.APP_TYPE_STATEMOD,
 				StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY,
@@ -10046,7 +10009,7 @@ private void ui_InitGUI ()
     results_problems_JPanel.setLayout(gbl);
     CommandLog_TableModel tableModel = null;
     try {
-    	tableModel = new CommandLog_TableModel(new Vector());
+    	tableModel = new CommandLog_TableModel(new ArrayList<CommandLogRecord>());
     }
     catch ( Exception e ) {
     	// Should not happen but log
@@ -10808,6 +10771,21 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 		__Commands_StateCU_CULocations_CheckCULocations_String);
 
 	if ( show_all_commands || (__statecuDatasetType >= StateCU_DataSet.TYPE_STRUCTURES) ) {
+		// Parcels submenu
+
+		JMenu Commands_StateCU_Parcels_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
+			Commands_StateCU_CULocationsData_JMenu, __Commands_StateCU_Parcels_String,
+			__Commands_StateCU_Parcels_String, false );
+		Commands_StateCU_Parcels_JMenu.add(
+	        __Commands_StateCU_Parcels_ReadCULocationParcelsFromHydroBase_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateCU_Parcels_ReadCULocationParcelsFromHydroBase_String,this));
+		Commands_StateCU_CULocations_JMenu.addSeparator();
+		Commands_StateCU_Parcels_JMenu.add(
+	        __Commands_StateCU_Parcels_WriteCULocationParcelsToFile_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateCU_Parcels_WriteCULocationParcelsToFile_String,this));
+	}
+
+	if ( show_all_commands || (__statecuDatasetType >= StateCU_DataSet.TYPE_STRUCTURES) ) {
 		// Crop Patterns Submenu
 
 		JMenu Commands_StateCU_CropPatternTS_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
@@ -10900,6 +10878,9 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 		Commands_StateCU_CropPatternTS_JMenu.add(
 			__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_String,this));
+		Commands_StateCU_CropPatternTS_JMenu.add(
+			__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_String,this));
 		ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateCU_CropPatternTS_JMenu,
 			__Commands_StateCU_CropPatternTS_CheckCropPatternTS_String);
 	}
@@ -13880,13 +13861,13 @@ private void uiAction_EditCommand ()
 	}
 	if ( selected_size > 0 ) {
 		Command command = (Command)__commands_JListModel.get(selected[0]);
-		List v = null;
+		List<Command> v = null;
 		if ( command instanceof Comment_Command ) {
 			// Allow multiple lines to be edited in a comment...
 			// This is handled in the called method, which brings up a multi-line editor for comments.
             // Only edit the contiguous # block. The first one is a # but stop adding when lines no longer
 			// start with #
-			v = new Vector ( selected_size );
+			v = new ArrayList ( selected_size );
 			for ( int i = 0; i < selected_size; i++ ) {
 				command = (Command)__commands_JListModel.get(selected[i]);
 				if ( !(command instanceof Comment_Command) ) {
@@ -13898,7 +13879,7 @@ private void uiAction_EditCommand ()
 		}
 		else {
             // Commands are one line...
-			v = new Vector ( 1 );
+			v = new ArrayList<>(1);
 			v.add ( command );
 		}
 		commandList_EditCommand ( "", v, __UPDATE_COMMAND ); // No action event from menus
@@ -14790,18 +14771,18 @@ Reset the menus for the data set type.  Assume that the data set has been
 discarded and that menus can be reset based only on the data set type.
 */
 private void uiAction_ResetMenusForDataSetType ()
-{	// First remove the listeners from the JFrame using the Vector of
-	// menus that were added previously.  Using a Vector is easier than
+{	// First remove the listeners from the JFrame using the list of
+	// menus that were added previously.  Using a list is easier than
 	// duplicating logic and tracking individual components.
 
 	Message.printStatus ( 1, "StateDMI_JFrame.resetMenusForDataSetType",
 		"Resetting menus for data set type." );
 	// TODO
 /*
-	int size = __dataset_menu_Vector.size();
+	int size = __dataset_menu_List.size();
 	for ( int i = 0; i < size; i++ ) {
 		// Remove the ActionListeners from this JFrame for each menu...
-		removeListener( (JMenuItem)__dataset_menu_Vector.elementAt(i));
+		removeListener( (JMenuItem)__dataset_menu_List.elementAt(i));
 	}
 */
 	// Remove the submenus but not the top-level menus themselves...
@@ -15634,7 +15615,7 @@ private void uiAction_ShowTableProperties ()
         reportProp.set ( "PrintFont", __FIXED_WIDTH_FONT );
         reportProp.set ( "PrintSize", "7" );
         reportProp.set ( "Title", "Table Properties" );
-        List<String> v = new Vector<String>();
+        List<String> v = new ArrayList<>();
         // Get the table of interest
         if ( __resultsTables_JList.getModel().getSize() > 0 ) {
             // If something is selected, show properties for the selected.  Otherwise, show properties for all.
@@ -15744,8 +15725,8 @@ List the total rights for each well structure, using the well rights that are in
 */
 void uiAction_Tool_ListWellStationRightTotals ()
 {	String routine = "StateDMI_JFrame.toolListWellStationRightTotals";
-	List<StateMod_WellRight> SMWellRight_Vector = __statedmiProcessor.getStateModWellRightList();
-	int size_wer = SMWellRight_Vector.size();
+	List<StateMod_WellRight> SMWellRight_List = __statedmiProcessor.getStateModWellRightList();
+	int size_wer = SMWellRight_List.size();
 	if ( size_wer == 0 ) {
 		Message.printWarning ( 1, routine,
 			"Well rights must first be processed (e.g., read well rights with a command." );
@@ -15758,22 +15739,22 @@ void uiAction_Tool_ListWellStationRightTotals ()
 	String id;
 	StateMod_WellRight wer;
 	StateMod_Well wes = null;
-	List<StateMod_Well> wes_Vector = new Vector ();
+	List<StateMod_Well> wes_List = new ArrayList<>();
 	int size_wes;
 	double decree;
 	boolean found;
 	for ( int iwer = 0; iwer < size_wer; iwer++ ) {
-		wer = SMWellRight_Vector.get(iwer);
+		wer = SMWellRight_List.get(iwer);
 		decree = wer.getDcrdivw();
 		if ( decree < 0.0 ) {
 			continue;
 		}
 		id = wer.getCgoto();
 		// Find the matching well station...
-		size_wes = wes_Vector.size();
+		size_wes = wes_List.size();
 		found = false;
 		for ( int iwes = 0; iwes < size_wes; iwes++ ) {
-			wes = wes_Vector.get(iwes);
+			wes = wes_List.get(iwes);
 			if ( id.equalsIgnoreCase(wes.getID()) ) {
 				found = true;
 				break;
@@ -15783,7 +15764,7 @@ void uiAction_Tool_ListWellStationRightTotals ()
 			// Add a new well station...
 			wes = new StateMod_Well ( false );
 			wes.setID ( id );
-			wes_Vector.add ( wes );
+			wes_List.add ( wes );
 		}
 		if ( wes.getDivcapw() < 0.0 ) {
 			wes.setDivcapw(decree);
@@ -15792,11 +15773,11 @@ void uiAction_Tool_ListWellStationRightTotals ()
 			wes.setDivcapw(decree+wes.getDivcapw());
 		}
 	}
-	size_wes = wes_Vector.size();
-	List<String> v = new Vector<String>();
+	size_wes = wes_List.size();
+	List<String> v = new ArrayList<>();
 	v.add ( "\"ID\",\"Total Decree\"" );
 	for ( int i = 0; i < size_wes; i++ ) {
-		wes = wes_Vector.get(i);
+		wes = wes_List.get(i);
 		v.add ( wes.getID() + "," + StringUtil.formatString(wes.getDivcapw(),"%.2f") );
 	}
 	PropList reportProp = new PropList ("HydroBase Properties");
