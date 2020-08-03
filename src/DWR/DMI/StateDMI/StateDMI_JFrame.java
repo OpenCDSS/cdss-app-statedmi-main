@@ -995,6 +995,12 @@ private JMenuItem
 private JMenu
  	__Commands_Datastore_JMenu = null;
 
+// Commands... Output File Processing...
+private JMenu
+	__Commands_Output_JMenu = null;
+private JMenuItem
+	__Commands_Output_SplitStateModReport_JMenuItem;
+
 // Commands... Spatial Processing...
 private JMenu
 	__Commands_Spatial_JMenu = null;
@@ -1982,6 +1988,11 @@ private String
 	
 	// Datastore Commands...
 	__Commands_Datastore_String = "Datastore Processing",
+
+	// Output File Processing Commands...
+
+	__Commands_Output_String = "Output File Processing",
+	__Commands_Output_SplitStateModReport_String = "SplitStateModReport()... <split StateMod report file>",
 	
 	// Spatial Commands...
 
@@ -3880,6 +3891,12 @@ public void actionPerformed ( ActionEvent event )
 	}
     else if (command.equals( __Commands_General_TestProcessing_StartRegressionTestResultsReport_String) ) {
         commandList_EditCommand ( __Commands_General_TestProcessing_StartRegressionTestResultsReport_String, null, __INSERT_COMMAND );
+    }
+
+	// Output File Processing Commands...
+	
+    else if (command.equals(__Commands_Output_SplitStateModReport_String ) ) {
+    	commandList_EditCommand(__Commands_Output_SplitStateModReport_String, null, __INSERT_COMMAND );
     }
 	
 	// Spatial Commands...
@@ -10298,6 +10315,14 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 	Commands_Datastore_JMenu.add(__Commands_TableRead_ReadTableFromDataStore_JMenuItem = 
 			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromDataStore_String, this));
 	
+	parent_JMenu.addSeparator();
+
+	// Commands - Output File Processing
+	JMenu Commands_Output_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( 
+			style, parent_JMenu, __Commands_Output_String, false);
+	Commands_Output_JMenu.add(__Commands_Output_SplitStateModReport_JMenuItem = 
+			new SimpleJMenuItem(__Commands_Output_SplitStateModReport_String, this));
+
 	parent_JMenu.addSeparator();
 	
 	// Commands - Spatial Processing

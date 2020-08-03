@@ -1104,6 +1104,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"SortWellStations") ) {
 		return new SortWellStations_Command ();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "SplitStateModReport") ) {
+        return new SplitStateModReport_Command ();
+    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "SplitTableColumn") ) {
         return new SplitTableColumn_Command ();
     }
