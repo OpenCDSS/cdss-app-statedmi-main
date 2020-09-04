@@ -694,14 +694,13 @@ private HydroBase_ParcelUseTS readHydroBaseParcel (
 		int parcel_id,
 		int parcel_year,
 		int Div_int,
-		int warningLevel, int warningCount, String commandTag, CommandStatus status,
-		boolean cacheHydroBase )
+		int warningLevel, int warningCount, String commandTag, CommandStatus status )
 {	String routine = "readWellRightsFromHydroBase_Command.readHydroBaseParcel";
 	List <HydroBase_ParcelUseTS> hbparcel_Vector = null;
 	String message;
 	try {
 		// Call the version that caches results
-		hbparcel_Vector = hdmi.readParcelUseTSList ( parcel_year, Div_int, parcel_id, cacheHydroBase );
+		hbparcel_Vector = hdmi.readParcelUseTSList ( parcel_year, Div_int, parcel_id );
 	}
 	catch ( Exception e ) {
 		message = "Unexpected error getting parcel data from HydroBase for " + id +
@@ -923,7 +922,7 @@ private List<HydroBase_NetAmts> readHydroBaseWellRightsForDiversionWDIDList (
 				defaultAdminNumber,
 				defaultApproDate,
 				permitIdPreFormat,
-				warningLevel, warningCount, commandTag, status, cacheHydroBase );
+				warningLevel, warningCount, commandTag, status );
 		int nwellr2 = 0;
 		if ( hbwellr2List != null ) {
 			nwellr2 = hbwellr2List.size();
@@ -1124,7 +1123,6 @@ Read HydroBase well rights as HydroBase_NetAmts (sec=parcel, =class), for a parc
 @param parcelYear Year for which to read data.
 @param div Water division for parcel data.
 @param hbwellrList The list of HydroBase_NetAmt containing wells associated with the parcel.
-@param cacheHydroBase if true, then on first read all the data for a division will be read
 @param permitIdPreFormat the String.format() specifier to apply to permit receipt after reading,
 for example "%s:P" to mimic legacy behavior.
 */
@@ -1146,7 +1144,7 @@ private void readHydroBaseWellRightsForParcel (
 		Date defaultApproDate,
 		String permitIdPreFormat,
 		List<HydroBase_NetAmts> hbwellrList,
-		int warningLevel, int warningCount, String commandTag, CommandStatus status, boolean cacheHydroBase )
+		int warningLevel, int warningCount, String commandTag, CommandStatus status )
 {	String routine = getClass().getSimpleName() + ".readHydroBaseWellRightsForParcel";
 	// First read the Wells - WellToParcel join to get the "holes in the ground"
 	String message;
@@ -1154,7 +1152,7 @@ private void readHydroBaseWellRightsForParcel (
 	List<HydroBase_Wells> hbwellParcelList = null;
 	try {
 		// Get the well/welltoparcels associated with the parcel...
-		hbwellParcelList = hdmi.readWellsWellToParcelList( parcelId, parcelYear, div, cacheHydroBase );
+		hbwellParcelList = hdmi.readWellsWellToParcelList( parcelId, parcelYear, div );
 	}
 	catch ( Exception e ) {
 		if ( partId == null ) {
@@ -1285,7 +1283,6 @@ of 1.0 when processing groundwater only.
 for example "%s:P" to mimic legacy behavior.
 @param hbwellr_Vector A list of HydroBase_NetAmt to be appended to as rights
 are read for the parcel list.
-@param cacheHydroBase if true, then on first read all the data for a division will be read
 */
 private List<HydroBase_NetAmts> readHydroBaseWellRightsForParcelList (
 		HydroBaseDMI hdmi,
@@ -1303,8 +1300,7 @@ private List<HydroBase_NetAmts> readHydroBaseWellRightsForParcelList (
 		double defaultAdminNumber,
 		Date defaultApproDate,
 		String permitIdPreFormat,
-		int warningLevel, int warningCount, String commandTag, CommandStatus status,
-		boolean cacheHydroBase )
+		int warningLevel, int warningCount, String commandTag, CommandStatus status )
 {	String routine = "readWellRightsFromHydroBase_Command.readHydroBaseWellRightsForParcelList";
 	String message;
 	// Loop through each parcel and append the HydroBase rights associated with each parcel
@@ -1326,7 +1322,7 @@ private List<HydroBase_NetAmts> readHydroBaseWellRightsForParcelList (
 		parcelId = Integer.parseInt(parcelIds.get(iparcel) );
 		// Get the HydroBase parcel data...
 		hbwellParcel = readHydroBaseParcel ( hdmi, well, locId, parcelId,
-			parcelYear, div, warningLevel, warningCount, commandTag, status, cacheHydroBase );
+			parcelYear, div, warningLevel, warningCount, commandTag, status );
 		if ( hbwellParcel == null ) {
 			// Should not happen but seems to be.
 			message = yearString + "Unable to find parcel data in HydroBase for location \"" +
@@ -1359,7 +1355,7 @@ private List<HydroBase_NetAmts> readHydroBaseWellRightsForParcelList (
 				defaultApproDate,
 				permitIdPreFormat,
 				hbwellrList,
-				warningLevel, warningCount, commandTag, status, cacheHydroBase );
+				warningLevel, warningCount, commandTag, status );
 	}
 	return hbwellrList;
 }
@@ -2504,7 +2500,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							defaultAdminNumber,
 							defaultApproDate,
 							PermitIDPreFormat,
-							warningLevel, warningCount, commandTag, status, cacheHydroBase );
+							warningLevel, warningCount, commandTag, status );
 					}
 					catch ( Exception e ) {
 						message = yearString + "Unexpected error querying HydroBase (" + e + ").";

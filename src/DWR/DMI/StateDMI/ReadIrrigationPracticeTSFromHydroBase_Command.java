@@ -226,7 +226,7 @@ private boolean doesHydroBaseParcelHaveGroundWaterSupply (
 	List<HydroBase_Wells> hbwellParcelList = null;
 	try {
 		// Get the well/welltoparcels associated with the parcel...
-		hbwellParcelList = hdmi.readWellsWellToParcelList(parcel_id, parcel_year, Div_int, cacheHydroBase );
+		hbwellParcelList = hdmi.readWellsWellToParcelList(parcel_id, parcel_year, Div_int );
 	}
 	catch ( Exception e ) {
 		// Should not happen
@@ -372,8 +372,7 @@ private int readHydroBaseIrrigationPracticeTSForParcel (
 			hbparcelList = hdmi.readParcelUseTSList (
 					parcel_year,
 					Div_int,
-					parcel_id,
-					cacheHydroBase );
+					parcel_id );
 		}
 	}
 	catch ( Exception e ) {

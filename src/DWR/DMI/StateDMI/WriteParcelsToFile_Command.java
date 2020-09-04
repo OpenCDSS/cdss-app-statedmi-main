@@ -435,7 +435,11 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 		out.println(cmnt + "  Model ID - StateCU location and node type");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
 		out.println(cmnt + "  LocId        :  CU Location ID surface water data");
-		out.println(cmnt + "  LocType      :  Location type (DIV, D&W, or WEL)");
+		out.println(cmnt + "  LocType      :  Location type for StateMod");
+		out.println(cmnt + "                  DIV - diversion");
+		out.println(cmnt + "                  D&W - diversion & well");
+		out.println(cmnt + "                  WEL - well");
+		out.println(cmnt + "                  ??? - unknown because StateCU locations don't use node type");
 		out.println(cmnt);
 		out.println(cmnt + "  Parcel Data - GIS loaded into HydroBase");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
@@ -449,8 +453,8 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 		out.println(cmnt + "  Whether or not the row of data is included - need to expand this to indicate how included or not");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
 		out.println(cmnt + "  DataSrc      :  Data source (typically from HydroBase but may enable user-supplied data).");
-		out.println(cmnt + "                  HB-PUTS = HydroBase ParcelUseTS/Structure" );
-		out.println(cmnt + "                  HB-WTP = HydroBase Well to Parcel" );
+		out.println(cmnt + "                  HB-PUTS = HydroBase ParcelUseTS/Structure from vw_CDSS_ParcelUseTSStructureToParcel" );
+		out.println(cmnt + "                  HB-WTP = HydroBase Well/Parcel from vw_CDSS_WellsWellToParcel" );
 		out.println(cmnt + "  CDS?         :  Indicates whether the parcel is included in CDS file acreage.");
 		out.println(cmnt + "                  CDS:YES = include in CDS area for the location");
 		out.println(cmnt + "                  CDS:NO = do not include - for GW supply in D&W, will be included in the Div node acreage");

@@ -207,6 +207,7 @@ private void initialize ( JFrame parent, ReadCULocationParcelsFromHydroBase_Comm
     JGUIUtil.addComponent(main_JPanel, new JLabel ("CU location ID:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__ID_JTextField = new JTextField("*",10);
+	__ID_JTextField.setToolTipText("Pattern to match CU loction identifiers, * for wildcard.");
 	__ID_JTextField.addKeyListener (this);
     JGUIUtil.addComponent(main_JPanel, __ID_JTextField,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -238,7 +239,7 @@ private void initialize ( JFrame parent, ReadCULocationParcelsFromHydroBase_Comm
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__Div_JTextField = new JTextField(10);
 	__Div_JTextField.setToolTipText("Divisions for irrigated acreage, separated by commas, "
-		+ "used to determine years for data (default is to determine from location WDIDs).");
+		+ "used to determine years for data (default is determine divisions from location IDs).");
 	__Div_JTextField.addKeyListener (this);
    	JGUIUtil.addComponent(main_JPanel, __Div_JTextField,
    		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);

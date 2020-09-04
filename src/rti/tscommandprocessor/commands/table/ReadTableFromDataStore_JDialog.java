@@ -523,6 +523,7 @@ private void initialize ( JFrame parent, ReadTableFromDataStore_Command command 
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Datastore:"),
         0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     __DataStore_JComboBox = new SimpleJComboBox ( false );
+    __DataStore_JComboBox.setToolTipText("Select the database datastore to query");
     StateDMI_Processor tsProcessor = (StateDMI_Processor)processor;
     List<DataStore> dataStoreList = tsProcessor.getDataStoresByType( DatabaseDataStore.class );
     List<String> datastoreChoices = new ArrayList<String>();
@@ -568,6 +569,7 @@ private void initialize ( JFrame parent, ReadTableFromDataStore_Command command 
     JGUIUtil.addComponent(table_JPanel, new JLabel ( "Datastore catalog (database):"),
         0, ++yTable, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     __DataStoreCatalog_JComboBox = new SimpleJComboBox ( false );
+    __DataStoreCatalog_JComboBox.setToolTipText("Database catalog - may be needed if table/view name is not enough.");
     __DataStoreCatalog_JComboBox.addItemListener ( this );
     JGUIUtil.addComponent(table_JPanel, __DataStoreCatalog_JComboBox,
         1, yTable, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -578,6 +580,7 @@ private void initialize ( JFrame parent, ReadTableFromDataStore_Command command 
     JGUIUtil.addComponent(table_JPanel, new JLabel ( "Datastore schema:"),
         0, ++yTable, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     __DataStoreSchema_JComboBox = new SimpleJComboBox ( false );
+    __DataStoreSchema_JComboBox.setToolTipText("Database schema - may be needed if table/view name is not enough.");
     __DataStoreSchema_JComboBox.addItemListener ( this );
     JGUIUtil.addComponent(table_JPanel, __DataStoreSchema_JComboBox,
         1, yTable, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -588,6 +591,7 @@ private void initialize ( JFrame parent, ReadTableFromDataStore_Command command 
     JGUIUtil.addComponent(table_JPanel, new JLabel ( "Datastore table:"),
         0, ++yTable, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     __DataStoreTable_JComboBox = new SimpleJComboBox ( false );
+    __DataStoreTable_JComboBox.setToolTipText("Table or view to query.");
     __DataStoreTable_JComboBox.addItemListener ( this );
     JGUIUtil.addComponent(table_JPanel, __DataStoreTable_JComboBox,
         1, yTable, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -597,6 +601,7 @@ private void initialize ( JFrame parent, ReadTableFromDataStore_Command command 
     JGUIUtil.addComponent(table_JPanel, new JLabel ("Datastore columns:"),
         0, ++yTable, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     __DataStoreColumns_JTextField = new JTextField (10);
+    __DataStoreColumns_JTextField.setToolTipText("Table/view columns to query, separated by spaces.");
     __DataStoreColumns_JTextField.addKeyListener (this);
     JGUIUtil.addComponent(table_JPanel, __DataStoreColumns_JTextField,
         1, yTable, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
@@ -606,6 +611,7 @@ private void initialize ( JFrame parent, ReadTableFromDataStore_Command command 
     JGUIUtil.addComponent(table_JPanel, new JLabel ("Order by:"),
         0, ++yTable, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     __OrderBy_JTextField = new JTextField (10);
+    __OrderBy_JTextField.setToolTipText("Columns to sort by, separated by spaces.");
     __OrderBy_JTextField.addKeyListener (this);
     JGUIUtil.addComponent(table_JPanel, __OrderBy_JTextField,
         1, yTable, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
@@ -615,6 +621,7 @@ private void initialize ( JFrame parent, ReadTableFromDataStore_Command command 
     JGUIUtil.addComponent(table_JPanel, new JLabel ("Top N rows:"),
         0, ++yTable, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     __Top_JTextField = new JTextField (10);
+    __Top_JTextField.setToolTipText("Number of rows to limit results.");
     __Top_JTextField.addKeyListener (this);
     JGUIUtil.addComponent(table_JPanel, __Top_JTextField,
         1, yTable, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
