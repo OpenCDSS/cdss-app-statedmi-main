@@ -394,13 +394,13 @@ private void initialize ( JFrame parent, SplitStateModReport_Command command )
 	__command_JTextArea.addKeyListener ( this );
 	__command_JTextArea.setEditable ( false );
 	JGUIUtil.addComponent(main_JPanel, new JScrollPane(__command_JTextArea),
-		1, y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+		1, y, 7, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	// South Panel: North
 	JPanel button_JPanel = new JPanel();
 	button_JPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         JGUIUtil.addComponent(main_JPanel, button_JPanel, 
-		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
+		0, ++y, 8, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
 	button_JPanel.add ( __ok_JButton = new SimpleJButton("OK", this) );
 	__ok_JButton.setToolTipText("Save changes to command");

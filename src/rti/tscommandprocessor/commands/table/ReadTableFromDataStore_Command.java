@@ -155,12 +155,22 @@ throws InvalidCommandParameterException
                     message, "Update the SQL string to start with SELECT." ) );
         }
     }
-    if ( (Top != null) && (Top.length() != 0) && !StringUtil.isInteger(Top)) {
-        message = "The Top value (" + Top +") is not an integer.";
-        warning += "\n" + message;
-        status.addToLog ( CommandPhaseType.INITIALIZATION,
-            new CommandLogRecord(CommandStatusType.FAILURE,
-                message, "Specify the Top parameter as an integer." ) );
+    if ( (Top != null) && (Top.length() != 0) ) {
+    	if ( !StringUtil.isInteger(Top) ) {
+    		message = "The Top value (" + Top +") is not an integer.";
+    		warning += "\n" + message;
+        	status.addToLog ( CommandPhaseType.INITIALIZATION,
+        		new CommandLogRecord(CommandStatusType.FAILURE,
+        			message, "Specify the Top parameter as an integer." ) );
+    	}
+        // Top should only be used when a table is specified
+        if ( (DataStoreTable == null) || DataStoreTable.isEmpty() ) {
+        	message = "The Top value (" + Top +") can only be specified when a table is specified.";
+        	warning += "\n" + message;
+        	status.addToLog ( CommandPhaseType.INITIALIZATION,
+            	new CommandLogRecord(CommandStatusType.FAILURE,
+                	message, "Specify in the SQL string or SQL file, for example: SELECT TOP " + Top + "..." ) );
+        }
     }
     String SqlFile_full = null;
     if ( (SqlFile != null) && !SqlFile.isEmpty() && (SqlFile.indexOf("${") < 0) ) {
@@ -351,7 +361,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     String DataStoreColumns = parameters.getValue ( "DataStoreColumns" );
     String OrderBy = parameters.getValue ( "OrderBy" );
     String Top = parameters.getValue ( "Top" );
-    Integer top = 0;
+    Integer top = 0; // Default is no top is used
     if ( (Top != null) && !Top.equals("") ) {
         top = Integer.parseInt(Top);
     }
@@ -492,7 +502,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
                     }
                 }
             }
-            if ( (Top != null) && !Top.equals("") ) {
+            if ( top > 0 ) {
                 q.setTop ( top );
             }
         }

@@ -867,7 +867,7 @@ private void submitParcelWellQuery()
 		try {
 			int idInt = Integer.parseInt(id);
 			// For each ID in the parcel list, get the well/parcel data
-			wellParcel1List = __dmi.readWellsWellToParcelList( idInt, parcelYear, div, true );
+			wellParcel1List = __dmi.readWellsWellToParcelList( idInt, parcelYear, div);
 			// Add the list to the big list - could do in one step but need to set the structure WD, ID,
 			// and name since not set during the query
 			int size = 0;
