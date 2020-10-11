@@ -36,6 +36,7 @@ import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
 import DWR.StateCU.StateCU_CropPatternTS;
 import DWR.StateCU.StateCU_Location;
+import DWR.StateCU.StateCU_LocationType;
 import DWR.StateCU.StateCU_Location_CollectionPartIdType;
 import DWR.StateCU.StateCU_Location_CollectionPartType;
 import DWR.StateCU.StateCU_Parcel;
@@ -198,7 +199,7 @@ Method to execute the readDiversionHistoricalTSMonthlyFromHydroBase() command.
 */
 public void runCommand ( int command_number )
 throws InvalidCommandParameterException, CommandWarningException, CommandException
-{	String message, routine = getCommandName() + "_Command.runCommand";
+{	String message, routine = getClass().getSimpleName() + ".runCommand";
 	// Use to allow called methods to increment warning count.
 	int warningLevel = 2;
 	int log_level = 3;
@@ -260,6 +261,26 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		message = "Error requesting CU location data from processor.";
 		Message.printWarning(warningLevel,
 			MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+	}
+	
+	/*
+	Get the list of parcel data for newer StateDMI.
+	*/
+	List<HydroBase_ParcelUseTS_FromSet> hydroBaseParcelUseTSFromSetList = null;
+	try {
+		@SuppressWarnings("unchecked")
+		List<HydroBase_ParcelUseTS_FromSet> dataList =
+			(List<HydroBase_ParcelUseTS_FromSet>)processor.getPropContents ( "HydroBase_ParcelUseTS_FromSet_List");
+		hydroBaseParcelUseTSFromSetList = dataList;
+	}
+	catch ( Exception e ) {
+		message = "Error requesting supplemental parcel use data from processor.";
+		Message.printWarning(warningLevel,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
 		status.addToLog ( CommandPhaseType.RUN,
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Report problem to software support." ) );
@@ -503,6 +524,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		boolean isCollection = false;
 		StopWatch stopWatchForLoc = new StopWatch();
 		int totalMs = 0; // total time to process
+		boolean culocHasSurfaceWaterSupply = false;
+		boolean culocHasGroundWaterSupply = false;
 		for ( int i = 0; i < culocListSize; i++ ) {
 			stopWatchForLoc.clearAndStart();
 			culoc = culocList.get(i);
@@ -517,6 +540,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				collectionPartType = culoc.getCollectionPartType();
 			}
 			++matchCount;
+
+			culocHasSurfaceWaterSupply = false;
+			culocHasGroundWaterSupply = false;
 
 			crop_patterns = null; // Initialized because checked below.
 			crop_set_count = 0;	// The number of times that a crop value is
@@ -617,8 +643,19 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										Message.printStatus ( 2, routine, "  Adding parcel ID " + parcel.getID() +
 											" to CU Location " + culoc_id + " took " + sw.getMilliseconds() + " ms");
 									}
+
+									// Set CU Location information to help set location type .
+
+									if ( parcel.hasGroundWaterSupply() ) {
+										culocHasGroundWaterSupply = true;
+									}
+									if ( parcel.hasSurfaceWaterSupply() ) {
+										culocHasSurfaceWaterSupply = true;
+									}
+	
 								} // end parcels
 							} // end year in period of interest
+				
 						} // end parcel years with data
 					} // end isWDID
 				} // end !isCollection
@@ -757,8 +794,19 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
 									// Add to the CULocation parcels
 									culoc.addParcel ( parcel );
+
+									// Set CU Location information to help set location type .
+
+									if ( parcel.hasGroundWaterSupply() ) {
+										culocHasGroundWaterSupply = true;
+									}
+									if ( parcel.hasSurfaceWaterSupply() ) {
+										culocHasSurfaceWaterSupply = true;
+									}
+
 								} // end parcels for collection part
 							} // end in requested period
+
 						} // end years with parcel data
 					} // end collection parts
 
@@ -930,6 +978,18 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									units );
 									*/
 							++crop_set_count;
+
+							// Set CU Location information to help set location type .
+
+							/* TODO smalers 2020-10-11 enable if parcels are supported
+							if ( parcel.hasGroundWaterSupply() ) {
+								culocHasGroundWaterSupply = true;
+							}
+							if ( parcel.hasSurfaceWaterSupply() ) {
+								culocHasSurfaceWaterSupply = true;
+							}
+							*/
+
 						} // end parcels in collection
 					} // end years in collection
 				} // end Well collection specified with parcels
@@ -999,9 +1059,23 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									// Read well to parcel data for permit receipt
 									wellParcelId = -1; // Not used since querying well WDID
 									wellDiv = -1; // Not used since querying well WDID
-									wellWD = -1;
+									wellWD = culoc.getCollectionPartIDWD(partId); // Determined up front when collection information was specified
 									wellID = -1;
-									hbWellsList = hbdmi.readWellsWellToParcelList(wellParcelId, year, wellDiv, partId, wellWD, wellID);
+									try {
+										hbWellsList = hbdmi.readWellsWellToParcelList(wellParcelId, year, wellDiv, partId, wellWD, wellID);
+									}
+									catch ( Exception e ) {
+										// Possible to have an error with bad receipt and no WD
+										message = "Error getting well/parcel data for year " + year + ", receipt=" + partId + " (" + e + ").";
+										Message.printWarning ( warningLevel, 
+				        					MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, "    " + message );
+			        					status.addToLog ( commandPhase,
+			            					new CommandLogRecord(CommandStatusType.WARNING, message,
+			            						"Check the log file - report to software support if necessary." ) );
+										Message.printWarning ( warningLevel, routine, e );
+										// Create an empty list to handle below
+										hbWellsList = new ArrayList<>();
+									}
 								    if ( hbWellsList.size() > 0 ) {
 								    	Message.printStatus ( 2, routine, "    Found " + hbWellsList.size() +
 								    		" matching well/parcel records (GW supply) for year " +
@@ -1052,6 +1126,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										parcel.addSupply(supplyFromGW);
 										// Add to the CULocation parcels
 										culoc.addParcel ( parcel );
+
+										// Set CU Location information to help set location type .
+
+										if ( parcel.hasGroundWaterSupply() ) {
+											culocHasGroundWaterSupply = true;
+										}
+										if ( parcel.hasSurfaceWaterSupply() ) {
+											culocHasSurfaceWaterSupply = true;
+										}
+
 									} // end parcels
 								} // end list of well/parcel
 							} // end part id list
@@ -1071,7 +1155,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			            new CommandLogRecord(CommandStatusType.FAILURE, message,
 			            	"Check the log file - report to software support if necessary." ) );
 				}
-	
 			}
 			catch ( Exception e ) {
 				Message.printWarning ( 3, routine, e );
@@ -1086,6 +1169,23 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			Message.printStatus ( 2, routine, "  Processed CU Location \"" + culoc_id +
 				"\" parcel data in " + stopWatchForLoc.getMilliseconds() + " ms." );
 			totalMs += stopWatchForLoc.getMilliseconds();
+			
+			// Based on the supply for the CU Location, estimate the node type DIV, D&W, WEL so that the parcel display report
+			// can display.  This is useful to understand the data.
+			
+			if ( !culocHasSurfaceWaterSupply && !culocHasGroundWaterSupply ) {
+				culoc.setLocationType(StateCU_LocationType.UNKNOWN);
+			}
+			else if ( culocHasSurfaceWaterSupply && culocHasGroundWaterSupply ) {
+				culoc.setLocationType(StateCU_LocationType.DIVERSION_AND_WELL);
+			}
+			else if ( culocHasSurfaceWaterSupply && !culocHasGroundWaterSupply ) {
+				culoc.setLocationType(StateCU_LocationType.DIVERSION);
+			}
+			else if ( !culocHasSurfaceWaterSupply && culocHasGroundWaterSupply ) {
+				culoc.setLocationType(StateCU_LocationType.WELL);
+			}
+			
 		} // end loop through CU Locations
 
 		Message.printStatus ( 2, routine, "Processed " + culocListSize + " CU Locations in " +

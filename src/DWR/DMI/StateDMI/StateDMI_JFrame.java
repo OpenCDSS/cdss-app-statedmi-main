@@ -7838,7 +7838,7 @@ private void results_ShowStateCUDelayTableData ()
 }
 
 /**
-Display the StateCU crop characteristics data.
+Display the StateCU location data.
 */
 private void results_ShowStateCULocationData() {
 	new StateCU_Location_JFrame ( true, __statecuDataset, null, false );
@@ -10183,8 +10183,7 @@ private void ui_InitGUI ()
 		7, 0, 2, 1, 0.0, 0.0, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	
 	__status_JTextField = new JTextField ( 5 );
-	__status_JTextField.setToolTipText (
-		"WAIT = StateDMI is processing commands, READY = ready for user input." );
+	__status_JTextField.setToolTipText ( "Wait = StateDMI is processing commands, Ready = ready for user input." );
 	__status_JTextField.setEditable(false);
 	JGUIUtil.addComponent(bottom_JPanel, __status_JTextField,
 		9, 0, 1, 1, 0.0, 0.0, GridBagConstraints.NONE, GridBagConstraints.WEST);
