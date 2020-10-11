@@ -289,11 +289,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         
 		if ( this instanceof WriteCropPatternTSParcelsToFile_Command ) {
 			writeCropPatternTSParcelsToTextFile(OutputFile_full, Delimiter, update,
-				processor.getStateCUCropPatternTSList(), OutputComments_List );
+				processor.getStateCUCropPatternTSList(), processor.getStateCULocationList(), OutputComments_List );
 		}
 		else if ( this instanceof WriteCULocationParcelsToFile_Command ) {
 			writeCULocationParcelsToTextFile(OutputFile_full, Delimiter, update,
-				processor.getStateCULocationList(), OutputComments_List );
+				processor.getStateCULocationList(), processor.getStateCULocationList(), OutputComments_List );
 		}
 			
     	// Set the filename(s) for the FileGenerator interface
@@ -365,7 +365,7 @@ public String toString ( PropList parameters )
  * Write the parcel data as a text file, using StateCU_Location as input.
  */
 private void writeCULocationParcelsToTextFile ( String outputFileFull, String delimiter, boolean update,
-	List<StateCU_Location> culocationList, List<String> outputCommentsList ) {
+	List<StateCU_Location> culocationList, List<StateCU_Location> culocList, List<String> outputCommentsList ) {
 	// Get the parcels for all the crop pattern TS
 	List<StateCU_Parcel> parcelList = new ArrayList<>();
 	for ( StateCU_Location cpts : culocationList ) {
@@ -373,14 +373,14 @@ private void writeCULocationParcelsToTextFile ( String outputFileFull, String de
 	}
 	
 	// Call the general write method
-	writeParcelsToTextFile ( outputFileFull, delimiter, update, parcelList, outputCommentsList );
+	writeParcelsToTextFile ( outputFileFull, delimiter, update, parcelList, culocList, outputCommentsList );
 }
 
 /**
  * Write the parcel data as a text file, using StateCU_CropPatternTS as input.
  */
 private void writeCropPatternTSParcelsToTextFile ( String outputFileFull, String delimiter, boolean update,
-	List<StateCU_CropPatternTS> cropPatternTSList, List<String> outputCommentsList ) {
+	List<StateCU_CropPatternTS> cropPatternTSList, List<StateCU_Location> culocList, List<String> outputCommentsList ) {
 	// Get the parcels for all the crop pattern TS
 	List<StateCU_Parcel> parcelList = new ArrayList<>();
 	for ( StateCU_CropPatternTS cpts : cropPatternTSList ) {
@@ -388,14 +388,22 @@ private void writeCropPatternTSParcelsToTextFile ( String outputFileFull, String
 	}
 	
 	// Call the general write method
-	writeParcelsToTextFile ( outputFileFull, delimiter, update, parcelList, outputCommentsList );
+	writeParcelsToTextFile ( outputFileFull, delimiter, update, parcelList, culocList, outputCommentsList );
 }
 
 /**
- * Write the parcel data as a text file, using StateCU_CropPatternTS as input.
+ * Write the parcel data as a text file, using StateCU_Parcel as input.
+ * This is the most general method and can be used to write parcel data that was read in
+ * using ReadCULocationParcelsFromHydroBase or ?? StateMod command ??
+ * @param outputFileFull full path to output file
+ * @param delimiter not currently used, may remove
+ * @param update whether to update or overwrite the file, used when creating the file header
+ * @param parcelList list of StateCU_Parcel to output
+ * @param culocList list of StateCU_Location, used for location type,
+ * @param outputCommentList additional comments for the file header
  */
 private void writeParcelsToTextFile ( String outputFileFull, String delimiter, boolean update,
-	List<StateCU_Parcel> parcelList, List<String> outputCommentsList ) {
+	List<StateCU_Parcel> parcelList, List<StateCU_Location> culocList, List<String> outputCommentsList ) {
 
 	List<String> newComments = new ArrayList<>();
 	List<String> commentIndicators = new ArrayList<String>(1);
@@ -429,17 +437,20 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 		out.println(cmnt);
 		out.println(cmnt + " ***************************************************************************************************");
 		out.println(cmnt + "  StateDMI CU Location Parcel File - this is a diagnostics report");
-		out.println(cmnt + "  - this report shows the relationships between a parcel and supplies for the parcel.");
-		out.println(cmnt + "  - the underlying data can be used for *.cds, *.ipy, and *.wer files.");
+		out.println(cmnt + "  - this report shows the relationships between a parcel and supplies for the parcel");
+		out.println(cmnt + "  - the data should match orginal GIS irrigated land and supply data");
+		out.println(cmnt + "  - the parcel/supply data can be used for *.cds, *.ipy, and *.wer files");
 		out.println(cmnt);
 		out.println(cmnt + "  Model ID - StateCU location and node type");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
 		out.println(cmnt + "  LocId        :  CU Location ID surface water data");
-		out.println(cmnt + "  LocType      :  Location type for StateMod");
+		out.println(cmnt + "  LocType      :  Location type");
+		out.println(cmnt + "                  - for StateMod, corresponds to network node type");
+		out.println(cmnt + "                  - for StateCU, determined from supply for parcels");
 		out.println(cmnt + "                  DIV - diversion");
 		out.println(cmnt + "                  D&W - diversion & well");
 		out.println(cmnt + "                  WEL - well");
-		out.println(cmnt + "                  ??? - unknown because StateCU locations don't use node type");
+		out.println(cmnt + "                  UNK - unknown, such as StateCU climate station dataset");
 		out.println(cmnt);
 		out.println(cmnt + "  Parcel Data - GIS loaded into HydroBase");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
@@ -452,7 +463,9 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 		out.println(cmnt);
 		out.println(cmnt + "  Whether or not the row of data is included - need to expand this to indicate how included or not");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
-		out.println(cmnt + "  DataSrc      :  Data source (typically from HydroBase but may enable user-supplied data).");
+		out.println(cmnt + "  DataSrc      :  Data source");
+		out.println(cmnt + "                  - typically from HydroBase but may enable user-supplied data");
+		out.println(cmnt + "                  - may in the future be read directly from GIS or other files");
 		out.println(cmnt + "                  HB-PUTS = HydroBase ParcelUseTS/Structure from vw_CDSS_ParcelUseTSStructureToParcel" );
 		out.println(cmnt + "                  HB-WTP = HydroBase Well/Parcel from vw_CDSS_WellsWellToParcel" );
 		out.println(cmnt + "  CDS?         :  Indicates whether the parcel is included in CDS file acreage.");
@@ -461,25 +474,29 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 		out.println(cmnt);
 		out.println(cmnt + "  SW Collection Data - surface water aggregate/system data");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
-		out.println(cmnt + "  SWPartType   :  Surface water supply part type (only is allowed Ditch).");
+		out.println(cmnt + "  SWPartType   :  Surface water supply part type (only Ditch is allowed).");
 		out.println(cmnt + "  SWPartIdType :  Surface water supply part ID type (only WDID is allowed).");
 		out.println(cmnt);
 		out.println(cmnt + "  SW Supply Data - portion of parcel acreage associated with surface water supply");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
-		out.println(cmnt + "  %Irrig       :  Percent of ParcelArea (from above) that is irrigated by the ditch.");
-		out.println(cmnt + "  SWIrrigArea  :  ParcelArea * %Irrig.");
+		out.println(cmnt + "  %Irrig       :  Fraction of ParcelArea (from above) that is irrigated by the ditch 0.0 to 1.0");
+		out.println(cmnt + "  SWIrrigArea  :  ParcelArea * %Irrig = area irrigated by surface water supply");
 		out.println(cmnt);
 		out.println(cmnt + "  GW Collection Data - groundwater aggregate/system data");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
 		out.println(cmnt + "  GWPartType   :  Water supply part type (Well or Parcel, the latter being phased out).");
-		out.println(cmnt + "                  WellInDitch = indicates a collection of ditches, with associated wells determined automatically.");
+		out.println(cmnt + "                  WellInDitch = indicates a collection of ditches, with associated wells determined.");
+		out.println(cmnt + "                                automatically based well -> parcel -> ditch relationship.");
 		out.println(cmnt + "                  Well = indicates a collection of wells specified using well identifiers.");
 		out.println(cmnt + "                  Parcel = indicates a collection of wells specified using parcel identifiers.");
 		out.println(cmnt + "  GWPartIdType :  Water supply part ID type (WDID or RECEIPT).");
-		out.println(cmnt + "                  If GWPartType=Well, WDID or RECEIPT.");
-		out.println(cmnt + "                  If GWPartType=Parcel, Parcel.");
-		out.println(cmnt + "  WDID         :  WDID of part if GWPartIdType=WDID.");
-		out.println(cmnt + "  Receipt      :  Receipt of part if GWPartIdType=RECEIPT.");
+		out.println(cmnt + "                  If GWPartType=Well:");
+		out.println(cmnt + "                     WDID - supply well has a WDID");
+		out.println(cmnt + "                     RECEIPT - supply well has a well permit receipt for identifier.");
+		out.println(cmnt + "                  If GWPartType=Parcel:");
+		out.println(cmnt + "                     Parcel - parcel identifier, THIS APPROACH IS BEING PHASED OUT");
+		out.println(cmnt + "  WDID         :  WDID for part if GWPartIdType=WDID.");
+		out.println(cmnt + "  Receipt      :  Receipt for part if GWPartIdType=RECEIPT.");
 		out.println(cmnt);
 		out.println(cmnt + "  GW Supply Data - portion of parcel acreage associated with groundwater supply");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
@@ -494,6 +511,9 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 	
 		StateCU_SupplyFromSW supplyFromSW = null;
 		StateCU_SupplyFromGW supplyFromGW = null;
+		String locid = "";
+		String locidPrev = "";
+		String locType = "???";
 		for ( StateCU_Parcel parcel : parcelList ) {
 			if (parcel == null) {
 				continue;
@@ -501,8 +521,16 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 	
 			// line 1 - parcel information
 			objectList.clear();
-			objectList.add(parcel.getLocationId());
-			objectList.add("???");
+			locid = parcel.getLocationId();
+			objectList.add(locid);
+			if ( !locid.equals(locidPrev) ) {
+				// Lookup the CULocation
+				// - only do for new location since lookups for each parcel would be a performance hit
+				StateCU_Location culoc = StateCU_Location.lookupForId ( culocList, locid );
+				// Set the location type based on whether surface or groundwater supply is available
+				locType = "" + culoc.getLocationType();
+			}
+			objectList.add(locType);
 			objectList.add(new Integer(parcel.getYear()));
 			objectList.add(parcel.getCrop());
 			objectList.add(new Double(parcel.getArea()));

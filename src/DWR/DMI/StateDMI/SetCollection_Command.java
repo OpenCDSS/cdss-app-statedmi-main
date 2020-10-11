@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
+import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
 import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Location_CollectionPartIdType;
 import DWR.StateCU.StateCU_Location_CollectionPartType;
@@ -402,6 +404,22 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
             new CommandLogRecord(CommandStatusType.FAILURE,
                 message, "Report to software support.  See log file for details." ) );
     }
+
+	// Get the HydroBase DMI...
+	HydroBaseDMI hbdmi = null;
+	try {
+		Object o = processor.getPropContents( "HydroBaseDMI");
+		hbdmi = (HydroBaseDMI)o;
+	}
+	catch ( Exception e ) {
+		message = "Error requesting HydroBase connection from processor.";
+		Message.printWarning(warning_level,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+	}
     
     if ( warning_count > 0 ) {
         message = "There were " + warning_count + " warnings about command input.";
@@ -435,19 +453,25 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		}
     		// Have a match so set the data...
     		List<String> tokens = StringUtil.breakStringList ( PartIDs, ", ", StringUtil.DELIM_SKIP_BLANKS );
-    		List<String> partIdList = new ArrayList<String>();
-    		List<StateCU_Location_CollectionPartIdType> partIdTypeList = new ArrayList<StateCU_Location_CollectionPartIdType>();
+    		List<String> partIdList = new ArrayList<>();
+    		List<StateCU_Location_CollectionPartIdType> partIdTypeList = new ArrayList<>();
+    		List<Integer> partIdWDList = new ArrayList<>(); // Used to store WD for well receipt so WD cache lookups can occur later
     		for ( String partId : tokens ) {
     			// Look for any IDs starting with p: and strip off.
     			if ( partId.startsWith("p:") ) {
     				// Assume a receipt number
     				partIdList.add(partId.substring(2));
     				partIdTypeList.add(StateCU_Location_CollectionPartIdType.RECEIPT);
+    				// Set the WD to -1, will be filled later
+    				partIdWDList.add(new Integer(-1));
     			}
     			else {
     				// Assume a WDID
     				partIdList.add(partId);
     				partIdTypeList.add(StateCU_Location_CollectionPartIdType.WDID);
+    				// Set the WD, mostly for information since used for Well part ID of receipt
+    				String wd = partId.substring(0,2);
+    				partIdWDList.add(new Integer(wd));
     			}
     		}
     		Message.printStatus ( 2, routine,
@@ -503,7 +527,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				}
     				culoc.setCollectionPartIDs ( partIdList, partIdTypesForCuloc );
     				*/
-    				culoc.setCollectionPartIDs ( partIdList, partIdTypeList );
+    				culoc.setCollectionPartIDs ( partIdList, partIdTypeList, partIdWDList );
     			}
     		}
     		else {
@@ -629,17 +653,43 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				"Setting " + id + " " + collectionType + " parts (" + PartType + ") -> " + tokens );
         		List<String> partIdList = new ArrayList<String>();
         		List<StateMod_Well_CollectionPartIdType> partIdTypeList = new ArrayList<StateMod_Well_CollectionPartIdType>();
+				List<Integer> partIdWDsForWell = new ArrayList<Integer>(); // Used to store WD for receipt, for cached data lookups
         		for ( String partId : tokens ) {
-        			// Look for any IDs starting with p: and strip off.
-        			if ( partId.startsWith("p:") ) {
+        			// Look for any IDs starting with P: and strip off.
+        			String partIdUpper = partId.toUpperCase();
+        			if ( partIdUpper.startsWith("P:") || partIdUpper.startsWith("RECEIPT:") ) {
+        				int offset = 0;
+        				if ( partIdUpper.startsWith("P:") ) {
+        					offset = 2;
+        				}
+        				else {
+        					offset = 8;
+        				}
         				// Assume a receipt number
-        				partIdList.add(partId.substring(2));
+        				partIdList.add(partId.substring(offset).trim());
         				partIdTypeList.add(StateMod_Well_CollectionPartIdType.RECEIPT);
+        				// Need to determine the water district for the receipt for use later querying cached data
+        				// - since the Set*FromList command is used for long lists, query the single receipt.
+        				List<HydroBase_Wells> wellsForReceipt = hbdmi.readWellsList(partId, -1, -1);
+        				if ( wellsForReceipt.size() != 1 ) {
+        					message = "Well \"" + id + "\" part \"" + partId + "\" RECEIPT has more than one HydroBase record.";
+        					Message.printWarning ( warning_level, 
+        						MessageUtil.formatMessageTag(command_tag, ++warning_count),
+        							routine, message );
+        					status.addToLog ( command_phase,
+        						new CommandLogRecord(CommandStatusType.WARNING,
+        							message, "Last collection information specified will apply." ) );
+        				}
+        				else {
+        					partIdWDsForWell.add(new Integer(wellsForReceipt.get(0).getWD()));
+        				}
         			}
         			else {
         				// Assume a WDID
         				partIdList.add(partId);
         				partIdTypeList.add(StateMod_Well_CollectionPartIdType.WDID);
+        				// The WD for the part is based on the first 2 digits of the WDID
+   						partIdWDsForWell.add(new Integer(partId.substring(0,2)));
         			}
         		}
     			if ( well.isCollection() ) {
@@ -683,7 +733,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				well.setCollectionPartIDsForYear ( Year_int, partIdList );
     			}
     			else if ( collectionPartTypeForWell == StateMod_Well_CollectionPartType.WELL ) {
-    				well.setCollectionPartIDs ( partIdList, partIdTypeList );
+    				well.setCollectionPartIDs ( partIdList, partIdTypeList, partIdWDsForWell );
     			}
     			else {
     				message = "CU Location collection \"" + id + "\" part type \"" + PartType + "\" is invalid.";

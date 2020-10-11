@@ -420,7 +420,8 @@ private void initialize (JFrame parent, SetCollection_Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Part IDs:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__PartIDs_JTextArea = new JTextArea (10,30);
-	__PartIDs_JTextArea.setToolTipText("Separate the part IDs by spaces or commas.");
+	__PartIDs_JTextArea.setToolTipText("Separate the part IDs by spaces or commas.  "
+		+ "All parts IDs are assumed to be WDIDs unless prefixed with p: or Receipt: for well permit receipt.");
 	__PartIDs_JTextArea.setLineWrap ( true );
 	__PartIDs_JTextArea.addKeyListener (this);
     JGUIUtil.addComponent(main_JPanel,
