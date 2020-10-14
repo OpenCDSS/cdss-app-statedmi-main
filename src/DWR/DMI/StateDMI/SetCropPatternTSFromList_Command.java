@@ -350,6 +350,9 @@ CommandWarningException, CommandException
 	if ( (ProcessWhen != null) && ProcessWhen.equalsIgnoreCase(_WithParcels)){
 		ProcessWhen_int = WithParcels_int;
 	}
+	if ( ProcessWhen == null ) {
+		ProcessWhen = _Now; // Default
+	}
 	
 	// Get the time series to fill...
 
@@ -369,22 +372,24 @@ CommandWarningException, CommandException
                 message, "Report to software support.  See log file for details." ) );
 	}
 	
-	// Get the supplemental ParcelUseTS...
+	// Get the supplemental ParcelUseTS so that records can be added if 'ProcessWhen=WithParcels'...
 	
 	List<StateDMI_HydroBase_ParcelUseTS> Supplemental_ParcelUseTS_Vector = null;
-	try {
-		@SuppressWarnings("unchecked")
-		List<StateDMI_HydroBase_ParcelUseTS> dataList = (List<StateDMI_HydroBase_ParcelUseTS>)processor.getPropContents( "HydroBase_SupplementalParcelUseTS_List");
-		Supplemental_ParcelUseTS_Vector = dataList;
-	}
-	catch ( Exception e ) {
-		Message.printWarning ( log_level, routine, e );
-		message = "Unable to get supplemental ParcelUseTS data.  Software bug.";
-        Message.printWarning ( warning_level, 
-            MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-        status.addToLog ( command_phase,
-            new CommandLogRecord(CommandStatusType.FAILURE,
-                message, "Report to software support.  See log file for details." ) );
+	if ( ProcessWhen.equalsIgnoreCase(_WithParcels) ) {
+		try {
+			@SuppressWarnings("unchecked")
+			List<StateDMI_HydroBase_ParcelUseTS> dataList = (List<StateDMI_HydroBase_ParcelUseTS>)processor.getPropContents( "HydroBase_SupplementalParcelUseTS_List");
+			Supplemental_ParcelUseTS_Vector = dataList;
+		}
+		catch ( Exception e ) {
+			Message.printWarning ( log_level, routine, e );
+			message = "Unable to get supplemental ParcelUseTS data.  Software bug.";
+        	Message.printWarning ( warning_level, 
+            	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+        	status.addToLog ( command_phase,
+            	new CommandLogRecord(CommandStatusType.FAILURE,
+                	message, "Report to software support.  See log file for details." ) );
+		}
 	}
 	
     // Output period will be used if not specified with SetStart and SetEnd

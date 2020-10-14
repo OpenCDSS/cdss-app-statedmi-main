@@ -1594,7 +1594,7 @@ The parcel data are also stored with the time series, for later data filling.
 @param part_id The source ID for the data, which may be the same location or
 part of a collection.  If null or blank is passed, the main "id" is used for messages.
 @param cal_year Year for crop data.
-@param parcel_id Parcel identifier for the calendear year.
+@param parcel_id Parcel identifier for the calendar year.
 @param crop_name Name of the crop.
 @param total_acres Total acres for the crop (all irrigation methods).
 @param datetime1 Start of period for crops - used if a new time series is added.

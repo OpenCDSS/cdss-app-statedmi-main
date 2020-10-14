@@ -61,7 +61,7 @@ command extends this class in order to uniquely represent the command, but much 
 is in this base class.
 </p>
 */
-public abstract class WriteParcelsToFile_Command extends AbstractCommand implements Command, FileGenerator
+public class WriteParcelsToFile_Command extends AbstractCommand implements Command, FileGenerator
 {
 
 /**
@@ -80,7 +80,8 @@ Constructor.
 */
 public WriteParcelsToFile_Command ()
 {	super();
-	setCommandName ( "Write?ParcelsToFile" );
+	//setCommandName ( "Write?ParcelsToFile" );
+	setCommandName ( "WriteParcelsToFile" );
 }
 
 /**
@@ -287,6 +288,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
         // StateCU components
         
+        /* TODO smalers 2020-10-11 remove when tests out
 		if ( this instanceof WriteCropPatternTSParcelsToFile_Command ) {
 			writeCropPatternTSParcelsToTextFile(OutputFile_full, Delimiter, update,
 				processor.getStateCUCropPatternTSList(), processor.getStateCULocationList(), OutputComments_List );
@@ -295,6 +297,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			writeCULocationParcelsToTextFile(OutputFile_full, Delimiter, update,
 				processor.getStateCULocationList(), processor.getStateCULocationList(), OutputComments_List );
 		}
+		*/
+
+        // Initial implementation is for parcels associated with StateCU locations.
+		writeCULocationParcelsToTextFile(OutputFile_full, Delimiter, update,
+			processor.getStateCULocationList(), processor.getStateCULocationList(), OutputComments_List );
 			
     	// Set the filename(s) for the FileGenerator interface
     	if ( outputFileList == null ) {
@@ -377,6 +384,7 @@ private void writeCULocationParcelsToTextFile ( String outputFileFull, String de
 }
 
 /**
+ * TODO smalers 2020-10-11 remove when clear that don't need.
  * Write the parcel data as a text file, using StateCU_CropPatternTS as input.
  */
 private void writeCropPatternTSParcelsToTextFile ( String outputFileFull, String delimiter, boolean update,
@@ -542,6 +550,7 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 			out.println(printLine);
 			
 			// line 2+ - supply information
+			// - list surface water supplies first, then groundwater
 			
 			for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 				if ( supply instanceof StateCU_SupplyFromSW ) {
@@ -557,7 +566,9 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 					printLine = StringUtil.formatString(objectList, format_2);
 					out.println(printLine);
 				}
-				else if ( supply instanceof StateCU_SupplyFromGW ) {
+			}
+			for ( StateCU_Supply supply : parcel.getSupplyList() ) {
+				if ( supply instanceof StateCU_SupplyFromGW ) {
 					objectList.clear();
 					supplyFromGW = (StateCU_SupplyFromGW)supply;
 					objectList.add(supply.getDataSource());
@@ -576,7 +587,8 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 					printLine = StringUtil.formatString(objectList, format_3);
 					out.println(printLine);
 				}
-				else {
+				else if ( !(supply instanceof StateCU_SupplyFromSW) ) {
+					// Not surface water or groundwater so an error
 					throw new RuntimeException("Supply type not handled - need to check code.");
 				}
 			}

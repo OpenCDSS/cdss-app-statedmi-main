@@ -251,12 +251,14 @@ private void initialize (JFrame parent, WriteParcelsToFile_Command command )
 	
 	// StateMod components/commands...
 
+	/* TODO smalers 2020-10-11 remove when tests out 
 	if ( __command instanceof WriteCropPatternTSParcelsToFile_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes StateCU crop pattern time series parcels to a text file."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
-	else if ( __command instanceof WriteCULocationParcelsToFile_Command ) {
+	*/
+	if ( __command instanceof WriteParcelsToFile_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command writes StateCU CU Location parcels to a text file."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		

@@ -25,8 +25,8 @@ package DWR.DMI.StateDMI;
 
 import javax.swing.JFrame;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import DWR.StateCU.StateCU_BlaneyCriddle;
 import DWR.StateCU.StateCU_ClimateStation;
@@ -64,6 +64,12 @@ public abstract class CheckStateCU_Command extends AbstractCommand implements Co
 {
 	
 /**
+Values for DeepCheck parameter.
+*/
+protected final String _False = "False";
+protected final String _True = "True";
+
+/**
 Values for IfNotFound parameter.
 */
 protected final String _Ignore = "Ignore";
@@ -88,8 +94,9 @@ cross-reference to the original commands.
 */
 public void checkCommandParameters ( PropList parameters, String command_tag, int warning_level )
 throws InvalidCommandParameterException
-{	String routine = getClass().getName() + ".checkCommandParameters";
+{	String routine = getClass().getSimpleName() + ".checkCommandParameters";
 	String ID = parameters.getValue ( "ID" );
+	String DeepCheck = parameters.getValue ( "DeepCheck" );
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
 	String message;
 	String warning = "";
@@ -105,6 +112,15 @@ throws InvalidCommandParameterException
 				message, "Specify the identifier pattern to match." ) );
 	}
 
+	if ( (DeepCheck != null) && (DeepCheck.length() > 0) && !DeepCheck.equalsIgnoreCase(_False) &&
+		!DeepCheck.equalsIgnoreCase(_True) ) {
+		message = "The DeepCheck value (" + DeepCheck + ") is invalid.";
+		warning += "\n" + message;
+		status.addToLog ( CommandPhaseType.INITIALIZATION,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Specify DeepCheck as " + _False + " (default), or " + _True + ".") );
+	}
+
 	if ( (IfNotFound != null) && (IfNotFound.length() > 0) && !IfNotFound.equalsIgnoreCase(_Ignore) &&
 		!IfNotFound.equalsIgnoreCase(_Fail) && !IfNotFound.equalsIgnoreCase(_Warn) ) {
 		message = "The IfNotFound value (" + IfNotFound + ") is invalid.";
@@ -116,10 +132,11 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List<String> valid_Vector = new Vector<String>();
-    valid_Vector.add ( "ID" );
-    valid_Vector.add ( "IfNotFound" );
-	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	List<String> validList = new ArrayList<>();
+    validList.add ( "ID" );
+    validList.add ( "DeepCheck" );
+    validList.add ( "IfNotFound" );
+	warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	if ( warning.length() > 0 ) {
 		Message.printWarning ( warning_level,
@@ -165,6 +182,11 @@ CommandWarningException, CommandException
 	if ( ID == null ) {
 		ID = "*"; // Default
 	}
+	String DeepCheck = parameters.getValue ( "DeepCheck" );
+	boolean deepCheck = false; // Default
+	if ( (DeepCheck != null) && DeepCheck.equalsIgnoreCase("true") ) {
+		deepCheck = true;
+	}
 	String idpattern_Java = StringUtil.replaceString(ID,"*",".*");
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
 	if ( IfNotFound == null ) {
@@ -190,21 +212,6 @@ CommandWarningException, CommandException
 		}
 	}
 
-	if ( this instanceof CheckPenmanMonteith_Command ) {
-		try {
-			@SuppressWarnings("unchecked")
-			List<StateCU_PenmanMonteith> objectList = (List<StateCU_PenmanMonteith>)processor.getPropContents("StateCU_PenmanMonteith_List");
-			dataList = objectList;
-		}
-		catch ( Exception e ) {
-			message = "Error requesting Penman-Monteith crop coefficients from processor.";
-			Message.printWarning(warning_level,
-				MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
-			status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
-				message, "Report problem to software support." ) );
-		}
-	}
-	
 	if ( this instanceof CheckClimateStations_Command ) {
 		try {
 			@SuppressWarnings("unchecked")
@@ -250,7 +257,8 @@ CommandWarningException, CommandException
 		}
 	}
 	
-	if ( this instanceof CheckCULocations_Command ) {
+	if ( (this instanceof CheckCULocations_Command) || (this instanceof CheckParcels_Command) ) {
+		// Parcels are accessed via CU Locations
 		try {
 			@SuppressWarnings("unchecked")
 			List<StateCU_Location> objectList = (List<StateCU_Location>)processor.getPropContents("StateCU_Location_List");
@@ -264,7 +272,7 @@ CommandWarningException, CommandException
 				message, "Report problem to software support." ) );
 		}
 	}
-	
+
 	if ( this instanceof CheckIrrigationPracticeTS_Command ) {
 		try {
 			@SuppressWarnings("unchecked")
@@ -279,6 +287,22 @@ CommandWarningException, CommandException
 				message, "Report problem to software support." ) );
 		}
 	}
+
+	if ( this instanceof CheckPenmanMonteith_Command ) {
+		try {
+			@SuppressWarnings("unchecked")
+			List<StateCU_PenmanMonteith> objectList = (List<StateCU_PenmanMonteith>)processor.getPropContents("StateCU_PenmanMonteith_List");
+			dataList = objectList;
+		}
+		catch ( Exception e ) {
+			message = "Error requesting Penman-Monteith crop coefficients from processor.";
+			Message.printWarning(warning_level,
+				MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+			status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+		}
+	}
+	
 	
 	// Get the data set for cross-checks between components...
 	
@@ -315,6 +339,8 @@ CommandWarningException, CommandException
 		String id; // Identifier for object, to use for wildcard matching
 		Message.printStatus(2, routine, "Checking " + dataListSize + " objects.");
 		for ( int i = 0; i < dataListSize; i++ ) {
+			notifyCommandProgressListeners ( i, dataListSize, (float)((i + 1)/((float)dataListSize)*100.0),
+				"Checking data object " + i + " of " + dataListSize );
 			data = dataList.get(i);
 			id = data.getID();
 			if ( this instanceof CheckCropCharacteristics_Command ||
@@ -328,7 +354,13 @@ CommandWarningException, CommandException
 			++matchCount;
 			// Check the object
 			if ( data instanceof StateCU_ComponentValidator ) {
-				StateCU_ComponentValidator validator = (StateCU_ComponentValidator)data;
+				StateCU_ComponentValidator validator = null;
+				if ( this instanceof CheckParcels_Command ) {
+					validator = ((StateCU_Location)data).getParcelValidator( (List<StateCU_Location>)dataList, deepCheck );
+				}
+				else {
+					validator = (StateCU_ComponentValidator)data;
+				}
 				StateCU_ComponentValidation problems = validator.validateComponent(dataset);
 				int problemsSize = problems.size();
 				if ( problemsSize > 0 ) {
@@ -391,12 +423,19 @@ public String toString ( PropList parameters )
 	}
 	
 	String ID = parameters.getValue ( "ID" );
+	String DeepCheck = parameters.getValue ( "DeepCheck" );
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
 		
 	StringBuffer b = new StringBuffer ();
 
 	if ( ID != null && ID.length() > 0 ) {
 		b.append ( "ID=\"" + ID + "\"" );
+	}
+	if ( DeepCheck != null && DeepCheck.length() > 0 ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "DeepCheck=" + DeepCheck );
 	}
 	if ( IfNotFound != null && IfNotFound.length() > 0 ) {
 		if ( b.length() > 0 ) {
