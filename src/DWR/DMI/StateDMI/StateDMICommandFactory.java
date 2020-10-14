@@ -222,6 +222,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"CheckIrrigationPracticeTS") ) {
 		return new CheckIrrigationPracticeTS_Command ();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString,"CheckParcels") ) {
+		return new CheckParcels_Command ();
+	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"CheckPenmanMonteith") ) {
 		return new CheckPenmanMonteith_Command ();
 	}
@@ -589,8 +592,11 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadCropPatternTSFromHydroBase")) {
 		return new ReadCropPatternTSFromHydroBase_Command();
 	}
-	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadCULocationParcelsFromHydroBase")) {
-		return new ReadCULocationParcelsFromHydroBase_Command();
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadCropPatternTSFromParcels")) {
+		return new ReadCropPatternTSFromParcels_Command();
+	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadParcelsFromHydroBase")) {
+		return new ReadParcelsFromHydroBase_Command();
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadCULocationsFromList")) {
 		return new ReadCULocationsFromList_Command();
@@ -1175,17 +1181,19 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteCropCharacteristicsToStateCU")) {
 		return new WriteCropCharacteristicsToStateCU_Command();
 	}
+	/* TODO smalers 2020-10-11 enable if need for troubleshooting
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteCropPatternTSParcelsToFile")) {
 		return new WriteCropPatternTSParcelsToFile_Command();
 	}
+	*/
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteCropPatternTSToDateValue")) {
 		return new WriteCropPatternTSToDateValue_Command();
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteCropPatternTSToStateCU")) {
 		return new WriteCropPatternTSToStateCU_Command();
 	}
-	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteCULocationParcelsToFile")) {
-		return new WriteCULocationParcelsToFile_Command();
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteParcelsToFile")) {
+		return new WriteParcelsToFile_Command();
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteCULocationsToList")) {
 		return new WriteCULocationsToList_Command();

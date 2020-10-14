@@ -61,22 +61,16 @@ import RTi.Util.Time.StopWatch;
 /**
 This class initializes, checks, and runs the ReadCropPatternTSFromHydroBase() command.
 */
-public class ReadCULocationParcelsFromHydroBase_Command 
+public class ReadParcelsFromHydroBase_Command 
 extends AbstractCommand implements Command
 {
 	
 /**
-Values for the DataFrom parameter.
-*/
-protected final String _Parcels = "Parcels";
-protected final String _Summary = "Summary";
-
-/**
 Constructor.
 */
-public ReadCULocationParcelsFromHydroBase_Command ()
+public ReadParcelsFromHydroBase_Command ()
 {	super();
-	setCommandName ( "ReadCULocationParcelsFromHydroBase" );
+	setCommandName ( "ReadParcelsFromHydroBase" );
 }
 
 /**
@@ -94,8 +88,6 @@ throws InvalidCommandParameterException
 	String InputStart = parameters.getValue ( "InputStart" );
 	String InputEnd = parameters.getValue( "InputEnd" );
 	String Div = parameters.getValue( "Div" );
-	String DataFrom = parameters.getValue( "DataFrom" ); // Experimental
-	String AreaPrecision = parameters.getValue( "AreaPrecision" ); // Experimental
 	String message;
 	String warning = "";
 	
@@ -147,31 +139,12 @@ throws InvalidCommandParameterException
 		}
 	}
 	
-	if ( (AreaPrecision != null) && (AreaPrecision.length() != 0) && !StringUtil.isInteger(AreaPrecision) ) {
-		message = "The area precision is invalid.";
-		warning += "\n" + message;
-		status.addToLog ( CommandPhaseType.INITIALIZATION,
-			new CommandLogRecord(CommandStatusType.FAILURE,
-				message, "Specify the division as an integer." ) );
-	}
-
-	if ( (DataFrom != null) && (DataFrom.length() > 0) &&
-		!DataFrom.equalsIgnoreCase(_Parcels) && !DataFrom.equalsIgnoreCase(_Summary) ) {
-		message = "The DataFrom value (" + DataFrom + ") is invalid.";
-		warning += "\n" + message;
-		status.addToLog ( CommandPhaseType.INITIALIZATION,
-			new CommandLogRecord(CommandStatusType.FAILURE,
-				message, "Specify DataFrom as " + _Parcels + " or " + _Summary + ".") );
-	}
-	
 	// Check for invalid parameters...
-	List<String> validList = new ArrayList<>(6);
+	List<String> validList = new ArrayList<>(4);
     validList.add ( "ID" );
     validList.add ( "InputStart" );
     validList.add ( "InputEnd" );
     validList.add ( "Div" );
-    validList.add ( "DataFrom" );
-    validList.add ( "AreaPrecision" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	if ( warning.length() > 0 ) {
@@ -189,7 +162,7 @@ not (e.g., "Cancel" was pressed.
 */
 public boolean editCommand ( JFrame parent )
 {	// The command will be modified if changed...
-	return (new ReadCULocationParcelsFromHydroBase_JDialog ( parent, this )).ok();
+	return (new ReadParcelsFromHydroBase_JDialog ( parent, this )).ok();
 }
 
 /**
@@ -810,11 +783,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						} // end years with parcel data
 					} // end collection parts
 
-					// Refresh the supply counts for parcels and area irrigated by each well supply.
-					// - may have some wells associated with ditch
-					// - TODO smalers 2020-09-03 make sure this should be used
-					culoc.recalcParcels();
-
 				} // end Ditch collection
 
 				else if ( isCollection && (collectionPartType == StateCU_Location_CollectionPartType.PARCEL) ) {
@@ -1142,9 +1110,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						} // end in period of interest
 					} // end years with parcel data
 
-					// Refresh the supply counts for parcels and area irrigated by each well supply.
-					culoc.recalcParcels();
-
 				} // end well collection specified with Well IDs
 
 				else if ( isCollection ) {
@@ -1155,6 +1120,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			            new CommandLogRecord(CommandStatusType.FAILURE, message,
 			            	"Check the log file - report to software support if necessary." ) );
 				}
+
+				// Refresh the supply counts for parcels and water supplies
+				// - necessary to properly do calculations with parcels
+				culoc.recalcParcels();
 			}
 			catch ( Exception e ) {
 				Message.printWarning ( 3, routine, e );
@@ -1226,8 +1195,6 @@ public String toString ( PropList parameters )
 	String InputStart = parameters.getValue ( "InputStart" );
 	String InputEnd = parameters.getValue( "InputEnd" );
 	String Div = parameters.getValue( "Div" );
-	String DataFrom = parameters.getValue( "DataFrom" ); // Experimental
-	String AreaPrecision = parameters.getValue( "AreaPrecision" ); // Experimental
 	
 	StringBuffer b = new StringBuffer ();
 
@@ -1251,18 +1218,6 @@ public String toString ( PropList parameters )
 			b.append ( "," );
 		}
 		b.append ( "Div=\"" + Div + "\"" );
-	}
-	if ( DataFrom != null && DataFrom.length() > 0 ) {
-		if ( b.length() > 0 ) {
-			b.append ( "," );
-		}
-		b.append ( "DataFrom=" + DataFrom );
-	}
-	if ( AreaPrecision != null && AreaPrecision.length() > 0 ) {
-		if ( b.length() > 0 ) {
-			b.append ( "," );
-		}
-		b.append ( "AreaPrecision=" + AreaPrecision );
 	}
 	
 	return getCommandName() + "(" + b.toString() + ")";

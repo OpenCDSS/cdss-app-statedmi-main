@@ -55,7 +55,7 @@ import RTi.Util.IO.PropList;
 Editor for ReadCULocationParcelsFromHydroBase() command.
 */
 @SuppressWarnings("serial")
-public class ReadCULocationParcelsFromHydroBase_JDialog extends JDialog
+public class ReadParcelsFromHydroBase_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
 
@@ -69,7 +69,7 @@ private JTextArea __command_JTextArea=null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
 private SimpleJButton __help_JButton = null;
-private ReadCULocationParcelsFromHydroBase_Command __command = null;
+private ReadParcelsFromHydroBase_Command __command = null;
 private boolean __ok = false;
 
 /**
@@ -77,7 +77,7 @@ Command editor constructor
 @param parent JFrame class instantiating this class.
 @param command Time series command to parse.
 */
-public ReadCULocationParcelsFromHydroBase_JDialog (	JFrame parent, ReadCULocationParcelsFromHydroBase_Command command )
+public ReadParcelsFromHydroBase_JDialog (	JFrame parent, ReadParcelsFromHydroBase_Command command )
 {	super(parent, true);
 	initialize (parent, command);
 }
@@ -165,7 +165,7 @@ Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
-private void initialize ( JFrame parent, ReadCULocationParcelsFromHydroBase_Command command)
+private void initialize ( JFrame parent, ReadParcelsFromHydroBase_Command command)
 {	__command = command;
 
 	addWindowListener(this);

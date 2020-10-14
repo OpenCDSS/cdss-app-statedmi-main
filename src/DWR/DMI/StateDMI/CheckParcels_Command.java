@@ -1,4 +1,4 @@
-// WriteCropPatternTSParcelsToFile_Command - This class initializes and runs the WriteCropPatternTSParcelsToFile() command.
+// CheckParcels_Command - This class initializes, checks, and runs the CheckParcels() command.
 
 /* NoticeStart
 
@@ -24,18 +24,17 @@ NoticeEnd */
 package DWR.DMI.StateDMI;
 
 /**
-This class initializes and runs the WriteCropPatternTSParcelsToFile() command.
-Most functionality is implemented in the base class.
+This class initializes, checks, and runs the CheckParcels() command.
 */
-public class WriteCropPatternTSParcelsToFile_Command extends WriteParcelsToFile_Command
+public class CheckParcels_Command extends CheckStateCU_Command
 {
-
+	
 /**
 Constructor.
 */
-public WriteCropPatternTSParcelsToFile_Command ()
+public CheckParcels_Command ()
 {	super();
-	setCommandName ( "WriteCropPatternTSParcelsToFile" );
+	setCommandName ( "CheckParcels" );
 }
 
 }

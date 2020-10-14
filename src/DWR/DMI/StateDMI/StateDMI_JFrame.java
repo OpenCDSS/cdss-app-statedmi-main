@@ -918,8 +918,9 @@ private JMenuItem
 private JMenu
 	__Commands_StateCU_Parcels_JMenu;
 private JMenuItem
-	__Commands_StateCU_Parcels_ReadCULocationParcelsFromHydroBase_JMenuItem,
-	__Commands_StateCU_Parcels_WriteCULocationParcelsToFile_JMenuItem;
+	__Commands_StateCU_Parcels_ReadParcelsFromHydroBase_JMenuItem,
+	__Commands_StateCU_Parcels_CheckParcels_JMenuItem,
+	__Commands_StateCU_Parcels_WriteParcelsToFile_JMenuItem;
 
 private JMenu
 	__Commands_StateCU_CropPatternTS_JMenu;
@@ -940,6 +941,7 @@ private JMenuItem
 	//__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromDBF_JMenuItem,
 	__Commands_StateCU_CropPatternTS_SetCropPatternTSFromList_JMenuItem,
 	__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromHydroBase_JMenuItem,
+	__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromParcels_JMenuItem,
 	__Commands_StateCU_CropPatternTS_SetCropPatternTS_JMenuItem,
 	__Commands_StateCU_CropPatternTS_TranslateCropPatternTS_JMenuItem,
 	__Commands_StateCU_CropPatternTS_RemoveCropPatternTS_JMenuItem,
@@ -1300,9 +1302,12 @@ JMenuItem
 	__Commands_StateMod_DiversionDemandTSOverrideMonthly_JMenuItem,
 	__Commands_StateMod_DiversionDemandTSAverageMonthly_JMenuItem;
 // Diversions - Demand TS, Daily
-//private JMenuItem
+private JMenuItem
 	//__Commands_StateMod_IrrigationPracticeTS_JMenuItem,
 	//__Commands_StateMod_ConsumptiveWaterRequirementTS_JMenuItem,
+    __Commands_StateMod_Parcels_ReadParcelsFromHydroBase_JMenuItem,
+    __Commands_StateMod_Parcels_CheckParcels_JMenuItem,
+    __Commands_StateMod_Parcels_WriteParcelsToFile_JMenuItem;
 	//__Commands_StateMod_SoilMoisture_JMenuItem;
 // Precipitation Data
 // Precipitation Data - TS Monthly
@@ -1896,8 +1901,9 @@ private String
 	// Parcels
 
 	__Commands_StateCU_Parcels_String = "Parcels",
-	__Commands_StateCU_Parcels_ReadCULocationParcelsFromHydroBase_String = "ReadCULocationParcelsFromHydroBase",
-	__Commands_StateCU_Parcels_WriteCULocationParcelsToFile_String = "WriteCULocationParcelsToFile",
+	__Commands_StateCU_Parcels_ReadParcelsFromHydroBase_String = "ReadParcelsFromHydroBase",
+	__Commands_StateCU_Parcels_CheckParcels_String = "CheckParcels",
+	__Commands_StateCU_Parcels_WriteParcelsToFile_String = "WriteParcelsToFile",
 
 	// CDS - crop pattern time series
 	
@@ -1920,6 +1926,7 @@ private String
 	//__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromDBF_String = "OLD: ReadCropPatternTSFromDBF() ...",
 	__Commands_StateCU_CropPatternTS_SetCropPatternTSFromList_String = "SetCropPatternTSFromList() ...",
 	__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromHydroBase_String = "ReadCropPatternTSFromHydroBase() ...",
+	__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromParcels_String = "ReadCropPatternTSFromParcels() ...",
 	__Commands_StateCU_CropPatternTS_SetCropPatternTS_String = "SetCropPatternTS() ...",
 	__Commands_StateCU_CropPatternTS_TranslateCropPatternTS_String = "TranslateCropPatternTS() ...",
 	__Commands_StateCU_CropPatternTS_RemoveCropPatternTS_String = "RemoveCropPatternTS() ...",
@@ -2141,6 +2148,10 @@ private String
 
 	__Commands_StateMod_ConsumptiveUseData_String = "Consumptive Use Data",
 	__Commands_StateMod_StateCUStructure_String = "StateCU Structures (for AWC)",
+	__Commands_StateMod_Parcels_String = "Parcels",
+	__Commands_StateMod_Parcels_ReadParcelsFromHydroBase_String = "ReadParcelsFromHydroBase()...",
+	__Commands_StateMod_Parcels_CheckParcels_String = "CheckParcels()...",
+	__Commands_StateMod_Parcels_WriteParcelsToFile_String = "WriteParcelsToFile()...",
 	__Commands_StateMod_IrrigationPracticeTS_String = "Irrigation Practice TS (Yearly)",
 	__Commands_StateMod_ConsumptiveWaterRequirementTS_String = "Consumptive Water Requirement (Monthly, Daily)",
 	
@@ -3537,14 +3548,19 @@ public void actionPerformed ( ActionEvent event )
     
     // StateCU Parcels (experimental - as input to CDS and IPY)
 
-	else if ( action.equals( __Commands_StateCU_Parcels_ReadCULocationParcelsFromHydroBase_String) ) {
+	else if ( action.equals( __Commands_StateCU_Parcels_ReadParcelsFromHydroBase_String) ) {
 		// Read parcels associated with CU Locations from HydroBase...
-		commandList_EditCommand ( __Commands_StateCU_Parcels_ReadCULocationParcelsFromHydroBase_String,
+		commandList_EditCommand ( __Commands_StateCU_Parcels_ReadParcelsFromHydroBase_String,
 		null, __INSERT_COMMAND);
 	}
-	else if ( action.equals( __Commands_StateCU_Parcels_WriteCULocationParcelsToFile_String) ) {
+	else if ( action.equals( __Commands_StateCU_Parcels_CheckParcels_String) ) {
+		// Check parcels.
+		commandList_EditCommand ( __Commands_StateCU_Parcels_CheckParcels_String,
+		null, __INSERT_COMMAND);
+	}
+	else if ( action.equals( __Commands_StateCU_Parcels_WriteParcelsToFile_String) ) {
 		// Write parcels associated with CU Locations to a file...
-		commandList_EditCommand ( __Commands_StateCU_Parcels_WriteCULocationParcelsToFile_String,
+		commandList_EditCommand ( __Commands_StateCU_Parcels_WriteParcelsToFile_String,
 		null, __INSERT_COMMAND);
 	}
 
@@ -3575,6 +3591,11 @@ public void actionPerformed ( ActionEvent event )
 	else if (o == __Commands_StateCU_CropPatternTS_ReadCropPatternTSFromHydroBase_JMenuItem) {
 		// Read CU crop patterns from HydroBase...
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromHydroBase_String,
+		null, __INSERT_COMMAND);
+	}
+	else if (o == __Commands_StateCU_CropPatternTS_ReadCropPatternTSFromParcels_JMenuItem) {
+		// Read CU crop patterns from Parcels...
+		commandList_EditCommand (__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromParcels_String,
 		null, __INSERT_COMMAND);
 	}
 	else if(o==__Commands_StateCU_CropPatternTS_SetCropPatternTS_JMenuItem){
@@ -10801,12 +10822,16 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 			Commands_StateCU_CULocationsData_JMenu, __Commands_StateCU_Parcels_String,
 			__Commands_StateCU_Parcels_String, false );
 		Commands_StateCU_Parcels_JMenu.add(
-	        __Commands_StateCU_Parcels_ReadCULocationParcelsFromHydroBase_JMenuItem =
-			new SimpleJMenuItem(__Commands_StateCU_Parcels_ReadCULocationParcelsFromHydroBase_String,this));
-		Commands_StateCU_CULocations_JMenu.addSeparator();
+	        __Commands_StateCU_Parcels_ReadParcelsFromHydroBase_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateCU_Parcels_ReadParcelsFromHydroBase_String,this));
+		Commands_StateCU_Parcels_JMenu.addSeparator();
 		Commands_StateCU_Parcels_JMenu.add(
-	        __Commands_StateCU_Parcels_WriteCULocationParcelsToFile_JMenuItem =
-			new SimpleJMenuItem(__Commands_StateCU_Parcels_WriteCULocationParcelsToFile_String,this));
+	        __Commands_StateCU_Parcels_CheckParcels_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateCU_Parcels_CheckParcels_String,this));
+		Commands_StateCU_Parcels_JMenu.addSeparator();
+		Commands_StateCU_Parcels_JMenu.add(
+	        __Commands_StateCU_Parcels_WriteParcelsToFile_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateCU_Parcels_WriteParcelsToFile_String,this));
 	}
 
 	if ( show_all_commands || (__statecuDatasetType >= StateCU_DataSet.TYPE_STRUCTURES) ) {
@@ -10858,6 +10883,9 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 		Commands_StateCU_CropPatternTS_JMenu.add(
 			__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromHydroBase_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromHydroBase_String,this));
+		Commands_StateCU_CropPatternTS_JMenu.add(
+			__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromParcels_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromParcels_String,this));
 		Commands_StateCU_CropPatternTS_JMenu.addSeparator();
 		Commands_StateCU_CropPatternTS_JMenu.add ( __Commands_StateCU_CropPatternTS_SetCropPatternTS_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_CropPatternTS_SetCropPatternTS_String,this) );
@@ -11098,6 +11126,25 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 
 	ui_InitGUIMenus_Commands_AddComponentMenu (	style, Commands_StateMod_ConsumptiveUseData_JMenu,
 		__Commands_StateMod_DiversionData_String, __Commands_StateMod_StateCUStructure_String, true );
+
+	//if ( show_all_commands || (__statecuDatasetType >= StateCU_DataSet.TYPE_STRUCTURES) ) {
+		// Parcels submenu
+
+		JMenu Commands_StateMod_Parcels_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
+			Commands_StateMod_ConsumptiveUseData_JMenu, __Commands_StateCU_Parcels_String,
+			__Commands_StateCU_Parcels_String, false );
+		Commands_StateMod_Parcels_JMenu.add(
+	        __Commands_StateMod_Parcels_ReadParcelsFromHydroBase_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateMod_Parcels_ReadParcelsFromHydroBase_String,this));
+		Commands_StateMod_Parcels_JMenu.addSeparator();
+		Commands_StateMod_Parcels_JMenu.add(
+	        __Commands_StateMod_Parcels_CheckParcels_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateMod_Parcels_CheckParcels_String,this));
+		Commands_StateMod_Parcels_JMenu.addSeparator();
+		Commands_StateMod_Parcels_JMenu.add(
+	        __Commands_StateMod_Parcels_WriteParcelsToFile_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateMod_Parcels_WriteParcelsToFile_String,this));
+	//}
 	
 	//Irrigation practice, yearly...
 
