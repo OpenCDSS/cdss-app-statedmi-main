@@ -30,9 +30,10 @@ import java.util.List;
 
 import DWR.StateCU.StateCU_CropPatternTS;
 import DWR.StateCU.StateCU_Location;
-import DWR.StateCU.StateCU_Location_CollectionPartIdType;
-import DWR.StateCU.StateCU_Location_CollectionPartType;
 import DWR.StateCU.StateCU_Parcel;
+import DWR.StateCU.StateCU_Supply;
+import DWR.StateCU.StateCU_SupplyFromGW;
+import DWR.StateCU.StateCU_SupplyFromSW;
 import DWR.StateCU.StateCU_Util;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
@@ -405,6 +406,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		}
 
 		// Loop through locations...
+		// TODO smalers 2020-10-14 remove unused code once tests out
 		int matchCount = 0;
 		String culoc_id;
 		StateCU_Location culoc;
@@ -415,10 +417,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		String parcelId;
 		int parcelIdInt;
 		String parcelCrop;
-		double parcelArea;
+		double parcelSupplyArea; // Parcel area associated with supply
 		StateCU_CropPatternTS cds = null;
 		YearTS yts;
 		DateTime temp_DateTime = new DateTime(DateTime.PRECISION_YEAR);
+		StateCU_SupplyFromSW swSupply;
+		StateCU_SupplyFromGW gwSupply;
+		boolean parcelHasSurfaceWaterSupply = false;
 
 		// Years with data, used to set time series with crops in those years to zero.
 		// - TODO smalers 2020-10-11 not sure about the following comment
@@ -440,8 +445,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			++matchCount;
 
 			try {
-				// Loop through the parcel objects and add new StateCU_CropPatternTS
-				// instances for each instance...
+				// Loop through the parcel objects and add new StateCU_CropPatternTS instances.
+				// - the parcel amounts are added based on each supply relationship,
+				//   which either use ditch percent_irrig or parcel divided by number of wells.
 	
 				// Replace or add in the list.  Pass individual fields because may or may
 				// not need to add a new StateCU_CropPatternTS or a time series in the object...
@@ -449,7 +455,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				for ( StateCU_Parcel parcel : culoc.getParcelList() ) {
 					parcelYear = parcel.getYear();
 					parcelCrop = parcel.getCrop();
-					parcelArea = parcel.getArea();
 					if ( (InputStart != null) && (parcelYear < InputStart_int) ) {
 						// Only process years that were requested.
 						continue;
@@ -462,6 +467,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					// but need integer ID below.
 					parcelId = parcel.getID();
 					parcelIdInt = Integer.parseInt(parcelId);
+					parcelHasSurfaceWaterSupply = parcel.hasSurfaceWaterSupply();
+					parcelSupplyArea = 0.0;
 					
 					// Find the CropPatternTS matching the CU Location
 					// - this should be fast since there are not a huge number of CU Locations
@@ -475,84 +482,107 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							new CommandLogRecord(CommandStatusType.FAILURE,
 								message, "This should not be the case if CreateCropPatternTSForCULocations() "
 										+ "was run before this command.  Report the issue to software support." ) );
+						// Can't continue processing
+						continue;
 					}
 					else {
 						cds = cdsList.get(pos);
 					}
 					
 					// Add the parcel data.  Inline this code rather than putting in a function because unlike
-					// legacy code this code won't be called for reset parcels (they will already have been set in parcels).
+					// legacy code this code won't be called for user-supplied parcel data
+					// (will already have been set in parcels).
 
 					// The StateCU_CropPatternTS is in the list.  Now check to see if the
 					// crop is in the list of time series...
 					yts = cds.getCropPatternTS ( parcelCrop );
 					if ( yts == null ) {
-						// Add the crop time series...
+						// Add the crop time series.
+						// - will be added alphabetically by crop name
 						yts = cds.addTS ( parcelCrop, true );
 					}
-					// Now check to see if there is an existing value...
+					// Get the value in the time series for the parcel year
+					// - used to check whether a value has been previously set
 					temp_DateTime.setYear ( parcelYear );
-					double val = yts.getDataValue ( temp_DateTime );
-					boolean do_store_parcel = true;	// Whether to store raw parcel data
-					if ( yts.isDataMissing(val) ) {
-						// Value is missing so set...
-						if ( Message.isDebugOn ) {
-							Message.printDebug ( dl, "", "  Initializing " + culoc_id + " from parcelId=" + parcelId + " " +
-							parcelYear + " " + parcelCrop + " to " + StringUtil.formatString(parcelArea,"%.4f") );
+					double val;
+					// Loop though the supplies associated with the parcel
+					for ( StateCU_Supply supply : parcel.getSupplyList() ) {
+						if ( supply instanceof StateCU_SupplyFromSW ) {
+							swSupply = (StateCU_SupplyFromSW)supply;
+							// Area for supply was previously calculated as (parcel area) * (ditch percent_irrig)
+							parcelSupplyArea = swSupply.getAreaIrrig();
 						}
-						yts.setDataValue ( temp_DateTime, parcelArea );
-					}
-					else {
-						// Value is not missing.  Need to either set or add to it...
-						//__CUCropPatternTS_match_List.add ( id + "-" + parcelYear + "-" + parcelCrop );
-						/*
-						if ( replace == 0 ) {
-							if ( Message.isDebugOn ) {
-								Message.printDebug ( dl, "", "Replacing " + id + " from " + part_id + " " +
-								parcelYear + " " + parcelCrop + " with " + StringUtil.formatString(parcelArea,"%.4f") );
+						else {
+							// Groundwater data
+							if ( !parcelHasSurfaceWaterSupply ) {
+								// Groundwater only so get the area from the supply
+								gwSupply = (StateCU_SupplyFromGW)supply;
+								// Area for supply was previously calculated as (parcel area) / (number of wells)
+								parcelSupplyArea = gwSupply.getAreaIrrig();
 							}
-							yts.setDataValue ( temp_DateTime, parcelArea );
-							do_store_parcel = false;
-							// FIXME SAM 2007-05-18 Evaluate whether need to save observations.
 						}
-						else if ( replace == 1 ) {*/
+						// Now check to see if there is an existing value...
+						val = yts.getDataValue ( temp_DateTime );
+						if ( yts.isDataMissing(val) ) {
+							// Value is missing so set...
 							if ( Message.isDebugOn ) {
-								Message.printDebug ( dl, "", "  Adding " + culoc_id + " from parcelId=" + parcelId + " " +
-								parcelYear + " " + parcelCrop + " + " + parcelArea + " = " +
-								StringUtil.formatString( (val + parcelArea), "%.4f") );
+								Message.printDebug ( dl, "", "  Initializing " + culoc_id + " from parcelId=" + parcelId + " " +
+								parcelYear + " " + parcelCrop + " to " + StringUtil.formatString(parcelSupplyArea,"%.4f") );
 							}
-							yts.setDataValue ( temp_DateTime, val + parcelArea );
+							yts.setDataValue ( temp_DateTime, parcelSupplyArea );
+						}
+						else {
+							// Value is not missing.  Need to either set or add to it...
+							//__CUCropPatternTS_match_List.add ( id + "-" + parcelYear + "-" + parcelCrop );
 							/*
-						}*/
-					}
+							if ( replace == 0 ) {
+								if ( Message.isDebugOn ) {
+									Message.printDebug ( dl, "", "Replacing " + id + " from " + part_id + " " +
+									parcelYear + " " + parcelCrop + " with " + StringUtil.formatString(parcelSupplyArea,"%.4f") );
+								}
+								yts.setDataValue ( temp_DateTime, parcelSupplyArea );
+							do_store_parcel = false;
+								// FIXME SAM 2007-05-18 Evaluate whether need to save observations.
+							}
+							else if ( replace == 1 ) {*/
+								if ( Message.isDebugOn ) {
+									Message.printDebug ( dl, "", "  Adding " + culoc_id + " from parcelId=" + parcelId + " " +
+									parcelYear + " " + parcelCrop + " + " + parcelSupplyArea + " = " +
+									StringUtil.formatString( (val + parcelSupplyArea), "%.4f") );
+								}
+								yts.setDataValue ( temp_DateTime, val + parcelSupplyArea );
+								/*
+							}*/
+						}
 
-					/* TODO smalers 2020-10-11 old logic that is too complicated, remove when tested out
-					StateCU_CropPatternTS cds = processor.findAndAddCUCropPatternTSValue (
-						culoc_id,
-						partId, // for messages
-						parcelYear,
-						parcelIdInt,
-						parcel.getCrop(),
-						parcel.getArea(),
-						OutputStart_DateTime, // Period in case new TS needs to be created
-						OutputEnd_DateTime,
-						units,
-						replaceFlag ); // Always add since don't have to deal with supplemental parcel data here
-					*/
-					// Add to list of parcel years that are being read.
-					// - TODO smalers 2020-10-11 seems like extra work
-					addToParcelYears ( parcelYear, parcel_years );
-					// Save data for use in checks and filling (does not increment acreage)...
-					/* TODO smalers 2020-10-11 experimental - leave out for now.
-					addParcelToCropPatternTS ( cds,
-						culoc_id,
-						parcelYear,
-						parcel.getCrop(),
-						parcel.getArea(),	// Total for irrigation method
-						units );
-					*/
-					// TODO smalers 2020-10-11 is the following needed
-					//++crop_set_count;
+						/* TODO smalers 2020-10-11 old logic that is too complicated, remove when tested out
+						StateCU_CropPatternTS cds = processor.findAndAddCUCropPatternTSValue (
+							culoc_id,
+							partId, // for messages
+							parcelYear,
+							parcelIdInt,
+							parcel.getCrop(),
+							parcel.getArea(),
+							OutputStart_DateTime, // Period in case new TS needs to be created
+							OutputEnd_DateTime,
+							units,
+							replaceFlag ); // Always add since don't have to deal with supplemental parcel data here
+						*/
+						// Add to list of parcel years that are being read.
+						// - Needed for below
+						addToParcelYears ( parcelYear, parcel_years );
+						// Save data for use in checks and filling (does not increment acreage)...
+						/* TODO smalers 2020-10-11 experimental - leave out for now.
+						addParcelToCropPatternTS ( cds,
+							culoc_id,
+							parcelYear,
+							parcel.getCrop(),
+							parcel.getArea(),	// Total for irrigation method
+							units );
+						*/
+						// TODO smalers 2020-10-11 is the following needed
+						//++crop_set_count;
+					}
 				}
 			}
 			catch ( Exception e ) {
