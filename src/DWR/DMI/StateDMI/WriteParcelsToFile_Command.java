@@ -429,15 +429,15 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 	
 		String printLine = null;
 		String cmnt = "#>";
-		String format_1 = "%-12.12s %-8.8s %4d %-20.20s %10.3f %-4.4s %-10.10s %15.15s %-10.10s";
+		String format_1 = "%-12.12s %-8.8s %-11.11s %4d %-20.20s %10.3f %-4.4s %-10.10s %15.15s %-10.10s";
 
 		// Surface water fields - space on the left to skip over above formatting
-		String format_2 = "                                                                                           " +
+		String format_2 = "                                                                                                       " +
 			"%-10.10s %-8.8s %-10.10s %-8.8s %-8.8s %8.3f %10.3f";
 
 		// Groundwater fields - data source and include align with  surface water and then space over to groundwater columns
-		String format_3 = "                                                                                           %-10.10s %-8.8s                                        " +
-			"          %-12.12s %-10.10s %-8.8s %-10.10s %8d %10.3f";
+		String format_3 = "                                                                                                       %-10.10s %-8.8s                                        " +
+			"          %-12.12s %-10.10s %-8.8s %-10.10s %8d %11.3f";
 
 		// Size to largest size
 		List<Object> objectList = new ArrayList<>(8);
@@ -451,14 +451,18 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 		out.println(cmnt);
 		out.println(cmnt + "  Model ID - StateCU location and node type");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
-		out.println(cmnt + "  LocId        :  CU Location ID surface water data");
-		out.println(cmnt + "  LocType      :  Location type");
-		out.println(cmnt + "                  - for StateMod, corresponds to network node type");
-		out.println(cmnt + "                  - for StateCU, determined from supply for parcels");
-		out.println(cmnt + "                  DIV - diversion");
-		out.println(cmnt + "                  D&W - diversion & well");
-		out.println(cmnt + "                  WEL - well");
-		out.println(cmnt + "                  UNK - unknown, such as StateCU climate station dataset");
+		out.println(cmnt + "  LocId          :  CU Location ID surface water data");
+		out.println(cmnt + "  LocType        :  Location type");
+		out.println(cmnt + "                    - for StateMod, corresponds to network node type");
+		out.println(cmnt + "                    - for StateCU, determined from supply for parcels");
+		out.println(cmnt + "                    DIV - diversion");
+		out.println(cmnt + "                    D&W - diversion & well");
+		out.println(cmnt + "                    WEL - well");
+		out.println(cmnt + "                    UNK - unknown, such as StateCU climate station dataset");
+		out.println(cmnt + "  CollectionType :  Used if multiple data objects are combined under one model identifier");
+		out.println(cmnt + "                    Single - single node (no collection)");
+		out.println(cmnt + "                    Aggregate - aggregate physical properties (capacity, etc.) and water rights into classes");
+		out.println(cmnt + "                    System - aggregate physical properties (capacity, etc.), maintain water rights");
 		out.println(cmnt);
 		out.println(cmnt + "  Parcel Data - GIS loaded into HydroBase");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
@@ -476,9 +480,12 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 		out.println(cmnt + "                  - may in the future be read directly from GIS or other files");
 		out.println(cmnt + "                  HB-PUTS = HydroBase ParcelUseTS/Structure from vw_CDSS_ParcelUseTSStructureToParcel" );
 		out.println(cmnt + "                  HB-WTP = HydroBase Well/Parcel from vw_CDSS_WellsWellToParcel" );
-		out.println(cmnt + "  CDS?         :  Indicates whether the parcel is included in CDS file acreage.");
-		out.println(cmnt + "                  CDS:YES = include in CDS area for the location");
-		out.println(cmnt + "                  CDS:NO = do not include - for GW supply in D&W, will be included in the Div node acreage");
+		out.println(cmnt + "                  SET = data are provided with Set...() or Read...() command" );
+		out.println(cmnt + "  CDS:?        :  Indicates whether the parcel is included in CDS file acreage.");
+		out.println(cmnt + "                  CDS:YES = include area irrigated by supply in CDS file");
+		out.println(cmnt + "                  - a location with surface water supply - area for surface supply is always included");
+		out.println(cmnt + "                  CDS:NO = do not include area irrigated by supply in CDS file");
+		out.println(cmnt + "                  - if GW supply, only include if parcel area is not included in surface water supply");
 		out.println(cmnt);
 		out.println(cmnt + "  SW Collection Data - surface water aggregate/system data");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
@@ -511,9 +518,10 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 		out.println(cmnt + "  #Wells       :  Number of wells that are associated with ParcelId.");
 		out.println(cmnt + "  GWIrrigArea  :  ParcelArea/#Wells, zero if area is already assigned to surface water ID for D&W node.");
 		out.println(cmnt);
-		out.println(cmnt + "----- Model Id ----|----------------------------- Parcel Data --------------------------||                 ||---- SW Collection Data ----|- SW Suppply Data -|------------- GW Collection Data ----------|-- GW Supply Data -|");
-		out.println(cmnt + "  LocId     LocType|Year        Crop          ParcelArea Units IrrigMeth    ParcelId    || DataSrc    CDS? ||SWPartType SWPartIdType WDID| %Irrig SWIrrigArea| GWPartType  GWPartIdType   WDID   Receipt | #Wells|GWIrrigArea|");
-		out.println(cmnt + "b--------exb------exb--exb------------------exb--------exb--exb--------exb-------------exb--------exb------exb--------exb------exb------exb------exb--------exb----------exb--------exb------exb--------exb------exb--------e");
+		out.println(cmnt + "---------- Model Id -----------|----------------------------- Parcel Data --------------------------||-Data Source/Use-||---- SW Collection Data ----|- SW Suppply Data -|------------- GW Collection Data ----------|-- GW Supply Data --|");
+		out.println(cmnt + "            Loc     Collection |                                           Irrigation               ||                 ||                            |                   |                                           |                    |");
+		out.println(cmnt + "  LocId     Type    Type       |Year        Crop          ParcelArea Units Method       ParcelId    || DataSrc    CDS? ||SWPartType SWPartIdType WDID| %Irrig SWIrrigArea| GWPartType  GWPartIdType   WDID   Receipt | #Wells |GWIrrigArea|");
+		out.println(cmnt + "b--------exb------exb---------exb--exb------------------exb--------exb--exb--------exb-------------exb--------exb------exb--------exb------exb------exb------exb--------exb----------exb--------exb------exb--------exb------exb---------ex");
 		out.println(cmnt + "EndHeader");
 		out.println(cmnt);
 	
@@ -522,6 +530,7 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 		String locid = "";
 		String locidPrev = "";
 		String locType = "???";
+		String collectionType = "";
 		for ( StateCU_Parcel parcel : parcelList ) {
 			if (parcel == null) {
 				continue;
@@ -535,10 +544,18 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 				// Lookup the CULocation
 				// - only do for new location since lookups for each parcel would be a performance hit
 				StateCU_Location culoc = StateCU_Location.lookupForId ( culocList, locid );
+
 				// Set the location type based on whether surface or groundwater supply is available
 				locType = "" + culoc.getLocationType();
+
+				// Set the collection type
+				collectionType = "Single";
+				if ( culoc.isCollection() ) {
+					collectionType = "" + culoc.getCollectionType();
+				}
 			}
 			objectList.add(locType);
+			objectList.add(collectionType);
 			objectList.add(new Integer(parcel.getYear()));
 			objectList.add(parcel.getCrop());
 			objectList.add(new Double(parcel.getArea()));

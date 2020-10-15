@@ -49,9 +49,7 @@ import RTi.Util.IO.PropList;
 import RTi.Util.IO.AbstractCommand;
 
 /**
-<p>
 This class initializes, checks, and runs the TranslateCropPatternTS() command.
-</p>
 */
 public class TranslateCropPatternTS_Command extends AbstractCommand implements Command
 {
@@ -81,7 +79,7 @@ cross-reference to the original commands.
 */
 public void checkCommandParameters ( PropList parameters, String command_tag, int warning_level )
 throws InvalidCommandParameterException
-{	String routine = getClass().getName() + ".checkCommandParameters";
+{	String routine = getClass().getSimpleName() + ".checkCommandParameters";
 	String ID = parameters.getValue ( "ID" );
 	String ListFile = parameters.getValue ( "ListFile" );
 	String IDCol = parameters.getValue ( "IDCol" );
@@ -201,14 +199,14 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List<String> valid_Vector = new Vector<String>(6);
-	valid_Vector.add ( "ID" );
-	valid_Vector.add ( "ListFile" );
-	valid_Vector.add ( "IDCol" );
-	valid_Vector.add ( "OldCropType" );
-	valid_Vector.add ( "NewCropType" );
-	valid_Vector.add ( "IfNotFound" );
-    warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	List<String> validList = new Vector<>(6);
+	validList.add ( "ID" );
+	validList.add ( "ListFile" );
+	validList.add ( "IDCol" );
+	validList.add ( "OldCropType" );
+	validList.add ( "NewCropType" );
+	validList.add ( "IfNotFound" );
+    warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	// Throw an InvalidCommandParameterException in case of errors.
 	if ( warning.length() > 0 ) {		
@@ -240,7 +238,7 @@ Run method internal to this class, to handle running in discovery and run mode.
 public void runCommand ( int command_number )
 throws InvalidCommandParameterException, CommandWarningException, CommandException
 {
-    String routine = getClass().getName() + ".runCommandInternal", message;
+    String routine = getClass().getSimpleName() + ".runCommandInternal", message;
     int warning_level = 2;
     String command_tag = "" + command_number;
     int warning_count = 0;
