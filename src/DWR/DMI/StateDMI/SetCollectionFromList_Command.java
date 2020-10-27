@@ -28,7 +28,10 @@ import javax.swing.JFrame;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
 import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
@@ -316,7 +319,7 @@ throws InvalidCommandParameterException
 	}
     
 	// Check for invalid parameters...
-	List<String> validList = new ArrayList<>(12);
+	List<String> validList = new ArrayList<>(13);
 	validList.add ( "ListFile" );
 	validList.add ( "TableID" );
 	validList.add ( "Year" );
@@ -328,6 +331,7 @@ throws InvalidCommandParameterException
 	validList.add ( "PartIDTypeColumn" );
 	validList.add ( "PartsListedHow" );
 	validList.add ( "PartIDsColMax" );
+	validList.add ( "WellReceiptWaterDistrictMap" );
 	validList.add ( "IfNotFound" );
     warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
@@ -373,6 +377,66 @@ public <T> List<T> getObjectList ( Class<T> c )
         v.add ( (T)table );
     }
     return v;
+}
+
+/**
+ * Get the water districts for well identifiers in the dataset, from the location IDs.
+ * This also includes water districts from WellReceiptWaterDistrictMap parameter.
+ * Example identifiers are:
+ * 
+ *   17_GW...
+ *   1234567
+ *   1234567I
+ *   1234567D
+ * @param culocList list of StateCU_Location to process
+ * @param receiptWDMap map of receipt to WD
+ */
+private int [] getWaterDistrictsForWells( List<StateCU_Location> culocList, Hashtable<String,String> receiptWDMap ) {
+   	List<Integer> wdList = new ArrayList<>();
+   	String culocid;
+   	for ( StateCU_Location culoc : culocList ) {
+   		culocid = culoc.getID();
+   		// Get the first 2 characters
+   		// - if an integer, assume the ID starts with a WDID that can be used to extract WD
+   		if ( StringUtil.isInteger(culocid.substring(0,2)) ) {
+   			// Only add the water district once
+   			boolean found = false;
+   			Integer wd = new Integer(culocid.substring(0,2));
+   			for ( Integer iwd : wdList ) {
+   				if ( wd.equals(iwd ) ) {
+   					found = true;
+   					break;
+   				}
+   			}
+   			if ( !found ) {
+   				wdList.add(wd);
+   			}
+   		}
+   	}
+
+   	// Also add water districts for wells in collections where well receipt is in water districts
+   	// outside of those indicated by model node identifiers.
+   	Set<Entry<String, String>> entrySet = receiptWDMap.entrySet();
+   	for ( Entry<String,String> entry : entrySet ) {
+   		boolean found = false;
+   		Integer wd = new Integer(entry.getValue());
+   		for ( Integer iwd : wdList ) {
+   			if ( wd.equals(iwd ) ) {
+   				found = true;
+   				break;
+   			}
+   		}
+   		if ( !found ) {
+   			wdList.add(wd);
+   		}
+   	}
+
+   	// Convert list to array:
+   	int [] wdArray = new int[wdList.size()];
+   	for ( int i = 0; i < wdArray.length; i++ ) {
+   		wdArray[i] = wdList.get(i).intValue();
+   	}
+   	return wdArray;
 }
 
 // Use base class parse method
@@ -496,6 +560,17 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	if ( PartsListedHow.equalsIgnoreCase("InColumn") ) {
 		partsInRow = false;
 	}
+    String WellReceiptWaterDistrictMap = parameters.getValue ( "WellReceiptWaterDistrictMap" );
+    Hashtable<String,String> receiptWDMap = new Hashtable<String,String>();
+    if ( (WellReceiptWaterDistrictMap != null) && (WellReceiptWaterDistrictMap.length() > 0) && (WellReceiptWaterDistrictMap.indexOf(":") > 0) ) {
+        // First break map pairs by comma
+        List<String>pairs = StringUtil.breakStringList(WellReceiptWaterDistrictMap, ",", 0 );
+        // Now break pairs and put in hashtable
+        for ( String pair : pairs ) {
+            String [] parts = pair.split(":");
+            receiptWDMap.put(parts[0].trim(), parts[1].trim() );
+        }
+    }
     String IfNotFound = parameters.getValue ( "IfNotFound" );
     if ( (IfNotFound == null) || IfNotFound.equals("") ) {
     	IfNotFound = _Warn;
@@ -1053,8 +1128,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     					StateCU_Location_CollectionPartIdType partIdTypeForCuloc = StateCU_Location_CollectionPartIdType.valueOfIgnoreCase(partIdTypeForLoop);
    						partIdTypesForCuloc.add(partIdTypeForCuloc); // Add in any case so ID and type lists align
    						if ( partIdTypeForCuloc == StateCU_Location_CollectionPartIdType.RECEIPT) { 
-   							// Set the WD to -1, will be filled later
-    						partIdWDsForCuloc.add(new Integer(-1));
+   							// Look up the WD from command parameter
+   							String wd = receiptWDMap.get(partIds.get(iPart));
+   							if ( wd != null ) {
+    							partIdWDsForCuloc.add(Integer.parseInt(wd));
+   							}
+   							else {
+   								// Set the WD to -1, will be filled later through an additional database query
+    							partIdWDsForCuloc.add(new Integer(-1));
+   							}
    						}
    						else {
    							// Set the WD, mostly for information since used for Well part ID of receipt
@@ -1304,8 +1386,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     						StateMod_Well_CollectionPartIdType partIdTypeForWell = StateMod_Well_CollectionPartIdType.valueOfIgnoreCase(partIdTypeForLoop);
     						partIdTypesForWell.add(partIdTypeForWell); // Add in any case so list is aligned with the ID list
     						if ( partIdTypeForWell == StateMod_Well_CollectionPartIdType.RECEIPT) { 
-    							// Set the WD to -1, will be filled later
-    							partIdWDsForWell.add(new Integer(-1));
+    							// Look up the WD from command parameter
+   								String wd = receiptWDMap.get(partIds.get(iPart));
+   								if ( wd != null ) {
+    								partIdWDsForWell.add(Integer.parseInt(wd));
+   								}
+   								else {
+   									// Set the WD to -1, will be filled later through an additional database query
+    								partIdWDsForWell.add(new Integer(-1));
+   								}
    							}
    							else {
    								// Set the WD, mostly for information since used for Well part ID of receipt
@@ -1426,10 +1515,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	} // End TableID set in processor
         } // End no index errors for table
 
-        	// Additional processing to set the WD for collection that are Well RECEIPT:
+        	// Additional processing to set the WD for collections that are Well RECEIPT:
         	// - TODO smalers 2020-10-10 also need to do for StateMod wells
         	List<String> problems = new ArrayList<>();
-        	setCollectionPartReceiptWDForCULocation ( hbdmi, culocList, problems );
+        	setCollectionPartReceiptWDForCULocations ( hbdmi, culocList, receiptWDMap, problems );
         	for ( String problem : problems ) {
         		status.addToLog ( commandPhase,
                 	new CommandLogRecord(CommandStatusType.WARNING,
@@ -1476,33 +1565,21 @@ Additional processing to set the WD for collection parts that are well RECEIPT:
 - WDID parts can be split to determine WD but receipt must query the database and match
 @param hbdmi HydroBaseDMI for database queries.
 @param culocList list of StateCU_Location to process.
+@param receiptWDMap map of receipt to WD
+@param problems list of problems found processing
 */
-private void setCollectionPartReceiptWDForCULocation ( HydroBaseDMI hbdmi, List<StateCU_Location> culocList, List<String> problems )
+private void setCollectionPartReceiptWDForCULocations ( HydroBaseDMI hbdmi,
+	List<StateCU_Location> culocList,
+    Hashtable<String,String> receiptWDMap,
+	List<String> problems )
 throws Exception {
-	String routine = getClass().getSimpleName() + ".setCollectionPartReceiptWD";
+	String routine = getClass().getSimpleName() + ".setCollectionPartReceiptWDForCULocation";
    	// Get the HydroBase_Well instances for the water districts that are candidates to be matched
    	// so that and provide WD.
 
-   	// Get the list of water districts from location IDs.
-   	// - example is 17_GW...
-   	// - example is 1234567
-   	// - example is 1234567I
-   	// - example is 1234567D
-   	List<Integer> wdList = new ArrayList<>();
-   	String culocid;
-   	for ( StateCU_Location culoc : culocList ) {
-   		culocid = culoc.getID();
-   		// Get the first 2 characters
-   		// - if an integer, assume the ID starts with a WDID that can be used to extract WD
-   		if ( StringUtil.isInteger(culocid.substring(0,2)) ) {
-   			wdList.add(new Integer(culocid.substring(0,2)));
-   		}
-   	}
-   	int [] wdArray = new int[wdList.size()];
-   	for ( int i = 0; i < wdArray.length; i++ ) {
-   		wdArray[i] = wdList.get(i).intValue();
-   	}
-       
+	// First get the water districts for the dataset.
+   	int [] wdArray = getWaterDistrictsForWells( culocList, receiptWDMap );
+
    	// Get the wells for divisions of interest that have non-empty receipt
    	//int [] divArray = HydroBase_WaterDistrict.lookupWaterDivisionIdsForDistricts(hbdmi.getWaterDistricts(), wdArray );
    	int [] divArray = null;
@@ -1518,7 +1595,9 @@ throws Exception {
    		StateCU_Location_CollectionPartType partType = culoc.getCollectionPartType();
    		String receipt = null;
    		if ( partType == StateCU_Location_CollectionPartType.WELL ) {
-   			// Have a well.  Loop through the ID list.  The year is irrelevant (only used with parcel ID types).
+   			// Have a well.
+   			// - Loop through the ID list.
+   			// - The year is irrelevant (year is only used with parcel ID types).
    			List<String> partIds = culoc.getCollectionPartIDsForYear(year);
    			List<StateCU_Location_CollectionPartIdType> partIdTypes = culoc.getCollectionPartIDTypes();
 			String partId;
@@ -1539,7 +1618,8 @@ throws Exception {
    					}
    					if ( !found ) {
    						String message = "Did not find well \"" + culoc.getID() + "\" part well receipt \"" + partId +
-   							"\" in HydroBase wells querying data in well identifier water districts.  "
+   							"\" in HydroBase wells querying data in water districts determined from well "
+   							+ "identifiers and WellReceiptWaterDistrictMap parameter.  "
    							+ "Unable to set WD used to retrieve data from cache."
    							+ "  Well will be omitted from processing.";
    						Message.printWarning(2, routine, message);
@@ -1627,7 +1707,8 @@ throws Exception {
    					}
    					if ( !found ) {
    						String message = "Did not find well \"" + smwell.getID() + "\" part well receipt \"" + partId +
-   							"\" in HydroBase wells querying data in well identifier water districts.  "
+   							"\" in HydroBase wells querying data in water districts determined from well "
+   							+ "identifiers and WellReceiptWaterDistrictMap parameter.  "
    							+ "Unable to set WD used to retrieve data from cache."
    							+ "  Well will be omitted from processing.";
    						Message.printWarning(2, routine, message);
@@ -1668,6 +1749,7 @@ public String toString ( PropList parameters )
 	String PartIDTypeColumn = parameters.getValue ( "PartIDTypeColumn" );
 	String PartIDsColMax = parameters.getValue ( "PartIDsColMax" );
 	String PartsListedHow = parameters.getValue ( "PartsListedHow" );
+	String WellReceiptWaterDistrictMap = parameters.getValue ( "WellReceiptWaterDistrictMap" );
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
 
 	StringBuffer b = new StringBuffer ();
@@ -1736,6 +1818,12 @@ public String toString ( PropList parameters )
 			b.append ( "," );
 		}
 		b.append ( "PartIDsColMax=\"" + PartIDsColMax + "\"" );
+	}
+	if ( (WellReceiptWaterDistrictMap != null) && (WellReceiptWaterDistrictMap.length() > 0) ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "WellReceiptWaterDistrictMap=\"" + WellReceiptWaterDistrictMap + "\"" );
 	}
 	if ( (IfNotFound != null) && (IfNotFound.length() > 0) ) {
 		if ( b.length() > 0 ) {

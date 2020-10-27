@@ -55,10 +55,8 @@ import RTi.Util.IO.PropList;
 import RTi.Util.String.StringUtil;
 
 /**
-<p>
 This class initializes, checks, and runs the Check*() commands for StateCU data.
 It should be extended and the command name set in derived classes.
-</p>
 */
 public abstract class CheckStateCU_Command extends AbstractCommand implements Command
 {

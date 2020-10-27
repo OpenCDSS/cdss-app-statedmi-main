@@ -497,6 +497,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		boolean isCollection = false;
 		StopWatch stopWatchForLoc = new StopWatch();
 		int totalMs = 0; // total time to process
+		// The following are used to allow estimating whether a StateCU node is DIV, D&W, or WEL.
 		boolean culocHasSurfaceWaterSupply = false;
 		boolean culocHasGroundWaterSupply = false;
 		for ( int i = 0; i < culocListSize; i++ ) {
@@ -610,6 +611,58 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									if ( Message.isDebugOn ) {
 										sw.clearAndStart();
 									}
+
+									// Additionally, process the wells associated with the parcel for groundwater supply
+									// - this logic is the same as collection system below for wells
+									// - TODO smalers 2020-02-17 this code is similar to well aggregation so could make code modular and reuse
+									// - Multiple wells might irrigate the same parcel.
+									//   However, the parcel is added once above and additional wells are added as supply for that parcel.
+									// - The parcel ID is unique, especially with year and first 3 digits are used for top-level cache.
+
+									StateCU_SupplyFromGW supplyFromGW = null;
+
+									sw.clearAndStart();
+									// The cache tree uses water district (of the well), then year for index
+									List<HydroBase_Wells> hbWellsList = hbdmi.readWellsWellToParcelList(
+										hbParcelUseTSStruct.getParcel_id(), year, -1, null, hbParcelUseTSStruct.getStructureWD(), -1);
+									if ( hbWellsList.size() > 0 ) {
+										Message.printStatus ( 2, routine, "      Found " + hbWellsList.size() +
+											" matching well/parcel records (GW suppply) for year " +
+											year + ", parcel ID=" + hbParcelUseTSStruct.getParcel_id() );
+									}
+									sw.stop();
+									// Uncomment for troubleshooting performance...
+									// Message.printStatus ( 2, routine, "  Reading well parcels for parcel_id " +
+									//	hbParcelUseTSStruct.getParcel_id() + " (" + parcelCount + " of " + parcelNum
+									//		+ ") took " + sw.getMilliseconds() + " ms");
+									// Create a new supply
+									// - if the parcel is a duplicate for the location, the parcel is added once and
+									//   the supply is added as an additional supply
+									for ( HydroBase_Wells hbWell : hbWellsList ) {
+										// Supply information information is joined
+										// - only one supply 
+										supplyFromGW = new StateCU_SupplyFromGW();
+										supplyFromGW.setDataSource("HB-WTP");
+										supplyFromGW.setCollectionPartType("WellInDitch");
+										double areaIrrigPercent = 1.0; // Well initially assumed to irrigate entire parcel
+										supplyFromGW.setAreaIrrigPercent(areaIrrigPercent);  // Well relationships don't use
+										supplyFromGW.setAreaIrrig(hbParcelUseTSStruct.getArea()*areaIrrigPercent);
+										// Do not include in CDS area since parcel area is already with ditch
+										supplyFromGW.setIncludeInCdsArea(false);
+										// Set whatever is available
+										// TODO smalers 2020-08-24 this is not used and takes time to query.
+										//sw.clearAndStart();
+										//structureView = hbdmi.readStructureViewForStructure_num(hbWell.getStructure_num());
+										//sw.stop();
+										//Message.printStatus ( 2, routine, "  Reading structure view for structure_num " +
+										//	hbWell.getStructure_num() + " took " + sw.getMilliseconds() + " ms");
+										supplyFromGW.setWDID(HydroBase_WaterDistrict.formWDID( hbWell.getWD(), hbWell.getID()) );
+										supplyFromGW.setReceipt(hbWell.getReceipt());
+										parcel.addSupply(supplyFromGW);
+									}
+									
+									// Add the parcel
+									
 									culoc.addParcel ( parcel );
 									if ( Message.isDebugOn ) {
 										sw.stop();
@@ -617,7 +670,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 											" to CU Location " + culoc_id + " took " + sw.getMilliseconds() + " ms");
 									}
 
-									// Set CU Location information to help set location type .
+									// Set CU Location information to help set location type.
 
 									if ( parcel.hasGroundWaterSupply() ) {
 										culocHasGroundWaterSupply = true;
@@ -760,7 +813,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										//sw.stop();
 										//Message.printStatus ( 2, routine, "  Reading structure view for structure_num " +
 										//	hbWell.getStructure_num() + " took " + sw.getMilliseconds() + " ms");
-										supplyFromSW.setWDID(HydroBase_WaterDistrict.formWDID( hbWell.getWD(), hbWell.getID()) );
+										supplyFromGW.setWDID(HydroBase_WaterDistrict.formWDID( hbWell.getWD(), hbWell.getID()) );
 										supplyFromGW.setReceipt(hbWell.getReceipt());
 										parcel.addSupply(supplyFromGW);
 									}
@@ -806,17 +859,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			        status.addToLog ( commandPhase,
 			            new CommandLogRecord(CommandStatusType.FAILURE,
 			                message, "Change aggregation/system data from parcel to well part type." ) );
-	
-					// Clear the existing time series contents.
-					/*
-					TODO - SAM 2004-05-18 - why is this done?
-					Comment out for now
-	
-					pos = StateCU_Util.indexOf (__CUCropPatternTS_List, culoc_id);
-					if ( pos >= 0 ) {
-						__CUCropPatternTS_List.get(pos).removeAllTS();
-					}
-					*/
 	
 					// Put together a list of parcel IDs from the current CU location.
 					// The aggregate/systems are allowed to vary over time so only read the parcels for

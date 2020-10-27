@@ -26,8 +26,8 @@ package DWR.DMI.StateDMI;
 import javax.swing.JFrame;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
 
 import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
 import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
@@ -225,14 +225,15 @@ throws InvalidCommandParameterException
 	}
     
 	// Check for invalid parameters...
-	Vector<String> valid_Vector = new Vector<String>(6);
-	valid_Vector.add ( "ID" );
-	valid_Vector.add ( "PartIDs" );
-	valid_Vector.add ( "Year" );
-	valid_Vector.add ( "Div" );
-	valid_Vector.add ( "PartType" );
-	valid_Vector.add ( "IfNotFound" );
-    warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	List<String> validList = new ArrayList<>(6);
+	validList.add ( "ID" );
+	validList.add ( "PartIDs" );
+	validList.add ( "Year" );
+	validList.add ( "Div" );
+	validList.add ( "PartType" );
+	validList.add ( "WellReceiptWaterDistrictMap" );
+	validList.add ( "IfNotFound" );
+    warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	// Throw an InvalidCommandParameterException in case of errors.
 	if ( warning.length() > 0 ) {		
@@ -348,6 +349,17 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	else if ( nodeType.equalsIgnoreCase(_Well) ) {
 		// Part type will have been set above (required).
 	}
+    String WellReceiptWaterDistrictMap = parameters.getValue ( "WellReceiptWaterDistrictMap" );
+    Hashtable<String,String> receiptWDMap = new Hashtable<String,String>();
+    if ( (WellReceiptWaterDistrictMap != null) && (WellReceiptWaterDistrictMap.length() > 0) && (WellReceiptWaterDistrictMap.indexOf(":") > 0) ) {
+        // First break map pairs by comma
+        List<String>pairs = StringUtil.breakStringList(WellReceiptWaterDistrictMap, ",", 0 );
+        // Now break pairs and put in hashtable
+        for ( String pair : pairs ) {
+            String [] parts = pair.split(":");
+            receiptWDMap.put(parts[0].trim(), parts[1].trim() );
+        }
+    }
     String IfNotFound = parameters.getValue ( "IfNotFound" );
     if ( (IfNotFound == null) || IfNotFound.equals("") ) {
     	IfNotFound = _Warn;
@@ -462,8 +474,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				// Assume a receipt number
     				partIdList.add(partId.substring(2));
     				partIdTypeList.add(StateCU_Location_CollectionPartIdType.RECEIPT);
-    				// Set the WD to -1, will be filled later
-    				partIdWDList.add(new Integer(-1));
+   					// Look up the WD from command parameter
+   					String wd = receiptWDMap.get(partId);
+   					if ( wd != null ) {
+    					partIdWDList.add(Integer.parseInt(wd));
+   					}
+   					else {
+   						// Set the WD to -1, will be filled later through an additional database query
+    					partIdWDList.add(new Integer(-1));
+   					}
     			}
     			else {
     				// Assume a WDID
@@ -680,8 +699,27 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         						new CommandLogRecord(CommandStatusType.WARNING,
         							message, "Last collection information specified will apply." ) );
         				}
+        				else if ( wellsForReceipt.size() == 0 ) {
+        					// No wells, see if there is a set.
+   							String wd = receiptWDMap.get(partId);
+   							if ( wd != null ) {
+    							partIdWDsForWell.add(new Integer(wellsForReceipt.get(0).getWD()));
+   							}
+   							else {
+   								// Set the WD to -1.
+   								message = "Well \"" + id + "\" part \"" + partId + "\" RECEIPT has no WD.  Won't be able to read well from cached data.";
+   								Message.printWarning ( warning_level, 
+   									MessageUtil.formatMessageTag(command_tag, ++warning_count),
+   										routine, message );
+   								status.addToLog ( command_phase,
+   									new CommandLogRecord(CommandStatusType.WARNING,
+   										message, "Specify the WellReceiptWaterDistrictMap parameter." ) );
+   								partIdWDsForWell.add(new Integer(-1));
+   							}
+        				}
         				else {
-        					partIdWDsForWell.add(new Integer(wellsForReceipt.get(0).getWD()));
+        					// Have a well record and can determine the WD for the receipt
+    						partIdWDsForWell.add(new Integer(wellsForReceipt.get(0).getWD()));
         				}
         			}
         			else {
@@ -803,6 +841,7 @@ public String toString ( PropList parameters )
 	String Div = parameters.getValue ( "Div" );
 	String PartType = parameters.getValue ( "PartType" );
 	String PartIDs = parameters.getValue ( "PartIDs" );
+	String WellReceiptWaterDistrictMap = parameters.getValue ( "WellReceiptWaterDistrictMap" );
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
 
 	StringBuffer b = new StringBuffer ();
@@ -832,6 +871,12 @@ public String toString ( PropList parameters )
 			b.append ( "," );
 		}
 		b.append ( "PartIDs=\"" + PartIDs + "\"" );
+	}
+	if ( (WellReceiptWaterDistrictMap != null) && (WellReceiptWaterDistrictMap.length() > 0) ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "WellReceiptWaterDistrictMap=\"" + WellReceiptWaterDistrictMap + "\"" );
 	}
 	if ( (IfNotFound != null) && (IfNotFound.length() > 0) ) {
 		if ( b.length() > 0 ) {

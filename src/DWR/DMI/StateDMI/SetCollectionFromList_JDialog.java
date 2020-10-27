@@ -55,6 +55,7 @@ import java.util.List;
 import DWR.StateMod.StateMod_Diversion_CollectionType;
 import DWR.StateMod.StateMod_Well_CollectionPartIdType;
 import DWR.StateMod.StateMod_Well_CollectionPartType;
+import RTi.Util.GUI.DictionaryJDialog;
 import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleFileFilter;
@@ -92,6 +93,7 @@ private JTextField __PartIDsCol_JTextField = null;
 private JTextField __PartIDTypeColumn_JTextField = null;
 private SimpleJComboBox __PartsListedHow_JComboBox = null;
 private JTextField __PartIDsColMax_JTextField = null;
+private JTextArea __WellReceiptWaterDistrictMap_JTextArea = null;
 private SimpleJComboBox	__IfNotFound_JComboBox = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
@@ -101,6 +103,7 @@ private SimpleJButton __path_JButton = null;
 private String __working_dir = null;	
 private SetCollectionFromList_Command __command = null;
 private boolean __ok = false;
+private JFrame __parent = null;
 
 /**
 Type of collection:  "Aggregate", "System", or "MultiStruct" - see StateMod definitions.
@@ -195,6 +198,24 @@ public void actionPerformed(ActionEvent event)
 		}
 		refresh ();
 	}
+    else if ( event.getActionCommand().equalsIgnoreCase("EditWellReceiptWaterDistrictMap") ) {
+        // Edit the dictionary in the dialog.  It is OK for the string to be blank.
+        String WellReceiptWaterDistrictMap = __WellReceiptWaterDistrictMap_JTextArea.getText().trim();
+        String [] notes = {
+            "The water district (WD) for each well in a collection is used to optimize reading data.",
+            "Wells that use permit receipt rather than WDID for identifier do not have WD in the identifier.",
+            "In most cases, the WDs from all locations can be used to query data to supply WD for receipts.",
+            "In rare cases, a well identified with a receipt exists outside of water districts determined from WDIDs.",
+            "Use this parameter to indicate the water district for such receipts.",
+            "This information will avoid warnings and allow the dataset to be fully processed.",
+        };
+        String dict = (new DictionaryJDialog ( __parent, true,  WellReceiptWaterDistrictMap,
+            "Edit WellReceiptWaterDistrictMap Parameter", notes, "Well Receipt", "Water District for Well",10)).response();
+        if ( dict != null ) {
+            __WellReceiptWaterDistrictMap_JTextArea.setText ( dict );
+            refresh();
+        }
+    }
 }
 
 /**
@@ -264,6 +285,12 @@ private void checkInput () {
 		String PartType = __PartType_JComboBox.getSelected();
 		if ( PartType.length() > 0 ) {
 			props.set("PartType", PartType);
+		}
+	}
+	if ( __WellReceiptWaterDistrictMap_JTextArea != null ) {
+		String WellReceiptWaterDistrictMap = __WellReceiptWaterDistrictMap_JTextArea.getText().trim().replace("\n"," ");
+		if ( WellReceiptWaterDistrictMap.length() > 0 ) {
+			props.set("WellReceiptWaterDistrictMap", WellReceiptWaterDistrictMap);
 		}
 	}
 	
@@ -349,6 +376,10 @@ private void commitEdits()
 		String PartType = __PartType_JComboBox.getSelected();
 		__command.setCommandParameter("PartType", PartType);
 	}
+	if ( __WellReceiptWaterDistrictMap_JTextArea != null ) {
+		String WellReceiptWaterDistrictMap = __WellReceiptWaterDistrictMap_JTextArea.getText().trim().replace("\n"," ");
+		__command.setCommandParameter("WellReceiptWaterDistrictMap", WellReceiptWaterDistrictMap);
+	}
 }
 
 /**
@@ -357,7 +388,8 @@ Instantiates the GUI components.
 @param command Command to edit.
 */
 private void initialize ( JFrame parent, SetCollectionFromList_Command command )
-{	__command = command;
+{	__parent = parent;
+	__command = command;
 	CommandProcessor processor = __command.getCommandProcessor();
 	__working_dir = StateDMICommandProcessorUtil.getWorkingDirForCommand ( processor, __command );
 
@@ -664,6 +696,22 @@ private void initialize ( JFrame parent, SetCollectionFromList_Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Optional - maximum column for part IDs if in row (default is use all)."), 
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+
+	if ( __nodeType.equalsIgnoreCase(__command._Well) ) {
+        JGUIUtil.addComponent(main_JPanel, new JLabel ("Well receipt water districts:"),
+                0, ++y, 1, 2, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+        __WellReceiptWaterDistrictMap_JTextArea = new JTextArea (3,35);
+        __WellReceiptWaterDistrictMap_JTextArea.setLineWrap ( true );
+        __WellReceiptWaterDistrictMap_JTextArea.setWrapStyleWord ( true );
+        __WellReceiptWaterDistrictMap_JTextArea.setToolTipText("Receipt:WaterDistrict,Receipt:WaterDistrict");
+        __WellReceiptWaterDistrictMap_JTextArea.addKeyListener (this);
+        JGUIUtil.addComponent(main_JPanel, new JScrollPane(__WellReceiptWaterDistrictMap_JTextArea),
+            1, y, 2, 2, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+        JGUIUtil.addComponent(main_JPanel, new JLabel ("Optional - water districts for well receipts."),
+            3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+        JGUIUtil.addComponent(main_JPanel, new SimpleJButton ("Edit","EditWellReceiptWaterDistrictMap",this),
+            3, ++y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+    }
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -770,6 +818,7 @@ private void refresh ()
 	String PartIDTypeColumn = "";
 	String PartIDsColMax = "";
 	String PartsListedHow = "";
+	String WellReceiptWaterDistrictMap = "";
 	String IfNotFound = "";
 	PropList parameters = null;
 	
@@ -789,6 +838,7 @@ private void refresh ()
 		PartIDTypeColumn = parameters.getValue ( "PartIDTypeColumn" );
 		PartsListedHow = parameters.getValue ( "PartsListedHow" );
 		PartIDsColMax = parameters.getValue ( "PartIDsColMax" );
+		WellReceiptWaterDistrictMap = parameters.getValue ( "WellReceiptWaterDistrictMap" );
 		IfNotFound = parameters.getValue ( "IfNotFound" );
 		if ( ListFile != null ) {
 			__ListFile_JTextField.setText (ListFile);
@@ -852,6 +902,9 @@ private void refresh ()
 		if ( PartIDsColMax == null ) {
 			__PartIDsColMax_JTextField.setText ( PartIDsColMax );
 		}
+		if ( WellReceiptWaterDistrictMap != null ) {
+			__WellReceiptWaterDistrictMap_JTextArea.setText(WellReceiptWaterDistrictMap);
+		}
 		if ( IfNotFound == null ) {
 			// Select default...
 			__IfNotFound_JComboBox.select ( 0 );
@@ -904,6 +957,10 @@ private void refresh ()
    		PartIDTypeColumn = __PartIDTypeColumn_JTextField.getText().trim();
    		parameters.add("PartIDTypeColumn=" + PartIDTypeColumn);
    	}
+	if ( __WellReceiptWaterDistrictMap_JTextArea != null ) {
+		WellReceiptWaterDistrictMap = __WellReceiptWaterDistrictMap_JTextArea.getText().trim().replace("\n"," ");
+		parameters.add("WellReceiptWaterDistrictMap=" + WellReceiptWaterDistrictMap);
+	}
 	__command_JTextArea.setText( __command.toString(parameters) );
 	// Check the path and determine what the label on the path button should be...
 	if (__path_JButton != null) {
