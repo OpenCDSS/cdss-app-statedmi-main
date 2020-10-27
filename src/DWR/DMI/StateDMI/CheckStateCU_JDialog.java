@@ -312,6 +312,8 @@ private void initialize ( JFrame parent, CheckStateCU_Command command )
         	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   2) Parcel is associated with more than one surface supply in a year and total of fractional areas is not equal to parcel area."),
            	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        JGUIUtil.addComponent(paragraph, new JLabel ("      The parcel may be associated with multiple model nodes, each with surface water supplies."),
+           	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel ("   3) [Deep Check] Parcel ID is associated with more than one CU Location in a year."),
            	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         idLabel = "CU location identifier:";
