@@ -142,6 +142,9 @@ import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Parcel;
 import DWR.StateCU.StateCU_PenmanMonteith;
+import DWR.StateCU.StateCU_Supply;
+import DWR.StateCU.StateCU_SupplyFromGW;
+import DWR.StateCU.StateCU_SupplyFromSW;
 import DWR.StateCU.StateCU_Util;
 
 /**
@@ -229,7 +232,7 @@ private volatile boolean __cancel_processing_requested = false;
 /**
 List of DataTable objects maintained by the processor.
 */
-List<DataTable> __TableList = new ArrayList<DataTable>();
+List<DataTable> __TableList = new ArrayList<>();
 
 /**
 Special flag to handle limitDiversionHistoricalTSMonthlyToRights() command,
@@ -311,6 +314,13 @@ mainly used when processing well to parcel relationships.
 */
 // TODO SAM 2007-02-18 Evaluate if needed
 //private List __CUParcelUseTS_List = new ArrayList();
+
+/**
+The internal list of StateCU_Parcel being processed.
+- a hashmap is kept for lookups of the parcels
+- lists to parcels are kept with the StateCU_Location
+*/
+private HashMap<String,StateCU_Parcel> __CUParcel_Map = new HashMap<>();
 
 /**
 The internal list of HydroBase_StructureToParcel records that can be examined.
@@ -1192,6 +1202,7 @@ public void clearResults()
 	__CUCropCharacteristics_List.clear();
 	__CUCropPatternTS_List.clear();
 	__CULocation_List.clear();
+	__CUParcel_Map.clear();
 	__CUIrrigationPracticeTS_List.clear();
 	__CUPenmanMonteith_List.clear();
 
@@ -1759,6 +1770,74 @@ protected void findAndAddCULocation ( StateCU_Location cu_loc, boolean replace )
 	else {
 		// Add at the end of the list...
 		__CULocation_List.add ( cu_loc );
+	}
+}
+
+/**
+Add a StateCU_Parcel instance to the __CUParcel_Map.
+Because parcels may be referenced by more than one supply (ditch or well),
+adding a second time is ignored.
+If supply data exist for the parcel, they are added if not already added.
+This is equivalent to calling the parce. addSupply() method.
+@param parcel parcel instance to be added.
+@param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
+This should only be used with commands that correct data, such as a set command.
+@param routine Routine to use for logging.
+@param messagePrefix Prefix for message line, for example spaces that align the message.
+*/
+protected void findAndAddCUParcel ( StateCU_Parcel parcel, boolean replace, String routine, String messagePrefix, List<String> problems )
+{ 
+	// Unique key is year and parcel ID.  Parcel ID contains the district.
+	String key = parcel.getYear() + "-" + parcel.getID();
+	StateCU_Parcel parcelFound = __CUParcel_Map.get(key);
+	String message;
+	if ( parcelFound != null ) {
+		// The StateCU_Parcel is already in the list...
+		//__CUParcel_match_List.add(id);
+		if ( replace ) {
+			message = messagePrefix + "Found existing parcel for year " + parcel.getYear() + ", parcelId=" + parcel.getID() + " - replacing previous.";
+			problems.add(message);
+			__CUParcel_Map.put ( key, parcel );
+		}
+		else {
+			// Don't want to replace because will lose previous supply relationships.
+			// - leave the parcel as is but make sure the main parts are the same
+			// - parcel year and ID must match since they are in the hash map key
+			// - this should never happen and is an error
+			if ( parcel.getCrop().equals(parcelFound.getCrop()) ) {
+				message = messagePrefix +
+    	    	    "Existing parcel for year " + parcel.getYear() + ", parcelId=" + parcel.getID() +
+    	    	    " has different crop (" + parcelFound.getCrop() + "/" + parcel.getCrop() + ")";
+				Message.printWarning ( 3, routine, message );
+				problems.add(message);
+			}
+			if ( parcel.getIrrigationMethod().equals(parcelFound.getIrrigationMethod()) ) {
+				message = messagePrefix +
+    	    	    "Existing parcel for year " + parcel.getYear() + ", parcelId=" + parcel.getID() +
+    	    	    " has different irrigation method (" + parcelFound.getIrrigationMethod() + "/" + parcel.getIrrigationMethod() + ")";
+				Message.printWarning ( 3, routine, message );
+				problems.add(message);
+			}
+			if ( parcel.getArea() != parcelFound.getArea() ) {
+				// Try an exact comparison but may need to allow for tolerance.
+				message = messagePrefix +
+    	    	    "Existing parcel for year " + parcel.getYear() + ", parcelId=" + parcel.getID() +
+    	    	    " has different area (" + parcelFound.getArea() + "/" + parcel.getArea() + ")";
+				Message.printWarning ( 3, routine, message );
+				problems.add(message);
+			}
+		}
+
+		// Add supply if does not exist.
+		// - won't be added if it already exists for the parcel
+		for ( StateCU_Supply supply : parcel.getSupplyList() ) {
+			parcel.addSupply(supply);
+		}
+		
+	}
+	else {
+		// Parcel was not found in the list.  Add at the end of the list...
+		__CUParcel_Map.put ( key, parcel );
 	}
 }
 
@@ -2985,6 +3064,15 @@ protected String getInitialWorkingDir()
 }
 
 /**
+ * Return a parcel for year and parcel ID.
+ * @return a parcel for year and parcel ID, or null if not found.
+ */
+public StateCU_Parcel getParcel ( int year, String parcelId ) {
+	String key = "" + year + "-" + parcelId;
+	return this.__CUParcel_Map.get(key);
+}
+
+/**
 Returns the header for the check file.
 @return String - Header to show in the check file.
 */
@@ -3559,6 +3647,14 @@ Return the list of StateCU_Location matches being maintained by this StateDMI_Pr
 */
 public List<String> getStateCULocationMatchList()
 {	return __CULocation_match_List;
+}
+
+/**
+Return the list of StateCU_Parcel being maintained by this StateDMI_Processor.
+@return the list of StateCU_Parcel being maintained by this StateDMI_Processor.
+*/
+public HashMap<String,StateCU_Parcel> getStateCUParcelList()
+{	return __CUParcel_Map;
 }
 
 /**
@@ -4821,7 +4917,7 @@ throws Exception
 }
 
 /**
-Reset all the data/results vectors to be empty.
+Reset all the data/results lists to be empty.
 @param appendResults if false, remove all the previous results before processing.
 */
 private void processCommands_ResetDataForRunStart ( boolean appendResults )
@@ -4927,6 +5023,10 @@ throws Exception
 	// Location Data
 	comp = __StateCU_DataSet.getComponentForComponentType( StateCU_DataSet.COMP_CU_LOCATIONS );
 	comp.setData ( __CULocation_List );
+	// Parcel Data
+	// - TODO smalers 2020-11-05 decide whether parcels are officially part of the dataset
+	//comp = __StateCU_DataSet.getComponentForComponentType( StateCU_DataSet.COMP_CU_PARCELS );
+	//comp.setData ( __CUParcel_List );
 }
 
 /**
@@ -6621,6 +6721,12 @@ public void setPropContents ( String prop, Object contents ) throws Exception
 		@SuppressWarnings("unchecked")
 		List<StateCU_Location> objectList = (List<StateCU_Location>)contents;
 		__CULocation_List = objectList;
+	}
+	else if ( prop.equalsIgnoreCase("StateCU_Parcel_List") || prop.equalsIgnoreCase("StateCU_Parcel_Map") ) {
+		// Handle treating as a list or a map
+		@SuppressWarnings("unchecked")
+		HashMap<String,StateCU_Parcel> objectList = (HashMap<String,StateCU_Parcel>)contents;
+		__CUParcel_Map = objectList;
 	}
 	else if ( prop.equalsIgnoreCase("StateMod_DiversionDemandTSMonthly_List") ) {
 		@SuppressWarnings("unchecked")

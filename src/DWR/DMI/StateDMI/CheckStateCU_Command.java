@@ -95,6 +95,7 @@ throws InvalidCommandParameterException
 {	String routine = getClass().getSimpleName() + ".checkCommandParameters";
 	String ID = parameters.getValue ( "ID" );
 	String DeepCheck = parameters.getValue ( "DeepCheck" );
+	String AreaPrecision = parameters.getValue ( "AreaPrecision" );
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
 	String message;
 	String warning = "";
@@ -108,6 +109,14 @@ throws InvalidCommandParameterException
 		status.addToLog ( CommandPhaseType.INITIALIZATION,
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Specify the identifier pattern to match." ) );
+	}
+
+	if ( (AreaPrecision != null) && !AreaPrecision.isEmpty() && !StringUtil.isInteger(AreaPrecision) ) {
+		message = "The AreaPrecision value (" + AreaPrecision + ") is invalid.";
+		warning += "\n" + message;
+		status.addToLog ( CommandPhaseType.INITIALIZATION,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Specify AreaPrecision as an integer.") );
 	}
 
 	if ( (DeepCheck != null) && (DeepCheck.length() > 0) && !DeepCheck.equalsIgnoreCase(_False) &&
@@ -130,8 +139,9 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List<String> validList = new ArrayList<>();
+	List<String> validList = new ArrayList<>(4);
     validList.add ( "ID" );
+    validList.add ( "AreaPrecision" );
     validList.add ( "DeepCheck" );
     validList.add ( "IfNotFound" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
@@ -179,6 +189,11 @@ CommandWarningException, CommandException
 	String ID = parameters.getValue ( "ID" );
 	if ( ID == null ) {
 		ID = "*"; // Default
+	}
+	int areaPrecision = 3; // Default
+	String AreaPrecision = parameters.getValue ( "AreaPrecision" );
+	if ( (AreaPrecision != null) && !AreaPrecision.isEmpty() ) {
+		areaPrecision = Integer.parseInt(AreaPrecision);
 	}
 	String DeepCheck = parameters.getValue ( "DeepCheck" );
 	boolean deepCheck = false; // Default
@@ -354,7 +369,7 @@ CommandWarningException, CommandException
 			if ( data instanceof StateCU_ComponentValidator ) {
 				StateCU_ComponentValidator validator = null;
 				if ( this instanceof CheckParcels_Command ) {
-					validator = ((StateCU_Location)data).getParcelValidator( (List<StateCU_Location>)dataList, deepCheck );
+					validator = ((StateCU_Location)data).getParcelValidator( (List<StateCU_Location>)dataList, deepCheck, areaPrecision );
 				}
 				else {
 					validator = (StateCU_ComponentValidator)data;
@@ -421,6 +436,7 @@ public String toString ( PropList parameters )
 	}
 	
 	String ID = parameters.getValue ( "ID" );
+	String AreaPrecision = parameters.getValue ( "AreaPrecision" );
 	String DeepCheck = parameters.getValue ( "DeepCheck" );
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
 		
@@ -428,6 +444,12 @@ public String toString ( PropList parameters )
 
 	if ( ID != null && ID.length() > 0 ) {
 		b.append ( "ID=\"" + ID + "\"" );
+	}
+	if ( AreaPrecision != null && AreaPrecision.length() > 0 ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "AreaPrecision=" + AreaPrecision );
 	}
 	if ( DeepCheck != null && DeepCheck.length() > 0 ) {
 		if ( b.length() > 0 ) {
