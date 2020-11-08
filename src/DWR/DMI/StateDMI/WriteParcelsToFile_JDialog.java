@@ -73,13 +73,14 @@ implements ActionListener, ItemListener, KeyListener, WindowListener
 {
 	private final String __AddWorkingDirectory = "Abs";
 	private final String __RemoveWorkingDirectory = "Rel";
-
+	
 private boolean __error_wait = false;
 private boolean __first_time = true;
 private SimpleJButton __browse_JButton = null;
 private SimpleJButton __path_JButton = null;
 private String __working_dir = null;	
 private JTextField __OutputFile_JTextField = null; 
+private SimpleJComboBox __FileFormat_JComboBox = null;
 private SimpleJComboBox __WriteHow_JComboBox = null;
 //private SimpleJComboBox __Delimiter_JComboBox = null;
 private JTextArea __command_JTextArea=null;
@@ -184,6 +185,7 @@ private void checkInput () {
 	// Put together a list of parameters to check...
 	PropList props = new PropList ( "" );
 	String OutputFile = __OutputFile_JTextField.getText().trim();
+	String FileFormat = __FileFormat_JComboBox.getSelected();
 	String WriteHow = __WriteHow_JComboBox.getSelected();
 	//String Delimiter = __Delimiter_JComboBox.getSelected();
 	
@@ -191,6 +193,9 @@ private void checkInput () {
 	
 	if (OutputFile.length() > 0) {
 		props.set("OutputFile", OutputFile);
+	}
+	if (FileFormat.length() > 0 ) {
+		props.set("FileFormat", FileFormat);
 	}
 	if (WriteHow.length() > 0 ) {
 		props.set("WriteHow", WriteHow);
@@ -216,10 +221,12 @@ already been checked and no errors were detected.
 private void commitEdits()
 {
 	String OutputFile = __OutputFile_JTextField.getText().trim();
+	String FileFormat = __FileFormat_JComboBox.getSelected();
 	String WriteHow = __WriteHow_JComboBox.getSelected();
 	//String Delimiter = __Delimiter_JComboBox.getSelected();
 
 	__command.setCommandParameter("OutputFile", OutputFile);
+	__command.setCommandParameter("FileFormat", FileFormat);
 	__command.setCommandParameter("WriteHow", WriteHow);
 	//__command.setCommandParameter("Delimiter", Delimiter);
 }
@@ -260,7 +267,13 @@ private void initialize (JFrame parent, WriteParcelsToFile_Command command )
 	*/
 	if ( __command instanceof WriteParcelsToFile_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
-		"This command writes StateCU CU Location parcels to a text file."),
+		"This command writes parcels to a text file."),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+       	JGUIUtil.addComponent(paragraph, new JLabel (
+		"The ModelParcelSupply file is sorted by model location (node), year/parcel, and supply."),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+       	JGUIUtil.addComponent(paragraph, new JLabel (
+		"The ParcelSupply file is sorted by year/parcel, and supply, similar to original spatial data."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 
@@ -300,6 +313,21 @@ private void initialize (JFrame parent, WriteParcelsToFile_Command command )
 	}
 	JGUIUtil.addComponent(main_JPanel, OutputFile_JPanel,
 		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("File format:"),
+		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	List<String> fileFormatList = new ArrayList<>(3);
+	fileFormatList.add ( "" );
+	fileFormatList.add ( __command._ModelParcelSupply );
+	fileFormatList.add ( __command._ParcelSupply );
+	__FileFormat_JComboBox = new SimpleJComboBox(false);
+	__FileFormat_JComboBox.setData ( fileFormatList );
+	__FileFormat_JComboBox.addItemListener (this);
+	JGUIUtil.addComponent(main_JPanel, __FileFormat_JComboBox,
+		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel (
+		"Optional - file format (default=" + __command._ModelParcelSupply + ")."),
+		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Write how:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -410,6 +438,7 @@ Refresh the command from the other text field contents.
 private void refresh ()
 {	String routine = __command.getCommandName() + "_JDialog.refresh";
 	String OutputFile = "";
+	String FileFormat = "";
 	String WriteHow = "";
 	//String Delimiter = "";
 	PropList props = null;
@@ -420,10 +449,27 @@ private void refresh ()
 		// Get the properties from the command
 		props = __command.getCommandParameters();
 		OutputFile = props.getValue ( "OutputFile" );
+		FileFormat = props.getValue ( "FileFormat" );
 		WriteHow = props.getValue ( "WriteHow" );
 		//Delimiter = props.getValue ( "Delimiter" );
 		if ( OutputFile != null ) {
 			__OutputFile_JTextField.setText (OutputFile);
+		}
+		if ( FileFormat == null ) {
+			// Select default...
+			__FileFormat_JComboBox.select ( 0 );
+		}
+		else {
+			if ( JGUIUtil.isSimpleJComboBoxItem(
+				__FileFormat_JComboBox, FileFormat, JGUIUtil.NONE, null, null ) ) {
+				__FileFormat_JComboBox.select ( FileFormat );
+			}
+			else {
+				Message.printWarning ( 1, routine,
+				"Existing command references an invalid FileFormat value \"" + FileFormat +
+				"\".  Select a different value or Cancel.");
+				__error_wait = true;
+			}
 		}
 		if ( WriteHow == null ) {
 			// Select default...
@@ -463,10 +509,12 @@ private void refresh ()
 	}
 	// Regardless, reset the command from the fields...
 	OutputFile = __OutputFile_JTextField.getText().trim();
+	FileFormat = __FileFormat_JComboBox.getSelected();
 	WriteHow = __WriteHow_JComboBox.getSelected();
 	//Delimiter = __Delimiter_JComboBox.getSelected();
 	props = new PropList(__command.getCommandName());
 	props.add("OutputFile=" + OutputFile);
+	props.add("FileFormat=" + FileFormat);
 	props.add("WriteHow=" + WriteHow);
 	//props.add("Delimiter=" + Delimiter);
 	__command_JTextArea.setText( __command.toString(props) );

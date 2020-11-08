@@ -28,11 +28,13 @@ import javax.swing.JFrame;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import DWR.StateCU.StateCU_CropPatternTS;
 import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Parcel;
+import DWR.StateCU.StateCU_Parcel_Comparator;
 import DWR.StateCU.StateCU_Supply;
 import DWR.StateCU.StateCU_SupplyFromGW;
 import DWR.StateCU.StateCU_SupplyFromSW;
@@ -69,6 +71,12 @@ Possible values for the WriteHow parameter.
 */
 protected final String _OverwriteFile = "OverwriteFile";
 protected final String _UpdateFile = "UpdateFile";
+
+/**
+ *  File formats
+ */
+protected final String _ModelParcelSupply = "ModelParcelSupply";
+protected final String _ParcelSupply = "ParcelSupply";
 
 /**
 List of output files that are created by this command.
@@ -166,6 +174,7 @@ throws InvalidCommandParameterException
 	// Check for invalid parameters...
 	List<String> validList = new ArrayList<>(3);
 	validList.add ( "OutputFile" );
+	validList.add ( "FileFormat" );
 	validList.add ( "WriteHow" );
 	validList.add ( "Delimiter" );
     warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
@@ -225,7 +234,7 @@ Run method internal to this class, to handle running in discovery and run mode.
 public void runCommand ( int command_number )
 throws InvalidCommandParameterException, CommandWarningException, CommandException
 {
-    String routine = getClass().getName() + ".runCommandInternal", message;
+    String routine = getClass().getSimpleName() + ".runCommandInternal", message;
     int warning_level = 2;
     String command_tag = "" + command_number;
     int warning_count = 0;
@@ -245,10 +254,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     PropList parameters = getCommandParameters();
     String OutputFile = parameters.getValue ( "OutputFile" );
+    String FileFormat = parameters.getValue ( "FileFormat" );
+    if ( (FileFormat == null) || FileFormat.equals("") ) {
+    	FileFormat = _ModelParcelSupply; // Default
+    }
     String WriteHow = parameters.getValue ( "WriteHow" );
     boolean update = false;
     if ( (WriteHow == null) || WriteHow.equals("") ) {
-    	WriteHow = _OverwriteFile;	// Default
+    	WriteHow = _OverwriteFile; // Default
     }
     else if ( WriteHow.equalsIgnoreCase(_UpdateFile) ) {
     	update = true;
@@ -300,7 +313,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		*/
 
         // Initial implementation is for parcels associated with StateCU locations.
-		writeCULocationParcelsToTextFile(OutputFile_full, Delimiter, update,
+		writeCULocationParcelsToTextFile( FileFormat, OutputFile_full, Delimiter, update,
 			processor.getStateCULocationList(), processor.getStateCULocationList(), OutputComments_List );
 			
     	// Set the filename(s) for the FileGenerator interface
@@ -345,12 +358,19 @@ public String toString ( PropList parameters )
 	}
 
 	String OutputFile = parameters.getValue ( "OutputFile" );
+	String FileFormat = parameters.getValue ( "FileFormat" );
 	String WriteHow = parameters.getValue ( "WriteHow" );
 	String Delimiter = parameters.getValue ( "Delimiter" );
 
 	StringBuffer b = new StringBuffer ();
 	if ( (OutputFile != null) && (OutputFile.length() > 0) ) {
 		b.append ( "OutputFile=\"" + OutputFile + "\"" );
+	}
+	if ( (FileFormat != null) && (FileFormat.length() > 0) ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "FileFormat=" + FileFormat );
 	}
 	if ( (WriteHow != null) && (WriteHow.length() > 0) ) {
 		if ( b.length() > 0 ) {
@@ -371,7 +391,7 @@ public String toString ( PropList parameters )
 /**
  * Write the parcel data as a text file, using StateCU_Location as input.
  */
-private void writeCULocationParcelsToTextFile ( String outputFileFull, String delimiter, boolean update,
+private void writeCULocationParcelsToTextFile ( String fileFormat, String outputFileFull, String delimiter, boolean update,
 	List<StateCU_Location> culocationList, List<StateCU_Location> culocList, List<String> outputCommentsList ) {
 	// Get the parcels for all the crop pattern TS
 	List<StateCU_Parcel> parcelList = new ArrayList<>();
@@ -380,7 +400,12 @@ private void writeCULocationParcelsToTextFile ( String outputFileFull, String de
 	}
 	
 	// Call the general write method
-	writeParcelsToTextFile ( outputFileFull, delimiter, update, parcelList, culocList, outputCommentsList );
+	if ( fileFormat.equalsIgnoreCase(_ModelParcelSupply) ) {
+		writeParcelsToModelParcelSupplyFile ( outputFileFull, delimiter, update, culocList, outputCommentsList );
+	}
+	else if ( fileFormat.equalsIgnoreCase(_ParcelSupply) ) {
+		writeParcelsToParcelSupplyFile ( outputFileFull, delimiter, update, parcelList, culocList, outputCommentsList );
+	}
 }
 
 /**
@@ -396,7 +421,7 @@ private void writeCropPatternTSParcelsToTextFile ( String outputFileFull, String
 	}
 	
 	// Call the general write method
-	writeParcelsToTextFile ( outputFileFull, delimiter, update, parcelList, culocList, outputCommentsList );
+	writeParcelsToModelParcelSupplyFile ( outputFileFull, delimiter, update, culocList, outputCommentsList );
 }
 
 /**
@@ -406,17 +431,16 @@ private void writeCropPatternTSParcelsToTextFile ( String outputFileFull, String
  * @param outputFileFull full path to output file
  * @param delimiter not currently used, may remove
  * @param update whether to update or overwrite the file, used when creating the file header
- * @param parcelList list of StateCU_Parcel to output
- * @param culocList list of StateCU_Location, used for location type,
+ * @param culocList list of StateCU_Location to output
  * @param outputCommentList additional comments for the file header
  */
-private void writeParcelsToTextFile ( String outputFileFull, String delimiter, boolean update,
-	List<StateCU_Parcel> parcelList, List<StateCU_Location> culocList, List<String> outputCommentsList ) {
+private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String delimiter, boolean update,
+	List<StateCU_Location> culocList, List<String> outputCommentsList ) {
 
 	List<String> newComments = new ArrayList<>();
-	List<String> commentIndicators = new ArrayList<String>(1);
+	List<String> commentIndicators = new ArrayList<>(1);
 	commentIndicators.add ( "#" );
-	List<String> ignoredCommentIndicators = new ArrayList<String>(1);
+	List<String> ignoredCommentIndicators = new ArrayList<>(1);
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 	try {
@@ -429,15 +453,15 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 	
 		String printLine = null;
 		String cmnt = "#>";
-		String format_1 = "%-12.12s %-8.8s %-11.11s %4d %-20.20s %10.3f %-4.4s %-10.10s %15.15s %-10.10s";
+		String format_1 = "%-12.12s %-4.4s %-11.11s %4d %-10.10s %-20.20s %10.3f %-4.4s %-10.10s";
 
 		// Surface water fields - space on the left to skip over above formatting
-		String format_2 = "                                                                                                       " +
-			"%-10.10s %-8.8s %-10.10s %-8.8s %-8.8s %8.3f %10.3f";
+		String format_2 = "                                                                                              " +
+			"%-10.10s %-8.8s %12.12s %4.4s %-10.10s %-8.8s %-8.8s %4d %8.3f %8.3f %10.3f";
 
 		// Groundwater fields - data source and include align with  surface water and then space over to groundwater columns
-		String format_3 = "                                                                                                       %-10.10s %-8.8s                                        " +
-			"          %-12.12s %-10.10s %-8.8s %-10.10s %8d %11.3f";
+		String format_3 = "                                                                                              %-10.10s %-8.8s                                        " +
+			"                                          %-12.12s %-10.10s %-8.8s %-10.10s %4d %11.3f";
 
 		// Size to largest size
 		List<Object> objectList = new ArrayList<>(8);
@@ -467,25 +491,32 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 		out.println(cmnt + "  Parcel Data - GIS loaded into HydroBase");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
 		out.println(cmnt + "  Year         :  Calendar year for parcel");
+		out.println(cmnt + "  ParcelId     :  Parcel identifier");
 		out.println(cmnt + "  Crop         :  Crop type for parcel (1 crop per parcel)");
 		out.println(cmnt + "  ParcelArea   :  Parcel area for crop");
 		out.println(cmnt + "  Units        :  Area units");
 		out.println(cmnt + "  IrrigMeth    :  Irrigation method");
-		out.println(cmnt + "  ParcelId     :  Parcel identifier");
 		out.println(cmnt);
 		out.println(cmnt + "  Whether or not the row of data is included - need to expand this to indicate how included or not");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
-		out.println(cmnt + "  DataSrc      :  Data source");
+		out.println(cmnt + "  DataSrc      :  Data source for the supply data");
 		out.println(cmnt + "                  - typically from HydroBase but may enable user-supplied data");
 		out.println(cmnt + "                  - may in the future be read directly from GIS or other files");
-		out.println(cmnt + "                  HB-PUTS = HydroBase ParcelUseTS/Structure from vw_CDSS_ParcelUseTSStructureToParcel" );
-		out.println(cmnt + "                  HB-WTP = HydroBase Well/Parcel from vw_CDSS_WellsWellToParcel" );
+		out.println(cmnt + "                  HB-PUTS = HydroBase ParcelUseTS/Structure from vw_CDSS_ParcelUseTSStructureToParcel (diversions)" );
+		out.println(cmnt + "                  HB-WTP = HydroBase Well/Parcel from vw_CDSS_WellsWellToParcel (wells)" );
 		out.println(cmnt + "                  SET = data are provided with Set...() or Read...() command" );
-		out.println(cmnt + "  CDS:?        :  Indicates whether the parcel is included in CDS file acreage.");
-		out.println(cmnt + "                  CDS:YES = include area irrigated by supply in CDS file");
+		out.println(cmnt + "  In CDS:      :  Indicates whether the parcel is included in CDS file acreage.");
+		out.println(cmnt + "                  CDS:YES = include parcel area in CDS file");
 		out.println(cmnt + "                  - a location with surface water supply - area for surface supply is always included");
-		out.println(cmnt + "                  CDS:NO = do not include area irrigated by supply in CDS file");
+		out.println(cmnt + "                  - a location with only groundwater supply");
+		out.println(cmnt + "                  CDS:NO = do not include parcel area in CDS file (unirrigated area - should not happen)");
 		out.println(cmnt + "                  - if GW supply, only include if parcel area is not included in surface water supply");
+		out.println(cmnt + "                  CDS:ERR = error determining whether to include parcel area in CDS FILE (input error)");
+		out.println(cmnt + "                  CDS:UNK = unknown whether to include parcel area in CDS FILE (should not happen)");
+		out.println(cmnt + "  CDS LocId    :  The StateCU location (or StateMod) ID where the parcel area is counted for CDS file. ");
+		out.println(cmnt + "                  - DIV or D&W identifier if surface water supply. ");
+		out.println(cmnt + "                  - WEL if groundwater supply only. ");
+		out.println(cmnt + "  CDS LocType  :  Type node type for CDS LocId, to help understand. ");
 		out.println(cmnt);
 		out.println(cmnt + "  SW Collection Data - surface water aggregate/system data");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
@@ -518,19 +549,241 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 		out.println(cmnt + "  #Wells       :  Number of wells that are associated with ParcelId.");
 		out.println(cmnt + "  GWIrrigArea  :  ParcelArea/#Wells, zero if area is already assigned to surface water ID for D&W node.");
 		out.println(cmnt);
-		out.println(cmnt + "---------- Model Id -----------|----------------------------- Parcel Data --------------------------||-Data Source/Use-||---- SW Collection Data ----|- SW Suppply Data -|------------- GW Collection Data ----------|-- GW Supply Data --|");
-		out.println(cmnt + "            Loc     Collection |                                           Irrigation               ||                 ||                            |                   |                                           |                    |");
-		out.println(cmnt + "  LocId     Type    Type       |Year        Crop          ParcelArea Units Method       ParcelId    || DataSrc    CDS? ||SWPartType SWPartIdType WDID| %Irrig SWIrrigArea| GWPartType  GWPartIdType   WDID   Receipt | #Wells |GWIrrigArea|");
-		out.println(cmnt + "b--------exb------exb---------exb--exb------------------exb--------exb--exb--------exb-------------exb--------exb------exb--------exb------exb------exb------exb--------exb----------exb--------exb------exb--------exb------exb---------ex");
+		out.println(cmnt + "-------- Model Id ---------|-------------------------- Parcel Data ------------------------||-------- Data Source/Use --------- ||---- SW Collection Data ----|-------- SW Suppply Data --------|------------- GW Collection Data ----------| GW Supply Data |");
+		out.println(cmnt + "           Loc  Collection |       Parcel                          Parcel          Irrig   ||                    CDS        Loc ||  SWPart   SWPartId         |#     Irrig   Irrig    SW        |   GWPart      GWPart                      |#     GW        |");
+		out.println(cmnt + "  LocId    Type Type       |Year   ID                Crop          Area     Units  Method  || DataSrc    CDS?    LocId      Type||  Type     Type       WDID  |Ditch Frac.   Frac.HB  IrrigArea |    Type       IdType     WDID     Receipt |Well  IrrigArea |");
+		out.println(cmnt + "b--------exb--exb---------exb--exb--------exb------------------exb--------exb--exb--------exb--------exb------exb----------exb--exb--------exb------exb------exb--exb------exb------exb--------exb----------exb--------exb------exb--------exb--exb---------ex");
 		out.println(cmnt + "EndHeader");
 		out.println(cmnt);
 	
 		StateCU_SupplyFromSW supplyFromSW = null;
 		StateCU_SupplyFromGW supplyFromGW = null;
-		String locid = "";
-		String locidPrev = "";
-		String locType = "???";
-		String collectionType = "";
+		
+		// Loop through the locations
+		List<StateCU_Parcel> parcelListSorted = new ArrayList<>();
+		StateCU_Parcel_Comparator parcelComparator = new StateCU_Parcel_Comparator(StateCU_Parcel_Comparator.YEAR_PARCELID);
+		for ( StateCU_Location culoc : culocList ) {
+
+			// Loop through the parcels for the location:
+			// - first sort to make sure the output is as expected
+			parcelListSorted.clear();
+			parcelListSorted.addAll(culoc.getParcelList());
+			Collections.sort(parcelListSorted, parcelComparator);
+
+			for ( StateCU_Parcel parcel : parcelListSorted ) {
+				if (parcel == null) {
+					continue;
+				}
+				// Make sure that the parcel's data is current.
+				// - TODO smalers 2020-11-05 should happen automatically when values are requested
+				parcel.recompute();
+	
+				// line 1 - parcel information
+				objectList.clear();
+				objectList.add(culoc.getID());
+				objectList.add("" + culoc.getLocationType());
+				if ( culoc.isCollection() ) {
+					objectList.add("" + culoc.getCollectionType());
+				}
+				else {
+					objectList.add("Single");
+				}
+				objectList.add(new Integer(parcel.getYear()));
+				objectList.add(parcel.getID());
+				objectList.add(parcel.getCrop());
+				objectList.add(new Double(parcel.getArea()));
+				objectList.add(parcel.getAreaUnits());
+				objectList.add(parcel.getIrrigationMethod());
+				//objectList.add("" + parcel.getIncludeParcelInCdsType());
+				// TODO smalers 2020-11-05 need to get from supply
+				//objectList.add(parcel.getDataSource());
+				printLine = StringUtil.formatString(objectList, format_1);
+				out.println(printLine);
+			
+				// line 2+ - supply information
+				// - list surface water supplies first, then groundwater
+			
+				for ( StateCU_Supply supply : parcel.getSupplyList() ) {
+					if ( supply instanceof StateCU_SupplyFromSW ) {
+						supplyFromSW = (StateCU_SupplyFromSW)supply;
+						objectList.clear();
+						objectList.add(supplyFromSW.getDataSource());
+						objectList.add("CDS:YES");
+						objectList.add(culoc.getID());
+						String loc = "???";
+						objectList.add(loc); // TODO smalers fill in the location type
+						objectList.add(supplyFromSW.getCollectionPartType());
+						objectList.add(supplyFromSW.getCollectionPartIdType());
+						objectList.add(supplyFromSW.getWDID());
+						objectList.add(new Integer(parcel.getSupplyFromSWCount()));
+						objectList.add(new Double(supplyFromSW.getAreaIrrigFraction()));
+						objectList.add(new Double(supplyFromSW.getAreaIrrigFractionHydroBase()));
+						objectList.add(new Double(supplyFromSW.getAreaIrrig()));
+						printLine = StringUtil.formatString(objectList, format_2);
+						out.println(printLine);
+					}
+				}
+				for ( StateCU_Supply supply : parcel.getSupplyList() ) {
+					if ( supply instanceof StateCU_SupplyFromGW ) {
+						objectList.clear();
+						supplyFromGW = (StateCU_SupplyFromGW)supply;
+						objectList.add(supply.getDataSource());
+						//if ( supplyFromGW.getIncludeInCdsArea() ) {
+						// TODO smalers 2020-11-06 fix this
+						boolean dosw = true;
+						if ( dosw ) {
+							objectList.add("CDS:YES");
+							// TODO smalers 2020-11-05 fix this
+							//objectList.add(parcel.getLocationId());
+							//objectList.add("???");
+							//objectList.add("???"); // TODO smalers fill in the location type
+						}
+						else {
+							objectList.add("CDS:NO");
+							// TODO smalers 2020-10-26 need to fill out
+							//objectList.add("???");
+							//objectList.add("???"); // TODO smalers fill in the location type
+						}
+						objectList.add(supplyFromGW.getCollectionPartType());
+						objectList.add(supplyFromGW.getCollectionPartIdType());
+						objectList.add(supplyFromGW.getWDID());
+						objectList.add(supplyFromGW.getReceipt());
+						objectList.add(new Integer(parcel.getSupplyFromGWCount()));
+						objectList.add(new Double(supplyFromGW.getAreaIrrig()));
+						printLine = StringUtil.formatString(objectList, format_3);
+						out.println(printLine);
+					}
+					else if ( !(supply instanceof StateCU_SupplyFromSW) ) {
+						// Not surface water or groundwater so an error
+						// - code error that will need to be fixed
+						throw new RuntimeException("Supply type not handled - need to check code.");
+					}
+				}
+			}
+		}
+	} 
+	catch (Exception e) {
+		throw e;
+	}
+	finally {
+		if (out != null) {
+			out.flush();
+			out.close();
+		}
+	}
+}
+
+/**
+ * Write the parcel data to a "parcel supply" text file, using StateCU_Parcel as input.
+ * This format closely matches the irrigated lands files.
+ * @param outputFileFull full path to output file
+ * @param delimiter not currently used, may remove
+ * @param update whether to update or overwrite the file, used when creating the file header
+ * @param parcelListOrig list of StateCU_Parcel to output, sort order is not assumed
+ * @param culocList list of StateCU_Location - currently not used for this file,
+ * but may output more information in the future
+ * @param outputCommentList additional comments for the file header
+ */
+private void writeParcelsToParcelSupplyFile ( String outputFileFull, String delimiter, boolean update,
+	List<StateCU_Parcel> parcelListOrig, List<StateCU_Location> culocList, List<String> outputCommentsList ) {
+
+	List<String> newComments = new ArrayList<>();
+	List<String> commentIndicators = new ArrayList<>(1);
+	commentIndicators.add ( "#" );
+	List<String> ignoredCommentIndicators = new ArrayList<>(1);
+	ignoredCommentIndicators.add ( "#>");
+	PrintWriter out = null;
+	try {
+		// Overwrite the file
+		out = IOUtil.processFileHeaders(
+			null, outputFileFull,
+			//IOUtil.getPathUsingWorkingDir(instrfile),
+			//IOUtil.getPathUsingWorkingDir(outstrfile),
+			newComments, commentIndicators, ignoredCommentIndicators, 0);
+	
+		String printLine = null;
+		String cmnt = "#>";
+		String format_1 = "%6d %4d %4d %15.15s %-20.20s %10.3f %-4.4s %-10.10s";
+
+		// Surface water fields - space on the left to skip over above formatting
+		String format_2 = "                                                                                 " +
+			"%-10.10s %6d %6.3f %8.3f %11.3f %-7.7s";
+
+		// Groundwater fields - data source and include align with  surface water and then space over to groundwater columns
+		String format_3 = "                                                                                                                                       " +
+			"%-10.10s %-10.10s %-12.12s %6d %6.3f %11.3f";
+
+		// Size to largest size
+		List<Object> objectList = new ArrayList<>(8);
+	
+		out.println(cmnt);
+		out.println(cmnt + " ***************************************************************************************************");
+		out.println(cmnt + "  Parcel/supply File - this is a diagnostics report");
+		out.println(cmnt + "  - this report lists each parcel and supplies for the parcel sorted by:");
+		out.println(cmnt + "      year");
+		out.println(cmnt + "      division");
+		out.println(cmnt + "      district");
+		out.println(cmnt + "      parcel ID");
+		out.println(cmnt + "  - the data should match orginal GIS irrigated land and supply data");
+		out.println(cmnt + "  - calculated fraction of area irrigated by ditch is 1/#ditches");
+		out.println(cmnt + "  - calculated fraction of area irrigated by well is 1/#wells");
+		out.println(cmnt);
+		out.println(cmnt + "  Parcel Data - GIS loaded into HydroBase, sorted by Year, Div, Dist, ParcelId");
+		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
+		out.println(cmnt + "  Year         :  Calendar year for parcel");
+		out.println(cmnt + "  Div          :  Water division");
+		out.println(cmnt + "  Dist         :  Water district - may be zero depending on how parcel data are read");
+		out.println(cmnt + "                    Current HydroBase design includes WD in digits 2-3 of the parcel ID");
+		out.println(cmnt + "  ParcelId     :  Parcel identifier");
+		out.println(cmnt + "  Crop         :  Crop type for parcel (1 crop per parcel)");
+		out.println(cmnt + "  ParcelArea   :  Parcel area for crop");
+		out.println(cmnt + "  Units        :  Area units");
+		out.println(cmnt + "  IrrigMethod  :  Irrigation method");
+		out.println(cmnt);
+		out.println(cmnt + "  SW Supply Data - portion of parcel acreage associated with surface water supply");
+		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
+		out.println(cmnt + "  WDID         :  Water district identifier for the ditch.");
+		out.println(cmnt + "  #Ditch       :  Number of ditches that are associated with the parcel.");
+		out.println(cmnt + "  SWFrac       :  1/#Ditch = fraction of ParcelArea (from above) that is irrigated by the ditch (0.0 to 1.0).");
+		out.println(cmnt + "  SWFracHB     :  SWFrac from HydroBase, should match SWFrac.");
+		out.println(cmnt + "  SWIrrigArea  :  ParcelArea * %Irrig = area irrigated by surface water supply for this ditch.");
+		out.println(cmnt + "  HBError      :  Indicates whether the SWFrac computed from data is different than SWFracHB from HydroBase");
+		out.println(cmnt + "                   ERROR - indicates that not all supplies in HydroBase parcel data are being modeled");
+		out.println(cmnt + "                           due to different number of ditches associated with the parcel.");
+		out.println(cmnt + "                           Checks are made to precision of 1 digit.");
+		out.println(cmnt + "                           The CheckParcels() command can be used to check to a specified precision.");
+		out.println(cmnt + "                           These errors need to be fixed to ensure the integrity of the dataset.");
+		out.println(cmnt + "                   Blank indicates that model dataset and HydroBase data agree.");
+		out.println(cmnt);
+		out.println(cmnt + "  GW Supply Data - portion of parcel acreage associated with groundwater supply");
+		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
+		out.println(cmnt + "  IdType       :  Water supply part ID type (WDID or RECEIPT).");
+		out.println(cmnt + "  WDID         :  WDID for supply well.");
+		out.println(cmnt + "  RECEIPT      :  Well permit receipt.");
+		out.println(cmnt + "  #Wells       :  Number of wells that are associated with ParcelId.");
+		out.println(cmnt + "  GWFrac       :  1/#Wells = fraction of ParcelArea (from above) that is irrigated by the ditch (0.0 to 1.0).");
+		out.println(cmnt + "                    - not in original data (calculated when loaded into HydroBase).");
+		out.println(cmnt + "  GWIrrigArea  :  ParcelArea/#Wells, zero if area is already assigned to surface water ID for D&W node.");
+		out.println(cmnt);
+		out.println(cmnt + "----------------------------------- Parcel Data ------------------------------|-------------------- SW Suppply ---------------------|----------------------- GW Supply Data ---------------------|");
+		out.println(cmnt + "                                                                      Irrig   |                                                     |                                                            |");
+		out.println(cmnt + "Year  Div Dist   ParcelId              Crop         ParcelArea Units  Method  |    WDID   #Ditch SWFrac SWFracHB SWIrrigArea HBError|  ID Type     WDID       Receipt   #Wells GWFrac GWIrrigArea|");
+		out.println(cmnt + "b--exb--exb--exb-------------exb------------------exb--------exb--exb--------exb--------exb----exb----exb------exb---------exb-----exb--------exb--------exb----------exb----exb----exb---------ex");
+		out.println(cmnt + "EndHeader");
+		out.println(cmnt);
+		
+		// Create a new  parcel list and sort by year, division, district, and parcel ID
+		// - don't need to copy the parcel instances, just make a new list
+		List<StateCU_Parcel> parcelList = new ArrayList<>();
+		for ( StateCU_Parcel parcel : parcelListOrig ) {
+			parcelList.add(parcel);
+		}
+		// Sort using the comparator
+		Collections.sort(parcelList, new StateCU_Parcel_Comparator(StateCU_Parcel_Comparator.YEAR_DIVISION_DISTRICT_PARCELID) );
+	
+		StateCU_SupplyFromSW supplyFromSW = null;
+		StateCU_SupplyFromGW supplyFromGW = null;
+		// Process all of the parcels
 		for ( StateCU_Parcel parcel : parcelList ) {
 			if (parcel == null) {
 				continue;
@@ -538,31 +791,14 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 	
 			// line 1 - parcel information
 			objectList.clear();
-			locid = parcel.getLocationId();
-			objectList.add(locid);
-			if ( !locid.equals(locidPrev) ) {
-				// Lookup the CULocation
-				// - only do for new location since lookups for each parcel would be a performance hit
-				StateCU_Location culoc = StateCU_Location.lookupForId ( culocList, locid );
-
-				// Set the location type based on whether surface or groundwater supply is available
-				locType = "" + culoc.getLocationType();
-
-				// Set the collection type
-				collectionType = "Single";
-				if ( culoc.isCollection() ) {
-					collectionType = "" + culoc.getCollectionType();
-				}
-			}
-			objectList.add(locType);
-			objectList.add(collectionType);
 			objectList.add(new Integer(parcel.getYear()));
+			objectList.add(new Integer(parcel.getDiv()));
+			objectList.add(new Integer(parcel.getWD()));
+			objectList.add(new Integer(parcel.getID()));
 			objectList.add(parcel.getCrop());
 			objectList.add(new Double(parcel.getArea()));
 			objectList.add(parcel.getAreaUnits());
 			objectList.add(parcel.getIrrigationMethod());
-			objectList.add(parcel.getID());
-			objectList.add(parcel.getDataSource());
 			printLine = StringUtil.formatString(objectList, format_1);
 			out.println(printLine);
 			
@@ -573,13 +809,12 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 				if ( supply instanceof StateCU_SupplyFromSW ) {
 					supplyFromSW = (StateCU_SupplyFromSW)supply;
 					objectList.clear();
-					objectList.add(supplyFromSW.getDataSource());
-					objectList.add("CDS:YES");
-					objectList.add(supplyFromSW.getCollectionPartType());
-					objectList.add(supplyFromSW.getCollectionPartIdType());
 					objectList.add(supplyFromSW.getWDID());
-					objectList.add(new Double(supplyFromSW.getAreaIrrigPercent()));
+					objectList.add(new Integer(parcel.getSupplyFromSWCount()));
+					objectList.add(new Double(supplyFromSW.getAreaIrrigFraction()));
+					objectList.add(new Double(supplyFromSW.getAreaIrrigFractionHydroBase()));
 					objectList.add(new Double(supplyFromSW.getAreaIrrig()));
+					objectList.add(supplyFromSW.getAreaIrrigFractionHydroBaseError());
 					printLine = StringUtil.formatString(objectList, format_2);
 					out.println(printLine);
 				}
@@ -588,25 +823,14 @@ private void writeParcelsToTextFile ( String outputFileFull, String delimiter, b
 				if ( supply instanceof StateCU_SupplyFromGW ) {
 					objectList.clear();
 					supplyFromGW = (StateCU_SupplyFromGW)supply;
-					objectList.add(supply.getDataSource());
-					if ( supplyFromGW.getIncludeInCdsArea() ) {
-						objectList.add("CDS:YES");
-					}
-					else {
-						objectList.add("CDS:NO");
-					}
-					objectList.add(supplyFromGW.getCollectionPartType());
 					objectList.add(supplyFromGW.getCollectionPartIdType());
 					objectList.add(supplyFromGW.getWDID());
 					objectList.add(supplyFromGW.getReceipt());
 					objectList.add(new Integer(parcel.getSupplyFromGWCount()));
+					objectList.add(new Double(1.0/parcel.getSupplyFromGWCount()));
 					objectList.add(new Double(supplyFromGW.getAreaIrrig()));
 					printLine = StringUtil.formatString(objectList, format_3);
 					out.println(printLine);
-				}
-				else if ( !(supply instanceof StateCU_SupplyFromSW) ) {
-					// Not surface water or groundwater so an error
-					throw new RuntimeException("Supply type not handled - need to check code.");
 				}
 			}
 		}
