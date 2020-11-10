@@ -1777,8 +1777,9 @@ protected void findAndAddCULocation ( StateCU_Location cu_loc, boolean replace )
 Add a StateCU_Parcel instance to the __CUParcel_Map.
 Because parcels may be referenced by more than one supply (ditch or well),
 adding a second time is ignored.
-If supply data exist for the parcel, they are added if not already added.
-This is equivalent to calling the parce. addSupply() method.
+If supply data exist for the parcel, they are added if not already added
+by calling the parcel.addSupply() method,
+which only adds a supply if not matched.
 @param parcel parcel instance to be added.
 @param replace If true, an existing instance is replaced if found.  If false, the original instance is used.
 This should only be used with commands that correct data, such as a set command.
@@ -1792,14 +1793,17 @@ protected void findAndAddCUParcel ( StateCU_Parcel parcel, boolean replace, Stri
 	StateCU_Parcel parcelFound = __CUParcel_Map.get(key);
 	String message;
 	if ( parcelFound != null ) {
-		// The StateCU_Parcel is already in the list...
+		// The StateCU_Parcel is already in the hashmap...
 		//__CUParcel_match_List.add(id);
 		if ( replace ) {
-			message = messagePrefix + "Found existing parcel for year " + parcel.getYear() + ", parcelId=" + parcel.getID() + " - replacing previous.";
+			// TODO smalers 2020-11-08 change from a warning when set commands are added for parcel data
+			message = messagePrefix + "Found existing parcel for year " + parcel.getYear() +
+				", parcelId=" + parcel.getID() + " - replacing previous global parcel using key: " + key;
 			problems.add(message);
 			__CUParcel_Map.put ( key, parcel );
 		}
 		else {
+			Message.printStatus(2,routine,messagePrefix + "Parcel previously added to global list using key: " + key );
 			// Don't want to replace because will lose previous supply relationships.
 			// - leave the parcel as is but make sure the main parts are the same
 			// - parcel year and ID must match since they are in the hash map key
@@ -1826,18 +1830,18 @@ protected void findAndAddCUParcel ( StateCU_Parcel parcel, boolean replace, Stri
 				Message.printWarning ( 3, routine, message );
 				problems.add(message);
 			}
-		}
 
-		// Add supply if does not exist.
-		// - won't be added if it already exists for the parcel
-		for ( StateCU_Supply supply : parcel.getSupplyList() ) {
-			parcel.addSupply(supply);
+			// Add supply if does not exist.
+			// - won't be added if it already exists for the parcel
+			for ( StateCU_Supply supply : parcel.getSupplyList() ) {
+				parcel.addSupply(supply);
+			}
 		}
-		
 	}
 	else {
-		// Parcel was not found in the list.  Add at the end of the list...
+		// Parcel was not found in the list.  Add to the hashmap.
 		__CUParcel_Map.put ( key, parcel );
+		Message.printStatus(2,routine,messagePrefix + "Adding parcel to global list using key: " + key );
 	}
 }
 
@@ -3283,6 +3287,10 @@ public Object getPropContents ( String prop ) throws Exception
 	}
 	else if ( prop.equalsIgnoreCase("StateCU_Location_List") ) {
 		return getStateCULocationList();
+	}
+	else if ( prop.equalsIgnoreCase("StateCU_Parcel_List") ) {
+		// This actually returns a map
+		return getStateCUParcelList();
 	}
 	else if ( prop.equalsIgnoreCase("StateCU_PenmanMonteith_List") ) {
 		return getStateCUPenmanMonteithList();

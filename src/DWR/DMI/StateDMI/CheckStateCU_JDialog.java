@@ -321,13 +321,13 @@ private void initialize ( JFrame parent, CheckStateCU_Command command )
         	"   2) Parcel is associated with more than one surface supply in a year and total of fractional areas is not equal to parcel area."),
            	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
-        	"      The parcel may be associated with multiple model nodes, each with surface water supplies."),
+        	"      This indicates that not all HydroBase parcel supplies are included in the dataset, or there are errors in supply assignment."),
            	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
-        	"   3) Sum of parcel supply irrigated area fractions from HydroBase does not match dataset sum."),
+        	"   3) Parcel surface water supply irrigated area fraction computed from number of supplies does not match fraction from HydroBase."),
            	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
-        	"      This indicates that not all HydroBase parcel supplies are included in the dataset."),
+        	"      This indicates that not all HydroBase parcel supplies are included in the dataset, or there are errors in supply assignment."),
            	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         //JGUIUtil.addComponent(paragraph, new JLabel ("   3) [Deep Check] Parcel ID is associated with more than one CU Location in a year."),
            	//0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -359,7 +359,7 @@ private void initialize ( JFrame parent, CheckStateCU_Command command )
     	JGUIUtil.addComponent(main_JPanel, __AreaPrecision_JTextField,
 			1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     	JGUIUtil.addComponent(main_JPanel, new JLabel (
-			"Optional - precision for area comparisons (3 digits)."),
+			"Optional - precision for area comparisons (default=3)."),
 			3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 
     	/* TODO smalers 2020-11-07 currently not needed - enable later if necessary

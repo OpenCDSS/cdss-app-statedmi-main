@@ -267,18 +267,21 @@ private void initialize (JFrame parent, WriteParcelsToFile_Command command )
 	*/
 	if ( __command instanceof WriteParcelsToFile_Command ) {
        	JGUIUtil.addComponent(paragraph, new JLabel (
-		"This command writes parcels to a text file."),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		    "This command writes parcels to a text file."),
+		    0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
        	JGUIUtil.addComponent(paragraph, new JLabel (
-		"The ModelParcelSupply file is sorted by model location (node), year/parcel, and supply."),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		    "The ModelParcelSupply file is sorted by model location (node), year/parcel, and supply."),
+		    0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
        	JGUIUtil.addComponent(paragraph, new JLabel (
-		"The ParcelSupply file is sorted by year/parcel, and supply, similar to original spatial data."),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+       	    "The ParcelSupply file is sorted by year/parcel, and supply, similar to original spatial data."),
+		    0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+       	JGUIUtil.addComponent(paragraph, new JLabel (
+       	    "The information in the file will be more complete if created after processing CropPatternTS."),
+		    0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	}
 
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"It is recommended that the file be specified using a path relative to the working directory."),
+		"It is recommended that the file is specified using a path relative to the working directory."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	if (__working_dir != null) {
         JGUIUtil.addComponent(paragraph, new JLabel ("The working directory is: "), 
