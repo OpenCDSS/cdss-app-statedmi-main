@@ -243,11 +243,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	/*
 	Get the map of parcel data for newer StateDMI.
 	*/
+	/* TODO smalers 2020-11-08 remove after testing - parcels are manipulated with findAndAdd...:w
 	HashMap<String,StateCU_Parcel> parcelMap = null;
 	try {
 		@SuppressWarnings("unchecked")
 		HashMap<String,StateCU_Parcel> dataMap =
-			(HashMap<String,StateCU_Parcel>)processor.getPropContents ( "HydroBase_CUParcel_List");
+			(HashMap<String,StateCU_Parcel>)processor.getPropContents ( "StateCU_Parcel_List");
 		parcelMap = dataMap;
 	}
 	catch ( Exception e ) {
@@ -259,6 +260,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Report problem to software support." ) );
 	}
+	*/
 	
 	/*
 	Get the list of parcel data for newer StateDMI.
@@ -561,7 +563,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
 					// If single diversion...
 					processing_ditches = true;
-					Message.printStatus ( 2, routine, "Processing single diversion (or well) \"" + culoc_id +
+					Message.printStatus ( 2, routine, "Processing single diversion \"" + culoc_id +
 						"\" using parcel/supply data from HydroBase vw_CDSS_ParcelUseTSStructureToParcel (all parcels are for single location)." );
 					int [] wdidParts = new int[2];
 					if ( HydroBase_WaterDistrict.isWDID(culoc_id)) {
@@ -575,6 +577,22 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							Message.printWarning ( 2, routine, "Error parsing WDID \"" + culoc_id + "\" - skipping location." );
 							continue;
 						}
+
+						// Make sure that the diversion structure is not also a well structure in HydroBase.
+						// - this results in confusing errors later so best to warn about now
+						List<HydroBase_Wells> hbwellCheckList = hbdmi.readWellsWellToParcelList(
+							-1, -1, -1, null, wdidParts[0], wdidParts[1]);
+						if ( hbwellCheckList.size() > 0 ) {
+							message = "CU location \"" + culoc_id +
+							    "\" has HydroBase vw_CDSS_ParcelUseTS (as ditch) and vw_CDSS_WellsWellToParcel (as well) data records.";
+							Message.printWarning ( warningLevel, 
+					        	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+				        	status.addToLog ( commandPhase,
+				            	new CommandLogRecord(CommandStatusType.WARNING,
+				                	message, "A WDID should only be associated with one of the HydroBase tables. "
+				                		+ "Original GIS data may have inaccurate supply type.  Additional errors may result." ) );
+						}
+						
 						// Loop through known years of data and process if in the requested period.
 						int year;
 						StateCU_Parcel parcel = null;
@@ -585,6 +603,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						structureView = null;
 						for ( int iy = 0; iy < parcelYearsForDiv.length; iy++ ) {
 							year = parcelYearsForDiv[iy];
+
 							if ( ((InputStart_DateTime == null) ||(parcelYearsForDiv[iy] >= InputStart_DateTime.getYear())) &&
 								((InputEnd_DateTime == null) || (parcelYearsForDiv[iy] <= InputEnd_DateTime.getYear()))) {
 								// Get HydroBase_ParcelUseTS for the structure
@@ -676,7 +695,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									List<HydroBase_Wells> hbWellsList = hbdmi.readWellsWellToParcelList(
 										hbParcelUseTSStruct.getParcel_id(), year, -1, null, hbParcelUseTSStruct.getStructureWD(), -1);
 									if ( hbWellsList.size() > 0 ) {
-										Message.printStatus ( 2, routine, "      Found " + hbWellsList.size() +
+										Message.printStatus ( 2, routine, "        Found " + hbWellsList.size() +
 											" matching well/parcel records (GW suppply) for year " +
 											year + ", parcel ID=" + hbParcelUseTSStruct.getParcel_id() );
 									}
@@ -707,6 +726,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										//sw.stop();
 										//Message.printStatus ( 2, routine, "  Reading structure view for structure_num " +
 										//	hbWell.getStructure_num() + " took " + sw.getMilliseconds() + " ms");
+										// Can't set generic ID because association is ditch -> parcel -> well, not requested collection part
 										supplyFromGW.setWDID(HydroBase_WaterDistrict.formWDID( hbWell.getWD(), hbWell.getID()) );
 										supplyFromGW.setReceipt(hbWell.getReceipt());
 										parcel.addSupply(supplyFromGW);
@@ -735,7 +755,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				
 						} // end parcel years with data
 					} // end isWDID
-				} // end !isCollection
+				} // end !isCollection - single ditch
 	
 				else if ( isCollection && (collectionPartType == StateCU_Location_CollectionPartType.DITCH) ) {
 					processing_ditches = true;
@@ -772,6 +792,21 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							continue;
 						}
 
+						// Make sure that the diversion structure is not also a well structure in HydroBase.
+						// - this results in confusing errors later so best to warn about now
+						List<HydroBase_Wells> hbwellCheckList = hbdmi.readWellsWellToParcelList(
+							-1, -1, -1, null, wdidParts[0], wdidParts[1]);
+						if ( hbwellCheckList.size() > 0 ) {
+							message = "CU location \"" + culoc_id + " part ID \"" + part_id + 
+							    "\" has HydroBase vw_CDSS_ParcelUseTS (as ditch) and vw_CDSS_WellsWellToParcel (as well) data records.";
+							Message.printWarning ( warningLevel, 
+					        	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+				        	status.addToLog ( commandPhase,
+				            	new CommandLogRecord(CommandStatusType.WARNING,
+				                	message, "A WDID should only be associated with one of the HydroBase tables. "
+				                		+ "Original GIS data may have inaccurate supply type.  Additional errors may result." ) );
+						}
+
 						// Loop through known years of data and process if in the requested period
 						int year;
 						StateCU_Parcel parcel = null;
@@ -782,6 +817,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						int parcelCount, parcelNum;
 						for ( int iy = 0; iy < parcelYearsForDiv.length; iy++ ) {
 							year = parcelYearsForDiv[iy];
+
 							if ( ((InputStart_DateTime == null) ||(parcelYearsForDiv[iy] >= InputStart_DateTime.getYear())) &&
 								((InputEnd_DateTime == null) || (parcelYearsForDiv[iy] <= InputEnd_DateTime.getYear()))) {
 								// Get HydroBase_ParcelUseTS for the structure
@@ -822,7 +858,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										// TODO smalers 2020-11-05 moved to supply
 										//parcel.setDataSource("HB-PUTS");
 										parcelProblems.clear();
-										processor.findAndAddCUParcel(parcel, false, routine, "    ", parcelProblems);
+										processor.findAndAddCUParcel(parcel, false, routine, "      ", parcelProblems);
 										if ( parcelProblems.size() > 0 ) {
 											for ( String parcelProblem : parcelProblems ) {
 												Message.printWarning ( warningLevel,
@@ -889,6 +925,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										//sw.stop();
 										//Message.printStatus ( 2, routine, "  Reading structure view for structure_num " +
 										//	hbWell.getStructure_num() + " took " + sw.getMilliseconds() + " ms");
+										// 
+										// Can't set generic ID because association is ditch -> parcel -> well, not requested collection part
 										supplyFromGW.setWDID(HydroBase_WaterDistrict.formWDID( hbWell.getWD(), hbWell.getID()) );
 										supplyFromGW.setReceipt(hbWell.getReceipt());
 										parcel.addSupply(supplyFromGW);
@@ -917,7 +955,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				else if ( isCollection && (collectionPartType == StateCU_Location_CollectionPartType.PARCEL) ) {
 					// Well only collection defined with list of parcels.
 					if ( 1 > 0 ) {
-						message = "CU location \"" + culoc_id + "\" is a collection specified with parcels - not currently handled.";
+						message = "CU location \"" + culoc_id + "\" is a collection specified with parcels - not currently handled.  "
+							+ "Specify collection using WDIDs and RECEIPTs";
 						Message.printWarning ( warningLevel, 
 						    MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
 						        status.addToLog ( commandPhase,
@@ -1140,6 +1179,23 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								    		" matching well/parcel records (GW supply) for year " +
 											year + ", wd=" + wdidParts[0] + ", id=" + wdidParts[1] );
 								    }
+
+								    // Make sure that the diversion structure is not also a well structure in HydroBase.
+								    // - this results in confusing errors later so best to warn about now
+								    if ( iy == 0 ) {
+								    	List<HydroBase_ParcelUseTSStructureToParcel> hbditchCheckList =
+									    	hbdmi.readParcelUseTSStructureToParcelListForStructureWdidCalYear(wdidParts[0], wdidParts[1], -1);
+								    	if ( hbditchCheckList.size() > 0 ) {
+									    	message = "CU location \"" + culoc_id + " part ID \"" + partId + 
+										    	"\" has HydroBase vw_CDSS_ParcelUseTS (as ditch) and vw_CDSS_WellsWellToParcel (as well) data records.";
+									    	Message.printWarning ( warningLevel, 
+						        		    	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+					        		    	status.addToLog ( commandPhase,
+					            		    	new CommandLogRecord(CommandStatusType.WARNING,
+					                		    	message, "A WDID should only be associated with one of the HydroBase tables. "
+					                		   			+ "Original GIS data may have inaccurate supply type.  Additional errors may result." ) );
+								    	}
+								    }
 								}
 								else if ( partIdType == StateCU_Location_CollectionPartIdType.RECEIPT ) {
 									// Read well to parcel data for permit receipt
@@ -1205,7 +1261,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 											// TODO smalers 2020-11-05 moved to supply data
 											//parcel.setDataSource("HB-WTP");
 											parcelProblems.clear();
-											processor.findAndAddCUParcel(parcel, false, routine, "    ", parcelProblems );
+											processor.findAndAddCUParcel(parcel, false, routine, "      ", parcelProblems );
 											if ( parcelProblems.size() > 0 ) {
 												for ( String parcelProblem : parcelProblems ) {
 													Message.printWarning ( warningLevel,
@@ -1216,8 +1272,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 												}
 											}
 										}
-										// Supply information information is joined
-										// - only one supply 
+										// Add supply information to the parcel.
 										supplyFromGW = new StateCU_SupplyFromGW();
 										supplyFromGW.setDataSource("HB-WTP");
 										supplyFromGW.setCollectionPartType(collectionPartTypeString);
@@ -1226,6 +1281,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										supplyFromGW.setAreaIrrigFraction(areaIrrigFraction);  // Well relationships don't use
 										supplyFromGW.setAreaIrrig(hbParcelUseTS.getArea()*areaIrrigFraction);
 										structureView = hbdmi.readStructureViewForStructure_num(hbWell.getStructure_num());
+										// Can set the ID since a specific part ID is specified for the collection.
+										supplyFromGW.setID(partId);
 										if ( partIdType == StateCU_Location_CollectionPartIdType.WDID ) {
 											supplyFromGW.setWDID(partId);
 										}
@@ -1235,8 +1292,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										parcel.addSupply(supplyFromGW);
 										// Add to the CULocation parcels
 										culoc.addParcel ( parcel );
-
-										// Set CU Location information to help set location type .
 
 										if ( parcel.hasGroundWaterSupply() ) {
 											culocHasGroundWaterSupply = true;

@@ -262,7 +262,7 @@ private void initialize (JFrame parent, Command command )
 		"    and changes are made to final CU Locations (not parts" +
 		" in an aggregate/system)."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(paragraph, new JLabel ("If ProcessWhen=WithParcels:"),
+    JGUIUtil.addComponent(paragraph, new JLabel ("If ProcessWhen=WithParcels (THIS IS BEING PHASED OUT - DO NOT USE):"),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"    The crop patterns are processed by ReadCropPatternTSFromHydroBase() command as additional irrigated parcels data."),

@@ -26,8 +26,11 @@ package DWR.DMI.StateDMI;
 import javax.swing.JFrame;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import DWR.StateCU.IncludeParcelInCdsType;
 import DWR.StateCU.StateCU_CropPatternTS;
 import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Parcel;
@@ -65,6 +68,43 @@ public ReadCropPatternTSFromParcels_Command ()
 {	super();
 	setCommandName ( "ReadCropPatternTSFromParcels" );
 }
+
+/**
+ * Add a parcel's area to the crop pattern area.
+ * This is an internal method.
+ * @param debug whether in debug mode, for troubleshooting
+ * @param culoc the CU location being processed.
+ * @param parcel the parcel being processed.
+ * @param yts the crop pattern time series to add to.
+ * @param temp_DateTime the DateTime at which to add the value, reused for optimization.
+ * @param parcelYear the year for data (will be set in temp_DateTime).
+ * @param parcelYears list of all years that have been processed, will update for the parcelYear.
+ * @param parcelCrop the crop for the parcel
+ * @param areaIrrig the area irrigated by a supply.
+ */
+private void addParcelArea ( boolean debug, StateCU_Location culoc, StateCU_Parcel parcel, YearTS yts, DateTime temp_DateTime,
+	int parcelYear, int [] parcelYears, String parcelCrop, double areaIrrig ) {
+	double val = yts.getDataValue ( temp_DateTime );
+	int dl = 1;
+	if ( yts.isDataMissing(val) ) {
+		// Value is missing so set...
+		if ( debug ) {
+			Message.printDebug ( dl, "", "  Initializing " + culoc.getID() + " from parcelId=" + parcel.getID() + " " +
+			parcelYear + " " + parcelCrop + " to " + StringUtil.formatString(areaIrrig,"%.3f") );
+		}
+		yts.setDataValue ( temp_DateTime, areaIrrig );
+	}
+	else {
+		// Value is not missing.  Need to either set or add to it...
+		if ( debug ) {
+			Message.printDebug ( dl, "", "  Adding " + culoc.getID() + " from parcelId=" + parcel.getID() + " " +
+				parcelYear + " " + parcelCrop + " + " + areaIrrig + " = " +
+				StringUtil.formatString( (val + areaIrrig), "%.3f") );
+		}
+		yts.setDataValue ( temp_DateTime, val + areaIrrig );
+	}
+	addToParcelYears ( parcelYear, parcelYears );
+}	
 
 /**
 Add parcel data from HydroBase to a StateCU_CropPatternTS so that it can be
@@ -322,6 +362,34 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Run CreateCropPatternTSForCULocations() before this command." ) );
 	}
+
+	/*
+	Get the map of parcel data for newer StateDMI.
+	*/
+	HashMap<String,StateCU_Parcel> parcelMap = null;
+	try {
+		@SuppressWarnings("unchecked")
+		HashMap<String,StateCU_Parcel> dataMap =
+			(HashMap<String,StateCU_Parcel>)processor.getPropContents ( "StateCU_Parcel_List");
+		parcelMap = dataMap;
+	}
+	catch ( Exception e ) {
+		message = "Error requesting parcel data from processor.";
+		Message.printWarning(warningLevel,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+	}
+	if ( parcelMap == null ) {
+		message = "Parcel list (map) is null.";
+		Message.printWarning ( warningLevel, 
+			MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+		status.addToLog ( commandPhase,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Software logic problem - results will not be correct.") );
+	}
 	
     // Output period will be used if not specified with InputStart and InputEnd
     
@@ -386,7 +454,32 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		// Remove all the elements for the list that tracks when identifiers
 		// are read from more than one main source (e.g., CDS, HydroBase).
 		// This is used to print a warning.
-		processor.resetDataMatches ( processor.getStateCUCropPatternTSMatchList() );
+		// TODO smalers 2020-11-08 not needed
+		//processor.resetDataMatches ( processor.getStateCUCropPatternTSMatchList() );
+		
+		// Reset all StateCU_Location CDS tracking for parcels.
+		// - the assignments will be made as processing occurs
+		// - there may be more than one ReadCropPatternTSFromParcels command but only clear for the first one.
+		boolean firstCommand = false;
+		List<String> commandsToFind = new ArrayList<>();
+		commandsToFind.add("ReadCropPatternTSFromParcels");
+		List<Command> commandList = StateDMICommandProcessorUtil.getCommandsBeforeIndex(
+			processor.indexOf(this), processor, commandsToFind, true);
+		if ( commandList.size() == 0 ) {
+			// No commands before this one so this is the first.
+			firstCommand = true;
+		}
+		if ( firstCommand ) {
+			// Reset the CDS indicators in all supplies
+			Message.printStatus(2,routine,"First ReadCropPatternTSFromParcels command - setting all parcel supplies to CDS:NO");
+			for ( Map.Entry<String, StateCU_Parcel> entry : parcelMap.entrySet() ) {
+				for ( StateCU_Supply supply : entry.getValue().getSupplyList() ) {
+					supply.setStateCULocationForCds(null);
+					supply.setIncludeInCdsType(IncludeParcelInCdsType.NO);
+					supply.setIncludeInCdsError("");
+				}
+			}
+		}
 		
 		DateTime InputStart_DateTime = null;
 		DateTime InputEnd_DateTime = null;
@@ -421,8 +514,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		StateCU_CropPatternTS cds = null;
 		YearTS yts;
 		DateTime temp_DateTime = new DateTime(DateTime.PRECISION_YEAR);
-		StateCU_SupplyFromSW swSupply;
-		StateCU_SupplyFromGW gwSupply;
+		StateCU_SupplyFromSW supplyFromSW;
+		StateCU_SupplyFromGW supplyFromGW;
 		boolean parcelHasSurfaceWaterSupply = false;
 
 		// Years with data, used to set time series with crops in those years to zero.
@@ -433,6 +526,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			parcel_years[i] = -1;
 		}
 
+		boolean debug = false;
 		for ( int i = 0; i < culocListSize; i++ ) {
 			culoc = culocList.get(i);
 			culoc_id = culoc.getID();
@@ -444,6 +538,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			}
 			++matchCount;
 
+			if ( debug ) {
+				Message.printStatus ( 2, routine, "Processing " + culoc_id );
+			}
+
 			try {
 				// Loop through the parcel objects and add new StateCU_CropPatternTS instances.
 				// - the parcel amounts are added based on each supply relationship,
@@ -453,6 +551,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				// not need to add a new StateCU_CropPatternTS or a time series in the object...
 				
 				for ( StateCU_Parcel parcel : culoc.getParcelList() ) {
+					Message.printStatus ( 2, routine, "  Processing " + culoc_id + " parcelId=" + parcel.getID() );
 					parcelYear = parcel.getYear();
 					parcelCrop = parcel.getCrop();
 					if ( (InputStart != null) && (parcelYear < InputStart_int) ) {
@@ -505,84 +604,143 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					// - used to check whether a value has been previously set
 					temp_DateTime.setYear ( parcelYear );
 					double val;
-					// Loop though the supplies associated with the parcel
-					for ( StateCU_Supply supply : parcel.getSupplyList() ) {
-						if ( supply instanceof StateCU_SupplyFromSW ) {
-							swSupply = (StateCU_SupplyFromSW)supply;
-							// Area for supply was previously calculated as (parcel area) * (ditch percent_irrig)
-							parcelSupplyArea = swSupply.getAreaIrrig();
+					
+					boolean useTestLogic = false;
+					if ( useTestLogic ) {
+					// This is the new test logic.
+					// DON'T THINK IT WORKS JUST RELYING ON PARCEL TOTAL.
+					// Instead, fix errors in input data and then the splits should always work because there is no double counting.
+						
+					// No need to loop through supplies because that has already been done when processing the parcels.
+					// The only case where a parcel's area would not be included is if the current model location is
+					// WEL (groundwater only) and the parcel has surface water from another location.
+					// Otherwise, the parcel area should be counted in this location.
+					// The other location with surface water supply will pick up the CDS acreage when it is processed.
+					
+					// To be sure, check the supplies for this node to determine if it is a groundwater only node.
+					if ( !culoc.hasSurfaceWaterSupply() ) {
+						// This node has only groundwater supply.
+						// Check whether the parcel being processed has surface water supply.
+						if ( parcel.hasSurfaceWaterSupply() ) {
+							// The parcel has surface water supply so don't add to this CU Location.
+							continue;
 						}
-						else {
-							// Groundwater data
-							if ( !parcelHasSurfaceWaterSupply ) {
-								// Groundwater only so get the area from the supply
-								gwSupply = (StateCU_SupplyFromGW)supply;
-								// Area for supply was previously calculated as (parcel area) / (number of wells)
-								parcelSupplyArea = gwSupply.getAreaIrrig();
-							}
-						}
-						// Now check to see if there is an existing value...
-						val = yts.getDataValue ( temp_DateTime );
-						if ( yts.isDataMissing(val) ) {
-							// Value is missing so set...
-							if ( Message.isDebugOn ) {
-								Message.printDebug ( dl, "", "  Initializing " + culoc_id + " from parcelId=" + parcelId + " " +
-								parcelYear + " " + parcelCrop + " to " + StringUtil.formatString(parcelSupplyArea,"%.4f") );
-							}
-							yts.setDataValue ( temp_DateTime, parcelSupplyArea );
-						}
-						else {
-							// Value is not missing.  Need to either set or add to it...
-							//__CUCropPatternTS_match_List.add ( id + "-" + parcelYear + "-" + parcelCrop );
-							/*
-							if ( replace == 0 ) {
-								if ( Message.isDebugOn ) {
-									Message.printDebug ( dl, "", "Replacing " + id + " from " + part_id + " " +
-									parcelYear + " " + parcelCrop + " with " + StringUtil.formatString(parcelSupplyArea,"%.4f") );
-								}
-								yts.setDataValue ( temp_DateTime, parcelSupplyArea );
-							do_store_parcel = false;
-								// FIXME SAM 2007-05-18 Evaluate whether need to save observations.
-							}
-							else if ( replace == 1 ) {*/
-								if ( Message.isDebugOn ) {
-									Message.printDebug ( dl, "", "  Adding " + culoc_id + " from parcelId=" + parcelId + " " +
-									parcelYear + " " + parcelCrop + " + " + parcelSupplyArea + " = " +
-									StringUtil.formatString( (val + parcelSupplyArea), "%.4f") );
-								}
-								yts.setDataValue ( temp_DateTime, val + parcelSupplyArea );
-								/*
-							}*/
-						}
-
-						/* TODO smalers 2020-10-11 old logic that is too complicated, remove when tested out
-						StateCU_CropPatternTS cds = processor.findAndAddCUCropPatternTSValue (
-							culoc_id,
-							partId, // for messages
-							parcelYear,
-							parcelIdInt,
-							parcel.getCrop(),
-							parcel.getArea(),
-							OutputStart_DateTime, // Period in case new TS needs to be created
-							OutputEnd_DateTime,
-							units,
-							replaceFlag ); // Always add since don't have to deal with supplemental parcel data here
-						*/
-						// Add to list of parcel years that are being read.
-						// - Needed for below
-						addToParcelYears ( parcelYear, parcel_years );
-						// Save data for use in checks and filling (does not increment acreage)...
-						/* TODO smalers 2020-10-11 experimental - leave out for now.
-						addParcelToCropPatternTS ( cds,
-							culoc_id,
-							parcelYear,
-							parcel.getCrop(),
-							parcel.getArea(),	// Total for irrigation method
-							units );
-						*/
-						// TODO smalers 2020-10-11 is the following needed
-						//++crop_set_count;
 					}
+
+					// Set the information used in reporting and troubleshooting.
+					//parcel.setStateCULocationForCds(culoc);
+					//parcel.setIncludeInCdsType(IncludeParcelInCdsType.YES);
+					
+					// The entire area is counted.
+					// For example, if surface water supply is used for the parcel:
+					// - if one surface water supply, then 100% of the area
+					// - if two surface water supplies, then each irrigate 50% of the area, so still 100%
+					// - similar logic for wells
+					// - the acreage gets split more when when processing the IPY file
+
+					// Now check to see if there is an existing value...
+					val = yts.getDataValue ( temp_DateTime );
+					double parcelArea = parcel.getArea();
+					if ( yts.isDataMissing(val) ) {
+						// Value is missing so set...
+						if ( Message.isDebugOn ) {
+							Message.printDebug ( dl, "", "  Initializing " + culoc_id + " from parcelId=" + parcelId + " " +
+							parcelYear + " " + parcelCrop + " to " + StringUtil.formatString(parcelArea,"%.3f") );
+						}
+						yts.setDataValue ( temp_DateTime, parcelArea );
+					}
+					else {
+						if ( Message.isDebugOn ) {
+							Message.printDebug ( dl, "", "  Adding " + culoc_id + " from parcelId=" + parcelId + " " +
+							parcelYear + " " + parcelCrop + " + " + parcelArea + " = " +
+							StringUtil.formatString( (val + parcelArea), "%.3f") );
+						}
+					}
+					yts.setDataValue ( temp_DateTime, val + parcelArea );
+
+					// Add to list of parcel years that are being read.
+					// - Needed for below
+					addToParcelYears ( parcelYear, parcel_years );
+					}
+
+					// TODO smalers 2020-11-08 old code is actually what needs to be working
+					boolean useCurrentCode = true;
+					if ( useCurrentCode ) {
+					// Loop though the supplies associated with the parcel.
+					//  - only assign supply acreage that was matched with this location.
+					//  - the math has already been done for the irrigated acreage fraction.
+					if ( parcel.hasSurfaceWaterSupply() ) {
+						if ( debug ) {
+							Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear +
+								" parcel ID " + parcel.getID() + " has surface water supply");
+						}
+						// Only assign surface water supply acreage and do not assign any groundwater acreage
+						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
+							if ( supply instanceof StateCU_SupplyFromSW ) {
+								supplyFromSW = (StateCU_SupplyFromSW)supply;
+								if ( culoc.idIsIn(supplyFromSW.getWDID()) ) {
+									// This culoc is associated with the supply via single ditch or collection.
+									// Area for supply was previously calculated as (parcel area) * (ditch percent_irrig)
+									if ( debug ) {
+										Message.printStatus(2, routine, "SW supply " + supplyFromSW.getWDID() + " ID is in CULoc" );
+									}
+									addParcelArea ( debug, culoc, parcel, yts, temp_DateTime, parcelYear, parcel_years, parcelCrop, supplyFromSW.getAreaIrrig() );
+									supply.setStateCULocationForCds(culoc);
+									supply.setIncludeInCdsType(IncludeParcelInCdsType.YES);
+								}
+								else {
+									// TODO smalers 2020-11-08 convert to debug or remove when tested
+									if ( debug ) {
+										Message.printStatus(2, routine, "Not adding CDS acreage for " + parcelYear +
+											" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
+											"\" does not have part types matching SW supply WDID " + supplyFromSW.getWDID() );
+									}
+								}
+							}
+						}
+					}
+					else if ( parcel.hasGroundWaterSupply() ) {
+						// Groundwater data only (no surface water supply):
+						// - assign the portion of the parcel attributed to the location
+						Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " + parcel.getID() + " has groundwater only");
+						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
+							if ( supply instanceof StateCU_SupplyFromGW ) {
+								// Groundwater only so get the area from the supply
+								supplyFromGW = (StateCU_SupplyFromGW)supply;
+								if ( debug ) {
+									Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " + parcel.getID() +
+										" supply WDID " + supplyFromGW.getWDID() + " receipt " + supplyFromGW.getReceipt() );
+								}
+								if ( culoc.idIsIn(supplyFromGW.getWDID(), supplyFromGW.getReceipt()) ) {
+									if ( debug ) {
+										Message.printStatus(2, routine, "GW supply WDID " + supplyFromGW.getWDID() +
+											" receipt " + supplyFromGW.getReceipt() + " is in CULoc" );
+									}
+									// This culoc is associated with the supply via single ditch or collection.
+									// Area for supply was previously calculated as (parcel area) * (ditch percent_irrig)
+									addParcelArea ( debug, culoc, parcel, yts, temp_DateTime, parcelYear, parcel_years, parcelCrop, supplyFromGW.getAreaIrrig() );
+									supply.setStateCULocationForCds(culoc);
+									supply.setIncludeInCdsType(IncludeParcelInCdsType.YES);
+								}
+								else {
+									// TODO smalers 2020-11-08 convert to debug or remove when tested
+									if ( debug ) {
+										Message.printStatus(2, routine, "Not adding CDS acreage for " + parcelYear +
+											" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
+											"\" does not have parts matching GW supply WDID " + supplyFromGW.getWDID() +
+											" receipt \"" + supplyFromGW.getReceipt() + "\"" );
+									}
+								}
+							}
+						}
+					}
+					else {
+						if ( debug ) {
+							Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear +
+								" parcel ID " + parcel.getID() + " does not have surface or groundwater supply");
+						}
+					}
+					} // End useOldCode
 				}
 			}
 			catch ( Exception e ) {

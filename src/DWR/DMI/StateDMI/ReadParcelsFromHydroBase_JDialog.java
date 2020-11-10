@@ -195,7 +195,7 @@ private void initialize ( JFrame parent, ReadParcelsFromHydroBase_Command comman
 		"The command processes collections and tracks other information."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
-    	"The resulting data can be used by other commands rather than re-reading the same complex data."),
+    	"The resulting data can be used by other commands rather than rereading the same complex data."),
     	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,

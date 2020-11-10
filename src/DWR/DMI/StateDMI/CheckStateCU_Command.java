@@ -316,7 +316,6 @@ CommandWarningException, CommandException
 		}
 	}
 	
-	
 	// Get the data set for cross-checks between components...
 	
 	StateCU_DataSet dataset = null;
