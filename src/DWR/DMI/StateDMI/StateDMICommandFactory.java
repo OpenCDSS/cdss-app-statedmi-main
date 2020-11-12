@@ -670,6 +670,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadIrrigationPracticeTSFromList")) {
 		return new ReadIrrigationPracticeTSFromList_Command();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadIrrigationPracticeTSFromParcels")) {
+		return new ReadIrrigationPracticeTSFromParcels_Command();
+	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadIrrigationPracticeTSFromStateCU")) {
 		return new ReadIrrigationPracticeTSFromStateCU_Command();
 	}

@@ -492,11 +492,11 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 
 		// Surface water fields - space on the left to skip over above formatting
 		String format_2 = "                                                                                              " +
-			"%-8.8s %-10.10s %-12.12s %-4.4s %-10.10s %-8.8s %-8.8s %4d %8.3f %8.3f %10.3f %-7.7s";
+			"%-8.8s %-8.8s %-12.12s %-4.4s %-6.6s %-6.6s %-8.8s %3d %5.3f %5.3f %10.3f %-7.7s";
 
 		// Groundwater fields - data source and include align with  surface water and then space over to groundwater columns
-		String format_3 = "                                                                                              %-8.8s %-10.10s %-12.12s %-4.4s                       " +
-			"                                                %-12.12s %-10.10s %-8.8s %-10.10s %4d %11.3f";
+		String format_3 = "                                                                                              %-8.8s %-10.10s %-12.12s %-4.4s                  " +
+			"                                       %-12.12s %-7.7s %-8.8s %-10.10s %4d %5.3f %5.5s %9.3f";
 
 		// Size to largest size
 		List<Object> objectList = new ArrayList<>(8);
@@ -564,10 +564,10 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 		out.println(cmnt);
 		out.println(cmnt + "  SW Supply Data - portion of parcel acreage associated with surface water supply");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
-		out.println(cmnt + "  #Ditch       :  Number of ditches that are associated with the parcel.");
+		out.println(cmnt + "  #Dit         :  Number of ditches that are associated with the parcel.");
 		out.println(cmnt + "  Irrig Frac   :  1/#Ditch = fraction of ParcelArea (from above) that is irrigated by the ditch (0.0 to 1.0).");
 		out.println(cmnt + "  Irrig FracHB :  SWFrac from HydroBase, should match SWFrac.");
-		out.println(cmnt + "  SWIrrigArea  :  ParcelArea * %Irrig = area irrigated by surface water supply for this ditch.");
+		out.println(cmnt + "  Irrig Area   :  ParcelArea * %Irrig = area irrigated by surface water supply for this ditch.");
 		out.println(cmnt + "  HBError      :  Indicates whether the SWFrac computed from data is different than SWFracHB from HydroBase");
 		out.println(cmnt + "                   ERROR - indicates that not all supplies in HydroBase parcel data are being modeled");
 		out.println(cmnt + "                           due to different number of ditches associated with the parcel.");
@@ -578,12 +578,12 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 		out.println(cmnt);
 		out.println(cmnt + "  GW Collection Data - groundwater aggregate/system data");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
-		out.println(cmnt + "  GWPartType   :  Water supply part type (Well or Parcel, the latter being phased out).");
+		out.println(cmnt + "  GWPart Type  :  Water supply part type (Well or Parcel, the latter being phased out).");
 		out.println(cmnt + "                  WellInDitch = indicates a collection of ditches, with associated wells determined.");
 		out.println(cmnt + "                                automatically based well -> parcel -> ditch relationship.");
 		out.println(cmnt + "                  Well = indicates a collection of wells specified using well identifiers.");
 		out.println(cmnt + "                  Parcel = indicates a collection of wells specified using parcel identifiers.");
-		out.println(cmnt + "  GWPartIdType :  Water supply part ID type (WDID or RECEIPT).");
+		out.println(cmnt + "  GWPart IdType:  Water supply part ID type (WDID or RECEIPT).");
 		out.println(cmnt + "                  If GWPartType=Well:");
 		out.println(cmnt + "                     WDID - supply well has a WDID");
 		out.println(cmnt + "                     RECEIPT - supply well has a well permit receipt for identifier.");
@@ -595,12 +595,14 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 		out.println(cmnt + "  GW Supply Data - portion of parcel acreage associated with groundwater supply");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
 		out.println(cmnt + "  #Wells       :  Number of wells that are associated with ParcelId.");
-		out.println(cmnt + "  GWIrrigArea  :  ParcelArea/#Wells, zero if area is already assigned to surface water ID for D&W node.");
+		out.println(cmnt + "  Irrig Frac   :  1/#Wells = fraction of ParcelArea (from above) that is irrigated by the well (0.0 to 1.0).");
+		out.println(cmnt + "  D&W Frac     :  Same as D&W Irrig Frac, applied when well supply is supplemental to ditch.");
+		out.println(cmnt + "  Irrig Area   :  ParcelArea * Irrig Frac (* D&W Frac), zero if parcel has surface water supply for D&W node.");
 		out.println(cmnt);
-		out.println(cmnt + "-------- Model Id ---------|-------------------------- Parcel Data ------------------------||-------- Data Source/Use --------- ||---- SW Collection Data ----|------------ SW Suppply Data -----------|------------- GW Collection Data ----------| GW Supply Data |");
-		out.println(cmnt + "           Loc  Collection |       Parcel                          Parcel          Irrig   ||                    CDS        Loc ||  SWPart   SWPartId         |#     Irrig   Irrig    Irrig            |   GWPart      GWPart                      |#     GW        |");
-		out.println(cmnt + "  LocId    Type Type       |Year   ID                Crop          Area     Units  Method  || CDS?     DataSrc   LocId      Type||  Type     Type       WDID  |Ditch Frac    FracHB   Area      HBError|    Type       IdType     WDID     Receipt |Well  IrrigArea |");
-		out.println(cmnt + "b--------exb--exb---------exb--exb--------exb------------------exb--------exb--exb--------exb------exb--------exb----------exb--exb--------exb------exb------exb--exb------exb------exb--------eb-----exb----------exb--------exb------exb--------exb--exb---------ex");
+		out.println(cmnt + "-------- Model Id ---------|-------------------------- Parcel Data ------------------------||------- Data Source/Use -------- ||- SW Collection Data -|--------- SW Suppply Data --------|----------- GW Collection Data ---------|----- GW Supply Data -----|");
+		out.println(cmnt + "           Loc  Collection |       Parcel                          Parcel          Irrig   ||                  CDS        Loc ||SWPart SWPart         |#   Irrig Irrig   Irrig           |   GWPart    GWPart                     |#    Irrig  D&W    Irrig  |");
+		out.println(cmnt + "  LocId    Type Type       |Year   ID                Crop          Area     Units  Method  || CDS?    DataSrc  LocId      Type||Type   IdType   WDID  |Dit Frac  FracHB  Area     HBError|    Type     IdType    WDID     Receipt |Well Frac   Frac   Area   |");
+		out.println(cmnt + "b--------exb--exb---------exb--exb--------exb------------------exb--------exb--exb--------exb------exb------exb----------exb--exb----exb----exb------exb-exb---exb---exb--------exb-----exb----------exb-----exb------exb--------exb--exb---exb---exb-------ex");
 		out.println(cmnt + "EndHeader");
 		out.println(cmnt);
 	
@@ -709,6 +711,15 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 						objectList.add(supplyFromGW.getWDID());
 						objectList.add(supplyFromGW.getReceipt());
 						objectList.add(new Integer(parcel.getSupplyFromGWCount()));
+						objectList.add(new Double(1.0/parcel.getSupplyFromGWCount()));
+						if ( parcel.getSupplyFromSWCount() > 0 ) {
+							// Format here as a string because can be a blank string if not a D&W
+							objectList.add(String.format("%5.3f", (1.0/parcel.getSupplyFromSWCount())));
+						}
+						else {
+							objectList.add("");
+						}
+						// The area does consider the D&W surface water split.
 						objectList.add(new Double(supplyFromGW.getAreaIrrig()));
 						printLine = StringUtil.formatString(objectList, format_3);
 						out.println(printLine);
@@ -769,7 +780,7 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 
 		// Groundwater fields - data source and include align with  surface water and then space over to groundwater columns
 		String format_3 = "                                                                                                                                       " +
-			"%-10.10s %-10.10s %-12.12s %6d %6.3f %11.3f";
+			"%-10.10s %-10.10s %-12.12s %6d %6.3f %6.6s %11.3f";
 
 		// Size to largest size
 		List<Object> objectList = new ArrayList<>(8);
@@ -791,19 +802,19 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 		out.println(cmnt + "  Div          :  Water division");
 		out.println(cmnt + "  Dist         :  Water district - may be zero depending on how parcel data are read");
 		out.println(cmnt + "                    Current HydroBase design includes WD in digits 2-3 of the parcel ID");
-		out.println(cmnt + "  ParcelId     :  Parcel identifier");
+		out.println(cmnt + "  Parcel Id    :  Parcel identifier");
 		out.println(cmnt + "  Crop         :  Crop type for parcel (1 crop per parcel)");
-		out.println(cmnt + "  ParcelArea   :  Parcel area for crop");
+		out.println(cmnt + "  Parcel Area  :  Parcel area for crop");
 		out.println(cmnt + "  Units        :  Area units");
-		out.println(cmnt + "  IrrigMethod  :  Irrigation method");
+		out.println(cmnt + "  Irrig Method :  Irrigation method");
 		out.println(cmnt);
 		out.println(cmnt + "  SW Supply Data - portion of parcel acreage associated with surface water supply");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
 		out.println(cmnt + "  WDID         :  Water district identifier for the ditch.");
 		out.println(cmnt + "  #Ditch       :  Number of ditches that are associated with the parcel.");
-		out.println(cmnt + "  SWFrac       :  1/#Ditch = fraction of ParcelArea (from above) that is irrigated by the ditch (0.0 to 1.0).");
-		out.println(cmnt + "  SWFracHB     :  SWFrac from HydroBase, should match SWFrac.");
-		out.println(cmnt + "  SWIrrigArea  :  ParcelArea * %Irrig = area irrigated by surface water supply for this ditch.");
+		out.println(cmnt + "  Irrig Frac   :  1/#Ditch = fraction of ParcelArea (from above) that is irrigated by the ditch (0.0 to 1.0).");
+		out.println(cmnt + "  Irrig FracHB :  SWFrac from HydroBase, should match SWFrac.");
+		out.println(cmnt + "  Irrig Area   :  ParcelArea * %Irrig = area irrigated by surface water supply for this ditch.");
 		out.println(cmnt + "  HBError      :  Indicates whether the SWFrac computed from data is different than SWFracHB from HydroBase");
 		out.println(cmnt + "                   ERROR - indicates that not all supplies in HydroBase parcel data are being modeled");
 		out.println(cmnt + "                           due to different number of ditches associated with the parcel.");
@@ -818,14 +829,15 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 		out.println(cmnt + "  WDID         :  WDID for supply well.");
 		out.println(cmnt + "  RECEIPT      :  Well permit receipt.");
 		out.println(cmnt + "  #Wells       :  Number of wells that are associated with ParcelId.");
-		out.println(cmnt + "  GWFrac       :  1/#Wells = fraction of ParcelArea (from above) that is irrigated by the ditch (0.0 to 1.0).");
+		out.println(cmnt + "  Irrig Frac   :  1/#Wells = fraction of ParcelArea (from above) that is irrigated by the ditch (0.0 to 1.0).");
 		out.println(cmnt + "                    - not in original data (calculated when loaded into HydroBase).");
-		out.println(cmnt + "  GWIrrigArea  :  ParcelArea/#Wells, zero if area is already assigned to surface water ID for D&W node.");
+		out.println(cmnt + "  D&W Frac     :  Same as surface water Irrig Frac, applied when well supply is supplemental to ditch.");
+		out.println(cmnt + "  Irrig Area   :  ParcelArea/#Wells, zero if area is already assigned to surface water ID for D&W node.");
 		out.println(cmnt);
-		out.println(cmnt + "----------------------------------- Parcel Data ------------------------------|-------------------- SW Suppply ---------------------|----------------------- GW Supply Data ---------------------|");
-		out.println(cmnt + "                                                                      Irrig   |                                                     |                                                            |");
-		out.println(cmnt + "Year  Div Dist   ParcelId              Crop         ParcelArea Units  Method  |    WDID   #Ditch SWFrac SWFracHB SWIrrigArea HBError|  ID Type     WDID       Receipt   #Wells GWFrac GWIrrigArea|");
-		out.println(cmnt + "b--exb--exb--exb-------------exb------------------exb--------exb--exb--------exb--------exb----exb----exb------exb---------exb-----exb--------exb--------exb----------exb----exb----exb---------ex");
+		out.println(cmnt + "----------------------------------- Parcel Data ------------------------------|-------------------- SW Suppply ---------------------|--------------------------- GW Supply Data ------------------------|");
+		out.println(cmnt + "                                                      Parcel          Irrig   |                   Irrig  Irrig      Irrig           |                                          Irrig   D&W     Irrig    |");
+		out.println(cmnt + "Year  Div Dist   ParcelId              Crop           Area     Units  Method  |    WDID   #Ditch  Frac   FracHB     Area     HBError|  ID Type     WDID       Receipt   #Wells Frac    Frac    Area     |");
+		out.println(cmnt + "b--exb--exb--exb-------------exb------------------exb--------exb--exb--------exb--------exb----exb----exb------exb---------exb-----exb--------exb--------exb----------exb----exb----exb----exb---------ex");
 		out.println(cmnt + "EndHeader");
 		out.println(cmnt);
 		
@@ -885,6 +897,13 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 					objectList.add(supplyFromGW.getReceipt());
 					objectList.add(new Integer(parcel.getSupplyFromGWCount()));
 					objectList.add(new Double(1.0/parcel.getSupplyFromGWCount()));
+					if ( parcel.getSupplyFromSWCount() > 0 ) {
+						// Format here as a string because can be a blank string if not a D&W
+						objectList.add(String.format("%6.3f", (1.0/parcel.getSupplyFromSWCount())));
+					}
+					else {
+						objectList.add("");
+					}
 					objectList.add(new Double(supplyFromGW.getAreaIrrig()));
 					printLine = StringUtil.formatString(objectList, format_3);
 					out.println(printLine);

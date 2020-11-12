@@ -208,6 +208,9 @@ private void initialize ( JFrame parent, ReadCropPatternTSFromHydroBase_Command 
 	paragraph.setLayout(new GridBagLayout());
 	int yy = -1;
     JGUIUtil.addComponent(paragraph, new JLabel (
+		"<html><b>This command is being phased out.  Use the ReadCropPatternTSFromParcels command.</b></html>"),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command reads crop pattern time series from HydroBase for CU Locations."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (

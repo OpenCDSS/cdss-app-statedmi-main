@@ -197,6 +197,9 @@ private void initialize ( JFrame parent, ReadIrrigationPracticeTSFromHydroBase_C
 	paragraph.setLayout(new GridBagLayout());
 	int yy = -1;
 	JGUIUtil.addComponent(paragraph, new JLabel (
+		"<b><html>This command is being phased out.  Use the ReadIrrigationPracticeTSFromParcels command.</b></html>"),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command reads irrigation practice acreage time series data from HydroBase database or web services."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(paragraph, new JLabel (

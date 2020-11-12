@@ -975,6 +975,7 @@ private JMenuItem
 	//__Commands_StateCU_IrrigationPracticeTS_ReadCropPatternTSFromDBF_JMenuItem,
 	__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromHydroBase_JMenuItem,
 	__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromList_JMenuItem,
+	__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromParcels_JMenuItem,
 	__Commands_StateCU_IrrigationPracticeTS_ReadCropPatternTSFromStateCU_JMenuItem,
 	__Commands_StateCU_IrrigationPracticeTS_SetIrrigationPracticeTSTotalAcreageToCropPatternTSTotalAcreage_JMenuItem,
 	__Commands_StateCU_IrrigationPracticeTS_SetIrrigationPracticeTSPumpingMaxUsingWellRights_JMenuItem,
@@ -1964,6 +1965,7 @@ private String
 	//	__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromDBF_String,
 	__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromHydroBase_String = "ReadIrrigationPracticeTSFromHydroBase() ...",
 	__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromList_String = "ReadIrrigationPracticeTSFromList() ...",
+	__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromParcels_String = "ReadIrrigationPracticeTSFromParcels() ...",
 	__Commands_StateCU_IrrigationPracticeTS_ReadCropPatternTSFromStateCU_String = "1: " + __Commands_StateCU_CropPatternTS_ReadCropPatternTSFromStateCU_String,
 	__Commands_StateCU_IrrigationPracticeTS_SetIrrigationPracticeTSTotalAcreageToCropPatternTSTotalAcreage_String = "2: SetIrrigationPracticeTSTotalAcreageToCropPatternTSTotalAcreage() ...",
 	__Commands_StateCU_IrrigationPracticeTS_SetIrrigationPracticeTSPumpingMaxUsingWellRights_String = "SetIrrigationPracticeTSPumpingMaxUsingWellRights() ...",
@@ -3720,6 +3722,11 @@ public void actionPerformed ( ActionEvent event )
 	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromList_JMenuItem)	{
 		// Read IPY area from List...
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromList_String,
+		null, __INSERT_COMMAND);
+	}
+	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromParcels_JMenuItem){
+		// Read IPY area from Parcels...
+		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromParcels_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_IrrigationPracticeTS_SetIrrigationPracticeTSTotalAcreageToCropPatternTSTotalAcreage_JMenuItem) {
@@ -10980,6 +10987,10 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 			__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromHydroBase_JMenuItem
 			= new SimpleJMenuItem(
 			__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromHydroBase_String,this));
+		Commands_StateCU_IrrigationPracticeTS_JMenu.add(
+			__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromParcels_JMenuItem
+			= new SimpleJMenuItem(
+			__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromParcels_String,this));
 		Commands_StateCU_IrrigationPracticeTS_JMenu.add(
 			__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromList_JMenuItem
 			= new SimpleJMenuItem(
