@@ -286,7 +286,7 @@ private void resetCropPatternTS ( StateDMI_Processor processor, List<StateCU_Cro
 }
 
 /**
-Method to execute the readDiversionHistoricalTSMonthlyFromHydroBase() command.
+Method to execute the ReadCropPatternTSFromHydroBase() command.
 @param command_number Command number in sequence.
 @exception Exception if there is an error processing the command.
 */

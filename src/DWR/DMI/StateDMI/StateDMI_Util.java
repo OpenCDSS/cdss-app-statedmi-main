@@ -24,8 +24,11 @@ NoticeEnd */
 package DWR.DMI.StateDMI;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
 import DWR.DMI.HydroBaseDMI.HydroBase_AdministrationNumber;
@@ -998,6 +1001,45 @@ throws Exception
 		}
 	}
 
+	int [] yearsArray = new int[years.size()];
+	for ( int i = 0; i < years.size(); i++ ) {
+		yearsArray[i] = years.get(i).intValue();
+	}
+	
+	return yearsArray;
+}
+
+/**
+Read the list of parcel years from parcels.
+@param parcelMap hashmap containing global list of parcels.
+@return an array of integer years for which parcel data exist in HydroBase.
+*/
+public static int [] readParcelYearListFromParcels ( HashMap<String,StateCU_Parcel> parcelMap ) {
+
+	List<Integer> years = new ArrayList<>();
+	StateCU_Parcel parcel;
+	Integer year;
+	boolean found;
+	for ( Map.Entry<String, StateCU_Parcel> entry : parcelMap.entrySet() ) {
+		parcel = entry.getValue();
+		year = parcel.getYear();
+		// Check whether the year has been added
+		found = false;
+		for ( Integer yearInList : years ) {
+			if ( yearInList.intValue() == year ) {
+				found = true;
+			}
+		}
+		if ( !found ) {
+			years.add(new Integer(year));
+		}
+	}
+	
+	// Sort the years alphabetically.
+	
+	Collections.sort(years);
+
+	// Return the years as an array
 	int [] yearsArray = new int[years.size()];
 	for ( int i = 0; i < years.size(); i++ ) {
 		yearsArray[i] = years.get(i).intValue();

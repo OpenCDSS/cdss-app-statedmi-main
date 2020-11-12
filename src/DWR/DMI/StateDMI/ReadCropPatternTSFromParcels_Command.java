@@ -276,7 +276,7 @@ private void resetCropPatternTS ( StateDMI_Processor processor, List<StateCU_Cro
 */
 
 /**
-Method to execute the readDiversionHistoricalTSMonthlyFromHydroBase() command.
+Method to execute the ReadCropPatternTSFromParcels() command.
 @param command_number Command number in sequence.
 @exception Exception if there is an error processing the command.
 */
@@ -526,7 +526,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			parcel_years[i] = -1;
 		}
 
-		boolean debug = false;
+		boolean debug = Message.isDebugOn;
 		for ( int i = 0; i < culocListSize; i++ ) {
 			culoc = culocList.get(i);
 			culoc_id = culoc.getID();
@@ -551,7 +551,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				// not need to add a new StateCU_CropPatternTS or a time series in the object...
 				
 				for ( StateCU_Parcel parcel : culoc.getParcelList() ) {
-					Message.printStatus ( 2, routine, "  Processing " + culoc_id + " parcelId=" + parcel.getID() );
+					if ( debug ) {
+						Message.printStatus ( 2, routine, "  Processing " + culoc_id + " parcelId=" + parcel.getID() );
+					}
 					parcelYear = parcel.getYear();
 					parcelCrop = parcel.getCrop();
 					if ( (InputStart != null) && (parcelYear < InputStart_int) ) {
@@ -701,6 +703,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					}
 					else if ( parcel.hasGroundWaterSupply() ) {
 						// Groundwater data only (no surface water supply):
+						// - groundwater associated with commingled lands will not assigned so no double-counting of groundwater
 						// - assign the portion of the parcel attributed to the location
 						Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " + parcel.getID() + " has groundwater only");
 						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
