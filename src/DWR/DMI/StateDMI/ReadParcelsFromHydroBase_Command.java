@@ -608,11 +608,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								((InputEnd_DateTime == null) || (parcelYearsForDiv[iy] <= InputEnd_DateTime.getYear()))) {
 								// Get HydroBase_ParcelUseTS for the structure
 								// - this will be cached using WD, year, and WDID
-								// - the following will print the query time to evaluate performance
 								List<HydroBase_ParcelUseTSStructureToParcel> hbParcelUseTSStructList =
 									hbdmi.readParcelUseTSStructureToParcelListForStructureWdidCalYear(wdidParts[0], wdidParts[1], year);
 							    if ( hbParcelUseTSStructList.size() > 0 ) {
-							    	Message.printStatus ( 2, routine, "  Found " + hbParcelUseTSStructList.size() +
+							    	Message.printStatus ( 2, routine, "  SW: Found " + hbParcelUseTSStructList.size() +
 							    		" matching structure/parcel records (SW supply) for year " +
 										year + ", wd=" + wdidParts[0] + ", id=" + wdidParts[1] );
 							    }
@@ -669,7 +668,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										sw.clearAndStart();
 										structureView = hbdmi.readStructureViewForStructure_num(hbParcelUseTSStruct.getStructure_num());
 										sw.stop();
-										Message.printStatus ( 2, routine, "  Reading structure view for structure_num " +
+										Message.printStatus ( 2, routine, "    Reading structure view for structure_num " +
 											hbParcelUseTSStruct.getStructure_num() + " took " + sw.getMilliseconds() + " ms");
 									}
 									supply.setWDID(HydroBase_WaterDistrict.formWDID( structureView.getWD(), structureView.getID()) );
@@ -679,6 +678,21 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									// Add to the CULocation parcels
 									if ( Message.isDebugOn ) {
 										sw.clearAndStart();
+									}
+
+									// Check that surface water supply WDID is not a well.
+									// - check structure type here
+									// - querying wells may not find and is slow
+									//List<HydroBase_Wells> hbwellCheckList2 = hbdmi.readWells(structureView.getWD(), structureView.getID());
+									//if ( hbwellCheckList2.size() > 0 ) {
+									if ( structureView.getStr_type().charAt(0) == 'W') {
+										message = "CU location \"" + culoc_id + " year " + year + " parcel ID " + parcel.getID() +
+											" SW supply WDID " + structureView.getWDID() + "\" is a well.";
+										Message.printWarning ( warningLevel, 
+					        				MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+				        				status.addToLog ( commandPhase,
+				            				new CommandLogRecord(CommandStatusType.WARNING,
+				                				message, "Original GIS data has GW supply in SW supply. Additional errors may result." ) );
 									}
 
 									// Additionally, process the wells associated with the parcel for groundwater supply
@@ -695,7 +709,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									List<HydroBase_Wells> hbWellsList = hbdmi.readWellsWellToParcelList(
 										hbParcelUseTSStruct.getParcel_id(), year, -1, null, hbParcelUseTSStruct.getStructureWD(), -1);
 									if ( hbWellsList.size() > 0 ) {
-										Message.printStatus ( 2, routine, "        Found " + hbWellsList.size() +
+										Message.printStatus ( 2, routine, "        GW: Found " + hbWellsList.size() +
 											" matching well/parcel records (GW suppply) for year " +
 											year + ", parcel ID=" + hbParcelUseTSStruct.getParcel_id() );
 									}
@@ -882,6 +896,21 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									supplyFromSW.setWDID(HydroBase_WaterDistrict.formWDID( structureView.getWD(), structureView.getID()) );
 									supplyFromSW.setID(supplyFromSW.getWDID());
 									parcel.addSupply(supplyFromSW);
+
+									// Check that surface water supply WDID is not a well.
+									// - could check structure type here but query wells to be more certain
+									//List<HydroBase_Wells> hbwellCheckList2 = hbdmi.readWellsWellToParcelList(
+									//	-1, -1, -1, null, structureView.getWD(), structureView.getID());
+									//if ( hbwellCheckList2.size() > 0 ) {
+									if ( structureView.getStr_type().charAt(0) == 'W') {
+										message = "CU location \"" + culoc_id + " year " + year + " parcel ID " + parcel.getID() +
+											" SW supply WDID " + structureView.getWDID() + "\" is a well.";
+										Message.printWarning ( warningLevel, 
+					        				MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+				        				status.addToLog ( commandPhase,
+				            				new CommandLogRecord(CommandStatusType.WARNING,
+				                				message, "Original GIS data has GW supply in SW supply. Additional errors may result." ) );
+									}
 
 									// Additionally, process the wells associated with the parcel for groundwater supply
 									// - TODO smalers 2020-02-17 this code is similar to well aggregation so could make code modular and reuse
@@ -1334,17 +1363,26 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			// Based on the supply for the CU Location, estimate the node type DIV, D&W, WEL so that the parcel display report
 			// can display.  This is useful to understand the data.
 			
-			if ( !culocHasSurfaceWaterSupply && !culocHasGroundWaterSupply ) {
-				culoc.setLocationType(StateCU_LocationType.UNKNOWN);
+			//else if ( !culocHasSurfaceWaterSupply && culocHasGroundWaterSupply ) {
+			if ( culoc.hasGroundwaterOnlySupply() ) {
+				// Model nodes that are single wells are not supported - must be defined as a well aggregate.
+				// Therefore ignore whether have any surface water supply
+				// (should not have any because of definition of well-only node) and rely on the aggregate check.
+				culoc.setLocationType(StateCU_LocationType.WELL);
 			}
+			// The remainder of these are based on checking the supplies associated with parcels.
+			// - necessary because what looks like a diversion single node or
+			//   aggregate/system may have also have wells after processing
 			else if ( culocHasSurfaceWaterSupply && culocHasGroundWaterSupply ) {
 				culoc.setLocationType(StateCU_LocationType.DIVERSION_AND_WELL);
 			}
 			else if ( culocHasSurfaceWaterSupply && !culocHasGroundWaterSupply ) {
+				// Clearly a diversion node.
 				culoc.setLocationType(StateCU_LocationType.DIVERSION);
 			}
-			else if ( !culocHasSurfaceWaterSupply && culocHasGroundWaterSupply ) {
-				culoc.setLocationType(StateCU_LocationType.WELL);
+			//else if ( !culocHasSurfaceWaterSupply && !culocHasGroundWaterSupply ) {
+			else {
+				culoc.setLocationType(StateCU_LocationType.UNKNOWN);
 			}
 			
 		} // end loop through CU Locations

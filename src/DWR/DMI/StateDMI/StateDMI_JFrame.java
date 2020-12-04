@@ -920,6 +920,7 @@ private JMenu
 private JMenuItem
 	__Commands_StateCU_Parcels_ReadParcelsFromHydroBase_JMenuItem,
 	__Commands_StateCU_Parcels_CheckParcels_JMenuItem,
+	__Commands_StateCU_Parcels_CheckIrrigatedLands_JMenuItem,
 	__Commands_StateCU_Parcels_WriteParcelsToFile_JMenuItem;
 
 private JMenu
@@ -1308,6 +1309,7 @@ private JMenuItem
 	//__Commands_StateMod_ConsumptiveWaterRequirementTS_JMenuItem,
     __Commands_StateMod_Parcels_ReadParcelsFromHydroBase_JMenuItem,
     __Commands_StateMod_Parcels_CheckParcels_JMenuItem,
+    __Commands_StateMod_Parcels_CheckIrrigatedLands_JMenuItem,
     __Commands_StateMod_Parcels_WriteParcelsToFile_JMenuItem;
 	//__Commands_StateMod_SoilMoisture_JMenuItem;
 // Precipitation Data
@@ -1904,6 +1906,7 @@ private String
 	__Commands_StateCU_Parcels_String = "Parcels",
 	__Commands_StateCU_Parcels_ReadParcelsFromHydroBase_String = "ReadParcelsFromHydroBase",
 	__Commands_StateCU_Parcels_CheckParcels_String = "CheckParcels",
+	__Commands_StateCU_Parcels_CheckIrrigatedLands_String = "CheckIrrigatedLands",
 	__Commands_StateCU_Parcels_WriteParcelsToFile_String = "WriteParcelsToFile",
 
 	// CDS - crop pattern time series
@@ -2153,6 +2156,7 @@ private String
 	__Commands_StateMod_Parcels_String = "Parcels",
 	__Commands_StateMod_Parcels_ReadParcelsFromHydroBase_String = "ReadParcelsFromHydroBase()...",
 	__Commands_StateMod_Parcels_CheckParcels_String = "CheckParcels()...",
+	__Commands_StateMod_Parcels_CheckIrrigatedLands_String = "CheckIrrigatedLands()...",
 	__Commands_StateMod_Parcels_WriteParcelsToFile_String = "WriteParcelsToFile()...",
 	__Commands_StateMod_IrrigationPracticeTS_String = "Irrigation Practice TS (Yearly)",
 	__Commands_StateMod_ConsumptiveWaterRequirementTS_String = "Consumptive Water Requirement (Monthly, Daily)",
@@ -3558,6 +3562,11 @@ public void actionPerformed ( ActionEvent event )
 	else if ( action.equals( __Commands_StateCU_Parcels_CheckParcels_String) ) {
 		// Check parcels.
 		commandList_EditCommand ( __Commands_StateCU_Parcels_CheckParcels_String,
+		null, __INSERT_COMMAND);
+	}
+	else if ( action.equals( __Commands_StateCU_Parcels_CheckIrrigatedLands_String) ) {
+		// Check parcels.
+		commandList_EditCommand ( __Commands_StateCU_Parcels_CheckIrrigatedLands_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( action.equals( __Commands_StateCU_Parcels_WriteParcelsToFile_String) ) {
@@ -10835,6 +10844,9 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 		Commands_StateCU_Parcels_JMenu.add(
 	        __Commands_StateCU_Parcels_CheckParcels_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_Parcels_CheckParcels_String,this));
+		Commands_StateCU_Parcels_JMenu.add(
+	        __Commands_StateCU_Parcels_CheckIrrigatedLands_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateCU_Parcels_CheckIrrigatedLands_String,this));
 		Commands_StateCU_Parcels_JMenu.addSeparator();
 		Commands_StateCU_Parcels_JMenu.add(
 	        __Commands_StateCU_Parcels_WriteParcelsToFile_JMenuItem =
@@ -11151,6 +11163,9 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 		Commands_StateMod_Parcels_JMenu.add(
 	        __Commands_StateMod_Parcels_CheckParcels_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateMod_Parcels_CheckParcels_String,this));
+		Commands_StateMod_Parcels_JMenu.add(
+	        __Commands_StateMod_Parcels_CheckIrrigatedLands_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateMod_Parcels_CheckIrrigatedLands_String,this));
 		Commands_StateMod_Parcels_JMenu.addSeparator();
 		Commands_StateMod_Parcels_JMenu.add(
 	        __Commands_StateMod_Parcels_WriteParcelsToFile_JMenuItem =

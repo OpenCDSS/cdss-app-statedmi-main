@@ -1,23 +1,23 @@
-// ReadTableFromDBF_JDialog - editor for ReadTableFromDBF command
+// ReadTableFromDBF_JDialog - editor dialog for ReadTableFromDBF command
 
 /* NoticeStart
 
-StateDMI
-StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+CDSS Time Series Processor Java Library
+CDSS Time Series Processor Java Library is a part of Colorado's Decision Support Systems (CDSS)
+Copyright (C) 1994-2019 Colorado Department of Natural Resources
 
-StateDMI is free software:  you can redistribute it and/or modify
+CDSS Time Series Processor Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-StateDMI is distributed in the hope that it will be useful,
+    CDSS Time Series Processor Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-    along with StateDMI.  If not, see <https://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with CDSS Time Series Processor Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
 
@@ -34,7 +34,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import DWR.DMI.StateDMI.StateDMI_Processor;
 import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 
 import java.awt.FlowLayout;
@@ -76,6 +75,9 @@ private boolean __first_time = true;
 private JTextArea __command_JTextArea=null;
 private JTextField  __TableID_JTextField = null;
 private JTextField __InputFile_JTextField = null;
+private JTextField __DoubleColumns_JTextField = null;
+private JTextField __IntegerColumns_JTextField = null;
+private JTextField __TextColumns_JTextField = null;
 private JTextField __Top_JTextField = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;
@@ -176,6 +178,9 @@ private void checkInput ()
 	PropList props = new PropList ( "" );
     String TableID = __TableID_JTextField.getText().trim();
 	String InputFile = __InputFile_JTextField.getText().trim();
+	String DoubleColumns  = __DoubleColumns_JTextField.getText().trim();
+	String IntegerColumns  = __IntegerColumns_JTextField.getText().trim();
+	String TextColumns  = __TextColumns_JTextField.getText().trim();
 	String Top = __Top_JTextField.getText().trim();
 	__error_wait = false;
 
@@ -185,6 +190,15 @@ private void checkInput ()
 	if ( InputFile.length() > 0 ) {
 		props.set ( "InputFile", InputFile );
 	}
+    if ( DoubleColumns.length() > 0 ) {
+        props.set ( "DoubleColumns", DoubleColumns );
+    }
+    if ( IntegerColumns.length() > 0 ) {
+        props.set ( "IntegerColumns", IntegerColumns );
+    }
+    if ( TextColumns.length() > 0 ) {
+        props.set ( "TextColumns", TextColumns );
+    }
     if ( Top.length() > 0 ) {
         props.set ( "Top", Top );
     }
@@ -206,9 +220,15 @@ already been checked and no errors were detected.
 private void commitEdits ()
 {	String TableID = __TableID_JTextField.getText().trim();
     String InputFile = __InputFile_JTextField.getText().trim();
+	String DoubleColumns  = __DoubleColumns_JTextField.getText().trim();
+	String IntegerColumns  = __IntegerColumns_JTextField.getText().trim();
+	String TextColumns  = __TextColumns_JTextField.getText().trim();
     String Top = __Top_JTextField.getText().trim();
     __command.setCommandParameter ( "TableID", TableID );
 	__command.setCommandParameter ( "InputFile", InputFile );
+	__command.setCommandParameter ( "DoubleColumns", DoubleColumns );
+	__command.setCommandParameter ( "IntegerColumns", IntegerColumns );
+	__command.setCommandParameter ( "TextColumns", TextColumns );
 	__command.setCommandParameter ( "Top", Top );
 }
 
@@ -220,7 +240,7 @@ Instantiates the GUI components.
 private void initialize ( JFrame parent, ReadTableFromDBF_Command command )
 {	__command = command;
 	CommandProcessor processor = __command.getCommandProcessor();
-	__working_dir = TSCommandProcessorUtil.getWorkingDirForCommand ( (StateDMI_Processor)processor, __command );
+	__working_dir = TSCommandProcessorUtil.getWorkingDirForCommand ( processor, __command );
 
 	addWindowListener(this);
 
@@ -238,11 +258,20 @@ private void initialize ( JFrame parent, ReadTableFromDBF_Command command )
 	int yy = -1;
     
    	JGUIUtil.addComponent(paragraph, new JLabel (
-	"This command reads a table from a dBASE file.  The table can then be used by other commands."),
-	0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+	    "This command reads a table from a dBASE DBF file.  The table can then be used by other commands."),
+	    0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"An example of a dBASE file is the attribute table file used with ESRI GIS shapefiles."),
-		0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
+		"An example of a DBF file is the attribute table file used with Esri GIS shapefiles."),
+		0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel (
+		"DBF integers are stored as floating-point numbers with precision=0, but integers cannot be assumed."),
+		0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel (
+		"Therefore, use the IntegerColumns parameter to indicate integer columns."),
+		0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel (
+		"Text (string) columns in the DBF can be converted to other types."),
+		0, ++yy, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	if (__working_dir != null) {
     	JGUIUtil.addComponent(paragraph, new JLabel (
 		"The working directory is: " + __working_dir), 
@@ -286,6 +315,39 @@ private void initialize ( JFrame parent, ReadTableFromDBF_Command command )
 	}
 	JGUIUtil.addComponent(main_JPanel, InputFile_JPanel,
 		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Double precision (number) columns:"),
+        0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    __DoubleColumns_JTextField = new JTextField (20);
+    __DoubleColumns_JTextField.setToolTipText("Specify column names containing floating point (double precision) values, separated by commas, can use * and ${Property} notation");
+    __DoubleColumns_JTextField.addKeyListener (this);
+    JGUIUtil.addComponent(main_JPanel, __DoubleColumns_JTextField,
+        1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel,
+        new JLabel ("Optional - columns that contain numbers, separated by commas."),
+        3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Integer columns:"),
+        0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    __IntegerColumns_JTextField = new JTextField (20);
+    __IntegerColumns_JTextField.setToolTipText("Specify column names containing integer values, separated by commas, can use * and ${Property} notation");
+    __IntegerColumns_JTextField.addKeyListener (this);
+    JGUIUtil.addComponent(main_JPanel, __IntegerColumns_JTextField,
+        1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel,
+        new JLabel ("Optional - columns that contain integers, separated by commas."),
+        3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Text columns:"),
+        0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    __TextColumns_JTextField = new JTextField (20);
+    __TextColumns_JTextField.setToolTipText("Specify column names containing text values, separated by commaas, can use * and ${Property} notation");
+    __TextColumns_JTextField.addKeyListener (this);
+    JGUIUtil.addComponent(main_JPanel, __TextColumns_JTextField,
+        1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel,
+        new JLabel ("Optional - columns that contain text, separated by commas."),
+        3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
         
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Top N rows:"),
         0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -374,12 +436,18 @@ Refresh the command from the other text field contents.
 private void refresh ()
 {	String TableID = "";
     String InputFile = "";
+	String DoubleColumns = "";
+	String IntegerColumns = "";
+	String TextColumns = "";
     String Top = "";
 	PropList props = __command.getCommandParameters();
 	if (__first_time) {
 		__first_time = false;
         TableID = props.getValue ( "TableID" );
 		InputFile = props.getValue ( "InputFile" );
+		DoubleColumns = props.getValue ( "DoubleColumns" );
+		IntegerColumns = props.getValue ( "IntegerColumns" );
+		TextColumns = props.getValue ( "TextColumns" );
 		Top = props.getValue ( "Top" );
         if ( TableID != null ) {
             __TableID_JTextField.setText ( TableID );
@@ -387,6 +455,15 @@ private void refresh ()
 		if ( InputFile != null ) {
 			__InputFile_JTextField.setText ( InputFile );
 		}
+        if ( DoubleColumns != null ) {
+            __DoubleColumns_JTextField.setText ( DoubleColumns );
+        }
+        if ( IntegerColumns != null ) {
+            __IntegerColumns_JTextField.setText ( IntegerColumns );
+        }
+        if ( TextColumns != null ) {
+            __TextColumns_JTextField.setText ( TextColumns );
+        }
         if ( Top != null ) {
             __Top_JTextField.setText ( Top );
         }
@@ -394,10 +471,16 @@ private void refresh ()
 	// Regardless, reset the command from the fields...
     TableID = __TableID_JTextField.getText().trim();
 	InputFile = __InputFile_JTextField.getText().trim();
+	DoubleColumns = __DoubleColumns_JTextField.getText().trim();
+	IntegerColumns = __IntegerColumns_JTextField.getText().trim();
+	TextColumns = __TextColumns_JTextField.getText().trim();
 	Top = __Top_JTextField.getText().trim();
 	props = new PropList ( __command.getCommandName() );
     props.add ( "TableID=" + TableID );
 	props.add ( "InputFile=" + InputFile );
+	props.add ( "DoubleColumns=" + DoubleColumns );
+	props.add ( "IntegerColumns=" + IntegerColumns );
+	props.add ( "TextColumns=" + TextColumns );
 	props.add ( "Top=" + Top );
 	__command_JTextArea.setText( __command.toString ( props ) );
 	// Check the path and determine what the label on the path button should be...

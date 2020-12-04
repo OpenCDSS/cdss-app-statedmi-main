@@ -222,6 +222,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"CheckIrrigationPracticeTS") ) {
 		return new CheckIrrigationPracticeTS_Command ();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString,"CheckIrrigatedLands") ) {
+		return new CheckIrrigatedLands_Command ();
+	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"CheckParcels") ) {
 		return new CheckParcels_Command ();
 	}
