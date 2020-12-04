@@ -81,7 +81,7 @@ private SimpleJButton __path_JButton = null;
 private String __working_dir = null;	
 private JTextField __OutputFile_JTextField = null; 
 private SimpleJComboBox __FileFormat_JComboBox = null;
-private SimpleJComboBox __WriteHow_JComboBox = null;
+private SimpleJComboBox __Verbose_JComboBox = null;
 //private SimpleJComboBox __Delimiter_JComboBox = null;
 private JTextArea __command_JTextArea=null;
 private SimpleJButton __cancel_JButton = null;
@@ -186,7 +186,7 @@ private void checkInput () {
 	PropList props = new PropList ( "" );
 	String OutputFile = __OutputFile_JTextField.getText().trim();
 	String FileFormat = __FileFormat_JComboBox.getSelected();
-	String WriteHow = __WriteHow_JComboBox.getSelected();
+	String Verbose = __Verbose_JComboBox.getSelected();
 	//String Delimiter = __Delimiter_JComboBox.getSelected();
 	
 	__error_wait = false;
@@ -197,8 +197,8 @@ private void checkInput () {
 	if (FileFormat.length() > 0 ) {
 		props.set("FileFormat", FileFormat);
 	}
-	if (WriteHow.length() > 0 ) {
-		props.set("WriteHow", WriteHow);
+	if (Verbose.length() > 0 ) {
+		props.set("Verbose", Verbose);
 	}
 	//if (Delimiter.length() > 0 ) {
 	//	props.set("Delimiter", Delimiter);
@@ -222,12 +222,12 @@ private void commitEdits()
 {
 	String OutputFile = __OutputFile_JTextField.getText().trim();
 	String FileFormat = __FileFormat_JComboBox.getSelected();
-	String WriteHow = __WriteHow_JComboBox.getSelected();
+	String Verbose = __Verbose_JComboBox.getSelected();
 	//String Delimiter = __Delimiter_JComboBox.getSelected();
 
 	__command.setCommandParameter("OutputFile", OutputFile);
 	__command.setCommandParameter("FileFormat", FileFormat);
-	__command.setCommandParameter("WriteHow", WriteHow);
+	__command.setCommandParameter("Verbose", Verbose);
 	//__command.setCommandParameter("Delimiter", Delimiter);
 }
 
@@ -332,19 +332,21 @@ private void initialize (JFrame parent, WriteParcelsToFile_Command command )
 		"Optional - file format (default=" + __command._ModelParcelSupply + ")."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
-    JGUIUtil.addComponent(main_JPanel, new JLabel ("Write how:"),
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Verbose?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	List<String> write_how_List = new ArrayList<>(3);
-	write_how_List.add ( "" );
-	write_how_List.add ( __command._OverwriteFile );
-	write_how_List.add ( __command._UpdateFile );
-	__WriteHow_JComboBox = new SimpleJComboBox(false);
-	__WriteHow_JComboBox.setData ( write_how_List );
-	__WriteHow_JComboBox.addItemListener (this);
-	JGUIUtil.addComponent(main_JPanel, __WriteHow_JComboBox,
+	List<String> verboseList = new ArrayList<>(3);
+	verboseList.add ( "" );
+	verboseList.add ( __command._False );
+	verboseList.add ( __command._True );
+	__Verbose_JComboBox = new SimpleJComboBox(false);
+	__Verbose_JComboBox.setToolTipText("Used with ModelParcelSupply. If True, all supplies assoicated with parcels are listed."
+		+ "  If False, groundwater only model nodes will not include parcels with surface water supply.");
+	__Verbose_JComboBox.setData ( verboseList );
+	__Verbose_JComboBox.addItemListener (this);
+	JGUIUtil.addComponent(main_JPanel, __Verbose_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
-		"Optional - indicate whether to overwrite/update (default=" + __command._OverwriteFile + ")."),
+		"Optional - write verbose format (default=" + __command._False + ")."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
     /*
@@ -442,7 +444,7 @@ private void refresh ()
 {	String routine = __command.getCommandName() + "_JDialog.refresh";
 	String OutputFile = "";
 	String FileFormat = "";
-	String WriteHow = "";
+	String Verbose = "";
 	//String Delimiter = "";
 	PropList props = null;
 	
@@ -453,7 +455,7 @@ private void refresh ()
 		props = __command.getCommandParameters();
 		OutputFile = props.getValue ( "OutputFile" );
 		FileFormat = props.getValue ( "FileFormat" );
-		WriteHow = props.getValue ( "WriteHow" );
+		Verbose = props.getValue ( "Verbose" );
 		//Delimiter = props.getValue ( "Delimiter" );
 		if ( OutputFile != null ) {
 			__OutputFile_JTextField.setText (OutputFile);
@@ -474,18 +476,18 @@ private void refresh ()
 				__error_wait = true;
 			}
 		}
-		if ( WriteHow == null ) {
+		if ( Verbose == null ) {
 			// Select default...
-			__WriteHow_JComboBox.select ( 0 );
+			__Verbose_JComboBox.select ( 0 );
 		}
 		else {
 			if ( JGUIUtil.isSimpleJComboBoxItem(
-				__WriteHow_JComboBox, WriteHow, JGUIUtil.NONE, null, null ) ) {
-				__WriteHow_JComboBox.select ( WriteHow );
+				__Verbose_JComboBox, Verbose, JGUIUtil.NONE, null, null ) ) {
+				__Verbose_JComboBox.select ( Verbose );
 			}
 			else {
 				Message.printWarning ( 1, routine,
-				"Existing command references an invalid WriteHow value \"" + WriteHow +
+				"Existing command references an invalid Verbose value \"" + Verbose +
 				"\".  Select a different value or Cancel.");
 				__error_wait = true;
 			}
@@ -513,12 +515,12 @@ private void refresh ()
 	// Regardless, reset the command from the fields...
 	OutputFile = __OutputFile_JTextField.getText().trim();
 	FileFormat = __FileFormat_JComboBox.getSelected();
-	WriteHow = __WriteHow_JComboBox.getSelected();
+	Verbose = __Verbose_JComboBox.getSelected();
 	//Delimiter = __Delimiter_JComboBox.getSelected();
 	props = new PropList(__command.getCommandName());
 	props.add("OutputFile=" + OutputFile);
 	props.add("FileFormat=" + FileFormat);
-	props.add("WriteHow=" + WriteHow);
+	props.add("Verbose=" + Verbose);
 	//props.add("Delimiter=" + Delimiter);
 	__command_JTextArea.setText( __command.toString(props) );
 	// Check the path and determine what the label on the path button should be...

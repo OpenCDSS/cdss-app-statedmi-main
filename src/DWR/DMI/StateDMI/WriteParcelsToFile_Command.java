@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 
 import DWR.StateCU.IncludeParcelInCdsType;
-import DWR.StateCU.StateCU_CropPatternTS;
 import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Parcel;
 import DWR.StateCU.StateCU_Parcel_Comparator;
@@ -70,10 +69,10 @@ public class WriteParcelsToFile_Command extends AbstractCommand implements Comma
 {
 
 /**
-Possible values for the WriteHow parameter.
+Possible values for the Verbose parameter.
 */
-protected final String _OverwriteFile = "OverwriteFile";
-protected final String _UpdateFile = "UpdateFile";
+protected final String _False = "False";
+protected final String _True = "True";
 
 /**
  *  File formats
@@ -106,7 +105,7 @@ cross-reference to the original commands.
 public void checkCommandParameters ( PropList parameters, String command_tag, int warning_level )
 throws InvalidCommandParameterException
 {	String OutputFile = parameters.getValue ( "OutputFile" );
-	String WriteHow = parameters.getValue ( "WriteHow" );
+	String Verbose = parameters.getValue ( "Verbose" );
 	//String Delimiter = parameters.getValue ( "Delimiter" );
 	String warning = "";
 	String message;
@@ -165,20 +164,20 @@ throws InvalidCommandParameterException
 		}
 	}
     
-	if ( (WriteHow != null) && (WriteHow.length() != 0) &&
-		!WriteHow.equals(_OverwriteFile) && !WriteHow.equals(_UpdateFile) ) {
-        message = "The valie for WriteHow (" + WriteHow + ") is invalid.";
+	if ( (Verbose != null) && (Verbose.length() != 0) &&
+		!Verbose.equals(_False) && !Verbose.equals(_True) ) {
+        message = "The value for Verbose (" + Verbose + ") is invalid.";
         warning += "\n" + message;
         status.addToLog ( CommandPhaseType.INITIALIZATION,
             new CommandLogRecord(CommandStatusType.FAILURE,
-                message, "Specify WriteHow as " + _OverwriteFile + " (default) or " + _UpdateFile ) );
+                message, "Specify Value as " + _False + " (default) or " + _True ) );
 	}
 
 	// Check for invalid parameters...
 	List<String> validList = new ArrayList<>(3);
 	validList.add ( "OutputFile" );
 	validList.add ( "FileFormat" );
-	validList.add ( "WriteHow" );
+	validList.add ( "Verbose" );
 	validList.add ( "Delimiter" );
     warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
@@ -262,13 +261,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     if ( (FileFormat == null) || FileFormat.equals("") ) {
     	FileFormat = _ModelParcelSupply; // Default
     }
-    String WriteHow = parameters.getValue ( "WriteHow" );
-    boolean update = false;
-    if ( (WriteHow == null) || WriteHow.equals("") ) {
-    	WriteHow = _OverwriteFile; // Default
-    }
-    else if ( WriteHow.equalsIgnoreCase(_UpdateFile) ) {
-    	update = true;
+    String Verbose = parameters.getValue ( "Verbose" );
+    boolean verbose = false; // Default
+    if ( (Verbose != null) && Verbose.equalsIgnoreCase(_True) ) {
+    	verbose = true;
     }
     String Delimiter = parameters.getValue ( "Delimiter" );
     if ( (Delimiter == null) || Delimiter.equals("") ) {
@@ -353,7 +349,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         }
         
         // Initial implementation is for parcels associated with StateCU locations.
-		writeCULocationParcelsToTextFile( FileFormat, OutputFile_full, Delimiter, update,
+		writeCULocationParcelsToTextFile( FileFormat, OutputFile_full, Delimiter, verbose,
 			processor.getStateCULocationList(), parcelList, OutputComments_List );
 			
     	// Set the filename(s) for the FileGenerator interface
@@ -399,7 +395,7 @@ public String toString ( PropList parameters )
 
 	String OutputFile = parameters.getValue ( "OutputFile" );
 	String FileFormat = parameters.getValue ( "FileFormat" );
-	String WriteHow = parameters.getValue ( "WriteHow" );
+	String Verbose = parameters.getValue ( "Verbose" );
 	String Delimiter = parameters.getValue ( "Delimiter" );
 
 	StringBuffer b = new StringBuffer ();
@@ -412,11 +408,11 @@ public String toString ( PropList parameters )
 		}
 		b.append ( "FileFormat=" + FileFormat );
 	}
-	if ( (WriteHow != null) && (WriteHow.length() > 0) ) {
+	if ( (Verbose != null) && (Verbose.length() > 0) ) {
 		if ( b.length() > 0 ) {
 			b.append ( "," );
 		}
-		b.append ( "WriteHow=" + WriteHow );
+		b.append ( "Verbose=" + Verbose );
 	}
 	if ( (Delimiter != null) && (Delimiter.length() > 0) ) {
 		if ( b.length() > 0 ) {
@@ -430,33 +426,27 @@ public String toString ( PropList parameters )
 
 /**
  * Write the parcel data as a text file, using StateCU_Location as input.
+ * @param fileFormat format for output file (_ModelParcelSupply or _ParcelSupply)
+ * @param outputFileFull full path to output file
+ * @param delimiter delimiter for output, not currently used because format is predefined
+ * @param verbose output verbose format - used with ModelParcelSupply format
+ * @param culocList list of StateCU_Location, when processing ModelParcelSupply
+ * @param parcelList list of StateCU_Parcel, when processing ParcelSupply
+ * @param outputCommentsList output comments for the top of the file
  */
-private void writeCULocationParcelsToTextFile ( String fileFormat, String outputFileFull, String delimiter, boolean update,
+private void writeCULocationParcelsToTextFile ( String fileFormat, String outputFileFull, String delimiter, boolean verbose,
 	List<StateCU_Location> culocList, List<StateCU_Parcel> parcelList, List<String> outputCommentsList ) {
+	
+	// Always overwrite the file rather than update
+	boolean update = false;
 	
 	// Call the general write method
 	if ( fileFormat.equalsIgnoreCase(_ModelParcelSupply) ) {
-		writeParcelsToModelParcelSupplyFile ( outputFileFull, delimiter, update, culocList, outputCommentsList );
+		writeParcelsToModelParcelSupplyFile ( outputFileFull, delimiter, update, culocList, outputCommentsList, verbose );
 	}
 	else if ( fileFormat.equalsIgnoreCase(_ParcelSupply) ) {
 		writeParcelsToParcelSupplyFile ( outputFileFull, delimiter, update, parcelList, outputCommentsList );
 	}
-}
-
-/**
- * TODO smalers 2020-10-11 remove when clear that don't need.
- * Write the parcel data as a text file, using StateCU_CropPatternTS as input.
- */
-private void writeCropPatternTSParcelsToTextFile ( String outputFileFull, String delimiter, boolean update,
-	List<StateCU_CropPatternTS> cropPatternTSList, List<StateCU_Location> culocList, List<String> outputCommentsList ) {
-	// Get the parcels for all the crop pattern TS
-	List<StateCU_Parcel> parcelList = new ArrayList<>();
-	for ( StateCU_CropPatternTS cpts : cropPatternTSList ) {
-		parcelList.addAll(cpts.getParcelList());
-	}
-	
-	// Call the general write method
-	writeParcelsToModelParcelSupplyFile ( outputFileFull, delimiter, update, culocList, outputCommentsList );
 }
 
 /**
@@ -468,9 +458,14 @@ private void writeCropPatternTSParcelsToTextFile ( String outputFileFull, String
  * @param update whether to update or overwrite the file, used when creating the file header
  * @param culocList list of StateCU_Location to output
  * @param outputCommentList additional comments for the file header
+ * @param verbose whether to output verbose format - this result in:
+ * <ul>
+ * <li> parcels with surface water supply for groundwater only model nodes are not listed in output
+ *      (they have CDS=NO anyhow)</li>
+ * </ul>
  */
 private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String delimiter, boolean update,
-	List<StateCU_Location> culocList, List<String> outputCommentsList ) {
+	List<StateCU_Location> culocList, List<String> outputCommentsList, boolean verbose ) {
 
 	List<String> newComments = new ArrayList<>();
 	List<String> commentIndicators = new ArrayList<>(1);
@@ -619,7 +614,7 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 			parcelListSorted.clear();
 			parcelListSorted.addAll(culoc.getParcelList());
 			Collections.sort(parcelListSorted, parcelComparator);
-
+			
 			for ( StateCU_Parcel parcel : parcelListSorted ) {
 				if (parcel == null) {
 					continue;
@@ -627,6 +622,15 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 				// Make sure that the parcel's data is current.
 				// - TODO smalers 2020-11-05 should happen automatically when values are requested
 				parcel.recompute();
+
+				// Skip the parcel output entirely if a groundwater only node and the parcel has surface water supply
+				// - in this case the parcel will have been counted with the D&W and not this WEL node
+				if ( !verbose ) {
+					// Not verbose so need to limit the output to only parcels 
+					if ( culoc.hasGroundwaterOnlySupply() && parcel.hasSurfaceWaterSupply() ) {
+						continue;
+					}
+				}
 	
 				// line 1 - parcel information
 				objectList.clear();
@@ -657,14 +661,14 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 						objectList.add("CDS:" + supplyFromSW.getIncludeParcelInCdsType());
 						objectList.add(supplyFromSW.getDataSource());
 						if ( supplyFromSW.getStateCULocationForCds() == null ) {
-						    if ( supplyFromSW.getIncludeParcelInCdsType() == IncludeParcelInCdsType.NO ) {
-						    	objectList.add("");
-							   	objectList.add("");
-						    }
-						    else {
-						    	objectList.add("???");
-							   	objectList.add("???");
-						    }
+					    	if ( supplyFromSW.getIncludeParcelInCdsType() == IncludeParcelInCdsType.NO ) {
+					    		objectList.add("");
+						   		objectList.add("");
+					    	}
+					    	else {
+					    		objectList.add("???");
+						   		objectList.add("???");
+					    	}
 						}
 						else {
 							objectList.add(supplyFromSW.getStateCULocationForCds().getID());
@@ -684,6 +688,9 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 				}
 
 				// line 3 - groundwater supply information
+				// - only output if is a parcel that is groundwater only because
+				//   parcels with surface water are counted under D&W
+				// - this is checked at the top of the loop
 
 				for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 					if ( supply instanceof StateCU_SupplyFromGW ) {
