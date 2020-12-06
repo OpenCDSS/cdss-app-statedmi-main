@@ -919,6 +919,7 @@ private JMenu
 	__Commands_StateCU_Parcels_JMenu;
 private JMenuItem
 	__Commands_StateCU_Parcels_ReadParcelsFromHydroBase_JMenuItem,
+	__Commands_StateCU_Parcels_ReadParcelsFromIrrigatedLands_JMenuItem,
 	__Commands_StateCU_Parcels_CheckParcels_JMenuItem,
 	__Commands_StateCU_Parcels_CheckIrrigatedLands_JMenuItem,
 	__Commands_StateCU_Parcels_WriteParcelsToFile_JMenuItem;
@@ -1308,6 +1309,7 @@ private JMenuItem
 	//__Commands_StateMod_IrrigationPracticeTS_JMenuItem,
 	//__Commands_StateMod_ConsumptiveWaterRequirementTS_JMenuItem,
     __Commands_StateMod_Parcels_ReadParcelsFromHydroBase_JMenuItem,
+    __Commands_StateMod_Parcels_ReadParcelsFromIrrigatedLands_JMenuItem,
     __Commands_StateMod_Parcels_CheckParcels_JMenuItem,
     __Commands_StateMod_Parcels_CheckIrrigatedLands_JMenuItem,
     __Commands_StateMod_Parcels_WriteParcelsToFile_JMenuItem;
@@ -1904,10 +1906,11 @@ private String
 	// Parcels
 
 	__Commands_StateCU_Parcels_String = "Parcels",
-	__Commands_StateCU_Parcels_ReadParcelsFromHydroBase_String = "ReadParcelsFromHydroBase",
-	__Commands_StateCU_Parcels_CheckParcels_String = "CheckParcels",
-	__Commands_StateCU_Parcels_CheckIrrigatedLands_String = "CheckIrrigatedLands",
-	__Commands_StateCU_Parcels_WriteParcelsToFile_String = "WriteParcelsToFile",
+	__Commands_StateCU_Parcels_ReadParcelsFromHydroBase_String = "ReadParcelsFromHydroBase() ...",
+	__Commands_StateCU_Parcels_ReadParcelsFromIrrigatedLands_String = "ReadParcelsFromIrrigatedLands() ...",
+	__Commands_StateCU_Parcels_CheckParcels_String = "CheckParcels() ...",
+	__Commands_StateCU_Parcels_CheckIrrigatedLands_String = "CheckIrrigatedLands() ...",
+	__Commands_StateCU_Parcels_WriteParcelsToFile_String = "WriteParcelsToFile() ...",
 
 	// CDS - crop pattern time series
 	
@@ -2155,6 +2158,7 @@ private String
 	__Commands_StateMod_StateCUStructure_String = "StateCU Structures (for AWC)",
 	__Commands_StateMod_Parcels_String = "Parcels",
 	__Commands_StateMod_Parcels_ReadParcelsFromHydroBase_String = "ReadParcelsFromHydroBase()...",
+	__Commands_StateMod_Parcels_ReadParcelsFromIrrigatedLands_String = "ReadParcelsFromIrrigatedLands()...",
 	__Commands_StateMod_Parcels_CheckParcels_String = "CheckParcels()...",
 	__Commands_StateMod_Parcels_CheckIrrigatedLands_String = "CheckIrrigatedLands()...",
 	__Commands_StateMod_Parcels_WriteParcelsToFile_String = "WriteParcelsToFile()...",
@@ -3557,6 +3561,11 @@ public void actionPerformed ( ActionEvent event )
 	else if ( action.equals( __Commands_StateCU_Parcels_ReadParcelsFromHydroBase_String) ) {
 		// Read parcels associated with CU Locations from HydroBase...
 		commandList_EditCommand ( __Commands_StateCU_Parcels_ReadParcelsFromHydroBase_String,
+		null, __INSERT_COMMAND);
+	}
+	else if ( action.equals( __Commands_StateCU_Parcels_ReadParcelsFromIrrigatedLands_String) ) {
+		// Read parcels associated with CU Locations from irrigated lands table...
+		commandList_EditCommand ( __Commands_StateCU_Parcels_ReadParcelsFromIrrigatedLands_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( action.equals( __Commands_StateCU_Parcels_CheckParcels_String) ) {
@@ -5924,6 +5933,7 @@ private void commandList_EditCommand ( String action, List<Command> command_List
 				//	1) Traditional commands foo(), may have leading "1: " or "[Legacy] 1:" that needs to be stripped.
 				//	2) Comments # blocks
 				//  3) Don't allow edit of /* */ comments - just insert/delete
+				// TODO smalers 2020-12-05 actions traditionally have () at end but may have some that don't have
 				String command_string = ui_StripMenuSequencePrefix(StringUtil.getToken(action,")",0,0)+ ")");
 				if ( Message.isDebugOn ) {
 					Message.printDebug ( dl, routine,
@@ -10840,6 +10850,9 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 		Commands_StateCU_Parcels_JMenu.add(
 	        __Commands_StateCU_Parcels_ReadParcelsFromHydroBase_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_Parcels_ReadParcelsFromHydroBase_String,this));
+		Commands_StateCU_Parcels_JMenu.add(
+	        __Commands_StateCU_Parcels_ReadParcelsFromIrrigatedLands_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateCU_Parcels_ReadParcelsFromIrrigatedLands_String,this));
 		Commands_StateCU_Parcels_JMenu.addSeparator();
 		Commands_StateCU_Parcels_JMenu.add(
 	        __Commands_StateCU_Parcels_CheckParcels_JMenuItem =
@@ -11159,6 +11172,9 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 		Commands_StateMod_Parcels_JMenu.add(
 	        __Commands_StateMod_Parcels_ReadParcelsFromHydroBase_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateMod_Parcels_ReadParcelsFromHydroBase_String,this));
+		Commands_StateMod_Parcels_JMenu.add(
+	        __Commands_StateMod_Parcels_ReadParcelsFromIrrigatedLands_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateMod_Parcels_ReadParcelsFromIrrigatedLands_String,this));
 		Commands_StateMod_Parcels_JMenu.addSeparator();
 		Commands_StateMod_Parcels_JMenu.add(
 	        __Commands_StateMod_Parcels_CheckParcels_JMenuItem =

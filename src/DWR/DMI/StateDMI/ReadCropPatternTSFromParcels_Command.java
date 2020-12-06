@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
 import DWR.StateCU.IncludeParcelInCdsType;
 import DWR.StateCU.StateCU_CropPatternTS;
 import DWR.StateCU.StateCU_Location;
@@ -439,6 +440,35 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
             new CommandLogRecord(CommandStatusType.FAILURE,
                 message, "Specify the output end with SetOutputPeriod() prior to this command" +
                 	" or specify the InputEnd parameter." ) );
+	}
+
+	// Get the HydroBase DMI...
+	// - only used to check the HydroBase version since parcels contain all necessary data for CDS
+	
+	HydroBaseDMI hbdmi = null;
+	try {
+		Object o = processor.getPropContents( "HydroBaseDMI");
+		hbdmi = (HydroBaseDMI)o;
+	}
+	catch ( Exception e ) {
+		message = "Error requesting HydroBase connection from processor.";
+		Message.printWarning(warningLevel,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+	}
+
+	// Check that HydroBase version is at least 20200720 for this command.
+	
+	if ( !hbdmi.isDatabaseVersionAtLeast(HydroBaseDMI.VERSION_20200720) ) {
+        message = "This HydroBase version (" + hbdmi.getDatabaseVersion() + ") is invalid";
+        Message.printWarning ( warningLevel, 
+        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+        status.addToLog ( commandPhase,
+            new CommandLogRecord(CommandStatusType.FAILURE,
+                message, "Confirm that the HydroBase version is >= 20200720." ) );
 	}
 	
 	if ( warning_count > 0 ) {

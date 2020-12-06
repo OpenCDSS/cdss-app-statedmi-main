@@ -601,6 +601,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadParcelsFromHydroBase")) {
 		return new ReadParcelsFromHydroBase_Command();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString,"ReadParcelsFromIrrigatedLands") ) {
+		return new ReadParcelsFromIrrigatedLands_Command ();
+	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadCULocationsFromList")) {
 		return new ReadCULocationsFromList_Command();
 	}

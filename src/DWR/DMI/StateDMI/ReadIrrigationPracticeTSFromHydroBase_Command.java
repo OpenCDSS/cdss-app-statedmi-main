@@ -1219,6 +1219,17 @@ CommandWarningException, CommandException
             new CommandLogRecord(CommandStatusType.FAILURE,
                 message, "Report to software support.  See log file for details." ) );
     }
+
+	// Check that HydroBase version is at least 20200720 for this command.
+	
+	if ( !hbdmi.isDatabaseVersionAtLeast(HydroBaseDMI.VERSION_20200720) ) {
+        message = "The HydroBase version (" + hbdmi.getDatabaseVersion() + ") is invalid";
+        Message.printWarning ( warningLevel, 
+        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+        status.addToLog ( commandPhase,
+            new CommandLogRecord(CommandStatusType.FAILURE,
+                message, "Confirm that the HydroBase version is >= 20200720." ) );
+	}
 	
 	if ( warning_count > 0 ) {
 		// Input error...
