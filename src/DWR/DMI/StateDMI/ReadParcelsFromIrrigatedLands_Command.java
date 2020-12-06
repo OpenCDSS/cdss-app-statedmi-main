@@ -1,4 +1,4 @@
-// CheckIrrigatedLands_Command - This class initializes, checks, and runs the CheckIrrigatedLands() command.
+// ReadParcelsFromIrrigatedLands_Command - This class initializes, checks, and runs the ReadParcelsFromIrrigatedLands() command.
 
 /* NoticeStart
 
@@ -30,6 +30,9 @@ import DWR.DMI.HydroBaseDMI.HydroBase_StructureView;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
 import DWR.DMI.StateDMI.StateDMI_Processor;
+import DWR.StateCU.StateCU_Parcel;
+import DWR.StateCU.StateCU_SupplyFromGW;
+import DWR.StateCU.StateCU_SupplyFromSW;
 import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 
 import java.util.ArrayList;
@@ -42,10 +45,10 @@ import RTi.Util.Table.DataTable;
 import RTi.Util.Table.TableField;
 import RTi.Util.Table.TableRecord;
 import RTi.Util.IO.AbstractCommand;
+import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandException;
 import RTi.Util.IO.CommandLogRecord;
 import RTi.Util.IO.CommandPhaseType;
-import RTi.Util.IO.CommandProcessor;
 import RTi.Util.IO.CommandProcessorRequestResultsBean;
 import RTi.Util.IO.CommandStatus;
 import RTi.Util.IO.CommandStatusType;
@@ -54,23 +57,23 @@ import RTi.Util.IO.InvalidCommandParameterException;
 import RTi.Util.IO.PropList;
 
 /**
-This class initializes, checks, and runs the CheckIrrigatedLands() command.
+This class initializes, checks, and runs the ReadParcelsFromIrrigatedLands() command.
 */
-public class CheckIrrigatedLands_Command extends AbstractCommand
+public class ReadParcelsFromIrrigatedLands_Command extends AbstractCommand
 {
-    
+	
 	/**
 	 * Used with IncludeParcelsWithNoSupply.
 	 */
 	public final String _False = "False";
 	public final String _True = "True";
-
+    
 /**
 Constructor.
 */
-public CheckIrrigatedLands_Command ()
+public ReadParcelsFromIrrigatedLands_Command ()
 {	super();
-	setCommandName ( "CheckIrrigatedLands" );
+	setCommandName ( "ReadParcelsFromIrrigatedLands" );
 }
 
 /**
@@ -135,7 +138,7 @@ public boolean editCommand ( JFrame parent )
         TSCommandProcessorUtil.getTableIdentifiersFromCommandsBeforeCommand(
             (StateDMI_Processor)getCommandProcessor(), this);
     // The command will be modified if changed...
-	return (new CheckIrrigatedLands_JDialog ( parent, this, tableIDChoices )).ok();
+	return (new ReadParcelsFromIrrigatedLands_JDialog ( parent, this, tableIDChoices )).ok();
 }
 
 /**
@@ -170,7 +173,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	String command_tag = "" + command_number;	
 	int warning_count = 0;
 
-	CommandProcessor processor = getCommandProcessor();
+	StateDMI_Processor processor = (StateDMI_Processor)getCommandProcessor();
     CommandStatus status = getCommandStatus();
     CommandPhaseType commandPhase = CommandPhaseType.RUN;
     Boolean clearStatus = new Boolean(true); // default
@@ -459,6 +462,22 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			break;
 		}
 	}
+	
+	// Make sure that this command is NOT used with ReadParcelsFromHydroBase commands because
+	// they both use the StateDMI processor parcel list and will conflict.
+	// Use the size of the command list to cause a search of all commands.
+
+	List<String> commandsToFind = new ArrayList<>();
+	commandsToFind.add("ReadParcelsFromHydroBase");
+	List<Command> commandList = StateDMICommandProcessorUtil.getCommandsBeforeIndex(
+		processor.size(), processor, commandsToFind, true);
+	if ( commandList.size() > 0 ) {
+		message = "Cannot use ReadParcelsFromIrrigatedLands with ReadParcelsFromHydroBase commands because they both use the processor parcel list.";
+	   	Message.printWarning(warning_level,
+	   		MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+	   	status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
+	   		message, "Evaluate workflow." ) );
+	}
 
 	if ( warning_count > 0 ) {
 		message = "There were " + warning_count + " warnings for command parameters.";
@@ -469,9 +488,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	}
 
 	try {
-    	// Check the irrigated lands table.
+    	// Convert the irrigated lands table into parcels with supplies.
 	    PropList requestParams = new PropList ( "" );
 	    requestParams.setUsingObject ( "TableID", TableID );
+	    int numParcelsRead = 0; // Number of parcels added 
+	    int numParcelsNotRead = 0; // Number of parcels skipped 
 	    try {
 	    	// Loop through the irrigated lands parcels.
 	    	TableRecord rec = null;
@@ -479,34 +500,52 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    	String receipt = null;
 	    	String gwType = null;
 	    	int [] wdidParts;
-	    	// Parcel data
-	    	String cropType = null;
-	    	int numParcelSWSupply = 0;
-	    	int numParcelGWSupply = 0;
-	    	
 	    	// Just use Object since only using for messaging
-	    	Object year;
-	    	Object parcelId;
+	    	Integer year;
+	    	Integer parcelId;
 	    	HydroBase_StructureView hbstruct = null;
 	    	HydroBase_Wells hbwells = null;
 	    	List<HydroBase_Wells> hbwellsList = null;
+	    	// Parcel-related data
+			StateCU_Parcel parcel = null;
+			List<String> parcelProblems = new ArrayList<>();
+			String cropType = null;
+			String error = "";
+			boolean addBadData = true; // TODO smalers 2020-12-05 currently this is the only default, may add as a command parameter
+			// Supply related data
+			StateCU_SupplyFromSW supplyFromSW = null;
+			StateCU_SupplyFromGW supplyFromGW = null;
 	    	// HashMap to store structure views to increase performance
 	    	HashMap<String,HydroBase_StructureView> hbstructMap = new HashMap<>();
 	    	HashMap<String,HydroBase_Wells> hbwellsMap = new HashMap<>();
 	    	for ( int irec = 0; irec < table.getNumberOfRecords(); irec++ ) {
+	    		// Records correspond to irrigated parcels
 	    		rec = table.getRecord(irec);
 
 				cropType = rec.getFieldValueString(cropTypeColumnNum);
 				if ( !includeCropType(cropType, excludeCrops) ) {
 					// Don't want to include parcels with this the crop type
 					// - will no see errors because parcel and supply output is omitted from report
+					++numParcelsNotRead;
 					continue;
 				}
-				year = (Integer)table.getFieldValue(irec, yearColumnNum);
-				parcelId = (Integer)table.getFieldValue(irec, parcelIdColumnNum);
 
-				numParcelSWSupply = 0;
-				numParcelGWSupply = 0;
+				// New parcel
+				parcel = new StateCU_Parcel();
+				//parcel.setStateCULocation(culoc);
+				year = (Integer)table.getFieldValue(irec, yearColumnNum);
+				parcel.setYear(year);
+				parcelId = (Integer)table.getFieldValue(irec, parcelIdColumnNum);
+				parcel.setID("" + parcelId);
+				parcel.setIdInt(parcelId);
+				parcel.setDiv((Integer)table.getFieldValue(irec, divColumnNum));
+				parcel.setWD((Integer)table.getFieldValue(irec, districtColumnNum));
+				parcel.setCrop(rec.getFieldValueString(cropTypeColumnNum));
+				parcel.setArea((Double)table.getFieldValue(irec, acresColumnNum));
+				parcel.setAreaUnits("acre");
+				parcel.setIrrigationMethod(rec.getFieldValueString(irrigTypeColumnNum));
+				
+				// The parcel is added to StateDMI global data after supply is checked
 
 	    		// Loop through surface water supplies
 	    		for ( int isw = 0; isw < swIdColNums.length; isw++ ) {
@@ -514,85 +553,126 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    			if ( (wdid != null) && !wdid.isEmpty() ) {
 	    				// Have a surface water supply to check.
 	    				// - read the structure
-	    				++numParcelSWSupply;
 	    				hbstruct = hbstructMap.get(wdid);
 	    				if ( hbstruct == null ) {
 	    					wdidParts = HydroBase_WaterDistrict.parseWDID(wdid);
 	    					hbstruct = hbdmi.readStructureViewForWDID(wdidParts[0], wdidParts[1]);
+	    					error = "";
 	    					if ( hbstruct == null ) {
-	    						year = table.getFieldValue(irec, yearColumnNum);
-	    						parcelId = table.getFieldValue(irec, parcelIdColumnNum);
 	    						message = "Year " + year + " parcel ID " + parcelId + " SW supply WDID " + wdid +
 	    							" is not found in the database.";
+	    						error = "WDID not in HydroBase";
 	        					Message.printWarning(warning_level,
 	        						MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
 	        					status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
 	        						message, "Check the irrigated lands GIS data." ) );
-	    						continue;
+	        					if ( !addBadData ) {
+	        						// TODO smalers 2020-12-05 Enable in the future - for now always include bad data
+	        						continue;
+	        					}
 	    					}
 	    					else {
 	    						hbstructMap.put(wdid, hbstruct);
 	    					}
+							// Always add surface supply information
+							supplyFromSW = new StateCU_SupplyFromSW();
+							supplyFromSW.setDataSource("IRRLANDS");
+							// Fraction and area irrigated is from HydroBase
+							// - values calculated from parcel area and number of diversions is calculated
+							// Don't have the irrigated fraction from HydroBase
+							/*
+							supplyFromSW.setAreaIrrigFractionHydroBase(hbParcelUseTSStruct.getPercent_irrig());
+							supplyFromSW.setAreaIrrigHydroBase(hbParcelUseTSStruct.getArea()*hbParcelUseTSStruct.getPercent_irrig());
+							if ( (structureView == null) ||
+								(structureView.getStructure_num() != hbParcelUseTSStruct.getStructure_num()) ) {
+								// Parcels are related to the same structure in the loop so only need to read once.
+								// TODO smalers 2020-08-24 Why is this even done since the structure WDID is
+								// the same as ParcelUseTS query above?
+								// - could set the structure name
+								sw.clearAndStart();
+								structureView = hbdmi.readStructureViewForStructure_num(hbParcelUseTSStruct.getStructure_num());
+								sw.stop();
+								Message.printStatus ( 2, routine, "    Reading structure view for structure_num " +
+									hbParcelUseTSStruct.getStructure_num() + " took " + sw.getMilliseconds() + " ms");
+							}
+							*/
+							supplyFromSW.setWDID(wdid);
+							supplyFromSW.setID(wdid);
+							// The supply will only be added once
+							parcel.addSupply(supplyFromSW);
 	    				}
 	    				if ( hbstruct.getStr_type().equals("W") ) {
 	    					// Surface water supply but using a well WDID.  This is a data error.
-	    					year = table.getFieldValue(irec, yearColumnNum);
-	    					parcelId = table.getFieldValue(irec, parcelIdColumnNum);
 	    					message = "Year " + year + " parcel ID " + parcelId + " SW supply WDID " + wdid +
 	    						" is a well structure (structure type = " + hbstruct.getStr_type() + ") - expecting ditch.";
 	        				Message.printWarning(warning_level,
 	        					MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
 	        				status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
 	        					message, "Check the irrigated lands GIS data." ) );
+    						error = "Not in HydroBase";
+    						supplyFromSW.setError(error, true);
 	    				}
 	    			}
 	    		}
+
 	    		// Loop through ground water supplies
+
 	    		for ( int igw = 0; igw < gwIdColNums.length; igw++ ) {
 	    			gwType = rec.getFieldValueString(gwIdTypeColNums[igw]);
 
 	    			if ( (gwType != null) && gwType.equalsIgnoreCase("WDID") ) {
-	    				++numParcelGWSupply;
 	    				wdid = rec.getFieldValueString(gwIdColNums[igw]);
 	    				if ( (wdid != null) && !wdid.isEmpty() ) {
+	    					Message.printStatus(2, routine, "Processing year " + year + " parcelID " + parcelId + " GW WDID " + wdid);
 	    					// Have a groundwater supply to check.
 	    					// - read the structure
-	    					wdidParts = HydroBase_WaterDistrict.parseWDID(wdid);
 	    					hbstruct = hbstructMap.get(wdid);
 	    					if ( hbstruct == null ) {
+	    						wdidParts = HydroBase_WaterDistrict.parseWDID(wdid);
 	    						hbstruct = hbdmi.readStructureViewForWDID(wdidParts[0], wdidParts[1]);
 	    						if ( hbstruct == null ) {
-	    							year = table.getFieldValue(irec, yearColumnNum);
-	    							parcelId = table.getFieldValue(irec, parcelIdColumnNum);
 	    							message = "Year " + year + " parcel ID " + parcelId + " GW supply WDID " + wdid +
 	    								" is not found in the database).";
+	    							error = "WDID not in HydroBase";
 	        						Message.printWarning(warning_level,
 	        							MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
 	        						status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
 	        							message, "Check the irrigated lands GIS data." ) );
-	    							continue;
+	        						supplyFromGW.setError(error, true);
+	        						if ( !addBadData ) {
+	        							// TODO smalers 2020-12-05 Enable in the future - for now always include bad data
+	        							continue;
+	        						}
 	    						}
 	    						else {
 	    							hbstructMap.put(wdid, hbstruct);
 	    						}
 	    					}
+	    					// Always add
+    						supplyFromGW = new StateCU_SupplyFromGW();
+    						supplyFromGW.setCollectionPartIdType("WDID");
+							supplyFromGW.setDataSource("IRRLANDS");
+							supplyFromGW.setWDID(wdid);
+							supplyFromGW.setID(wdid);
+							// The supply will only be added to the parcel once
+							parcel.addSupply(supplyFromGW);
 	    					if ( !hbstruct.getStr_type().equals("W") ) {
 	    						// Groundwater supply but using a WDID that is not a well.  This is a data error.
-	    						year = table.getFieldValue(irec, yearColumnNum);
-	    						parcelId = table.getFieldValue(irec, parcelIdColumnNum);
 	    						message = "Year " + year + " parcel ID " + parcelId + " GW supply WDID " + wdid +
 	    							" is not a well structure (structure type is " + hbstruct.getStr_type() + ").";
+	    						error = "WDID is not a well structure.";
 	        					Message.printWarning(warning_level,
 	        						MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
 	        					status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
 	        						message, "Check the irrigated lands GIS data." ) );
+	        					// Add to the error
+	        					supplyFromGW.setError(error, true);
 	    					}
 	    				}
 	    			}
-	    			else if ( gwType.equalsIgnoreCase("Receipt") ) {
+	    			else if ( (gwType != null) && gwType.equalsIgnoreCase("Receipt") ) {
 	    				// TODO smalers 2020-12-04 check for receipt in wells
-	    				++numParcelGWSupply;
-	    				receipt = rec.getFieldValueString(columnNum);
+	    				receipt = rec.getFieldValueString(gwIdColNums[igw]);
 	    				if ( (receipt != null) && !receipt.isEmpty() ) {
 	    					// Have a groundwater supply to check.
 	    					// - read the well
@@ -601,51 +681,94 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    						hbwellsList = hbdmi.readWellsList(receipt, -1, -1);
 	    						if ( (hbwellsList == null) || (hbwellsList.size() == 0) ) {
 	    							// Groundwater supply but receipt is not found in the database.
-	    							year = table.getFieldValue(irec, yearColumnNum);
-	    							parcelId = table.getFieldValue(irec, parcelIdColumnNum);
 	    							message = "Year " + year + " parcel ID " + parcelId + " GW supply receipt " + receipt +
 	    								" is not found in the database.";
+	    							error = "Receipt not in HydroBase";
 	        						Message.printWarning(warning_level,
 	        							MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
 	        						status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
 	        							message, "Check the irrigated lands GIS data." ) );
+	        						// Add to the error
+	        						supplyFromGW.setError(error, true);
 	    						}
 	    						else {
 	    							hbwellsMap.put(receipt, hbwells);
 	    						}
 	    					}
+	    					// Always add
+    						supplyFromGW = new StateCU_SupplyFromGW();
+    						supplyFromGW.setCollectionPartIdType("RECEIPT");
+							supplyFromGW.setDataSource("IRRLANDS");
+							supplyFromGW.setReceipt(receipt);
+							supplyFromGW.setID(receipt);
+							// The supply will only be added once
+							parcel.addSupply(supplyFromGW);
 	    				}
 	    			}
 	    		}
-
+	    		
 	    		// Add an error if there are no supplies for a parcel
 	    		// - if NO_CROP was excluded then this is particularly an issue
 	    		// - recompute the parcel data to make sure the counts are accurate
-	    		if ( (numParcelSWSupply + numParcelGWSupply) == 0 ) {
+	    		parcel.recompute();
+	    		boolean doAddParcel = true;
+	    		if ( (parcel.getSupplyFromSWCount() + parcel.getSupplyFromGWCount()) == 0 ) {
 	    			// Parcel does not have any supply
 	    			if ( includeParcelsWithNoSupply ) {
 	    				// Include but add an error.
 	    				message = "Year " + year + " parcel ID " + parcelId + " has no supplies for included crops.";
+						error = "No supplies.";
 						Message.printWarning(warning_level,
 							MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
 						status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
 							message, "Check the irrigated lands GIS data." ) );
+	    				parcel.setError(error, true);
 	    			}
+	    			else {
+	    				doAddParcel = false;
+	    			}
+	    		}
+
+	    		if ( doAddParcel ) {
+	    			++numParcelsRead;
+	    			// TODO smalers 2020-12-04 source is on the supply but not parcels
+	    			//parcel.setDataSource("IRRLANDS");
+	    			// TODO smalers 2020-11-05 moved to supply data
+	    			//parcel.setDataSource("HB-PUTS");
+	    			parcelProblems.clear();
+	    			processor.findAndAddCUParcel(parcel, false, routine, "    ", parcelProblems);
+	    			if ( parcelProblems.size() > 0 ) {
+	    				// This should not happen.  It is included for software troubleshooting.
+	    				for ( String parcelProblem : parcelProblems ) {
+	    					Message.printWarning ( warning_level,
+	    						MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, parcelProblem );
+	    					status.addToLog ( commandPhase,
+	    						new CommandLogRecord(CommandStatusType.WARNING,
+	    							parcelProblem, "Report to software support." ) );
+	    				}
+	    			}
+				}
+	    		else {
+	    			++numParcelsNotRead;
 	    		}
 	    	}
 	    }
 	    catch ( Exception e ) {
-	        message = "Error checking irrigated lands table \"" + TableID + "\".";
+	        message = "Error reading parcels from irrigated lands table \"" + TableID + "\".";
 	        Message.printWarning ( 3, routine, e );
 	        Message.printWarning(warning_level,
 	            MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
 	        status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
 	            message, "Report problem to software support." ) );
 	    }
+	    
+	    Message.printStatus(2,routine, "Read " + numParcelsRead + " parcels from irrigated lands table \"" + TableID + "\".");
+	    Message.printStatus(2,routine, "Skipped " + numParcelsNotRead + " parcels from irrigated lands table \"" + TableID + "\".");
+	    Message.printStatus(2,routine, "Have " + processor.getStateCUParcelList().size() + " parcels from all irrigated lands tables.");
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( 3, routine, e );
-		message = "Unexpected error checking irrigated lands table (" + e + ").";
+		message = "Unexpected reading parcels from irrigated lands table (" + e + ").";
 		Message.printWarning ( 2, MessageUtil.formatMessageTag(command_tag, ++warning_count), routine,message );
         status.addToLog ( commandPhase, new CommandLogRecord(CommandStatusType.FAILURE,
             message, "Report problem to software support." ) );

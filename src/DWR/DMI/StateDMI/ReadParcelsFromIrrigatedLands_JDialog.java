@@ -1,4 +1,4 @@
-// CheckIrrigatedLands_JDialog - editor for CheckIrrigatedLands command
+// ReadParcelsFromIrrigatedLands_JDialog - editor for ReadParcelsFromIrrigatedLands command
 
 /* NoticeStart
 
@@ -57,7 +57,7 @@ import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 
 @SuppressWarnings("serial")
-public class CheckIrrigatedLands_JDialog extends JDialog
+public class ReadParcelsFromIrrigatedLands_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
 
@@ -70,7 +70,7 @@ private SimpleJComboBox __IncludeParcelsWithNoSupply_JComboBox = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;
 private SimpleJButton __help_JButton = null;
-private CheckIrrigatedLands_Command __command = null;
+private ReadParcelsFromIrrigatedLands_Command __command = null;
 private boolean __ok = false;
 
 /**
@@ -79,7 +79,7 @@ Command dialog constructor.
 @param command Command to edit.
 @param tableIDChoices list of table identifiers to provide as choices
 */
-public CheckIrrigatedLands_JDialog ( JFrame parent, CheckIrrigatedLands_Command command, List<String> tableIDChoices )
+public ReadParcelsFromIrrigatedLands_JDialog ( JFrame parent, ReadParcelsFromIrrigatedLands_Command command, List<String> tableIDChoices )
 {	super(parent, true);
 	initialize ( parent, command, tableIDChoices );
 }
@@ -95,7 +95,7 @@ public void actionPerformed(ActionEvent event)
 		response ( false );
 	}
 	else if ( o == __help_JButton ) {
-		HelpViewer.getInstance().showHelp("command", "CheckIrrigatedLands");
+		HelpViewer.getInstance().showHelp("command", "ReadParcelsFromIrrigatedLands");
 	}
 	else if ( o == __ok_JButton ) {
 		refresh ();
@@ -147,6 +147,7 @@ private void commitEdits ()
 {	String TableID = __TableID_JComboBox.getSelected();
 	String ExcludeCrops = __ExcludeCrops_JTextField.getText().trim();
 	String IncludeParcelsWithNoSupply = __IncludeParcelsWithNoSupply_JComboBox.getSelected();
+
     __command.setCommandParameter ( "TableID", TableID );
     __command.setCommandParameter ( "ExcludeCrops", ExcludeCrops );
     __command.setCommandParameter ( "IncludeParcelsWithNoSupply", IncludeParcelsWithNoSupply );
@@ -157,7 +158,7 @@ Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit and possibly run.
 */
-private void initialize ( JFrame parent, CheckIrrigatedLands_Command command, List<String> tableIDChoices )
+private void initialize ( JFrame parent, ReadParcelsFromIrrigatedLands_Command command, List<String> tableIDChoices )
 {	__command = command;
 
 	addWindowListener(this);
@@ -176,25 +177,16 @@ private void initialize ( JFrame parent, CheckIrrigatedLands_Command command, Li
 	int yy = -1;
     
    	JGUIUtil.addComponent(paragraph, new JLabel (
-        "This command checks irrigated lands GIS layer that has been read into a table, for example from irrigated lands shapefile 'dbf' file."),
+        "This command reads parcels from irrigated lands GIS layer that has been read into a table,"),
         0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(paragraph, new JLabel (
-        "Crop types (e.g., NO_CROP) and parcels with no supply can be excluded from checks."),
+        "for example from irrigated lands shapefile 'dbf' file."),
         0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(paragraph, new JLabel (
-        "The following are checked:"),
+        "This provides an alternative to reading irrigated lands from HydroBase,"),
         0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(paragraph, new JLabel (
-        " 1. Surface water supply WDID is valid and corresponds to a ditch structure."),
-        0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-   	JGUIUtil.addComponent(paragraph, new JLabel (
-        " 2. Groundwater supply WDID is valid and corresponds to a well structure."),
-        0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-   	JGUIUtil.addComponent(paragraph, new JLabel (
-        " 3. Groundwater supply RECEIPT is valid and corresponds to a well."),
-        0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-   	JGUIUtil.addComponent(paragraph, new JLabel (
-        " 4. Parcels with no supply (if included in the checks)."),
+        "for example in cases where HydroBase has not been updated for changes that have been made in the GIS."),
         0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
@@ -212,7 +204,7 @@ private void initialize ( JFrame parent, CheckIrrigatedLands_Command command, Li
     //__TableID_JComboBox.setMaximumRowCount(tableIDChoices.size());
     JGUIUtil.addComponent(main_JPanel, __TableID_JComboBox,
         1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(main_JPanel, new JLabel( "Required - irrigated lands table to check."), 
+    JGUIUtil.addComponent(main_JPanel, new JLabel( "Required - irrigated lands table to process."), 
         3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Exclude crops:"),
@@ -317,7 +309,7 @@ public boolean ok ()
 Refresh the command from the other text field contents.
 */
 private void refresh ()
-{	String routine = getClass().getName() + ".refresh";
+{	String routine = getClass().getSimpleName() + ".refresh";
     String TableID = "";
     String ExcludeCrops = "";
     String IncludeParcelsWithNoSupply = "";

@@ -779,15 +779,21 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 	
 		String printLine = null;
 		String cmnt = "#>";
-		String format_1 = "%6d %4d %4d %15.15s %-20.20s %10.3f %-4.4s %-10.10s";
+		String format_1 = "%6d %4d %4d %15.15s %-20.20s %10.3f %-4.4s %-10.10s"; // When no general parcel error
+		String format_1_error = format_1 + // When have a general parcel error
+			"                                                      " + // Skip surface supply data
+			"                                                                       %s"; // Skip groundwater supply and output general error
 
 		// Surface water fields - space on the left to skip over above formatting
-		String format_2 = "                                                                                 " +
+		String format_2 = "                                                                                 " + // General parcel data
 			"%-10.10s %6d %6.3f %8.3f %11.3f %-7.7s";
+		String format_2_error = format_2 +
+			"                                                                       %s"; // Skip groundwater supply and output general error
 
 		// Groundwater fields - data source and include align with  surface water and then space over to groundwater columns
-		String format_3 = "                                                                                                                                       " +
+		String format_3 = "                                                                                                                                       " + // Skip general parcel and surface supply data
 			"%-10.10s %-10.10s %-12.12s %6d %6.3f %6.6s %11.3f";
+		String format_3_error = format_3 + " %s"; // Groundwater supply data and general error
 
 		// Size to largest size
 		List<Object> objectList = new ArrayList<>(8);
@@ -820,7 +826,8 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 		out.println(cmnt + "  WDID         :  Water district identifier for the ditch.");
 		out.println(cmnt + "  #Ditch       :  Number of ditches that are associated with the parcel.");
 		out.println(cmnt + "  Irrig Frac   :  1/#Ditch = fraction of ParcelArea (from above) that is irrigated by the ditch (0.0 to 1.0).");
-		out.println(cmnt + "  Irrig FracHB :  SWFrac from HydroBase, should match SWFrac.");
+		out.println(cmnt + "  Irrig FracHB :  SWFrac from HydroBase, should match SWFrac if number of surface water supplies matches.");
+		out.println(cmnt + "               :  Will be missing if parcels were read using ReadParcelsFromIrrigatedLands command.");
 		out.println(cmnt + "  Irrig Area   :  ParcelArea * %Irrig = area irrigated by surface water supply for this ditch.");
 		out.println(cmnt + "  HBError      :  Indicates whether the SWFrac computed from data is different than SWFracHB from HydroBase");
 		out.println(cmnt + "                   ERROR - indicates that not all supplies in HydroBase parcel data are being modeled");
@@ -829,6 +836,7 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 		out.println(cmnt + "                           The CheckParcels() command can be used to check to a specified precision.");
 		out.println(cmnt + "                           These errors need to be fixed to ensure the integrity of the dataset.");
 		out.println(cmnt + "                   Blank indicates that model dataset and HydroBase data agree.");
+		out.println(cmnt + "                   - Will also be blank if parcels were read using ReadParcelsFromIrrigatedLands command.");
 		out.println(cmnt);
 		out.println(cmnt + "  GW Supply Data - portion of parcel acreage associated with groundwater supply");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
@@ -841,10 +849,14 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 		out.println(cmnt + "  D&W Frac     :  Same as surface water Irrig Frac, applied when well supply is supplemental to ditch.");
 		out.println(cmnt + "  Irrig Area   :  ParcelArea/#Wells, zero if area is already assigned to surface water ID for D&W node.");
 		out.println(cmnt);
-		out.println(cmnt + "----------------------------------- Parcel Data ------------------------------|-------------------- SW Suppply ---------------------|--------------------------- GW Supply Data ------------------------|");
+		out.println(cmnt + "  Error        :  General error - for troubleshooting");
+		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
+		out.println(cmnt + "               :  Will be used for parcel and supply report output lines if there are processing errors.");
+		out.println(cmnt);
+		out.println(cmnt + "----------------------------------- Parcel Data ------------------------------|-------------------- SW Suppply ---------------------|--------------------------- GW Supply Data ------------------------| Error");
 		out.println(cmnt + "                                                      Parcel          Irrig   |                   Irrig  Irrig      Irrig           |                                          Irrig   D&W     Irrig    |");
 		out.println(cmnt + "Year  Div Dist   ParcelId              Crop           Area     Units  Method  |    WDID   #Ditch  Frac   FracHB     Area     HBError|  ID Type     WDID       Receipt   #Wells Frac    Frac    Area     |");
-		out.println(cmnt + "b--exb--exb--exb-------------exb------------------exb--------exb--exb--------exb--------exb----exb----exb------exb---------exb-----exb--------exb--------exb----------exb----exb----exb----exb---------ex");
+		out.println(cmnt + "b--exb--exb--exb-------------exb------------------exb--------exb--exb--------exb--------exb----exb----exb------exb---------exb-----exb--------exb--------exb----------exb----exb----exb----exb---------exb----------");
 		out.println(cmnt + "EndHeader");
 		out.println(cmnt);
 		
@@ -875,7 +887,15 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 			objectList.add(new Double(parcel.getArea()));
 			objectList.add(parcel.getAreaUnits());
 			objectList.add(parcel.getIrrigationMethod());
-			printLine = StringUtil.formatString(objectList, format_1);
+			if ( parcel.getError().length() > 0 ) {
+				// Output the parcel error at the end
+				objectList.add("ERROR: " + parcel.getError());
+				printLine = StringUtil.formatString(objectList, format_1_error);
+			}
+			else {
+				// No parcel error so don't output a bunch of whitespace
+				printLine = StringUtil.formatString(objectList, format_1);
+			}
 			out.println(printLine);
 			
 			// line 2+ - supply information
@@ -890,8 +910,26 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 					objectList.add(new Double(supplyFromSW.getAreaIrrigFraction()));
 					objectList.add(new Double(supplyFromSW.getAreaIrrigFractionHydroBase()));
 					objectList.add(new Double(supplyFromSW.getAreaIrrig()));
-					objectList.add(supplyFromSW.getAreaIrrigFractionHydroBaseError());
-					printLine = StringUtil.formatString(objectList, format_2);
+					if ( supplyFromSW.getAreaIrrigFractionHydroBase() >= 0.0 ) {
+						// Have HydroBase fraction from ReadParcelsFromHydroBase
+						objectList.add(supplyFromSW.getAreaIrrigFractionHydroBaseError());
+					}
+					else {
+						// Do not have HydroBase fraction from ReadParcelsFromIrrigatedLands
+						objectList.add("");
+					}
+					// Only show as an error if HydroBase fraction is available:
+					// - won't be available if parcels were read from irrigated lands using
+					//   ReadParcelsFromIrrigatedLands command
+					if ( supplyFromSW.getError().length() > 0 ) {
+						// Output the parcel error at the end
+						objectList.add("ERROR: " + supplyFromSW.getError());
+						printLine = StringUtil.formatString(objectList, format_2_error);
+					}
+					else {
+						// No parcel error so don't output a bunch of whitespace
+						printLine = StringUtil.formatString(objectList, format_2);
+					}
 					out.println(printLine);
 				}
 			}
@@ -912,7 +950,15 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 						objectList.add("");
 					}
 					objectList.add(new Double(supplyFromGW.getAreaIrrig()));
-					printLine = StringUtil.formatString(objectList, format_3);
+					if ( supplyFromGW.getError().length() > 0 ) {
+						// Output the parcel error at the end
+						objectList.add("ERROR: " + supplyFromGW.getError());
+						printLine = StringUtil.formatString(objectList, format_3_error);
+					}
+					else {
+						// No parcel error so don't output a bunch of whitespace
+						printLine = StringUtil.formatString(objectList, format_3);
+					}
 					out.println(printLine);
 				}
 			}

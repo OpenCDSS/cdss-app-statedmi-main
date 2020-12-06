@@ -370,6 +370,17 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
                 	" or specify the InputEnd parameter." ) );
 	}
 	
+	// Check that HydroBase version is at least 20200720 for this command.
+	
+	if ( !hbdmi.isDatabaseVersionAtLeast(HydroBaseDMI.VERSION_20200720) ) {
+        message = "The HydroBase version (" + hbdmi.getDatabaseVersion() + ") is invalid";
+        Message.printWarning ( warningLevel, 
+        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+        status.addToLog ( commandPhase,
+            new CommandLogRecord(CommandStatusType.FAILURE,
+                message, "Confirm that the HydroBase version is >= 20200720." ) );
+	}
+	
 	if ( warning_count > 0 ) {
 		// Input error...
 		message = "Insufficient data to run command.";
@@ -380,11 +391,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	}
 	
 	try {
-		// Remove all the elements for the list that tracks when identifiers
-		// are read from more than one main source (e.g., CDS, HydroBase).
-		// This is used to print a warning.
-		processor.resetDataMatches ( processor.getStateCUCropPatternTSMatchList() );
-		
 		DateTime InputStart_DateTime = null;
 		DateTime InputEnd_DateTime = null;
 		if ( (InputStart != null) ) {
