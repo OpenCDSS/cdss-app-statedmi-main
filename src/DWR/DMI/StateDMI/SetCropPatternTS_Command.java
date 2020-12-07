@@ -417,6 +417,7 @@ CommandWarningException, CommandException
 	}
 	*/
 
+	/*
 	List<HydroBase_ParcelUseTS_FromSet> supplementalParcelList = null;
 	try {
 		@SuppressWarnings("unchecked")
@@ -433,6 +434,7 @@ CommandWarningException, CommandException
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Report problem to software support." ) );
 	}
+	*/
 	
 	// Get the output period
 
@@ -513,7 +515,7 @@ CommandWarningException, CommandException
 		double missing;	// Used to set data to missing
 		YearTS ts = null;	// Crop time series to process.
 		DateTime date = new DateTime(DateTime.PRECISION_YEAR);
-		if ( ProcessWhen.equalsIgnoreCase("Now") ) {
+		if ( ProcessWhen.equalsIgnoreCase(_Now) ) {
 			// Loop through the crop pattern data and try to find matching records...
 			for (int i = 0; i < cdsListSize; i++) {
 				cds = cdsList.get(i);
@@ -522,13 +524,12 @@ CommandWarningException, CommandException
 					// Identifier does not match...
 					continue;
 				}
-				++matchCount;
 
 				// Have a match so reset or save the data.
+				++matchCount;
 
 				// Reset the data.  First set the existing crop patterns for the location to zero.
-				// This will ensure that any crops not mentioned in the command are set to zero for the
-				// given years...
+				// This will ensure that any crops not mentioned in the command are set to zero for the given years...
 
 				crop_names = cds.getCropNames();
 				ncrop_names = 0;
@@ -542,11 +543,12 @@ CommandWarningException, CommandException
 						date.setYear(year);
 						if ( SetToMissing_boolean ) {
 							// Set the crop value to missing...
+							Message.printStatus(2, routine, "Setting \"" + cds_id + "\" year " + year + " crop \"" + crop_names.get(ic) + " to missing value " + missing );
 							ts.setDataValue ( date, missing );
 						}
 						else {
-							// Replace or add in the crop pattern list.  Pass
-							// individual fields because we may or may not need to add a new
+							// Replace or add in the crop pattern list.
+							// Pass individual fields because may or may not need to add a new
 							// StateCU_CropPatternTS or a time series in the object...
 							processor.findAndAddCUCropPatternTSValue (
 							cds_id, cds_id,
@@ -567,8 +569,8 @@ CommandWarningException, CommandException
 				if ( !SetToMissing_boolean ) {
 					for ( int ic = 0; ic < __cropTypes.length; ic++ ) {
 						for ( year = SetStart_int; year <= SetEnd_int; year++){
-							// Replace or add in crop pattern time series list.  Pass
-							// individual fields because we may or may not need to add a new
+							// Replace or add in crop pattern time series list.
+							// Pass individual fields because may or may not need to add a new
 							// StateCU_CropPatternTS or a time series in the object...
 							processor.findAndAddCUCropPatternTSValue (
 							cds_id, cds_id,
@@ -589,6 +591,11 @@ CommandWarningException, CommandException
 			}
 		}
 		else {
+			message = "ProcessWhen=" + _WithParcels + " is no longer supported.";
+        	status.addToLog ( CommandPhaseType.RUN,
+       			new CommandLogRecord(CommandStatusType.FAILURE,message, "Use SetParcel to change parcel data." ) );
+			Message.printWarning(3, routine, message );
+			/*
 			// ProcessWhen=WithParcels
 			// Save the data so that it can be processed later when records are read from HydroBase.
 			// Add a record for each year/crop/structure combination, as if a data
@@ -691,6 +698,7 @@ CommandWarningException, CommandException
 						message, "Verify that the identifier is correct." +
 								"  The time series must be created before setting any data." ) );
 			}
+		*/
 		}
 	}
     catch ( Exception e ) {
@@ -947,8 +955,8 @@ CommandWarningException, CommandException
 							ts.setDataValue ( date, missing );
 						}
 						else {
-							// Replace or add in the crop pattern list.  Pass
-							// individual fields because we may or may not need to add a new
+							// Replace or add in the crop pattern list.
+							// Pass individual fields because may or may not need to add a new
 							// StateCU_CropPatternTS or a time series in the object...
 							processor.findAndAddCUCropPatternTSValue (
 							cds_id, cds_id,
@@ -969,8 +977,8 @@ CommandWarningException, CommandException
 				if ( !SetToMissing_boolean ) {
 					for ( int ic = 0; ic < __cropTypes.length; ic++ ) {
 						for ( year = SetStart_int; year <= SetEnd_int; year++){
-							// Replace or add in crop pattern time series list.  Pass
-							// individual fields because we may or may not need to add a new
+							// Replace or add in crop pattern time series list.
+							// Pass individual fields because may or may not need to add a new
 							// StateCU_CropPatternTS or a time series in the object...
 							processor.findAndAddCUCropPatternTSValue (
 							cds_id, cds_id,

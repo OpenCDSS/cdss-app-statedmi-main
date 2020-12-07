@@ -30,6 +30,7 @@ import DWR.DMI.HydroBaseDMI.HydroBase_StructureView;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
 import DWR.DMI.StateDMI.StateDMI_Processor;
+import DWR.StateCU.StateCU_Supply;
 import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 
 import java.util.ArrayList;
@@ -517,6 +518,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    				++numParcelSWSupply;
 	    				hbstruct = hbstructMap.get(wdid);
 	    				if ( hbstruct == null ) {
+	    					// Have not read the structure before so try to read
 	    					wdidParts = HydroBase_WaterDistrict.parseWDID(wdid);
 	    					hbstruct = hbdmi.readStructureViewForWDID(wdidParts[0], wdidParts[1]);
 	    					if ( hbstruct == null ) {
@@ -534,12 +536,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    						hbstructMap.put(wdid, hbstruct);
 	    					}
 	    				}
-	    				if ( hbstruct.getStr_type().equals("W") ) {
+	    				// TODO smalers 2020-12-06 add check for duplicate supply like in ReadParcelsFromIrrigatedLands command
+	    				if ( (hbstruct != null) && hbstruct.getStr_type().equals("W") ) {
 	    					// Surface water supply but using a well WDID.  This is a data error.
 	    					year = table.getFieldValue(irec, yearColumnNum);
 	    					parcelId = table.getFieldValue(irec, parcelIdColumnNum);
 	    					message = "Year " + year + " parcel ID " + parcelId + " SW supply WDID " + wdid +
-	    						" is a well structure (structure type = " + hbstruct.getStr_type() + ") - expecting ditch.";
+	    						" is a well structure (structure type = " + hbstruct.getStr_type() + ") - expecting diviersion structure.";
 	        				Message.printWarning(warning_level,
 	        					MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
 	        				status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
@@ -560,6 +563,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    					wdidParts = HydroBase_WaterDistrict.parseWDID(wdid);
 	    					hbstruct = hbstructMap.get(wdid);
 	    					if ( hbstruct == null ) {
+	    						// Have not read before so try to read
 	    						hbstruct = hbdmi.readStructureViewForWDID(wdidParts[0], wdidParts[1]);
 	    						if ( hbstruct == null ) {
 	    							year = table.getFieldValue(irec, yearColumnNum);
@@ -576,7 +580,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    							hbstructMap.put(wdid, hbstruct);
 	    						}
 	    					}
-	    					if ( !hbstruct.getStr_type().equals("W") ) {
+	    					// TODO smalers 2020-12-06 add check for duplicate supply like in ReadParcelsFromIrrigatedLands command
+	    					if ( (hbstruct != null) && !hbstruct.getStr_type().equals("W") ) {
 	    						// Groundwater supply but using a WDID that is not a well.  This is a data error.
 	    						year = table.getFieldValue(irec, yearColumnNum);
 	    						parcelId = table.getFieldValue(irec, parcelIdColumnNum);
@@ -598,6 +603,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    					// - read the well
 	    					hbwells = hbwellsMap.get(receipt);
 	    					if ( hbwells == null ) {
+	    						// Have not read before so try to read
 	    						hbwellsList = hbdmi.readWellsList(receipt, -1, -1);
 	    						if ( (hbwellsList == null) || (hbwellsList.size() == 0) ) {
 	    							// Groundwater supply but receipt is not found in the database.
@@ -614,6 +620,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    							hbwellsMap.put(receipt, hbwells);
 	    						}
 	    					}
+	    					// TODO smalers 2020-12-06 add check for duplicate supply like in ReadParcelsFromIrrigatedLands command
 	    				}
 	    			}
 	    		}

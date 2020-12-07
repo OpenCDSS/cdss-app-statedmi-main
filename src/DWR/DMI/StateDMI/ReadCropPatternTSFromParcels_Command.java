@@ -26,6 +26,7 @@ package DWR.DMI.StateDMI;
 import javax.swing.JFrame;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,7 @@ import RTi.Util.IO.CommandStatusType;
 import RTi.Util.IO.CommandWarningException;
 import RTi.Util.IO.InvalidCommandParameterException;
 import RTi.Util.IO.PropList;
+import RTi.Util.Math.MathUtil;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 
@@ -134,23 +136,30 @@ private void addParcelToCropPatternTS ( StateCU_CropPatternTS cds, String parcel
 
 /**
 Add to the unique list of parcel years that were processed.
+@param parcelYear parcel year being processed
+@param parcelYears array of parcel years being processed.
+The array is initialized with -1 and leading values are set to the years as processing occurs.
 */
-private void addToParcelYears ( int year, int [] parcel_years )
+private void addToParcelYears ( int parcelYear, int [] parcelYears )
 {	boolean found = false;
-	int insert_i = 0;
-	for ( int i = 0; i < parcel_years.length; i++ ) {
-		if ( parcel_years[i] < 0 ) {
+	int insert_i = -1;
+	for ( int i = 0; i < parcelYears.length; i++ ) {
+		if ( parcelYears[i] < 0 ) {
 			// No more data to search
 			insert_i = i;
 			break;
 		}
-		else if ( year == parcel_years[i] ) {
+		else if ( parcelYear == parcelYears[i] ) {
 			found = true;
 			break;
 		}
 	}
+	if ( insert_i < 0 ) {
+		// Could not find parcelYears insert position, likely because the array size is too small.
+		// This should never happen but throw an exception if it does
+	}
 	if ( !found ) {
-		parcel_years[insert_i] = year;
+		parcelYears[insert_i] = parcelYear;
 	}
 }
 
@@ -289,7 +298,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	int log_level = 3;
 	String command_tag = "" + command_number;
 	int warning_count = 0;
-	int dl = 1; // Debug level
+	//int dl = 1; // Debug level
 	
 	CommandPhaseType commandPhase = CommandPhaseType.RUN;
 	StateDMI_Processor processor = (StateDMI_Processor)getCommandProcessor();
@@ -318,12 +327,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	// Get the list of CU locations.
 	
 	List<StateCU_Location> culocList = null;
-	int culocListSize = 0;
 	try {
 		@SuppressWarnings("unchecked")
 		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents ( "StateCU_Location_List");
 		culocList = dataList;
-		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {
 		message = "Error requesting CU location data from processor.";
@@ -529,48 +536,44 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		}
 
 		// Loop through locations...
-		// TODO smalers 2020-10-14 remove unused code once tests out
-		int matchCount = 0;
-		String culoc_id;
-		StateCU_Location culoc;
 		int parcelYear;
-		int replaceFlag = 1; // Add the parcel acreage value to the CropPatternTS time series.
-		String partId = "";
-		String units = "ACRE";
+		//String units = "ACRE";
 		String parcelId;
-		int parcelIdInt;
 		String parcelCrop;
-		double parcelSupplyArea; // Parcel area associated with supply
 		StateCU_CropPatternTS cds = null;
 		YearTS yts;
 		DateTime temp_DateTime = new DateTime(DateTime.PRECISION_YEAR);
 		StateCU_SupplyFromSW supplyFromSW;
 		StateCU_SupplyFromGW supplyFromGW;
-		boolean parcelHasSurfaceWaterSupply = false;
 
-		// Years with data, used to set time series with crops in those years to zero.
+		// Years with data, used to set time series missing values in those years to zero no crop acreage.
+		// - this is across all locations because it is assumed that irrigated lands assessment for a year will be for the whole division.
+		// - TODO smalers 2020-12-06 what happens if there are stray parcels/wells in other division with different irrigated lands years?
 		// - TODO smalers 2020-10-11 not sure about the following comment
 		// - TODO SAM 2007-06-14 need to rework to require users to specify the years to read.
-		int [] parcel_years = new int[100];
-		for ( int i = 0; i < parcel_years.length; i++ ) {
-			parcel_years[i] = -1;
+		int [] parcelYears = new int[500];
+		for ( int i = 0; i < parcelYears.length; i++ ) {
+			parcelYears[i] = -1;
 		}
 
 		boolean debug = Message.isDebugOn;
-		for ( int i = 0; i < culocListSize; i++ ) {
-			culoc = culocList.get(i);
-			culoc_id = culoc.getID();
+		// Use the following to determine if model location is groundwater only.
+		// - in this case only parcels that do not have surface supply are processed
+		boolean isLocationGWOnly = false;
+		for ( StateCU_Location culoc : culocList ) {
+			String culoc_id = culoc.getID();
 			
 			// Filter on requested locations
 			if ( !culoc_id.matches(idpattern_Java) ) {
 				// Identifier does not match...
 				continue;
 			}
-			++matchCount;
 
 			if ( debug ) {
 				Message.printStatus ( 2, routine, "Processing " + culoc_id );
 			}
+			
+			isLocationGWOnly = culoc.hasGroundwaterOnlySupply();
 
 			try {
 				// Loop through the parcel objects and add new StateCU_CropPatternTS instances.
@@ -597,9 +600,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					// StateCU_Parcel uses string identifier for parcel because derived from StateCU_Data,
 					// but need integer ID below.
 					parcelId = parcel.getID();
-					parcelIdInt = Integer.parseInt(parcelId);
-					parcelHasSurfaceWaterSupply = parcel.hasSurfaceWaterSupply();
-					parcelSupplyArea = 0.0;
 					
 					// Find the CropPatternTS matching the CU Location
 					// - this should be fast since there are not a huge number of CU Locations
@@ -630,81 +630,21 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					if ( yts == null ) {
 						// Add the crop time series.
 						// - will be added alphabetically by crop name
-						yts = cds.addTS ( parcelCrop, true );
+						// - overwrite=true because adding no matter what in this case
+						boolean overwrite = true;
+						yts = cds.addTS ( parcelCrop, overwrite );
 					}
 					// Get the value in the time series for the parcel year
 					// - used to check whether a value has been previously set
 					temp_DateTime.setYear ( parcelYear );
-					double val;
-					
-					boolean useTestLogic = false;
-					if ( useTestLogic ) {
-					// This is the new test logic.
-					// DON'T THINK IT WORKS JUST RELYING ON PARCEL TOTAL.
-					// Instead, fix errors in input data and then the splits should always work because there is no double counting.
-						
-					// No need to loop through supplies because that has already been done when processing the parcels.
-					// The only case where a parcel's area would not be included is if the current model location is
-					// WEL (groundwater only) and the parcel has surface water from another location.
-					// Otherwise, the parcel area should be counted in this location.
-					// The other location with surface water supply will pick up the CDS acreage when it is processed.
-					
-					// To be sure, check the supplies for this node to determine if it is a groundwater only node.
-					if ( !culoc.hasSurfaceWaterSupply() ) {
-						// This node has only groundwater supply.
-						// Check whether the parcel being processed has surface water supply.
-						if ( parcel.hasSurfaceWaterSupply() ) {
-							// The parcel has surface water supply so don't add to this CU Location.
-							continue;
-						}
-					}
 
-					// Set the information used in reporting and troubleshooting.
-					//parcel.setStateCULocationForCds(culoc);
-					//parcel.setIncludeInCdsType(IncludeParcelInCdsType.YES);
-					
-					// The entire area is counted.
-					// For example, if surface water supply is used for the parcel:
-					// - if one surface water supply, then 100% of the area
-					// - if two surface water supplies, then each irrigate 50% of the area, so still 100%
-					// - similar logic for wells
-					// - the acreage gets split more when when processing the IPY file
-
-					// Now check to see if there is an existing value...
-					val = yts.getDataValue ( temp_DateTime );
-					double parcelArea = parcel.getArea();
-					if ( yts.isDataMissing(val) ) {
-						// Value is missing so set...
-						if ( Message.isDebugOn ) {
-							Message.printDebug ( dl, "", "  Initializing " + culoc_id + " from parcelId=" + parcelId + " " +
-							parcelYear + " " + parcelCrop + " to " + StringUtil.formatString(parcelArea,"%.3f") );
-						}
-						yts.setDataValue ( temp_DateTime, parcelArea );
-					}
-					else {
-						if ( Message.isDebugOn ) {
-							Message.printDebug ( dl, "", "  Adding " + culoc_id + " from parcelId=" + parcelId + " " +
-							parcelYear + " " + parcelCrop + " + " + parcelArea + " = " +
-							StringUtil.formatString( (val + parcelArea), "%.3f") );
-						}
-					}
-					yts.setDataValue ( temp_DateTime, val + parcelArea );
-
-					// Add to list of parcel years that are being read.
-					// - Needed for below
-					addToParcelYears ( parcelYear, parcel_years );
-					}
-
-					// TODO smalers 2020-11-08 old code is actually what needs to be working
-					boolean useCurrentCode = true;
-					if ( useCurrentCode ) {
 					// Loop though the supplies associated with the parcel.
 					//  - only assign supply acreage that was matched with this location.
 					//  - the math has already been done for the irrigated acreage fraction.
-					if ( parcel.hasSurfaceWaterSupply() ) {
+					if ( parcel.hasSurfaceWaterSupply() && !isLocationGWOnly ) {
 						if ( debug ) {
 							Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear +
-								" parcel ID " + parcel.getID() + " has surface water supply");
+								" parcel ID " + parcel.getID() + " has surface water supply for DIV and D&W.");
 						}
 						// Only assign surface water supply acreage and do not assign any groundwater acreage
 						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
@@ -716,8 +656,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									if ( debug ) {
 										Message.printStatus(2, routine, "SW supply " + supplyFromSW.getWDID() + " ID is in CULoc" );
 									}
-									addParcelArea ( debug, culoc, parcel, yts, temp_DateTime, parcelYear, parcel_years, parcelCrop, supplyFromSW.getAreaIrrig() );
+									addParcelArea ( debug, culoc, parcel, yts, temp_DateTime, parcelYear, parcelYears, parcelCrop, supplyFromSW.getAreaIrrig() );
 									supply.setStateCULocationForCds(culoc);
+									// Supplies where initialized to CDS:NO previously so only set to yes here
 									supply.setIncludeInCdsType(IncludeParcelInCdsType.YES);
 								}
 								else {
@@ -731,11 +672,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							}
 						}
 					}
-					else if ( parcel.hasGroundWaterSupply() ) {
+					else if ( !parcel.hasSurfaceWaterSupply() && isLocationGWOnly ) {
 						// Groundwater data only (no surface water supply):
-						// - groundwater associated with commingled lands will not assigned so no double-counting of groundwater
+						// - groundwater associated with commingled lands will not assigned so no double-counting of parcel
 						// - assign the portion of the parcel attributed to the location
-						Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " + parcel.getID() + " has groundwater only");
+						Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " +
+							parcel.getID() + " has groundwater only.");
 						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 							if ( supply instanceof StateCU_SupplyFromGW ) {
 								// Groundwater only so get the area from the supply
@@ -751,8 +693,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									}
 									// This culoc is associated with the supply via single ditch or collection.
 									// Area for supply was previously calculated as (parcel area) * (ditch percent_irrig)
-									addParcelArea ( debug, culoc, parcel, yts, temp_DateTime, parcelYear, parcel_years, parcelCrop, supplyFromGW.getAreaIrrig() );
+									// - parcel_years is output and is the list of years with data, across all locations in the command
+									addParcelArea ( debug, culoc, parcel, yts, temp_DateTime, parcelYear, parcelYears, parcelCrop, supplyFromGW.getAreaIrrig() );
 									supply.setStateCULocationForCds(culoc);
+									// Supplies where initialized to CDS:NO previously so only set to yes here
 									supply.setIncludeInCdsType(IncludeParcelInCdsType.YES);
 								}
 								else {
@@ -768,12 +712,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						}
 					}
 					else {
-						if ( debug ) {
-							Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear +
-								" parcel ID " + parcel.getID() + " does not have surface or groundwater supply");
-						}
+						// This should not happen due to location/parcel/supply relationship in the first place
+						Message.printWarning(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear +
+							" parcel ID " + parcel.getID() + " does not have surface or groundwater supply");
 					}
-					} // End useOldCode
 				}
 			}
 			catch ( Exception e ) {
@@ -787,44 +729,59 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			}
 		}
 
-		// The above code edited individual values in time series.  Loop through
-		// now and make sure that the totals are up to date...
+		// The above code accumulated individual parcel/crop fractional areas into the crop pattern time series.
+		// Loop through now and make sure that missing values in each data year are set to zero and
+		// the totals for each data year are up to date.
+		// Loop using the same logic as above to make sure everything is based on CU locations.
 
-		int size = cdsList.size();
-		StateCU_CropPatternTS cds2;
-		StringBuffer parcel_years_string = new StringBuffer();
-		for ( int iyear = 0; iyear < parcel_years.length; iyear++ ) {
-			if ( parcel_years[iyear] < 0 ) {
+		StringBuffer parcelYearsString = new StringBuffer();
+		sortParcelYears(parcelYears);
+		for ( int iyear = 0; iyear < parcelYears.length; iyear++ ) {
+			if ( parcelYears[iyear] < 0 ) {
 				// Done processing years...
 				break;
 			}
 			if ( iyear != 0 ) {
-				parcel_years_string.append ( ", ");
+				parcelYearsString.append ( ", ");
 			}
-			parcel_years_string.append ( parcel_years[iyear]);
+			parcelYearsString.append ( parcelYears[iyear]);
 		}
+
 		Message.printStatus( 2, routine,
-			"Crop data years that were processed are:  " + parcel_years_string.toString() );
-		for (int i = 0; i < size; i++) {
-			cds2 = cdsList.get(i);
-			Message.printStatus( 2, routine,
-				"Setting missing data to zero in data years for \"" + cds2.getID() + "\"." );
-			// Finally, if a crop pattern value is set in any year, assume
-			// that all other missing values should be treated as zero.  If all data
-			// are missing, including no crops, the total should be set to zero.  In
-			// other words, crop patterns for a year must include all crops
-			// and filling should not occur in a year when data values have been set.
-			for ( int iyear = 0; iyear < parcel_years.length; iyear++ ) {
-				if ( parcel_years[iyear] < 0 ) {
-					// Done processing years...
-					break;
-				}
-				cds2.setCropAreasToZero (
-					parcel_years[iyear], // Specific year to process
-					false );// Only set missing to zero (leave non-missing as is)
+			"Crop data years that were processed for location pattern " + ID + " are: " + parcelYearsString );
+
+		for ( StateCU_Location culoc : culocList ) {
+			// Only process the locations of interest for the command.
+			String culoc_id = culoc.getID();
+			if ( !culoc_id.matches(idpattern_Java) ) {
+				// Identifier does not match...
+				continue;
 			}
-			// Recalculate totals for the location...
-			cds2.refresh ();
+			int pos = StateCU_Util.indexOf ( cdsList, culoc_id );
+			if ( pos >= 0 ) {
+				// Have crop pattern time series to process
+				cds = cdsList.get(pos);
+				Message.printStatus( 2, routine,
+					"  Setting missing data to zero in data years (" + parcelYearsString + ") for \"" + cds.getID() + "\"." );
+				// Finally, if a crop pattern value is set in any year, assume
+				// that all other missing values for crops in the year should be treated as zero.
+				// If all data are missing, including no crops, the total should be set to zero.
+				// In other words, crop patterns for a year must include all crops
+				// and filling should not occur in a year when data values have been set.
+				boolean setAllValuesToZero = false;
+				for ( int iyear = 0; iyear < parcelYears.length; iyear++ ) {
+					// parcelYears array was filled with -1 to begin with so first -1 is end of data.
+					if ( parcelYears[iyear] < 0 ) {
+						// Done processing years...
+						break;
+					}
+					cds.setCropAreasToZero (
+						parcelYears[iyear], // Specific year to process
+						setAllValuesToZero );
+				}
+				// Recalculate totals for the location for all years that have data.
+				cds.refresh ();
+			}
 		}
 		
 		// Warn about identifiers that have been replaced in the
@@ -852,6 +809,31 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	}
 	
     status.refreshPhaseSeverity(CommandPhaseType.RUN,CommandStatusType.SUCCESS);
+}
+
+/**
+ * Sort the parcel years so actual years are at the front and then 1 at the end.
+ * @param parcelYears array of parcel years to short, with -1 being no data,
+ * at the end of the array before and after sorting.
+ */
+private void sortParcelYears(int[] parcelYears) {
+	Arrays.sort(parcelYears);
+	// -1 values will be at the front
+	int firstYearPos = -1;
+	for ( int i = 0; i < parcelYears.length; i++ ) {
+		if ( parcelYears[i] > 0 ) {
+			firstYearPos = i;
+			break;
+		}
+	}
+	// Move the actual years to the front
+	for ( int i = firstYearPos, j = 0; i < parcelYears.length; i++, j++ ) {
+		parcelYears[j] = parcelYears[i];
+	}
+	// Reset the values at the end to -1
+	for ( int i = firstYearPos, j = 0; i < parcelYears.length; i++, j++ ) {
+		parcelYears[i] = -1;
+	}
 }
 
 /**

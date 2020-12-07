@@ -25,6 +25,7 @@ package DWR.DMI.StateDMI;
 
 import javax.swing.JFrame;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -124,16 +125,16 @@ throws InvalidCommandParameterException
 		message = "A location identifier or pattern must be specified.";
 		warning += "\n" + message;
 		status.addToLog ( CommandPhaseType.INITIALIZATION,
-				new CommandLogRecord(CommandStatusType.FAILURE,
-						message, "Specify the location identifier pattern to match." ) );
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Specify the location identifier pattern to match." ) );
 	}
 	
 	if ( (CropType == null) || (CropType.length() == 0) ) {
 		message = "A crop type must be specified.";
 		warning += "\n" + message;
 		status.addToLog ( CommandPhaseType.INITIALIZATION,
-				new CommandLogRecord(CommandStatusType.FAILURE,
-						message, "Specify the crop type to match." ) );
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Specify the crop type to match." ) );
 	}
 	
 	if ( (IncludeSurfaceWaterSupply != null) && (IncludeSurfaceWaterSupply.length() > 0) &&
@@ -142,32 +143,32 @@ throws InvalidCommandParameterException
 		message = "The IncludeSurfaceWaterSupply value (" + IncludeSurfaceWaterSupply + ") is invalid.";
 		warning += "\n" + message;
 		status.addToLog ( CommandPhaseType.INITIALIZATION,
-				new CommandLogRecord(CommandStatusType.FAILURE,
-						message, "Specify IncludeSurfaceWaterSupply as " + _False + 
-						" or " + _True + " (default=" + _True + ").") );
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Specify IncludeSurfaceWaterSupply as " + _False + 
+					" or " + _True + " (default=" + _True + ").") );
 	}
 	
 	if ( (IncludeGroundwaterOnlySupply != null) && (IncludeGroundwaterOnlySupply.length() > 0) &&
-			!IncludeGroundwaterOnlySupply.equalsIgnoreCase(_False) &&
-			!IncludeGroundwaterOnlySupply.equalsIgnoreCase(_True) ) {
+		!IncludeGroundwaterOnlySupply.equalsIgnoreCase(_False) &&
+		!IncludeGroundwaterOnlySupply.equalsIgnoreCase(_True) ) {
 		message = "The IncludeGroundwaterOnlySupply value (" + IncludeGroundwaterOnlySupply + ") is invalid.";
 		warning += "\n" + message;
 		status.addToLog ( CommandPhaseType.INITIALIZATION,
-				new CommandLogRecord(CommandStatusType.FAILURE,
-						message, "Specify IncludeGroundwaterOnlySupply as " + _False + 
-						" or " + _True + " (default=" + _True + ").") );
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Specify IncludeGroundwaterOnlySupply as " + _False + 
+					" or " + _True + " (default=" + _True + ").") );
 	}
 	
 	if ( this instanceof FillCropPatternTSProrateAgStats_Command ) {
 		if ( (NormalizeTotals != null) && (NormalizeTotals.length() > 0) &&
-				!NormalizeTotals.equalsIgnoreCase(_False) &&
-				!NormalizeTotals.equalsIgnoreCase(_True) ) {
+			!NormalizeTotals.equalsIgnoreCase(_False) &&
+			!NormalizeTotals.equalsIgnoreCase(_True) ) {
 			message = "The NormalizeTotals value (" + NormalizeTotals + ") is invalid.";
 			warning += "\n" + message;
 			status.addToLog ( CommandPhaseType.INITIALIZATION,
-					new CommandLogRecord(CommandStatusType.FAILURE,
-							message, "Specify NormalizeTotals as " + _False + " or " + _True +
-							" (default=" + _False + " for one crop or " + _True + " for multiple crops).") );
+				new CommandLogRecord(CommandStatusType.FAILURE,
+					message, "Specify NormalizeTotals as " + _False + " or " + _True +
+						" (default=" + _False + " for one crop or " + _True + " for multiple crops).") );
 		}
 	}
 	
@@ -269,41 +270,41 @@ throws InvalidCommandParameterException
 		message = "The IfNotFound value (" + IfNotFound + ") is invalid.";
 		warning += "\n" + message;
 		status.addToLog ( CommandPhaseType.INITIALIZATION,
-				new CommandLogRecord(CommandStatusType.FAILURE,
-						message, "Specify IfNotFound as " + _Ignore + ", " + _Fail +
-						", or " + _Warn + " (default).") );
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Specify IfNotFound as " + _Ignore + ", " + _Fail +
+					", or " + _Warn + " (default).") );
 	}
 
 	// Check for invalid parameters...
-	List<String> valid_Vector = new Vector<String>();
-    valid_Vector.add ( "ID" );
-	valid_Vector.add ( "IncludeSurfaceWaterSupply" );
-    valid_Vector.add ( "IncludeGroundwaterOnlySupply" );
-	valid_Vector.add ( "CropType" );
+	List<String> validList = new ArrayList<>();
+    validList.add ( "ID" );
+	validList.add ( "IncludeSurfaceWaterSupply" );
+    validList.add ( "IncludeGroundwaterOnlySupply" );
+	validList.add ( "CropType" );
 	if ( this instanceof FillCropPatternTSProrateAgStats_Command ) {
-		valid_Vector.add ( "NormalizeTotals" );
+		validList.add ( "NormalizeTotals" );
 	}
-	valid_Vector.add ( "FillStart" );
-	valid_Vector.add ( "FillEnd" );
+	validList.add ( "FillStart" );
+	validList.add ( "FillEnd" );
 	if ( this instanceof FillCropPatternTSUsingWellRights_Command ) {
-		valid_Vector.add ( "ParcelYear" );
+		validList.add ( "ParcelYear" );
 	}
 	if (this instanceof FillCropPatternTSProrateAgStats_Command ||
 		this instanceof FillCropPatternTSRepeat_Command ) {
-		valid_Vector.add ( "FillDirection" );
+		validList.add ( "FillDirection" );
 	}
 	if ( this instanceof FillCropPatternTSRepeat_Command ) {
-		valid_Vector.add ( "FillFlag" );
+		validList.add ( "FillFlag" );
 	}
 	if ( this instanceof FillCropPatternTSInterpolate_Command ||
 		this instanceof FillCropPatternTSRepeat_Command ) {
-		valid_Vector.add ( "MaxIntervals" );
+		validList.add ( "MaxIntervals" );
 	}
 	if ( this instanceof FillCropPatternTSConstant_Command ) {
-		valid_Vector.add ( "Constant" );
+		validList.add ( "Constant" );
 	}
-	valid_Vector.add ( "IfNotFound" );
-	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	validList.add ( "IfNotFound" );
+	warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	if ( warning.length() > 0 ) {
 		Message.printWarning ( warning_level,
@@ -419,7 +420,7 @@ private int fillCropPatternTSUsingRights (
 			parcel_always_off = true;
 		}
 		else {
-			parcelRightTS = (TS)werYearTSList.get(pos);
+			parcelRightTS = werYearTSList.get(pos);
 			Message.printStatus ( 2, routine, "Using right time series for parcel " + parcel.getID() );
 		}
 		// Now loop through the years to fill...
@@ -868,7 +869,7 @@ CommandWarningException, CommandException
 							message, "Verify that the ID is correct and that CU locations have been read before this command." ) );
 					continue;
 				}
-				culoc = (StateCU_Location)culocList.get(pos);
+				culoc = culocList.get(pos);
 				county = culoc.getRegion1();
 				if ( county.length() == 0 ) {
 					message = "CU location \"" + id +
@@ -890,7 +891,7 @@ CommandWarningException, CommandException
 				((this instanceof FillCropPatternTSProrateAgStats_Command) && !NormalizeTotals_boolean) ) {
 				// Process the time series one at a time...
 				for ( icrop = 0; icrop < ncrops; icrop++ ) {
-					cropName = (String)cropNames.get(icrop);
+					cropName = cropNames.get(icrop);
 					if ( cropName.matches(croppattern_Java) ) {
 						// Crop matches...
 						yts = cupatts.getCropPatternTS ( cropName );
@@ -1039,7 +1040,7 @@ CommandWarningException, CommandException
 				// used to fill in the values for "observed_total",
 				// "observed_actual", "prorated_total", and "agstats_total".
 				for ( icrop = 0; icrop < cropTypeList_size; icrop++){
-					cropName = (String)cropTypeList.get( icrop );
+					cropName = cropTypeList.get( icrop );
 					// Get the CASS totals for all years and for the years when observations exist.
 					// Find a matching AgStats time series using the CU location county and time series
 					// data type (crop type).
@@ -1128,7 +1129,7 @@ CommandWarningException, CommandException
 						continue;
 					}
 					for ( icrop = 0; icrop < cropTypeList_size; icrop++ ) {
-						cropName = (String)cropTypeList.get( icrop );
+						cropName = cropTypeList.get( icrop );
 						yts = cupatts.getCropPatternTS ( cropName );
 						if ( yts == null ) {
 							// No crop time series to adjust

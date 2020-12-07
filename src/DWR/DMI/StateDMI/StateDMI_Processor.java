@@ -1792,6 +1792,8 @@ protected void findAndAddCUParcel ( StateCU_Parcel parcel, boolean replace, Stri
 	String key = parcel.getYear() + "-" + parcel.getID();
 	StateCU_Parcel parcelFound = __CUParcel_Map.get(key);
 	String message;
+	// Use debug to increase logging messages
+	boolean debug = Message.isDebugOn;
 	if ( parcelFound != null ) {
 		// The StateCU_Parcel is already in the hashmap...
 		//__CUParcel_match_List.add(id);
@@ -1841,7 +1843,9 @@ protected void findAndAddCUParcel ( StateCU_Parcel parcel, boolean replace, Stri
 	else {
 		// Parcel was not found in the list.  Add to the hashmap.
 		__CUParcel_Map.put ( key, parcel );
-		Message.printStatus(2,routine,messagePrefix + "Adding parcel to global list using key: " + key );
+		if ( debug ) {
+			Message.printStatus(2,routine,messagePrefix + "Adding parcel to global list using key: " + key );
+		}
 	}
 }
 

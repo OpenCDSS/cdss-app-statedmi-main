@@ -946,14 +946,21 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetIrrigationPracticeTS")) {
 		return new SetIrrigationPracticeTS_Command();
 	}
-	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetTableValues") ) {
-        return new SetTableValues_Command ();
-    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"SetOutputPeriod") ) {
 		return new SetOutputPeriod_Command ();
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"SetOutputYearType") ) {
 		return new SetOutputYearType_Command ();
+	}
+	// Order these so that SetParcel is found last
+	else if ( StringUtil.startsWithIgnoreCase( commandString,"SetParcelGroundWaterSupply") ) {
+		return new SetParcelGroundWaterSupply_Command ();
+	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString,"SetParcelSurfaceWaterSupply") ) {
+		return new SetParcelSurfaceWaterSupply_Command ();
+	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString,"SetParcel") ) {
+		return new SetParcel_Command ();
 	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"SetPenmanMonteith") ) {
 		return new SetPenmanMonteith_Command ();
@@ -996,6 +1003,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"SetStreamGageStation") ) {
 		return new SetStreamGageStation_Command ();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString, "SetTableValues") ) {
+        return new SetTableValues_Command ();
+    }
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"SetWarningLevel") ) {
 		return new SetWarningLevel_Command ();
 	}
