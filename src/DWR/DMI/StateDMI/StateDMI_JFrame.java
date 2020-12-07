@@ -920,6 +920,9 @@ private JMenu
 private JMenuItem
 	__Commands_StateCU_Parcels_ReadParcelsFromHydroBase_JMenuItem,
 	__Commands_StateCU_Parcels_ReadParcelsFromIrrigatedLands_JMenuItem,
+	__Commands_StateCU_Parcels_SetParcel_JMenuItem,
+	__Commands_StateCU_Parcels_SetParcelSurfaceWaterSupply_JMenuItem,
+	__Commands_StateCU_Parcels_SetParcelGroundWaterSupply_JMenuItem,
 	__Commands_StateCU_Parcels_CheckParcels_JMenuItem,
 	__Commands_StateCU_Parcels_CheckIrrigatedLands_JMenuItem,
 	__Commands_StateCU_Parcels_WriteParcelsToFile_JMenuItem;
@@ -1310,6 +1313,9 @@ private JMenuItem
 	//__Commands_StateMod_ConsumptiveWaterRequirementTS_JMenuItem,
     __Commands_StateMod_Parcels_ReadParcelsFromHydroBase_JMenuItem,
     __Commands_StateMod_Parcels_ReadParcelsFromIrrigatedLands_JMenuItem,
+    __Commands_StateMod_Parcels_SetParcel_JMenuItem,
+    __Commands_StateMod_Parcels_SetParcelSurfaceWaterSupply_JMenuItem,
+    __Commands_StateMod_Parcels_SetParcelGroundWaterSupply_JMenuItem,
     __Commands_StateMod_Parcels_CheckParcels_JMenuItem,
     __Commands_StateMod_Parcels_CheckIrrigatedLands_JMenuItem,
     __Commands_StateMod_Parcels_WriteParcelsToFile_JMenuItem;
@@ -1908,6 +1914,9 @@ private String
 	__Commands_StateCU_Parcels_String = "Parcels",
 	__Commands_StateCU_Parcels_ReadParcelsFromHydroBase_String = "ReadParcelsFromHydroBase() ...",
 	__Commands_StateCU_Parcels_ReadParcelsFromIrrigatedLands_String = "ReadParcelsFromIrrigatedLands() ...",
+	__Commands_StateCU_Parcels_SetParcel_String = "SetParcel() ...",
+	__Commands_StateCU_Parcels_SetParcelSurfaceWaterSupply_String = "SetParcelSurfaceWaterSupply() ...",
+	__Commands_StateCU_Parcels_SetParcelGroundWaterSupply_String = "SetParcelGroundWaterSupply() ...",
 	__Commands_StateCU_Parcels_CheckParcels_String = "CheckParcels() ...",
 	__Commands_StateCU_Parcels_CheckIrrigatedLands_String = "CheckIrrigatedLands() ...",
 	__Commands_StateCU_Parcels_WriteParcelsToFile_String = "WriteParcelsToFile() ...",
@@ -2159,6 +2168,9 @@ private String
 	__Commands_StateMod_Parcels_String = "Parcels",
 	__Commands_StateMod_Parcels_ReadParcelsFromHydroBase_String = "ReadParcelsFromHydroBase()...",
 	__Commands_StateMod_Parcels_ReadParcelsFromIrrigatedLands_String = "ReadParcelsFromIrrigatedLands()...",
+	__Commands_StateMod_Parcels_SetParcel_String = "SetParcel()...",
+	__Commands_StateMod_Parcels_SetParcelSurfaceWaterSupply_String = "SetParcelSurfaceWaterSupply()...",
+	__Commands_StateMod_Parcels_SetParcelGroundWaterSupply_String = "SetParcelGroundWaterSupply()...",
 	__Commands_StateMod_Parcels_CheckParcels_String = "CheckParcels()...",
 	__Commands_StateMod_Parcels_CheckIrrigatedLands_String = "CheckIrrigatedLands()...",
 	__Commands_StateMod_Parcels_WriteParcelsToFile_String = "WriteParcelsToFile()...",
@@ -3566,6 +3578,21 @@ public void actionPerformed ( ActionEvent event )
 	else if ( action.equals( __Commands_StateCU_Parcels_ReadParcelsFromIrrigatedLands_String) ) {
 		// Read parcels associated with CU Locations from irrigated lands table...
 		commandList_EditCommand ( __Commands_StateCU_Parcels_ReadParcelsFromIrrigatedLands_String,
+		null, __INSERT_COMMAND);
+	}
+	else if ( action.equals( __Commands_StateCU_Parcels_SetParcel_String) ) {
+		// Set/remove parcel data.
+		commandList_EditCommand ( __Commands_StateCU_Parcels_SetParcel_String,
+		null, __INSERT_COMMAND);
+	}
+	else if ( action.equals( __Commands_StateCU_Parcels_SetParcelSurfaceWaterSupply_String) ) {
+		// Set/remove parcel surface water supply data.
+		commandList_EditCommand ( __Commands_StateCU_Parcels_SetParcelSurfaceWaterSupply_String,
+		null, __INSERT_COMMAND);
+	}
+	else if ( action.equals( __Commands_StateCU_Parcels_SetParcelGroundWaterSupply_String) ) {
+		// Set/remove parcel groundwater supply data.
+		commandList_EditCommand ( __Commands_StateCU_Parcels_SetParcelGroundWaterSupply_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( action.equals( __Commands_StateCU_Parcels_CheckParcels_String) ) {
@@ -10855,6 +10882,16 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 			new SimpleJMenuItem(__Commands_StateCU_Parcels_ReadParcelsFromIrrigatedLands_String,this));
 		Commands_StateCU_Parcels_JMenu.addSeparator();
 		Commands_StateCU_Parcels_JMenu.add(
+	        __Commands_StateCU_Parcels_SetParcel_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateCU_Parcels_SetParcel_String,this));
+		Commands_StateCU_Parcels_JMenu.add(
+	        __Commands_StateCU_Parcels_SetParcelSurfaceWaterSupply_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateCU_Parcels_SetParcelSurfaceWaterSupply_String,this));
+		Commands_StateCU_Parcels_JMenu.add(
+	        __Commands_StateCU_Parcels_SetParcelGroundWaterSupply_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateCU_Parcels_SetParcelGroundWaterSupply_String,this));
+		Commands_StateCU_Parcels_JMenu.addSeparator();
+		Commands_StateCU_Parcels_JMenu.add(
 	        __Commands_StateCU_Parcels_CheckParcels_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_Parcels_CheckParcels_String,this));
 		Commands_StateCU_Parcels_JMenu.add(
@@ -11175,6 +11212,16 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 		Commands_StateMod_Parcels_JMenu.add(
 	        __Commands_StateMod_Parcels_ReadParcelsFromIrrigatedLands_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateMod_Parcels_ReadParcelsFromIrrigatedLands_String,this));
+		Commands_StateMod_Parcels_JMenu.addSeparator();
+		Commands_StateMod_Parcels_JMenu.add(
+	        __Commands_StateMod_Parcels_SetParcel_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateMod_Parcels_SetParcel_String,this));
+		Commands_StateMod_Parcels_JMenu.add(
+	        __Commands_StateMod_Parcels_SetParcelSurfaceWaterSupply_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateMod_Parcels_SetParcelSurfaceWaterSupply_String,this));
+		Commands_StateMod_Parcels_JMenu.add(
+	        __Commands_StateMod_Parcels_SetParcelGroundWaterSupply_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateMod_Parcels_SetParcelGroundWaterSupply_String,this));
 		Commands_StateMod_Parcels_JMenu.addSeparator();
 		Commands_StateMod_Parcels_JMenu.add(
 	        __Commands_StateMod_Parcels_CheckParcels_JMenuItem =

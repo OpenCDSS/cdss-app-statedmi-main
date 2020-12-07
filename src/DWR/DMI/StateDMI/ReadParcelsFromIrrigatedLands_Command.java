@@ -31,6 +31,7 @@ import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
 import DWR.DMI.StateDMI.StateDMI_Processor;
 import DWR.StateCU.StateCU_Parcel;
+import DWR.StateCU.StateCU_Supply;
 import DWR.StateCU.StateCU_SupplyFromGW;
 import DWR.StateCU.StateCU_SupplyFromSW;
 import rti.tscommandprocessor.core.TSCommandProcessorUtil;
@@ -555,6 +556,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    				// - read the structure
 	    				hbstruct = hbstructMap.get(wdid);
 	    				if ( hbstruct == null ) {
+	    					// Have not read before so try to read
 	    					wdidParts = HydroBase_WaterDistrict.parseWDID(wdid);
 	    					hbstruct = hbdmi.readStructureViewForWDID(wdidParts[0], wdidParts[1]);
 	    					error = "";
@@ -572,46 +574,60 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	        					}
 	    					}
 	    					else {
+	    						// Add the structure to the hash map
 	    						hbstructMap.put(wdid, hbstruct);
 	    					}
-							// Always add surface supply information
-							supplyFromSW = new StateCU_SupplyFromSW();
-							supplyFromSW.setDataSource("IRRLANDS");
-							// Fraction and area irrigated is from HydroBase
-							// - values calculated from parcel area and number of diversions is calculated
-							// Don't have the irrigated fraction from HydroBase
-							/*
-							supplyFromSW.setAreaIrrigFractionHydroBase(hbParcelUseTSStruct.getPercent_irrig());
-							supplyFromSW.setAreaIrrigHydroBase(hbParcelUseTSStruct.getArea()*hbParcelUseTSStruct.getPercent_irrig());
-							if ( (structureView == null) ||
-								(structureView.getStructure_num() != hbParcelUseTSStruct.getStructure_num()) ) {
-								// Parcels are related to the same structure in the loop so only need to read once.
-								// TODO smalers 2020-08-24 Why is this even done since the structure WDID is
-								// the same as ParcelUseTS query above?
-								// - could set the structure name
-								sw.clearAndStart();
-								structureView = hbdmi.readStructureViewForStructure_num(hbParcelUseTSStruct.getStructure_num());
-								sw.stop();
-								Message.printStatus ( 2, routine, "    Reading structure view for structure_num " +
-									hbParcelUseTSStruct.getStructure_num() + " took " + sw.getMilliseconds() + " ms");
+	    				}
+						// Always add surface supply information
+						supplyFromSW = new StateCU_SupplyFromSW();
+						supplyFromSW.setDataSource("IRRLANDS");
+						// Fraction and area irrigated is from HydroBase
+						// - values calculated from parcel area and number of diversions is calculated
+						// Don't have the irrigated fraction from HydroBase
+						/*
+						supplyFromSW.setAreaIrrigFractionHydroBase(hbParcelUseTSStruct.getPercent_irrig());
+						supplyFromSW.setAreaIrrigHydroBase(hbParcelUseTSStruct.getArea()*hbParcelUseTSStruct.getPercent_irrig());
+						if ( (structureView == null) ||
+							(structureView.getStructure_num() != hbParcelUseTSStruct.getStructure_num()) ) {
+							// Parcels are related to the same structure in the loop so only need to read once.
+							// TODO smalers 2020-08-24 Why is this even done since the structure WDID is
+							// the same as ParcelUseTS query above?
+							// - could set the structure name
+							sw.clearAndStart();
+							structureView = hbdmi.readStructureViewForStructure_num(hbParcelUseTSStruct.getStructure_num());
+							sw.stop();
+							Message.printStatus ( 2, routine, "    Reading structure view for structure_num " +
+								hbParcelUseTSStruct.getStructure_num() + " took " + sw.getMilliseconds() + " ms");
+						}
+						*/
+						supplyFromSW.setID(wdid); // General ID
+						supplyFromSW.setWDID(wdid); // Specific ID
+						// Check for the same supply for same parcel.  Check before adding.
+						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
+							if ( supply.getID().equalsIgnoreCase(wdid) ) {
+								message = "Year " + year + " parcel ID " + parcelId + " SW supply WDID " + wdid +
+									" is a duplicate supply.";
+								Message.printWarning(warning_level,
+									MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+								status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
+									message, "Check the irrigated lands GIS data." ) );
+								supplyFromSW.setError("Duplicate supply.", true);
 							}
-							*/
-							supplyFromSW.setWDID(wdid);
-							supplyFromSW.setID(wdid);
-							// The supply will only be added once
-							parcel.addSupply(supplyFromSW);
-	    				}
-	    				if ( hbstruct.getStr_type().equals("W") ) {
-	    					// Surface water supply but using a well WDID.  This is a data error.
-	    					message = "Year " + year + " parcel ID " + parcelId + " SW supply WDID " + wdid +
-	    						" is a well structure (structure type = " + hbstruct.getStr_type() + ") - expecting ditch.";
-	        				Message.printWarning(warning_level,
-	        					MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
-	        				status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
-	        					message, "Check the irrigated lands GIS data." ) );
-    						error = "Not in HydroBase";
-    						supplyFromSW.setError(error, true);
-	    				}
+						}
+						// The supply will only be added once
+						parcel.addSupply(supplyFromSW);
+
+						if ( (hbstruct != null) && hbstruct.getStr_type().equals("W") ) {
+							// Surface water supply but using a well WDID.  This is a data error.
+							message = "Year " + year + " parcel ID " + parcelId + " SW supply WDID " + wdid +
+								" is a well structure (structure type = " + hbstruct.getStr_type() + ") - expecting diversion structure.";
+							Message.printWarning(warning_level,
+								MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+							status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
+								message, "Check the irrigated lands GIS data." ) );
+							error = "WDID is a well structure.";
+							supplyFromSW.setError(error, true);
+						}
 	    			}
 	    		}
 
@@ -628,6 +644,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    					// - read the structure
 	    					hbstruct = hbstructMap.get(wdid);
 	    					if ( hbstruct == null ) {
+	    						// Have not read structure before so try to red
 	    						wdidParts = HydroBase_WaterDistrict.parseWDID(wdid);
 	    						hbstruct = hbdmi.readStructureViewForWDID(wdidParts[0], wdidParts[1]);
 	    						if ( hbstruct == null ) {
@@ -645,6 +662,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	        						}
 	    						}
 	    						else {
+	    							// Add to the hashmap
 	    							hbstructMap.put(wdid, hbstruct);
 	    						}
 	    					}
@@ -652,15 +670,21 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     						supplyFromGW = new StateCU_SupplyFromGW();
     						supplyFromGW.setCollectionPartIdType("WDID");
 							supplyFromGW.setDataSource("IRRLANDS");
-							supplyFromGW.setWDID(wdid);
-							supplyFromGW.setID(wdid);
+							supplyFromGW.setID(wdid); // General ID
+							supplyFromGW.setWDID(wdid); // Specific ID
 							// The supply will only be added to the parcel once
+							// Check for the same supply for same parcel.  Check before adding.
+							for ( StateCU_Supply supply : parcel.getSupplyList() ) {
+								if ( supply.getID().equalsIgnoreCase(wdid) ) {
+									supplyFromSW.setError("Duplicate supply.", true);
+								}
+							}
 							parcel.addSupply(supplyFromGW);
-	    					if ( !hbstruct.getStr_type().equals("W") ) {
+	    					if ( (hbstruct != null) && !hbstruct.getStr_type().equals("W") ) {
 	    						// Groundwater supply but using a WDID that is not a well.  This is a data error.
 	    						message = "Year " + year + " parcel ID " + parcelId + " GW supply WDID " + wdid +
 	    							" is not a well structure (structure type is " + hbstruct.getStr_type() + ").";
-	    						error = "WDID is not a well structure.";
+	    						error = "WDID is not a well structure, is " + hbstruct.getStr_type() + ".";
 	        					Message.printWarning(warning_level,
 	        						MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
 	        					status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
@@ -678,6 +702,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    					// - read the well
 	    					hbwells = hbwellsMap.get(receipt);
 	    					if ( hbwells == null ) {
+	    						// Have not read the well before
 	    						hbwellsList = hbdmi.readWellsList(receipt, -1, -1);
 	    						if ( (hbwellsList == null) || (hbwellsList.size() == 0) ) {
 	    							// Groundwater supply but receipt is not found in the database.
@@ -692,6 +717,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	        						supplyFromGW.setError(error, true);
 	    						}
 	    						else {
+	    							// Add to the hash map for caching
 	    							hbwellsMap.put(receipt, hbwells);
 	    						}
 	    					}
@@ -699,9 +725,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     						supplyFromGW = new StateCU_SupplyFromGW();
     						supplyFromGW.setCollectionPartIdType("RECEIPT");
 							supplyFromGW.setDataSource("IRRLANDS");
-							supplyFromGW.setReceipt(receipt);
-							supplyFromGW.setID(receipt);
+							supplyFromGW.setID(receipt); // General ID
+							supplyFromGW.setReceipt(receipt); // Specific ID
 							// The supply will only be added once
+							// Check for the same supply for same parcel.  Check before adding.
+							for ( StateCU_Supply supply : parcel.getSupplyList() ) {
+								if ( supply.getID().equalsIgnoreCase(receipt) ) {
+									supplyFromGW.setError("Duplicate supply.", true);
+								}
+							}
 							parcel.addSupply(supplyFromGW);
 	    				}
 	    			}

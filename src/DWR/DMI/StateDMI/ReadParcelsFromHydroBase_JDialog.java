@@ -1,4 +1,4 @@
-// ReadCULocationParcelsFromHydroBase_JDialog - Editor for ReadCULocationParcelsFromHydroBase() command.
+// ReadParcelsFromHydroBase_JDialog - Editor for ReadParcelsFromHydroBase() command.
 
 /* NoticeStart
 
@@ -52,7 +52,7 @@ import RTi.Util.Help.HelpViewer;
 import RTi.Util.IO.PropList;
 
 /**
-Editor for ReadCULocationParcelsFromHydroBase() command.
+Editor for ReadParcelsFromHydroBase() command.
 */
 @SuppressWarnings("serial")
 public class ReadParcelsFromHydroBase_JDialog extends JDialog

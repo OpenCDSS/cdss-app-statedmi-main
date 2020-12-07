@@ -26,7 +26,6 @@ package DWR.DMI.StateDMI;
 import javax.swing.JFrame;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
@@ -419,7 +418,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		List<String> culoc_wdids = new ArrayList<String>(100);
 		String culoc_id = null;
 		List<HydroBase_ParcelUseTS> crop_patterns;
-		List<HydroBase_StructureView> crop_patterns_sv = null; // Crop pattern records from HydroBase for parcels
 		List<HydroBase_StructureView> crop_patterns2 = null; // Crop pattern records for individual parts of aggregates.
 		int ih, hsize; // Counter and size for HydroBase records.
 		String units = "ACRE"; // Units for area
@@ -429,8 +427,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		int [] collection_years; // Years corresponding to the collection definitions.
 		String part_id; // One ID from an aggregate/system.
 		int collection_size; // Size of a collection.
-		int [] wdid_parts = new int[2];	// WDID parts for parsing.
-		boolean processing_ditches = true; // Whether ditches are being processed (false indicates wells and parcels).
 		int crop_set_count = 0;	// The number of times that any crop value is set for a location, for this command.
 		int [] parcel_years = new int[100];	// Data from HydroBase
 										// TODO SAM 2007-06-14 need to rework to require users to specify the years to read.
@@ -518,7 +514,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		}
 		
 		// Loop through locations
-		int matchCount = 0;
 		List<String> partIdList = null; // List of aggregate/system parts
 		// List of aggregate/system parts ID types (will contain "WDID" or "Receipt")
 		List<StateCU_Location_CollectionPartIdType> partIdTypeList = null;
@@ -545,7 +540,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			if ( isCollection ) {
 				collectionPartType = culoc.getCollectionPartType();
 			}
-			++matchCount;
 
 			culocHasSurfaceWaterSupply = false;
 			culocHasGroundWaterSupply = false;
@@ -568,7 +562,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					// to indicate whether a ditch or well WDID in StateCU (can do that in StateMod).
 
 					// If single diversion...
-					processing_ditches = true;
 					Message.printStatus ( 2, routine, "Processing single diversion \"" + culoc_id +
 						"\" using parcel/supply data from HydroBase vw_CDSS_ParcelUseTSStructureToParcel (all parcels are for single location)." );
 					int [] wdidParts = new int[2];
@@ -778,7 +771,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				} // end !isCollection - single ditch
 	
 				else if ( isCollection && (collectionPartType == StateCU_Location_CollectionPartType.DITCH) ) {
-					processing_ditches = true;
 					Message.printStatus ( 2, routine, "Processing diversion aggregate/system \"" + culoc_id + "\" (may or may not have wells)" );
 					// Aggregate/system diversion...
 					// Put together a list of WDIDs from the current CU location.  Currently ditch
@@ -792,7 +784,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					}
 					culoc_wdids.clear();
 					// This will contain the records for all the collection parts...
-					crop_patterns_sv = new ArrayList<>();
 					int [] wdidParts = new int[2];
 					for ( int j = 0; j < collection_size; j++ ) {
 						part_id = collection_ids.get(j);
@@ -834,7 +825,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						StateCU_SupplyFromGW supplyFromGW = null;
 						HydroBase_StructureView structureView = null;
 						StopWatch sw = new StopWatch();
-						int parcelCount, parcelNum;
 						for ( int iy = 0; iy < parcelYearsForDiv.length; iy++ ) {
 							year = parcelYearsForDiv[iy];
 
@@ -855,10 +845,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								// - If the parcel is a duplicate for the location due to one to many relationship,
 								//   the parcel is added once and the supply is added as an additional supply
 								//   This should not happen since the ditch will be the same for multiple parcels.
-								parcelNum = hbParcelUseTSStructList.size();
-								parcelCount = 0;
 								for ( HydroBase_ParcelUseTSStructureToParcel hbParcelUseTSStruct : hbParcelUseTSStructList ) {
-									++parcelCount;
 									StateCU_Parcel savedParcel = processor.getParcel(year, "" + hbParcelUseTSStruct.getParcel_id());
 									if ( savedParcel != null ) {
 										// Existing parcel.  Add the supply but leave other information as is.
@@ -1000,7 +987,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				        continue;
 					}
 
-					processing_ditches = false;
 					Message.printStatus ( 2, routine, "Processing well aggregate/system \"" + culoc_id + "\"" );
 					message = "Using parcels to specify groundwater-only aggregation/system is being phased out - "
 						+ "should specify aggregation using part type \"Well\" with well WDID and well permit receipt.";
@@ -1158,7 +1144,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					// Well only collection defined with list of well WDIDs and/or receipts.
 					
 					String collectionPartTypeString = "Well";
-					processing_ditches = false;
 					Message.printStatus ( 2, routine, "Processing well aggregate/system \"" + culoc_id +
 						"\" using list of WDID/permit receipt for parts (expect 1+ wells)." );
 					// The collection definitions are the same each year (same list of wells throughout the period).

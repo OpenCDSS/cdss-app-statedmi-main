@@ -52,7 +52,7 @@ public class StateDMI
 {
 
 public static final String PROGRAM_NAME = "StateDMI";
-public static final String PROGRAM_VERSION = "5.00.04dev (2020-12-04)";
+public static final String PROGRAM_VERSION = "5.00.04dev (2020-12-07)";
 
 /**
 Interface for StateCU commands.

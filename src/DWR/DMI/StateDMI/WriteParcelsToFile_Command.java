@@ -788,7 +788,7 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 		String format_2 = "                                                                                 " + // General parcel data
 			"%-10.10s %6d %6.3f %8.3f %11.3f %-7.7s";
 		String format_2_error = format_2 +
-			"                                                                       %s"; // Skip groundwater supply and output general error
+			"                                                                     %s"; // Skip groundwater supply and output general error
 
 		// Groundwater fields - data source and include align with  surface water and then space over to groundwater columns
 		String format_3 = "                                                                                                                                       " + // Skip general parcel and surface supply data

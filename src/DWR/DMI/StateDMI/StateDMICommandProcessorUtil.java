@@ -569,7 +569,7 @@ public static List<Command> getCommandsBeforeIndex (
 	}
 	List<Command> foundCommandsSorted = new ArrayList<>(size);
 	for ( int i = (size - 1); i >= 0; i-- ) {
-		foundCommandsSorted.add ( foundCommandsSorted.get(i));
+		foundCommandsSorted.add ( foundCommands.get(i));
 	}
 	return foundCommandsSorted;
 }
