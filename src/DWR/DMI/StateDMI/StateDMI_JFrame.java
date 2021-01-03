@@ -957,6 +957,7 @@ private JMenuItem
 	__Commands_StateCU_CropPatternTS_FillCropPatternTSUsingWellRights_JMenuItem,
 	__Commands_StateCU_CropPatternTS_FillCropPatternTSRepeat_JMenuItem,
 	__Commands_StateCU_CropPatternTS_SortCropPatternTS_JMenuItem,
+	__Commands_StateCU_CropPatternTS_CompareCropPatternTSFiles_JMenuItem,
 	__Commands_StateCU_CropPatternTS_WriteCropPatternTSToStateCU_JMenuItem,
 	__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_JMenuItem,
 	__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_JMenuItem;
@@ -1958,6 +1959,7 @@ private String
 	__Commands_StateCU_CropPatternTS_WriteCropPatternTSToStateCU_String = "WriteCropPatternTSToStateCU() ...",
 	__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_String = "WriteCropPatternTSToDateValue() ...",
 	__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_String = "WriteCropPatternParcelsToFile() ...",
+	__Commands_StateCU_CropPatternTS_CompareCropPatternTSFiles_String = "CompareCropPatternTSFiles() ...",
 	__Commands_StateCU_CropPatternTS_CheckCropPatternTS_String = "CheckCropPatternTS() ...",
 
 	__Commands_StateCU_IrrigationPracticeTS_String = "Irrigation Practice TS (Yearly)",
@@ -3712,6 +3714,11 @@ public void actionPerformed ( ActionEvent event )
 	else if (o ==__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_JMenuItem) {
 		// Write CU crop pattern parcel data to file...
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_String,
+		null, __INSERT_COMMAND);
+	}
+	else if ( action.equals(__Commands_StateCU_CropPatternTS_CompareCropPatternTSFiles_String)) {
+		// Check CU crop patterns...
+		commandList_EditCommand (__Commands_StateCU_CropPatternTS_CompareCropPatternTSFiles_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( action.equals(__Commands_StateCU_CropPatternTS_CheckCropPatternTS_String)) {
@@ -11002,6 +11009,10 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 		Commands_StateCU_CropPatternTS_JMenu.add(
 			__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_String,this));
+		Commands_StateCU_CropPatternTS_JMenu.addSeparator();
+		Commands_StateCU_CropPatternTS_JMenu.add(
+			__Commands_StateCU_CropPatternTS_CompareCropPatternTSFiles_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateCU_CropPatternTS_CompareCropPatternTSFiles_String,this));
 		ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateCU_CropPatternTS_JMenu,
 			__Commands_StateCU_CropPatternTS_CheckCropPatternTS_String);
 	}

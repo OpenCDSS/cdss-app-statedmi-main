@@ -26,7 +26,7 @@ package DWR.DMI.StateDMI;
 import javax.swing.JFrame;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +53,6 @@ import RTi.Util.IO.CommandStatusType;
 import RTi.Util.IO.CommandWarningException;
 import RTi.Util.IO.InvalidCommandParameterException;
 import RTi.Util.IO.PropList;
-import RTi.Util.Math.MathUtil;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 
@@ -86,7 +85,7 @@ public ReadCropPatternTSFromParcels_Command ()
  * @param areaIrrig the area irrigated by a supply.
  */
 private void addParcelArea ( boolean debug, StateCU_Location culoc, StateCU_Parcel parcel, YearTS yts, DateTime temp_DateTime,
-	int parcelYear, int [] parcelYears, String parcelCrop, double areaIrrig ) {
+	int parcelYear, List<Integer> parcelYears, String parcelCrop, double areaIrrig ) {
 	double val = yts.getDataValue ( temp_DateTime );
 	int dl = 1;
 	if ( yts.isDataMissing(val) ) {
@@ -137,29 +136,19 @@ private void addParcelToCropPatternTS ( StateCU_CropPatternTS cds, String parcel
 /**
 Add to the unique list of parcel years that were processed.
 @param parcelYear parcel year being processed
-@param parcelYears array of parcel years being processed.
-The array is initialized with -1 and leading values are set to the years as processing occurs.
+@param parcelYears list of parcel years being processed.
 */
-private void addToParcelYears ( int parcelYear, int [] parcelYears )
+private void addToParcelYears ( int parcelYear, List<Integer> parcelYears )
 {	boolean found = false;
-	int insert_i = -1;
-	for ( int i = 0; i < parcelYears.length; i++ ) {
-		if ( parcelYears[i] < 0 ) {
-			// No more data to search
-			insert_i = i;
-			break;
-		}
-		else if ( parcelYear == parcelYears[i] ) {
+	for ( Integer parcelYear0 : parcelYears ) {
+		if ( parcelYear0.equals(parcelYear) ) {
 			found = true;
 			break;
 		}
 	}
-	if ( insert_i < 0 ) {
-		// Could not find parcelYears insert position, likely because the array size is too small.
-		// This should never happen but throw an exception if it does
-	}
 	if ( !found ) {
-		parcelYears[insert_i] = parcelYear;
+		// Add a new parcel year
+		parcelYears.add ( new Integer(parcelYear) );
 	}
 }
 
@@ -534,6 +523,17 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		else if ( OutputEnd_DateTime != null ) {
 			InputEnd_DateTime = new DateTime(OutputEnd_DateTime);
 		}
+		
+		// Get the snapshot years from the parcels by examining years from all parcels.
+		int startYear = -1;
+		int endYear = -1;
+		if ( InputStart_DateTime != null ) {
+			startYear = InputStart_DateTime.getYear();
+		}
+		if ( InputStart_DateTime != null ) {
+			endYear = InputEnd_DateTime.getYear();
+		}
+		List<Integer> allParcelYears = StateCU_Location.getParcelYears ( culocList, startYear, endYear );
 
 		// Loop through locations...
 		int parcelYear;
@@ -546,20 +546,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		StateCU_SupplyFromSW supplyFromSW;
 		StateCU_SupplyFromGW supplyFromGW;
 
-		// Years with data, used to set time series missing values in those years to zero no crop acreage.
-		// - this is across all locations because it is assumed that irrigated lands assessment for a year will be for the whole division.
-		// - TODO smalers 2020-12-06 what happens if there are stray parcels/wells in other division with different irrigated lands years?
-		// - TODO smalers 2020-10-11 not sure about the following comment
-		// - TODO SAM 2007-06-14 need to rework to require users to specify the years to read.
-		int [] parcelYears = new int[500];
-		for ( int i = 0; i < parcelYears.length; i++ ) {
-			parcelYears[i] = -1;
-		}
+		// Years with data for this command, used to set time series missing values in those years to zero no crop acreage.
+		// - this is across all locations processed by this command because it is assumed that
+		//   irrigated lands assessment for a year will be for the whole division.
+		// - however, it is not for the full dataset, which is in 'allParcelYears' checked below
+		// - this is currently only used for information
+		List<Integer> parcelYears = new ArrayList<>();
 
 		boolean debug = Message.isDebugOn;
-		// Use the following to determine if model location is groundwater only.
-		// - in this case only parcels that do not have surface supply are processed
-		boolean isLocationGWOnly = false;
 		for ( StateCU_Location culoc : culocList ) {
 			String culoc_id = culoc.getID();
 			
@@ -573,8 +567,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				Message.printStatus ( 2, routine, "Processing " + culoc_id );
 			}
 			
-			isLocationGWOnly = culoc.hasGroundwaterOnlySupply();
-
 			try {
 				// Loop through the parcel objects and add new StateCU_CropPatternTS instances.
 				// - the parcel amounts are added based on each supply relationship,
@@ -641,10 +633,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					// Loop though the supplies associated with the parcel.
 					//  - only assign supply acreage that was matched with this location.
 					//  - the math has already been done for the irrigated acreage fraction.
-					if ( parcel.hasSurfaceWaterSupply() && !isLocationGWOnly ) {
+					if ( parcel.hasSurfaceWaterSupply() && !culoc.hasGroundwaterOnlySupply() ) {
+						// CU location Has surface water supply and is NOT WEL so OK to process 
 						if ( debug ) {
 							Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear +
-								" parcel ID " + parcel.getID() + " has surface water supply for DIV and D&W.");
+								" parcel ID " + parcel.getID() + " has surface water supply, is a DIV or D&W.");
 						}
 						// Only assign surface water supply acreage and do not assign any groundwater acreage
 						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
@@ -672,12 +665,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							}
 						}
 					}
-					else if ( !parcel.hasSurfaceWaterSupply() && isLocationGWOnly ) {
+					else if ( culoc.hasGroundwaterOnlySupply() ) {
 						// Groundwater data only (no surface water supply):
 						// - groundwater associated with commingled lands will not assigned so no double-counting of parcel
 						// - assign the portion of the parcel attributed to the location
 						Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " +
-							parcel.getID() + " has groundwater only.");
+							parcel.getID() + " has groundwater only for model, is WEL.");
 						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 							if ( supply instanceof StateCU_SupplyFromGW ) {
 								// Groundwater only so get the area from the supply
@@ -712,9 +705,61 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						}
 					}
 					else {
-						// This should not happen due to location/parcel/supply relationship in the first place
-						Message.printWarning(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear +
-							" parcel ID " + parcel.getID() + " does not have surface or groundwater supply");
+						// This should not happen due to location/parcel/supply relationship in the first place.
+						// - there is a lot of code below to figure out why this is a data issue
+						message = "CUloc " + culoc.getID() + " year " + parcelYear +
+							" parcel ID " + parcel.getID() + " does not appear to be DIV, D&W, or WEL based on available data.";
+						Message.printWarning ( warningLevel, 
+			        		MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+		        		status.addToLog ( commandPhase,
+		            		new CommandLogRecord(CommandStatusType.WARNING, message,
+		            			"This may be a HydroBase data load issue.  For example, GIS data error may cause a HydroBase data load error."
+		            			+ "  Use SetParcel* commands to fix input data.  See log file for more information." ) );
+		        		// Print more information to troubleshoot:
+						Message.printWarning(3, routine, "  CU Location has GW only supply based on aggregation/system (WEL): " + culoc.hasGroundwaterOnlySupply() );
+						Message.printWarning(3, routine, "  CU Location has SW supply (DIV or D&W because is not WEL): " + culoc.hasSurfaceWaterSupply() );
+						Message.printWarning(3, routine, "  Parcel has surface water supply = " + parcel.hasSurfaceWaterSupply() );
+						Message.printWarning(3, routine, "  Parcel has " + parcel.getSupplyFromSWCount() + " surface water supplies based on parcel data." );
+						if ( parcel.getSupplyFromSWCount() > 0 ) {
+							for ( StateCU_Supply supply : parcel.getSupplyList() ) {
+								if ( supply instanceof StateCU_SupplyFromSW ) {
+									supplyFromSW = (StateCU_SupplyFromSW)supply;
+									// Any SW supply should have been added to DIV or D&W
+									Message.printWarning(3, routine, "    SW supply WDID = " + supplyFromSW.getWDID() );
+									if ( !supplyFromSW.getWDID().isEmpty() ) {
+										if ( culoc.idIsIn(supplyFromSW.getWDID()) ) {
+											Message.printWarning(3, routine, "      WDID is in CU Location " +
+												culoc.getCollectionType() + "? = " +  culoc.idIsIn(supplyFromSW.getWDID()) );
+										}
+									}
+								}
+							}
+						}
+						Message.printWarning(3, routine, "  Parcel has groundwater supply = " + parcel.hasGroundWaterSupply() );
+						Message.printWarning(3, routine, "  Parcel has " + parcel.getSupplyFromGWCount() + " groundwater supplies based on parcel data." );
+						if ( parcel.getSupplyFromGWCount() > 0 ) {
+							for ( StateCU_Supply supply : parcel.getSupplyList() ) {
+								if ( supply instanceof StateCU_SupplyFromGW ) {
+									supplyFromGW = (StateCU_SupplyFromGW)supply;
+									Message.printWarning(3, routine, "    GW supply WDID = " + supplyFromGW.getWDID() + " RECEIPT = " + supplyFromGW.getReceipt() );
+									// Check to see if the well supply is in the original aggregate list for this WEL node
+									if ( !supplyFromGW.getWDID().isEmpty() ) {
+										if ( culoc.idIsIn(supplyFromGW.getWDID()) ) {
+											Message.printWarning(3, routine, "      WDID is in CU Location " +
+												culoc.getCollectionType() + "? = " +  culoc.idIsIn(supplyFromGW.getWDID()) );
+										}
+										if ( culoc.idIsIn(supplyFromGW.getReceipt()) ) {
+											Message.printWarning(3, routine, "      RECEIPT is in CU Location " +
+												culoc.getCollectionType() + "? = " +  culoc.idIsIn(supplyFromGW.getReceipt()) );
+										}
+									}
+								}
+							}
+						}
+						if ( (parcel.getSupplyFromSWCount() + parcel.getSupplyFromGWCount()) == 0) {
+							Message.printWarning(3, routine, "  Parcel has no supply data - could be a HydroBase data load issue."
+								+ "  Model configuration is not consistent with HydroBase data." );
+						}
 					}
 				}
 			}
@@ -732,23 +777,48 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		// The above code accumulated individual parcel/crop fractional areas into the crop pattern time series.
 		// Loop through now and make sure that missing values in each data year are set to zero and
 		// the totals for each data year are up to date.
-		// Loop using the same logic as above to make sure everything is based on CU locations.
+		// Loop using the same logic as above to check CU locations
+		// to make sure everything is based on CU locations.
 
+		boolean setZerosForAllSnapshotYears = true;
 		StringBuffer parcelYearsString = new StringBuffer();
-		sortParcelYears(parcelYears);
-		for ( int iyear = 0; iyear < parcelYears.length; iyear++ ) {
-			if ( parcelYears[iyear] < 0 ) {
-				// Done processing years...
-				break;
+		StringBuffer allParcelYearsString = new StringBuffer();
+
+		Collections.sort(allParcelYears);
+		for ( Integer iyear : allParcelYears ) {
+			if ( allParcelYearsString.length() > 0 ) {
+				allParcelYearsString.append ( ", ");
 			}
-			if ( iyear != 0 ) {
+			allParcelYearsString.append ( iyear.toString() );
+		}
+
+		Collections.sort(parcelYears);
+		for ( Integer iyear : parcelYears ) {
+			if ( parcelYearsString.length() > 0 ) {
 				parcelYearsString.append ( ", ");
 			}
-			parcelYearsString.append ( parcelYears[iyear]);
+			parcelYearsString.append ( iyear.toString() );
 		}
 
 		Message.printStatus( 2, routine,
-			"Crop data years that were processed for location pattern " + ID + " are: " + parcelYearsString );
+			"Parcel crop data years for all locations in dataset are: " + allParcelYearsString );
+		Message.printStatus( 2, routine,
+			"Parcel crop data years that were processed for location pattern " + ID + " are: " + parcelYearsString );
+
+		List<Integer> parcelYearsToZero = null;
+		String parcelYearsToZeroString = "";
+		if ( setZerosForAllSnapshotYears ) {
+			// All years with data in dataset are used.
+			// This is the only behavior right now.
+			parcelYearsToZeroString = "" + allParcelYearsString;
+			parcelYearsToZero = allParcelYears;
+		}
+		else {
+			// Only years with data in this command's locations are used.
+			// TODO smalers 2020-12-08 keep this around for now but may never be used
+			parcelYearsToZeroString = "" + parcelYearsString;
+			parcelYearsToZero = parcelYears;
+		}
 
 		for ( StateCU_Location culoc : culocList ) {
 			// Only process the locations of interest for the command.
@@ -762,21 +832,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				// Have crop pattern time series to process
 				cds = cdsList.get(pos);
 				Message.printStatus( 2, routine,
-					"  Setting missing data to zero in data years (" + parcelYearsString + ") for \"" + cds.getID() + "\"." );
+					"  Setting missing data to zero in years (" + parcelYearsToZeroString + ") for \"" + cds.getID() + "\"." );
 				// Finally, if a crop pattern value is set in any year, assume
 				// that all other missing values for crops in the year should be treated as zero.
 				// If all data are missing, including no crops, the total should be set to zero.
 				// In other words, crop patterns for a year must include all crops
 				// and filling should not occur in a year when data values have been set.
 				boolean setAllValuesToZero = false;
-				for ( int iyear = 0; iyear < parcelYears.length; iyear++ ) {
-					// parcelYears array was filled with -1 to begin with so first -1 is end of data.
-					if ( parcelYears[iyear] < 0 ) {
-						// Done processing years...
-						break;
-					}
+				for ( Integer iyear : parcelYearsToZero ) {
 					cds.setCropAreasToZero (
-						parcelYears[iyear], // Specific year to process
+						iyear, // Specific year to process
 						setAllValuesToZero );
 				}
 				// Recalculate totals for the location for all years that have data.
@@ -809,31 +874,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	}
 	
     status.refreshPhaseSeverity(CommandPhaseType.RUN,CommandStatusType.SUCCESS);
-}
-
-/**
- * Sort the parcel years so actual years are at the front and then 1 at the end.
- * @param parcelYears array of parcel years to short, with -1 being no data,
- * at the end of the array before and after sorting.
- */
-private void sortParcelYears(int[] parcelYears) {
-	Arrays.sort(parcelYears);
-	// -1 values will be at the front
-	int firstYearPos = -1;
-	for ( int i = 0; i < parcelYears.length; i++ ) {
-		if ( parcelYears[i] > 0 ) {
-			firstYearPos = i;
-			break;
-		}
-	}
-	// Move the actual years to the front
-	for ( int i = firstYearPos, j = 0; i < parcelYears.length; i++, j++ ) {
-		parcelYears[j] = parcelYears[i];
-	}
-	// Reset the values at the end to -1
-	for ( int i = firstYearPos, j = 0; i < parcelYears.length; i++, j++ ) {
-		parcelYears[i] = -1;
-	}
 }
 
 /**

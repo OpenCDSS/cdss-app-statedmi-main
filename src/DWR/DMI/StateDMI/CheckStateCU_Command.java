@@ -38,6 +38,7 @@ import DWR.StateCU.StateCU_Data;
 import DWR.StateCU.StateCU_DataSet;
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import DWR.StateCU.StateCU_Location;
+import DWR.StateCU.StateCU_Location_ParcelValidator;
 import DWR.StateCU.StateCU_PenmanMonteith;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
@@ -315,7 +316,7 @@ CommandWarningException, CommandException
 				message, "Report problem to software support." ) );
 		}
 	}
-	
+
 	// Get the data set for cross-checks between components...
 	
 	StateCU_DataSet dataset = null;
@@ -357,7 +358,7 @@ CommandWarningException, CommandException
 			id = data.getID();
 			if ( this instanceof CheckCropCharacteristics_Command ||
 				this instanceof CheckBlaneyCriddle_Command || this instanceof CheckPenmanMonteith_Command) {
-				// Use the name
+				// Use the name rather than ID
 				id = data.getName();
 			}
 			if ( !id.matches(idpattern_Java) ) {
@@ -368,10 +369,28 @@ CommandWarningException, CommandException
 			if ( data instanceof StateCU_ComponentValidator ) {
 				StateCU_ComponentValidator validator = null;
 				if ( this instanceof CheckParcels_Command ) {
+					// Need to evaluate all parcels for a StateCU_Location, not just the individual parcel's data.
 					validator = ((StateCU_Location)data).getParcelValidator( (List<StateCU_Location>)dataList, deepCheck, areaPrecision );
 				}
 				else {
 					validator = (StateCU_ComponentValidator)data;
+				}
+				if ( i == 0 ) {
+					// Extra check on full dataset for parcels - only need to do once so do for the first item and put at the top of output.
+					if ( validator instanceof StateCU_Location_ParcelValidator ) {
+						StateCU_ComponentValidation problems = ((StateCU_Location_ParcelValidator)validator).validateAllComponentData(dataset);
+						int problemsSize = problems.size();
+						if ( problemsSize > 0 ) {
+							// Need to log all the problems at the command level
+							for ( int iprob = 0; iprob < problemsSize; ++iprob ) {
+								String problem = problems.get(iprob).getProblem();
+								Message.printWarning(warning_level,
+									MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, problem );
+								status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.WARNING,
+									problem, problems.get(iprob).getRecommendation() ) );
+							}
+						}
+					}
 				}
 				StateCU_ComponentValidation problems = validator.validateComponent(dataset);
 				int problemsSize = problems.size();
@@ -403,6 +422,7 @@ CommandWarningException, CommandException
 					message, "Verify that the identifier is correct." ) );
 			}
 		}
+
 	}
     catch ( Exception e ) {
         message = "Unexpected error checking data (" + e + ").";

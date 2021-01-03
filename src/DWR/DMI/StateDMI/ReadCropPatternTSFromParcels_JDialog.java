@@ -190,6 +190,10 @@ private void initialize ( JFrame parent, ReadCropPatternTSFromParcels_Command co
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"All available years will be read, unless an input period is specified."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel (
+		"All years that are detected in the parcel dataset will have data values set in results, "
+		+ "including zero if no crops are grown in the year."),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
 		0, ++y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
