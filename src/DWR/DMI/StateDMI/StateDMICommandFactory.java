@@ -264,6 +264,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "CloseExcelWorkbook") ) {
 		return new CloseExcelWorkbook_Command ();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString,"CompareCropPatternTSFiles") ) {
+		return new CompareCropPatternTSFiles_Command ();
+	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"CompareFiles") ) {
 		return new CompareFiles_Command ();
 	}

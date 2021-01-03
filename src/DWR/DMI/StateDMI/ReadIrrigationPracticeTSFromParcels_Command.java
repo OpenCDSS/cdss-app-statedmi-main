@@ -91,13 +91,15 @@ time series.  This method is called when processing actual parcels and user-supp
 @param ipyts StateCU_IrrigationPracticeTS to which parcel data are added.
 @param parcel_year Calendar year for parcel data.
 @param supply for the parcel
+@param status CommandStatus for logging
 */
 public static void processIrrigationPracticeTSParcel (
 		boolean debug,
 		StateCU_Location culoc,
 		StateCU_IrrigationPracticeTS ipyts,
 		StateCU_Parcel parcel,
-		StateCU_Supply supply ) {
+		StateCU_Supply supply,
+		CommandStatus status) {
 	String routine = "StateDMI_Util.processIrrigationPracticeTSParcel";
 	// Transfer the parcel data into the IrrigationPracticeTS
 
@@ -162,7 +164,7 @@ public static void processIrrigationPracticeTSParcel (
 			}
 		}
 	}
-	else if ( !parcel.hasSurfaceWaterSupply() && culoc.hasGroundwaterOnlySupply() ) {
+	else if ( culoc.hasGroundwaterOnlySupply() ) {
 		// Groundwater only
 		if ( supply.isGroundWater() ) {
 			// Should always be the case
@@ -184,8 +186,13 @@ public static void processIrrigationPracticeTSParcel (
 	}
 	else {
 		// This should not happen due to location/parcel/supply relationship in the first place
-		Message.printWarning(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear +
-			" parcel ID " + parcel.getID() + " does not have surface or groundwater supply");
+		String message = "CUloc " + culoc.getID() + " year " + parcelYear +
+			" parcel ID " + parcel.getID() + " does not appear to be DIV, D&W, or WEL based on available data.";
+		Message.printWarning ( 3, routine, message ); 
+   		status.addToLog ( CommandPhaseType.RUN,
+       		new CommandLogRecord(CommandStatusType.WARNING, message,
+       			"This may be a HydroBase data load issue.  For example, GIS data error may cause a HydroBase data load error."
+       			+ "  Use SetParcel* commands to fix input data.  See log file for more information." ) );
 	}
 	
 	// Next add to the component areas.
@@ -712,7 +719,8 @@ CommandWarningException, CommandException
 							culoc,
 							ipyts,
 							parcel,
-							supply ); // Applies to the supply, not parcel overall
+							supply,
+							status); // Applies to the supply, not parcel overall
 					}
 				}
 			} // End parcel year

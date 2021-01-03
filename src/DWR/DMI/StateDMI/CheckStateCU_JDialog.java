@@ -122,7 +122,6 @@ private void checkInput ()
 	PropList parameters = new PropList ( "" );
 	String ID = __ID_JTextField.getText().trim();
 	//String DeepCheck = __DeepCheck_JComboBox.getSelected();
-	String AreaPrecision = __AreaPrecision_JTextField.getText().trim();
 	String IfNotFound = __IfNotFound_JComboBox.getSelected();
 
 	__error_wait = false;
@@ -133,8 +132,11 @@ private void checkInput ()
     //if ( DeepCheck.length() > 0 ) {
     //    parameters.set ( "DeepCheck", DeepCheck );
     //}
-	if ( AreaPrecision.length() > 0 ) {
-		parameters.set ( "AreaPrecision", AreaPrecision );
+	if ( __AreaPrecision_JTextField != null ) {
+		String AreaPrecision = __AreaPrecision_JTextField.getText().trim();
+		if ( AreaPrecision.length() > 0 ) {
+			parameters.set ( "AreaPrecision", AreaPrecision );
+		}
 	}
     if ( IfNotFound.length() > 0 ) {
         parameters.set ( "IfNotFound", IfNotFound );
@@ -158,11 +160,13 @@ private void commitEdits ()
 {	String ID = __ID_JTextField.getText().trim();
 	__command.setCommandParameter ( "ID", ID );
 	//String DeepCheck = __DeepCheck_JComboBox.getSelected();
-	String AreaPrecision = __AreaPrecision_JTextField.getText().trim();
 	//__command.setCommandParameter ( "DeepCheck", DeepCheck );
+	if ( __AreaPrecision_JTextField != null ) {
+		String AreaPrecision = __AreaPrecision_JTextField.getText().trim();
+		__command.setCommandParameter ( "AreaPrecision", AreaPrecision );
+	}
 	String IfNotFound = __IfNotFound_JComboBox.getSelected();
 	__command.setCommandParameter ( "IfNotFound", IfNotFound );
-	__command.setCommandParameter ( "AreaPrecision", AreaPrecision );
 }
 
 public void stateChanged(ChangeEvent e) {
@@ -312,7 +316,7 @@ private void initialize ( JFrame parent, CheckStateCU_Command command )
 	}
 	else if ( __command instanceof CheckParcels_Command ) {
         JGUIUtil.addComponent(paragraph, new JLabel (
-        	"This command checks parcel data. Warnings are generated for the following conditions:"),
+        	"This command checks parcel data associate with model locations. Warnings are generated for the following conditions:"),
     		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"   1) Parcel has no surface water or groundwater supply for any year."),
@@ -328,6 +332,9 @@ private void initialize ( JFrame parent, CheckStateCU_Command command )
            	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         JGUIUtil.addComponent(paragraph, new JLabel (
         	"      This indicates that not all HydroBase parcel supplies are included in the dataset, or there are errors in supply assignment."),
+           	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+        JGUIUtil.addComponent(paragraph, new JLabel (
+        	"   4) Check that parcels for only one division are being processed - otherwise there may be issues handling different snapshot years."),
            	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
         //JGUIUtil.addComponent(paragraph, new JLabel ("   3) [Deep Check] Parcel ID is associated with more than one CU Location in a year."),
            	//0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
@@ -508,8 +515,10 @@ private void refresh ()
 			}
 		}
 		*/
-		if ( AreaPrecision != null ) {
-			__AreaPrecision_JTextField.setText(AreaPrecision);
+		if ( __AreaPrecision_JTextField != null ) {
+			if ( AreaPrecision != null ) {
+				__AreaPrecision_JTextField.setText(AreaPrecision);
+			}
 		}
 		if ( IfNotFound == null ) {
 			// Select default...
@@ -532,10 +541,12 @@ private void refresh ()
 	// Always get the value that is selected...
 	props = new PropList ( __command.getCommandName() );
 	ID = __ID_JTextField.getText().trim();
-	AreaPrecision = __AreaPrecision_JTextField.getText().trim();
 	//DeepCheck = __DeepCheck_JComboBox.getSelected();
 	props.add ( "ID=" + ID );
-	props.add ( "AreaPrecision=" + AreaPrecision );
+	if ( __AreaPrecision_JTextField != null ) {
+		AreaPrecision = __AreaPrecision_JTextField.getText().trim();
+		props.add ( "AreaPrecision=" + AreaPrecision );
+	}
 	//props.add ( "DeepCheck=" + DeepCheck );
 	IfNotFound = __IfNotFound_JComboBox.getSelected();
 	props.add ( "IfNotFound=" + IfNotFound );
