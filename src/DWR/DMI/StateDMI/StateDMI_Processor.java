@@ -143,8 +143,6 @@ import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Parcel;
 import DWR.StateCU.StateCU_PenmanMonteith;
 import DWR.StateCU.StateCU_Supply;
-import DWR.StateCU.StateCU_SupplyFromGW;
-import DWR.StateCU.StateCU_SupplyFromSW;
 import DWR.StateCU.StateCU_Util;
 
 /**
@@ -3554,10 +3552,10 @@ public boolean getReadOnly ()
 }
 
 /**
- * returns the status of the last run
+ * Returns the status of the last run.
  * false = errors encountered on run
  * true = successful run
- * @return runSuccessful
+ * @return whether the run was successful.
  */
 public boolean getRunStatus()
 {
@@ -3611,7 +3609,6 @@ Return the list of StateCU_CropCharacteristics matches being maintained by this 
 protected List<String> getStateCUCropCharacteristicsMatchList()
 {	return __CUCropCharacteristics_match_List;
 }
-
 
 /**
 Return the list of StateCU_CropPatternTS being maintained by this StateDMI_Processor.
@@ -3683,6 +3680,15 @@ Return the list of StateCU_BlaneyCriddle matches being maintained by this StateD
 */
 public List<String> getStateCUPenmanMonteithMatchList()
 {	return __CUPenmanMonteith_match_List;
+}
+
+/**
+ * Return the StateDMI version.
+ * @return the StateDMI version string (e.g., "5.00.00"),
+ * useful for checking test version requirements.
+ */
+public String getStateDmiVersionString() {
+	return StateDMI.PROGRAM_VERSION.split(" ")[0].trim();
 }
 
 /**
@@ -4630,10 +4636,44 @@ throws Exception
     
     		if ( command instanceof Comment_Command ) {
     			// Comment.  Mark as processing successful.
-    			command_status.refreshPhaseSeverity(CommandPhaseType.INITIALIZATION,CommandStatusType.SUCCESS);
-    			command_status.refreshPhaseSeverity(CommandPhaseType.RUN,CommandStatusType.SUCCESS);
-    			commandProfile.setEndTime(System.currentTimeMillis());
-                commandProfile.setEndHeap(Runtime.getRuntime().totalMemory());
+                String commandStringUpper = command_String.toUpperCase();
+                if ( commandStringUpper.indexOf("@REQUIRE") > 0 ) {
+                	// Check @require comments for syntax errors
+                	// - need to be correct to ensure that tests run properly
+                	// - when running automated tests with RunCommands, these conditions are checked for the entire command file
+                	//   before even attempting to run so FAILURE will not occur in test (it won't even be run)
+                	// - TODO smalers 2021-01-03 evaluate whether this can be put in Comment_Command.runCommand(),
+                	//   but currently the logic depends on the processor so not generic for StateDMI and TSTool.
+                	try {
+                		List<Command> commentList = new ArrayList<>();
+                		commentList.add(command);
+        	        	if ( StateDMICommandFileRunner.areRequirementsMet(this, commentList) ) {
+        	        		command_status.addToLog(CommandPhaseType.RUN,
+			    			    new CommandLogRecord(CommandStatusType.SUCCESS,
+				   			    "@require condition was met", "Command file will be run unless other requirement is not met.") );
+        	        	}
+        	        	else {
+        	        		command_status.addToLog(CommandPhaseType.RUN,
+			    			    new CommandLogRecord(CommandStatusType.FAILURE,
+				   			    "@require condition was NOT met", "Command file should not be run unless requirements are met.") );
+        	        	}
+                	}
+                	catch ( Exception e ) {
+        	        	// Syntax error - mark the command with an error
+                		// Set the command status information.
+        	    		if ( command instanceof CommandStatusProvider ) {
+				    		// Add to the command log as a failure...
+				    		command_status.addToLog(CommandPhaseType.RUN,
+				    			new CommandLogRecord(CommandStatusType.FAILURE,
+					   			"Error checking @require comment (" + e + ").", "See log file for details.") );
+			    		}
+                	}
+                }
+        	    // Refresh severity since not handled in the command
+       	    	command_status.refreshPhaseSeverity(CommandPhaseType.INITIALIZATION,CommandStatusType.SUCCESS);
+   			 	command_status.refreshPhaseSeverity(CommandPhaseType.RUN,CommandStatusType.SUCCESS);
+   			 	commandProfile.setEndTime(System.currentTimeMillis());
+               	commandProfile.setEndHeap(Runtime.getRuntime().totalMemory());
     			continue;
     		}
     		else if ( command instanceof CommentBlockStart_Command ) {
@@ -6549,9 +6589,9 @@ The DataStore identifier is used to lookup the instance.  If a match is found,
 the old instance is optionally closed and discarded before adding the new instance.
 The new instance is added at the end.
 @param dataStore DataStore to add to the list.  Null will be ignored.
-@param closeOld If an old data store is matched, close the data store (e.g., database connection) if
-true.  The main issue is that if something else is using a DMI instance (e.g.,
-the StateDMI UI) it may be necessary to leave the old instance open.
+@param closeOld If an old data store is matched and true, close the datastore database connection.
+The main issue is that if something else is using a DMI instance (e.g.,
+the StateDMI UI) it may be necessary to leave the old connection instance open.
 */
 protected void setDataStore ( DataStore dataStore, boolean closeOld )
 {   String routine = getClass().getSimpleName() + ".setDataStore";
@@ -6562,10 +6602,12 @@ protected void setDataStore ( DataStore dataStore, boolean closeOld )
     	//Message.printDebug(1, routine, "Setting datastore \"" + dataStore.getName() + "\"" );
     	Message.printStatus(2, routine, "Setting datastore \"" + dataStore.getName() + "\"" );
     //}
+    DataStore matchedDataStore = null;
     for ( DataStore ds : __dataStoreList ) {
-        if ( ds.getName().equalsIgnoreCase(dataStore.getName())){
+        if ( ds.getName().equalsIgnoreCase(dataStore.getName())) {
             // The input name of the current instance matches that of the instance in the list.
             // Replace the instance in the list by the new instance...
+        	matchedDataStore = ds;
             if ( closeOld ) {
                 try {
                     if ( ds instanceof DatabaseDataStore ) {
@@ -6581,6 +6623,10 @@ protected void setDataStore ( DataStore dataStore, boolean closeOld )
                 }
             }
         }
+    }
+    if ( matchedDataStore != null ) {
+    	// Remove from the list.
+    	__dataStoreList.remove(matchedDataStore);
     }
 
     // Add a new instance to the list, alphabetized (ignore case)...

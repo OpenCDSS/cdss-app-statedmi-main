@@ -27,7 +27,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
+import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
+import DWR.DMI.HydroBaseDMI.HydroBaseDataStore;
 import RTi.Util.IO.Command;
+import RTi.Util.Message.Message;
+import RTi.Util.String.StringUtil;
+import rti.tscommandprocessor.commands.util.Comment_Command;
 
 /**
 This class allows a commands file to be be run.  For example, it can be
@@ -51,12 +56,145 @@ public StateDMI_Processor getProcessor() {
 }
 
 /**
+Determine whether the command file requirements are met.
+This is used in the StateDMI RunCommands() command to determine if a command file meets requirements
+to run, typically version compatibility.
+This method is static because it is called for single commands and full command file.
+@param processor The command processor.
+@param commands list of commands to check.
+If null or empty, process all the commands for the processor, such as when called from RunCommands command.
+If a single command, then checking syntax errors in a comment from the command processor.
+@return false if any comments have "@require" statements that evaluate to false, otherwise true
+*/
+public static boolean areRequirementsMet ( StateDMI_Processor processor, List<Command> commands ) {
+	String routine = StateDMICommandFileRunner.class.getSimpleName() + ".areRequirementsMet";
+	String message;
+	boolean requirementsMet = true; // Default until indicated otherwise
+	if ( (commands == null) || (commands.size() == 0) ) {
+		commands = processor.getCommands();
+	}
+    String commandString;
+    String commandStringUpper;
+    int pos;
+    String appName;
+    String datastoreName;
+    String operator;
+    String version;
+    for ( Command command : commands ) {
+   		if ( command instanceof Comment_Command ) {
+   			commandString = command.toString();
+   			commandStringUpper = commandString.toUpperCase();
+   			// The following handles #@require and # @require (whitespace after comment)
+   			pos = commandStringUpper.indexOf("@REQUIRE");
+   			if ( pos > 0 ) {
+   				// Detected a @require annotation.
+   				// - check the token following @require
+   				Message.printStatus(2, routine, "Detected @REQUIRE: " + commandString);
+   				if ( commandString.length() > (pos + 8) ) {
+   					// Have trailing characters.
+   					// Split the comment starting with @.
+   					String [] parts = commandString.substring(pos).split(" ");
+   					Message.printStatus(2, routine, "@REQUIRE comment has " + parts.length + " parts.");
+   					if ( parts.length > 1 ) {
+   						if ( parts[1].trim().equalsIgnoreCase("DATASTORE") ) {
+   							// For example:
+   							// @require datastore HydroBase >= 20200720
+   							Message.printStatus(2, routine, "Detected DATASTORE");
+   							if ( parts.length < 5 ) {
+   								message = "Error processing @require - expecting 5+ tokens (have " + parts.length + "): " + commandString;
+   								Message.printWarning(3, routine, message);
+   								throw new RuntimeException (message);
+   							}
+   							else {
+   								// datastoreName should always be 'HydroBase' for general tests
+   								datastoreName = parts[2].trim();
+   								operator = parts[3].trim();
+   								version = parts[4].trim();
+   								// Get the datastore from the processor
+   								if ( !datastoreName.equalsIgnoreCase("HydroBase") ) {
+   									message = "Don't know how to handle datastore name in @require (only handle HydroBase): " + commandString;
+   									Message.printWarning(3, routine, message);
+   									throw new RuntimeException(message);
+   								}
+   								HydroBaseDataStore dataStore = (HydroBaseDataStore)((StateDMI_Processor)processor).getDataStoreForName (
+   									datastoreName, HydroBaseDataStore.class );
+   								if ( dataStore == null ) {
+   									// This is currently a major issue since StateDMI depends on HydroBase datastore
+   									message = "Unable to get datastore for name \"" + datastoreName + "\"";
+   									Message.printWarning(3, routine, message);
+   									throw new RuntimeException(message);
+   								}
+   								else {
+   									// Get the version for the processor
+   									HydroBaseDMI dmi = (HydroBaseDMI)dataStore.getDMI();
+   									String dbVersion = dmi.getDatabaseVersionFromName();
+   									// Check the datastore version against the requirement, using string comparison.
+   									if ( !StringUtil.compareUsingOperator(dbVersion, operator, version) ) {
+   										Message.printStatus(2, routine, "Database version \"" + dbVersion + " does NOT meet required " + operator + " " + version);
+   										// Set the return value.
+   										// - any false value from list of comments will set the overall return value to false
+   										requirementsMet = false;
+   									}
+   									else {
+   										Message.printStatus(2, routine, "Database version \"" + dbVersion + " does meet required " + operator + " " + version);
+   									}
+   								}
+   							}
+   						}
+   						else if ( parts[1].trim().toUpperCase().startsWith("APP") ) {
+   							Message.printStatus(2, routine, "Detected APP");
+   							if ( parts.length < 5 ) {
+   								message = "Error processing @require - expecting 5+ tokens (have " + parts.length + "): " + commandString;
+   								Message.printWarning(3, routine, message);
+   								throw new RuntimeException(message);
+   							}
+   							else {
+   								// appName must be StateDMI
+   								appName = parts[2].trim();
+   								if ( !appName.equalsIgnoreCase("StateDMI") ) {
+   									message = "Don't know how to handle application name \"" + appName
+   										+ "\" in @require (only handle StateDMI): " + commandString;
+   									Message.printWarning(3, routine, message);
+   									throw new RuntimeException(message);
+   								}
+   								operator = parts[3].trim();
+   								version = parts[4].trim();
+   								// Get the version for the app
+   								String appVersion = processor.getStateDmiVersionString();
+   								// - TODO smalers 2021-01-01 for now always meet requirement
+   								// Check the app version against the requirement, using string comparison.
+   								if ( !StringUtil.compareUsingOperator(appVersion, operator, version) ) {
+   									requirementsMet = false;
+   								}
+   							}
+                    	}
+                    }
+   					else {
+  						message = "Error processing @require - expecting 5+ tokens (have " + parts.length + "): " + commandString;
+   						Message.printWarning(3, routine, message);
+   						throw new RuntimeException (message);
+   					}
+                }
+   				else {
+  					message = "Error processing @require - expecting 5+ tokens but line is too short: " + commandString;
+   					Message.printWarning(3, routine, message);
+   					throw new RuntimeException (message);
+   				}
+            }
+   			else {
+   				// OK - since comments may not contain any @require
+   			}
+        }
+    }
+    return requirementsMet;
+}
+
+/**
 Determine whether the command file is enabled.
-This is used in the TSTool RunCommands() command to determine if a command file is enabled.
+This is used in the StateDMI RunCommands() command to determine if a command file is enabled.
 @return false if any comments have "@enabled False", otherwise true
 */
-public boolean isCommandFileEnabled ()
-{
+public boolean isCommandFileEnabled () {
     List<Command> commands = __processor.getCommands();
     String C;
     int pos;

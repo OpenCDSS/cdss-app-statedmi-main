@@ -91,6 +91,7 @@ import javax.swing.event.ListDataListener;
 import javax.swing.UIManager;
 
 import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
+import DWR.DMI.HydroBaseDMI.HydroBaseDataStore;
 import DWR.DMI.HydroBaseDMI.HydroBase_CountyRef;
 import DWR.DMI.HydroBaseDMI.HydroBase_Cropchar;
 import DWR.DMI.HydroBaseDMI.HydroBase_CUBlaneyCriddle;
@@ -104,7 +105,7 @@ import rti.tscommandprocessor.commands.util.Exit_Command;
 import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 
 import RTi.GRTS.TSViewJFrame;
-
+import RTi.DMI.DatabaseDataStore;
 import RTi.GIS.GeoView.GeoViewJFrame;
 
 import RTi.TS.TS;
@@ -1039,9 +1040,14 @@ private JMenu
 	__Commands_General_Comments_JMenu;
 private JMenuItem
 	__Commands_General_Comments_Comment_JMenuItem,
-	__Commands_General_Comments_ReadOnlyComment_JMenuItem = null,
 	__Commands_General_Comments_StartComment_JMenuItem,
-	__Commands_General_Comments_EndComment_JMenuItem;
+	__Commands_General_Comments_EndComment_JMenuItem,
+	__Commands_General_Comments_ReadOnlyComment_JMenuItem = null,
+	__Commands_General_Comments_EnabledComment_JMenuItem = null,
+	__Commands_General_Comments_ExpectedStatusFailureComment_JMenuItem = null,
+	__Commands_General_Comments_ExpectedStatusWarningComment_JMenuItem = null,
+	__Commands_General_Comments_RequireApplicationComment_JMenuItem = null,
+	__Commands_General_Comments_RequireDatastoreComment_JMenuItem = null;
 
 private JMenu
     __Commands_General_FileHandling_JMenu = null;
@@ -2046,9 +2052,14 @@ private String
     
 	__Commands_General_Comments_String = "General - Comments",
 	__Commands_General_Comments_Comment_String = "# comment(s) ...",
-    __Commands_General_Comments_ReadOnlyComment_String = "#@readOnly <insert read-only comment>",
 	__Commands_General_Comments_StartComment_String = "/* <start comment block>",
 	__Commands_General_Comments_EndComment_String = "*/ <end comment block>",
+    __Commands_General_Comments_ReadOnlyComment_String = "#@readOnly <insert read-only comment>",
+    __Commands_General_Comments_EnabledComment_String = "#@enabled False <used to disable command file for testing>",
+    __Commands_General_Comments_ExpectedStatusFailureComment_String = "#@expectedStatus Failure <used to test commands>",
+    __Commands_General_Comments_ExpectedStatusWarningComment_String = "#@expectedStatus Warning <used to test commands>",
+    __Commands_General_Comments_RequireApplicationComment_String = "#@require application ... <check application version dependency>",
+    __Commands_General_Comments_RequireDatastoreComment_String = "#@require datastore ... <check datastore version dependency>",
 	
 	__Commands_General_FileHandling_String = "General - File Handling",
 	__Commands_General_FileHandling_FTPGet_String = "FTPGet()... <get file(s) using FTP>",
@@ -3870,6 +3881,46 @@ public void actionPerformed ( ActionEvent event )
     	List<Command> comments = new ArrayList<>(1);
         comments.add ( commandList_NewCommand("#@readOnly",true) );
         commandList_EditCommand ( __Commands_General_Comments_ReadOnlyComment_String, comments, __INSERT_COMMAND );
+    }
+    else if (command.equals(__Commands_General_Comments_EnabledComment_String) ) {
+        // Most inserts let the editor format the command.  However, in this case the specific
+        // comment needs to be supplied.  Otherwise, the comment will be blank or the string from
+        // the menu, which has too much verbage.
+    	List<Command> comments = new ArrayList<>(1);
+        comments.add ( commandList_NewCommand("#@enabled False",true) );
+        commandList_EditCommand ( __Commands_General_Comments_EnabledComment_String, comments, __INSERT_COMMAND );
+    }
+    else if (command.equals(__Commands_General_Comments_ExpectedStatusFailureComment_String) ) {
+        // Most inserts let the editor format the command.  However, in this case the specific
+        // comment needs to be supplied.  Otherwise, the comment will be blank or the string from
+        // the menu, which has too much verbage.
+    	List<Command> comments = new ArrayList<>(1);
+        comments.add ( commandList_NewCommand("#@expectedStatus Failure",true) );
+        commandList_EditCommand ( __Commands_General_Comments_ExpectedStatusFailureComment_String, comments, __INSERT_COMMAND );
+    }
+    else if (command.equals(__Commands_General_Comments_ExpectedStatusWarningComment_String) ) {
+        // Most inserts let the editor format the command.  However, in this case the specific
+        // comment needs to be supplied.  Otherwise, the comment will be blank or the string from
+        // the menu, which has too much verbage.
+    	List<Command> comments = new ArrayList<>(1);
+        comments.add ( commandList_NewCommand("#@expectedStatus Warning",true) );
+        commandList_EditCommand ( __Commands_General_Comments_ExpectedStatusWarningComment_String, comments, __INSERT_COMMAND );
+    }
+    else if (command.equals(__Commands_General_Comments_RequireApplicationComment_String) ) {
+        // Most inserts let the editor format the command.  However, in this case the specific
+        // comment needs to be supplied.  Otherwise, the comment will be blank or the string from
+        // the menu, which has too much verbage.
+    	List<Command> comments = new ArrayList<>(1);
+        comments.add ( commandList_NewCommand("#@require application StateDMI >= X.YY.ZZ",true) );
+        commandList_EditCommand ( __Commands_General_Comments_RequireApplicationComment_String, comments, __INSERT_COMMAND );
+    }
+    else if (command.equals(__Commands_General_Comments_RequireDatastoreComment_String) ) {
+        // Most inserts let the editor format the command.  However, in this case the specific
+        // comment needs to be supplied.  Otherwise, the comment will be blank or the string from
+        // the menu, which has too much verbage.
+    	List<Command> comments = new ArrayList<>(1);
+        comments.add ( commandList_NewCommand("#@require datastore HydroBase >= YYYYMMDD",true) );
+        commandList_EditCommand ( __Commands_General_Comments_RequireDatastoreComment_String, comments, __INSERT_COMMAND );
     }
 	else if (command.equals(__Commands_General_Comments_StartComment_String) ) {
 		commandList_EditCommand ( __Commands_General_Comments_StartComment_String, null, __INSERT_COMMAND );
@@ -5909,7 +5960,12 @@ private void commandList_EditCommand ( String action, List<Command> command_List
 	else {
 		// New command, so look for comment actions.
 		if ( action.equals(__Commands_General_Comments_Comment_String) ||
-		        action.equals(__Commands_General_Comments_ReadOnlyComment_String) ) {
+	        action.equals(__Commands_General_Comments_ReadOnlyComment_String) ||
+	        action.equals(__Commands_General_Comments_EnabledComment_String) ||
+	        action.equals(__Commands_General_Comments_ExpectedStatusFailureComment_String) ||
+	        action.equals(__Commands_General_Comments_ExpectedStatusWarningComment_String) ||
+	        action.equals(__Commands_General_Comments_RequireApplicationComment_String) ||
+	        action.equals(__Commands_General_Comments_RequireDatastoreComment_String) ) {
 			is_comment_block = true;
 		}
 	}
@@ -10459,12 +10515,25 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 		style, parent_JMenu, __Commands_General_Comments_String, false );
 	Commands_General_Comments_JMenu.add( __Commands_General_Comments_Comment_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_Comments_Comment_String, this));
-	Commands_General_Comments_JMenu.add( __Commands_General_Comments_ReadOnlyComment_JMenuItem =
-		new SimpleJMenuItem( __Commands_General_Comments_ReadOnlyComment_String, this));
 	Commands_General_Comments_JMenu.add( __Commands_General_Comments_StartComment_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_Comments_StartComment_String, this));
 	Commands_General_Comments_JMenu.add( __Commands_General_Comments_EndComment_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_Comments_EndComment_String, this));
+	Commands_General_Comments_JMenu.addSeparator();
+	Commands_General_Comments_JMenu.add( __Commands_General_Comments_ReadOnlyComment_JMenuItem =
+		new SimpleJMenuItem( __Commands_General_Comments_ReadOnlyComment_String, this));
+	Commands_General_Comments_JMenu.addSeparator();
+	Commands_General_Comments_JMenu.add( __Commands_General_Comments_EnabledComment_JMenuItem =
+		new SimpleJMenuItem( __Commands_General_Comments_EnabledComment_String, this));
+	Commands_General_Comments_JMenu.add( __Commands_General_Comments_ExpectedStatusFailureComment_JMenuItem =
+		new SimpleJMenuItem( __Commands_General_Comments_ExpectedStatusFailureComment_String, this));
+	Commands_General_Comments_JMenu.add( __Commands_General_Comments_ExpectedStatusWarningComment_JMenuItem =
+		new SimpleJMenuItem( __Commands_General_Comments_ExpectedStatusWarningComment_String, this));
+	Commands_General_Comments_JMenu.addSeparator();
+	Commands_General_Comments_JMenu.add( __Commands_General_Comments_RequireApplicationComment_JMenuItem =
+		new SimpleJMenuItem( __Commands_General_Comments_RequireApplicationComment_String, this));
+	Commands_General_Comments_JMenu.add( __Commands_General_Comments_RequireDatastoreComment_JMenuItem =
+		new SimpleJMenuItem( __Commands_General_Comments_RequireDatastoreComment_String, this));
 	
 	// General - File Handling...
 	
@@ -14337,6 +14406,19 @@ private void uiAction_OpenHydroBase ()
 				Message.printWarning ( 1, routine, "HydroBase features will be disabled." );
 			}
 			
+			// Define datastores if indicated in the HydroBase selector dialog.
+			
+			if ( selectHydroBaseJDialog.getDefineHydroBaseDatastore() ) {
+				// Unlike TSTool there are not input filter UI elements to coordinate with.
+				// Therefore just add or replace the datastore matching name 'HydroBase'.
+				uiAction_OpenHydroBaseDataStore("HydroBase", "", __hbdmi);
+			}
+
+			if ( selectHydroBaseJDialog.getDefineHydroBaseVersionDatastore() ) {
+				String version = this.__hbdmi.getDatabaseVersionFromName();
+				uiAction_OpenHydroBaseDataStore("HydroBase", version, __hbdmi);
+			}
+			
 			// Set the initial model to that specified by the user...
 			String model = selectHydroBaseJDialog.getSelectedModel();
 			if ( model.equalsIgnoreCase("StateCU") ) {
@@ -14352,6 +14434,57 @@ private void uiAction_OpenHydroBase ()
 			__hbdmi = null;
 		}
 		ui_CheckGUIState();	// To update File...Properties...HydroBase
+	}
+}
+
+/**
+ * Open a HydroBase datastore given its name.
+ * @param baseName base datastore name, should be 'HydroBase'.
+ * @param version database version to add to baseName, empty for 'HydroBase' and format 'YYYYMMDD' for
+ * datastore 'HydroBaseYYYYMMDD'.
+ * @param dmi HydroBaseDMI to use in the datastore.
+ */
+private void uiAction_OpenHydroBaseDataStore(String baseName, String version, HydroBaseDMI dmi) {
+	String routine = getClass().getSimpleName() + ".openHydroBaseDataStore";
+
+	HydroBaseDataStore ds = null;
+	String name = null;
+	try {
+		String description = null;
+		if ( (version == null) || version.isEmpty() ) {
+			name = "HydroBase";
+			description = "HydroBase datastore using default name 'HydroBase'.";
+		}
+		else {
+			name = "HydroBase" + version;
+			description = "HydroBase datastore using name 'HydroBase' with version " + version + ".";
+		}
+
+		// See if a datastore exists for the requested name.
+		DataStore dataStore = ((StateDMI_Processor)this.__statedmiProcessor).getDataStoreForName (
+			"HydroBase", DatabaseDataStore.class );
+
+		if ( dataStore != null ) {
+			// Close the existing datastore/database.
+			// Actually don't need to do anything because resetting below will replace
+			// the datastore instance in the processor.
+			Message.printStatus(2, routine, "Detected exising datastore name \"" + name
+				+ "\" - will replace in processor.");
+		}
+
+		// Open the new datastore
+		ds = new HydroBaseDataStore( name, description, dmi );
+		// TODO smalers 2021-01-03 don't set a message because it is interpreted as an error.
+		//ds.setStatusMessage("Opened based on SelectHydroBase login dialog input.");
+		// Set the datastore in the processor
+		// TODO SAM 2021-01-03 property does not handled boolean so call method directly.
+		//this.__statedmiProcessor.setPropContents ( "DataStore", ds );
+		boolean closeOld = false;
+		this.__statedmiProcessor.setDataStore( ds, closeOld );
+	}
+	catch ( Exception e ) {
+		String message = "Error creating datastore \"" + name + "\" (" + e + ").";
+		Message.printWarning ( 2, routine, message );
 	}
 }
 
