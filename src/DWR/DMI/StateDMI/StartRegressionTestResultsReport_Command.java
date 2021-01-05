@@ -26,7 +26,6 @@ package DWR.DMI.StateDMI;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.JFrame;
 
@@ -86,8 +85,7 @@ Check the command parameter for valid values, combination, etc.
 @param command_tag an indicator to be used when printing messages, to allow a
 cross-reference to the original commands.
 @param warning_level The warning level to use when printing parse warnings
-(recommended is 2 for initialization, and 1 for interactive command editor
-dialogs).
+(recommended is 2 for initialization, and 1 for interactive command editor dialogs).
 */
 public void checkCommandParameters ( PropList parameters, String command_tag,int warning_level )
 throws InvalidCommandParameterException
@@ -101,7 +99,8 @@ throws InvalidCommandParameterException
 	CommandStatus status = getCommandStatus();
 	status.clearLog(CommandPhaseType.INITIALIZATION);
 	
-	try { Object o = processor.getPropContents ( "WorkingDir" );
+	try {
+		Object o = processor.getPropContents ( "WorkingDir" );
 		// Working directory is available so use it...
 		if ( o != null ) {
 			working_dir = (String)o;
@@ -152,7 +151,7 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List<String> validList = new ArrayList<String>(2);
+	List<String> validList = new ArrayList<>(2);
 	validList.add ( "Outputfile" );
 	validList.add ( "TestResultsTableID" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
@@ -191,7 +190,7 @@ Return the list of files that were created by this command.
 */
 public List<File> getGeneratedFileList ()
 {
-	List<File> list = new Vector<File>();
+	List<File> list = new ArrayList<>();
 	if ( getOutputFile() != null ) {
 		list.add ( getOutputFile() );
 	}
@@ -207,7 +206,7 @@ public <T> List<T> getObjectList ( Class<T> c )
 {   DataTable table = getDiscoveryTable();
     List<T> v = null;
     if ( (table != null) && (c == table.getClass()) ) {
-        v = new Vector<T>();
+        v = new ArrayList<>();
         v.add ( (T)table );
     }
     return v;
@@ -293,6 +292,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	        	String [] columnNames = {
 	        		"Num",
 	        		"Enabled",
+	        		"Requirements OK",
 	        		"Run Time (ms)",
 	        		"Test Pass/Fail",
 	        		"Commands Expected Status",
@@ -302,13 +302,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	        	int [] columnTypes = {
 	        		TableField.DATA_TYPE_INT,
 	        		TableField.DATA_TYPE_STRING,
+	        		TableField.DATA_TYPE_STRING,
 	        		TableField.DATA_TYPE_LONG,
 	        		TableField.DATA_TYPE_STRING,
 	        		TableField.DATA_TYPE_STRING,
 	        		TableField.DATA_TYPE_STRING,
 	        		TableField.DATA_TYPE_STRING
 	        	};
-	        	List<TableField> columnList = new ArrayList<TableField>();
+	        	List<TableField> columnList = new ArrayList<>();
                 for ( int i = 0; i < columnNames.length; i++ ) {
                     // No precision is necessary and specify the field width as -1 meaning it can grow
                     columnList.add ( new TableField(columnTypes[i], columnNames[i], -1) );

@@ -51,8 +51,16 @@ program can run either in batch mode or UI application.
 public class StateDMI
 {
 
+/**
+ * Public-facing program name.
+ */
 public static final String PROGRAM_NAME = "StateDMI";
-public static final String PROGRAM_VERSION = "5.00.05dev (2020-12-10)";
+
+/**
+ * Public-facing Full version and date.
+ * Do not change format without checking dependencies.
+ */
+public static final String PROGRAM_VERSION = "5.00.06dev (2021-01-03)";
 
 /**
 Interface for StateCU commands.

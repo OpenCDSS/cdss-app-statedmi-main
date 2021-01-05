@@ -1,7 +1,7 @@
 package rti.tscommandprocessor.commands.util;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.JFrame;
 
@@ -69,7 +69,7 @@ not (e.g., "Cancel" was pressed.
 */
 public boolean editCommand ( JFrame parent )
 {	// The command will be modified if changed...
-	List<String> v = new Vector<String>();
+	List<String> v = new ArrayList<>();
     v.add( getCommandString() );
 	return (new Comment_JDialog ( parent, v )).ok();
 }

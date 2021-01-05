@@ -24,8 +24,8 @@ NoticeEnd */
 package DWR.DMI.StateDMI;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.JFrame;
 
@@ -50,9 +50,7 @@ import RTi.Util.IO.PropList;
 // FIXME SAM 2008-07-15 Need to add ability to inherit the properties of the main processor
 
 /**
-<p>
 This class initializes, checks, and runs the RunCommands() command.
-</p>
 */
 public class RunCommands_Command extends AbstractCommand implements Command
 {
@@ -66,13 +64,13 @@ protected final String _Warning = "Warning";
 protected final String _Failure = "Failure";
 
 /**
-ResetWorkflowProperties parameter values.
+IfRequirementsNotMet parameter values.
 */
-protected final String _False = "False";
-protected final String _True = "True";
+protected final String _Fail = "Fail";
+protected final String _Ignore = "Ignore";
 
 /**
-ResetWorkflowProperties parameter values.
+Used for overall command status.
 */
 private final String __FAIL = "FAIL";
 private final String __PASS = "PASS";
@@ -112,6 +110,7 @@ throws InvalidCommandParameterException
     String ExpectedStatus = parameters.getValue ( "ExpectedStatus" );
     //String InheritParentWorkflowProperties = parameters.getValue ( "InheritParentWorkflowProperties" );
     String ShareDataStores = parameters.getValue ( "ShareDataStores" );
+    String IfRequirementsNotMet = parameters.getValue ( "IfRequirementsNotMet" );
 	String warning = "";
     String message;
 	
@@ -126,22 +125,24 @@ throws InvalidCommandParameterException
                 new CommandLogRecord(CommandStatusType.FAILURE,
                         message, "Specify an input file." ) );
 	}
-	else {	String working_dir = null;
+	else if ( InputFile.indexOf("${") < 0 ) {
+		String working_dir = null;
 	
-			try { Object o = processor.getPropContents ( "WorkingDir" );
-					// Working directory is available so use it...
-					if ( o != null ) {
-						working_dir = (String)o;
-					}
-			}
-			catch ( Exception e ) {
-				message = "Error requesting WorkingDir from processor.";
-                warning += "\n" + message;
-                status.addToLog ( CommandPhaseType.INITIALIZATION,
-                        new CommandLogRecord(CommandStatusType.FAILURE,
-                                message, "Software error - report problem to support." ) );
-			}
-	
+		try {
+			Object o = processor.getPropContents ( "WorkingDir" );
+			// Working directory is available so use it...
+			if ( o != null ) {
+				working_dir = (String)o;
+				}
+		}
+		catch ( Exception e ) {
+			message = "Error requesting WorkingDir from processor.";
+               warning += "\n" + message;
+               status.addToLog ( CommandPhaseType.INITIALIZATION,
+                   new CommandLogRecord(CommandStatusType.FAILURE,
+                       message, "Software error - report problem to support." ) );
+		}
+
 		try {
             String adjusted_path = IOUtil.verifyPathForOS(IOUtil.adjustPath ( working_dir, InputFile));
 			File f = new File ( adjusted_path );
@@ -178,10 +179,10 @@ throws InvalidCommandParameterException
     */
     
     if ( (ExpectedStatus != null) && (ExpectedStatus.length() == 0) &&
-            !ExpectedStatus.equalsIgnoreCase(_Unknown) &&
-            !ExpectedStatus.equalsIgnoreCase(_Success) &&
-            !ExpectedStatus.equalsIgnoreCase(_Warning) &&
-            !ExpectedStatus.equalsIgnoreCase(_Failure) ) {
+        !ExpectedStatus.equalsIgnoreCase(_Unknown) &&
+        !ExpectedStatus.equalsIgnoreCase(_Success) &&
+        !ExpectedStatus.equalsIgnoreCase(_Warning) &&
+        !ExpectedStatus.equalsIgnoreCase(_Failure) ) {
         message = "The expected status is invalid.";
         warning += "\n" + message;
         status.addToLog ( CommandPhaseType.INITIALIZATION,
@@ -191,7 +192,7 @@ throws InvalidCommandParameterException
     }
     
     if ( (ShareDataStores != null) && (ShareDataStores.length() == 0) &&
-        !ShareDataStores.equalsIgnoreCase(_Copy) &&
+        //!ShareDataStores.equalsIgnoreCase(_Copy) &&
         !ShareDataStores.equalsIgnoreCase(_DoNotShare) &&
         !ShareDataStores.equalsIgnoreCase(_Share)) {
         message = "The ShareDataStores parameter is invalid.";
@@ -202,14 +203,24 @@ throws InvalidCommandParameterException
                 " (default if blank), " + ", or " + _Share) );
     }
 
+    if ( (IfRequirementsNotMet != null) && (IfRequirementsNotMet.length() == 0) &&
+        !IfRequirementsNotMet.equalsIgnoreCase(_Fail) &&
+        !IfRequirementsNotMet.equalsIgnoreCase(_Ignore)) {
+        message = "The IfRequirementsNotMet parameter is invalid.";
+        warning += "\n" + message;
+        status.addToLog ( CommandPhaseType.INITIALIZATION,
+            new CommandLogRecord(CommandStatusType.FAILURE,
+                message, "Specify IfRequirementsNotMet as " + _Fail + " (default) or " + _Ignore) );
+    }
+
 	// Check for invalid parameters...
-    List<String> valid_Vector = new Vector<String>();
-	valid_Vector.add ( "InputFile" );
+    List<String> validList = new ArrayList<>(4);
+	validList.add ( "InputFile" );
 	//valid_Vector.add ( "InheritParentWorkflowProperties" );
-    valid_Vector.add ( "ExpectedStatus" );
-    valid_Vector.add ( "ShareProperties" );
-    valid_Vector.add ( "ShareDataStores" );
-    warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+    validList.add ( "ExpectedStatus" );
+    validList.add ( "ShareProperties" );
+    validList.add ( "IfRequirementsNotMet" );
+    warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	if ( warning.length() > 0 ) {
 		Message.printWarning ( warning_level,
@@ -255,8 +266,13 @@ CommandWarningException, CommandException
     //String InheritParentWorkflowProperties = parameters.getValue ( "InheritParentWorkflowProperties" );
     String ShareDataStores = parameters.getValue ( "ShareDataStores" );
     if ( (ShareDataStores == null) || ShareDataStores.equals("") ) {
-        ShareDataStores = _Share;
+        ShareDataStores = _Share; // default
     }
+    String IfRequirementsNotMet = parameters.getValue ( "IfRequirementsNotMet" );
+    if ( (IfRequirementsNotMet == null) || IfRequirementsNotMet.equals("") ) {
+        IfRequirementsNotMet = _Fail; // default
+    }
+    // TODO smalers 2021-01-04 does not allow user changes?
 	String AppendResults = parameters.getValue ( "AppendResults" );
 	
 	if ( warning_count > 0 ) {
@@ -286,130 +302,190 @@ CommandWarningException, CommandException
         if ( ExpectedStatus != null ) {
             expectedStatus = ExpectedStatus;
         }
-		if ( isEnabled ) {
-			// Set the database connection information...
-        	// FIXME SAM 2007-11-25 This needs to be generic "DataSource" objects.
-        	StateDMI_Processor runner_processor = runner.getProcessor();
-            if ( ShareDataStores.equalsIgnoreCase(_Share) ) {
-            	// All datastores are transferred
-            	runner_processor.setPropContents("HydroBaseDMIList", processor.getPropContents("HydroBaseDMIList"));
-            	runner_processor.setDataStores(((StateDMI_Processor)processor).getDataStores(), false);
-            }
-            /*
-             * TODO SAM 2010-09-30 Need to evaluate how to share properties - issue is that built-in properties are
-             * handled explicitly whereas user-defined properties are in a list that can be easily shared.
-             * Also, some properties like the working directory receive special treatment.
-             * For now don't bite off the property issue
-            if ( ShareProperties.equalsIgnoreCase(_Copy) ) {
-                setProcessorProperties(processor,runner_processor,true);
-            }
-            else if ( ShareProperties.equalsIgnoreCase(_Share) ) {
-                // All data stores are transferred
-                setProcessorProperties(processor,runner_processor,false);
-            }
-            */
-            // Actually, need to share the StartLogEnabled property because it is used in troubleshooting
-            // to ensure all logging goes to the main log file.
-            Prop prop = processor.getProp("StartLogEnabled");
-            if ( prop != null ) {
-            	// Will be a Boolean
-            	runner.getProcessor().setPropContents("StartLogEnabled", prop.getContents());
-            }
-			runner.runCommands();
-    	    // Total runtime for the commands
-            long runTimeTotal = TSCommandProcessorUtil.getRunTimeTotal(runner.getProcessor().getCommands());
-		
-    		// Set the CommandStatus for this command to the most severe status of the
-    		// commands file that was just run.
-    		CommandStatusType maxSeverity = TSCommandProcessorUtil.getCommandStatusMaxSeverity((StateDMI_Processor)runner.getProcessor());
-    		String testPassFail = "????"; // Status for the test, which is not always the same as maxSeverity
-    		if ( ExpectedStatus != null ) {
-    		    if ( maxSeverity.toString().equalsIgnoreCase(ExpectedStatus) ) {
-                    // User has indicated an expected status and it matches the actual so consider this a success.
-                    // This should generally be used only when running a test that we expect to fail (e.g., run
-                    // obsolete command or testing handling of errors).
-                    status.addToLog(CommandPhaseType.RUN,new CommandLogRecord(CommandStatusType.SUCCESS,
-                    	"Severity for RunCommands (" + maxSeverity +
-                    	") is max of commands in command file that was run - matches expected (" +
-                    	ExpectedStatus + ") so RunCommands status=Success.",
-                        "Additional status messages are omitted to allow test to be success - " +
-                        "refer to log file if warning/failure."));
-                    // TODO SAM 2008-07-09 Need to evaluate how to append all the log messages but still
-                    // have a successful status that shows in the displays.
-                    // DO NOT append the messages from the command because their status will cause the
-                    // error displays to show problem indicators.
-                    testPassFail = __PASS;
-    		    }
-    		    else {
-    		        // User has specified an expected status and it does NOT match the actual status so this is a failure.
-                    status.addToLog(CommandPhaseType.RUN,new CommandLogRecord(CommandStatusType.SUCCESS,
-                        "Severity for RunCommands (" + maxSeverity +
-                        ") is max of commands in command file that was run - does not match expected (" +
-                        ExpectedStatus + ") so RunCommands status=Failure.",
-                        "Check the command to confirm the expected status."));
-                    // TODO SAM 2008-07-09 Need to evaluate how to append all the log messages but still
-                    // have a successful status that shows in the displays.
-                    // DO NOT append the messages from the command because their status will cause the
-                    // error displays to show problem indicators.
-                    testPassFail = __FAIL;
-    		    }
-            }
-            else {
-                status.addToLog(CommandPhaseType.RUN,new CommandLogRecord(maxSeverity,
-    				"Severity for RunCommands (" + maxSeverity + ") is max of commands in command file that was run.",
-    				"Status messages from commands that were run are appended to RunCommand status messages."));
-                // Append the log records from the command file that was run.
-                // The status contains lists of CommandLogRecord for each run mode.
-                // For RunCommands() the log messages should be associated with the originating command, not this RunCommand command
-                CommandStatusUtil.appendLogRecords ( status, (List)runner.getProcessor().getCommands() );
-                if ( maxSeverity.greaterThanOrEqualTo(CommandStatusType.WARNING)) {
-                    testPassFail = __FAIL;
-                }
-                else {
-                    testPassFail = __PASS;
-                }
-            }
-
-        	// Also add a record to the regression report...
-        	// TODO SAM 2008-07-09 Evaluate whether to print the expected status, the actual status and the
-        	// test status.
-        	StateDMICommandProcessorUtil.appendToRegressionTestReport(processor,isEnabled,runTimeTotal,
-        		testPassFail,expectedStatus,maxSeverity,InputFile_full);
-
-			// If it was requested to append the results to the calling processor, get
-			// the results from the runner and do so...
-		
-			if ( (AppendResults != null) && AppendResults.equalsIgnoreCase("true")) {
-				/* FIXME SAM 2008-11-19 Need to enable
-				StateDMI_Processor processor2 = runner.getProcessor();
-				Object o_tslist = processor2.getPropContents("TSResultsList");
-				PropList request_params = new PropList ( "" );
-				if ( o_tslist != null ) {
-					Vector tslist = (Vector)o_tslist;
-					int size = tslist.size();
-					TS ts;
-					for ( int i = 0; i < size; i++ ) {
-						ts = (TS)tslist.elementAt(i);
-						request_params.setUsingObject( "TS", ts );
-						processor.processRequest( "AppendTimeSeries", request_params );
-					}
-				}
-				*/
-				status.addToLog(CommandPhaseType.RUN,
-        	            new CommandLogRecord(
-        	                    CommandStatusType.FAILURE,
-        	                    "Appending results is not currently enabled.",
-        	                    "Do not try to append results."));
-			}
-		
-			Message.printStatus ( 2, routine,"...done processing commands from file." );
-	    }
-        else {
-            // Add a record to the regression report (the isEnabled value is what is important for the report
-            // because the test is not actually run)...
-            TSCommandProcessorUtil.appendToRegressionTestReport(processor,isEnabled,0L,
-                 "",expectedStatus,CommandStatusType.UNKNOWN,InputFile_full);
+        // Determine if requirements are met, needed also when checking if enabled.
+        boolean areRequirementsMet = true;
+        Exception requirementsException = null;
+        try {
+        	// Pass the processor from the runner because a static method.
+        	// - pass null command list to cause all to be processed
+        	areRequirementsMet = StateDMICommandFileRunner.areRequirementsMet(runner.getProcessor(), null);
         }
+        catch ( Exception e ) {
+        	// Syntax error - mark the command with an error
+        	requirementsException = e;
+        }
+		if ( isEnabled ) {
+			// Command file is enabled
+			if ( areRequirementsMet ) {
+				// Requirements are also met so can run.
+				// Set the database connection information...
+        		// FIXME SAM 2007-11-25 This needs to be generic "DataSource" objects.
+        		StateDMI_Processor runner_processor = runner.getProcessor();
+            	if ( ShareDataStores.equalsIgnoreCase(_Share) ) {
+            		// All datastores are transferred
+            		runner_processor.setPropContents("HydroBaseDMIList", processor.getPropContents("HydroBaseDMIList"));
+            		runner_processor.setDataStores(((StateDMI_Processor)processor).getDataStores(), false);
+            	}
+            	/*
+             	* TODO SAM 2010-09-30 Need to evaluate how to share properties - issue is that built-in properties are
+             	* handled explicitly whereas user-defined properties are in a list that can be easily shared.
+             	* Also, some properties like the working directory receive special treatment.
+             	* For now don't bite off the property issue
+            	if ( ShareProperties.equalsIgnoreCase(_Copy) ) {
+                	setProcessorProperties(processor,runner_processor,true);
+            	}
+            	else if ( ShareProperties.equalsIgnoreCase(_Share) ) {
+                	// All data stores are transferred
+                	setProcessorProperties(processor,runner_processor,false);
+            	}
+            	*/
+            	// Actually, need to share the StartLogEnabled property because it is used in troubleshooting
+            	// to ensure all logging goes to the main log file.
+            	Prop prop = processor.getProp("StartLogEnabled");
+            	if ( prop != null ) {
+            		// Will be a Boolean
+            		runner.getProcessor().setPropContents("StartLogEnabled", prop.getContents());
+            	}
+            	// Run the command file.
+				runner.runCommands();
+    	    	// Total runtime for the commands
+            	long runTimeTotal = TSCommandProcessorUtil.getRunTimeTotal(runner.getProcessor().getCommands());
+		
+    			// Set the CommandStatus for this command to the most severe status of the
+    			// commands file that was just run.
+    			CommandStatusType maxSeverity = TSCommandProcessorUtil.getCommandStatusMaxSeverity((StateDMI_Processor)runner.getProcessor());
+    			String testPassFail = "????"; // Status for the test, which is not always the same as maxSeverity
+    			if ( ExpectedStatus != null ) {
+    		    	if ( maxSeverity.toString().equalsIgnoreCase(ExpectedStatus) ) {
+                    	// User has indicated an expected status and it matches the actual so consider this a success.
+                    	// This should generally be used only when running a test that we expect to fail (e.g., run
+                    	// obsolete command or testing handling of errors).
+                    	status.addToLog(CommandPhaseType.RUN,new CommandLogRecord(CommandStatusType.SUCCESS,
+                    		"Severity for RunCommands (" + maxSeverity +
+                    		") is max of commands in command file that was run - matches expected (" +
+                    		ExpectedStatus + ") so RunCommands status=Success.",
+                        	"Additional status messages are omitted to allow test to be success - " +
+                        	"refer to log file if warning/failure."));
+                    	// TODO SAM 2008-07-09 Need to evaluate how to append all the log messages but still
+                    	// have a successful status that shows in the displays.
+                    	// DO NOT append the messages from the command because their status will cause the
+                    	// error displays to show problem indicators.
+                    	testPassFail = __PASS;
+    		    	}
+    		    	else {
+    		        	// User has specified an expected status and it does NOT match the actual status so this is a failure.
+                    	status.addToLog(CommandPhaseType.RUN,new CommandLogRecord(CommandStatusType.SUCCESS,
+                        	"Severity for RunCommands (" + maxSeverity +
+                        	") is max of commands in command file that was run - does not match expected (" +
+                        	ExpectedStatus + ") so RunCommands status=Failure.",
+                        	"Check the command to confirm the expected status."));
+                    	// TODO SAM 2008-07-09 Need to evaluate how to append all the log messages but still
+                    	// have a successful status that shows in the displays.
+                    	// DO NOT append the messages from the command because their status will cause the
+                    	// error displays to show problem indicators.
+                    	testPassFail = __FAIL;
+    		    	}
+    			}
+    			else {
+    				status.addToLog(CommandPhaseType.RUN,new CommandLogRecord(maxSeverity,
+    					"Severity for RunCommands (" + maxSeverity + ") is max of commands in command file that was run.",
+    					"Status messages from commands that were run are appended to RunCommand status messages."));
+    				// Append the log records from the command file that was run.
+    				// The status contains lists of CommandLogRecord for each run mode.
+    				// For RunCommands() the log messages should be associated with the originating command, not this RunCommand command
+    				CommandStatusUtil.appendLogRecords ( status, (List)runner.getProcessor().getCommands() );
+    				if ( maxSeverity.greaterThanOrEqualTo(CommandStatusType.WARNING)) {
+    					testPassFail = __FAIL;
+    				}
+    				else {
+    					testPassFail = __PASS;
+    				}
+    			}
+
+    			// Also add a record to the regression report...
+    			// TODO SAM 2008-07-09 Evaluate whether to print the expected status, the actual status and the
+    			// test status.
+    			StateDMICommandProcessorUtil.appendToRegressionTestReport(processor,
+    				isEnabled,areRequirementsMet,runTimeTotal,
+    				testPassFail,expectedStatus,maxSeverity,InputFile_full);
+
+    			// If it was requested to append the results to the calling processor, get
+    			// the results from the runner and do so...
+		
+    			if ( (AppendResults != null) && AppendResults.equalsIgnoreCase("true")) {
+    				/* FIXME SAM 2008-11-19 Need to enable
+					StateDMI_Processor processor2 = runner.getProcessor();
+					Object o_tslist = processor2.getPropContents("TSResultsList");
+					PropList request_params = new PropList ( "" );
+					if ( o_tslist != null ) {
+						Vector tslist = (Vector)o_tslist;
+						int size = tslist.size();
+						TS ts;
+						for ( int i = 0; i < size; i++ ) {
+							ts = (TS)tslist.elementAt(i);
+							request_params.setUsingObject( "TS", ts );
+							processor.processRequest( "AppendTimeSeries", request_params );
+						}
+					}
+    				 */
+    				status.addToLog(CommandPhaseType.RUN,
+        	            new CommandLogRecord( CommandStatusType.FAILURE,
+       	                    "Appending results is not currently enabled.",
+       	                    "Do not try to append results."));
+    			}
+		
+    			Message.printStatus ( 2, routine,"...done processing commands from file." );
+			}
+			else {
+				// Requirements were not met
+				// Add a record to the regression report (the isEnabled value is what is important for the report
+				// because the test is not actually run)...
+				// - TODO smalers 2021-01-03 need to evaluate how to indicate requirements not met
+				boolean isEnabled2 = true;
+				// Also set a message
+				if ( IfRequirementsNotMet.equalsIgnoreCase(_Fail) ) {
+					StateDMICommandProcessorUtil.appendToRegressionTestReport(processor,isEnabled2,areRequirementsMet,0L,
+					"",expectedStatus,CommandStatusType.FAILURE,InputFile_full);
+					status.addToLog(CommandPhaseType.RUN,
+   	            	new CommandLogRecord(
+                    	CommandStatusType.FAILURE,
+  	                    	"Command file requirements specified by @require comments were not met.",
+   	                    	"Check the log file for details."));
+				}
+				else {
+					StateDMICommandProcessorUtil.appendToRegressionTestReport(processor,isEnabled2,areRequirementsMet,0L,
+					"",expectedStatus,CommandStatusType.UNKNOWN,InputFile_full);
+					status.addToLog(CommandPhaseType.RUN,
+   	            	new CommandLogRecord(
+                    	CommandStatusType.SUCCESS,
+  	                    	"Command file requirements specified by @require comments were not met but configured to ignore.",
+   	                    	"Check the log file for details."));
+				}
+			}
+        }
+		else {
+			// Command file has @enabled False
+			// Add a record to the regression report (the isEnabled value is what is important for the report
+			// because the test is not actually run)...
+			// - TODO smalers 2021-01-03 need to evaluate how to indicate requirements not met
+			boolean isEnabled2 = false;
+			StateDMICommandProcessorUtil.appendToRegressionTestReport(processor,isEnabled2,areRequirementsMet,0L,
+				"",expectedStatus,CommandStatusType.UNKNOWN,InputFile_full);
+			// Add a status message to help make obvious that is disabled.
+			status.addToLog(CommandPhaseType.RUN,
+            	new CommandLogRecord(
+                   	CommandStatusType.SUCCESS,
+                    	"Command file is disabled by @enabled False comment so did not run.",
+                    	"Remove the comment to enable running."));
+		}
+		if ( requirementsException != null ) {
+			// There was an exception checking requirements - user needs to get syntax right so that software checks work.
+			status.addToLog(CommandPhaseType.RUN,
+   	            new CommandLogRecord(
+                    CommandStatusType.FAILURE,
+  	                    "Error checking command file @require comments (" + requirementsException + ").",
+   	                    "Check the log file for details."));
+		}
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( 3, routine, e );
@@ -434,6 +510,7 @@ public String toString ( PropList props )
     String ExpectedStatus = props.getValue("ExpectedStatus");
     //String InheritParentWorkflowProperties = props.getValue("InheritParentWorkflowProperties");
     String ShareDataStores = props.getValue("ShareDataStores");
+    String IfRequirementsNotMet = props.getValue("IfRequirementsNotMet");
 	StringBuffer b = new StringBuffer ();
 	if ( (InputFile != null) && (InputFile.length() > 0) ) {
 		if ( b.length() > 0 ) {
@@ -459,6 +536,12 @@ public String toString ( PropList props )
             b.append ( "," );
         }
         b.append ( "ShareDataStores=" + ShareDataStores );
+    }
+    if ( (IfRequirementsNotMet != null) && (IfRequirementsNotMet.length() > 0) ) {
+        if ( b.length() > 0 ) {
+            b.append ( "," );
+        }
+        b.append ( "IfRequirementsNotMet=" + IfRequirementsNotMet );
     }
 	return getCommandName() + "(" + b.toString() + ")";
 }

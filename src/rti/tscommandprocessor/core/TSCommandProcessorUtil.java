@@ -26,6 +26,7 @@ package rti.tscommandprocessor.core;
 import java.awt.Desktop;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.StringBuffer;
 import java.net.URI;
@@ -1305,6 +1306,68 @@ public static List<String> getTableIdentifiersFromCommandsBeforeCommand( StateDM
     List<Command> commands = getCommandsBeforeIndex ( processor, pos );
     // Get the time series identifiers from the commands...
     return getTableIdentifiersFromCommands ( commands );
+}
+
+/**
+Get values for a tag in command comments.  Tags are strings like "@tagName" or "@tagName value"
+(without the quotes).
+@param processor CommandProcessor to evaluate.
+@param tag Tag to search for, without the leading "@".
+@return a list of tag values, which are either Strings for the value or True if the tag has
+no value.  Return an empty list if the tag was not found.
+*/
+public static List<Object> getTagValues ( CommandProcessor processor, String tag )
+{
+    List<Object> tagValues = new ArrayList<>();
+    // Loop through the commands and check comments for the special string
+    List<Command> commandList = processor.getCommands();
+    int size = commandList.size();
+    Command c;
+    String searchTag = "@" + tag;
+    for ( int i = 0; i < size; i++ ) {
+        c = commandList.get(i);
+        String commandString = c.toString();
+        if ( !commandString.trim().startsWith("#") ) {
+            continue;
+        }
+        // Check the comment.
+        int pos = StringUtil.indexOfIgnoreCase(commandString,searchTag,0);
+        if ( pos >= 0 ) {
+            List<String> parts = StringUtil.breakStringList(
+                commandString.substring(pos)," \t", StringUtil.DELIM_SKIP_BLANKS);
+            if ( parts.size() == 1 ) {
+                // No value to the tag so
+                tagValues.add ( new Boolean(true) );
+            }
+            else {
+                // Add as a string - note that this value may contain multiple values separated by
+                // commas or some other encoding.  The calling code needs to handle.
+                tagValues.add ( parts.get(1) );
+            }
+        }
+    }
+    return tagValues;
+}
+
+/**
+Get values for a tag in command file comments.  Tags are strings like "@tagName" or "@tagName value"
+(without the quotes).
+@param processor CommandProcessor to evaluate.
+@param tag Tag to search for, without the leading "@".
+@return a list of tag values, which are either Strings for the value or True if the tag has
+no value.  Return an empty list if the tag was not found.
+*/
+public static List<Object> getTagValues ( String commandFile, String tag )
+throws IOException, FileNotFoundException
+{
+    StateDMI_Processor processor = new StateDMI_Processor();
+    // TODO SAM 2013-02-17 This might be an expensive way to parse tags because
+    // command objects are heavier than simple strings
+    boolean createUnknownCommandIfNotRecognized = true;
+    boolean append = false;
+    //boolean runDiscoveryOnLoad = false;
+    processor.readCommandFile(commandFile, createUnknownCommandIfNotRecognized, append);
+    return getTagValues ( processor, tag );
 }
 
 /**

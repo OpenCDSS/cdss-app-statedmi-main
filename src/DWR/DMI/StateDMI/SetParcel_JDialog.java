@@ -200,7 +200,7 @@ private void commitEdits ()
 /**
 Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
-@param command Vector of String containing the command.
+@param command command to edit.
 */
 private void initialize (JFrame parent, SetParcel_Command command )
 {	__command = command;

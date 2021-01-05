@@ -316,7 +316,7 @@ private void initialize ( JFrame parent, Command command )
 		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"A top-level folder is specified and will be searched for command files matching" +
-		" the specified pattern."),
+		" the specified pattern(s)."),
 		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
     	"The resulting output command file will include RunCommands() commands for each matched file," +
@@ -357,13 +357,14 @@ private void initialize ( JFrame parent, Command command )
 	JGUIUtil.addComponent(main_JPanel, SearchFolder_JPanel,
 		1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
     
-    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Command file name pattern:" ), 
+    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Command file name pattern(s):" ), 
     	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     __FilenamePattern_JTextField = new JTextField ( 50 );
+    __FilenamePattern_JTextField.setToolTipText("List of command file patterns, separated by commas. Use * for wildcard. Matches are case-independent.");
     __FilenamePattern_JTextField.addKeyListener ( this );
     JGUIUtil.addComponent(main_JPanel, __FilenamePattern_JTextField,
 	1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(main_JPanel, new JLabel( "Default is \"Test_*.StateDMI\""), 
+    JGUIUtil.addComponent(main_JPanel, new JLabel( "Default is \"Test_*.StateDMI,test-*.statedmi\""), 
     		3, y, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Command file to create:" ), 

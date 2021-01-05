@@ -30,8 +30,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 import javax.swing.JFrame;
 
 import RTi.Util.IO.AbstractCommand;
@@ -50,11 +50,10 @@ import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.String.StringUtil;
+import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 
 /**
-<p>
 This class initializes, checks, and runs the CreateRegressionTestCommandFile() command.
-</p>
 */
 public class CreateRegressionTestCommandFile_Command extends AbstractCommand
 implements Command, FileGenerator
@@ -127,14 +126,14 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List<String> valid_Vector = new Vector<String>(6);
-	valid_Vector.add ( "SearchFolder" );
-	valid_Vector.add ( "FilenamePattern" );
-	valid_Vector.add ( "OutputFile" );
-	valid_Vector.add ( "Append" );
-	valid_Vector.add ( "IncludeTestSuite" );
-	valid_Vector.add ( "IncludeOS" );
-    warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	List<String> validList = new ArrayList<>(6);
+	validList.add ( "SearchFolder" );
+	validList.add ( "FilenamePattern" );
+	validList.add ( "OutputFile" );
+	validList.add ( "Append" );
+	validList.add ( "IncludeTestSuite" );
+	validList.add ( "IncludeOS" );
+    warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
     
     status.refreshPhaseSeverity(CommandPhaseType.INITIALIZATION,CommandStatusType.SUCCESS);
 }
@@ -197,140 +196,147 @@ Return the list of files that were created by this command.
 */
 public List<File> getGeneratedFileList ()
 {
-	List<File> list = new Vector<File>();
+	List<File> list = new ArrayList<>();
     if ( getOutputFile() != null ) {
         list.add ( getOutputFile() );
     }
     return list;
 }
 
-// FIXME SAM 2008-07-31 Should separate out this method from the checks for tags to simplify logic of each
+//FIXME SAM 2008-07-31 Should separate out this method from the checks for tags to simplify logic of each
 /**
 Visits all files and directories under the given directory and if
 the file matches a valid commands file it is added to the test list.
 All commands file that end with ".<product_name>" will be added to the list.
-@param commandFileVector List of command files that are matched, to be appended to.
+@param commandFileList List of command files that are matched, to be appended to.
 @param path Folder in which to start searching for command files.
-@param pattern Pattern to match when searching files, for example "test*.StateDMI".
+@param patterns Array of pattern to match when searching files, for example "test*.TSTool",
+Java regular expressions.
 @param includedTestSuites the test suites for test cases that
 should be included, indicated by "@testSuite ABC" tags in the comments of command files.
 @param includedOS the operating systems for test cases that
-should be included, indicated by "@os Windows" and "@os UNIX" tags in the
-comments of command files.
+should be included, indicated by "@os Windows" and "@os UNIX" tags in the comments of command files.
 @throws IOException 
- */
-private void getMatchingFilenamesInTree ( List<String> commandFileVector, File path, String pattern,
-        String[] includedTestSuites, String[] includedOS ) 
+*/
+private void getMatchingFilenamesInTree ( List<String> commandFileList, File path, String[] patterns,
+     String[] includedTestSuites, String[] includedOS ) 
 throws IOException
-{   String routine = getClass().getName() + ".getMatchingFilenamesInTree";
-    // Determine if UNIX and Windows tests have been requested
-    // Check the OS only if the specific  
-    boolean needToCheckForUnixOS = false;
-    boolean needToCheckForWindowsOS = false;
-    for ( int i = 0; i < includedOS.length; i++ ) {
-        if ( includedOS[i].equalsIgnoreCase("UNIX") ) {
-            needToCheckForUnixOS = true;
-            Message.printStatus ( 2, routine, "Will only include tests that are for UNIX." );
-        }
-    }
-    for ( int i = 0; i < includedOS.length; i++ ) {
-        if ( includedOS[i].equalsIgnoreCase("Windows") ) {
-            needToCheckForWindowsOS = true;
-            Message.printStatus ( 2, routine, "Will only include tests that are for Windows." );
-        }
-    }
-    if (path.isDirectory()) {
-        String[] children = path.list();
-        for (int i = 0; i < children.length; i++) 
-        {
-        	// Recursively call with full path using the directory and child name.
-        	getMatchingFilenamesInTree(commandFileVector,new File(path,children[i]), pattern,
-        	        includedTestSuites, includedOS );
-        }
-    }
-    else {
-        //add to list if command file is valid
-        String pathName = path.getName();
-    	Message.printStatus(2, "", "Checking path \"" + pathName + "\" against \"" + pattern + "\"" );
-    	// Do comparison on file name without directory.
-        if( pathName.matches( pattern )
-        		// FIXME SAM 2007-10-15 Need to enable something like the following to make more robust
-        		//&& isValidCommandsFile( dir )
-        		) {
-        	Message.printStatus(2, "", "File matched." );
-        	// Exclude the command file if tag in the file indicates that it is not compatible with
-        	// this command's parameters.
-        	boolean doAddForOS = false;
-        	List<String> tagValues = StateDMICommandProcessorUtil.getTagValues ( path.toString(), "os", null );
-        	if ( !needToCheckForUnixOS && !needToCheckForWindowsOS ) {
-        	    // Not checking for OS so go ahead and add
-        	    doAddForOS = true;
-        	}
-        	if ( !doAddForOS && needToCheckForUnixOS ) {
-                boolean tagHasUNIX = false;
-        	    // os tag needs to be blank or include "UNIX"
-        	    for ( int ivalue = 0; ivalue < tagValues.size(); ivalue++ ) {
-        	    	String s = tagValues.get(ivalue);
-        	        if ( (s != null) && s.toUpperCase().matches("UNIX") ) {
-        	            tagHasUNIX = true;
-        	    	}
-        	    }
-                if ( (tagValues.size() == 0) || tagHasUNIX ) {
-                    // Test is not OS-specific or test is for UNIX so include for UNIX
-                    doAddForOS = true;
-                }
-         	}
-        	if ( !doAddForOS && needToCheckForWindowsOS ) {
-                boolean tagHasWindows = false;
-                // os tag needs to be blank or include "Windows"
-                for ( int ivalue = 0; ivalue < tagValues.size(); ivalue++ ) {
-                    String s = tagValues.get(ivalue);
-                    if ( (s != null) && s.toUpperCase().matches("WINDOWS") ) {
-                        tagHasWindows = true;
-                    }
-                }
-                if ( (tagValues.size() == 0) || tagHasWindows ) {
-                    // Test is not OS-specific or test is for Windows so include for Windows
-                    doAddForOS = true;
-                }
-        	}
-        	// Check to see if the test suite has been specified and matches that in the file
-        	boolean doAddForTestSuite = false;
-        	if ( includedTestSuites.length == 0 ) {
-        	    doAddForTestSuite = true;
-        	}
-        	else {
-        	    // Check to see if the test suites in the test match the requested test suites
-        	    List<String> tagValues2 = StateDMICommandProcessorUtil.getTagValues ( path.toString(), "testSuite", null );
-        	    if ( tagValues2.size() == 0 ) {
-        	        // Test case is not specified to belong to a specific suite so it is always included
-        	        doAddForTestSuite = true;
-        	    }
-        	    else {
-        	        // Check each value in the file against requested test suites
-        	        for ( int i = 0; i < tagValues2.size(); i++ ) {
-        	        	String tagValue = tagValues2.get(i);
-        	            if ( tagValue == null ) {
-        	                continue;
-        	            }
-        	            for ( int j = 0; j < includedTestSuites.length; j++ ) {
-        	                if ( tagValues2.get(i).toUpperCase().matches(includedTestSuites[j]) ) {
-        	                    doAddForTestSuite = true;
-        	                    break;
-        	                }
-        	            }
-        	            if ( doAddForTestSuite ) {
-        	                break;
-        	            }
-        	        }
-        	    }
-        	}
-        	if ( doAddForOS && doAddForTestSuite ) {
-        	    // Test is to be included for the OS and test suite.
-        	    commandFileVector.add(path.toString());
-        	}
-        }
-    }
+{   String routine = getClass().getSimpleName() + ".getMatchingFilenamesInTree";
+ // Determine if UNIX and Windows tests have been requested
+ // Check the OS only if the specific  
+ boolean needToCheckForUnixOS = false;
+ boolean needToCheckForWindowsOS = false;
+ for ( int i = 0; i < includedOS.length; i++ ) {
+     if ( includedOS[i].equalsIgnoreCase("UNIX") ) {
+         needToCheckForUnixOS = true;
+         Message.printStatus ( 2, routine, "Will only include tests that are for UNIX." );
+     }
+ }
+ for ( int i = 0; i < includedOS.length; i++ ) {
+     if ( includedOS[i].equalsIgnoreCase("Windows") ) {
+         needToCheckForWindowsOS = true;
+         Message.printStatus ( 2, routine, "Will only include tests that are for Windows." );
+     }
+ }
+ if (path.isDirectory()) {
+     String[] children = path.list();
+     for (int i = 0; i < children.length; i++) {
+     	// Recursively call with full path using the directory and child name.
+     	getMatchingFilenamesInTree(commandFileList,new File(path,children[i]), patterns,
+ 	        includedTestSuites, includedOS );
+     }
+ }
+ else {
+     //add to list if command file is valid
+     String pathName = path.getName();
+ 	// Do comparison on file name without directory.
+ 	for ( int i = 0; i < patterns.length; i++ ) {
+ 		String pattern = patterns[i];
+ 		Message.printStatus(2, "", "Checking path \"" + pathName + "\" against pattern \"" + pattern + "\"" );
+ 	    if( pathName.matches( pattern )
+ 		    // FIXME SAM 2007-10-15 Need to enable something like the following to make more robust
+ 		    //&& isValidCommandsFile( dir )
+ 		    ) {
+     	    Message.printStatus(2, "", "File matched." );
+     	    // Exclude the command file if tag in the file indicates that it is not compatible with
+     	    // this command's parameters.
+     	    boolean doAddForOS = false;
+     	    List<Object> tagValues = TSCommandProcessorUtil.getTagValues ( path.toString(), "os" );
+     	    if ( !needToCheckForUnixOS && !needToCheckForWindowsOS ) {
+     	        // Not checking for OS so go ahead and add
+     	        doAddForOS = true;
+     	    }
+     	    if ( !doAddForOS && needToCheckForUnixOS ) {
+                 boolean tagHasUNIX = false;
+     	        // os tag needs to be blank or include "UNIX"
+     	        for ( int ivalue = 0; ivalue < tagValues.size(); ivalue++ ) {
+     	            Object o = tagValues.get(ivalue);
+     	            if ( o instanceof String ) {
+     	                String s = (String)o;
+     	                if ( s.toUpperCase().matches("UNIX") ) {
+     	                    tagHasUNIX = true;
+     	                }
+     	            }
+     	        }
+                 if ( (tagValues.size() == 0) || tagHasUNIX ) {
+                     // Test is not OS-specific or test is for UNIX so include for UNIX
+                     doAddForOS = true;
+                 }
+      	    }
+     	    if ( !doAddForOS && needToCheckForWindowsOS ) {
+                 boolean tagHasWindows = false;
+                 // os tag needs to be blank or include "Windows"
+                 for ( int ivalue = 0; ivalue < tagValues.size(); ivalue++ ) {
+                     Object o = tagValues.get(ivalue);
+                     if ( o instanceof String ) {
+                         String s = (String)o;
+                         if ( s.toUpperCase().matches("WINDOWS") ) {
+                             tagHasWindows = true;
+                         }
+                     }
+                 }
+                 if ( (tagValues.size() == 0) || tagHasWindows ) {
+                     // Test is not OS-specific or test is for Windows so include for Windows
+                     doAddForOS = true;
+                 }
+     	    }
+     	    // Check to see if the test suite has been specified and matches that in the file
+     	    boolean doAddForTestSuite = false;
+     	    if ( includedTestSuites.length == 0 ) {
+     	        doAddForTestSuite = true;
+     	    }
+     	    else {
+     	        // Check to see if the test suites in the test match the requested test suites
+     	        List<Object> tagValues2 = TSCommandProcessorUtil.getTagValues ( path.toString(), "testSuite" );
+     	        if ( tagValues2.size() == 0 ) {
+     	            // Test case is not specified to belong to a specific suite so it is always included
+     	            doAddForTestSuite = true;
+     	        }
+     	        else {
+     	            // Check each value in the file against requested test suites
+     	            for ( int itag = 0; itag < tagValues2.size(); itag++ ) {
+     	                if ( !(tagValues2.get(itag) instanceof String) ) {
+     	                    continue;
+     	                }
+     	                for ( int j = 0; j < includedTestSuites.length; j++ ) {
+     	                    if ( ((String)tagValues2.get(itag)).toUpperCase().matches(includedTestSuites[j]) ) {
+     	                        doAddForTestSuite = true;
+     	                        break;
+     	                    }
+     	                }
+     	                if ( doAddForTestSuite ) {
+     	                    break;
+     	                }
+     	            }
+     	        }
+     	    }
+     	    if ( doAddForOS && doAddForTestSuite ) {
+     	        // Test is to be included for the OS and test suite.
+     	        commandFileList.add(path.toString());
+     	    }
+ 	    }
+     }
+  }
 }
 
 /**
@@ -353,7 +359,7 @@ command could produce some results).
 public void runCommand ( int command_number )
 throws InvalidCommandParameterException,
 CommandWarningException, CommandException
-{	String routine = getClass().getName() + ".runCommand", message;
+{	String routine = getClass().getSimpleName() + ".runCommand", message;
 	int warning_level = 2;
 	String command_tag = "" + command_number;
 	int warning_count = 0;
@@ -366,14 +372,23 @@ CommandWarningException, CommandException
 	
 	String SearchFolder = parameters.getValue ( "SearchFolder" );
 	String FilenamePattern = parameters.getValue ( "FilenamePattern" );
-	String FilenamePattern_Java = "";
+	String [] FilenamePattern_Java = new String[0];
 	if ( FilenamePattern == null ) {
-		// The pattern we want is "Test_*.StateDMI" where the . is literal.
+		// The default patterns are:
+		//     "Test_*.StateDMI" where the . is literal, and want ignore case
+		//     "test-*.statedmi" where the . is literal, and want ignore case
 		// For Java string matching, need to replace * with .* and . with \...
-		FilenamePattern_Java = "^[tT][Ee][Ss][Tt]_.*\\x2eStateDMI";
+		// The \\x2e means literal period, so as to not be confused with regex period.
+		FilenamePattern_Java = new String[2];
+		FilenamePattern_Java[0] = "^[Tt][eE][sS][tT]_.*\\x2e[Ss][tT][aA][tT][eE][Dd][Mm][Ii]";
+		FilenamePattern_Java[1] = "^[tT][eE][sS][tT]-.*\\x2e[sS][tT][aA][tT][eE][dD][mM][iI]";
 	}
 	else {
-		FilenamePattern_Java = StringUtil.replaceString(FilenamePattern,"*",".*");
+		String [] parts = FilenamePattern.split(",");
+		FilenamePattern_Java = new String[parts.length];
+		for ( int i = 0; i < parts.length; i++ ) {
+			FilenamePattern_Java[i] = StringUtil.replaceString(parts[i].trim(),"*",".*");
+		}
 	}
 	String OutputFile = parameters.getValue ( "OutputFile" );
 	String Append = parameters.getValue ( "Append" );
@@ -429,7 +444,7 @@ CommandWarningException, CommandException
 
 	try {
 	    // Get the list of files to run as test cases...
-		List<String> files = new Vector<String>();
+		List<String> files = new ArrayList<>();
         String [] includedTestSuitePatterns = new String[0];
         includedTestSuitePatterns = StringUtil.toArray(StringUtil.breakStringList(IncludeTestSuitePattern,",",0));
         String [] includedOSPatterns = new String[0];
@@ -437,6 +452,14 @@ CommandWarningException, CommandException
         getMatchingFilenamesInTree ( files, new File(SearchFolder_full), FilenamePattern_Java,
                 includedTestSuitePatterns, includedOSPatterns );
         int size = files.size();
+        // If the output file exists, remove it.
+        // - this ensures that switching from old-style .StateDMI to .statedmi extension does not confuse File
+        //   (have seen old .StateDMI extension persist even when command file is updated to use .statedmi
+        // - for example .StateDMI file may be shown in results when .statedmi is in OutputFile
+        if ( IOUtil.fileExists(OutputFile_full) ) {
+        	File OutputFile_full_File = new File(OutputFile_full);
+        	OutputFile_full_File.delete();
+        }
 		// Open the output file...
 		PrintWriter out = new PrintWriter(new FileOutputStream(OutputFile_full, Append_boolean));
 		File OutputFile_full_File = new File(OutputFile_full);
@@ -466,11 +489,12 @@ CommandWarningException, CommandException
 		String commandFileToRun;
 		for ( int i = 0; i < size; i++ ) {
 			// The command files to run are relative to the commands file being created.
-			commandFileToRun = IOUtil.toRelativePath ( OutputFile_full_File.getParent(), (String)files.get(i) );
+			commandFileToRun = IOUtil.toRelativePath ( OutputFile_full_File.getParent(), files.get(i) );
 			// Determine if the command file has @expectedStatus in it.  If so, define an ExpectedStatus
 			// parameter for the command.
+			// Also ignore the command file if requirements not met, but will be listed in the report.
 			out.println ( "RunCommands(InputFile=\"" + commandFileToRun + "\"" +
-			        determineExpectedStatusParameter ( (String)files.get(i) ) + ")");
+			        determineExpectedStatusParameter ( files.get(i) ) + ",IfRequirementsNotMet=Ignore)");
 		}
 		out.close();
         // Save the output file name...

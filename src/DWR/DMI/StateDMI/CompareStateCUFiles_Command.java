@@ -43,19 +43,15 @@ import RTi.Util.IO.CommandStatusType;
 import RTi.Util.IO.CommandWarningException;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.InvalidCommandParameterException;
-import RTi.Util.IO.InvalidCommandSyntaxException;
-import RTi.Util.IO.Prop;
 import RTi.Util.IO.PropList;
 import RTi.Util.IO.AbstractCommand;
 import RTi.Util.String.StringUtil;
 
 /**
-<p>
-This class initializes, checks, and runs the Read*FromStateCU() commands.  It is an abstract
-base class that must be controlled via a derived class.  For example, the ReadClimateStationsFromStateCU()
-command extends this class in order to uniquely represent the command, but much of the functionality
-is in the base class.
-</p>
+This class initializes, checks, and runs the StateCU Compare*Files() commands.
+It is an abstract base class that must be controlled via a derived class.
+For example, the CompareCropPatternTSFiles() command extends this class in order to uniquely represent the command,
+but much of the functionality is in the base class.
 */
 public abstract class CompareStateCUFiles_Command extends AbstractCommand implements Command
 {
@@ -272,45 +268,7 @@ protected File getInputFile2 ()
 	return __InputFile2_File;
 }
 
-/**
-Parse the command string into a PropList of parameters.
-@param command_string A string command to parse.
-@exception InvalidCommandSyntaxException if during parsing the command is determined to have invalid syntax.
-@exception InvalidCommandParameterException if during parsing the command
-parameters are determined to be invalid.
-*/
-public void parseCommand ( String command_string )
-throws InvalidCommandSyntaxException, InvalidCommandParameterException
-{	String routine = "readStateMod_Command.parseCommand", message;
-	int warning_level = 2;
-    CommandStatus status = getCommandStatus();
-
-    if ( (command_string.indexOf("=") > 0) || command_string.endsWith("()") ) {
-		// New syntax...
-		super.parseCommand ( command_string );
-	}
-	else {
-		// Parse the old command...
-		List<String> tokens = StringUtil.breakStringList (command_string,
-			"(,)", StringUtil.DELIM_ALLOW_STRINGS );
-		if ( tokens.size() != 2 ) {
-			message = "Invalid syntax for command.  Expecting ReadCULocationsFromStateCU(InputFile).";
-			Message.printWarning ( warning_level, routine, message);
-            status.addToLog ( CommandPhaseType.INITIALIZATION,
-                new CommandLogRecord(CommandStatusType.FAILURE,
-                    message, "Use the command editor to correct the command." ) );
-			throw new InvalidCommandSyntaxException ( message );
-		}
-		String InputFile = tokens.get(1).trim();
-		PropList parameters = new PropList ( getCommandName() );
-		parameters.setHowSet ( Prop.SET_FROM_PERSISTENT );
-		if ( InputFile.length() > 0 ) {
-			parameters.set ( "InputFile", InputFile );
-		}
-		parameters.setHowSet ( Prop.SET_UNKNOWN );
-		setCommandParameters ( parameters );
-	}
-}
+// Parent parseCommmand is used
 
 /**
 Run method internal to this class, to handle running in discovery and run mode.
