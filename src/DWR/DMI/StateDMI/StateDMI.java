@@ -59,8 +59,11 @@ public static final String PROGRAM_NAME = "StateDMI";
 /**
  * Public-facing Full version and date.
  * Do not change format without checking dependencies.
+ * Use period to separate parts so that version comparisons can be done.
+ * Use 5.00.06.dev rather than 5.00.06dev
+ * (the latter was used previously but causes issues with version checks).
  */
-public static final String PROGRAM_VERSION = "5.00.06dev (2021-01-03)";
+public static final String PROGRAM_VERSION = "5.00.06.dev (2021-01-05)";
 
 /**
 Interface for StateCU commands.
