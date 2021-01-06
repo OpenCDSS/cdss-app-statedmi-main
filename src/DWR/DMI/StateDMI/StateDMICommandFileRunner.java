@@ -128,7 +128,7 @@ public static boolean areRequirementsMet ( StateDMI_Processor processor, List<Co
    									// Get the version for the processor
    									HydroBaseDMI dmi = (HydroBaseDMI)dataStore.getDMI();
    									String dbVersion = dmi.getDatabaseVersionFromName();
-   									// Check the datastore version against the requirement, using string comparison.
+   									// Check the datastore version against the requirement, using string comparison since no delimiters.
    									if ( !StringUtil.compareUsingOperator(dbVersion, operator, version) ) {
    										Message.printStatus(2, routine, "Database version \"" + dbVersion + " does NOT meet required " + operator + " " + version);
    										// Set the return value.
@@ -162,8 +162,9 @@ public static boolean areRequirementsMet ( StateDMI_Processor processor, List<Co
    								// Get the version for the app
    								String appVersion = processor.getStateDmiVersionString();
    								// - TODO smalers 2021-01-01 for now always meet requirement
-   								// Check the app version against the requirement, using string comparison.
-   								if ( !StringUtil.compareUsingOperator(appVersion, operator, version) ) {
+   								// Check the app version against the requirement, using semantic version comparison.
+   								// - only compare the first 3 parts because modifier can cause issues comparing.
+   								if ( !StringUtil.compareSemanticVersions(appVersion, operator, version, 3) ) {
    									requirementsMet = false;
    								}
    							}

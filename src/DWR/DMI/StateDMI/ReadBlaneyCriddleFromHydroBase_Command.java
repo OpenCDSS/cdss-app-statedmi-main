@@ -25,8 +25,8 @@ package DWR.DMI.StateDMI;
 
 import javax.swing.JFrame;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
 import DWR.DMI.HydroBaseDMI.HydroBase_CUBlaneyCriddle;
@@ -48,9 +48,7 @@ import RTi.Util.IO.InvalidCommandParameterException;
 import RTi.Util.IO.PropList;
 
 /**
-<p>
 This class initializes, checks, and runs the ReadBlaneyCriddleFromHydroBase() command.
-</p>
 */
 public class ReadBlaneyCriddleFromHydroBase_Command 
 extends AbstractCommand implements Command
@@ -98,9 +96,9 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List<String> valid_Vector = new Vector<String>();
-    valid_Vector.add ( "BlaneyCriddleMethod" );
-	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	List<String> validList = new ArrayList<>();
+    validList.add ( "BlaneyCriddleMethod" );
+	warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	if ( warning.length() > 0 ) {
 		Message.printWarning ( warning_level,
@@ -119,7 +117,7 @@ not (e.g., "Cancel" was pressed.
 public boolean editCommand ( JFrame parent )
 {	String routine = getClass().getName() + ".editCommand";
 	CommandProcessor processor = getCommandProcessor();
-	List<String> BlaneyCriddleMethod_List = new Vector<String>();
+	List<String> BlaneyCriddleMethod_List = new ArrayList<>();
 	try {
 		@SuppressWarnings("unchecked")
 		List<String> dataList = (List<String>)processor.getPropContents("CUMethod_List");

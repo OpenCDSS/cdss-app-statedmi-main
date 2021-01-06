@@ -3684,7 +3684,7 @@ public List<String> getStateCUPenmanMonteithMatchList()
 
 /**
  * Return the StateDMI version.
- * @return the StateDMI version string (e.g., "5.00.00"),
+ * @return the StateDMI version string (e.g., "5.00.00" for full version string "5.00.00 (YYYY-MM-dd"),
  * useful for checking test version requirements.
  */
 public String getStateDmiVersionString() {

@@ -2932,11 +2932,7 @@ public StateDMI_JFrame ( StateDMISession session, int app_type )
 
 	ui_InitGUI();
 
-	// Get database connection information.  Force a login if the database connection cannot be made...
-
-	uiAction_OpenHydroBase();
-	
-	// Open remaining datastores, displaying dialog if SystemLogin or SystemPassword property is "prompt"
+	// Open startup datastores, displaying dialog if SystemLogin or SystemPassword property is "prompt"
 	// TODO SAM 2010-09-03 migrate more input types to datastores
 	try {
 		Message.printStatus(2, rtn, "Opening datastores from StateDMI UI...");
@@ -2945,6 +2941,11 @@ public StateDMI_JFrame ( StateDMISession session, int app_type )
 	catch ( Exception e ) {
 	    Message.printStatus ( 1, rtn, "Error opening datastores (" + e + ")." );
 	}
+
+	// Select HydroBase database.  Force a login if the database connection cannot be made.
+	// - this will override any startup datastores opened above
+
+	uiAction_OpenHydroBase();
 
 	// Default the working directory to the directory where the application started...
 
@@ -14413,11 +14414,15 @@ private void uiAction_OpenHydroBase ()
 				// Therefore just add or replace the datastore matching name 'HydroBase'.
 				uiAction_OpenHydroBaseDataStore("HydroBase", "", __hbdmi);
 			}
+			Message.printStatus(2, routine, "After opening HydroBase datastore HydroBaseDMI is open:  " + __hbdmi.isOpen());
+			Message.printStatus(2, routine, "After opening HydroBase datastore HydroBaseDMI is closed:  " + __hbdmi.getConnection().isClosed());
 
 			if ( selectHydroBaseJDialog.getDefineHydroBaseVersionDatastore() ) {
 				String version = this.__hbdmi.getDatabaseVersionFromName();
 				uiAction_OpenHydroBaseDataStore("HydroBase", version, __hbdmi);
 			}
+			Message.printStatus(2, routine, "After opening HydroBase version datastore HydroBaseDMI is open:  " + __hbdmi.isOpen());
+			Message.printStatus(2, routine, "After opening HydroBase version datastore HydroBaseDMI is closed:  " + __hbdmi.getConnection().isClosed());
 			
 			// Set the initial model to that specified by the user...
 			String model = selectHydroBaseJDialog.getSelectedModel();
