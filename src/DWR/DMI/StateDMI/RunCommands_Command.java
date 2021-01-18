@@ -305,27 +305,28 @@ CommandWarningException, CommandException
         // Determine if requirements are met, needed also when checking if enabled.
         boolean areRequirementsMet = true;
         Exception requirementsException = null;
-        try {
-        	// Pass the processor from the runner because a static method.
-        	// - pass null command list to cause all to be processed
-        	areRequirementsMet = StateDMICommandFileRunner.areRequirementsMet(runner.getProcessor(), null);
-        }
-        catch ( Exception e ) {
-        	// Syntax error - mark the command with an error
-        	requirementsException = e;
-        }
 		if ( isEnabled ) {
 			// Command file is enabled
+			// Must set the datastores first because they are required to check whether requirements are met.
+			// Set the database connection information...
+        	// FIXME SAM 2007-11-25 This needs to be generic "DataSource" objects.
+        	StateDMI_Processor runner_processor = runner.getProcessor();
+            if ( ShareDataStores.equalsIgnoreCase(_Share) ) {
+            	// All datastores are transferred
+            	runner_processor.setPropContents("HydroBaseDMIList", processor.getPropContents("HydroBaseDMIList"));
+            	runner_processor.setDataStores(((StateDMI_Processor)processor).getDataStores(), false);
+            }
+            try {
+        	    // Pass the processor from the runner because a static method.
+        	    // - pass null command list to cause all to be processed
+        	    areRequirementsMet = StateDMICommandFileRunner.areRequirementsMet(runner_processor, null);
+            }
+            catch ( Exception e ) {
+        	    // Syntax error - mark the command with an error
+        	    requirementsException = e;
+            }
 			if ( areRequirementsMet ) {
 				// Requirements are also met so can run.
-				// Set the database connection information...
-        		// FIXME SAM 2007-11-25 This needs to be generic "DataSource" objects.
-        		StateDMI_Processor runner_processor = runner.getProcessor();
-            	if ( ShareDataStores.equalsIgnoreCase(_Share) ) {
-            		// All datastores are transferred
-            		runner_processor.setPropContents("HydroBaseDMIList", processor.getPropContents("HydroBaseDMIList"));
-            		runner_processor.setDataStores(((StateDMI_Processor)processor).getDataStores(), false);
-            	}
             	/*
              	* TODO SAM 2010-09-30 Need to evaluate how to share properties - issue is that built-in properties are
              	* handled explicitly whereas user-defined properties are in a list that can be easily shared.

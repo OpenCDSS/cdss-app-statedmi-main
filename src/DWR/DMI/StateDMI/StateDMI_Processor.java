@@ -2904,7 +2904,8 @@ public DataStore getDataStoreForName ( String name, Class<? extends DataStore> d
 {   for ( DataStore dataStore : getDataStores() ) {
         if ( dataStore.getName().equalsIgnoreCase(name) ) {
             if ( dataStoreClass != null ) {
-                if (dataStore.getClass() == dataStoreClass ) {
+                //if (dataStore.getClass() == dataStoreClass ) {
+                if (dataStore.getClass().equals(dataStoreClass) ) {
                     ; // Match is OK
                 }
                 // Also check for common base classes

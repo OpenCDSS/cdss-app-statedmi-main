@@ -994,6 +994,7 @@ private JMenuItem
 	__Commands_StateCU_IrrigationPracticeTS_FillIrrigationPracticeTSInterpolate_JMenuItem,
 	__Commands_StateCU_IrrigationPracticeTS_FillIrrigationPracticeTSRepeat_JMenuItem,
 	__Commands_StateCU_IrrigationPracticeTS_SortIrrigationPracticeTS_JMenuItem,
+	__Commands_StateCU_IrrigationPracticeTS_CompareIrrigationPracticeTSFiles_JMenuItem,
 	__Commands_StateCU_IrrigationPracticeTS_WriteIrrigationPracticeTSToStateCU_JMenuItem,
 	__Commands_StateCU_IrrigationPracticeTS_WriteIrrigationPracticeTSToDateValue_JMenuItem,
 
@@ -2002,6 +2003,7 @@ private String
 	__Commands_StateCU_IrrigationPracticeTS_SortIrrigationPracticeTS_String = "SortIrrigationPracticeTS() ...",
 	__Commands_StateCU_IrrigationPracticeTS_WriteIrrigationPracticeTSToDateValue_String = "WriteIrrigationPracticeTSToDateValue() ...",
 	__Commands_StateCU_IrrigationPracticeTS_WriteIrrigationPracticeTSToStateCU_String = "WriteIrrigationPracticeTSToStateCU() ...",
+	__Commands_StateCU_IrrigationPracticeTS_CompareIrrigationPracticeTSFiles_String = "CompareIrrigationPracticeTSFiles() ...",
 	__Commands_StateCU_IrrigationPracticeTS_CheckIrrigationPracticeTS_String = "CheckIrrigationPracticeTS() ...",
 
 	// Reuse StateMod
@@ -2983,7 +2985,7 @@ public void actionPerformed ( ActionEvent event )
 		uiAction_OpenCommandFile ( null, true );
 	}
 	else if ( command.toUpperCase().endsWith(".STATEDMI")) {
-    	// TSTool command file in recent files, treat as open
+    	// StateDMI command file in recent files, treat as open
     	uiAction_OpenCommandFile ( command, false );
     }
 	else if ( o == __File_Open_ModelNetwork_JMenuItem ) {
@@ -3036,7 +3038,7 @@ public void actionPerformed ( ActionEvent event )
     else if (command.equals(__File_Print_Commands_String) ) {
         // Get all commands as strings for printing
         try {
-            new TextPrinterJob ( commandList_GetCommandStrings(true), "TSTool Commands",
+            new TextPrinterJob ( commandList_GetCommandStrings(true), "StateDMI Commands",
                 null, // printer name
                 "na-letter", // paper size
                 null, // paper source
@@ -3729,12 +3731,12 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 	else if ( action.equals(__Commands_StateCU_CropPatternTS_CompareCropPatternTSFiles_String)) {
-		// Check CU crop patterns...
+		// Compare crop pattern time series files...
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_CompareCropPatternTSFiles_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( action.equals(__Commands_StateCU_CropPatternTS_CheckCropPatternTS_String)) {
-		// Check CU crop patterns...
+		// Check CU crop pattern time series...
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_CheckCropPatternTS_String,
 		null, __INSERT_COMMAND);
 	}
@@ -3855,8 +3857,13 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_WriteIrrigationPracticeTSToStateCU_String,
 		null, __INSERT_COMMAND);
 	}
+	else if ( action.equals(__Commands_StateCU_IrrigationPracticeTS_CompareIrrigationPracticeTSFiles_String)) {
+		// Compare irrigation practice time series files...
+		commandList_EditCommand (__Commands_StateCU_IrrigationPracticeTS_CompareIrrigationPracticeTSFiles_String,
+		null, __INSERT_COMMAND);
+	}
 	else if (action.equals(__Commands_StateCU_IrrigationPracticeTS_CheckIrrigationPracticeTS_String)){
-		// Write irrigation practice time series to a StateCU file...
+		// Check irrigation practice time series to a StateCU file...
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_CheckIrrigationPracticeTS_String,
 		null, __INSERT_COMMAND);
 	}
@@ -11187,6 +11194,10 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 		Commands_StateCU_IrrigationPracticeTS_JMenu.add(
 			__Commands_StateCU_IrrigationPracticeTS_WriteIrrigationPracticeTSToStateCU_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_IrrigationPracticeTS_WriteIrrigationPracticeTSToStateCU_String,this));
+		Commands_StateCU_IrrigationPracticeTS_JMenu.addSeparator();
+		Commands_StateCU_IrrigationPracticeTS_JMenu.add(
+			__Commands_StateCU_IrrigationPracticeTS_CompareIrrigationPracticeTSFiles_JMenuItem =
+			new SimpleJMenuItem(__Commands_StateCU_IrrigationPracticeTS_CompareIrrigationPracticeTSFiles_String,this));
 		ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateCU_IrrigationPracticeTS_JMenu,
 			__Commands_StateCU_IrrigationPracticeTS_CheckIrrigationPracticeTS_String);
 		
@@ -16134,12 +16145,12 @@ private void uiAction_ViewCommandFileDiff () {
 		String tempCommandFile = IOUtil.tempFileName();
 		File f = new File(tempCommandFile);
 		String tempFolder = f.getParent();
-		String file2Path = tempFolder + File.separator + "StateDMI-commands.TSTool";
+		String file2Path = tempFolder + File.separator + "StateDMI-commands.statedmi";
 		try {
 			uiAction_WriteCommandFile_Helper(file2Path);
 		}
 		catch ( Exception e ) {
-			Message.printWarning(1, "", "Error saving commands to temporry file for diff (" + e + ")" );
+			Message.printWarning(1, "", "Error saving commands to temporary file for diff (" + e + ")" );
 			return;
 		}
 		// Run the diff program

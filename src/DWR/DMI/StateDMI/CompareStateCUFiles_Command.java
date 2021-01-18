@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import DWR.StateCU.StateCU_CropPatternTS;
+import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import DWR.StateCU.StateCU_Util;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
@@ -368,11 +369,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			// Read the second file
 			List<StateCU_CropPatternTS> cdsList2 = StateCU_CropPatternTS.readStateCUFile(InputFile2_full, null, null);
 
-			// Loop through the data and add new StateCU_ClimateStation instances for each entry...
-			// - TODO smalers 2020-12-08 for now use the first list as the driver
+			// Compare the two lists.
 
 			StateCU_CropPatternTS cds2 = null;
-			List<String> diffText = new ArrayList<String>();
+			List<String> diffText = new ArrayList<>();
 			for ( StateCU_CropPatternTS cds1 : cdsList1 ) {
 				// Find the matching object in the second list
 				int pos = StateCU_Util.indexOf(cdsList2, cds1.getID());
@@ -384,6 +384,48 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				}
 				// The following handles nulls
 				List<String> diffText1 = StateCU_CropPatternTS.compare(cds1, cds2, precision);
+				diffText.addAll(diffText1);
+			}
+			
+			if ( diffText.size() > 0 ) {
+				message = "Have " + diffText.size() + " differences between \"" +
+					InputFile1_full + "\" and \"" + InputFile2_full + "\"";
+				Message.printWarning ( warning_level, 
+					MessageUtil.formatMessageTag(command_tag, ++warning_count),
+					routine, message );
+				status.addToLog ( command_phase,
+					new CommandLogRecord(CommandStatusType.WARNING,
+						message, "See log file for details." ) );
+				for ( String text : diffText ) {
+					Message.printStatus(2, routine, text);
+				}
+			}
+		}
+		else if ( this instanceof CompareIrrigationPracticeTSFiles_Command ) {
+	        Message.printStatus ( 2, routine, "Comparing StateCU IrrigationPracticeTS files \"" +
+	        	InputFile1_full + "\" and \"" + InputFile2_full + "\"" );
+		
+			// Read the first file
+			List<StateCU_IrrigationPracticeTS> ipyList1 = StateCU_IrrigationPracticeTS.readStateCUFile(InputFile1_full, null, null);
+
+			// Read the second file
+			List<StateCU_IrrigationPracticeTS> ipyList2 = StateCU_IrrigationPracticeTS.readStateCUFile(InputFile2_full, null, null);
+
+			// Compare the two lists.
+
+			StateCU_IrrigationPracticeTS ipy2 = null;
+			List<String> diffText = new ArrayList<>();
+			for ( StateCU_IrrigationPracticeTS ipy1 : ipyList1 ) {
+				// Find the matching object in the second list
+				int pos = StateCU_Util.indexOf(ipyList2, ipy1.getID());
+				if ( pos < 0 ) {
+					ipy2 = null;
+				}
+				else {
+					ipy2 = ipyList2.get(pos);
+				}
+				// The following handles nulls
+				List<String> diffText1 = StateCU_IrrigationPracticeTS.compare(ipy1, ipy2, precision);
 				diffText.addAll(diffText1);
 			}
 			
