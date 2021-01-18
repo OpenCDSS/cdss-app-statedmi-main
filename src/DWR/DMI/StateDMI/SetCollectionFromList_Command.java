@@ -1177,8 +1177,23 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     				for ( int iPart = 0; iPart < partIds.size(); iPart++ ) {
    						partIdTypesForCuloc.add( StateCU_Location_CollectionPartIdType.WDID );
    						// Set the WD, mostly for information since only used in processing for Well part ID of receipt
-    					String wd = partIds.get(iPart).substring(0,2);
-    					partIdWDsForCuloc.add(new Integer(wd));
+   						partId = partIds.get(iPart);
+    					String wd = partId.substring(0,2);
+    					try {
+    						partIdWDsForCuloc.add(new Integer(wd));
+    					}
+    					catch ( NumberFormatException e ) {
+    						// Not a WDID
+    						message = "Part id \"" + partId + "\" is not an integer - cannot set WDID.";
+	  						Message.printWarning(warning_level,
+		  						MessageUtil.formatMessageTag( command_tag, ++warning_count),
+		  						routine, message );
+	  						status.addToLog ( CommandPhaseType.RUN,
+		  						new CommandLogRecord(CommandStatusType.FAILURE,
+			  						message, "Report problem to software support." ) );
+	  						// Add a value to keep lists aligned.
+    						partIdWDsForCuloc.add(new Integer(-1));
+    					}
     				}
     				culoc.setCollectionPartIDs ( partIds, partIdTypesForCuloc, partIdWDsForCuloc );
     				// All part types are WDID.  Set to help with visualization and data checks.
@@ -1515,24 +1530,26 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	} // End TableID set in processor
         } // End no index errors for table
 
-        	// Additional processing to set the WD for collections that are Well RECEIPT:
-        	// - TODO smalers 2020-10-10 also need to do for StateMod wells
-        	List<String> problems = new ArrayList<>();
-        	setCollectionPartReceiptWDForCULocations ( hbdmi, culocList, receiptWDMap, problems );
-        	for ( String problem : problems ) {
-        		status.addToLog ( commandPhase,
-                	new CommandLogRecord(CommandStatusType.WARNING,
-                        problem, "See log file for details." ) );
-        	}
+ 			if ( nodeTypeFromCommand.equalsIgnoreCase(_Well) ) {
+        		// Additional processing to set the WD for collections that are Well RECEIPT:
+        		// - TODO smalers 2020-10-10 also need to do for StateMod wells
+        		List<String> problems = new ArrayList<>();
+        		setCollectionPartReceiptWDForCULocations ( hbdmi, culocList, receiptWDMap, problems );
+        		for ( String problem : problems ) {
+        			status.addToLog ( commandPhase,
+                		new CommandLogRecord(CommandStatusType.WARNING,
+                        	problem, "See log file for details." ) );
+        		}
 
-        	problems = new ArrayList<>();
-        	setCollectionPartReceiptWDForStateModWell ( hbdmi, wellList, problems );
-        	for ( String problem : problems ) {
-        		status.addToLog ( commandPhase,
-                	new CommandLogRecord(CommandStatusType.WARNING,
-                        problem, "See log file for details." ) );
+        		problems = new ArrayList<>();
+        		setCollectionPartReceiptWDForStateModWell ( hbdmi, wellList, problems );
+        		for ( String problem : problems ) {
+        			status.addToLog ( commandPhase,
+                		new CommandLogRecord(CommandStatusType.WARNING,
+                        	problem, "See log file for details." ) );
+        		}
         	}
-
+	
     	} // End run mode
     	else if ( commandPhase == CommandPhaseType.DISCOVERY ) {
     	    // Create an empty table and set the ID

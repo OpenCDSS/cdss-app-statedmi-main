@@ -172,7 +172,7 @@ public static void appendToRegressionTestReport(CommandProcessor processor,
     	}
     	if ( isEnabled ) {
     		if ( testPassFail.toUpperCase().indexOf("FAIL") >= 0 ) {
-	       		indicator = "*";
+	       		indicator = "=";
 	       		++__regressionTestFailCount;
     		}
     		else {
@@ -1257,32 +1257,37 @@ throws FileNotFoundException
     __regression_test_fp = new PrintWriter ( new FileOutputStream ( outputFile, append ) );
     IOUtil.printCreatorHeader ( __regression_test_fp, "#", 80, 0 );
     __regression_test_fp.println ( "#" );
-    __regression_test_fp.println ( "# Command file regression test report from StartRegressionTestResultsReport() and RunCommands()" );
+    __regression_test_fp.println ( "# Command file regression test report from StartRegressionTestResultsReport() and RunCommands() commands." );
+    __regression_test_fp.println ( "# The CreateRegressionTestCommandFile() command is used to create the command file with RunCommands() commands." );
     __regression_test_fp.println ( "#" );
     __regression_test_fp.println ( "# Explanation of columns:" );
     __regression_test_fp.println ( "#" );
     __regression_test_fp.println ( "# Num: count of the tests" );
+    __regression_test_fp.println ( "#   This includes all tests, even those that are disabled." );
     __regression_test_fp.println ( "# Enabled:" );
-    __regression_test_fp.println ( "#    TRUE (blank) if test enabled (default)." );
-    __regression_test_fp.println ( "#    FALSE if \"#@enabled false\" in command file." );
-    __regression_test_fp.println ( "#    FALSE-REQ if \"#@require\" conditions not met for command file." );
-    __regression_test_fp.println ( "# Requirements Met (see \"#@require \" in command file):" );
-    __regression_test_fp.println ( "#    TRUE (blank) if command file requirements are met." );
-    __regression_test_fp.println ( "#    FALSE if command file requirements are not met." );
+    __regression_test_fp.println ( "#   TRUE - (blank) if the test is enabled (default)." );
+    __regression_test_fp.println ( "#   FALSE - if \"#@enabled false\" in the command file." );
+    __regression_test_fp.println ( "#   FALSE-REQ - if \"#@require\" conditions are not met for the command file." );
+    __regression_test_fp.println ( "# Requirements Met (see \"#@require\" in command file):" );
+    __regression_test_fp.println ( "#   TRUE - (blank) if command file requirements are met." );
+    __regression_test_fp.println ( "#   FALSE - if command file requirements are not met." );
+    __regression_test_fp.println ( "#     Command files are not run because RunCommands(IfRequirementsNotMet=Ignore) and do not count as PASS or FAIL." );
     __regression_test_fp.println ( "# Run Time: run time in milliseconds" );
+    __regression_test_fp.println ( "#   Only used in table output and HTML so that text report can be compared (time will cause all lines to be different)." );
     __regression_test_fp.println ( "# Test Pass/Fail:" );
-    __regression_test_fp.println ( "#    PASS if the test failed (or blank if disabled)." );
-    __regression_test_fp.println ( "#      A test will pass if the command file actual status matches the expected status." );
-    __regression_test_fp.println ( "#    FAIL if the test failed." );
-    __regression_test_fp.println ( "#      Search for *FAIL* to find failed tests." );
-    __regression_test_fp.println ( "#    Blank if disabled." );
-    __regression_test_fp.println ( "#      Disabled tests are not run and do not count as PASS or FAIL." );
-    __regression_test_fp.println ( "#      Tests with requirements that are not OK are usually ignored and do not count as PASS or FAIL." );
+    __regression_test_fp.println ( "#   PASS - if the test passed." );
+    __regression_test_fp.println ( "#     A test will pass if the command file 'Actual Status' matches the 'Expected Status'." );
+    __regression_test_fp.println ( "#   =FAIL= - if the test failed." );
+    __regression_test_fp.println ( "#      Search for =FAIL= to find failed tests - equals used to differentiate from other instances of 'FAIL'." );
+    __regression_test_fp.println ( "#   Blank - if disabled (see 'Enabled' column)." );
+    __regression_test_fp.println ( "#     Disabled tests are not run and do not count as PASS or FAIL." );
+    __regression_test_fp.println ( "#     Tests with requirements that are not OK are usually ignored and do not count as PASS or FAIL." );
     __regression_test_fp.println ( "# Commands Expected Status:" );
-    __regression_test_fp.println ( "#    Default is assumed to be SUCCESS." );
-    __regression_test_fp.println ( "#    \"#@expectedStatus Warning|Failure\" comment in command file overrides default." );
+    __regression_test_fp.println ( "#   SUCCESS - default that is assumed." );
+    __regression_test_fp.println ( "#   FAILURE or WARNING - if \"#@expectedStatus Warning|Failure\" comment in command file overrides default." );
     __regression_test_fp.println ( "# Commands Actual Status:" );
-    __regression_test_fp.println ( "#    The most severe status (Success|Warning|Failure) for each command file." );
+    __regression_test_fp.println ( "#    The most severe status (SUCCESS|WARNING|FAILURE) for each command file." );
+    __regression_test_fp.println ( "# Command File: name of the command file being run as the test" );
     __regression_test_fp.println ( "#" );
     
     __regression_test_fp.println ( "#    |         |            |Test  |Commands  |Commands   |" );

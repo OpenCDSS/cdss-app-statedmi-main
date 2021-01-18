@@ -59,9 +59,7 @@ import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 
 /**
-<p>
 This class initializes, checks, and runs the ReadDiversionHistoricalTSMonthlyFromHydroBase() command.
-</p>
 */
 public class ReadDiversionHistoricalTSMonthlyFromHydroBase_Command 
 extends AbstractCommand implements Command
@@ -858,7 +856,7 @@ CommandWarningException, CommandException
 						pts.setDate2Original( OutputEnd_DateTime);
 						pts.allocateDataSpace();
 					}
-					// By here we have a part to process...
+					// By here have a part to process...
 					++part_count;
 					// Fill with diversion comments...
 					if ( (pts != null) && UseDiversionComments.equalsIgnoreCase(_True) ) {
@@ -892,10 +890,13 @@ CommandWarningException, CommandException
 					// Initialize the total time series if necessary...
 	
 					if ( !ts_initialized && (pts != null) ) {
-						// Just use the time series that was returned...
-						Message.printStatus ( 2, routine, "Initializing " + collection_type + " "+
-						id + " time series to first part (" + part_id + ") time series." );
+						// Just use the time series that was returned.
+						// - this ensures that the main data for the time series is in place
+						// - TODO smalers 2021-01-17 is this confusing and possibly fragile?
 						ts = pts;
+						Message.printStatus ( 2, routine, "Initializing " + collection_type + " "+
+						id + " time series to first part (" + part_id + ") time series with period " + ts.getDate1() + " to " + ts.getDate2() + "." );
+						Message.printStatus ( 2, routine, "Output time series will initially have the data for first part, with other parts added.");
 						ts_initialized = true;
 						// Set the identifier and name to that of the collection...
 						ts.getIdentifier().setLocation(id);
@@ -907,13 +908,14 @@ CommandWarningException, CommandException
 					}
 	
 					// Add the part to the raw data total so that
-					// averages can be computed based on the total of the original data...
+					// averages can be computed based on the total of the original data.
+					// sumts was cloned from the initial time series above so only add parts 2+.
 					if ( (sumts != null) && (pts != null) && (part_count > 1) ) {
 						// Add the part time series to the full time series...
 						try {
-							//Message.printStatus ( 2, routine, "Adding part \"" + part_id +
-							//"\" diversion TS to unfilled " + "main TS \""+id + "\"" );
-							sumts = (MonthTS)TSUtil.add ( sumts,pts);
+							Message.printStatus ( 2, routine, "Adding part \"" + (iparts + 1) + ": " + part_id +
+							"\" diversion TS to unfilled main TS \""+ id + "\" - used with statistics." );
+							sumts = (MonthTS)TSUtil.add ( sumts, pts);
 						}
 						catch ( Exception e ) {
 							// Hide for now since similar error will be made for add on filled data.
@@ -924,8 +926,9 @@ CommandWarningException, CommandException
 						}
 					}
 	
-					// If requested, fill the part before adding it
-					// to the sum.  Do not process if a blank part was created because errors will occur.
+					// If requested, fill the part before adding it to the sum.
+					// Do not process if a blank part was created because errors will occur.
+					// This will also fill the initial time series part since ts=pts above.
 	
 					if ( (pts != null) && !blank_ts_created && (fill_pattern || fill_average) ) {
 						// Need to fill with one or both in the requested order...
@@ -958,12 +961,13 @@ CommandWarningException, CommandException
 						}// End filling.
 					}
 	
-					// Accumulate the data.  This logic follows the old watright logic.  Let
-					// the all-missing time series go through because it will add to the history and
-					// description...
+					// Accumulate the data.  This logic follows the old watright logic.i
+					// Let the all-missing time series go through because it will add to the history and description.
 	
-					if ( (pts != null) && (part_count > 1) ) {
-						// Add the part time series to the full time series...
+					if ( (pts != null) && (part_count > 1) && (ts != pts) ) {
+						// Add the part time series to the full time series.
+						// - only add the 2nd and greater parts since first part is used to initialize the output time series.
+						// - add an extra check for ts != pts above in case someone mistakenly changes the logic.
 						try {
 							Message.printStatus ( 2, routine, "Adding part \"" +
 							(iparts + 1) + ": " + part_id + "\" diversion TS to main TS \""+ id + "\"" );

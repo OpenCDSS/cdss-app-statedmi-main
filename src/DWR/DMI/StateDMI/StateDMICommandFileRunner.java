@@ -96,7 +96,35 @@ public static boolean areRequirementsMet ( StateDMI_Processor processor, List<Co
    					String [] parts = commandString.substring(pos).split(" ");
    					Message.printStatus(2, routine, "@REQUIRE comment has " + parts.length + " parts.");
    					if ( parts.length > 1 ) {
-   						if ( parts[1].trim().equalsIgnoreCase("DATASTORE") ) {
+   						if ( parts[1].trim().toUpperCase().startsWith("APP") ) {
+   							Message.printStatus(2, routine, "Detected APP");
+   							if ( parts.length < 5 ) {
+   								message = "Error processing @require - expecting 5+ tokens (have " + parts.length + "): " + commandString;
+   								Message.printWarning(3, routine, message);
+   								throw new RuntimeException(message);
+   							}
+   							else {
+   								// appName must be StateDMI
+   								appName = parts[2].trim();
+   								if ( !appName.equalsIgnoreCase("StateDMI") ) {
+   									message = "Don't know how to handle application name \"" + appName
+   										+ "\" in @require (only handle StateDMI): " + commandString;
+   									Message.printWarning(3, routine, message);
+   									throw new RuntimeException(message);
+   								}
+   								operator = parts[3].trim();
+   								version = parts[4].trim();
+   								// Get the version for the app
+   								String appVersion = processor.getStateDmiVersionString();
+   								// - TODO smalers 2021-01-01 for now always meet requirement
+   								// Check the app version against the requirement, using semantic version comparison.
+   								// - only compare the first 3 parts because modifier can cause issues comparing.
+   								if ( !StringUtil.compareSemanticVersions(appVersion, operator, version, 3) ) {
+   									requirementsMet = false;
+   								}
+   							}
+                    	}
+   						else if ( parts[1].trim().equalsIgnoreCase("DATASTORE") ) {
    							// For example:
    							// @require datastore HydroBase >= 20200720
    							Message.printStatus(2, routine, "Detected DATASTORE");
@@ -130,45 +158,17 @@ public static boolean areRequirementsMet ( StateDMI_Processor processor, List<Co
    									String dbVersion = dmi.getDatabaseVersionFromName();
    									// Check the datastore version against the requirement, using string comparison since no delimiters.
    									if ( !StringUtil.compareUsingOperator(dbVersion, operator, version) ) {
-   										Message.printStatus(2, routine, "Database version \"" + dbVersion + " does NOT meet required " + operator + " " + version);
+   										Message.printStatus(2, routine, "Database version \"" + dbVersion + "\" DOES NOT meet required " + operator + " \"" + version + "\"");
    										// Set the return value.
    										// - any false value from list of comments will set the overall return value to false
    										requirementsMet = false;
    									}
    									else {
-   										Message.printStatus(2, routine, "Database version \"" + dbVersion + " does meet required " + operator + " " + version);
+   										Message.printStatus(2, routine, "Database version \"" + dbVersion + "\" DOES meet required " + operator + " \"" + version + "\"");
    									}
    								}
    							}
    						}
-   						else if ( parts[1].trim().toUpperCase().startsWith("APP") ) {
-   							Message.printStatus(2, routine, "Detected APP");
-   							if ( parts.length < 5 ) {
-   								message = "Error processing @require - expecting 5+ tokens (have " + parts.length + "): " + commandString;
-   								Message.printWarning(3, routine, message);
-   								throw new RuntimeException(message);
-   							}
-   							else {
-   								// appName must be StateDMI
-   								appName = parts[2].trim();
-   								if ( !appName.equalsIgnoreCase("StateDMI") ) {
-   									message = "Don't know how to handle application name \"" + appName
-   										+ "\" in @require (only handle StateDMI): " + commandString;
-   									Message.printWarning(3, routine, message);
-   									throw new RuntimeException(message);
-   								}
-   								operator = parts[3].trim();
-   								version = parts[4].trim();
-   								// Get the version for the app
-   								String appVersion = processor.getStateDmiVersionString();
-   								// - TODO smalers 2021-01-01 for now always meet requirement
-   								// Check the app version against the requirement, using semantic version comparison.
-   								// - only compare the first 3 parts because modifier can cause issues comparing.
-   								if ( !StringUtil.compareSemanticVersions(appVersion, operator, version, 3) ) {
-   									requirementsMet = false;
-   								}
-   							}
-                    	}
                     }
    					else {
   						message = "Error processing @require - expecting 5+ tokens (have " + parts.length + "): " + commandString;

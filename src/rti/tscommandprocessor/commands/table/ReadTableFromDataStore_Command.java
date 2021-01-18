@@ -109,11 +109,11 @@ throws InvalidCommandParameterException
     status.clearLog(CommandPhaseType.INITIALIZATION);
 
     if ( (DataStore == null) || (DataStore.length() == 0) ) {
-        message = "The data store must be specified.";
+        message = "The datastore must be specified.";
         warning += "\n" + message;
         status.addToLog ( CommandPhaseType.INITIALIZATION,
             new CommandLogRecord(CommandStatusType.FAILURE,
-                message, "Specify the data store." ) );
+                message, "Specify the datastore." ) );
     }
     int specCount = 0;
     if ( (Sql != null) && !Sql.equals("") ) {
@@ -129,18 +129,18 @@ throws InvalidCommandParameterException
         ++specCount;
     }
     if ( specCount == 0 ) {
-        message = "The data store table, SQL statement, SQL file, or procedure must be specified.";
+        message = "The datastore table, SQL statement, SQL file, or procedure must be specified.";
         warning += "\n" + message;
         status.addToLog ( CommandPhaseType.INITIALIZATION,
             new CommandLogRecord(CommandStatusType.FAILURE,
-                message, "Specify the data store table, SQL statement, SQL file, or procedure." ) );
+                message, "Specify the datastore table, SQL statement, SQL file, or procedure." ) );
     }
     if ( specCount > 1 ) {
-        message = "Only one of the data store table, SQL statement, SQL file, or procedure can be specified.";
+        message = "Only one of the datastore table, SQL statement, SQL file, or procedure can be specified.";
         warning += "\n" + message;
         status.addToLog ( CommandPhaseType.INITIALIZATION,
             new CommandLogRecord(CommandStatusType.FAILURE,
-                message, "Specify the data store table, SQL statement, or SQL file." ) );
+                message, "Specify the datastore table, SQL statement, or SQL file." ) );
     }
     // Remove comments.  In general /* */ are the main comments supported because they are used with SQL Server
     // and Oracle and generally easy to deal with.
@@ -387,12 +387,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     }
     String RowCountProperty = parameters.getValue ( "RowCountProperty" );
     
-    // Find the data store to use...
+    // Find the datastore to use...
     DataStore dataStore = ((StateDMI_Processor)processor).getDataStoreForName (
         DataStore, DatabaseDataStore.class );
     DMI dmi = null;
     if ( dataStore == null ) {
-        message = "Could not get data store for name \"" + DataStore + "\" to query data.";
+        message = "Could not get datastore for name \"" + DataStore + "\" to query data.";
         Message.printWarning ( 2, routine, message );
         status.addToLog ( commandPhase,
             new CommandLogRecord(CommandStatusType.FAILURE,
@@ -455,7 +455,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
                 Message.printWarning ( 2, routine, message );
                 status.addToLog ( commandPhase,
                     new CommandLogRecord(CommandStatusType.FAILURE,
-                        message, "Verify that the database for data store \"" + DataStore +
+                        message, "Verify that the database for datastore \"" + DataStore +
                         "\" is accessible.") );
             }
             // Get the columns to query
@@ -700,7 +700,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
             Message.printWarning ( 2, routine, message );
             status.addToLog ( commandPhase,
                 new CommandLogRecord(CommandStatusType.FAILURE,
-                    message, "Verify that the database for data store \"" + DataStore +
+                    message, "Verify that the database for datastore \"" + DataStore +
                     "\" is appropriate for SQL statement: \"" + queryString + "\"." ) );
             Message.printWarning ( 3, routine, e );
         }

@@ -270,6 +270,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"CompareFiles") ) {
 		return new CompareFiles_Command ();
 	}
+	else if ( StringUtil.startsWithIgnoreCase( commandString,"CompareIrrigationPracticeTSFiles") ) {
+		return new CompareIrrigationPracticeTSFiles_Command ();
+	}
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"CompareTables") ) {
 		return new CompareTables_Command ();
 	}

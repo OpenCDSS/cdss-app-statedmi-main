@@ -219,10 +219,15 @@ throws InvalidCommandParameterException
 	String SupplyType = parameters.getValue ( "SupplyType" );
 	if ( (SupplyType != null) && !SupplyType.isEmpty() ) {
 		message = "The SupplyType parameter (" + SupplyType + ") is not used for StateDMI version >= 5.00.00 - ignoring.";
-		warning += "\n" + message;
+		// Don't increment the warning because it will cause the command to not be run.
+		//warning += "\n" + message;
 		status.addToLog ( CommandPhaseType.INITIALIZATION,
-			new CommandLogRecord(CommandStatusType.WARNING,
-				message, "Supply type is used with SetIrrigationPracticeTS* commands.") );
+			// Show as info since if a warning it causes the command to not run.
+			// - info does not seem to be processed properly - results in black dots in left gutter
+			//new CommandLogRecord(CommandStatusType.WARNING,
+			//new CommandLogRecord(CommandStatusType.INFO,
+			new CommandLogRecord(CommandStatusType.SUCCESS,
+				message, "Need to update the commands to latest syntax.") );
 	}
 	
 	if ( (SetToMissing != null) && (SetToMissing.length() > 0) &&
@@ -591,6 +596,7 @@ CommandWarningException, CommandException
 			}
 		}
 		else {
+			// As of version 5.00.00 this is not supported.
 			message = "ProcessWhen=" + _WithParcels + " is no longer supported.";
         	status.addToLog ( CommandPhaseType.RUN,
        			new CommandLogRecord(CommandStatusType.FAILURE,message, "Use SetParcel to change parcel data." ) );

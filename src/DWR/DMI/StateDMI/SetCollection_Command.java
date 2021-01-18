@@ -348,6 +348,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	}
 	else if ( nodeType.equalsIgnoreCase(_Well) ) {
 		// Part type will have been set above (required).
+		// - can be Well or Parcel
 	}
     String WellReceiptWaterDistrictMap = parameters.getValue ( "WellReceiptWaterDistrictMap" );
     Hashtable<String,String> receiptWDMap = new Hashtable<String,String>();
@@ -469,28 +470,48 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     		List<StateCU_Location_CollectionPartIdType> partIdTypeList = new ArrayList<>();
     		List<Integer> partIdWDList = new ArrayList<>(); // Used to store WD for well receipt so WD cache lookups can occur later
     		for ( String partId : tokens ) {
-    			// Look for any IDs starting with p: and strip off.
-    			if ( partId.startsWith("p:") ) {
-    				// Assume a receipt number
-    				partIdList.add(partId.substring(2));
-    				partIdTypeList.add(StateCU_Location_CollectionPartIdType.RECEIPT);
-   					// Look up the WD from command parameter
-   					String wd = receiptWDMap.get(partId);
-   					if ( wd != null ) {
-    					partIdWDList.add(Integer.parseInt(wd));
-   					}
-   					else {
-   						// Set the WD to -1, will be filled later through an additional database query
-    					partIdWDList.add(new Integer(-1));
-   					}
+    			if ( PartType.equalsIgnoreCase(_Parcel) ) {
+    				// Part is the parcel ID.
+   					partIdList.add(partId);
     			}
     			else {
-    				// Assume a WDID
-    				partIdList.add(partId);
-    				partIdTypeList.add(StateCU_Location_CollectionPartIdType.WDID);
-    				// Set the WD, mostly for information since used for Well part ID of receipt
-    				String wd = partId.substring(0,2);
-    				partIdWDList.add(new Integer(wd));
+    				// Look for any IDs starting with p: and strip off.
+    				if ( partId.startsWith("p:") || partId.startsWith("P:")) {
+    					// Assume a receipt number
+    					partIdList.add(partId.substring(2));
+    					partIdTypeList.add(StateCU_Location_CollectionPartIdType.RECEIPT);
+   						// Look up the WD from command parameter
+   						String wd = receiptWDMap.get(partId);
+   						if ( wd != null ) {
+    						partIdWDList.add(Integer.parseInt(wd));
+   						}
+   						else {
+   							// Set the WD to -1, will be filled later through an additional database query
+    						partIdWDList.add(new Integer(-1));
+   						}
+    				}
+    				else {
+    					// Assume a WDID
+    					partIdList.add(partId);
+    					partIdTypeList.add(StateCU_Location_CollectionPartIdType.WDID);
+    					// Set the WD, mostly for information since used for Well part ID of receipt
+    					try {
+    						String wd = partId.substring(0,2);
+    						partIdWDList.add(new Integer(wd));
+    					}
+    					catch ( NumberFormatException e ) {
+    						// Not a WDID
+    						message = "Part id \"" + partId + "\" is not an integer - cannot set WDID.";
+	  						Message.printWarning(warning_level,
+		  						MessageUtil.formatMessageTag( command_tag, ++warning_count),
+		  						routine, message );
+	  						status.addToLog ( CommandPhaseType.RUN,
+		  						new CommandLogRecord(CommandStatusType.FAILURE,
+			  						message, "Report problem to software support." ) );
+	  						// Add a value to keep lists aligned.
+    						partIdWDList.add(new Integer(-1));
+    					}
+    				}
     			}
     		}
     		Message.printStatus ( 2, routine,
@@ -505,14 +526,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	            new CommandLogRecord(CommandStatusType.FAILURE,
     	                message, "Last collection information specified will apply." ) );
     		}
+    		// Set the collection type.
     		if ( collectionType.equalsIgnoreCase( StateCU_Location_CollectionType.AGGREGATE.toString()) ) {
     			culoc.setCollectionType ( StateCU_Location_CollectionType.AGGREGATE );
     		}
     		else if ( collectionType.equalsIgnoreCase(StateCU_Location_CollectionType.SYSTEM.toString()) ) {
     			culoc.setCollectionType ( StateCU_Location_CollectionType.SYSTEM );
     		}
+    		// Get the enumeration from the part type string.
    			StateCU_Location_CollectionPartType collectionPartTypeForCuloc = StateCU_Location_CollectionPartType.valueOfIgnoreCase(PartType);
-				if ( collectionPartTypeForCuloc == null ) {
+			if ( collectionPartTypeForCuloc == null ) {
    				message = "CU Location collection \"" + id + "\" part type \"" + PartType + "\" is invalid.";
    				Message.printWarning ( warning_level, 
    					MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
@@ -520,9 +543,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
    					message, "Verify that part type is valid." ) );
 			}
     		culoc.setCollectionPartType ( collectionPartTypeForCuloc );
+    		// Node type is determined from the command name.
     		if ( nodeType.equalsIgnoreCase(_Well) ) {
+    			// SetWell...
     			culoc.setCollectionDiv ( Div_int );
     			if ( PartType.equalsIgnoreCase(StateCU_Location_CollectionPartType.PARCEL.toString()) ) {
+    				Message.printStatus ( 2, routine,
+    					"Setting " + id + " " + collectionType + " year " + Year_int + " parts (" + PartType + ") -> " + StringUtil.toString(partIdList,",") );
     				culoc.setCollectionPartIDsForYear ( Year_int, partIdList );
     			}
     			else if ( PartType.equalsIgnoreCase(StateCU_Location_CollectionPartType.DITCH.toString()) ) {
@@ -550,6 +577,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			}
     		}
     		else {
+    			// SetDiversion...
+    			// - part type is always WDID
     			culoc.setCollectionPartIDs ( partIdList );
     		}
     		matchFound = true;
@@ -670,64 +699,72 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			List<String> tokens = StringUtil.breakStringList ( PartIDs, ", ", StringUtil.DELIM_SKIP_BLANKS );
     			Message.printStatus ( 2, routine,
     				"Setting " + id + " " + collectionType + " parts (" + PartType + ") -> " + tokens );
-        		List<String> partIdList = new ArrayList<String>();
+        		List<String> partIdList = new ArrayList<>();
         		List<StateMod_Well_CollectionPartIdType> partIdTypeList = new ArrayList<StateMod_Well_CollectionPartIdType>();
-				List<Integer> partIdWDsForWell = new ArrayList<Integer>(); // Used to store WD for receipt, for cached data lookups
+				List<Integer> partIdWDsForWell = new ArrayList<>(); // Used to store WD for receipt, for cached data lookups
         		for ( String partId : tokens ) {
-        			// Look for any IDs starting with P: and strip off.
-        			String partIdUpper = partId.toUpperCase();
-        			if ( partIdUpper.startsWith("P:") || partIdUpper.startsWith("RECEIPT:") ) {
-        				int offset = 0;
-        				if ( partIdUpper.startsWith("P:") ) {
-        					offset = 2;
-        				}
-        				else {
-        					offset = 8;
-        				}
-        				// Assume a receipt number
-        				partIdList.add(partId.substring(offset).trim());
-        				partIdTypeList.add(StateMod_Well_CollectionPartIdType.RECEIPT);
-        				// Need to determine the water district for the receipt for use later querying cached data
-        				// - since the Set*FromList command is used for long lists, query the single receipt.
-        				List<HydroBase_Wells> wellsForReceipt = hbdmi.readWellsList(partId, -1, -1);
-        				if ( wellsForReceipt.size() != 1 ) {
-        					message = "Well \"" + id + "\" part \"" + partId + "\" RECEIPT has more than one HydroBase record.";
-        					Message.printWarning ( warning_level, 
-        						MessageUtil.formatMessageTag(command_tag, ++warning_count),
-        							routine, message );
-        					status.addToLog ( command_phase,
-        						new CommandLogRecord(CommandStatusType.WARNING,
-        							message, "Last collection information specified will apply." ) );
-        				}
-        				else if ( wellsForReceipt.size() == 0 ) {
-        					// No wells, see if there is a set.
-   							String wd = receiptWDMap.get(partId);
-   							if ( wd != null ) {
-    							partIdWDsForWell.add(new Integer(wellsForReceipt.get(0).getWD()));
-   							}
-   							else {
-   								// Set the WD to -1.
-   								message = "Well \"" + id + "\" part \"" + partId + "\" RECEIPT has no WD.  Won't be able to read well from cached data.";
-   								Message.printWarning ( warning_level, 
-   									MessageUtil.formatMessageTag(command_tag, ++warning_count),
-   										routine, message );
-   								status.addToLog ( command_phase,
-   									new CommandLogRecord(CommandStatusType.WARNING,
-   										message, "Specify the WellReceiptWaterDistrictMap parameter." ) );
-   								partIdWDsForWell.add(new Integer(-1));
-   							}
-        				}
-        				else {
-        					// Have a well record and can determine the WD for the receipt
-    						partIdWDsForWell.add(new Integer(wellsForReceipt.get(0).getWD()));
-        				}
-        			}
+        			if ( PartType.equalsIgnoreCase(_Parcel) ) {
+    				 	// Part is the parcel ID.
+   					 	partIdList.add(partId);
+    			 	}
         			else {
-        				// Assume a WDID
-        				partIdList.add(partId);
-        				partIdTypeList.add(StateMod_Well_CollectionPartIdType.WDID);
-        				// The WD for the part is based on the first 2 digits of the WDID
-   						partIdWDsForWell.add(new Integer(partId.substring(0,2)));
+        				// Look for any IDs starting with P: and strip off.
+        				String partIdUpper = partId.toUpperCase();
+        				if ( partIdUpper.startsWith("P:") || partIdUpper.startsWith("RECEIPT:") ) {
+        					int offset = 0;
+        					if ( partIdUpper.startsWith("P:") ) {
+        						offset = 2;
+        					}
+        					else {
+        						offset = 8;
+        					}
+        					// Assume a receipt number
+        					String receipt = partId.substring(offset).trim();
+        					partIdList.add(receipt);
+        					partIdTypeList.add(StateMod_Well_CollectionPartIdType.RECEIPT);
+        					// Need to determine the water district for the receipt for use later querying cached data
+        					// - since the Set*FromList command is used for long lists, query the single receipt.
+        					List<HydroBase_Wells> wellsForReceipt = hbdmi.readWellsList(receipt, -1, -1);
+        					if ( wellsForReceipt.size() > 1 ) {
+        						message = "Well \"" + id + "\" part \"" + receipt + "\" RECEIPT has more than one HydroBase record.";
+        						Message.printWarning ( warning_level, 
+        							MessageUtil.formatMessageTag(command_tag, ++warning_count),
+        								routine, message );
+        						status.addToLog ( command_phase,
+        							new CommandLogRecord(CommandStatusType.WARNING,
+        								message, "Last collection information specified will apply." ) );
+        					}
+        					else if ( wellsForReceipt.size() == 0 ) {
+        						// No wells, see if there is a set.
+   								String wd = receiptWDMap.get(partId);
+   								if ( wd != null ) {
+    								partIdWDsForWell.add(new Integer(wellsForReceipt.get(0).getWD()));
+   								}
+   								else {
+   									// Set the WD to -1.
+   									message = "Well \"" + id + "\" part \"" + receipt +
+   										"\" RECEIPT has no well record in HydroBase.  Won't be able to read well from cached data using well WD.";
+   									Message.printWarning ( warning_level, 
+   										MessageUtil.formatMessageTag(command_tag, ++warning_count),
+   											routine, message );
+   									status.addToLog ( command_phase,
+   										new CommandLogRecord(CommandStatusType.WARNING,
+   											message, "Specify the WellReceiptWaterDistrictMap parameter." ) );
+   									partIdWDsForWell.add(new Integer(-1));
+   								}
+        					}
+        					else {
+        						// Have a well record and can determine the WD for the receipt
+    							partIdWDsForWell.add(new Integer(wellsForReceipt.get(0).getWD()));
+        					}
+        				}
+        				else {
+        					// Assume a WDID
+        					partIdList.add(partId);
+        					partIdTypeList.add(StateMod_Well_CollectionPartIdType.WDID);
+        					// The WD for the part is based on the first 2 digits of the WDID
+   							partIdWDsForWell.add(new Integer(partId.substring(0,2)));
+        				}
         			}
         		}
     			if ( well.isCollection() ) {
