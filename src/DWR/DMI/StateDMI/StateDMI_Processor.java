@@ -298,7 +298,8 @@ are used by readIrrigationPracticeTSFromHyroBase().
 */
 private List<StateCU_IrrigationPracticeTS> __CUIrrigationPracticeTS_List = new ArrayList<>();
 // TODO smalers 2019-11-13 need to fix the following to not interfere with __HydroBase_Supplemental_ParcelUseTS_List
-private List<StateDMI_HydroBase_StructureView> __HydroBase_Supplemental_ParcelUseTS_List = new ArrayList<>();
+//private List<StateDMI_HydroBase_StructureView> __HydroBase_Supplemental_ParcelUseTS_List = new ArrayList<>();
+private List<HydroBase_ParcelUseTS> __HydroBase_Supplemental_ParcelUseTS_List = new ArrayList<>();
 
 /**
 The internal list of TS contain Agricultural Statistics (AgStats)...
@@ -3062,6 +3063,14 @@ private List<HydroBase_ParcelUseTS_FromSet> getHydroBaseParcelUseTSFromSetList (
 }
 
 /**
+Returns additional ParcelUseTS from 
+*/
+//private List<StateDMI_HydroBase_StructureView> getHydroBaseSupplementalParcelUseTSList() {
+private List<HydroBase_ParcelUseTS> getHydroBaseSupplementalParcelUseTSList() {
+	return __HydroBase_Supplemental_ParcelUseTS_List;
+}
+
+/**
 Return the initial working directory for the processor.
 @return the initial working directory for the processor.
 */
@@ -3248,9 +3257,10 @@ public Object getPropContents ( String prop ) throws Exception
 	}
 	else if ( prop.equalsIgnoreCase("HydroBase_SupplementalParcelUseTS_List") ||
 		prop.equalsIgnoreCase("HydroBase_Supplemental_ParcelUseTS_List") ) {
-		//return getHydroBaseSupplementalParcelUseTSList();
-		throw new RuntimeException("Need to update code to use \"HydroBase_ParcelUseTS_FromSet_List\" instead of " +
-		"\"HydroBase_SupplementalParcelUseTS_List\" or \"HydroBase_Supplemental_ParcelUseTS_List\"" );
+		return getHydroBaseSupplementalParcelUseTSList();
+		// TODO smalers 2021-01-18 go back to the original functionality since can work separately from StateDMI 5.05 parcels approach.
+		//throw new RuntimeException("Need to update code to use \"HydroBase_ParcelUseTS_FromSet_List\" instead of " +
+		//"\"HydroBase_SupplementalParcelUseTS_List\" or \"HydroBase_Supplemental_ParcelUseTS_List\"" );
 	}
 	else if ( prop.equalsIgnoreCase("InitialWorkingDir") ) {
 		return getInitialWorkingDir();
