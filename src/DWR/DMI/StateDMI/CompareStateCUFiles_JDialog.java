@@ -121,6 +121,10 @@ public void actionPerformed(ActionEvent event)
 			fc.setDialogTitle("Specify StateCU Crop Pattern TS File to Read");
 			sff = new SimpleFileFilter("cds", "StateCU Crop Pattern TS File");
 		}
+		else if ( __command instanceof CompareIrrigationPracticeTSFiles_Command ) {
+			fc.setDialogTitle("Specify StateCU Irrigation Practice TS File to Read");
+			sff = new SimpleFileFilter("ipy", "StateCU Irrigation Practice TS File");
+		}
 		fc.addChoosableFileFilter(sff);
 		fc.setFileFilter(sff);
 
@@ -161,6 +165,10 @@ public void actionPerformed(ActionEvent event)
 		if ( __command instanceof CompareCropPatternTSFiles_Command ) {
 			fc.setDialogTitle("Specify StateCU Crop Pattern TS File to Read");
 			sff = new SimpleFileFilter("cds", "StateCU Crop Pattern TS File");
+		}
+		else if ( __command instanceof CompareIrrigationPracticeTSFiles_Command ) {
+			fc.setDialogTitle("Specify StateCU Irrigation Practice TS File to Read");
+			sff = new SimpleFileFilter("ipy", "StateCU Irrigation Practice TS File");
 		}
 		fc.addChoosableFileFilter(sff);
 		fc.setFileFilter(sff);
@@ -314,6 +322,17 @@ private void initialize (JFrame parent, Command command )
        	JGUIUtil.addComponent(paragraph, new JLabel (
        		"This command compares two StateCU crop pattern time series files."),
        		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
+       	JGUIUtil.addComponent(paragraph, new JLabel (
+       		"See the log file for command output."),
+       		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
+	}
+	else if ( __command instanceof CompareIrrigationPracticeTSFiles_Command ) {
+       	JGUIUtil.addComponent(paragraph, new JLabel (
+       		"This command compares two StateCU irrigation practice time series files."),
+       		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
+       	JGUIUtil.addComponent(paragraph, new JLabel (
+       		"See the log file for command output."),
+       		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
 	}
 
     JGUIUtil.addComponent(paragraph, new JLabel (
@@ -379,6 +398,19 @@ private void initialize (JFrame parent, Command command )
 		JGUIUtil.addComponent(main_JPanel, new JLabel ("Precision:"),
 			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 		__Precision_JTextField = new JTextField (10);
+		__Precision_JTextField.setToolTipText("Number of digits after decimal to compare crop area values");
+		__Precision_JTextField.addKeyListener (this);
+		JGUIUtil.addComponent(main_JPanel, __Precision_JTextField,
+			1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+		JGUIUtil.addComponent(main_JPanel, new JLabel (
+			"Optional - number of digits to compare (default=3)."),
+			3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+	}
+	else if ( command instanceof CompareCropPatternTSFiles_Command ) {
+		JGUIUtil.addComponent(main_JPanel, new JLabel ("Precision:"),
+			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+		__Precision_JTextField = new JTextField (10);
+		__Precision_JTextField.setToolTipText("Number of digits after decimal to compare irrigated area values.  The precision to compare efficincy values defaults to 2.");
 		__Precision_JTextField.addKeyListener (this);
 		JGUIUtil.addComponent(main_JPanel, __Precision_JTextField,
 			1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);

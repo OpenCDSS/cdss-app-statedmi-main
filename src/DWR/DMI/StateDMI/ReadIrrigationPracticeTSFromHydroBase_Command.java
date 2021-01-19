@@ -63,13 +63,13 @@ import cdss.dmi.hydrobase.rest.ColoradoHydroBaseRestDataStore;
 import riverside.datastore.DataStore;
 
 /**
-<p>
+See also the ReadIrrigationPracticeTSFromParcels command, which is newer and should be used.
+
 This class initializes, checks, and runs the ReadIrrigationPracticeTSFromHydroBase() command.
 Irrigation practice acreage time series data will be completely defined for years with HydroBase data.
 NO ADJUSTMENT of data occurs after the read - it is simply set in the results.
 NO CHECK of total acreage is done since it is expected that the crop pattern time series
 total acreage is set after reading from HydroBase.
-</p>
 */
 public class ReadIrrigationPracticeTSFromHydroBase_Command 
 extends AbstractCommand implements Command
@@ -1170,7 +1170,8 @@ CommandWarningException, CommandException
 	}
 	
 	// Get the supplemental crop pattern data specified with SetCropPatternTS() and
-	// SetCropPatternTSFromList() commands...
+	// SetCropPatternTSFromList() commands.
+	// - this is used in the legacy approach but not with newer ReadIrrigationPracticeTSFromParcels() and related commands.
 	
 	List<StateDMI_HydroBase_ParcelUseTS> hydroBaseSupplementalParcelUseTSList = null;
 	try {
@@ -1220,22 +1221,11 @@ CommandWarningException, CommandException
                 message, "Report to software support.  See log file for details." ) );
     }
 
-	// Check that HydroBase version is at least 20200720 for this command.
-	
-	if ( !hbdmi.isDatabaseVersionAtLeast(HydroBaseDMI.VERSION_20200720) ) {
-        message = "The HydroBase version (" + hbdmi.getDatabaseVersion() + ") is invalid";
-        Message.printWarning ( warningLevel, 
-        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-        status.addToLog ( commandPhase,
-            new CommandLogRecord(CommandStatusType.FAILURE,
-                message, "Confirm that the HydroBase version is >= 20200720." ) );
-	}
-	
 	if ( warning_count > 0 ) {
 		// Input error...
-		message = "Insufficient data to run command.";
+		message = "Errors exist in input - unable to run the command.";
         status.addToLog ( CommandPhaseType.RUN,
-        new CommandLogRecord(CommandStatusType.FAILURE, message, "Check input to command." ) );
+        new CommandLogRecord(CommandStatusType.FAILURE, message, "Check command input." ) );
 		Message.printWarning(3, routine, message );
 		throw new CommandException ( message );
 	}

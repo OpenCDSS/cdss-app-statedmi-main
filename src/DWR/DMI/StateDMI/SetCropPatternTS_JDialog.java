@@ -46,9 +46,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
@@ -83,7 +82,7 @@ private SimpleJButton __ok_JButton = null;
 private SimpleJButton __help_JButton = null;	
 private SetCropPatternTS_Command __command = null;
 private boolean __ok = false;
-private boolean enableStateDMIPre050000 = false; // Set to true for features < StateDMI 5.00.00
+private boolean enableStateDMIPre050000 = true; // Set to true for features < StateDMI 5.00.00
 
 /**
 Command editor constructor.
@@ -226,7 +225,7 @@ private void initialize (JFrame parent, Command command )
 	paragraph.setLayout(new GridBagLayout());
 	int yy = -1;
    	JGUIUtil.addComponent(paragraph, new JLabel (
-   		"This command edits crop pattern time series data using the CU Location ID to look up the location."),
+   		"This command sets (edits) crop pattern time series data using the CU Location ID to look up the location."),
    		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"Crop patterns should be specified separated by commans using the format:"),
@@ -240,11 +239,11 @@ private void initialize (JFrame parent, Command command )
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"     ALFALFA,300,POTATOES,150"),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(paragraph, new JLabel ("If ProcessWhen=Now:"),
+    JGUIUtil.addComponent(paragraph, new JLabel ("If ProcessWhen=Now (the default):"),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"    Previous crop patterns for matching CU " +
-		"locations (created with CreateCropPatternTSForCULocations()) are reset when the command is processed."),
+		"locations (created with CreateCropPatternTSForCULocations and other commands) are reset when the command is processed."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"    Acreage for other crops at the location and date (e.g., " +
@@ -262,7 +261,7 @@ private void initialize (JFrame parent, Command command )
 		"    and changes are made to final CU Locations (not parts" +
 		" in an aggregate/system)."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(paragraph, new JLabel ("If ProcessWhen=WithParcels (THIS IS BEING PHASED OUT - DO NOT USE):"),
+    JGUIUtil.addComponent(paragraph, new JLabel ("<html>If ProcessWhen=WithParcels (<b>This is being phased out - if possible, do not use</b>):"),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"    The crop patterns are processed by ReadCropPatternTSFromHydroBase() command as additional irrigated parcels data."),
@@ -277,6 +276,8 @@ private void initialize (JFrame parent, Command command )
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"    and data can be defined for parts of an aggregate/system."),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel ("<html>Also see the newer SetParcel*() commands.</html>"),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
@@ -322,45 +323,14 @@ private void initialize (JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, __CropPattern_JTextField,
 		1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 
-    JGUIUtil.addComponent(main_JPanel, new JLabel ("Irrigation method:"),
-       		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List<String> IrrigationMethod_Vector = new Vector<String>(2);
-    IrrigationMethod_Vector.add ( __command._Flood );
-    IrrigationMethod_Vector.add ( __command._Sprinkler );
-    __IrrigationMethod_JComboBox = new SimpleJComboBox(false);
-    __IrrigationMethod_JComboBox.setData ( IrrigationMethod_Vector );
-    __IrrigationMethod_JComboBox.addItemListener (this);
-    JGUIUtil.addComponent(main_JPanel, __IrrigationMethod_JComboBox,
-    	1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(main_JPanel, new JLabel (
-        "Required - irrigation method for crops."),
-        3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
-    
-    if ( this.enableStateDMIPre050000 ) {
-    	// This does not appear to be needed for crop pattern TS so remove.
-    	JGUIUtil.addComponent(main_JPanel, new JLabel ("Supply type:"),
-       		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    	List<String> SupplyType_Vector = new Vector<String>(2);
-    	SupplyType_Vector.add ( __command._Ground );
-    	SupplyType_Vector.add ( __command._Surface );
-    	__SupplyType_JComboBox = new SimpleJComboBox(false);
-    	__SupplyType_JComboBox.setData ( SupplyType_Vector );
-    	__SupplyType_JComboBox.addItemListener (this);
-    	JGUIUtil.addComponent(main_JPanel, __SupplyType_JComboBox,
-    		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-    	JGUIUtil.addComponent(main_JPanel, new JLabel (
-        	"Required - supply type for crops."),
-        	3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
-    }
- 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Set to missing:"),
    		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List<String> SetToMissing_Vector = new Vector<String>(3);
-    SetToMissing_Vector.add ( "" );
-    SetToMissing_Vector.add ( __command._True );
-    SetToMissing_Vector.add ( __command._False );
+    List<String> SetToMissingList = new ArrayList<>(3);
+    SetToMissingList.add ( "" );
+    SetToMissingList.add ( __command._True );
+    SetToMissingList.add ( __command._False );
     __SetToMissing_JComboBox = new SimpleJComboBox(false);
-    __SetToMissing_JComboBox.setData ( SetToMissing_Vector );
+    __SetToMissing_JComboBox.setData ( SetToMissingList );
     __SetToMissing_JComboBox.addItemListener (this);
     JGUIUtil.addComponent(main_JPanel, __SetToMissing_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -370,12 +340,12 @@ private void initialize (JFrame parent, Command command )
         
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Process when:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List<String> process_when_Vector = new Vector<String>(3);
-	process_when_Vector.add ( "" );
-	process_when_Vector.add ( __command._Now );
-	process_when_Vector.add ( __command._WithParcels );
+    List<String> processWhenList = new ArrayList<>(3);
+	processWhenList.add ( "" );
+	processWhenList.add ( __command._Now );
+	processWhenList.add ( __command._WithParcels );
 	__ProcessWhen_JComboBox = new SimpleJComboBox(false);
-	__ProcessWhen_JComboBox.setData ( process_when_Vector );
+	__ProcessWhen_JComboBox.setData ( processWhenList );
 	__ProcessWhen_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __ProcessWhen_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -386,7 +356,7 @@ private void initialize (JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-    List<String> IfNotFound_List = new Vector<String>(4);
+    List<String> IfNotFound_List = new ArrayList<>(4);
     IfNotFound_List.add("");
 	IfNotFound_List.add ( __command._Ignore );
 	IfNotFound_List.add ( __command._Warn );
@@ -398,6 +368,53 @@ private void initialize (JFrame parent, Command command )
 	JGUIUtil.addComponent(main_JPanel, new JLabel (
 	   	"Optional - indicate action if no match is found (default=" + __command._Warn + ")."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
+
+    JGUIUtil.addComponent(main_JPanel, new JLabel (
+		"The following are used with StateDMI < 5.x.  Irrigation data are used when processing irrigation practice time series."),
+		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel (
+		"For StateDMI >= 5.x, the SetParcel*() commands can be used."),
+		0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Irrigation method:"),
+       		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    List<String> IrrigationMethodList = new ArrayList<>(3);
+    IrrigationMethodList.add ( "" );
+    IrrigationMethodList.add ( __command._Flood );
+    IrrigationMethodList.add ( __command._Sprinkler );
+    __IrrigationMethod_JComboBox = new SimpleJComboBox(false);
+    __IrrigationMethod_JComboBox.setData ( IrrigationMethodList );
+    __IrrigationMethod_JComboBox.addItemListener (this);
+    JGUIUtil.addComponent(main_JPanel, __IrrigationMethod_JComboBox,
+    	1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel (
+        "Used with StateDMI < 5.x - irrigation method for crops."),
+        3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+    
+    if ( this.enableStateDMIPre050000 ) {
+    	// TODO smalers 2021-01-18 not needed for crop pattern TS
+    	JGUIUtil.addComponent(main_JPanel, new JLabel ("Supply type:"),
+       		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    	List<String> SupplyTypeList = new ArrayList<>(3);
+    	SupplyTypeList.add ( "" );
+    	SupplyTypeList.add ( __command._Ground );
+    	SupplyTypeList.add ( __command._Surface );
+    	__SupplyType_JComboBox = new SimpleJComboBox(false);
+    	__SupplyType_JComboBox.setToolTipText("Used with StateDMI < 5.x - see command documentation.");
+    	__SupplyType_JComboBox.setData ( SupplyTypeList );
+    	__SupplyType_JComboBox.addItemListener (this);
+    	JGUIUtil.addComponent(main_JPanel, __SupplyType_JComboBox,
+    		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    	JGUIUtil.addComponent(main_JPanel, new JLabel (
+        	"Used with StateDMI < 5.x - supply type for crops."),
+        	3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+    }
+
+    JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
+        0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"), 
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);

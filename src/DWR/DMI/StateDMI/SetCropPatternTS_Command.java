@@ -204,7 +204,7 @@ throws InvalidCommandParameterException
 				message, "Specify the irrigation method as " + _Flood + " or " + _Sprinkler + ".") );
 	}
 	
-	/* TODO smalers 2020-02-15 Only if StateDMI before 5.00.00
+	// TODO smalers 2020-02-15 Only if StateDMI before 5.00.00
 	String SupplyType = parameters.getValue ( "SupplyType" );
 	if ( (SupplyType != null) && !SupplyType.equalsIgnoreCase(_Ground) &&
 		!SupplyType.equalsIgnoreCase(_Surface) ) {
@@ -214,9 +214,8 @@ throws InvalidCommandParameterException
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Specify the supply type as " + _Ground + " or " + _Surface + ".") );
 	}
-	*/
 
-	String SupplyType = parameters.getValue ( "SupplyType" );
+	// TODO smalers 2021-01-18 need to get this to show up in command status.
 	if ( (SupplyType != null) && !SupplyType.isEmpty() ) {
 		message = "The SupplyType parameter (" + SupplyType + ") is not used for StateDMI version >= 5.00.00 - ignoring.";
 		// Don't increment the warning because it will cause the command to not be run.
@@ -343,8 +342,8 @@ CommandWarningException, CommandException
 	}
 	//String CropPattern = parameters.getValue ( "CropPattern" ); parsed in checkCommandParameters
 	String IrrigationMethod = parameters.getValue ( "IrrigationMethod" );
-	// TODO smalers 2020-02-15 Only if before StateDMI 5.00.00
-	//String SupplyType = parameters.getValue ( "SupplyType" );
+	// TODO smalers 2020-02-15 not needed for StateDMI 5+
+	String SupplyType = parameters.getValue ( "SupplyType" );
 	String SetToMissing = parameters.getValue ( "SetToMissing" );
 	boolean SetToMissing_boolean = false;
 	if ( (SetToMissing == null) || SetToMissing.equals("") ) {
