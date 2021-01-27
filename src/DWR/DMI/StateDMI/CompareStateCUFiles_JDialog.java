@@ -406,11 +406,11 @@ private void initialize (JFrame parent, Command command )
 			"Optional - number of digits to compare (default=3)."),
 			3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 	}
-	else if ( command instanceof CompareCropPatternTSFiles_Command ) {
+	else if ( command instanceof CompareIrrigationPracticeTSFiles_Command ) {
 		JGUIUtil.addComponent(main_JPanel, new JLabel ("Precision:"),
 			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 		__Precision_JTextField = new JTextField (10);
-		__Precision_JTextField.setToolTipText("Number of digits after decimal to compare irrigated area values.  The precision to compare efficincy values defaults to 2.");
+		__Precision_JTextField.setToolTipText("Number of digits after decimal to compare irrigated area values.  The precision to compare efficiency values defaults to 2.");
 		__Precision_JTextField.addKeyListener (this);
 		JGUIUtil.addComponent(main_JPanel, __Precision_JTextField,
 			1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);

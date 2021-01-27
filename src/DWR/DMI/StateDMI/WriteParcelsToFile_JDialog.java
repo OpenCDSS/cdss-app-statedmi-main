@@ -339,7 +339,7 @@ private void initialize (JFrame parent, WriteParcelsToFile_Command command )
 	verboseList.add ( __command._False );
 	verboseList.add ( __command._True );
 	__Verbose_JComboBox = new SimpleJComboBox(false);
-	__Verbose_JComboBox.setToolTipText("Used with ModelParcelSupply. If True, all supplies assoicated with parcels are listed."
+	__Verbose_JComboBox.setToolTipText("Used with ModelParcelSupply. If True, all supplies associated with parcels are listed."
 		+ "  If False, groundwater only model nodes will not include parcels with surface water supply.");
 	__Verbose_JComboBox.setData ( verboseList );
 	__Verbose_JComboBox.addItemListener (this);

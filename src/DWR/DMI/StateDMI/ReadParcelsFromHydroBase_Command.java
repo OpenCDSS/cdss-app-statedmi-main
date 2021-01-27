@@ -44,6 +44,7 @@ import DWR.StateCU.StateCU_SupplyFromGW;
 import DWR.StateCU.StateCU_SupplyFromSW;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
+import RTi.DMI.DMIUtil;
 import RTi.Util.IO.AbstractCommand;
 import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandException;
@@ -740,7 +741,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										//Message.printStatus ( 2, routine, "  Reading structure view for structure_num " +
 										//	hbWell.getStructure_num() + " took " + sw.getMilliseconds() + " ms");
 										// Can't set generic ID because association is ditch -> parcel -> well, not requested collection part
-										supplyFromGW.setWDID(HydroBase_WaterDistrict.formWDID( hbWell.getWD(), hbWell.getID()) );
+										if ( hbWell.getID() <= 0 ) {
+											// WDID not not available
+											supplyFromGW.setWDID("");
+										}
+										else {
+											supplyFromGW.setWDID(HydroBase_WaterDistrict.formWDID( hbWell.getWD(), hbWell.getID()) );
+										}
 										supplyFromGW.setReceipt(hbWell.getReceipt());
 										parcel.addSupply(supplyFromGW);
 									}
@@ -949,7 +956,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										//	hbWell.getStructure_num() + " took " + sw.getMilliseconds() + " ms");
 										// 
 										// Can't set generic ID because association is ditch -> parcel -> well, not requested collection part
-										supplyFromGW.setWDID(HydroBase_WaterDistrict.formWDID( hbWell.getWD(), hbWell.getID()) );
+										if ( hbWell.getID() <= 0 ) {
+											// WDID not not available
+											supplyFromGW.setWDID("");
+										}
+										else {
+											supplyFromGW.setWDID(HydroBase_WaterDistrict.formWDID( hbWell.getWD(), hbWell.getID()) );
+										}
 										supplyFromGW.setReceipt(hbWell.getReceipt());
 										parcel.addSupply(supplyFromGW);
 									}

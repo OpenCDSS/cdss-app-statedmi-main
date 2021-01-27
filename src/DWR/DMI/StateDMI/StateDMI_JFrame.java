@@ -960,8 +960,9 @@ private JMenuItem
 	__Commands_StateCU_CropPatternTS_SortCropPatternTS_JMenuItem,
 	__Commands_StateCU_CropPatternTS_CompareCropPatternTSFiles_JMenuItem,
 	__Commands_StateCU_CropPatternTS_WriteCropPatternTSToStateCU_JMenuItem,
-	__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_JMenuItem,
-	__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_JMenuItem;
+	__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_JMenuItem;
+	// TODO smalers 2021-01-24 - used for supplemental data?  Not sure if it was fully ever implemented.
+	//__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_JMenuItem;
 private JMenu
 	__Commands_StateCU_IrrigationPracticeTS_JMenu;
 private JMenuItem
@@ -1965,7 +1966,8 @@ private String
 	__Commands_StateCU_CropPatternTS_SortCropPatternTS_String = "SortCropPatternTS() ...",
 	__Commands_StateCU_CropPatternTS_WriteCropPatternTSToStateCU_String = "WriteCropPatternTSToStateCU() ...",
 	__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_String = "WriteCropPatternTSToDateValue() ...",
-	__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_String = "WriteCropPatternParcelsToFile() ...",
+	// TODO smalers 2021-01-24 - used for supplemental data?  Not sure if it was fully ever implemented.
+	//__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_String = "WriteCropPatternParcelsToFile() ...",
 	__Commands_StateCU_CropPatternTS_CompareCropPatternTSFiles_String = "CompareCropPatternTSFiles() ...",
 	__Commands_StateCU_CropPatternTS_CheckCropPatternTS_String = "CheckCropPatternTS() ...",
 
@@ -3725,11 +3727,14 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_String,
 		null, __INSERT_COMMAND);
 	}
+	// TODO smalers 2021-01-24 - used for supplemental data?  Not sure if it was fully ever implemented.
+    /*
 	else if (o ==__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_JMenuItem) {
 		// Write CU crop pattern parcel data to file...
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_String,
 		null, __INSERT_COMMAND);
 	}
+	*/
 	else if ( action.equals(__Commands_StateCU_CropPatternTS_CompareCropPatternTSFiles_String)) {
 		// Compare crop pattern time series files...
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_CompareCropPatternTSFiles_String,
@@ -11083,9 +11088,12 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 		Commands_StateCU_CropPatternTS_JMenu.add(
 			__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_String,this));
+		// TODO smalers 2021-01-24 - used for supplemental data?  Not sure if it was fully ever implemented.
+		/*
 		Commands_StateCU_CropPatternTS_JMenu.add(
 			__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_String,this));
+		*/
 		Commands_StateCU_CropPatternTS_JMenu.addSeparator();
 		Commands_StateCU_CropPatternTS_JMenu.add(
 			__Commands_StateCU_CropPatternTS_CompareCropPatternTSFiles_JMenuItem =
