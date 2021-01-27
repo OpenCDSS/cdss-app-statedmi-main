@@ -340,7 +340,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		}
 	}
 
-	// Get the list of well stations...
+	// Get the list of CU locationss...
 	
 	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
@@ -566,10 +566,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		DateTime year_DateTime = new DateTime(DateTime.PRECISION_YEAR);
 
 		// The divisions are needed for well collections specified with WDIDS and receipts.
+		String divListString = "UNKNOWN";
 		if ( (Div_array == null) || (Div_array.length == 0) ) {
 			// Get the divisions from the list of structures
 			// - split WDIDs and then lookup division from WD
-			Message.printStatus(2, routine, "Determining division list from CU location identifiers.");
+			Message.printStatus(2, routine, "Divisions were not specified as a command parameter.");
+			Message.printStatus(2, routine, "Determining division list from CU location identifiers that are WDIDs (used to determine available parcel years).");
 			int [] wdidParts;
 			List<Integer> divList = new ArrayList<>(); // List of divisions determined from WDID list
 			List<HydroBase_WaterDistrict> wdList = hbdmi.getWaterDistricts(); // All water districts
@@ -594,19 +596,22 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					}
 				}
 			}
-			// Now convert to an array for use in following code
-			Div_array = new int[divList.size()];
-			for ( int i = 0; i < Div_array.length; i++ ) {
-				Div_array[i] = divList.get(i).intValue();
-				Message.printStatus(2, routine, "Will process division " + Div_array[i] + " for irrigated acreage.");
+			if ( divList.size() > 0 ) {
+				// Convert to an array for use in following code.
+				Div_array = new int[divList.size()];
+				for ( int i = 0; i < Div_array.length; i++ ) {
+					Div_array[i] = divList.get(i).intValue();
+					Message.printStatus(2, routine, "Will process division " + Div_array[i] + " for irrigated acreage.");
+					// Format the string for logging.
+					if ( i == 0 ) {
+						divListString += ", ";
+					}
+					divListString += Div_array[i];
+				}
 			}
-		}
-		String divListString = "";
-		for ( int i = 0; i < Div_array.length; i++ ) {
-			if ( i == 0 ) {
-				divListString += ", ";
+			else {
+				Message.printStatus(2, routine, "Will process NO DIVISIONS for irrigated acreage (this is likly an error in input).");
 			}
-			divListString += Div_array[i];
 		}
 		
 		// Get the parcel years that are available for the divisions of interest
@@ -961,6 +966,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					processing_ditches = false;
 					Message.printStatus ( 2, routine, "Processing well aggregate/system \"" + culoc_id +
 						"\" using list of WDID/permit receipt for parts." );
+					// TODO smalers 2020-01-24 this code is not fully functional given migration to new
+					// ReadCropPatternTSFromParcels command.
+					// - zero results will likely be returned.
+					message = "CU location \"" + culoc_id + "\" is attempting to process well-only location, "
+							+ "which is not supported by StateDMI 5.x+.  Results will likely be empty or inaccurate.";
+					Message.printWarning ( warningLevel, 
+				        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+			        status.addToLog ( commandPhase,
+			            new CommandLogRecord(CommandStatusType.FAILURE, message,
+			            	"Use the ReadCropPatternTSFromParcels command instead." ) );
 					// The collection definitions are the same each year (same list of wells throughout the period).
 					// If the period is provided then the start and end are known.
 					// However, don't want to requery data every year because that will be slow.
@@ -985,7 +1000,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							// Get the vw_CDSS_WellsWellToParcel records, which tie well WDID and permit number to parcel.
 							// This will give the list of parcels to process.
 							int iPart = -1;
-							StateCU_Location_CollectionPartIdType partIdType; // Part type for specifid ID, idicates whether WDID or receipt
+							StateCU_Location_CollectionPartIdType partIdType; // Part type for specified ID, indicates whether WDID or receipt
 							for ( String partId : partIdList ) {
 								++iPart;
 								partIdType = partIdTypeList.get(iPart);

@@ -213,23 +213,19 @@ throws InvalidCommandParameterException
 		}
 	}
 
-	if ( (this instanceof CompareCropPatternTSFiles_Command) ) {
-		if ( (Precision != null) && !Precision.isEmpty() && !StringUtil.isInteger(Precision) ) {
-	        message = "The value for Precision (" + Precision + ") is invalid.";
-	        warning += "\n" + message;
-	        status.addToLog ( CommandPhaseType.INITIALIZATION,
-	            new CommandLogRecord(CommandStatusType.FAILURE,
-	                message, "Specify Precision as an integer" ) );
-		}
+	if ( (Precision != null) && !Precision.isEmpty() && !StringUtil.isInteger(Precision) ) {
+        message = "The value for Precision (" + Precision + ") is invalid.";
+        warning += "\n" + message;
+        status.addToLog ( CommandPhaseType.INITIALIZATION,
+            new CommandLogRecord(CommandStatusType.FAILURE,
+                message, "Specify Precision as an integer" ) );
 	}
 
 	// Check for invalid parameters...
 	List<String> validList = new ArrayList<>();
 	validList.add ( "InputFile1" );
 	validList.add ( "InputFile2" );
-	if ( this instanceof CompareCropPatternTSFiles_Command ) {
-		validList.add ( "Precision" );
-	}
+	validList.add ( "Precision" );
     warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	// Throw an InvalidCommandParameterException in case of errors.
@@ -271,6 +267,25 @@ protected File getInputFile2 ()
 
 // Parent parseCommmand is used
 
+private void printDiffSummary ( String routine, List<String> diffIds, List<Integer> diffCount, List<String> diffText ) {
+	Message.printStatus(2, routine, "");
+	Message.printStatus(2, routine, "Difference count (only locations with differences are listed):");
+	Message.printStatus(2, routine, "");
+	if ( diffIds.size() == 0 ) {
+		Message.printStatus(2, routine, "No differences.");
+	}
+	else {
+		Message.printStatus(2, routine, "             Difference");
+		Message.printStatus(2, routine, "ID           Count");
+		Message.printStatus(2, routine, "------------ ----------");
+		for ( int i = 0; i < diffIds.size(); i++ ) {
+			Message.printStatus(2, routine, String.format("%-12.12s %5d", diffIds.get(i), diffCount.get(i)));
+		}
+		Message.printStatus(2, routine, "------------ ----------");
+		Message.printStatus(2, routine, String.format("%5d        %5d", diffIds.size(), diffText.size()));
+	}
+}
+
 /**
 Run method internal to this class, to handle running in discovery and run mode.
 @param command_number Command number 1+ from processor.
@@ -294,11 +309,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     String InputFile2 = parameters.getValue ( "InputFile2" );
 
     int precision = 3;
-	if ( this instanceof CompareCropPatternTSFiles_Command ) {
-		String Precision = parameters.getValue ( "Precision" );
-		if ( (Precision != null) && !Precision.isEmpty() ) {
-			precision = Integer.parseInt(Precision);
-		}
+	String Precision = parameters.getValue ( "Precision" );
+	if ( (Precision != null) && !Precision.isEmpty() ) {
+		precision = Integer.parseInt(Precision);
 	}
     
     if ( warning_count > 0 ) {
@@ -359,6 +372,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
             throw new CommandException ( message );
     	}
     	
+		List<String> diffText = new ArrayList<>();
+		List<String> diffIds = new ArrayList<>();
+		List<Integer> diffCount = new ArrayList<>();
 		if ( this instanceof CompareCropPatternTSFiles_Command ) {
 	        Message.printStatus ( 2, routine, "Comparing StateCU CropPatternTS files \"" +
 	        	InputFile1_full + "\" and \"" + InputFile2_full + "\"" );
@@ -372,7 +388,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			// Compare the two lists.
 
 			StateCU_CropPatternTS cds2 = null;
-			List<String> diffText = new ArrayList<>();
 			for ( StateCU_CropPatternTS cds1 : cdsList1 ) {
 				// Find the matching object in the second list
 				int pos = StateCU_Util.indexOf(cdsList2, cds1.getID());
@@ -385,17 +400,22 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				// The following handles nulls
 				List<String> diffText1 = StateCU_CropPatternTS.compare(cds1, cds2, precision);
 				diffText.addAll(diffText1);
+				if ( diffText1.size() > 0 ) {
+					diffIds.add(cds1.getID());
+					diffCount.add(new Integer(diffText1.size()));
+				}
 			}
 			
+			message = "Have " + diffText.size() + " differences between \"" +
+				InputFile1_full + "\" and \"" + InputFile2_full + "\"";
 			if ( diffText.size() > 0 ) {
-				message = "Have " + diffText.size() + " differences between \"" +
-					InputFile1_full + "\" and \"" + InputFile2_full + "\"";
 				Message.printWarning ( warning_level, 
 					MessageUtil.formatMessageTag(command_tag, ++warning_count),
 					routine, message );
 				status.addToLog ( command_phase,
 					new CommandLogRecord(CommandStatusType.WARNING,
 						message, "See log file for details." ) );
+				printDiffSummary(routine, diffIds, diffCount, diffText);
 				for ( String text : diffText ) {
 					Message.printStatus(2, routine, text);
 				}
@@ -414,7 +434,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			// Compare the two lists.
 
 			StateCU_IrrigationPracticeTS ipy2 = null;
-			List<String> diffText = new ArrayList<>();
 			for ( StateCU_IrrigationPracticeTS ipy1 : ipyList1 ) {
 				// Find the matching object in the second list
 				int pos = StateCU_Util.indexOf(ipyList2, ipy1.getID());
@@ -427,17 +446,23 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				// The following handles nulls
 				List<String> diffText1 = StateCU_IrrigationPracticeTS.compare(ipy1, ipy2, precision);
 				diffText.addAll(diffText1);
+				if ( diffText1.size() > 0 ) {
+					diffIds.add(ipy1.getID());
+					diffCount.add(new Integer(diffText1.size()));
+				}
 			}
 			
+			message = "Have " + diffText.size() + " differences between \"" +
+				InputFile1_full + "\" and \"" + InputFile2_full + "\"";
 			if ( diffText.size() > 0 ) {
-				message = "Have " + diffText.size() + " differences between \"" +
-					InputFile1_full + "\" and \"" + InputFile2_full + "\"";
 				Message.printWarning ( warning_level, 
 					MessageUtil.formatMessageTag(command_tag, ++warning_count),
 					routine, message );
 				status.addToLog ( command_phase,
 					new CommandLogRecord(CommandStatusType.WARNING,
 						message, "See log file for details." ) );
+				printDiffSummary(routine, diffIds, diffCount, diffText);
+				Message.printStatus(2, routine, "");
 				for ( String text : diffText ) {
 					Message.printStatus(2, routine, text);
 				}
@@ -506,13 +531,11 @@ public String toString ( PropList parameters )
 			}
 		b.append ( "InputFile2=\"" + InputFile2 + "\"" );
 	}
-	if ( this instanceof CompareCropPatternTSFiles_Command ) {
-		if ( (Precision != null) && (Precision.length() > 0) ) {
-			if ( b.length() > 0 ) {
-				b.append ( ",");
-			}
-			b.append ( "Precision=" + Precision );
+	if ( (Precision != null) && (Precision.length() > 0) ) {
+		if ( b.length() > 0 ) {
+			b.append ( ",");
 		}
+		b.append ( "Precision=" + Precision );
 	}
 	
 	return getCommandName() + "(" + b.toString() + ")";

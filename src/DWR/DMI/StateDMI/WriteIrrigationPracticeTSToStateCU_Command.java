@@ -327,12 +327,14 @@ private void checkIrrigationPracticeTS ( List<StateCU_IrrigationPracticeTS> tsli
 			// Only check if both values are non-missing.  Otherwise there are a lot of nuisance warnings.
 			if ( (calculated_total >= 0.0) && (AcresTotal_double >= 0.0) &&
 				Math.abs(calculated_total - AcresTotal_double) > tolerance ) {
+				String format = "%." + precision + "f";
 				status.addToLog ( CommandPhaseType.RUN,
 					new CommandLogRecord(CommandStatusType.FAILURE,
 						"Location \"" + id + "\" acreage terms do not add to total in " +
 						date.getYear() + ".  Total of parts = " +
-						StringUtil.formatString(calculated_total,"%."+precision+"f") +
-						" Total value in IPY = " + StringUtil.formatString(AcresTotal_double,"%."+precision+"f"),
+						StringUtil.formatString(calculated_total,format) +
+						" Total value in IPY = " + StringUtil.formatString(AcresTotal_double,format) +
+						", differerence = " + StringUtil.formatString((AcresTotal_double - calculated_total), format),
 						"Verify data processing." ) );
 			}
 		}

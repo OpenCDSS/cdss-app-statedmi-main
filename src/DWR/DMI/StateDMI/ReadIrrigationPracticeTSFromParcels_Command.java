@@ -143,11 +143,12 @@ public static void processIrrigationPracticeTSParcel (
 		isHighEfficiency = true;
 	}
 	
-	// Total acres are incremented using CDS logic.
+	// Total acres are incremented using ReadCropPatternTSFromParcels logic.
 	// - if surface parcel has surface water supply and CU Location matches, update
 	// - else groundwater only so update if CU Location matches
 
 	if ( parcel.hasSurfaceWaterSupply() && !culoc.hasGroundwaterOnlySupply() ) {
+		// DIV or D&W
 		if ( supply.isSurfaceWater() ) {
 			// May also have groundwater supply, but only count surface water in the total, similar to CDS.
 			if ( idIsIn ) {
@@ -156,7 +157,7 @@ public static void processIrrigationPracticeTSParcel (
 					ipyts.setTacre ( parcelYear, areaIrrigFromSupply );
 				}
 				else {
-					ipyts.setTacre ( parcelYear, ipyts.getTacre(parcelYear) + areaIrrigFromSupply );
+					ipyts.setTacre ( parcelYear, (ipyts.getTacre(parcelYear) + areaIrrigFromSupply) );
 				}
 				Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
 					" parcelId=" + parcelId + " added SW WDID=" + supplyFromSW.getWDID() +
@@ -165,8 +166,17 @@ public static void processIrrigationPracticeTSParcel (
 			}
 		}
 	}
-	else if ( culoc.hasGroundwaterOnlySupply() ) {
-		// Groundwater only
+	else if ( parcel.hasSurfaceWaterSupply() && culoc.hasGroundwaterOnlySupply() ) {
+		// WEL location parcel that has surface water supply.
+		// The acreage will have been added to the D&W node above, for the appropriate location.
+		// No need to do anything.  The parcel will be skipped for the location.
+		Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " +
+			parcel.getID() + " has groundwater only for model, is WEL.");
+		Message.printStatus(2, routine, "  Skipping parcel because has surface supply (will have been added to a D&W).");
+	}
+	//else if ( culoc.hasGroundwaterOnlySupply() ) {
+	else if ( !parcel.hasSurfaceWaterSupply() && culoc.hasGroundwaterOnlySupply() ) {
+		// WEL location with groundwater only supply
 		if ( supply.isGroundWater() ) {
 			// Should always be the case
 			if ( idIsIn ) {
@@ -176,7 +186,7 @@ public static void processIrrigationPracticeTSParcel (
 					ipyts.setTacre ( parcelYear, areaIrrigFromSupply );
 				}
 				else {
-					ipyts.setTacre ( parcelYear, ipyts.getTacre(parcelYear) + areaIrrigFromSupply );
+					ipyts.setTacre ( parcelYear, (ipyts.getTacre(parcelYear) + areaIrrigFromSupply) );
 				}
 				Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
 					" parcelId=" + parcelId + " added GW WDID=" + supplyFromGW.getWDID() +
@@ -213,42 +223,58 @@ public static void processIrrigationPracticeTSParcel (
 		if ( isHighEfficiency ) {
 			// Sprinkler or drip irrigation
 			if ( ipyts.getAcgwspr(parcelYear) < 0.0 ) {
-				ipyts.setAcgwspr ( parcelYear, areaIrrigFromSupply*dwFactor );
+				// TODO smalers 2020-01-23 actually the number of ditches is already accounted for in areaIrrigFromSupply.
+				// - therefore, don't multiply by dwFactor here
+				//ipyts.setAcgwspr ( parcelYear, areaIrrigFromSupply*dwFactor );
+				ipyts.setAcgwspr ( parcelYear, areaIrrigFromSupply );
 			}
 			else {
-				ipyts.setAcgwspr ( parcelYear, ipyts.getAcgwspr(parcelYear) + areaIrrigFromSupply*dwFactor );
+				// TODO smalers 2020-01-23 actually the number of ditches is already accounted for in areaIrrigFromSupply.
+				// - therefore, don't multiply by dwFactor here
+				//ipyts.setAcgwspr ( parcelYear, ipyts.getAcgwspr(parcelYear) + areaIrrigFromSupply*dwFactor );
+				ipyts.setAcgwspr ( parcelYear, ipyts.getAcgwspr(parcelYear) + areaIrrigFromSupply );
 			}
 			if ( parcel.getSupplyFromSWCount() > 0 ) {
 				Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
 					" parcelId=" + parcelId +" added D&W well " +
-					StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW sprinkler area, result = " +
+					//StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW sprinkler area, result = " +
+					StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to GW sprinkler area, result = " +
 					StringUtil.formatString(ipyts.getAcgwspr(parcelYear),"%.2f") );
 			}
 			else {
 				Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
 					" parcelId=" + parcelId +" added WEL well " +
-					StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW sprinkler area, result = " +
+					//StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW sprinkler area, result = " +
+					StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to GW sprinkler area, result = " +
 					StringUtil.formatString(ipyts.getAcgwspr(parcelYear),"%.2f") );
 			}
 		}
 		else {
 			// Flood irrigation
 			if ( ipyts.getAcgwfl(parcelYear) < 0.0 ) {
-				ipyts.setAcgwfl ( parcelYear, areaIrrigFromSupply*dwFactor );
+				// TODO smalers 2020-01-23 actually the number of ditches is already accounted for in areaIrrigFromSupply.
+				// - therefore, don't multiply by dwFactor here
+				//ipyts.setAcgwfl ( parcelYear, areaIrrigFromSupply*dwFactor );
+				ipyts.setAcgwfl ( parcelYear, areaIrrigFromSupply );
 			}
 			else {
-				ipyts.setAcgwfl ( parcelYear, ipyts.getAcgwfl(parcelYear) + areaIrrigFromSupply*dwFactor );
+				// TODO smalers 2020-01-23 actually the number of ditches is already accounted for in areaIrrigFromSupply.
+				// - therefore, don't multiply by dwFactor here
+				//ipyts.setAcgwfl ( parcelYear, ipyts.getAcgwfl(parcelYear) + areaIrrigFromSupply*dwFactor );
+				ipyts.setAcgwfl ( parcelYear, ipyts.getAcgwfl(parcelYear) + areaIrrigFromSupply );
 			}
 			if ( parcel.getSupplyFromSWCount() > 0 ) {
 				Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
 					" parcelId=" + parcelId +" added D&W well " +
-					StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW flood area, result = " +
+					//StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW flood area, result = " +
+					StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to GW flood area, result = " +
 					StringUtil.formatString(ipyts.getAcgwfl(parcelYear),"%.2f") );
 			}
 			else {
 				Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
 					" parcelId=" + parcelId +" added WEL well" +
-					StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW flood area, result = " +
+					//StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW flood area, result = " +
+					StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to GW flood area, result = " +
 					StringUtil.formatString(ipyts.getAcgwfl(parcelYear),"%.2f") );
 			}
 		}

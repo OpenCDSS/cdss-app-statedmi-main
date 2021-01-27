@@ -35,6 +35,7 @@ import DWR.DMI.HydroBaseDMI.HydroBase_AdministrationNumber;
 import DWR.DMI.HydroBaseDMI.HydroBase_NetAmts;
 import DWR.DMI.HydroBaseDMI.HydroBase_NetAmts_CollectionPartIdType;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
+import DWR.DMI.HydroBaseDMI.HydroBase_WaterDivision;
 import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import DWR.StateCU.StateCU_Parcel;
@@ -207,6 +208,32 @@ protected static void findAndAddSMWellRight ( List<StateMod_WellRight> SMWellRig
 			}
 			SMWellRight_Vector.add ( pos, wellr );
 		}
+	}
+}
+
+/**
+ * Get the water district from a location ID.
+ * If the location ID seems to be a WD, return the first 2 digits.
+ * Else if the first 2 characters are digits, return them.
+ * Else return -1.
+ * @param id the identifier to examine
+ */
+public static int getWaterDistrictFromID(String id) {
+	if ( HydroBase_WaterDistrict.isWDID(id) ) {
+		try {
+			int [] parts = HydroBase_WaterDistrict.parseWDID(id);
+			return parts[0];
+		}
+		catch ( Exception e ) {
+			return -1;
+		}
+	}
+	else if ( (id.length() >= 2) && Character.isDigit(id.charAt(0)) && Character.isDigit(id.charAt(1)) ) {
+		Integer wd = Integer.parseInt(id.substring(0,2));
+		return wd.intValue();
+	}
+	else {
+		return -1;
 	}
 }
 
@@ -968,6 +995,43 @@ protected static int readParcelUseTSFromHydroBaseWellsHelper (
 	// Add to the return list and return the error count...
 	hbwellrList.add ( hbwellr );
 	return warningCount;
+}
+
+/**
+ * Get the lists of parcel year for each division.
+ * This can be used for modeling, for example to know which parcel years should
+ * be set to zero acres when data are missing at a location.
+ * Loop through all the divisions and get the distinct list of years with parcel data.
+ * TODO smalers 2021-01-25 in production the StateCU_Parcel.getParcelYearMapForDivisions() is used due to bad HydroBase data.
+ * @param hdmi HydroBaseDMI for queries.
+ * @param startYear start of period to include, -1 to include all.
+ * @param endYear end of period to include, -1 to include all.
+ */
+public static HashMap<Integer,List<Integer>> readParcelYearMapForDivisions ( HydroBaseDMI hdmi, int startYear, int endYear ) throws Exception {
+	HashMap<Integer,List<Integer>> parcelMap = new HashMap<>();
+	for ( int divPos = 0; divPos < HydroBase_WaterDivision.getDivisionNumbers().length; ++divPos ) {
+		int div = HydroBase_WaterDivision.getDivisionNumbers()[divPos];
+		List<Integer> yearList = new ArrayList<>();
+		int [] yearArray = readParcelYearListFromHydroBase(hdmi,div);
+		int year;
+		for ( int i = 0; i < yearArray.length; i++ ) {
+			year = yearArray[i];
+			if ( startYear >= 0 ) {
+				if ( year < startYear ) {
+					continue;
+				}
+			}
+			if ( endYear >= 0 ) {
+				if ( year > endYear ) {
+					continue;
+				}
+			}
+			yearList.add(new Integer(year));
+		}
+		Collections.sort(yearList);
+		parcelMap.put(new Integer(div), yearList);
+	}
+	return parcelMap;
 }
 
 /**
