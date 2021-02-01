@@ -492,7 +492,7 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 
 		// Groundwater fields - data source and include align with  surface water and then space over to groundwater columns
 		String format_3 = "                                                                                                        %-8.8s %-8.8s %-12.12s %-4.4s             " +
-			"                                                  %-12.12s %-7.7s %-8.8s %-10.10s %4d %5.3f %9.3f";
+			"                                                  %-12.12s %-7.7s %-8.8s %-10.10s %4d %5.3f %5.5s %9.3f";
 
 		// Size to largest size
 		List<Object> objectList = new ArrayList<>(8);
@@ -590,8 +590,9 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 		out.println(cmnt + "    - the collection part ID (WDID or receipt) is the same as the parcel supply ID");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
 		out.println(cmnt + "  GWPart Type  :  Water supply part type (Well or Parcel, the latter being phased out).");
-		out.println(cmnt + "                  WellInDitch = indicates a collection of ditches (D&W), with associated wells determined.");
-		out.println(cmnt + "                                automatically based well -> parcel -> ditch relationship.");
+		out.println(cmnt + "                  WellInDitch = indicates a collection of ditches (D&W)");
+		out.println(cmnt + "                  - associated wells are determined automatically based well -> parcel -> ditch relationship.");
+		out.println(cmnt + "                  - the assoicated ditch is either the locId if single ditch or see previous SW supply line.");
 		out.println(cmnt + "                  Well = indicates a collection of wells (WEL) specified using well identifiers.");
 		out.println(cmnt + "                  Parcel = indicates a collection of wells (WEL) specified using parcel identifiers.");
 		out.println(cmnt + "  GWPart IdType:  Water supply part ID type (WDID or RECEIPT).");
@@ -607,14 +608,14 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
 		out.println(cmnt + "  #Wells       :  Number of wells that are associated with ParcelId.");
 		out.println(cmnt + "  Irrig Frac   :  1/#Wells = fraction of ParcelArea (from above) that is irrigated by the well (0.0 to 1.0).");
-		//out.println(cmnt + "  D&W Frac     :  Same as D&W Irrig Frac, applied when well supply is supplemental to ditch.");
+		out.println(cmnt + "  D&W Frac     :  Same as D&W Irrig Frac, applied when well supply is supplemental to ditch.");
 		out.println(cmnt + "  Irrig Area   :  ParcelArea * Irrig Frac (* D&W Frac), zero if parcel has surface water supply for D&W node.");
 		out.println(cmnt);
-		out.println(cmnt + "-------- Model Id ---------|------------------------------- Parcel Data -----------------------------||----------- Data Source/Use ------------- ||            Collections use WDID Parts              |       WEL Collection Part ID is the same as GW Supply ID    |");
-		out.println(cmnt + "                           |                                                                         || Include                    CDS     LocId || SW     |-------------- SW Supply Data -------------|----------- GW Collection Data ---------|-- GW Supply Data --|");
-		out.println(cmnt + "           Loc  Collection |       Parcel                                    Parcel          Irrig   || in               CDS       LocId   has   || Collect|#     Ditch  Irrig Irrig   Irrig           |   GWPart    GWPart    Well     Well    |#    Irrig   Irrig  |");
-		out.println(cmnt + "  LocId    Type Type       |Year   ID        Div Dist        Crop            Area     Units  Method  || CDS?    DataSrc  LocId     Type    Set   || WDID   |Dit   WDID   Frac  FracHB  Area     HBError|    Type     IdType    WDID     Receipt |Well Frac    Area   |");
-		out.println(cmnt + "b--------exb--exb---------exb--exb--------exb--exb--exb------------------exb--------exb--exb--------exb------exb------exb----------exb--exb------exb------exb-exb------exb---exb---exb--------exb-----exb----------exb-----exb------exb--------exb--exb---exb-------ex");
+		out.println(cmnt + "-------- Model Id ---------|------------------------------- Parcel Data -----------------------------||----------- Data Source/Use ------------- ||            Collections use WDID Parts              |          WEL Collection Part ID is the same as GW Supply ID       |");
+		out.println(cmnt + "                           |                                                                         || Include                    CDS     LocId || SW     |-------------- SW Supply Data -------------|----------- GW Collection Data ---------|----- GW Supply Data -----|");
+		out.println(cmnt + "           Loc  Collection |       Parcel                                    Parcel          Irrig   || in               CDS       LocId   has   || Collect|#     Ditch  Irrig Irrig   Irrig           |   GWPart    GWPart    Well     Well    |#    Irrig D&W     Irrig  |");
+		out.println(cmnt + "  LocId    Type Type       |Year   ID        Div Dist        Crop            Area     Units  Method  || CDS?    DataSrc  LocId     Type    Set   || WDID   |Dit   WDID   Frac  FracHB  Area     HBError|    Type     IdType    WDID     Receipt |Well Frac  Frac    Area   |");
+		out.println(cmnt + "b--------exb--exb---------exb--exb--------exb--exb--exb------------------exb--------exb--exb--------exb------exb------exb----------exb--exb------exb------exb-exb------exb---exb---exb--------exb-----exb----------exb-----exb------exb--------exb--exb---exb---exb-------ex");
 		out.println(cmnt + "EndHeader");
 		out.println(cmnt);
 	
@@ -757,14 +758,14 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 						objectList.add(supplyFromGW.getReceipt());
 						objectList.add(new Integer(parcel.getSupplyFromGWCount()));
 						objectList.add(new Double(1.0/parcel.getSupplyFromGWCount()));
-						// TODO smalers 2020-01-23 DW fraction is not used, removed when checks out
-						//if ( parcel.getSupplyFromSWCount() > 0 ) {
-						//	// Format here as a string because can be a blank string if not a D&W
-						//	objectList.add(String.format("%5.3f", (1.0/parcel.getSupplyFromSWCount())));
-						//}
-						//else {
-						//	objectList.add("");
-						//}
+						// TODO smalers 2020-01-23 DW fraction is used in IPY calculations, removed when checks out
+						if ( parcel.getSupplyFromSWCount() > 0 ) {
+							// Format here as a string because can be a blank string if not a D&W
+							objectList.add(String.format("%5.3f", (1.0/parcel.getSupplyFromSWCount())));
+						}
+						else {
+							objectList.add("");
+						}
 						// The area does consider the D&W surface water split.
 						objectList.add(new Double(supplyFromGW.getAreaIrrig()));
 						printLine = StringUtil.formatString(objectList, format_3);

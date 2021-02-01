@@ -334,7 +334,11 @@ private void checkIrrigationPracticeTS ( List<StateCU_IrrigationPracticeTS> tsli
 						date.getYear() + ".  Total of parts = " +
 						StringUtil.formatString(calculated_total,format) +
 						" Total value in IPY = " + StringUtil.formatString(AcresTotal_double,format) +
-						", differerence = " + StringUtil.formatString((AcresTotal_double - calculated_total), format),
+						", differerence = " + StringUtil.formatString((AcresTotal_double - calculated_total), format) + 
+						".  AcSwFl=" + String.format("%.1f", AcresSWFlood_double) +
+						" AcSwSpr=" + String.format("%.1f", AcresSWSprinkler_double) +
+						" AcGwFl=" + String.format("%.1f", AcresGWFlood_double) +
+						" AcGwSpr=" + String.format("%.1f", AcresGWSprinkler_double),
 						"Verify data processing." ) );
 			}
 		}

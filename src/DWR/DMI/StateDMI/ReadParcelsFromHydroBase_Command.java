@@ -759,7 +759,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									}
 									*/
 
-									// Additionally, process the wells associated with the parcel for groundwater supply
+									// Additionally, process the wells associated with the parcel
+									// (which is associated with the ditch) for groundwater supply
 									// - this logic is the same as collection system below for wells
 									// - TODO smalers 2020-02-17 this code is similar to well aggregation so could make code modular and reuse
 									// - Multiple wells might irrigate the same parcel.
@@ -791,6 +792,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										supplyFromGW = new StateCU_SupplyFromGW();
 										supplyFromGW.setDataSource("HB-WTP");
 										supplyFromGW.setCollectionPartType("WellInDitch");
+										supplyFromGW.setAssociatedDitchCollectionID(culoc_id); // Single ditch WDID
 										double areaIrrigFraction = 1.0; // Well initially assumed to irrigate entire parcel
 										supplyFromGW.setAreaIrrigFraction(areaIrrigFraction);  // Well relationships don't use
 										supplyFromGW.setAreaIrrig(hbParcelUseTSStruct.getArea()*areaIrrigFraction);
@@ -1082,6 +1084,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										supplyFromGW = new StateCU_SupplyFromGW();
 										supplyFromGW.setDataSource("HB-WTP");
 										supplyFromGW.setCollectionPartType("WellInDitch");
+										supplyFromGW.setAssociatedDitchCollectionID(part_id); // Ditch part WDID
 										double areaIrrigFraction = 1.0; // Well initially assumed to irrigate entire parcel
 										supplyFromGW.setAreaIrrigFraction(areaIrrigFraction);  // Well relationships don't use
 										supplyFromGW.setAreaIrrig(hbParcelUseTSStruct.getArea()*areaIrrigFraction);
