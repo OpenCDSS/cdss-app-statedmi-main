@@ -483,15 +483,16 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 	
 		String printLine = null;
 		String cmnt = "#>";
-		String format_1 = "%-12.12s %-4.4s %-11.11s %4d %-10.10s %4d %4d %-20.20s %10.3f %-4.4s %-10.10s";
+		String format_1 =
+			"%-12.12s %-4.4s %-11.11s %4d %-10.10s %4d %4d %-20.20s %10.3f %-4.4s %-10.10s                                     %-8.8s";
 
 		// Surface water fields - space on the left to skip over above formatting
 		String format_2 = "                                                                                                        " +
-			"%-8.8s %-8.8s %-12.12s %-4.4s %-6.6s %-6.6s %-8.8s %3d %5.3f %5.3f %10.3f %-7.7s";
+			"%-8.8s %-8.8s %-12.12s %-4.4s          %-8.8s %3d %-8.8s %5.3f %5.3f %10.3f %-7.7s";
 
 		// Groundwater fields - data source and include align with  surface water and then space over to groundwater columns
-		String format_3 = "                                                                                                        %-8.8s %-8.8s %-12.12s %-4.4s                  " +
-			"                                         %-12.12s %-7.7s %-8.8s %-10.10s %4d %5.3f %9.3f";
+		String format_3 = "                                                                                                        %-8.8s %-8.8s %-12.12s %-4.4s             " +
+			"                                                  %-12.12s %-7.7s %-8.8s %-10.10s %4d %5.3f %9.3f";
 
 		// Size to largest size
 		List<Object> objectList = new ArrayList<>(8);
@@ -530,39 +531,50 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 		out.println(cmnt + "  Units        :  Area units");
 		out.println(cmnt + "  IrrigMeth    :  Irrigation method");
 		out.println(cmnt);
-		out.println(cmnt + "  Whether or not the row of data is included - need to expand this to indicate how included or not");
+		out.println(cmnt + "  Data Source/Use - whether or not the row of data is included in the CDS file");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
-		out.println(cmnt + "  In CDS:      :  Indicates whether the parcel is included in CDS file acreage.");
-		out.println(cmnt + "                  This will only be set after running 'ReadCropPatternTSFromParcels' command.");
-		out.println(cmnt + "                  CDS:YES = include parcel area in CDS file");
-		out.println(cmnt + "                  - a parcel with surface water supply - area for parcel is always included");
-		out.println(cmnt + "                  - a parcel with only groundwater supply");
-		out.println(cmnt + "                  CDS:NO = do not include parcel area in CDS file");
-		out.println(cmnt + "                  - if GW supply, only include parcel area if no surface water supply");
-		out.println(cmnt + "                  - if GW suppply, a D&W model node will include the area");
-		out.println(cmnt + "                  - ReadCropPatternTSFromParcels commands must have included the location");
-		out.println(cmnt + "                  CDS:ERR = error determining whether to include parcel area in CDS FILE (input error)");
-		out.println(cmnt + "                  CDS:UNK = unknown whether to include parcel area in CDS FILE (should not happen)");
-		out.println(cmnt + "                  - will have this value until crop pattern time series are processed");
-		out.println(cmnt + "  DataSrc      :  Data source for the supply data");
-		out.println(cmnt + "                  - typically from HydroBase but may enable user-supplied data");
-		out.println(cmnt + "                  - may in the future be read directly from GIS or other files");
-		out.println(cmnt + "                  HB-PUTS = HydroBase ParcelUseTS/Structure from vw_CDSS_ParcelUseTSStructureToParcel (diversions)" );
-		out.println(cmnt + "                  HB-WTP = HydroBase Well/Parcel from vw_CDSS_WellsWellToParcel (wells)" );
-		out.println(cmnt + "                  SET = data are provided with Set...() or Read...() command" );
-		out.println(cmnt + "  CDS LocId    :  The StateCU location (or StateMod) ID where the parcel area is counted for CDS file. ");
-		out.println(cmnt + "                  - DIV or D&W identifier if surface water supply. ");
-		out.println(cmnt + "                  - WEL if groundwater supply only. ");
-		out.println(cmnt + "  CDS LocType  :  Type node type for CDS LocId, to help understand. ");
+		out.println(cmnt + "  Include in CDS :  Indicates whether the parcel is included in CDS file acreage for the LocId.");
+		out.println(cmnt + "                    This will only be set after running 'ReadCropPatternTSFromParcels' command.");
+		out.println(cmnt + "                    CDS:YES = include parcel area in CDS file based on irrigated acreage parcel assignment");
+		out.println(cmnt + "                    - YES if a parcel with surface water supply - area for parcel is always included");
+		out.println(cmnt + "                    - YES if a parcel with only groundwater supply and model node is a WEL");
+		out.println(cmnt + "                    - a parcel can have CDS:YES for surface water supplies or groundwater supplies, but not both");
+		out.println(cmnt + "                    CDS:NO = do not include parcel area in CDS file based on irrigated acreage parcel assignment");
+		out.println(cmnt + "                    - NO if GW supply but parcel also has surface water supply");
+		out.println(cmnt + "                      - if GW only suppply WEL node, a D&W model node will include the area");
+		out.println(cmnt + "                    CDS:ERR = error determining whether to include parcel area in CDS FILE (input error)");
+		out.println(cmnt + "                    CDS:UNK = unknown whether to include parcel area in CDS FILE (should not happen)");
+		out.println(cmnt + "                    - will have this value until crop pattern time series are processed by");
+		out.println(cmnt + "                      ReadCropPatternTSFromParcels or SetCropPatternTSFromParcels commands for location");
+		out.println(cmnt + "  DataSrc        :  Data source for the supply data");
+		out.println(cmnt + "                    - typically from HydroBase but may enable user-supplied data");
+		out.println(cmnt + "                    - may in the future be read directly from GIS or other files");
+		out.println(cmnt + "                    HB-PUTS = HydroBase ParcelUseTS/Structure from vw_CDSS_ParcelUseTSStructureToParcel (diversions)" );
+		out.println(cmnt + "                    HB-WTP = HydroBase Well/Parcel from vw_CDSS_WellsWellToParcel (wells)" );
+		out.println(cmnt + "                    SET = data are provided with SetParcelSurfaceWaterSupply() or SetParcelGroundWaterSupply() commands" );
+		out.println(cmnt + "  CDS LocId      :  The StateCU location (or StateMod) ID where the parcel area is counted for CDS file. ");
+		out.println(cmnt + "                    - DIV or D&W identifier if parcel has surface water supply. ");
+		out.println(cmnt + "                    - WEL identifier if parcel has groundwater supply only. ");
+		out.println(cmnt + "                    - ??? if the parcel has not been associated with a model location via ReadCropPatternTSFromParcels, ");
+		out.println(cmnt + "                      such as when SetCropPatternTS*() commands are used to assign data at the end of processing.");
+		out.println(cmnt + "  CDS LocId Type :  Type node type for CDS LocId, to confirm data processing. ");
+		out.println(cmnt + "                    - should match the model node location type");
+		out.println(cmnt + "                    - ??? if the parcel has not been associated with a model location via ReadCropPatternTSFromParcels, ");
+		out.println(cmnt + "                      such as when SetCropPatternTS*() commands are used to assign data at the end of processing.");
+		out.println(cmnt + "  LocId has Set  :  Whether LocId has a SetCropPatternTS*() command - will override any parcel data in this file in output. ");
+		out.println(cmnt + "                 :  - will override any parcel data in this file in output. ");
+		out.println(cmnt + "                 :  - if CDS:UNK, LocId CDS data may be set by one or more StateDMI set commands. ");
 		out.println(cmnt);
 		out.println(cmnt + "  SW Collection Data - surface water aggregate/system data");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
-		out.println(cmnt + "  SWPartType   :  Surface water supply part type (only Ditch is allowed).");
-		out.println(cmnt + "  SWPartIdType :  Surface water supply part ID type (only WDID is allowed).");
+		out.println(cmnt + "  SW Collect WDID :  The WDID of the diversion collection part.");
+		out.println(cmnt + "                     - If a WEL, blank (see the LocId for the location WDID).");
+		out.println(cmnt + "                     - If a D&W, the collection part ID, mus be a WDID.");
 		out.println(cmnt);
 		out.println(cmnt + "  SW Supply Data - portion of parcel acreage associated with surface water supply");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
 		out.println(cmnt + "  #Dit         :  Number of ditches that are associated with the parcel.");
+		out.println(cmnt + "  WDID         :  Surface water supply ditch WDID.");
 		out.println(cmnt + "  Irrig Frac   :  1/#Ditch = fraction of ParcelArea (from above) that is irrigated by the ditch (0.0 to 1.0).");
 		out.println(cmnt + "  Irrig FracHB :  SWFrac from HydroBase, should match SWFrac.");
 		out.println(cmnt + "  Irrig Area   :  ParcelArea * %Irrig = area irrigated by surface water supply for this ditch.");
@@ -575,12 +587,13 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 		out.println(cmnt + "                   Blank indicates that model dataset and HydroBase data agree.");
 		out.println(cmnt);
 		out.println(cmnt + "  GW Collection Data - groundwater aggregate/system data");
+		out.println(cmnt + "    - the collection part ID (WDID or receipt) is the same as the parcel supply ID");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
 		out.println(cmnt + "  GWPart Type  :  Water supply part type (Well or Parcel, the latter being phased out).");
-		out.println(cmnt + "                  WellInDitch = indicates a collection of ditches, with associated wells determined.");
+		out.println(cmnt + "                  WellInDitch = indicates a collection of ditches (D&W), with associated wells determined.");
 		out.println(cmnt + "                                automatically based well -> parcel -> ditch relationship.");
-		out.println(cmnt + "                  Well = indicates a collection of wells specified using well identifiers.");
-		out.println(cmnt + "                  Parcel = indicates a collection of wells specified using parcel identifiers.");
+		out.println(cmnt + "                  Well = indicates a collection of wells (WEL) specified using well identifiers.");
+		out.println(cmnt + "                  Parcel = indicates a collection of wells (WEL) specified using parcel identifiers.");
 		out.println(cmnt + "  GWPart IdType:  Water supply part ID type (WDID or RECEIPT).");
 		out.println(cmnt + "                  If GWPartType=Well:");
 		out.println(cmnt + "                     WDID - supply well has a WDID");
@@ -597,10 +610,11 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 		//out.println(cmnt + "  D&W Frac     :  Same as D&W Irrig Frac, applied when well supply is supplemental to ditch.");
 		out.println(cmnt + "  Irrig Area   :  ParcelArea * Irrig Frac (* D&W Frac), zero if parcel has surface water supply for D&W node.");
 		out.println(cmnt);
-		out.println(cmnt + "-------- Model Id ---------|------------------------------- Parcel Data -----------------------------||------- Data Source/Use -------- ||- SW Collection Data -|--------- SW Suppply Data --------|----------- GW Collection Data ---------|-- GW Supply Data --|");
-		out.println(cmnt + "           Loc  Collection |       Parcel                                    Parcel          Irrig   ||                  CDS        Loc ||SWPart SWPart         |#   Irrig Irrig   Irrig           |   GWPart    GWPart                     |#    Irrig   Irrig  |");
-		out.println(cmnt + "  LocId    Type Type       |Year   ID        Div Dist        Crop            Area     Units  Method  || CDS?    DataSrc  LocId      Type||Type   IdType   WDID  |Dit Frac  FracHB  Area     HBError|    Type     IdType    WDID     Receipt |Well Frac    Area   |");
-		out.println(cmnt + "b--------exb--exb---------exb--exb--------exb--exb--exb------------------exb--------exb--exb--------exb------exb------exb----------exb--exb----exb----exb------exb-exb---exb---exb--------exb-----exb----------exb-----exb------exb--------exb--exb---exb-------ex");
+		out.println(cmnt + "-------- Model Id ---------|------------------------------- Parcel Data -----------------------------||----------- Data Source/Use ------------- ||            Collections use WDID Parts              |       WEL Collection Part ID is the same as GW Supply ID    |");
+		out.println(cmnt + "                           |                                                                         || Include                    CDS     LocId || SW     |-------------- SW Supply Data -------------|----------- GW Collection Data ---------|-- GW Supply Data --|");
+		out.println(cmnt + "           Loc  Collection |       Parcel                                    Parcel          Irrig   || in               CDS       LocId   has   || Collect|#     Ditch  Irrig Irrig   Irrig           |   GWPart    GWPart    Well     Well    |#    Irrig   Irrig  |");
+		out.println(cmnt + "  LocId    Type Type       |Year   ID        Div Dist        Crop            Area     Units  Method  || CDS?    DataSrc  LocId     Type    Set   || WDID   |Dit   WDID   Frac  FracHB  Area     HBError|    Type     IdType    WDID     Receipt |Well Frac    Area   |");
+		out.println(cmnt + "b--------exb--exb---------exb--exb--------exb--exb--exb------------------exb--------exb--exb--------exb------exb------exb----------exb--exb------exb------exb-exb------exb---exb---exb--------exb-----exb----------exb-----exb------exb--------exb--exb---exb-------ex");
 		out.println(cmnt + "EndHeader");
 		out.println(cmnt);
 	
@@ -630,7 +644,7 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 				// - in this case the parcel will have been counted with the D&W and not this WEL node
 				if ( !verbose ) {
 					// Not verbose so need to limit the output to only parcels 
-					if ( culoc.hasGroundwaterOnlySupply() && parcel.hasSurfaceWaterSupply() ) {
+					if ( culoc.isGroundwaterOnlySupplyModelNode() && parcel.hasSurfaceWaterSupply() ) {
 						continue;
 					}
 				}
@@ -655,6 +669,13 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 				objectList.add(new Double(parcel.getArea()));
 				objectList.add(parcel.getAreaUnits());
 				objectList.add(parcel.getIrrigationMethod());
+				if ( culoc.hasSetCropPatternTSCommands(parcel.getYear()) ) {
+					// A SetCropPatternTS command was used for the location
+					objectList.add("SET:YES");
+				}
+				else {
+					objectList.add("");
+				}
 
 				printLine = StringUtil.formatString(objectList, format_1);
 				out.println(printLine);
@@ -681,10 +702,18 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 							objectList.add(supplyFromSW.getStateCULocationForCds().getID());
 							objectList.add("" + supplyFromSW.getStateCULocationForCds().getLocationType());
 						}
-						objectList.add(supplyFromSW.getCollectionPartType());
-						objectList.add(supplyFromSW.getCollectionPartIdType());
-						objectList.add(supplyFromSW.getWDID());
+						//objectList.add(supplyFromSW.getCollectionPartType());
+						//objectList.add(supplyFromSW.getCollectionPartIdType());
+						if ( culoc.isCollection() ) {
+							// Collection so output the collection part ID
+							objectList.add(supplyFromSW.getCollectionPartId());
+						}
+						else {
+							// Single ditch so leave the collection WDID blank
+							objectList.add("");
+						}
 						objectList.add(new Integer(parcel.getSupplyFromSWCount()));
+						objectList.add(supplyFromSW.getWDID());
 						objectList.add(new Double(supplyFromSW.getAreaIrrigFraction()));
 						objectList.add(new Double(supplyFromSW.getAreaIrrigFractionHydroBase()));
 						objectList.add(new Double(supplyFromSW.getAreaIrrig()));
@@ -708,10 +737,12 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 						objectList.add(supplyFromGW.getDataSource());
 						if ( supplyFromGW.getStateCULocationForCds() == null ) {
 						    if ( supplyFromGW.getIncludeParcelInCdsType() == IncludeParcelInCdsType.NO ) {
+						    	// Case where D&W and parcel supply area is included in D&W location (not WEL location)
 						    	objectList.add("");
 							   	objectList.add("");
 						    }
 						    else {
+						    	// Should not typically occur?
 						    	objectList.add("???");
 							   	objectList.add("???");
 						    }

@@ -64,7 +64,7 @@ public static final String PROGRAM_NAME = "StateDMI";
  * (the latter was used previously but causes issues with version checks).
  * For consistency, the second and third parts should be zero-padded to 2 digits.
  */
-public static final String PROGRAM_VERSION = "5.00.07.dev (2021-01-22)";
+public static final String PROGRAM_VERSION = "5.00.07.dev (2021-01-31)";
 
 /**
 Interface for StateCU commands.

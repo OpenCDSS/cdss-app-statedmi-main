@@ -147,7 +147,7 @@ public static void processIrrigationPracticeTSParcel (
 	// - if surface parcel has surface water supply and CU Location matches, update
 	// - else groundwater only so update if CU Location matches
 
-	if ( parcel.hasSurfaceWaterSupply() && !culoc.hasGroundwaterOnlySupply() ) {
+	if ( parcel.hasSurfaceWaterSupply() && !culoc.isGroundwaterOnlySupplyModelNode() ) {
 		// DIV or D&W
 		if ( supply.isSurfaceWater() ) {
 			// May also have groundwater supply, but only count surface water in the total, similar to CDS.
@@ -166,7 +166,7 @@ public static void processIrrigationPracticeTSParcel (
 			}
 		}
 	}
-	else if ( parcel.hasSurfaceWaterSupply() && culoc.hasGroundwaterOnlySupply() ) {
+	else if ( parcel.hasSurfaceWaterSupply() && culoc.isGroundwaterOnlySupplyModelNode() ) {
 		// WEL location parcel that has surface water supply.
 		// The acreage will have been added to the D&W node above, for the appropriate location.
 		// No need to do anything.  The parcel will be skipped for the location.
@@ -174,8 +174,8 @@ public static void processIrrigationPracticeTSParcel (
 			parcel.getID() + " has groundwater only for model, is WEL.");
 		Message.printStatus(2, routine, "  Skipping parcel because has surface supply (will have been added to a D&W).");
 	}
-	//else if ( culoc.hasGroundwaterOnlySupply() ) {
-	else if ( !parcel.hasSurfaceWaterSupply() && culoc.hasGroundwaterOnlySupply() ) {
+	//else if ( culoc.isGroundwaterOnlySupplyModelNode() ) {
+	else if ( !parcel.hasSurfaceWaterSupply() && culoc.isGroundwaterOnlySupplyModelNode() ) {
 		// WEL location with groundwater only supply
 		if ( supply.isGroundWater() ) {
 			// Should always be the case

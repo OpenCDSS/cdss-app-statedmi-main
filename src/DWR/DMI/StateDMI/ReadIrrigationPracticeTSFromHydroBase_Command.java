@@ -1392,7 +1392,7 @@ CommandWarningException, CommandException
 					yts.setDataValue ( date, 0.0 );
 				}
 	
-				if ( culoc.hasGroundwaterOnlySupply() && (collectionPartType == StateCU_Location_CollectionPartType.PARCEL) ) {
+				if ( culoc.isGroundwaterOnlySupplyModelNode() && (collectionPartType == StateCU_Location_CollectionPartType.PARCEL) ) {
 					// StateCU Location that is a collection of parcels (and therefore a well-only location).
 					// This approach is being phased out other than Rio Grande (and may also be phased out for Rio Grande).
 					Message.printStatus ( 2, routine, locType + " \"" + culocId + "\" is associated with a collection of parcels..." );
@@ -1412,7 +1412,7 @@ CommandWarningException, CommandException
 							Div_int,
 							warningLevel, warning_count, command_tag, status, cacheHydroBase);
 				}
-				else if ( culoc.hasGroundwaterOnlySupply() && (collectionPartType == StateCU_Location_CollectionPartType.WELL) ) {
+				else if ( culoc.isGroundwaterOnlySupplyModelNode() && (collectionPartType == StateCU_Location_CollectionPartType.WELL) ) {
 					// StateCU Location that is a collection of well (and therefore a well-only location) and the well
 					// may or may not be an aggregate.
 					// This approach is preferred to collection of parcels.

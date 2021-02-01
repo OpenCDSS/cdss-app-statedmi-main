@@ -30,6 +30,7 @@ import java.util.List;
 
 import DWR.StateCU.StateCU_CropPatternTS;
 import DWR.StateCU.StateCU_Location;
+import DWR.StateCU.StateCU_Util;
 import RTi.TS.YearTS;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
@@ -524,6 +525,8 @@ CommandWarningException, CommandException
 			for (int i = 0; i < cdsListSize; i++) {
 				cds = cdsList.get(i);
 				cds_id = cds.getID();
+				// Get the StateCU_Location, used below to track which years have set commands.
+				int culocPos = StateCU_Util.indexOf(culocList,cds_id);
 				if ( !cds_id.matches(idpattern_Java) ) {
 					// Identifier does not match...
 					continue;
@@ -564,6 +567,12 @@ CommandWarningException, CommandException
 							OutputEnd_DateTime,
 							Units, 0 );
 						}
+
+						// Indicate that location has a set command, used with parcel report file.
+						if ( culocPos >= 0 ) {
+							StateCU_Location culoc = culocList.get(culocPos);
+							culoc.setHasSetCropPatternTSCommands(year);
+						}
 					}
 				}
 
@@ -585,6 +594,12 @@ CommandWarningException, CommandException
 							OutputStart_DateTime,
 							OutputEnd_DateTime,
 							Units, 0 );
+
+							// Indicate that location has a set command, used with parcel report file.
+							if ( culocPos >= 0 ) {
+								StateCU_Location culoc = culocList.get(culocPos);
+								culoc.setHasSetCropPatternTSCommands(year);
+							}
 						}
 					}
 				}

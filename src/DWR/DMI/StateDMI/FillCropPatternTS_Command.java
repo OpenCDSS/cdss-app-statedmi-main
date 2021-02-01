@@ -843,10 +843,10 @@ CommandWarningException, CommandException
 			else {
 				// Check that only one type is included so not everything is skipped.
 				// TODO SAM 2007-07-12 Need to fix this
-				if ( IncludeSurfaceWaterSupply_boolean && !culoc.hasSurfaceWaterSupply() ) {
+				if ( IncludeSurfaceWaterSupply_boolean && !culoc.hasSurfaceWaterSupplyForModelNode() ) {
 					continue;
 				}
-				if ( IncludeGroundwaterOnlySupply_boolean && !culoc.hasGroundwaterOnlySupply() ) {
+				if ( IncludeGroundwaterOnlySupply_boolean && !culoc.isGroundwaterOnlySupplyModelNode() ) {
 					continue;
 				}
 			}

@@ -31,6 +31,7 @@ import java.util.List;
 import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
 import DWR.DMI.HydroBaseDMI.HydroBase_ParcelUseTS;
 import DWR.DMI.HydroBaseDMI.HydroBase_ParcelUseTSStructureToParcel;
+import DWR.DMI.HydroBaseDMI.HydroBase_ParcelUseTSStructureToParcel_DistrictCache;
 import DWR.DMI.HydroBaseDMI.HydroBase_StructureView;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
@@ -44,7 +45,6 @@ import DWR.StateCU.StateCU_SupplyFromGW;
 import DWR.StateCU.StateCU_SupplyFromSW;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
-import RTi.DMI.DMIUtil;
 import RTi.Util.IO.AbstractCommand;
 import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandException;
@@ -434,6 +434,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		for ( int i = 0; i < parcel_years.length; i++ ) {
 			parcel_years[i] = -1;
 		}
+
+		// Indicate that only irrigated parcels should be included (e.g., 'NO_CROP' will be ignored)
+		boolean includeOnlyIrrigatedParcels = true;
 		
 		// Convert supplemental ParcelUseTS to StructureIrrigSummaryTS
 		// - the supplemental data was read from ReadCropPatternTS and ReadCropPatternTSFromList commands
@@ -513,6 +516,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
                			message, "Report to software support." ) );
 					throw new CommandException ( message );
 		}
+		
+		// Get the cached HydroBase_ParcelUseTSStructureToParcel data.
+		List<HydroBase_ParcelUseTSStructureToParcel_DistrictCache> hydroBaseParcelUseTSStructureToParcelDistrictCache =
+			hbdmi.getParcelUseStructureToParcelDistrictCache();
 		
 		// Loop through locations
 		List<String> partIdList = null; // List of aggregate/system parts
@@ -597,10 +604,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						int year;
 						StateCU_Parcel parcel = null;
 						StateCU_SupplyFromSW supply = null;
-						HydroBase_StructureView structureView = null;
+						// TODO smalers 2020-01-27 not needed for identifier - remove when check out
+						//HydroBase_StructureView structureView = null;
 						StopWatch sw = new StopWatch();
 						// Reset the structure view before processing years
-						structureView = null;
+						//structureView = null;
 						for ( int iy = 0; iy < parcelYearsForDiv.length; iy++ ) {
 							year = parcelYearsForDiv[iy];
 
@@ -608,11 +616,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								((InputEnd_DateTime == null) || (parcelYearsForDiv[iy] <= InputEnd_DateTime.getYear()))) {
 								// Get HydroBase_ParcelUseTS for the structure
 								// - this will be cached using WD, year, and WDID
+								// - this results in the parcels for the single WDID
+								// - TODO smalers 2021-01-27 need to determine how to handle invalid crop types
 								List<HydroBase_ParcelUseTSStructureToParcel> hbParcelUseTSStructList =
-									hbdmi.readParcelUseTSStructureToParcelListForStructureWdidCalYear(wdidParts[0], wdidParts[1], year);
+									hbdmi.readParcelUseTSStructureToParcelListForStructureWdidCalYear(wdidParts[0], wdidParts[1], year,
+									includeOnlyIrrigatedParcels);
 							    if ( hbParcelUseTSStructList.size() > 0 ) {
 							    	Message.printStatus ( 2, routine, "  SW: Found " + hbParcelUseTSStructList.size() +
-							    		" matching structure/parcel records (SW supply) for year " +
+							    		" matching structure/parcel records (parcels associated with ditch) for year " +
 										year + ", wd=" + wdidParts[0] + ", id=" + wdidParts[1] );
 							    }
 								// Create a new parcel and related supply to track the information.
@@ -629,7 +640,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										parcel = new StateCU_Parcel();
 										parcel.setStateCULocation(culoc);
 										parcel.setYear(year);
-										// Water district is set from 
+										// Water district is set from parcel ID
 										parcel.setDiv(hbParcelUseTSStruct.getDiv());
 										parcel.setWDFromParcelID(hbParcelUseTSStruct.getParcel_id());
 										parcel.setCrop(hbParcelUseTSStruct.getLand_use());
@@ -639,42 +650,92 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										parcel.setID("" + hbParcelUseTSStruct.getParcel_id());
 										// TODO smalers 2020-11-05 moved to supply data
 										//parcel.setDataSource("HB-PUTS");
-										parcelProblems.clear();
-										processor.findAndAddCUParcel(parcel, false, routine, "    ", parcelProblems);
-										if ( parcelProblems.size() > 0 ) {
-											for ( String parcelProblem : parcelProblems ) {
-												Message.printWarning ( warningLevel,
-													MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, parcelProblem );
-												status.addToLog ( commandPhase,
-													new CommandLogRecord(CommandStatusType.WARNING,
-														parcelProblem, "Report to software support." ) );
-											}
-										}
 									}
-									// Supply information information is joined
-									// - only one supply source (this WDID)
-									supply = new StateCU_SupplyFromSW();
-									supply.setDataSource("HB-PUTS");
-									// Fraction and area irrigated is from HydroBase
-									// - values calculated from parcel area and number of diversions is calculated
-									supply.setAreaIrrigFractionHydroBase(hbParcelUseTSStruct.getPercent_irrig());
-									supply.setAreaIrrigHydroBase(hbParcelUseTSStruct.getArea()*hbParcelUseTSStruct.getPercent_irrig());
-									if ( (structureView == null) ||
-										(structureView.getStructure_num() != hbParcelUseTSStruct.getStructure_num()) ) {
-										// Parcels are related to the same structure in the loop so only need to read once.
-										// TODO smalers 2020-08-24 Why is this even done since the structure WDID is
-										// the same as ParcelUseTS query above?
-										// - could set the structure name
-										sw.clearAndStart();
-										structureView = hbdmi.readStructureViewForStructure_num(hbParcelUseTSStruct.getStructure_num());
-										sw.stop();
-										Message.printStatus ( 2, routine, "    Reading structure view for structure_num " +
-											hbParcelUseTSStruct.getStructure_num() + " took " + sw.getMilliseconds() + " ms");
+									
+									// The above determined which parcel record is associated with the single WDID.
+									// However the following cases may occur:
+									// 1) Zero records may be returned.  If the model WDID does not match a record,
+									//    then no crop/parcel is available in a year so no supplies are associated.
+									// 2) Typically for modeling there should be one record where the WDID of the model node
+									//    matches the WDID of a supply (wd id from ParcelUseTSStructureToParcel).
+									//    This record should be processed.  If percent_irrig = 1.0 there is only one record.
+									// 3) There may be multiple surface supplies associated with the parcel,
+									//    indicated by a 'percent_irrig' value that is < 1.0.
+									// For case 1, the above record can be processed directly.
+									// For case 3, an additional query is needed to get the supplies associated with the parcel.
+									// The parcel should not show up under any other model node.
+									// Rely on the percent irrigated data in HydroBase to optimize code because otherwise
+									// would need to always search for the parcel list.
+									
+									// Create the array each time.
+									List<HydroBase_ParcelUseTSStructureToParcel> hbParcelUseTSStructList2 = null;
+									// Roundoff from 1.0 could occur so check for nearly 1.0
+									if ( hbParcelUseTSStruct.getPercent_irrig() >= .999999 ) {
+										// Assume this is the only structure irrigating the parcel so reuse the single record from above.
+										hbParcelUseTSStructList2 = new ArrayList<>();
+										hbParcelUseTSStructList2.add(hbParcelUseTSStruct);
 									}
-									supply.setWDID(HydroBase_WaterDistrict.formWDID( structureView.getWD(), structureView.getID()) );
-									supply.setID(HydroBase_WaterDistrict.formWDID( structureView.getWD(), structureView.getID()) );
-									// The supply will only be added once
-									parcel.addSupply(supply);
+									else {
+										// Multiple surface water supplies irrigate the parcel.
+										// - reread the data but use the year and parcel ID for the search
+										// - although the cache is optimized for WD, cal_year, it is possible
+										//   that supplies are in different water districts
+										// - the following does not specify WD so cache for all water districts
+										//   must have already been read
+										hbParcelUseTSStructList2 = HydroBase_ParcelUseTSStructureToParcel_DistrictCache.getDataForParcelId(
+											hydroBaseParcelUseTSStructureToParcelDistrictCache,
+											hbParcelUseTSStruct.getParcel_id(), year);
+									}
+							    	if ( hbParcelUseTSStructList2.size() == 1 ) {
+							    		Message.printStatus ( 2, routine, "    SW: Found " + hbParcelUseTSStructList2.size() +
+							    			" surface water supplies for year " +
+										year + ", parcelId=" + hbParcelUseTSStruct.getParcel_id() + " - single ditch supplies parcel");
+									}
+							    	else if ( hbParcelUseTSStructList2.size() > 1 ) {
+							    		Message.printStatus ( 2, routine, "    SW: Found " + hbParcelUseTSStructList2.size() +
+							    			" surface water supplies for year " +
+										year + ", parcelId=" + hbParcelUseTSStruct.getParcel_id() + " - each ditch supplies 1/" +
+							    			hbParcelUseTSStructList2.size() + " of parcel area");
+									}
+
+							    	for ( HydroBase_ParcelUseTSStructureToParcel hbParcelUseTSStruct2 : hbParcelUseTSStructList2 ) {
+							    		// Supply information information is joined
+								  		// - only one supply source (this WDID)
+								  		supply = new StateCU_SupplyFromSW();
+								  		// Source of supply data is ParcelUseTS data.
+								  		supply.setDataSource("HB-PUTS");
+								  		// Collection part ID is empty since a DIV
+								  		supply.setCollectionPartId("");
+								  		// Fraction and area irrigated is from HydroBase
+								  		// - values calculated from parcel area and number of diversions is calculated
+								  		supply.setAreaIrrigFractionHydroBase(hbParcelUseTSStruct2.getPercent_irrig());
+								  		supply.setAreaIrrigHydroBase(hbParcelUseTSStruct2.getArea()*hbParcelUseTSStruct2.getPercent_irrig());
+								  		// TODO smalers 2021-01-27 don't need to do this because the ParcelUseTSStructureToParcel data have the WD and ID.
+								  		/*
+								  		if ( (structureView == null) ||
+									  		(structureView.getStructure_num() != hbParcelUseTSStruct2.getStructure_num()) ) {
+									  		// Parcels are related to the same structure in the loop so only need to read once.
+									  		// TODO smalers 2020-08-24 Why is this even done since the structure WDID is
+									  		// the same as ParcelUseTS query above?
+									  		// - could set the structure name
+									  		sw.clearAndStart();
+									  		structureView = hbdmi.readStructureViewForStructure_num(hbParcelUseTSStruct2.getStructure_num());
+									  		sw.stop();
+									  		Message.printStatus ( 2, routine, "    Reading structure view for structure_num " +
+										  		hbParcelUseTSStruct2.getStructure_num() + " took " + sw.getMilliseconds() + " ms");
+								  		}
+								  		supply.setWDID(HydroBase_WaterDistrict.formWDID( structureView.getWD(), structureView.getID()) );
+								  		supply.setID(HydroBase_WaterDistrict.formWDID( structureView.getWD(), structureView.getID()) );
+								  		*/
+								  		supply.setWDID(HydroBase_WaterDistrict.formWDID( hbParcelUseTSStruct2.getStructureWD(), hbParcelUseTSStruct2.getStructureID()) );
+								  		supply.setID(HydroBase_WaterDistrict.formWDID( hbParcelUseTSStruct2.getStructureWD(), hbParcelUseTSStruct2.getStructureID()) );
+								  		// The supply will only be added once
+								  		// - computation of total number of supplies and corresponding fraction is computed in called code
+								  		parcel.addSupply(supply);
+								  		// For logging...
+							    		//Message.printStatus ( 2, routine, "      SW: supply WDID is " + supply.getWDID() );
+							    	}
+
 									// Add to the CULocation parcels
 									if ( Message.isDebugOn ) {
 										sw.clearAndStart();
@@ -685,8 +746,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									// - querying wells may not find and is slow
 									//List<HydroBase_Wells> hbwellCheckList2 = hbdmi.readWells(structureView.getWD(), structureView.getID());
 									//if ( hbwellCheckList2.size() > 0 ) {
+									/* TODO smalers 2021-01-27 comment out since structure view query is no longer needed for WD and ID.
+									 * - use the CheckParcels command to run this check
 									if ( structureView.getStr_type().charAt(0) == 'W') {
-										message = "CU location \"" + culoc_id + " year " + year + " parcel ID " + parcel.getID() +
+										message = "    CU location \"" + culoc_id + " year " + year + " parcel ID " + parcel.getID() +
 											" SW supply WDID " + structureView.getWDID() + "\" is a well.";
 										Message.printWarning ( warningLevel, 
 					        				MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
@@ -694,6 +757,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				            				new CommandLogRecord(CommandStatusType.WARNING,
 				                				message, "Original GIS data has GW supply in SW supply. Additional errors may result." ) );
 									}
+									*/
 
 									// Additionally, process the wells associated with the parcel for groundwater supply
 									// - this logic is the same as collection system below for wells
@@ -746,13 +810,32 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 											supplyFromGW.setWDID("");
 										}
 										else {
+											supplyFromGW.setID(HydroBase_WaterDistrict.formWDID( hbWell.getWD(), hbWell.getID()) );
 											supplyFromGW.setWDID(HydroBase_WaterDistrict.formWDID( hbWell.getWD(), hbWell.getID()) );
+										}
+										if ( supplyFromGW.getID().isEmpty()) {
+											supplyFromGW.setID(hbWell.getReceipt());
 										}
 										supplyFromGW.setReceipt(hbWell.getReceipt());
 										parcel.addSupply(supplyFromGW);
 									}
+
+									// Add the parcel to the global list.
+									// - add after supplies are processed because they are handled in the following
+									//   if additional supply is encountered in a parcel that has been seen before
+									parcelProblems.clear();
+									processor.findAndAddCUParcel(parcel, false, routine, "    ", parcelProblems);
+									if ( parcelProblems.size() > 0 ) {
+										for ( String parcelProblem : parcelProblems ) {
+											Message.printWarning ( warningLevel,
+												MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, parcelProblem );
+											status.addToLog ( commandPhase,
+												new CommandLogRecord(CommandStatusType.WARNING,
+													parcelProblem, "Report to software support." ) );
+										}
+									}
 									
-									// Add the parcel
+									// Add the parcel to the CU Location.
 									
 									culoc.addParcel ( parcel );
 									if ( Message.isDebugOn ) {
@@ -842,7 +925,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								// - the following prints out the read time
 								// - this is cached using WD, year, and WDID
 								List<HydroBase_ParcelUseTSStructureToParcel> hbParcelUseTSStructList =
-									hbdmi.readParcelUseTSStructureToParcelListForStructureWdidCalYear(wdidParts[0], wdidParts[1], year);
+									hbdmi.readParcelUseTSStructureToParcelListForStructureWdidCalYear(wdidParts[0], wdidParts[1], year,
+									includeOnlyIrrigatedParcels);
 								if ( hbParcelUseTSStructList.size() > 0 ) {
 									Message.printStatus ( 2, routine, "    Found " + hbParcelUseTSStructList.size() +
 										" matching structure/parcel records (SW supply) for year " +
@@ -883,34 +967,91 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 											}
 										}
 									}
-									// Supply information information is joined
-									// - only one supply 
-									supplyFromSW = new StateCU_SupplyFromSW();
-									supplyFromSW.setDataSource("HB-PUTS");
-									// Fraction and area irrigated is from HydroBase
-									// - values calculated from parcel area and number of diversions is calculated
-									supplyFromSW.setAreaIrrigFractionHydroBase(hbParcelUseTSStruct.getPercent_irrig());
-									supplyFromSW.setAreaIrrigHydroBase(hbParcelUseTSStruct.getArea()*hbParcelUseTSStruct.getPercent_irrig());
-									structureView = hbdmi.readStructureViewForStructure_num(hbParcelUseTSStruct.getStructure_num());
-									// ID for the supply is the same as WDID
-									supplyFromSW.setWDID(HydroBase_WaterDistrict.formWDID( structureView.getWD(), structureView.getID()) );
-									supplyFromSW.setID(supplyFromSW.getWDID());
-									parcel.addSupply(supplyFromSW);
 
-									// Check that surface water supply WDID is not a well.
-									// - could check structure type here but query wells to be more certain
-									//List<HydroBase_Wells> hbwellCheckList2 = hbdmi.readWellsWellToParcelList(
-									//	-1, -1, -1, null, structureView.getWD(), structureView.getID());
-									//if ( hbwellCheckList2.size() > 0 ) {
-									if ( structureView.getStr_type().charAt(0) == 'W') {
-										message = "CU location \"" + culoc_id + " year " + year + " parcel ID " + parcel.getID() +
-											" SW supply WDID " + structureView.getWDID() + "\" is a well.";
-										Message.printWarning ( warningLevel, 
-					        				MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-				        				status.addToLog ( commandPhase,
-				            				new CommandLogRecord(CommandStatusType.WARNING,
-				                				message, "Original GIS data has GW supply in SW supply. Additional errors may result." ) );
+									// The above determined which parcel record is associated with the single WDID.
+									// However the following cases may occur:
+									// 1) Zero records may be returned.  If the model WDID does not match a record,
+									//    then no crop/parcel is available in a year so no supplies are associated.
+									// 2) Typically for modeling there should be one record where the WDID of the model node
+									//    matches the WDID of a supply (wd id from ParcelUseTSStructureToParcel).
+									//    This record should be processed.  If percent_irrig = 1.0 there is only one record.
+									// 3) There may be multiple surface supplies associated with the parcel,
+									//    indicated by a 'percent_irrig' value that is < 1.0.
+									// For case 1, the above record can be processed directly.
+									// For case 3, an additional query is needed to get the supplies associated with the parcel.
+									// The parcel should not show up under any other model node.
+									// Rely on the percent irrigated data in HydroBase to optimize code because otherwise
+									// would need to always search for the parcel list.
+									
+									// Create the array each time.
+									List<HydroBase_ParcelUseTSStructureToParcel> hbParcelUseTSStructList2 = null;
+									// Roundoff from 1.0 could occur so check for nearly 1.0
+									if ( hbParcelUseTSStruct.getPercent_irrig() >= .999999 ) {
+										// Assume this is the only structure irrigating the parcel so reuse the single record from above.
+										hbParcelUseTSStructList2 = new ArrayList<>();
+										hbParcelUseTSStructList2.add(hbParcelUseTSStruct);
 									}
+									else {
+										// Multiple surface water supplies irrigate the parcel.
+										// - reread the data but use the year and parcel ID for the search
+										// - although the cache is optimized for WD, cal_year, it is possible
+										//   that supplies are in different water districts
+										// - the following does not specify WD so cache for all water districts
+										//   must have already been read
+										hbParcelUseTSStructList2 = HydroBase_ParcelUseTSStructureToParcel_DistrictCache.getDataForParcelId(
+											hydroBaseParcelUseTSStructureToParcelDistrictCache,
+											hbParcelUseTSStruct.getParcel_id(), year);
+									}
+							    	if ( hbParcelUseTSStructList2.size() == 1 ) {
+							    		Message.printStatus ( 2, routine, "    SW: Found " + hbParcelUseTSStructList2.size() +
+							    			" surface water supplies for year " +
+										year + ", parcelId=" + hbParcelUseTSStruct.getParcel_id() + " - single ditch supplies parcel");
+									}
+							    	else if ( hbParcelUseTSStructList2.size() > 1 ) {
+							    		Message.printStatus ( 2, routine, "    SW: Found " + hbParcelUseTSStructList2.size() +
+							    			" surface water supplies for year " +
+										year + ", parcelId=" + hbParcelUseTSStruct.getParcel_id() + " - each ditch supplies 1/" +
+							    			hbParcelUseTSStructList2.size() + " of parcel area");
+									}
+
+							    	for ( HydroBase_ParcelUseTSStructureToParcel hbParcelUseTSStruct2 : hbParcelUseTSStructList2 ) {
+							    		// Supply information information is joined
+								  		// - only one supply 
+								  		supplyFromSW = new StateCU_SupplyFromSW();
+								  		// Source of data is ParcelUseTS
+								  		supplyFromSW.setDataSource("HB-PUTS");
+								  		// Set the collection part ID so it can be output
+								  		supplyFromSW.setCollectionPartId(part_id);
+								  		// Fraction and area irrigated is from HydroBase
+								  		// - values calculated from parcel area and number of diversions is calculated
+								  		supplyFromSW.setAreaIrrigFractionHydroBase(hbParcelUseTSStruct2.getPercent_irrig());
+								  		supplyFromSW.setAreaIrrigHydroBase(hbParcelUseTSStruct2.getArea()*hbParcelUseTSStruct2.getPercent_irrig());
+								  		// TODO smalers 2021-01-27 comment out since slows down and check is in the check command
+								  		//structureView = hbdmi.readStructureViewForStructure_num(hbParcelUseTSStruct2.getStructure_num());
+								  		// ID for the supply is the same as WDID
+								  		//supplyFromSW.setWDID(HydroBase_WaterDistrict.formWDID( structureView.getWD(), structureView.getID()) );
+								  		//supplyFromSW.setID(supplyFromSW.getWDID());
+								  		supplyFromSW.setWDID(HydroBase_WaterDistrict.formWDID( hbParcelUseTSStruct2.getStructureWD(), hbParcelUseTSStruct2.getStructureID()) );
+								  		supplyFromSW.setID(HydroBase_WaterDistrict.formWDID( hbParcelUseTSStruct2.getStructureWD(), hbParcelUseTSStruct2.getStructureID()) );
+								  		parcel.addSupply(supplyFromSW);
+
+								  		// Check that surface water supply WDID is not a well.
+								  		// - could check structure type here but query wells to be more certain
+								  		//List<HydroBase_Wells> hbwellCheckList2 = hbdmi.readWellsWellToParcelList(
+								  		//	-1, -1, -1, null, structureView.getWD(), structureView.getID());
+								  		//if ( hbwellCheckList2.size() > 0 ) {
+								  		/* TODO smalers 2021-01-27 comment out since slows down and check is in the check comamand
+								  		if ( structureView.getStr_type().charAt(0) == 'W') {
+									  		message = "CU location \"" + culoc_id + " year " + year + " parcel ID " + parcel.getID() +
+										  		" SW supply WDID " + structureView.getWDID() + "\" is a well.";
+									  		Message.printWarning ( warningLevel, 
+					        			  		MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+				        			  		status.addToLog ( commandPhase,
+				            			  		new CommandLogRecord(CommandStatusType.WARNING,
+				                			  		message, "Original GIS data has GW supply in SW supply. Additional errors may result." ) );
+								  		}
+								  		*/
+							    	}
 
 									// Additionally, process the wells associated with the parcel for groundwater supply
 									// - TODO smalers 2020-02-17 this code is similar to well aggregation so could make code modular and reuse
@@ -961,7 +1102,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 											supplyFromGW.setWDID("");
 										}
 										else {
+											supplyFromGW.setID(HydroBase_WaterDistrict.formWDID( hbWell.getWD(), hbWell.getID()) );
 											supplyFromGW.setWDID(HydroBase_WaterDistrict.formWDID( hbWell.getWD(), hbWell.getID()) );
+										}
+										if ( supplyFromGW.getID().isEmpty() ) {
+											supplyFromGW.setID(hbWell.getReceipt());
 										}
 										supplyFromGW.setReceipt(hbWell.getReceipt());
 										parcel.addSupply(supplyFromGW);
@@ -1267,7 +1412,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									//List<HydroBase_ParcelUseTS> hbParcelUseTSList =
 									//	hbdmi.readParcelUseTSList(year, -1, hbWell.getParcel_id(), cacheHydroBase);
 									List<HydroBase_ParcelUseTS> hbParcelUseTSList =
-										hbdmi.readParcelUseTSList(year, -1, hbWell.getParcel_id() );
+										hbdmi.readParcelUseTSList(year, -1, hbWell.getParcel_id(),
+										includeOnlyIrrigatedParcels);
 									// The following messge does not provide a lot of value
 									//Message.printStatus(2, routine, "      Found " + hbParcelUseTSList.size() + " ParcelUseTS for parcel " +
 									//	hbWell.getParcel_id() );
@@ -1368,7 +1514,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			// can display.  This is useful to understand the data.
 			
 			//else if ( !culocHasSurfaceWaterSupply && culocHasGroundWaterSupply ) {
-			if ( culoc.hasGroundwaterOnlySupply() ) {
+			if ( culoc.isGroundwaterOnlySupplyModelNode() ) {
 				// Model nodes that are single wells are not supported - must be defined as a well aggregate.
 				// Therefore ignore whether have any surface water supply
 				// (should not have any because of definition of well-only node) and rely on the aggregate check.

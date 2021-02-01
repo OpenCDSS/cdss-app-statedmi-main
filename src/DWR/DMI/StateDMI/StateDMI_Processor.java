@@ -1784,8 +1784,9 @@ which only adds a supply if not matched.
 This should only be used with commands that correct data, such as a set command.
 @param routine Routine to use for logging.
 @param messagePrefix Prefix for message line, for example spaces that align the message.
+@return true if the parcel was added, false if not (because already added).
 */
-protected void findAndAddCUParcel ( StateCU_Parcel parcel, boolean replace, String routine, String messagePrefix, List<String> problems )
+protected boolean findAndAddCUParcel ( StateCU_Parcel parcel, boolean replace, String routine, String messagePrefix, List<String> problems )
 { 
 	// Unique key is year and parcel ID.  Parcel ID contains the district.
 	String key = parcel.getYear() + "-" + parcel.getID();
@@ -1793,6 +1794,7 @@ protected void findAndAddCUParcel ( StateCU_Parcel parcel, boolean replace, Stri
 	String message;
 	// Use debug to increase logging messages
 	boolean debug = Message.isDebugOn;
+	boolean didAdd = false;
 	if ( parcelFound != null ) {
 		// The StateCU_Parcel is already in the hashmap...
 		//__CUParcel_match_List.add(id);
@@ -1802,6 +1804,7 @@ protected void findAndAddCUParcel ( StateCU_Parcel parcel, boolean replace, Stri
 				", parcelId=" + parcel.getID() + " - replacing previous global parcel using key: " + key;
 			problems.add(message);
 			__CUParcel_Map.put ( key, parcel );
+			didAdd = true;
 		}
 		else {
 			Message.printStatus(2,routine,messagePrefix + "Parcel previously added to global list using key: " + key );
@@ -1809,14 +1812,14 @@ protected void findAndAddCUParcel ( StateCU_Parcel parcel, boolean replace, Stri
 			// - leave the parcel as is but make sure the main parts are the same
 			// - parcel year and ID must match since they are in the hash map key
 			// - this should never happen and is an error
-			if ( parcel.getCrop().equals(parcelFound.getCrop()) ) {
+			if ( !parcel.getCrop().equals(parcelFound.getCrop()) ) {
 				message = messagePrefix +
     	    	    "Existing parcel for year " + parcel.getYear() + ", parcelId=" + parcel.getID() +
     	    	    " has different crop (" + parcelFound.getCrop() + "/" + parcel.getCrop() + ")";
 				Message.printWarning ( 3, routine, message );
 				problems.add(message);
 			}
-			if ( parcel.getIrrigationMethod().equals(parcelFound.getIrrigationMethod()) ) {
+			if ( !parcel.getIrrigationMethod().equals(parcelFound.getIrrigationMethod()) ) {
 				message = messagePrefix +
     	    	    "Existing parcel for year " + parcel.getYear() + ", parcelId=" + parcel.getID() +
     	    	    " has different irrigation method (" + parcelFound.getIrrigationMethod() + "/" + parcel.getIrrigationMethod() + ")";
@@ -1837,6 +1840,7 @@ protected void findAndAddCUParcel ( StateCU_Parcel parcel, boolean replace, Stri
 			for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 				parcel.addSupply(supply);
 			}
+			didAdd = false;
 		}
 	}
 	else {
@@ -1845,7 +1849,9 @@ protected void findAndAddCUParcel ( StateCU_Parcel parcel, boolean replace, Stri
 		if ( debug ) {
 			Message.printStatus(2,routine,messagePrefix + "Adding parcel to global list using key: " + key );
 		}
+		didAdd = true;
 	}
+	return didAdd;
 }
 
 /**

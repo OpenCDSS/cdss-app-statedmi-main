@@ -573,7 +573,7 @@ CommandWarningException, CommandException
 			int pos = StateCU_Util.indexOf( culocList, ipy_id);
 			if ( pos >= 0 ) {
 				culoc = (StateCU_Location)culocList.get(pos);
-				is_gw_only = culoc.hasGroundwaterOnlySupply();
+				is_gw_only = culoc.isGroundwaterOnlySupplyModelNode();
 			}
 
 			// Have a match so reset the data...

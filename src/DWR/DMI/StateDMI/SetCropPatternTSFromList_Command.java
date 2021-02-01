@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Vector;
 
 import DWR.StateCU.StateCU_CropPatternTS;
+import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Util;
 
 import RTi.TS.YearTS;
@@ -391,6 +392,26 @@ CommandWarningException, CommandException
                 	message, "Report to software support.  See log file for details." ) );
 		}
 	}
+
+	// Get the list of CU locations, used to check the data ...
+	
+	List<StateCU_Location> culocList = null;
+	//int culocListSize = 0;
+	try {
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
+		//culocListSize = culocList.size();
+	}
+	catch ( Exception e ) {
+		message = "Error requesting StateCU_Location_List from processor.";
+		Message.printWarning(warning_level,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+	}
 	
     // Output period will be used if not specified with SetStart and SetEnd
     
@@ -557,6 +578,7 @@ CommandWarningException, CommandException
 					continue;
 				}
 			}
+
 			// Find the StateCU_IrrigationPracticeTS instance to modify...
 			if ( ProcessWhen_int == Now_int ) {
 				cdsPos = StateCU_Util.indexOf(CUCropPatternTS_Vector,id);
@@ -578,6 +600,9 @@ CommandWarningException, CommandException
 			// Get the data values from the table one time...
 			//++matchCount;
 			cds_id = id;
+			// Also get the CU location, used later to set the StateCU_Location list of years with CDS set commands.
+			int culocPos = StateCU_Util.indexOf(culocList,cds_id);
+
 			Year_int = -1;	// Indicate not to set for a specific year
 			if ( YearCol != null ) {
 				Year_String = (String)rec.getFieldValue( YearCol_int);
@@ -688,6 +713,14 @@ CommandWarningException, CommandException
 						StringUtil.atod(Area_String),
 						CUCropPatternTS_encountered[cdsPos] );
 				} // End process now or with parcels
+
+				// Indicate that location has a set command, used with parcel report file.
+				// - OK to set extra years in a span
+				if ( culocPos >= 0 ) {
+					StateCU_Location culoc = culocList.get(culocPos);
+					culoc.setHasSetCropPatternTSCommands(year);
+				}
+
 			} // End year loop
 		}
 	}
