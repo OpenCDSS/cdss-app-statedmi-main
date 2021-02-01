@@ -522,6 +522,53 @@ public static String expandTimeSeriesMetadataString ( CommandProcessor processor
     }
     return s2;
 }
+
+/**
+Get the commands after the indicated index position.  Only the requested commands are returned.
+Use this, for example, to get the SetCropPatternTS() commands after a
+ReadCropPatternTSFromHydroBase() command, to check for empty parcel list.
+@return List of commands (as list of Command instances) after the index that match the commands in
+the neededCommandsList.  This will always return a non-null list, even if
+no commands are in the list.
+@param index The index in the command list after which to search for other commands.
+@param processor A TSCommandProcessor with commands to search.
+@param neededCommandsList List of commands (as String) that need to be processed
+(e.g., "setWorkingDir").  Only the main command name should be defined.
+@param firstOnly if true, only the first item after the requested index is returned.
+If false, all matching commands after the point are returned in the order of commands.
+*/
+public static List<Command> getCommandsAfterIndex (
+	int index,
+	StateDMI_Processor processor,
+	List<String> neededCommandsList,
+	boolean firstOnly )
+{	// Now search backwards matching commands for each of the requested commands...
+	int size = 0;
+	if ( neededCommandsList != null ) {
+		size = neededCommandsList.size();
+	}
+	List<Command> foundCommands = new ArrayList<>();
+	// Get the commands from the processor
+	List<Command> commands = processor.getCommands();
+	Command command;
+	// Now loop up through the command list...
+	for ( int ic = (index + 1); ic < commands.size(); ic++ ) {
+		command = commands.get(ic);
+		for ( String neededCommandString : neededCommandsList) {
+			// TODO smalers 2020-12-05 old logic compared full string, but should just use command name
+			// - remove the old code when tests out
+			//if ( neededCommandString.regionMatches(true,0,command.toString().trim(),0, neededCommandString.length() ) ) {
+			if ( neededCommandString.equalsIgnoreCase(command.getCommandName()) ) {
+				foundCommands.add ( command );
+				if ( firstOnly ) {
+					// Don't need to search any more...
+					break;
+				}
+			}
+		}
+	}
+	return foundCommands;
+}
 	
 /**
 Get the commands before the indicated index position.  Only the requested commands are returned.

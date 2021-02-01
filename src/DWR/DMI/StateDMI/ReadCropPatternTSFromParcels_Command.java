@@ -558,11 +558,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		}
 		if ( firstCommand ) {
 			// Reset the CDS indicators in all supplies
-			Message.printStatus(2,routine,"First ReadCropPatternTSFromParcels command - setting all parcel supplies to CDS:NO");
+			Message.printStatus(2,routine,"First ReadCropPatternTSFromParcels command - setting all parcel supplies to CDS:UNK");
 			for ( Map.Entry<String, StateCU_Parcel> entry : parcelMap.entrySet() ) {
 				for ( StateCU_Supply supply : entry.getValue().getSupplyList() ) {
 					supply.setStateCULocationForCds(null);
-					supply.setIncludeInCdsType(IncludeParcelInCdsType.NO);
+					// TODO smalers 2021-01-30 use UNK because some locations may use SetCropPatternTS so
+					// report needs to not say NO outright
+					//supply.setIncludeInCdsType(IncludeParcelInCdsType.NO);
+					supply.setIncludeInCdsType(IncludeParcelInCdsType.UNKNOWN);
 					supply.setIncludeInCdsError("");
 				}
 			}
@@ -616,6 +619,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		List<Integer> parcelYears = new ArrayList<>();
 		
 		boolean debug = Message.isDebugOn;
+		// Set to true for troubleshooting
+		debug = true;
 		for ( StateCU_Location culoc : culocList ) {
 			String culoc_id = culoc.getID();
 			
@@ -695,80 +700,164 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					// Loop though the supplies associated with the parcel.
 					//  - only assign supply acreage that was matched with this location.
 					//  - the math has already been done for the irrigated acreage fraction.
-					if ( parcel.hasSurfaceWaterSupply() && !culoc.hasGroundwaterOnlySupply() ) {
-						// D&W node - parcel has surface water supply and is location is NOT WEL so OK to process.
+					if ( parcel.hasSurfaceWaterSupply() && !culoc.isGroundwaterOnlySupplyModelNode() ) {
+						// DIV or D&W node - parcel has surface water supply and is location is NOT WEL so OK to process.
+						// - otherwise WEL can have surface water supply but don't want to count in WEL
 						if ( debug ) {
-							Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear +
+							Message.printStatus(2, routine, "    CUloc " + culoc.getID() + " year " + parcelYear +
 								" parcel ID " + parcel.getID() + " has surface water supply, is a DIV or D&W.");
 						}
 						// Only assign surface water supply acreage and do not assign any groundwater acreage
 						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 							if ( supply instanceof StateCU_SupplyFromSW ) {
 								supplyFromSW = (StateCU_SupplyFromSW)supply;
-								if ( culoc.idIsIn(supplyFromSW.getWDID()) ) {
+								// TODO smalers 2021-01-27 the following logic seems wrong since it omits D&W parts
+								// - the WDIDS for the collection may result in parcels that have supply ditches with WDIDs that don't match the collection WDID list
+								// - maybe should include in single DIV for matching supply, and include in D&W regardless, and only include parcel once regardless
+								boolean doInclude = false;
+								String notIncludeMessage = "";
+								if ( culoc.isCollection() ) {
+									// Collection should ensure that parcels don't show up in more than one collection.
+									if ( culoc.idIsIn(supplyFromSW.getWDID()) ) {
+										doInclude = true;
+									}
+									else {
+										doInclude = false;
+										notIncludeMessage = "because is a collection ID and surface supply ID " + supplyFromSW.getID() + " does not match collection part IDs";
+									}
+								}
+								else {
+									// Single DIV so only include if the surface supply ID matches the location ID
+									if ( culoc.idIsIn(supplyFromSW.getWDID()) ) {
+										doInclude = true;
+									}
+									else {
+										doInclude = false;
+										notIncludeMessage = "because is a single ID and surface supply ID " + supplyFromSW.getID() + " does not match location ID";
+									}
+								}
+								if ( doInclude ) {
 									// This culoc is associated with the supply via single ditch or collection.
 									// Area for supply was previously calculated as (parcel area) * (ditch percent_irrig)
 									if ( debug ) {
-										Message.printStatus(2, routine, "SW supply " + supplyFromSW.getWDID() + " ID is in CULoc" );
+										Message.printStatus(2, routine, "    SW supply " + supplyFromSW.getWDID() + " ID is in CULoc" );
 									}
 									addParcelArea ( debug, culoc, parcel, yts, temp_DateTime, parcelYear, parcelYears, parcelCrop, supplyFromSW.getAreaIrrig() );
+									if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.YES ) {
+										// Should not happen, should only be set to YES once
+										message = "CUloc " + culoc.getID() + " year " + parcelYear +
+											" parcel ID " + parcel.getID() + " supply ID " + culoc.getID() +
+											" area was previously added to CDS (location " + supply.getStateCULocationForCds().getID() + ").";
+										Message.printWarning ( warningLevel, 
+			        						MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, "    " + message );
+		        						status.addToLog ( commandPhase,
+		            						new CommandLogRecord(CommandStatusType.WARNING, message,
+		            							"Area should only be added once - ditch is included in more than one DIV or D&W model locations." ) );
+									}
 									supply.setStateCULocationForCds(culoc);
-									// Supplies were initialized to CDS:NO previously so only set to yes here
 									supply.setIncludeInCdsType(IncludeParcelInCdsType.YES);
 								}
 								else {
 									// TODO smalers 2020-11-08 convert to debug or remove when tested
+									// TODO smalers 2021-01-30 old code that is not relevant?
 									if ( debug ) {
-										Message.printStatus(2, routine, "Not adding CDS acreage for " + parcelYear +
+										Message.printStatus(2, routine, "    Not adding CDS acreage for " + parcelYear +
 											" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
-											"\" does not have part types matching SW supply WDID " + supplyFromSW.getWDID() );
+											"\" (" + notIncludeMessage + ")" );
 									}
+									// TODO smalers 2021-01-30 new code 
+									// - supply is not included
+									// - only set to know if unknown because don't want to reset
+									if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN ) {
+										supply.setIncludeInCdsType(IncludeParcelInCdsType.NO);
+									}
+								}
+							}
+							else if ( supply instanceof StateCU_SupplyFromGW ) {
+								// Parcel also has groundwater supplies that are not counted since surface water is counted
+								if ( debug ) {
+									Message.printStatus(2, routine, "    Not adding CDS acreage for " + parcelYear +
+										" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
+										"\" groundwater supply " + supply.getID() + " (because parcel has SW supply)");
+								}
+								// Only set to know if unknown because don't want to reset
+								if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN ) {
+									supply.setStateCULocationForCds(null);
+									supply.setIncludeInCdsType(IncludeParcelInCdsType.NO);
 								}
 							}
 						}
 					}
-					else if ( parcel.hasSurfaceWaterSupply() && culoc.hasGroundwaterOnlySupply() ) {
+					else if ( parcel.hasSurfaceWaterSupply() && culoc.isGroundwaterOnlySupplyModelNode() ) {
 						// WEL location parcel that has surface water supply.
 						// The acreage will have been added to the D&W node above, for the appropriate location.
 						// No need to do anything.  The parcel will be skipped for the location.
-						Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " +
-							parcel.getID() + " has groundwater only for model, is WEL.");
-						Message.printStatus(2, routine, "  Skipping parcel because has surface supply (will have been added to a D&W).");
+						Message.printStatus(2, routine, "    CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " +
+							parcel.getID() + " is groundwater only for model, is WEL.");
+						Message.printStatus(2, routine, "  Skipping parcel for CDS because has surface supply (will have been added to a D&W).");
+						// Set all supply relationships to not include in CDS
+						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
+							if ( debug ) {
+								Message.printStatus(2, routine, "    Not adding CDS acreage for " + parcelYear +
+									" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
+									"\" groundwater supply " + supply.getID() + " (beause parcel has SW supply)");
+							}
+							// Only set to know if unknown because don't want to reset
+							if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN ) {
+								supply.setStateCULocationForCds(null);
+								supply.setIncludeInCdsType(IncludeParcelInCdsType.NO);
+							}
+						}
 					}
-					else if ( !parcel.hasSurfaceWaterSupply() && culoc.hasGroundwaterOnlySupply() ) {
+					else if ( !parcel.hasSurfaceWaterSupply() && culoc.isGroundwaterOnlySupplyModelNode() ) {
 						// WEL location parcel with only surface water supply
 						// - groundwater associated with commingled lands will not assigned so no double-counting of parcel
 						// - assign the portion of the parcel attributed to the location
-						Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " +
-							parcel.getID() + " has groundwater only for model, is WEL.");
+						Message.printStatus(2, routine, "    CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " +
+							parcel.getID() + " is groundwater only for model, is WEL.");
 						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 							if ( supply instanceof StateCU_SupplyFromGW ) {
 								// Groundwater only so get the area from the supply
 								supplyFromGW = (StateCU_SupplyFromGW)supply;
 								if ( debug ) {
-									Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " + parcel.getID() +
+									Message.printStatus(2, routine, "    CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " + parcel.getID() +
 										" supply WDID " + supplyFromGW.getWDID() + " receipt " + supplyFromGW.getReceipt() );
 								}
+								// OK to check this here because collection is done by specific parts
 								if ( culoc.idIsIn(supplyFromGW.getWDID(), supplyFromGW.getReceipt()) ) {
 									if ( debug ) {
-										Message.printStatus(2, routine, "GW supply WDID " + supplyFromGW.getWDID() +
+										Message.printStatus(2, routine, "    GW supply WDID " + supplyFromGW.getWDID() +
 											" receipt " + supplyFromGW.getReceipt() + " is in CULoc" );
 									}
 									// This culoc is associated with the supply via single ditch or collection.
 									// Area for supply was previously calculated as (parcel area) * (ditch percent_irrig)
 									// - parcel_years is output and is the list of years with data, across all locations in the command
 									addParcelArea ( debug, culoc, parcel, yts, temp_DateTime, parcelYear, parcelYears, parcelCrop, supplyFromGW.getAreaIrrig() );
+									if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.YES ) {
+										// Should not happen, should only be set to YES once
+										message = "CUloc " + culoc.getID() + " year " + parcelYear +
+											" parcel ID " + parcel.getID() + " supply ID " + culoc.getID() +
+											" area was previously added to CDS (location " + supply.getStateCULocationForCds().getID() + ").";
+										Message.printWarning ( warningLevel, 
+			        						MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, "    " + message );
+		        						status.addToLog ( commandPhase,
+		            						new CommandLogRecord(CommandStatusType.WARNING, message,
+		            							"Area should only be added once - well is included in more than one WEL model locations." ) );
+									}
 									supply.setStateCULocationForCds(culoc);
-									// Supplies were initialized to CDS:NO previously so only set to yes here
 									supply.setIncludeInCdsType(IncludeParcelInCdsType.YES);
 								}
 								else {
 									// TODO smalers 2020-11-08 convert to debug or remove when tested
 									if ( debug ) {
-										Message.printStatus(2, routine, "Not adding CDS acreage for " + parcelYear +
+										Message.printStatus(2, routine, "    Not adding CDS acreage for " + parcelYear +
 											" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
-											"\" does not have parts matching GW supply WDID " + supplyFromGW.getWDID() +
-											" receipt \"" + supplyFromGW.getReceipt() + "\"" );
+											"\" (because does not have parts matching GW supply WDID " + supplyFromGW.getWDID() +
+											" receipt \"" + supplyFromGW.getReceipt() + "\")" );
+									}
+									// Only set to know if unknown because don't want to reset
+									if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN ) {
+										supply.setIncludeInCdsType(IncludeParcelInCdsType.NO);
 									}
 								}
 							}
@@ -786,8 +875,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		            			"This may be a HydroBase data load issue.  For example, GIS data error may cause a HydroBase data load error."
 		            			+ "  Use SetParcel* commands to fix input data.  See log file for more information." ) );
 		        		// Print more information to troubleshoot:
-						Message.printWarning(3, routine, "  CU Location has GW only supply based on aggregation/system (WEL): " + culoc.hasGroundwaterOnlySupply() );
-						Message.printWarning(3, routine, "  CU Location has SW supply (DIV or D&W because is not WEL): " + culoc.hasSurfaceWaterSupply() );
+						Message.printWarning(3, routine, "  CU Location has GW only supply based on aggregation/system (WEL): " + culoc.isGroundwaterOnlySupplyModelNode() );
+						Message.printWarning(3, routine, "  CU Location has SW supply (DIV or D&W because is not WEL): " + culoc.hasSurfaceWaterSupplyForModelNode() );
 						Message.printWarning(3, routine, "  Parcel has surface water supply = " + parcel.hasSurfaceWaterSupply() );
 						Message.printWarning(3, routine, "  Parcel has " + parcel.getSupplyFromSWCount() + " surface water supplies based on parcel data." );
 						if ( parcel.getSupplyFromSWCount() > 0 ) {
@@ -797,12 +886,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									// Any SW supply should have been added to DIV or D&W
 									Message.printWarning(3, routine, "    SW supply WDID = " + supplyFromSW.getWDID() );
 									if ( !supplyFromSW.getWDID().isEmpty() ) {
-										if ( culoc.idIsIn(supplyFromSW.getWDID()) ) {
-											Message.printWarning(3, routine, "      WDID is in CU Location " +
-												culoc.getCollectionType() + "? = " +  culoc.idIsIn(supplyFromSW.getWDID()) );
-										}
+										Message.printWarning(3, routine, "      SW supply WDID is in CU Location " +
+											culoc.getCollectionType() + "? = " +  culoc.idIsIn(supplyFromSW.getWDID()) );
 									}
 								}
+								supply.setIncludeInCdsType(IncludeParcelInCdsType.ERROR);
 							}
 						}
 						Message.printWarning(3, routine, "  Parcel has groundwater supply = " + parcel.hasGroundWaterSupply() );
@@ -824,11 +912,18 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										}
 									}
 								}
+								supply.setIncludeInCdsType(IncludeParcelInCdsType.ERROR);
 							}
 						}
 						if ( (parcel.getSupplyFromSWCount() + parcel.getSupplyFromGWCount()) == 0) {
-							Message.printWarning(3, routine, "  Parcel has no supply data - could be a HydroBase data load issue."
-								+ "  Model configuration is not consistent with HydroBase data." );
+							message = "  Parcel has no supply data - could be a HydroBase data load issue."
+								+ "  Model configuration is not consistent with HydroBase data.";
+							Message.printWarning(3, routine, message );
+							Message.printWarning ( warningLevel, 
+			        			MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+		        			status.addToLog ( commandPhase,
+		            			new CommandLogRecord(CommandStatusType.WARNING, message,
+		            				"Check original parcel data." ) );
 						}
 					}
 				}

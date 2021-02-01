@@ -393,7 +393,7 @@ CommandWarningException, CommandException
 			}
 			else {
 				culoc = (StateCU_Location)culocList.get(pos);
-				if ( culoc.hasGroundwaterOnlySupply() ) {
+				if ( culoc.isGroundwaterOnlySupplyModelNode() ) {
 					has_gwonly_supply = true;
 				}
 			}

@@ -50,9 +50,12 @@ import RTi.Util.IO.CommandPhaseType;
 import RTi.Util.IO.CommandStatus;
 import RTi.Util.IO.CommandStatusType;
 import RTi.Util.IO.CommandWarningException;
+import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.InvalidCommandParameterException;
 import RTi.Util.IO.PropList;
 import RTi.Util.String.StringUtil;
+import RTi.Util.Table.DataTable;
+import RTi.Util.Table.TableRecord;
 import RTi.Util.Time.DateTime;
 
 /**
@@ -232,6 +235,79 @@ not (e.g., "Cancel" was pressed.
 public boolean editCommand ( JFrame parent )
 {	// The command will be modified if changed...
 	return (new ReadCropPatternTSFromHydroBase_JDialog ( parent, this )).ok();
+}
+
+/**
+ * Check whether a location has corresponding SetCropPatternTS() command that matches the ID.
+ */
+private boolean locationHasSetCommand ( StateDMI_Processor processor, String culoc_id ) {
+	String routine = getClass().getSimpleName() + ".locationHasSetCommand";
+	boolean hasSetCommand = false;
+	// Get SetCropPatternTS commands after this command
+	List<String> commandsToFind = new ArrayList<>();
+	commandsToFind.add("SetCropPatternTS");
+	commandsToFind.add("SetCropPatternTSFromList");
+	List<Command> commandList = StateDMICommandProcessorUtil.getCommandsBeforeIndex(
+		processor.indexOf(this), processor, commandsToFind, true);
+	if ( commandList.size() == 0 ) {
+		// Loop through
+		for ( Command command : commandList ) {
+			String ID = command.getCommandParameters().getValue("ID");
+			String idpattern_Java = StringUtil.replaceString(ID,"*",".*");
+			if ( command instanceof SetCropPatternTS_Command ) {
+				if ( culoc_id.matches(idpattern_Java) ) {
+					// Identifier matches...
+					hasSetCommand = true;
+					break;
+				}
+			}
+			else if ( command instanceof SetCropPatternTS_Command ) {
+				if ( culoc_id.matches(idpattern_Java) ) {
+					// Identifier matches, but also need to read the list file to see if any location IDs match...
+					String ListFile = command.getCommandParameters().getValue ( "ListFile" );
+					String ListFile_full = IOUtil.verifyPathForOS(
+	        			IOUtil.toAbsolutePath(StateDMICommandProcessorUtil.getWorkingDir(processor),
+                			StateDMICommandProcessorUtil.expandParameterValue(processor,this,ListFile)));
+					String IDCol = command.getCommandParameters().getValue ( "IDCol" );
+					int IDCol_int = -1;
+					if ( IDCol != null ) {
+						IDCol_int = Integer.parseInt ( IDCol ) - 1;
+					}
+					// Read the list file using the table...
+
+					PropList props = new PropList ("");
+					props.set ( "Delimiter=," );		// see existing prototype
+					props.set ( "CommentLineIndicator=#" );	// New - skip lines that start with this
+					props.set ( "TrimStrings=True" );	// If true, trim strings after reading.
+					try {
+						DataTable table = DataTable.parseFile ( ListFile_full, props );
+						TableRecord rec = null;
+						String id;
+
+						int tsize = 0;
+						if ( table != null ) {
+							tsize = table.getNumberOfRecords();
+						}
+						for ( int j = 0; j < tsize; j++ ) {
+							rec = table.getRecord(j);
+							id = (String)rec.getFieldValue(IDCol_int);
+
+							if ( id.matches(idpattern_Java) ) {
+								// Identifier matches...
+								hasSetCommand = true;
+								break;
+							}
+						}
+					}
+					catch ( Exception e ) {
+						Message.printWarning(3, routine, "Error processing SetCropPatternTSFromList file to check if ID is matched.");
+					}
+				}
+			}
+		}
+	}
+	// Check whether the ID parameter of the command matches culoc_id
+	return hasSetCommand;
 }
 
 /**
@@ -714,12 +790,19 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						hydroBaseStructureViewFromSetList,
 						status, command_tag, warningLevel, warning_count);
 					if ( crop_patterns_sv.size() == 0 ) {
-						message = "CU location \"" + culoc_id + "\" had no crop pattern data from HydroBase or set commands.";
-						Message.printWarning ( warningLevel, 
-					        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-					       status.addToLog ( commandPhase,
-					           new CommandLogRecord(CommandStatusType.WARNING,
-					            message, "May be OK if period is short, but likely an issue if full period has been specified." ) );
+						// Look forward in commands to see if any SetCropPatternTS commands are found that match the ID of interest.
+						// - this does NOT check for setting individual parcels, which seems to be a Rio Grande thing and is being phased out.
+						if ( locationHasSetCommand(processor, culoc_id) ) {
+							// OK
+						}
+						else {
+							message = "CU location \"" + culoc_id + "\" had no crop pattern data from HydroBase or set commands.";
+							Message.printWarning ( warningLevel, 
+					        	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+					       	status.addToLog ( commandPhase,
+					           	new CommandLogRecord(CommandStatusType.WARNING,
+					            	message, "May be OK if period is short, but likely an issue if full period has been specified." ) );
+						}
 					}
 					//}
 					// The results are processed below...
@@ -800,12 +883,17 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					*/
 
 					if ( crop_patterns_sv.size() == 0 ) {
-						message = "CU location \"" + culoc_id + "\" had no crop pattern data from HydroBase or set commands.";
-						Message.printWarning ( warningLevel, 
-					        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-					       status.addToLog ( commandPhase,
-					           new CommandLogRecord(CommandStatusType.WARNING,
-					            message, "May be OK if period is short, but likely an issue if full period has been specified." ) );
+						if ( locationHasSetCommand(processor, culoc_id) ) {
+							// OK
+						}
+						else {
+							message = "CU location \"" + culoc_id + "\" had no crop pattern data from HydroBase or set commands.";
+							Message.printWarning ( warningLevel, 
+					        	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+					       	status.addToLog ( commandPhase,
+					           	new CommandLogRecord(CommandStatusType.WARNING,
+					            	message, "May be OK if period is short, but likely an issue if full period has been specified." ) );
+						}
 					}
 	
 					// Process the records below into the collection ID...
