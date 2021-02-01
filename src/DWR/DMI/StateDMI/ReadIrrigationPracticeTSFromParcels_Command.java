@@ -116,6 +116,7 @@ public static void processIrrigationPracticeTSParcel (
 	if ( supply.isSurfaceWater() ) {
 		supplyFromSW = (StateCU_SupplyFromSW)supply;
 		areaIrrigFromSupply = supplyFromSW.getAreaIrrig();
+		// Surface supply identifiers are always WDIDs
 		idIsIn = culoc.idIsIn(supplyFromSW.getWDID());
 		if ( debug ) {
 			Message.printStatus( 2, routine, "  Processing SW supply WDID=" + supplyFromSW.getWDID() + " areaIrrig=" + areaIrrigFromSupply ); 
@@ -124,8 +125,22 @@ public static void processIrrigationPracticeTSParcel (
 	else if ( supply.isGroundWater() ) {
 		supplyFromGW = (StateCU_SupplyFromGW)supply;
 		areaIrrigFromSupply = supplyFromGW.getAreaIrrig();
-		// Does not really matter for groundwater?
-		idIsIn = culoc.idIsIn(supplyFromGW.getWDID(), supplyFromGW.getReceipt());
+		// Groundwater supply identifiers may be WDID or receipt
+		if ( culoc.isGroundwaterOnlySupplyModelNode() ) {
+			// See if the well supply matches a collection part
+			idIsIn = culoc.idIsIn(supplyFromGW.getWDID(), supplyFromGW.getReceipt());
+		}
+		else {
+			// Must be a D&W where well supply is associated with a ditch that
+			// - check that the ditch resulting in the well association is in the location surface water collection
+			if ( culoc.isCollection() ) {
+				idIsIn = culoc.idIsIn(supplyFromGW.getAssociatedDitchCollectionID());
+			}
+			else {
+				// Single ditch D&W, must be in the location.
+				idIsIn = true;
+			}
+		}
 		if ( debug ) {
 			Message.printStatus( 2, routine, "  Processing GW supply WDID=" + supplyFromGW.getWDID() + " receipt=" + supplyFromGW.getReceipt() + " areaIrrig=" + areaIrrigFromSupply ); 
 		}
@@ -147,6 +162,7 @@ public static void processIrrigationPracticeTSParcel (
 	// - if surface parcel has surface water supply and CU Location matches, update
 	// - else groundwater only so update if CU Location matches
 
+	// Set the following to true if the supply is included in CDS and therefore also included in IPY
 	if ( parcel.hasSurfaceWaterSupply() && !culoc.isGroundwaterOnlySupplyModelNode() ) {
 		// DIV or D&W
 		if ( supply.isSurfaceWater() ) {
@@ -214,12 +230,13 @@ public static void processIrrigationPracticeTSParcel (
 		// - can be associated with CU Location because of well collection in which supply ID idIsIn will match
 		// - or can be associated with parcels under wells, in which case
 
+		// TODO smalers 2021-01-31 dwFactor is handled in the parcel so don't need to compute here
 		// dwFactor is the areaIrrigFraction for surface water supplies, which is 1/(# ditches) for the parcel
 		// - this ensures that the well contribution to each D&W parcel part is correct
-		double dwFactor = 1.0;
-		if ( parcel.getSupplyFromSWCount() > 0 ) {
-			dwFactor = 1.0/parcel.getSupplyFromSWCount();
-		}
+		// double dwFactor = 1.0;
+		// if ( parcel.getSupplyFromSWCount() > 0 ) {
+		// 	dwFactor = 1.0/parcel.getSupplyFromSWCount();
+		// }
 		if ( isHighEfficiency ) {
 			// Sprinkler or drip irrigation
 			if ( ipyts.getAcgwspr(parcelYear) < 0.0 ) {
