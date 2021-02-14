@@ -539,6 +539,8 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 		out.println(cmnt + "                    - YES if a parcel with surface water supply - area for parcel is always included");
 		out.println(cmnt + "                    - YES if a parcel with only groundwater supply and model node is a WEL");
 		out.println(cmnt + "                    - a parcel can have CDS:YES for surface water supplies or groundwater supplies, but not both");
+		out.println(cmnt + "                    - IMPORTANT: a parcel/supply may show CDS:YES for surface water supply under GW-only model node");
+		out.println(cmnt + "                      but this is only shown in verbose report mode - the supply is only included in the D&W node.");
 		out.println(cmnt + "                    CDS:NO = do not include parcel area in CDS file based on irrigated acreage parcel assignment");
 		out.println(cmnt + "                    - NO if GW supply but parcel also has surface water supply");
 		out.println(cmnt + "                      - if GW only suppply WEL node, a D&W model node will include the area");
