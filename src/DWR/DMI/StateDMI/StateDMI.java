@@ -58,13 +58,20 @@ public static final String PROGRAM_NAME = "StateDMI";
 
 /**
  * Public-facing Full version and date.
- * Do not change format without checking dependencies.
- * Use period to separate parts so that version comparisons can be done.
- * Use 5.00.06.dev rather than 5.00.06dev
- * (the latter was used previously but causes issues with version checks).
- * For consistency, the second and third parts should be zero-padded to 2 digits.
+ * - Do not change format without checking dependencies.
+ * - See also the conf/product.properties file, which needs to be consistent for installer.
+ * - Use Semantic version with period to separate parts so that version comparisons can be done.
+ * - Indicate development version using Use 5.0.8.dev rather than 5.0.6dev
+ *   (the latter was used previously but causes issues with version checks).
+ * - The second and third parts of the version were traditionally zero-padded to
+ *   ensure sorting in Windows Start menu.  This was needed at one point but is no longer needed.
+ * - Version parts starting in 0 and with second digit 8 or 9 cause issues with launch4j
+ *   because it treats as octal numbers.
+ * - Up to 5.00.07.dev, zero-padding was used for second and third parts.
+ *   As of version 5.0.8.dev, no zero-padding is used, although single zero is allowed.
+ * - The version is used by build scripts to assign version to installers and documentation.
  */
-public static final String PROGRAM_VERSION = "5.00.07.dev (2021-01-31)";
+public static final String PROGRAM_VERSION = "5.0.8.dev (2021-02-09)";
 
 /**
 Interface for StateCU commands.

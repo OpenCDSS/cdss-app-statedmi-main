@@ -705,7 +705,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						// - otherwise WEL can have surface water supply but don't want to count in WEL
 						if ( debug ) {
 							Message.printStatus(2, routine, "    CUloc " + culoc.getID() + " year " + parcelYear +
-								" parcel ID " + parcel.getID() + " has surface water supply, is a DIV or D&W.");
+								" parcel ID " + parcel.getID() + " has SW supply, is a DIV or D&W.");
 						}
 						// Only assign surface water supply acreage and do not assign any groundwater acreage
 						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
@@ -723,7 +723,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									}
 									else {
 										doInclude = false;
-										notIncludeMessage = "because is a collection ID and surface supply ID " + supplyFromSW.getID() + " does not match collection part IDs";
+										notIncludeMessage = "because is a collection ID and SW supply ID " + supplyFromSW.getID() + " does not match collection part IDs";
 									}
 								}
 								else {
@@ -733,7 +733,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									}
 									else {
 										doInclude = false;
-										notIncludeMessage = "because is a single ID and surface supply ID " + supplyFromSW.getID() + " does not match location ID";
+										notIncludeMessage = "because is a single ID and SW supply ID " + supplyFromSW.getID() + " does not match location ID";
 									}
 								}
 								if ( doInclude ) {
@@ -778,7 +778,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								if ( debug ) {
 									Message.printStatus(2, routine, "    Not adding CDS acreage for " + parcelYear +
 										" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
-										"\" groundwater supply " + supply.getID() + " (because parcel has SW supply)");
+										"\" GW supply " + supply.getID() + " (because parcel has SW supply)");
 								}
 								// Only set to know if unknown because don't want to reset
 								if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN ) {
@@ -793,14 +793,21 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						// The acreage will have been added to the D&W node above, for the appropriate location.
 						// No need to do anything.  The parcel will be skipped for the location.
 						Message.printStatus(2, routine, "    CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " +
-							parcel.getID() + " is groundwater only for model, is WEL.");
-						Message.printStatus(2, routine, "  Skipping parcel for CDS because has surface supply (will have been added to a D&W).");
+							parcel.getID() + " is GW only for model, is WEL.");
+						Message.printStatus(2, routine, "  Skipping parcel for CDS (because has SW supply and will have been added to a D&W).");
 						// Set all supply relationships to not include in CDS
 						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 							if ( debug ) {
-								Message.printStatus(2, routine, "    Not adding CDS acreage for " + parcelYear +
-									" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
-									"\" groundwater supply " + supply.getID() + " (beause parcel has SW supply)");
+								if ( supply instanceof StateCU_SupplyFromGW ) {
+									Message.printStatus(2, routine, "    Not adding CDS acreage for " + parcelYear +
+										" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
+										"\" GW supply " + supply.getID() + " (because parcel has SW supply)");
+								}
+								else if ( supply instanceof StateCU_SupplyFromSW ) {
+									Message.printStatus(2, routine, "    Not adding CDS acreage for " + parcelYear +
+										" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
+										"\" SW supply " + supply.getID() + " (because parcel has SW supply)");
+								}
 							}
 							// Only set to know if unknown because don't want to reset
 							if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN ) {
@@ -814,7 +821,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						// - groundwater associated with commingled lands will not assigned so no double-counting of parcel
 						// - assign the portion of the parcel attributed to the location
 						Message.printStatus(2, routine, "    CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " +
-							parcel.getID() + " is groundwater only for model, is WEL.");
+							parcel.getID() + " is GW only for model, is WEL.");
 						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 							if ( supply instanceof StateCU_SupplyFromGW ) {
 								// Groundwater only so get the area from the supply
@@ -827,7 +834,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								if ( culoc.idIsIn(supplyFromGW.getWDID(), supplyFromGW.getReceipt()) ) {
 									if ( debug ) {
 										Message.printStatus(2, routine, "    GW supply WDID " + supplyFromGW.getWDID() +
-											" receipt " + supplyFromGW.getReceipt() + " is in CULoc" );
+											" RECEIPT '" + supplyFromGW.getReceipt() + "' is in CULoc" );
 									}
 									// This culoc is associated with the supply via single ditch or collection.
 									// Area for supply was previously calculated as (parcel area) * (ditch percent_irrig)
@@ -853,7 +860,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										Message.printStatus(2, routine, "    Not adding CDS acreage for " + parcelYear +
 											" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
 											"\" (because does not have parts matching GW supply WDID " + supplyFromGW.getWDID() +
-											" receipt \"" + supplyFromGW.getReceipt() + "\")" );
+											" RECEIPT '" + supplyFromGW.getReceipt() + "')" );
 									}
 									// Only set to know if unknown because don't want to reset
 									if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN ) {
@@ -877,8 +884,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		        		// Print more information to troubleshoot:
 						Message.printWarning(3, routine, "  CU Location has GW only supply based on aggregation/system (WEL): " + culoc.isGroundwaterOnlySupplyModelNode() );
 						Message.printWarning(3, routine, "  CU Location has SW supply (DIV or D&W because is not WEL): " + culoc.hasSurfaceWaterSupplyForModelNode() );
-						Message.printWarning(3, routine, "  Parcel has surface water supply = " + parcel.hasSurfaceWaterSupply() );
-						Message.printWarning(3, routine, "  Parcel has " + parcel.getSupplyFromSWCount() + " surface water supplies based on parcel data." );
+						Message.printWarning(3, routine, "  Parcel has SW supply = " + parcel.hasSurfaceWaterSupply() );
+						Message.printWarning(3, routine, "  Parcel has " + parcel.getSupplyFromSWCount() + " SW supplies based on parcel data." );
 						if ( parcel.getSupplyFromSWCount() > 0 ) {
 							for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 								if ( supply instanceof StateCU_SupplyFromSW ) {
@@ -893,13 +900,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								supply.setIncludeInCdsType(IncludeParcelInCdsType.ERROR);
 							}
 						}
-						Message.printWarning(3, routine, "  Parcel has groundwater supply = " + parcel.hasGroundWaterSupply() );
-						Message.printWarning(3, routine, "  Parcel has " + parcel.getSupplyFromGWCount() + " groundwater supplies based on parcel data." );
+						Message.printWarning(3, routine, "  Parcel has GW supply = " + parcel.hasGroundWaterSupply() );
+						Message.printWarning(3, routine, "  Parcel has " + parcel.getSupplyFromGWCount() + " GW supplies based on parcel data." );
 						if ( parcel.getSupplyFromGWCount() > 0 ) {
 							for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 								if ( supply instanceof StateCU_SupplyFromGW ) {
 									supplyFromGW = (StateCU_SupplyFromGW)supply;
-									Message.printWarning(3, routine, "    GW supply WDID = " + supplyFromGW.getWDID() + " RECEIPT = " + supplyFromGW.getReceipt() );
+									Message.printWarning(3, routine, "    GW supply WDID = " + supplyFromGW.getWDID() + " RECEIPT = '" + supplyFromGW.getReceipt() + "'" );
 									// Check to see if the well supply is in the original aggregate list for this WEL node
 									if ( !supplyFromGW.getWDID().isEmpty() ) {
 										if ( culoc.idIsIn(supplyFromGW.getWDID()) ) {

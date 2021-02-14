@@ -142,7 +142,7 @@ updateIndex() {
 checkOperatingSystem
 
 # Get the location where this script is located since it may have been run from any folder
-scriptFolder=`cd $(dirname "$0") && pwd`
+scriptFolder=$(cd $(dirname "$0") && pwd)
 scriptName=$(basename $0)
 repoFolder=$(dirname "$scriptFolder")
 srcFolder="$repoFolder/src"

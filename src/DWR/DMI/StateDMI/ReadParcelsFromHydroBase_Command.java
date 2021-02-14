@@ -1453,8 +1453,42 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 															parcelProblem, "Report to software support." ) );
 												}
 											}
+
+											// Get HydroBase_ParcelUseTS for the structure
+											// - this will used cached data if HydroBase >= 20200824
+											// - the following prints out the read time
+											// - this is cached using WD, year, and WDID
+											int parcelId = hbWell.getParcel_id();
+											// TODO smalers 2021-01-09 the well WD is used since ParcelUseTS does not have WD.
+											// - might be an issue in rare case where a parcel is supplied by well in another district
+											int wd = hbWell.getWD();
+											List<HydroBase_ParcelUseTSStructureToParcel> hbParcelUseTSStructList =
+												hbdmi.readParcelUseTSStructureToParcelListForParcelIdCalYear(wd, parcelId, year,
+												includeOnlyIrrigatedParcels);
+											if ( hbParcelUseTSStructList.size() > 0 ) {
+												Message.printStatus ( 2, routine, "    Found " + hbParcelUseTSStructList.size() +
+													" matching structure/parcel records (SW supply) for year " +
+													year + ", wd=" + wd + ", parcelId=" + parcelId );
+											}
+											for ( HydroBase_ParcelUseTSStructureToParcel hbputs : hbParcelUseTSStructList ) {
+												StateCU_SupplyFromSW supplyFromSW = new StateCU_SupplyFromSW();
+												// Source of data is ParcelUseTS
+												supplyFromSW.setDataSource("HB-PUTS");
+												// Set the collection part ID so it can be output
+												// - TODO smalers 2021-02-08 not relevant since collection is for WEL
+												//supplyFromSW.setCollectionPartId(part_id);
+												// Fraction and area irrigated is from HydroBase
+												// - values calculated from parcel area and number of diversions is calculated
+												supplyFromSW.setAreaIrrigFractionHydroBase(hbputs.getPercent_irrig());
+												supplyFromSW.setAreaIrrigHydroBase(hbputs.getArea()*hbputs.getPercent_irrig());
+												supplyFromSW.setWDID(HydroBase_WaterDistrict.formWDID( hbputs.getStructureWD(), hbputs.getStructureID()) );
+												supplyFromSW.setID(HydroBase_WaterDistrict.formWDID( hbputs.getStructureWD(), hbputs.getStructureID()) );
+												parcel.addSupply(supplyFromSW);
+											}
 										}
+
 										// Add supply information to the parcel.
+										// - given that the initial call was for all parcels associated with a well WDID/receipt, one supply is added
 										supplyFromGW = new StateCU_SupplyFromGW();
 										supplyFromGW.setDataSource("HB-WTP");
 										supplyFromGW.setCollectionPartType(collectionPartTypeString);
