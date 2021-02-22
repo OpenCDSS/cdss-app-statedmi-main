@@ -416,7 +416,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		}
 	}
 
-	// Get the list of CU locationss...
+	// Get the list of CU locations...
 	
 	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
@@ -696,7 +696,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		int [] parcelYearsForDiv = null;
 		try {
 			Message.printStatus(2, routine, "Determining parcel years for divisions: " + divListString );
-			parcelYearsForDiv = StateDMI_Util.readParcelYearListFromHydroBase ( hbdmi, Div_array );
+			// TODO smalers 2021-02-21 need to evaluate whether to enable exclusion for bad data.
+			// - modelers used work-arounds
+			int [] excludeYears = new int[0];
+			parcelYearsForDiv = StateDMI_Util.readParcelYearListFromHydroBase ( hbdmi, Div_array, excludeYears );
 			for ( int i = 0; i < parcelYearsForDiv.length; i++ ) {
 				Message.printStatus(2, routine, "Will process parcel year: " + parcelYearsForDiv[i] );
 			}

@@ -307,7 +307,10 @@ private void initialize (JFrame parent, SetCropPatternTSFromList_Command command
        	"If ProcessWhen=Now, supplied data will be applied when the command is processed."),
      	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"The crop pattern data will be reset to new values.  All crops not set will be set to zero."),
+		"The crop pattern data will be reset to new values."),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel (
+		"All crops for a location and year are set to zero before setting new data for a year."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
        	"If ProcessWhen=WithParcels, " +
@@ -324,6 +327,9 @@ private void initialize (JFrame parent, SetCropPatternTSFromList_Command command
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"    2) If a year column is specified, year and corresponding values "+
 		"are read from the list file.  The set period limits the years that are processed."),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel (
+		"The supply type is a legacy feature and is not used when ReadCropPatternTSFromParcels() is use."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"It is recommended that the location of the file be " +

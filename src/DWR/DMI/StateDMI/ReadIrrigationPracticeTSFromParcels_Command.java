@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
+import DWR.StateCU.IncludeParcelInCdsType;
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Parcel;
@@ -86,7 +87,7 @@ public ReadIrrigationPracticeTSFromParcels_Command ()
 }
 
 /**
-Process a single parcel's data and add to the irrigation practice
+Process a single parcel's single supply data and add to the irrigation practice
 time series.  This method is called when processing actual parcels and user-supplied supplemental data.
 @param id Location identifier (the main ID, not the aggregate/system part).
 @param ipyts StateCU_IrrigationPracticeTS to which parcel data are added.
@@ -165,7 +166,18 @@ public static void processIrrigationPracticeTSParcel (
 	// Set the following to true if the supply is included in CDS and therefore also included in IPY
 	if ( parcel.hasSurfaceWaterSupply() && !culoc.isGroundwaterOnlySupplyModelNode() ) {
 		// DIV or D&W
-		if ( supply.isSurfaceWater() ) {
+		if ( !supply.getIsModeled() ) {
+			// Supply is not modeled (is not in dataset) so skip
+			// - typically only impacts GW only node fractional areas but put here in case added for surface water also
+			Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
+				" parcelId=" + parcelId + " skipping supply ID=" + supply.getID() +
+				" since supply is not in dataset.");
+			if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN) {
+				// CDS use is not set so set to help inform in parcels report
+				supply.setIncludeInCdsType(IncludeParcelInCdsType.NOT_MODELED);
+			}
+		}
+		else if ( supply.isSurfaceWater() ) {
 			// May also have groundwater supply, but only count surface water in the total, similar to CDS.
 			if ( idIsIn ) {
 				// Source supply ID must match the CU Location or collection part
@@ -179,6 +191,10 @@ public static void processIrrigationPracticeTSParcel (
 					" parcelId=" + parcelId + " added SW WDID=" + supplyFromSW.getWDID() +
 					" area " + StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to total area, result = " +
 					StringUtil.formatString(ipyts.getTacre(parcelYear),"%.2f") );
+				if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN) {
+					// CDS use is not set so set to help inform in parcels report
+					supply.setIncludeInCdsType(IncludeParcelInCdsType.YES);
+				}
 			}
 		}
 	}
@@ -193,7 +209,18 @@ public static void processIrrigationPracticeTSParcel (
 	//else if ( culoc.isGroundwaterOnlySupplyModelNode() ) {
 	else if ( !parcel.hasSurfaceWaterSupply() && culoc.isGroundwaterOnlySupplyModelNode() ) {
 		// WEL location with groundwater only supply
-		if ( supply.isGroundWater() ) {
+		if ( !supply.getIsModeled() ) {
+			// Supply is not modeled (is not in dataset) so skip
+			// - typically only impacts GW only node fractional areas but put here in case added for surface water also
+			Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
+				" parcelId=" + parcelId + " skipping supply ID=" + supplyFromGW.getID() +
+				" since supply is not in dataset.");
+			if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN) {
+				// CDS use is not set so set to help inform in parcels report
+				supply.setIncludeInCdsType(IncludeParcelInCdsType.NOT_MODELED);
+			}
+		}
+		else if ( supply.isGroundWater() ) {
 			// Should always be the case
 			if ( idIsIn ) {
 				// Source supply ID must match the CU Location or collection part
@@ -208,6 +235,10 @@ public static void processIrrigationPracticeTSParcel (
 					" parcelId=" + parcelId + " added GW WDID=" + supplyFromGW.getWDID() +
 					" receipt=" + supplyFromGW.getReceipt() + " area " + StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to total area, result = " +
 					StringUtil.formatString(ipyts.getTacre(parcelYear),"%.2f") );
+				if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN) {
+					// CDS use is not set so set to help inform in parcels report
+					supply.setIncludeInCdsType(IncludeParcelInCdsType.YES);
+				}
 			}
 		}
 	}
@@ -224,7 +255,10 @@ public static void processIrrigationPracticeTSParcel (
 	
 	// Next add to the component areas.
 
-	if ( supply.isGroundWater() ) {
+	if ( !supply.getIsModeled() ) {
+		// Supply is not modeled (is not in dataset) so skip
+	}
+	else if ( supply.isGroundWater() ) {
 		// Has groundwater supply
 		// - does not need to be GW only
 		// - can be associated with CU Location because of well collection in which supply ID idIsIn will match

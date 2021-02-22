@@ -275,7 +275,7 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 		+ " or permits (identified by receipt number)."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"<html><b>A new simple approach is now the default - see the General tab below.</b></html>"),
+		"<html><b>A new 'UseParcels' approach is now the default - see the General tab below.</b></html>"),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
        
 	JGUIUtil.addComponent(main_JPanel, paragraph,
@@ -294,13 +294,19 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
     __main_JTabbedPane.addTab ( "General", general_JPanel );
     
    	JGUIUtil.addComponent(general_JPanel, new JLabel (
-		"Well right processing using HydroBase can be complex due to right/permit/parcel/ditch relationships."),
+		"Well right processing using HydroBase can be complex due to model node, parcel, supply, and right/permit relationships."),
 		0, ++yGeneral, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(general_JPanel, new JLabel (
-		"However, a Simple approach is now the default due to improvements in data and changes in modeling approach."),
+		"However, a 'UseParcels' approach is now the default, which uses data from ReadParcelsFromHydroBase() command."),
 		0, ++yGeneral, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(general_JPanel, new JLabel (
-		"The older approach is referred to as Legacy.  Parameters are documented as applying to Simple, Legacy, or both approaches."),
+		"The 'Simple' approach was previously implemented but has been replaced by 'UseParcels' approach."),
+		0, ++yGeneral, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(general_JPanel, new JLabel (
+		"The oldest approach is referred to as 'Legacy'."),
+		0, ++yGeneral, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(general_JPanel, new JLabel (
+		"Parameters apply to a specific approach or are common between approaches.  See the parameter documentation."),
 		0, ++yGeneral, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(general_JPanel, new JLabel (
 		"If the well rights are to be aggregated into water right classes, use the AggregateWellRights() command to reduce" +
@@ -311,22 +317,23 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
    	
    	JGUIUtil.addComponent(general_JPanel, new JLabel ("Approach:"),
 		0, ++yGeneral, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-   	List<String> approachList = new ArrayList<String>(3);
+   	List<String> approachList = new ArrayList<>(4);
    	approachList.add ( "" );
    	approachList.add ( __command._Legacy );
    	approachList.add ( __command._Simple );
+   	approachList.add ( __command._UseParcels );
 	__Approach_JComboBox = new SimpleJComboBox(false);
 	__Approach_JComboBox.setData ( approachList );
 	__Approach_JComboBox.addItemListener(this);
 	JGUIUtil.addComponent(general_JPanel, __Approach_JComboBox,
 		1, yGeneral, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(general_JPanel, new JLabel (
-		"Optional - approach to process well rights (default="+__command._Simple + ".)."),
+		"Optional - approach to process well rights (default="+__command._UseParcels + ".)."),
 		3, yGeneral, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	
    	JGUIUtil.addComponent(general_JPanel, new JLabel ( "Optimization level:"),
 		0, ++yGeneral, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	List<String> optimizationList = new ArrayList<String>(3);
+	List<String> optimizationList = new ArrayList<>(3);
 	optimizationList.add ( "" );
 	optimizationList.add ( __command._UseLessMemory );
 	optimizationList.add ( __command._UseMoreMemory );
@@ -425,7 +432,7 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 		"<html><b>Note that more recent versions of HydroBase use parcel identifiers that include water district (older did not).</b></html>"),
 		0, ++yWellParcel, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(wellParcel_JPanel, new JLabel (
-		"<html><b>These parameters are only used with Legacy approach and are ignored for Simple approach.</b></html>"),
+		"<html><b>These parameters are only used with Legacy approach and are ignored for Simple and UseParcels approaches.</b></html>"),
 		0, ++yWellParcel, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(wellParcel_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
 		0, ++yWellParcel, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
@@ -433,11 +440,12 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
     JGUIUtil.addComponent(wellParcel_JPanel, new JLabel ( "Water Division (Div):"),
 		0, ++yWellParcel, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__Div_JTextField = new JTextField(10);
+	__Div_JTextField.setToolTipText("Required for StateDMI prior to 5.0.9.");
 	__Div_JTextField.addKeyListener (this);
    	JGUIUtil.addComponent(wellParcel_JPanel, __Div_JTextField,
 		1, yWellParcel, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(wellParcel_JPanel, new JLabel (
-		"Required - water division for the parcels."),
+		"Optional - water division for the parcels."),
 		3, yWellParcel, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
    	
     JGUIUtil.addComponent(wellParcel_JPanel, new JLabel ( "Year:"),
@@ -472,7 +480,7 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 		"Water rights are desirable but are not always available."),
 		0, ++yRightPermit, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(rightPermit_JPanel, new JLabel (
-		"<html><b>The DefineRightHow parameter is only used with Legacy approach and is ignored for Simple approach (right is always used if available).</b></html>"),
+		"<html><b>The DefineRightHow parameter is only used with Legacy approach and is ignored for other approaches (right is always used if available).</b></html>"),
 		0, ++yRightPermit, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(rightPermit_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
 		0, ++yRightPermit, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
@@ -651,7 +659,7 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 	JGUIUtil.addComponent(onOff_JPanel, __OnOffDefault_JComboBox,
 		1, yOnOff, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     JGUIUtil.addComponent(onOff_JPanel, new JLabel (
-		"Optional - default StateMod OnOff switch (default=" + __command._AppropriationDate + ")."),
+		"Optional - default StateMod OnOff switch (default=" + __command._AppropriationDate + " year)."),
 		3, yOnOff, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"), 

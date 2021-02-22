@@ -1238,7 +1238,8 @@ CommandWarningException, CommandException
 			if ( hbdmi != null ) {
 				// Direct database query
 				try {
-					parcelYears = StateDMI_Util.readParcelYearListFromHydroBase ( hbdmi, Div_int );
+					int [] excludeYears = new int[0];
+					parcelYears = StateDMI_Util.readParcelYearListFromHydroBase ( hbdmi, Div_int, excludeYears );
 				}
 				catch ( Exception e ) {
 					parcelYears = null;
