@@ -4717,6 +4717,7 @@ throws Exception
     			command_status.refreshPhaseSeverity(CommandPhaseType.RUN,CommandStatusType.SUCCESS);
     			commandProfile.setEndTime(System.currentTimeMillis());
                 commandProfile.setEndHeap(Runtime.getRuntime().totalMemory());
+    			Message.printStatus ( 1, routine, "In comment...skipping command." );
     			continue;
     		}
     		else if ( command instanceof Exit_Command ) {

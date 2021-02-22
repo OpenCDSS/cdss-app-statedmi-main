@@ -55,10 +55,8 @@ import RTi.Util.Time.DateTime;
 import RTi.Util.Time.TimeInterval;
 
 /**
-<p>
 This class initializes, checks, and runs the FillCropPatternTS*() commands.  It is extended by the
 specific fill commands.
-</p>
 */
 public abstract class FillCropPatternTS_Command
 extends AbstractCommand implements Command
@@ -811,7 +809,7 @@ CommandWarningException, CommandException
 		// to be filled.  Process each crop time series independently...
 		int matchCount = 0; // Track how many IDs result in changes
 		for ( int i = 0; i < cdsListSize; i++ ) {
-			cupatts =(StateCU_CropPatternTS)cdsList.get(i);
+			cupatts = cdsList.get(i);
 			id = cupatts.getID();
 			if ( Message.isDebugOn ) {
 				Message.printDebug ( 2, routine, "Checking CULocation " + id + " against \"" + idpattern_Java + "\"" );
@@ -835,7 +833,7 @@ CommandWarningException, CommandException
 							message, "Verify that the ID is correct and that CU locations have been read before this command." ) );
 					continue;
 				}
-				culoc = (StateCU_Location)culocList.get(pos);
+				culoc = culocList.get(pos);
 			}
 			if ( IncludeSurfaceWaterSupply_boolean && IncludeGroundwaterOnlySupply_boolean ) {
 				// Including both...
@@ -898,28 +896,26 @@ CommandWarningException, CommandException
 						++matchCount;
 						// Reset the data...
 						if ( this instanceof FillCropPatternTSConstant_Command ) {
+							int nfilled = TSUtil.fillConstant ( yts, FillStart_DateTime,
+							FillEnd_DateTime, Constant_double, null );
 							Message.printStatus ( 2, routine,
 							"FillConstant " + id + "-" + cropName +
-							" " + FillStart_DateTime + " to " + FillEnd_DateTime );
-							TSUtil.fillConstant ( yts, FillStart_DateTime,
-							FillEnd_DateTime, Constant_double, null );
+							" " + FillStart_DateTime + " to " + FillEnd_DateTime + " (" + nfilled + " values filled).");
 						}
 						else if ( this instanceof FillCropPatternTSRepeat_Command ) {
+							int nfilled = TSUtil.fillRepeat ( yts, FillStart_DateTime,
+							FillEnd_DateTime, FillDirection_int, MaxIntervals_int, FillFlag );
 							Message.printStatus ( 2, routine,
 							"FillRepeat " + id + "-" + cropName +
-							" " + FillStart_DateTime + " to " + FillEnd_DateTime);
-							TSUtil.fillRepeat ( yts, FillStart_DateTime,
-							FillEnd_DateTime, FillDirection_int, MaxIntervals_int, FillFlag );
+							" " + FillStart_DateTime + " to " + FillEnd_DateTime+ " (" + nfilled + " values filled)." );
 						}
 						else if ( this instanceof FillCropPatternTSInterpolate_Command ) {
-							Message.printStatus ( 2, routine, "FillInterpolate " + id + "-" +
-							cropName + " " + FillStart_DateTime + " to " + FillEnd_DateTime);
-							TSUtil.fillInterpolate ( yts, FillStart_DateTime,
+							int nfilled = TSUtil.fillInterpolate ( yts, FillStart_DateTime,
 							FillEnd_DateTime, MaxIntervals_int, 0 );
+							Message.printStatus ( 2, routine, "FillInterpolate " + id + "-" +
+							cropName + " " + FillStart_DateTime + " to " + FillEnd_DateTime+ " (" + nfilled + " values filled)." );
 						}
 						else if ( this instanceof FillCropPatternTSProrateAgStats_Command ) {
-							Message.printStatus ( 2, routine, "FillProrateAgStats " + id + " - " +
-							county + ", " + cropName );
 							// Find a matching AgStats time series using the CU location county and
 							// data type (crop type).
 							countyts = processor.findAgStatsTS ( county, cropName );
@@ -934,8 +930,10 @@ CommandWarningException, CommandException
 										message, "Verify that the AgStats time series were read using a prior ReadAgStatsTSFromDateValue() command." ) );
 								continue;
 							}
-							TSUtil.fillProrate ( yts, countyts, FillStart_DateTime,
+							int nfilled = TSUtil.fillProrate ( yts, countyts, FillStart_DateTime,
 								FillEnd_DateTime, fillProrate_PropList );
+							Message.printStatus ( 2, routine, "FillProrateAgStats " + id + " - " +
+							county + ", " + cropName + " (" + nfilled + " values filled)." );
 						}
 						else if ( this instanceof FillCropPatternTSUsingWellRights_Command ) {
 							// Fill the specific crop using rights, for the requested period.
@@ -1078,10 +1076,10 @@ CommandWarningException, CommandException
 						}
 					}
 					if ( (yts != null) && (countyts != null) ) {
-						Message.printStatus ( 2, routine,
-						"FillProrateAgStats " + id + " - " + county + ", " + cropName );
-						TSUtil.fillProrate ( yts, countyts,
+						int nfilled = TSUtil.fillProrate ( yts, countyts,
 							FillStart_DateTime, FillEnd_DateTime, fillProrate_PropList );
+						Message.printStatus ( 2, routine,
+						"FillProrateAgStats " + id + " - " + county + ", " + cropName + " (" + nfilled + " values filled).");
 						// Add to the prorated totals for the crops...
 						for ( date= new DateTime(FillStart_DateTime2), iyear = year1;
 							iyear != (year2 + dyear); date.addYear(dyear), iyear += dyear ) {

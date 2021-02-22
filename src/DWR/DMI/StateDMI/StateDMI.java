@@ -71,7 +71,7 @@ public static final String PROGRAM_NAME = "StateDMI";
  *   As of version 5.0.8.dev, no zero-padding is used, although single zero is allowed.
  * - The version is used by build scripts to assign version to installers and documentation.
  */
-public static final String PROGRAM_VERSION = "5.0.8.dev (2021-02-09)";
+public static final String PROGRAM_VERSION = "5.0.9.dev (2021-02-21)";
 
 /**
 Interface for StateCU commands.

@@ -1459,6 +1459,7 @@ private JMenuItem
 	//__Commands_StateMod_WellRights_SetDiversionAggregateFromList_JMenuItem,
 	//__Commands_StateMod_WellRights_SetDiversionSystem_JMenuItem,
 	//__Commands_StateMod_WellRights_SetDiversionSystemFromList_JMenuItem,
+	__Commands_StateMod_WellRights_ReadParcelsFromHydroBase_JMenuItem,
 	__Commands_StateMod_WellRights_ReadWellRightsFromHydroBase_JMenuItem,
 	__Commands_StateMod_WellRights_ReadWellRightsFromStateMod_JMenuItem,
 	__Commands_StateMod_WellRights_SetWellRight_JMenuItem,
@@ -2603,6 +2604,7 @@ private String
 	//	__Commands_StateCU_CULocations_SetDiversionSystem_String,
 	//__Commands_StateMod_WellRights_SetDiversionSystemFromList_String =
 	//	__Commands_StateCU_CULocations_SetDiversionSystemFromList_String,
+	__Commands_StateMod_WellRights_ReadParcelsFromHydroBase_String = "ReadParcelsFromHydroBase() ...",
 	__Commands_StateMod_WellRights_ReadWellRightsFromHydroBase_String = "ReadWellRightsFromHydroBase() ...",
 	__Commands_StateMod_WellRights_ReadWellRightsFromStateMod_String = "ReadWellRightsFromStateMod() ...",
 	__Commands_StateMod_WellRights_SetWellRight_String = "SetWellRight() ...",
@@ -5000,6 +5002,13 @@ public void actionPerformed ( ActionEvent event )
 	}
 	else if ( action.equals(__Commands_StateMod_WellStations_CheckWellStations_String)){
 		commandList_EditCommand ( __Commands_StateMod_WellStations_CheckWellStations_String,
+		null, __INSERT_COMMAND);
+	}
+
+	// StateMod parcel commands...
+
+	else if ( o == __Commands_StateMod_WellRights_ReadParcelsFromHydroBase_JMenuItem){
+		commandList_EditCommand ( __Commands_StateMod_WellRights_ReadParcelsFromHydroBase_String,
 		null, __INSERT_COMMAND);
 	}
 
@@ -12703,6 +12712,10 @@ private void ui_InitGUIMenus_Commands_StateMod_WellRights ( int style, JMenu par
 		new SimpleJMenuItem(__Commands_StateMod_WellRights_SetWellSystem_String,this));
 	Commands_StateMod_WellRights_JMenu.add(
 		new SimpleJMenuItem(__Commands_StateMod_WellRights_SetWellSystemFromList_String,this));
+	Commands_StateMod_WellRights_JMenu.addSeparator ();
+	Commands_StateMod_WellRights_JMenu.add (
+		__Commands_StateMod_WellRights_ReadParcelsFromHydroBase_JMenuItem =
+		new SimpleJMenuItem(__Commands_StateMod_WellRights_ReadParcelsFromHydroBase_String,this));
 	Commands_StateMod_WellRights_JMenu.addSeparator ();
 	Commands_StateMod_WellRights_JMenu.add (
 		__Commands_StateMod_WellRights_ReadWellRightsFromHydroBase_JMenuItem =

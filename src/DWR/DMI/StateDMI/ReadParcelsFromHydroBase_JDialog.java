@@ -64,6 +64,7 @@ private boolean __first_time = true;
 private JTextField __ID_JTextField=null;
 private JTextField __InputStart_JTextField = null;
 private JTextField __InputEnd_JTextField = null;
+private JTextField __ExcludeYears_JTextField = null;
 private JTextField __Div_JTextField = null;
 private JTextArea __command_JTextArea=null;
 private SimpleJButton __cancel_JButton = null;
@@ -114,6 +115,7 @@ private void checkInput ()
 	String ID = __ID_JTextField.getText().trim();
 	String InputStart = __InputStart_JTextField.getText().trim();
 	String InputEnd = __InputEnd_JTextField.getText().trim();
+	String ExcludeYears = __ExcludeYears_JTextField.getText().trim();
 	String Div = __Div_JTextField.getText().trim();
 	
 	// Put together a list of parameters to check...
@@ -127,6 +129,9 @@ private void checkInput ()
 	}
 	if (InputEnd.length() > 0 ) {
 		props.set("InputEnd", InputEnd);
+	}
+	if (ExcludeYears.length() > 0 ) {
+		props.set("ExcludeYears", ExcludeYears);
 	}
 	if ( Div.length() > 0 ) {
 		props.set ( "Div", Div );
@@ -153,10 +158,12 @@ private void commitEdits()
 	String ID = __ID_JTextField.getText().trim();
 	String InputStart = __InputStart_JTextField.getText().trim();
 	String InputEnd = __InputEnd_JTextField.getText().trim();
+	String ExcludeYears = __ExcludeYears_JTextField.getText().trim();
 	String Div = __Div_JTextField.getText().trim();
 	__command.setCommandParameter("ID", ID);
 	__command.setCommandParameter("InputStart", InputStart);
 	__command.setCommandParameter("InputEnd", InputEnd);
+	__command.setCommandParameter("ExcludeYears", ExcludeYears);
 	__command.setCommandParameter ( "Div", Div );
 }
 
@@ -233,6 +240,17 @@ private void initialize ( JFrame parent, ReadParcelsFromHydroBase_Command comman
        	1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
        	"Optional - ending year to read data (blank for full period)."),
+       	3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Exclude years:"),
+        0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+    __ExcludeYears_JTextField = new JTextField (10);
+    __ExcludeYears_JTextField.setToolTipText("Indicate years to exclude, separated by commas, for example to ignore HydroBase data.");
+    __ExcludeYears_JTextField.addKeyListener (this);
+    JGUIUtil.addComponent(main_JPanel, __ExcludeYears_JTextField,
+       	1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel (
+       	"Optional - years to exclude."),
        	3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Water division(s):"),
@@ -326,6 +344,7 @@ private void refresh ()
 	String ID="";
 	String InputStart = "";
 	String InputEnd = "";
+	String ExcludeYears = "";
 	String Div = "";
 	PropList props = null;
 	
@@ -337,6 +356,7 @@ private void refresh ()
 		ID = props.getValue ( "ID" );
 		InputStart = props.getValue ( "InputStart" );
 		InputEnd = props.getValue ( "InputEnd" );
+		ExcludeYears = props.getValue ( "ExcludeYears" );
 		Div = props.getValue ( "Div" );
 		if ( ID != null ) {
 			__ID_JTextField.setText(ID);
@@ -346,6 +366,9 @@ private void refresh ()
 		}
 		if ( InputEnd != null ) {
 			__InputEnd_JTextField.setText(InputEnd);
+		}
+		if ( ExcludeYears != null ) {
+			__ExcludeYears_JTextField.setText(ExcludeYears);
 		}
 		if ( Div != null ) {
 			__Div_JTextField.setText(Div);
@@ -358,10 +381,12 @@ private void refresh ()
 	ID = __ID_JTextField.getText().trim();
 	InputStart = __InputStart_JTextField.getText().trim();
 	InputEnd = __InputEnd_JTextField.getText().trim();
+	ExcludeYears = __ExcludeYears_JTextField.getText().trim();
 	Div = __Div_JTextField.getText().trim();
 	props.add("ID=" + ID);
 	props.add("InputStart=" + InputStart);
 	props.add("InputEnd=" + InputEnd);
+	props.add("ExcludeYears=" + ExcludeYears);
 	props.add("Div=" + Div);
 	__command_JTextArea.setText( __command.toString(props) );
 }

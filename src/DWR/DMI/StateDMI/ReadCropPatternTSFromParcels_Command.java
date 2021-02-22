@@ -709,7 +709,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						}
 						// Only assign surface water supply acreage and do not assign any groundwater acreage
 						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
-							if ( supply instanceof StateCU_SupplyFromSW ) {
+							if ( !supply.getIsModeled() ) {
+								// Supply is not modeled (is not in dataset) so skip
+								// - typically only impacts GW only node fractional areas but put here in case added for surface water also
+								Message.printStatus( 2, routine, "    For location " + culoc.getID() + " year " + parcelYear +
+									" parcelId=" + parcelId + " skipping supply ID=" + supply.getID() +
+									" since supply is not in dataset.");
+								supply.setIncludeInCdsType(IncludeParcelInCdsType.NOT_MODELED);
+							}
+							else if ( supply instanceof StateCU_SupplyFromSW ) {
 								supplyFromSW = (StateCU_SupplyFromSW)supply;
 								// TODO smalers 2021-01-27 the following logic seems wrong since it omits D&W parts
 								// - the WDIDS for the collection may result in parcels that have supply ditches with WDIDs that don't match the collection WDID list
@@ -823,7 +831,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						Message.printStatus(2, routine, "    CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " +
 							parcel.getID() + " is GW only for model, is WEL.");
 						for ( StateCU_Supply supply : parcel.getSupplyList() ) {
-							if ( supply instanceof StateCU_SupplyFromGW ) {
+							if ( !supply.getIsModeled() ) {
+								// Supply is not modeled (is not in dataset) so skip
+								// - typically only impacts GW only node fractional areas
+								Message.printStatus( 2, routine, "    For location " + culoc.getID() + " year " + parcelYear +
+									" parcelId=" + parcelId + " skipping supply ID=" + supply.getID() +
+									" since supply is not in dataset.");
+								supply.setIncludeInCdsType(IncludeParcelInCdsType.NOT_MODELED);
+							}
+							else if ( supply instanceof StateCU_SupplyFromGW ) {
 								// Groundwater only so get the area from the supply
 								supplyFromGW = (StateCU_SupplyFromGW)supply;
 								if ( debug ) {
@@ -955,7 +971,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		HashMap<Integer,List<Integer>> divParcelYears = getParcelYearMapForDivisions(culocList, startYear, endYear);
 		// TODO smalers 2021-01-25 do not use the following for filling because HydroBase contains bad data for parcels in 2003,
 		// which are not found in the in-memory parcel map.  Print out below as FYI.
-		HashMap<Integer,List<Integer>> divHydroBaseParcelYears = StateDMI_Util.readParcelYearMapForDivisions(hbdmi, startYear, endYear);
+		// - instead, get valid parcel years from the parcel data (ReadParcelsFromHydroBase has way to exclude bad years)
+		int [] excludeYears = new int[0];
+		HashMap<Integer,List<Integer>> divHydroBaseParcelYears =
+			StateDMI_Util.readParcelYearMapForDivisions(hbdmi, startYear, endYear, excludeYears);
 		StringBuffer [] divParcelYearsString = new StringBuffer[HydroBase_WaterDivision.getDivisionNumbers().length];
 		StringBuffer [] divHydroBaseParcelYearsString = new StringBuffer[HydroBase_WaterDivision.getDivisionNumbers().length];
 		// Create strings for each division to use in output below.

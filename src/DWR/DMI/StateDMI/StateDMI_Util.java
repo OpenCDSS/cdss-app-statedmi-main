@@ -34,6 +34,7 @@ import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
 import DWR.DMI.HydroBaseDMI.HydroBase_AdministrationNumber;
 import DWR.DMI.HydroBaseDMI.HydroBase_NetAmts;
 import DWR.DMI.HydroBaseDMI.HydroBase_NetAmts_CollectionPartIdType;
+import DWR.DMI.HydroBaseDMI.HydroBase_Util;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDivision;
 import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
@@ -1002,17 +1003,18 @@ protected static int readParcelUseTSFromHydroBaseWellsHelper (
  * This can be used for modeling, for example to know which parcel years should
  * be set to zero acres when data are missing at a location.
  * Loop through all the divisions and get the distinct list of years with parcel data.
- * TODO smalers 2021-01-25 in production the StateCU_Parcel.getParcelYearMapForDivisions() is used due to bad HydroBase data.
  * @param hdmi HydroBaseDMI for queries.
  * @param startYear start of period to include, -1 to include all.
  * @param endYear end of period to include, -1 to include all.
+ * @param excludeYears years to exclude, such as for bad HydroBase data.
  */
-public static HashMap<Integer,List<Integer>> readParcelYearMapForDivisions ( HydroBaseDMI hdmi, int startYear, int endYear ) throws Exception {
+public static HashMap<Integer,List<Integer>> readParcelYearMapForDivisions (
+	HydroBaseDMI hdmi, int startYear, int endYear, int [] excludeYears ) throws Exception {
 	HashMap<Integer,List<Integer>> parcelMap = new HashMap<>();
 	for ( int divPos = 0; divPos < HydroBase_WaterDivision.getDivisionNumbers().length; ++divPos ) {
 		int div = HydroBase_WaterDivision.getDivisionNumbers()[divPos];
 		List<Integer> yearList = new ArrayList<>();
-		int [] yearArray = readParcelYearListFromHydroBase(hdmi,div);
+		int [] yearArray = readParcelYearListFromHydroBase(hdmi, div, excludeYears);
 		int year;
 		for ( int i = 0; i < yearArray.length; i++ ) {
 			year = yearArray[i];
@@ -1037,34 +1039,51 @@ public static HashMap<Integer,List<Integer>> readParcelYearMapForDivisions ( Hyd
 /**
 Read the list of parcel years from HydroBase.
 @param hdmi HydroBaseDMI instance for queries.
-@param Div_int integer division to process.
+@param Div_int integer single water division to process.
+@param excludeYears years to exclude, such as for bad HydroBase data.
 @return an array of integer years for which parcel data exist in HydroBase.
 */
-public static int [] readParcelYearListFromHydroBase ( HydroBaseDMI hdmi, int div )
+public static int [] readParcelYearListFromHydroBase ( HydroBaseDMI hdmi, int div, int [] excludeYears )
 throws Exception
 {
 	int [] divs = { div };
-	return readParcelYearListFromHydroBase(hdmi, divs);
+	return readParcelYearListFromHydroBase(hdmi, divs, excludeYears);
 }
 
 /**
 Read the list of parcel years from HydroBase.
 @param hdmi HydroBaseDMI instance for queries.
-@param Div_int integer division to process.
+@param divs water divisions to process.
+@param excludeYears years to exclude, such as for bad HydroBase data.
 @return an array of integer years for which parcel data exist in HydroBase.
 */
-public static int [] readParcelYearListFromHydroBase ( HydroBaseDMI hdmi, int [] divs )
+public static int [] readParcelYearListFromHydroBase ( HydroBaseDMI hdmi, int [] divs, int [] excludeYears )
 throws Exception
 {	// TODO SAM 2007-05-25 Check HydroBase version for the following
 
 	List<Integer> years = new ArrayList<>();
 	for ( int idivs = 0; idivs < divs.length; idivs++ ) {
-		List<Integer> v = hdmi.readParcelUseTSDistinctCalYearsList(divs[idivs]);
-		if ( v != null ) {
-			years.addAll(v);
+		List<Integer> yearList = hdmi.readParcelUseTSDistinctCalYearsList(divs[idivs]);
+		// Check that the year is not excluded
+		for ( Integer year : yearList ) {
+			boolean include = true;
+			if ( (excludeYears != null) && (excludeYears.length > 0) ) {
+				// Check the exclude list.
+				for ( int excludeYear : excludeYears ) {
+					if ( year == excludeYear ) {
+						include = false;
+						break;
+					}
+				}
+			}
+			if ( include) {
+				// OK to include the year.
+				years.add(year);
+			}
 		}
 	}
 
+	// Convert the list to an array.
 	int [] yearsArray = new int[years.size()];
 	for ( int i = 0; i < years.size(); i++ ) {
 		yearsArray[i] = years.get(i).intValue();
@@ -1761,17 +1780,21 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 	}
 	else {
 		// Bad input
-		message = "Requested unknown part type \"" + partIdType + "\" for well station \"" + wellStationId + "\" partID \"" + partId + "\".";
+		message = "Requested unknown part ID type \"" + partIdType + "\" for well station \"" +
+			wellStationId + "\" partID \"" + partId + "\".";
 		Message.printWarning(warningLevel,
 			MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
 		status.addToLog ( CommandPhaseType.RUN,
 			new CommandLogRecord(CommandStatusType.WARNING,
-				message, "Verify that specified well ID type is correct (WDID or Receipt)." ) );
+				message, "Verify that specified well part ID type is correct ('WDID' or 'Receipt')." ) );
+		// Create an empty list to handle below.
+		hbWellsList = new ArrayList<>();
 	}
 	// There should only be one entry for returned value, matching a single well
 	if ( hbWellsList.size() == 0 ) {
 		// No well was matched so input data is in error
-		message = "Requested well " + partIdType + " for well station \"" + wellStationId + "\" partId \"" + partId + "\" matches no records in vw_CDSS_Wells";
+		message = "Requested well " + partIdType + " for well station \"" +
+			wellStationId + "\" partId \"" + partId + "\" matches no records in vw_CDSS_Wells";
 			Message.printWarning(warningLevel,
 				MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
 			status.addToLog ( CommandPhaseType.RUN,
@@ -1780,7 +1803,8 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 	}
 	else if ( hbWellsList.size() != 1 ) {
 		// Expecting 1 record so HydroBase is in error (duplicate receipt or WDID)
-		message = "Requested well " + partIdType + " for well station \"" + wellStationId + "\" partID \"" + partId + "\" matches "
+		message = "Requested well " + partIdType + " for well station \"" +
+			wellStationId + "\" partID \"" + partId + "\" matches "
 			+ hbWellsList.size() + " records in vw_CDSS_Wells but expecting exactly 1 match";
 		Message.printWarning(warningLevel,
 			MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
@@ -1887,11 +1911,17 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 			// Requested a WDID so read from NetAmts using WDID, may return 0 or more records
 			message = "    Requested well " + partIdType + " for well station \"" + wellStationId +
 					"\" - WDID is requested so reading from HydroBase NetAmts table";
-			boolean positiveNetRateAbs = false;
+			boolean positiveNetRateAbs = false; // Don't omit zero degree rights
 			boolean oldList = false;
 			List<String> orderByList = null;
-			List<HydroBase_NetAmts> hbNetAmtsList = hdmi.readNetAmtsList(-1, wdidParts[0], wdidParts[1],
+			// Get all the records for all use types.
+			// - the query will use WD and ID
+			int structureNum = HydroBase_Util.MISSING_INT;
+			List<HydroBase_NetAmts> hbNetAmtsList = hdmi.readNetAmtsList(structureNum, wdidParts[0], wdidParts[1],
 				positiveNetRateAbs, orderByList, oldList );
+			Message.printStatus(2,routine,
+				"      Well " + partIdType + " for well station \"" + wellStationId
+				+ "\" part ID \"" + partId + "\" has " + hbNetAmtsList.size() + " NetAmts table records (before filtering)");
 			// Further filter rights
 			// TODO SAM 2016-10-03 evaluate adding use criteria to the above read method
 			HydroBase_NetAmts tmp;
@@ -1900,7 +1930,7 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 				doRemove = false;
 				tmp = hbNetAmtsList.get(i);
 				if ( tmp.getUse().toUpperCase().indexOf("IRR") < 0 ) {
-					// Include rights only if use includes IRR, and this one does not
+					// Include rights only if use includes IRR, and this one does not include.
 					doRemove = true;
 				}
 				else {
@@ -1928,12 +1958,12 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 			if ( hbNetAmtsList.size() == 0 ) {
 				// No well was matched so input data is in error
 				if ( useApex ) {
-					message = "      Requested well " + partIdType + " for well station \"" + wellStationId
-							+ "\" part ID \"" + partId + "\" matches no abs or APEX, IRR records in the NetAmts table";
+					message = "      Well " + partIdType + " for well station \"" + wellStationId
+							+ "\" part ID \"" + partId + "\" matches no abs or APEX, IRR records in the NetAmts table (after filtering)";
 				}
 				else {
-					message = "      Requested well " + partIdType + " for well station \"" + wellStationId
-						+ "\" part ID \"" + partId + "\" matches no abs, IRR records in the NetAmts table";
+					message = "      Well " + partIdType + " for well station \"" + wellStationId
+						+ "\" part ID \"" + partId + "\" matches no abs, IRR records in the NetAmts table (after filtering)";
 				}
 				Message.printWarning(warningLevel,
 					MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );

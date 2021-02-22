@@ -25,8 +25,9 @@ package DWR.DMI.StateDMI;
 
 import javax.swing.JFrame;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
 
 import DWR.StateCU.StateCU_CropPatternTS;
 import DWR.StateCU.StateCU_Location;
@@ -53,9 +54,7 @@ import RTi.Util.Table.TableRecord;
 import RTi.Util.Time.DateTime;
 
 /**
-<p>
 This class initializes, checks, and runs the SetCropPatternTSFromList() command.
-</p>
 */
 public class SetCropPatternTSFromList_Command 
 extends AbstractCommand implements Command
@@ -249,19 +248,19 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List<String> valid_Vector = new Vector<String>(11);
-	valid_Vector.add ( "ID" );
-	valid_Vector.add ( "ListFile" );
-	valid_Vector.add ( "SetStart" );
-	valid_Vector.add ( "SetEnd" );
-	valid_Vector.add ( "YearCol" );
-	valid_Vector.add ( "IDCol" );
-	valid_Vector.add ( "CropTypeCol" );
-	valid_Vector.add ( "AreaCol" );
-	valid_Vector.add ( "IrrigationMethodCol" );
-	valid_Vector.add ( "SupplyTypeCol" );
-	valid_Vector.add ( "ProcessWhen" );
-    warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	List<String> validList = new ArrayList<String>(11);
+	validList.add ( "ID" );
+	validList.add ( "ListFile" );
+	validList.add ( "SetStart" );
+	validList.add ( "SetEnd" );
+	validList.add ( "YearCol" );
+	validList.add ( "IDCol" );
+	validList.add ( "CropTypeCol" );
+	validList.add ( "AreaCol" );
+	validList.add ( "IrrigationMethodCol" );
+	validList.add ( "SupplyTypeCol" );
+	validList.add ( "ProcessWhen" );
+    warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	// Throw an InvalidCommandParameterException in case of errors.
 	if ( warning.length() > 0 ) {		
@@ -282,6 +281,66 @@ not (e.g., "Cancel" was pressed.
 public boolean editCommand ( JFrame parent )
 {	// The command will be modified if changed...
 	return (new SetCropPatternTSFromList_JDialog ( parent, this )).ok();
+}
+
+/**
+ * Initialize the map used for data resets.
+ * The year range from the records in the file are used for array limits
+ * @param cdsList list of StateCU_CropPatternTS to process.
+ * @param idCol table column containing location ID.
+ * @param yearCol table column containing years.
+ * @param ID the ID command parameter.
+ * @param idPatternJava the Java ID pattern to match.
+ * @return the map used to track data records, initialized to all zeros.
+ */
+private HashMap<String,Boolean> initializeIdYearMap( List<StateCU_CropPatternTS> cdsList, DataTable table, int idCol, int yearCol,
+	String ID, String idPatternJava ) {
+	HashMap<String,Boolean> IdYearMap = new HashMap<>();
+	// Loop through the table and determine the unique list of location IDs and years.
+	int tsize = 0;
+	if ( table != null ) {
+		tsize = table.getNumberOfRecords();
+	}
+	TableRecord rec = null;
+	String id;
+	String yearString;
+	Integer year;
+	String mapKey;
+	for ( int irec = 0; irec < tsize; irec++ ) {
+		try {
+			rec = table.getRecord(irec);
+			id = (String)rec.getFieldValue(idCol);
+			if ( ID.equals("*") ) {
+				// Will process all.
+			}
+			else {
+				// Match the ID in the record with the IDs to process.
+				if ( !id.matches(idPatternJava) ) {
+					// Identifier does not match.  Do not process the record...
+					continue;
+				}
+			}
+			// Get the year from the record.
+			if ( yearCol >= 0 ) {
+				// Retrieve the year from the list file record
+				yearString = (String)rec.getFieldValue( yearCol);
+				if ( StringUtil.isInteger( yearString) ) {
+					// Convert for use below...
+					year = Integer.parseInt ( yearString );
+					// Add an entry to the map if not previously added.
+					// - set to false to indicate that the id/year has not yet been processed
+					mapKey = id + "-" + year;
+					if ( IdYearMap.get(mapKey) == null ) {
+						IdYearMap.put(mapKey, new Boolean(false));
+					}
+				}
+			}
+		}
+		catch ( Exception e ) {
+			// Should not happen and if so will be handled in main processing also.
+		}
+	}
+	return IdYearMap;
 }
 
 /**
@@ -357,11 +416,11 @@ CommandWarningException, CommandException
 	
 	// Get the time series to fill...
 
-	List<StateCU_CropPatternTS> CUCropPatternTS_Vector = null;
+	List<StateCU_CropPatternTS> CUCropPatternTS_List = null;
 	try {
 		@SuppressWarnings("unchecked")
 		List<StateCU_CropPatternTS> dataList = (List<StateCU_CropPatternTS>)processor.getPropContents( "StateCU_CropPatternTS_List");
-		CUCropPatternTS_Vector = dataList;
+		CUCropPatternTS_List = dataList;
 	}
 	catch ( Exception e ) {
 		Message.printWarning ( log_level, routine, e );
@@ -375,12 +434,12 @@ CommandWarningException, CommandException
 	
 	// Get the supplemental ParcelUseTS so that records can be added if 'ProcessWhen=WithParcels'...
 	
-	List<StateDMI_HydroBase_ParcelUseTS> Supplemental_ParcelUseTS_Vector = null;
+	List<StateDMI_HydroBase_ParcelUseTS> Supplemental_ParcelUseTS_List = null;
 	if ( ProcessWhen.equalsIgnoreCase(_WithParcels) ) {
 		try {
 			@SuppressWarnings("unchecked")
 			List<StateDMI_HydroBase_ParcelUseTS> dataList = (List<StateDMI_HydroBase_ParcelUseTS>)processor.getPropContents( "HydroBase_SupplementalParcelUseTS_List");
-			Supplemental_ParcelUseTS_Vector = dataList;
+			Supplemental_ParcelUseTS_List = dataList;
 		}
 		catch ( Exception e ) {
 			Message.printWarning ( log_level, routine, e );
@@ -444,7 +503,9 @@ CommandWarningException, CommandException
                 message, "Report to software support.  See log file for details." ) );
     }
 	
-	int SetStart_int = 0, SetEnd_int = 0;
+    // If start and end are specified.
+	int SetStart_int = 0;
+	int SetEnd_int = 0;
 	if ( SetStart == null ) {
 		if ( OutputStart_DateTime == null ) {
 			message = "Set start and global OutputStart are not set.";
@@ -489,6 +550,23 @@ CommandWarningException, CommandException
 	// Process the data....
 	
 	try {
+		if ( (SupplyTypeCol != null) && !SupplyTypeCol.isEmpty() ) {
+			// The SupplyTypeCol parameter should NOT be used with ReadParcelsFromHydroBase commands because
+			// the parameter is used with legacy ReadCropPatternTSFromHydroBase() command.
+			List<String> commandsToFind = new ArrayList<>();
+			commandsToFind.add("ReadParcelsFromHydroBase");
+			commandsToFind.add("ReadCropPatternTSFromParcels");
+			List<Command> commandList = StateDMICommandProcessorUtil.getCommandsBeforeIndex(
+				processor.size(), processor, commandsToFind, true);
+			if ( commandList.size() > 0 ) {
+				message = "The SupplyTypeCol parameter is ignored when using ReadParcelsFromHydroBase() and ReadCropPatternTSFromParcels() commands.";
+	   			Message.printWarning(warning_level,
+	   				MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+	   			status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
+	   				message, "Update command to not specify SupplyTypeCol." ) );
+			}
+		}
+
 		String ListFile_full = IOUtil.verifyPathForOS(
 	        IOUtil.toAbsolutePath(StateDMICommandProcessorUtil.getWorkingDir(processor),
                 StateDMICommandProcessorUtil.expandParameterValue(processor,this,ListFile)));
@@ -532,17 +610,16 @@ CommandWarningException, CommandException
 
 		// Do this the brute force way...
 		
-		// Create an array to indicate how many records have been processed for a location (may be
-		// multiple records for a location in the list file).  The first encounter will trigger a zeroing
-		// in the file.
+		// Create an array to indicate how many records have been processed for a location in a year
+		// (may be multiple records for a location in the list file, including multiple records per year because of multiple crops).
+		// The first encounter of a data record in a year and location will trigger a zeroing of the data for a year and location.
 		
-		int [] CUCropPatternTS_encountered = new int[CUCropPatternTS_Vector.size()];
-		for ( int i = 0; i < CUCropPatternTS_encountered.length; i++ ) {
-			CUCropPatternTS_encountered[i] = 0;
-		}
+		HashMap<String,Boolean> idYearHasBeenProcessedMap = initializeIdYearMap( CUCropPatternTS_List, table, IDCol_int, YearCol_int,
+			ID, idpattern_Java);
 
 		// Loop through the list file records.  If the CU location is matched,
-		// find the irrigation practice information for the location.
+		// find the irrigation practice time series object for the location
+		// and set the data.
 
 		StateCU_CropPatternTS cds;
 		String Year_String = "";
@@ -550,26 +627,30 @@ CommandWarningException, CommandException
 		String Area_String = "";
 		String IrrigationMethod_String = "";
 		String SupplyType_String = "";
-		boolean fill_CropType = false;
-		boolean fill_Area = false;
-		boolean fill_IrrigationMethod = false;
-		boolean fill_SupplyType = false;
+		// Booleans that indicate if specific data values should be set
+		// because column was specified.
+		boolean set_CropType = false;
+		boolean set_Area = false;
+		boolean set_IrrigationMethod = false;
+		boolean set_SupplyType = false;
 		TableRecord rec = null;
 		// TODO smalers 2019-05-28 enable matchCount
 		//int matchCount = 0;
-		int year, year1, year2; // Year for iterator, and bounds on iteration
+		int year; // Year for iterator
 		int cdsPos = 0; // Location of ID in CropPatternTS object
 		int Year_int; // Integer value of year from column in file
+		double area = 0.0; // Double year, from string
 		String cds_id, id;
+
 		// Loop through the table and see if there are any matches for the
 		// CU Location ID for the record.  This will be relatively fast if no
 		// YearCol is given and/or if the ID=*.
-		for ( int j = 0; j < tsize; j++ ) {
-			rec = table.getRecord(j);
+		for ( int irec = 0; irec < tsize; irec++ ) {
+			rec = table.getRecord(irec);
 			id = (String)rec.getFieldValue(IDCol_int);
 			cds = null;	// Initialize to prevent compiler warnings
 			if ( ID.equals("*") ) {
-				;	// Will process.
+				// Will process all locations.
 			}
 			else {
 				// Match the ID in the record with the IDs to process.
@@ -579,12 +660,13 @@ CommandWarningException, CommandException
 				}
 			}
 
-			// Find the StateCU_IrrigationPracticeTS instance to modify...
+			// Find the StateCU_IrrigationPracticeTS instance to modify.
+			// - don't need to check if processing supplemental data for parcels
 			if ( ProcessWhen_int == Now_int ) {
-				cdsPos = StateCU_Util.indexOf(CUCropPatternTS_Vector,id);
+				cdsPos = StateCU_Util.indexOf(CUCropPatternTS_List,id);
 				if ( cdsPos < 0 ) {
 					message = "List file location \"" + id +
-						"\" does not match any CU locations.  Cannot set crop pattern.";
+						"\" does not match any CU locations.  Cannot set crop pattern.  Skipping.";
 			        Message.printWarning ( warning_level, 
 		                MessageUtil.formatMessageTag(command_tag, ++warning_count),routine, message );
 		            status.addToLog ( command_phase,
@@ -592,23 +674,23 @@ CommandWarningException, CommandException
 		                    message, "Verify that list file location identifiers match CU locations." ) );
 					continue;
 				}
-				cds = (StateCU_CropPatternTS)CUCropPatternTS_Vector.get(cdsPos);
-				// Increment the counter of records processed for the location
-				++CUCropPatternTS_encountered[cdsPos];
+				cds = (StateCU_CropPatternTS)CUCropPatternTS_List.get(cdsPos);
 			}
-			// OK to set the data...
-			// Get the data values from the table one time...
+
+			// OK to set the data.
+			// Get the data values from the table record.
 			//++matchCount;
 			cds_id = id;
 			// Also get the CU location, used later to set the StateCU_Location list of years with CDS set commands.
 			int culocPos = StateCU_Util.indexOf(culocList,cds_id);
 
-			Year_int = -1;	// Indicate not to set for a specific year
-			if ( YearCol != null ) {
+			Year_int = -1;	// Initialize not to set for a specific year, from the data record.
+			if ( YearCol_int >= 0 ) {
+				// Retrieve the year from the list file record
 				Year_String = (String)rec.getFieldValue( YearCol_int);
 				if ( !StringUtil.isInteger( Year_String)) {
 					message = "Year in list file (" + Year_String
-					+ ") column " + (YearCol + 1) + " is not a number.  Skipping record " + (j + 1) + ".";
+					+ ") column " + (YearCol + 1) + " is not a number.  Skipping record " + (irec + 1) + ".";
 			        Message.printWarning ( warning_level, 
 		                MessageUtil.formatMessageTag(command_tag, ++warning_count),routine, message );
 		            status.addToLog ( command_phase,
@@ -621,107 +703,160 @@ CommandWarningException, CommandException
 					Year_int = Integer.parseInt ( Year_String );
 				}
 			}
-			fill_CropType = false;
+			set_CropType = false;
 			if ( CropTypeCol != null ) {
 				CropType_String = (String)rec.getFieldValue(CropTypeCol_int);
-				fill_CropType = true;
+				set_CropType = true;
 			}
-			fill_Area = false;
+			set_Area = false;
 			if ( AreaCol != null ) {
 				Area_String = (String)rec.getFieldValue(AreaCol_int);
-				fill_Area = true;
+				set_Area = true;
 				if ( !StringUtil.isDouble(Area_String)) {
 					message = "Area (" + Area_String + ") in column " + (AreaCol_int + 1) +
-					"is not a number.  Skipping record " + (j + 1) + ".";
+					"is not a number.  Skipping record " + (irec + 1) + ".";
 			        Message.printWarning ( warning_level, 
 		                MessageUtil.formatMessageTag(command_tag, ++warning_count),routine, message );
 		            status.addToLog ( command_phase,
 		                new CommandLogRecord(CommandStatusType.FAILURE,
 		                    message, "Verify that the area in the list file is a number." ) );
-					fill_Area = false;
-				}
-			}
-			if ( fill_CropType && fill_Area && (Year_int > 0) ) {
-				// Set the data for the specified year...
-				if ( ProcessWhen_int == Now_int ) {
-					Message.printStatus ( 2, routine, "Setting " + cds_id + " crop " + CropType_String +
-					" area for year " + Year_int + " -> " + Area_String );
-					setCropPatternTS ( cds, Year_int, Year_int, CropType_String, StringUtil.atod(Area_String),
-						CUCropPatternTS_encountered[cdsPos] );
-				}
-			}
-			fill_IrrigationMethod = false;
-			if ( IrrigationMethodCol != null ) {
-				IrrigationMethod_String = (String)rec.getFieldValue(IrrigationMethodCol_int);
-				fill_IrrigationMethod = true;
-				// Data will be used below.
-			}
-			fill_SupplyType = false;
-			if ( SupplyTypeCol != null ) {
-				SupplyType_String = (String)rec.getFieldValue(SupplyTypeCol_int);
-				fill_SupplyType = true;
-				// Data will be used below.
-			}
-			// If the crop and year were not provided, no need to set.
-			if ( !fill_CropType || !fill_Area ) {
-				continue;
-			}
-			// Now have the data for the record.  Set the data depending on whether
-			// processing now and whether the year was specified in the record.
-			if ( Year_int > 0 ) {
-				// Record had the year so use it for start and end of set
-				year1 = Year_int;
-				year2 = Year_int;
-			}
-			else {
-				// Set for the set (or output period)...
-				year1 = SetStart_int;
-				year2 = SetEnd_int;
-			}
-			for ( year = year1; year <= year2; year++ ){
-				if ( ProcessWhen_int == WithParcels_int ) {
-					// Instead of setting the data, save supplemental records for
-					// use with the readCropPatternTSFromHydroBase command.
-					StateDMI_HydroBase_ParcelUseTS hbputs = new StateDMI_HydroBase_ParcelUseTS();
-					hbputs.setCal_year ( year );
-					hbputs.setLocationID ( id );
-					// Records are primitive so store total acres...
-					hbputs.setArea ( StringUtil.atod(Area_String) );
-					hbputs.setLand_use ( CropType_String );
-					// Optional - may be used for troubleshooting
-					if ( fill_IrrigationMethod ) {
-						hbputs.setIrrig_type ( IrrigationMethod_String );
-					}
-					if ( fill_SupplyType ) {
-						hbputs.setSupply_type ( SupplyType_String );
-					}
-					Supplemental_ParcelUseTS_Vector.add ( hbputs );
+					set_Area = false;
 				}
 				else {
-					// Set the data now
-					// Print the message once...
-					if ( year == SetStart_int ) {
-						Message.printStatus ( 2, routine, "Setting " + cds_id + " CropType " +
-							CropType_String + " area " + SetStart_int + " to " + SetEnd_int + " -> "+
-							Area_String );
-					}
-					setCropPatternTS (
-						cds,
-						year,	// Iterating from SetStart to SetEnd
-						year,
-						CropType_String,
-						StringUtil.atod(Area_String),
-						CUCropPatternTS_encountered[cdsPos] );
-				} // End process now or with parcels
-
-				// Indicate that location has a set command, used with parcel report file.
-				// - OK to set extra years in a span
-				if ( culocPos >= 0 ) {
-					StateCU_Location culoc = culocList.get(culocPos);
-					culoc.setHasSetCropPatternTSCommands(year);
+					area = Double.parseDouble(Area_String);
 				}
+			}
+			set_IrrigationMethod = false;
+			if ( IrrigationMethodCol != null ) {
+				IrrigationMethod_String = (String)rec.getFieldValue(IrrigationMethodCol_int);
+				set_IrrigationMethod = true;
+				// Data will be used below.
+			}
+			set_SupplyType = false;
+			if ( SupplyTypeCol != null ) {
+				SupplyType_String = (String)rec.getFieldValue(SupplyTypeCol_int);
+				set_SupplyType = true;
+				// Data will be used below.
+			}
+			// If the crop and year were not provided, can't set.
+			if ( set_CropType && set_Area ) {
+				// Have the data for the record.
+				// Set the data depending on whether the year was specified in the record.
+				// - if ProcessWhen=Now, set the data, otherwise set supplemental data
+				if ( Year_int > 0 ) {
+					// Record had the year so use it to set a single year of data
+					// - only set if within the set (by default output) period
+					year = Year_int;
+					boolean doSet = true;
+					if ( (SetStart_int > 0) && (year < SetStart_int) ) {
+						// Not in the set period.
+						doSet = false;
+					}
+					if ( (SetEnd_int > 0) && (year > SetEnd_int) ) {
+						// Not in the set period.
+						doSet = false;
+					}
+					if ( doSet ) {
+						// Set the data for the specified year found in the file record.
+						if ( ProcessWhen_int == Now_int ) {
+							// The data file year is in the period being set.
+							Message.printStatus ( 2, routine, "Setting " + cds_id + " crop " + CropType_String +
+								" area for single year " + year + " -> " + Area_String );
+							// For the first record for the ID and year, all crops will be zeroed.
+							// Subsequent records will not zero.
+							setCropPatternTS (
+								cds, // object to update
+								year, // single year
+								year, // single year
+								CropType_String, // crop type
+								area, // area
+								idYearHasBeenProcessedMap ); // whether a record has been found for the location and year, to trigger zeroing
+						}
+						else if ( ProcessWhen_int == WithParcels_int ) {
+							// This is used with legacy approach.
+							// Instead of setting the data, save supplemental records for
+							// use with the readCropPatternTSFromHydroBase command.
+							Message.printStatus ( 2, routine, "Saving supplemental data for use with ReadCropPatternTSFromHydroBase " +
+								cds_id + " crop " + CropType_String + " area for single year " + year + " -> " + Area_String );
+							StateDMI_HydroBase_ParcelUseTS hbputs = new StateDMI_HydroBase_ParcelUseTS();
+							hbputs.setCal_year ( year );
+							hbputs.setLocationID ( id );
+							// Records are primitive so store total acres...
+							hbputs.setArea ( area );
+							hbputs.setLand_use ( CropType_String );
+							// Optional - may be used for troubleshooting
+							if ( set_IrrigationMethod ) {
+								hbputs.setIrrig_type ( IrrigationMethod_String );
+							}
+							if ( set_SupplyType ) {
+								hbputs.setSupply_type ( SupplyType_String );
+							}
+							Supplemental_ParcelUseTS_List.add ( hbputs );
+						}
+						// Indicate that location has a set command, used with parcel report file.
+						// - OK to set extra years in a span
+						if ( culocPos >= 0 ) {
+							StateCU_Location culoc = culocList.get(culocPos);
+							culoc.setHasSetCropPatternTSCommands(year);
+						}
+					}
+				}
+				else {
+					// Year was not set in the file so set for the output period.
+					// - set for all years in set/output period
+					int year1 = cds.getDate1().getYear();
+					int year2 = cds.getDate2().getYear();
+					if ( SetStart_int > 0 ) {
+						year1 = SetStart_int;
+					}
+					if ( SetEnd_int > 0 ) {
+						year2 = SetEnd_int;
+					}
+					if ( ProcessWhen_int == Now_int ) {
+						// Set the data now
+						Message.printStatus ( 2, routine, "Setting " + cds_id + " CropType " +
+							CropType_String + " " + year1 + " to " + year2 + " area " + " -> "+ Area_String );
+						// The following method handles looping.
+						setCropPatternTS (
+							cds,
+							year1,
+							year2,
+							CropType_String,
+							area,
+							idYearHasBeenProcessedMap );
+					}
+					else if ( ProcessWhen_int == WithParcels_int ) {
+						for ( year = year1; year <= year2; year++ ) {
+							// Instead of setting the data, save supplemental records for
+							// use with the readCropPatternTSFromHydroBase command.
+							Message.printStatus ( 2, routine, "Saving supplemental data for use with ReadCropPatternTSFromHydroBase " +
+								cds_id + " crop " + CropType_String + " area for year " + year + " -> " + Area_String );
+							StateDMI_HydroBase_ParcelUseTS hbputs = new StateDMI_HydroBase_ParcelUseTS();
+							hbputs.setCal_year ( year );
+							hbputs.setLocationID ( id );
+							// Records are primitive so store total acres...
+							hbputs.setArea ( area );
+							hbputs.setLand_use ( CropType_String );
+							// Optional - may be used for troubleshooting
+							if ( set_IrrigationMethod ) {
+								hbputs.setIrrig_type ( IrrigationMethod_String );
+							}
+							if ( set_SupplyType ) {
+								hbputs.setSupply_type ( SupplyType_String );
+							}
+							Supplemental_ParcelUseTS_List.add ( hbputs );
+		
+							// Indicate that location has a set command, used with parcel report file.
+							// - OK to set extra years in a span
+							if ( culocPos >= 0 ) {
+								StateCU_Location culoc = culocList.get(culocPos);
+								culoc.setHasSetCropPatternTSCommands(year);
+							}
+						}
+					}
 
-			} // End year loop
+				} // End year loop
+			}
 		}
 	}
     catch ( Exception e ) {
@@ -740,22 +875,20 @@ CommandWarningException, CommandException
 }
 
 /**
-Set the crop pattern data for a single location.  The data are first set to zero and then to the new crop.
+Set the crop pattern data for a single location.
+If the first occurrence of id/Year, the data are first set to zero and then to the new crop.
 @param cds Crop pattern time series to set data.
 @param setstart Starting year to set data.
 @param setend Ending year to set data.
 @param crop_type Crop type to set.
 @param area Crop area to set.
+@param idYearHasBeenProcessedMap map used to track whether a location and year has had data set.
+If false for an ID and year, the data are set to zero before resetting values.
 */
 private void setCropPatternTS ( StateCU_CropPatternTS cds, int setstart, int setend, String crop_type,
-	double area, int recordCount )
+	double area, HashMap<String,Boolean> idYearHasBeenProcessedMap )
 throws Exception
 {
-	if ( recordCount == 1 ) {
-		// Zero the crops first so that set data are new values.
-		setCropPatternTSToZero(cds, setstart, setend);
-	}
-	
 	// Now reset to new data.  The number of crops does not
 	// need to match the original.  First make sure the crop time series is available.
 	
@@ -765,11 +898,23 @@ throws Exception
 		cds.addTS ( crop_type, true );
 	}
 
+	String mapKey;
+	Boolean hasIdYearBeenProcessed;
 	for ( int year = setstart; year <= setend; year++){
+		mapKey = cds.getID() + "-" + year;
+		hasIdYearBeenProcessed = idYearHasBeenProcessedMap.get(mapKey);
+		if ( (hasIdYearBeenProcessed != null) && !hasIdYearBeenProcessed.booleanValue() ) {
+			// The ID/year has not been processed before.
+			// Zero the crops first so that set data are new values.
+			setCropPatternTSToZero(cds, setstart, setend);
+			// Indicate that the ID and year have been processed so won't be zeroed again.
+			idYearHasBeenProcessedMap.put(mapKey,new Boolean(true));
+		}
 		cds.setCropArea ( crop_type, year, area );
 	}
 
-	// Refresh the contents to calculate total area...
+	// Refresh the contents to calculate total area.
+	// - do this every call so that the results are always up to date if used
 
 	cds.refresh();
 }
@@ -784,10 +929,8 @@ encountered.
 private void setCropPatternTSToZero ( StateCU_CropPatternTS cds, int setStart, int setEnd )
 throws Exception
 {
-	// Reset the data.
-	// First set the existing crop patterns for the location
-	// to zero, for the specified year(s).  This will ensure that any crops not
-	// mentioned in the command are set to zero for the given years...
+	// Set the existing crop patterns for the location to zero, for the specified year(s).
+	// This will ensure that any crops not mentioned in the command are set to zero for the given years.
 
 	List<String> crop_names = cds.getCropNames();
 	int ncrop_names = 0;
@@ -795,6 +938,9 @@ throws Exception
 		ncrop_names = crop_names.size();
 	}
 	for ( int ic = 0; ic < ncrop_names; ic++ ) {
+		// TODO smalers 2021-02-17 uncomment for debugging
+		Message.printStatus(2, "setCropPatternTSToZero", "Setting crop patterns to zero for \"" +
+			crop_names.get(ic) + "\" for " + setStart + " to " + setEnd );
 		for ( int year = setStart; year <= setEnd; year++ ){
 			cds.setCropArea( crop_names.get(ic), year, 0.0 );
 		}
