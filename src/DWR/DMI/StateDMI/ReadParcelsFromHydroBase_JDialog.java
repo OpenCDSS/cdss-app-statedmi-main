@@ -78,7 +78,7 @@ Command editor constructor
 @param parent JFrame class instantiating this class.
 @param command Time series command to parse.
 */
-public ReadParcelsFromHydroBase_JDialog (	JFrame parent, ReadParcelsFromHydroBase_Command command )
+public ReadParcelsFromHydroBase_JDialog ( JFrame parent, ReadParcelsFromHydroBase_Command command )
 {	super(parent, true);
 	initialize (parent, command);
 }
@@ -199,10 +199,13 @@ private void initialize ( JFrame parent, ReadParcelsFromHydroBase_Command comman
 		"    - ditch and well water supply associated with the parcels"),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"The command processes collections and tracks other information."),
+		"The command processes collections and tracks other information to allow fast access to data."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
     	"The resulting data can be used by other commands rather than rereading the same complex data."),
+    	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel (
+    	"Use the WriteParcelsToFile() command to output a model/parcel/supply report that is useful for troubleshooting."),
     	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,

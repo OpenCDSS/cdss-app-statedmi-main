@@ -544,6 +544,9 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 		out.println(cmnt + "                    CDS:NO = do not include parcel area in CDS file based on irrigated acreage parcel assignment");
 		out.println(cmnt + "                    - NO if GW supply but parcel also has surface water supply");
 		out.println(cmnt + "                      - if GW only suppply WEL node, a D&W model node will include the area");
+		out.println(cmnt + "                    CDS:NA = well supply that is not included in the dataset");
+		out.println(cmnt + "                    - included in count that is used to compute area fraction, but not included in CDS area.");
+		out.println(cmnt + "                    - not included in any IPY acreage.");
 		out.println(cmnt + "                    CDS:ERR = error determining whether to include parcel area in CDS FILE (input error)");
 		out.println(cmnt + "                    CDS:UNK = unknown whether to include parcel area in CDS FILE (should not happen)");
 		out.println(cmnt + "                    - will have this value until crop pattern time series are processed by");
@@ -739,8 +742,9 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 						objectList.add("CDS:" + supplyFromGW.getIncludeParcelInCdsType());
 						objectList.add(supplyFromGW.getDataSource());
 						if ( supplyFromGW.getStateCULocationForCds() == null ) {
-						    if ( supplyFromGW.getIncludeParcelInCdsType() == IncludeParcelInCdsType.NO ) {
-						    	// Case where D&W and parcel supply area is included in D&W location (not WEL location)
+						    if ( (supplyFromGW.getIncludeParcelInCdsType() == IncludeParcelInCdsType.NO) ||
+						    	(supplyFromGW.getIncludeParcelInCdsType() == IncludeParcelInCdsType.NOT_MODELED) ) {
+						    	// Case where D&W and parcel supply area is included in D&W location (not WEL location) or not modeled.
 						    	objectList.add("");
 							   	objectList.add("");
 						    }
