@@ -1500,7 +1500,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         	        MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
         	        status.addToLog ( commandPhase, new CommandLogRecord(CommandStatusType.WARNING,
     	                message, "Verify that the list file contents are correct and that the indicated identifiers are included " +
-	                		"as " + nodeTypeFromCommand + " stations in the data set as intended." + message2 ) ); 
+	                		"as " + nodeTypeFromCommand + " stations in the data set as intended." +
+    	                	"A list file shared with StateCU may result in warnings because the StateCU model may include more locations." + message2 ) ); 
 			}
 			else if ( IfNotFound.equalsIgnoreCase(_Fail) ) {
 	            Message.printWarning ( warning_level, 

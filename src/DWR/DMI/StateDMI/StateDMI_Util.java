@@ -1756,6 +1756,7 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 	String partId,
 	StateMod_Well_CollectionPartIdType partIdType,
 	DefineWellRightHowType defineWellRightHow,
+	List<String> uses,
 	boolean useApex,
 	double defaultAdminNumber,
 	Date defaultApproDate,
@@ -1767,10 +1768,19 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 	// First read from the HydroBase vw_CDSS_Wells view
 	List<HydroBase_Wells> hbWellsList = null;
 	int wdidParts[] = null;
+	StringBuilder useBuilder = new StringBuilder();
+	for ( String use : uses ) {
+		if ( useBuilder.length() > 0 ) {
+			useBuilder.append(",");
+		}
+		useBuilder.append(use);
+	}
 	if ( partIdType == StateMod_Well_CollectionPartIdType.WDID ) {
 		// Read rights for well structure WDID
 		// Split the WDID into parts in case it is not always 7 digits
 		wdidParts = HydroBase_WaterDistrict.parseWDID(partId,null);
+		// The list does not filter by decree amount or use types.
+		// That is done below.
 		hbWellsList = hdmi.readWellsList(null, wdidParts[0], wdidParts[1]);
 	}
 	else if ( partIdType == StateMod_Well_CollectionPartIdType.RECEIPT ) {
@@ -1924,27 +1934,52 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 				+ "\" part ID \"" + partId + "\" has " + hbNetAmtsList.size() + " NetAmts table records (before filtering)");
 			// Further filter rights
 			// TODO SAM 2016-10-03 evaluate adding use criteria to the above read method
-			HydroBase_NetAmts tmp;
+			HydroBase_NetAmts right;
+			String useFromRight;
 			boolean doRemove = false;
-			for ( int i = hbNetAmtsList.size() -1; i >= 0; i-- ) {
+			String wdid;
+			// Iterate backward so that rights can be removed from end without concurrent edit exception.
+			for ( int i = (hbNetAmtsList.size() - 1); i >= 0; i-- ) {
 				doRemove = false;
-				tmp = hbNetAmtsList.get(i);
-				if ( tmp.getUse().toUpperCase().indexOf("IRR") < 0 ) {
-					// Include rights only if use includes IRR, and this one does not include.
-					doRemove = true;
+				right = hbNetAmtsList.get(i);
+				useFromRight = right.getUse().toUpperCase(); // Concatenated uses such as IRR, ALL, ALLIRR, or other string.
+				wdid = HydroBase_WaterDistrict.formWDID(right.getWD(), right.getID());
+				// Check the uses that are allowed
+				if ( uses.size() > 0 ) {
+					// Have uses to match.
+					boolean useMatched = false;
+					for ( String use : uses ) {
+						if ( useFromRight.indexOf(use) >= 0 ) {
+							// Include the right only if use type includes specified use type
+							// and this one does not include.
+							// If use type of the record is empty, don't check (could be from permit?).
+							useMatched = true;
+							break;
+						}
+					}
+					if ( !useMatched ) {
+						// Use types were specified and were not matched so don't include.
+						Message.printStatus(2,routine,"        Removing right WDID=" + wdid + " appropriation date=" +
+							right.getApro_date() + " because use (" + right.getUse() + ") does not match a requested use (" + useBuilder +").");
+						doRemove = true;
+					}
 				}
-				else {
-					// Also check whether absolute or APEX
+				if ( !doRemove ) {
+					// Right will be included up to this point. Also check whether absolute or APEX.
 					if ( useApex ) {
-						if ( !tmp.getAbs().equalsIgnoreCase("Y") && !tmp.getApex().equalsIgnoreCase("Y") ) {
+						if ( !right.getAbs().equalsIgnoreCase("Y") && !right.getApex().equalsIgnoreCase("Y") ) {
 							// Neither abs or apex is Y so remove
+							Message.printStatus(2,routine,"        Removing right WDID=" + wdid + " appropriation date=" +
+								right.getApro_date() + " because not absolute or APEX right.");
 							doRemove = true;
 						}
 					}
 					else {
 						// Not including APEX so only include absolute
-						if ( !tmp.getAbs().equalsIgnoreCase("Y") ) {
+						if ( !right.getAbs().equalsIgnoreCase("Y") ) {
 							// Only include absolute rights
+							Message.printStatus(2,routine,"        Removing right WDID=" + wdid + " appropriation date=" +
+								right.getApro_date() + " because not absolute right.");
 							doRemove = true;
 						}
 					}
@@ -1959,11 +1994,11 @@ protected static int readWellRightsFromHydroBaseWellsHelper (
 				// No well was matched so input data is in error
 				if ( useApex ) {
 					message = "      Well " + partIdType + " for well station \"" + wellStationId
-							+ "\" part ID \"" + partId + "\" matches no abs or APEX, IRR records in the NetAmts table (after filtering)";
+							+ "\" supply part ID \"" + partId + "\" matches no records for abs decree/APEX, use=IRR/ALL in the NetAmts table (after filtering)";
 				}
 				else {
 					message = "      Well " + partIdType + " for well station \"" + wellStationId
-						+ "\" part ID \"" + partId + "\" matches no abs, IRR records in the NetAmts table (after filtering)";
+						+ "\" supply part ID \"" + partId + "\" matches no records for abs decree, use=IRR/ALL in the NetAmts table (after filtering)";
 				}
 				Message.printWarning(warningLevel,
 					MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );

@@ -681,8 +681,13 @@ CommandWarningException, CommandException
 			// Get the data values from the table record.
 			//++matchCount;
 			cds_id = id;
-			// Also get the CU location, used later to set the StateCU_Location list of years with CDS set commands.
+
+			// Also get the CU location, used to set the StateCU_Location list of years with CDS set commands.
 			int culocPos = StateCU_Util.indexOf(culocList,cds_id);
+			StateCU_Location culoc = null;
+			if ( culocPos >= 0 ) {
+				culoc = culocList.get(culocPos);
+			}
 
 			Year_int = -1;	// Initialize not to set for a specific year, from the data record.
 			if ( YearCol_int >= 0 ) {
@@ -765,6 +770,7 @@ CommandWarningException, CommandException
 							// For the first record for the ID and year, all crops will be zeroed.
 							// Subsequent records will not zero.
 							setCropPatternTS (
+								culoc, // tracks years with set commands
 								cds, // object to update
 								year, // single year
 								year, // single year
@@ -793,12 +799,6 @@ CommandWarningException, CommandException
 							}
 							Supplemental_ParcelUseTS_List.add ( hbputs );
 						}
-						// Indicate that location has a set command, used with parcel report file.
-						// - OK to set extra years in a span
-						if ( culocPos >= 0 ) {
-							StateCU_Location culoc = culocList.get(culocPos);
-							culoc.setHasSetCropPatternTSCommands(year);
-						}
 					}
 				}
 				else {
@@ -818,6 +818,7 @@ CommandWarningException, CommandException
 							CropType_String + " " + year1 + " to " + year2 + " area " + " -> "+ Area_String );
 						// The following method handles looping.
 						setCropPatternTS (
+							culoc, // tracks years with set commands
 							cds,
 							year1,
 							year2,
@@ -845,13 +846,6 @@ CommandWarningException, CommandException
 								hbputs.setSupply_type ( SupplyType_String );
 							}
 							Supplemental_ParcelUseTS_List.add ( hbputs );
-		
-							// Indicate that location has a set command, used with parcel report file.
-							// - OK to set extra years in a span
-							if ( culocPos >= 0 ) {
-								StateCU_Location culoc = culocList.get(culocPos);
-								culoc.setHasSetCropPatternTSCommands(year);
-							}
 						}
 					}
 
@@ -877,6 +871,7 @@ CommandWarningException, CommandException
 /**
 Set the crop pattern data for a single location.
 If the first occurrence of id/Year, the data are first set to zero and then to the new crop.
+@param culoc Location so that list of years with set commands can be tracked.
 @param cds Crop pattern time series to set data.
 @param setstart Starting year to set data.
 @param setend Ending year to set data.
@@ -885,7 +880,7 @@ If the first occurrence of id/Year, the data are first set to zero and then to t
 @param idYearHasBeenProcessedMap map used to track whether a location and year has had data set.
 If false for an ID and year, the data are set to zero before resetting values.
 */
-private void setCropPatternTS ( StateCU_CropPatternTS cds, int setstart, int setend, String crop_type,
+private void setCropPatternTS ( StateCU_Location culoc, StateCU_CropPatternTS cds, int setstart, int setend, String crop_type,
 	double area, HashMap<String,Boolean> idYearHasBeenProcessedMap )
 throws Exception
 {
@@ -911,6 +906,12 @@ throws Exception
 			idYearHasBeenProcessedMap.put(mapKey,new Boolean(true));
 		}
 		cds.setCropArea ( crop_type, year, area );
+
+		// Indicate that location has a set command, used with parcel report file.
+		// - OK to set extra years in a span
+		if ( culoc != null ) {
+			culoc.setHasSetCropPatternTSCommands(year);
+		}
 	}
 
 	// Refresh the contents to calculate total area.
