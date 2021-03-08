@@ -38,6 +38,7 @@ import DWR.StateCU.StateCU_Data;
 import DWR.StateCU.StateCU_DataSet;
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import DWR.StateCU.StateCU_Location;
+import DWR.StateCU.StateCU_Location_ParcelSupplyValidator;
 import DWR.StateCU.StateCU_Location_ParcelValidator;
 import DWR.StateCU.StateCU_PenmanMonteith;
 import RTi.Util.Message.Message;
@@ -256,6 +257,7 @@ CommandWarningException, CommandException
 		}
 	}
 	
+	List<StateCU_Location> culocList = new ArrayList<>(); // Need for extra checks.
 	if ( this instanceof CheckCropPatternTS_Command ) {
 		try {
 			@SuppressWarnings("unchecked")
@@ -264,6 +266,19 @@ CommandWarningException, CommandException
 		}
 		catch ( Exception e ) {
 			message = "Error requesting crop pattern time series from processor.";
+			Message.printWarning(warning_level,
+				MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+			status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+		}
+		// Also need list of StateCU_Location for supply check
+		try {
+			@SuppressWarnings("unchecked")
+			List<StateCU_Location>culocList0 = (List<StateCU_Location>)processor.getPropContents("StateCU_Location_List");
+			culocList = culocList0;
+		}
+		catch ( Exception e ) {
+			message = "Error requesting StateCU locations from processor.";
 			Message.printWarning(warning_level,
 				MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
 			status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
@@ -373,12 +388,30 @@ CommandWarningException, CommandException
 					validator = ((StateCU_Location)data).getParcelValidator( (List<StateCU_Location>)dataList, deepCheck, areaPrecision );
 				}
 				else {
+					// Normal validator for a StateCU object using the interface on the data object.
 					validator = (StateCU_ComponentValidator)data;
 				}
 				if ( i == 0 ) {
-					// Extra check on full dataset for parcels - only need to do once so do for the first item and put at the top of output.
 					if ( validator instanceof StateCU_Location_ParcelValidator ) {
+						// Extra check on full dataset for parcels - only need to do once so do for the first item and put at the top of output.
 						StateCU_ComponentValidation problems = ((StateCU_Location_ParcelValidator)validator).validateAllComponentData(dataset);
+						int problemsSize = problems.size();
+						if ( problemsSize > 0 ) {
+							// Need to log all the problems at the command level
+							for ( int iprob = 0; iprob < problemsSize; ++iprob ) {
+								String problem = problems.get(iprob).getProblem();
+								Message.printWarning(warning_level,
+									MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, problem );
+								status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.WARNING,
+									problem, problems.get(iprob).getRecommendation() ) );
+							}
+						}
+					}
+					else if ( (this instanceof CheckCropPatternTS_Command) || (this instanceof CheckIrrigationPracticeTS_Command) ) {
+						// Extra check on full dataset to make sure no CDS:UNK.
+						// - call a method in this class
+						StateCU_Location_ParcelSupplyValidator validator2 = new StateCU_Location_ParcelSupplyValidator(culocList);
+						StateCU_ComponentValidation problems = ((StateCU_Location_ParcelSupplyValidator)validator2).validateAllComponentData(dataset);
 						int problemsSize = problems.size();
 						if ( problemsSize > 0 ) {
 							// Need to log all the problems at the command level

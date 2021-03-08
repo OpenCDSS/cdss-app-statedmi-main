@@ -52,7 +52,6 @@ import javax.swing.event.ChangeListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
@@ -80,11 +79,12 @@ private SimpleJComboBox __IDFormat_JComboBox = null;
 private JTextField __PermitIDPostFormat_JTextField=null;
 private JTextField __Year_JTextField = null;
 private JTextField __Div_JTextField = null;
+private JTextField __IncludeUses_JTextField=null;
+private SimpleJComboBox __UseApex_JComboBox = null;
 private JTextField __DecreeMin_JTextField=null;
 private JTextField __DefaultAppropriationDate_JTextField = null;
 private SimpleJComboBox __DefineRightHow_JComboBox = null;
 private SimpleJComboBox __ReadWellRights_JComboBox = null;
-private SimpleJComboBox __UseApex_JComboBox = null;
 private SimpleJComboBox __OnOffDefault_JComboBox = null;
 private JTextArea __command_JTextArea=null;
 private SimpleJButton __cancel_JButton = null;
@@ -138,11 +138,12 @@ private void checkInput ()
 	String PermitIDPostFormat = __PermitIDPostFormat_JTextField.getText().trim();
 	String Year = __Year_JTextField.getText().trim();
 	String Div = __Div_JTextField.getText().trim();
+	String IncludeUses = __IncludeUses_JTextField.getText().trim();
+	String UseApex = __UseApex_JComboBox.getSelected();
 	String DecreeMin = __DecreeMin_JTextField.getText().trim();
 	String DefaultAppropriationDate = __DefaultAppropriationDate_JTextField.getText().trim();
 	String DefineRightHow = __DefineRightHow_JComboBox.getSelected();
 	String ReadWellRights = __ReadWellRights_JComboBox.getSelected();
-	String UseApex = __UseApex_JComboBox.getSelected();
 	String OnOffDefault = __OnOffDefault_JComboBox.getSelected();
 	String Optimization = __Optimization_JComboBox.getSelected();
 	__error_wait = false;
@@ -172,6 +173,12 @@ private void checkInput ()
 	if ( Div.length() > 0 ) {
 		props.set ( "Div", Div );
 	}
+	if ( IncludeUses.length() > 0 ) {
+		props.set ( "IncludeUses", IncludeUses );
+	}
+	if ( UseApex.length() > 0 ) {
+		props.set ( "UseApex", UseApex );
+	}
 	if (DecreeMin.length() > 0 ) {
 		props.set("DecreeMin", DecreeMin);
 	}
@@ -183,9 +190,6 @@ private void checkInput ()
 	}
 	if ( ReadWellRights.length() > 0 ) {
 		props.set ( "ReadWellRights", ReadWellRights );
-	}
-	if ( UseApex.length() > 0 ) {
-		props.set ( "UseApex", UseApex );
 	}
 	if ( OnOffDefault.length() > 0 ) {
 		props.set ( "OnOffDefault", OnOffDefault );
@@ -217,11 +221,12 @@ private void commitEdits ()
 	String PermitIDPostFormat = __PermitIDPostFormat_JTextField.getText().trim();
 	String Year = __Year_JTextField.getText().trim();
 	String Div = __Div_JTextField.getText().trim();
+	String IncludeUses = __IncludeUses_JTextField.getText().trim();
+	String UseApex = __UseApex_JComboBox.getSelected();
 	String DecreeMin = __DecreeMin_JTextField.getText().trim();
 	String DefaultAppropriationDate = __DefaultAppropriationDate_JTextField.getText().trim();
 	String DefineRightHow = __DefineRightHow_JComboBox.getSelected();
 	String ReadWellRights = __ReadWellRights_JComboBox.getSelected();
-	String UseApex = __UseApex_JComboBox.getSelected();
 	String OnOffDefault = __OnOffDefault_JComboBox.getSelected();
 	String Optimization = __Optimization_JComboBox.getSelected();
 
@@ -233,11 +238,12 @@ private void commitEdits ()
 	__command.setCommandParameter ( "PermitIDPostFormat", PermitIDPostFormat);
 	__command.setCommandParameter ( "Year", Year );
 	__command.setCommandParameter ( "Div", Div );
+	__command.setCommandParameter ( "IncludeUses", IncludeUses );
+	__command.setCommandParameter ( "UseApex", UseApex );
 	__command.setCommandParameter ( "DecreeMin", DecreeMin);
 	__command.setCommandParameter ( "DefaultAppropriationDate", DefaultAppropriationDate );
 	__command.setCommandParameter ( "DefineRightHow", DefineRightHow );
 	__command.setCommandParameter ( "ReadWellRights", ReadWellRights );
-	__command.setCommandParameter ( "UseApex", UseApex );
 	__command.setCommandParameter ( "OnOffDefault", OnOffDefault );
 	__command.setCommandParameter ( "Optimization", Optimization );
 }
@@ -395,19 +401,19 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 		+ "using WDID rather than processing well/parcel data."),
 		0, ++yExplicitWDID, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(explicitWDID_JPanel, new JLabel (
-		"<html><b>This parameter is only used with Legacy approach and is ignored for Simple approach.</b></html>"),
+		"<html><b>This parameter is only used with Legacy approach and is ignored for other approaches.</b></html>"),
 		0, ++yExplicitWDID, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(explicitWDID_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
 		0, ++yExplicitWDID, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
    	
    	JGUIUtil.addComponent(explicitWDID_JPanel, new JLabel ("Read well rights?:"),
 		0, ++yExplicitWDID, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-   	List<String> read_Vector = new Vector<String>(3);
-   	read_Vector.add ( "" );
-	read_Vector.add ( __command._True );
-	read_Vector.add ( __command._False );
+   	List<String> readList = new ArrayList<>(3);
+   	readList.add ( "" );
+	readList.add ( __command._True );
+	readList.add ( __command._False );
 	__ReadWellRights_JComboBox = new SimpleJComboBox(false);
-	__ReadWellRights_JComboBox.setData ( read_Vector );
+	__ReadWellRights_JComboBox.setData ( readList );
 	__ReadWellRights_JComboBox.addItemListener(this);
 	JGUIUtil.addComponent(explicitWDID_JPanel, __ReadWellRights_JComboBox,
 		1, yExplicitWDID, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -487,13 +493,13 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
    	
    	JGUIUtil.addComponent(rightPermit_JPanel, new JLabel ("Define right how?:"),
 		0, ++yRightPermit, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-   	List<String> define_Vector = new Vector<String>(4);
-   	define_Vector.add ( "" );
-	define_Vector.add ( "" + DefineWellRightHowType.EARLIEST_DATE );
-	define_Vector.add ( "" + DefineWellRightHowType.LATEST_DATE );
-	define_Vector.add ( "" + DefineWellRightHowType.RIGHT_IF_AVAILABLE );
+   	List<String> defineList = new ArrayList<>(4);
+   	defineList.add ( "" );
+	defineList.add ( "" + DefineWellRightHowType.EARLIEST_DATE );
+	defineList.add ( "" + DefineWellRightHowType.LATEST_DATE );
+	defineList.add ( "" + DefineWellRightHowType.RIGHT_IF_AVAILABLE );
 	__DefineRightHow_JComboBox = new SimpleJComboBox(false);
-	__DefineRightHow_JComboBox.setData ( define_Vector );
+	__DefineRightHow_JComboBox.setData ( defineList );
 	__DefineRightHow_JComboBox.addItemListener(this);
 	JGUIUtil.addComponent(rightPermit_JPanel, __DefineRightHow_JComboBox,
 		1, yRightPermit, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -515,13 +521,16 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
     int yDecree = -1;
     JPanel decree_JPanel = new JPanel();
     decree_JPanel.setLayout( new GridBagLayout() );
-    __main_JTabbedPane.addTab ( "Decree Value", decree_JPanel );
+    __main_JTabbedPane.addTab ( "Decree Value & Use", decree_JPanel );
    	
    	JGUIUtil.addComponent(decree_JPanel, new JLabel (
-		"The decree value for water rights is taken from water right decree (explicit WDID) or well yield (if processing well/parcel data)."),
+		"These parameters impact the number of well rights and permits that are processed."),
 		0, ++yDecree, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(decree_JPanel, new JLabel (
-		"The cross-referenced well/parcel/right/permit data represent yield in gallons per minute (GPM)."),
+		"The decree value for water rights is taken from water right decree (from well WDID) or well yield (from well permit)."),
+		0, ++yDecree, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(decree_JPanel, new JLabel (
+		"The cross-referenced well/parcel/right/permit data represent yield in gallons per minute (GPM) and is converted to CFS."),
 		0, ++yDecree, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(decree_JPanel, new JLabel (
 		"Additionally, an alternate point/exchange (APEX) water right decree may be found with a decree or separate from a water right decree."),
@@ -534,32 +543,44 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 		0, ++yDecree, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(decree_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
 		0, ++yDecree, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-   	
-    JGUIUtil.addComponent(decree_JPanel, new JLabel ("Decree minimum:"),
+
+    JGUIUtil.addComponent(decree_JPanel, new JLabel ("Include well right uses:"),
 		0, ++yDecree, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	__DecreeMin_JTextField = new JTextField(10);
-	__DecreeMin_JTextField.addKeyListener (this);
-    JGUIUtil.addComponent(decree_JPanel, __DecreeMin_JTextField,
+	__IncludeUses_JTextField = new JTextField(10);
+	__IncludeUses_JTextField.setToolTipText("HydroBase water right uses as three-letter appreviations separated by commas.");
+	__IncludeUses_JTextField.addKeyListener (this);
+    JGUIUtil.addComponent(decree_JPanel, __IncludeUses_JTextField,
 		1, yDecree, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     JGUIUtil.addComponent(decree_JPanel, new JLabel (
-		"Optional - minimum decree to include (default = .0005 CFS)."),
+		"Optional - uses to include (default = IRR,ALL)."),
 		3, yDecree, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-    
+   	
    	JGUIUtil.addComponent(decree_JPanel, new JLabel ( "Use APEX?:"),
 		0, ++yDecree, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-   	List<String> apex_Vector = new Vector<String>(3);
-   	apex_Vector.add ( "" );
-	apex_Vector.add ( __command._True );
-	apex_Vector.add ( __command._False );
+   	List<String> apexList = new ArrayList<>(3);
+   	apexList.add ( "" );
+	apexList.add ( __command._True );
+	apexList.add ( __command._False );
 	__UseApex_JComboBox = new SimpleJComboBox(false);
-	__UseApex_JComboBox.setData ( apex_Vector );
+	__UseApex_JComboBox.setData ( apexList );
 	__UseApex_JComboBox.addItemListener(this);
 	JGUIUtil.addComponent(decree_JPanel, __UseApex_JComboBox,
 		1, yDecree, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(decree_JPanel, new JLabel (
-		"Optional - add APEX amount to right amount (default=False)."),
+		"Optional - add APEX amount to right amount (default=" + __command._False + ")."),
 		3, yDecree, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	
+    JGUIUtil.addComponent(decree_JPanel, new JLabel ("Decree minimum:"),
+		0, ++yDecree, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__DecreeMin_JTextField = new JTextField(10);
+	__DecreeMin_JTextField.setToolTipText("Exclude rights/permits that have decree in CFS less than this value.  APEX is considered in the value.  50 GPM = .1114 CFS");
+	__DecreeMin_JTextField.addKeyListener (this);
+    JGUIUtil.addComponent(decree_JPanel, __DecreeMin_JTextField,
+		1, yDecree, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(decree_JPanel, new JLabel (
+		"Optional - minimum decree to include (default = .0005 CFS = .2244 GPM)."),
+		3, yDecree, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+
     // Panel for right ID format
     int yId = -1;
     JPanel id_JPanel = new JPanel();
@@ -571,6 +592,9 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 		0, ++yId, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(id_JPanel, new JLabel (
 		"HydroBase identifiers may be a water right WDID (7 digits) or permit receipt (8 digits and possibly characters)."),
+		0, ++yId, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+   	JGUIUtil.addComponent(id_JPanel, new JLabel (
+		"Model identifiers follow modeling conventions and may add extra characters, for example 10_GW103 for groundwater-only supply location."),
 		0, ++yId, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(id_JPanel, new JLabel (
 		"Because WDIDs and permit receipts may have the same numeric values, it may be necessary to add characters to identifiers."),
@@ -617,6 +641,7 @@ private void initialize ( JFrame parent, ReadWellRightsFromHydroBase_Command com
 	formatChoices.add ( __command._StationIDAutoN );
 	__IDFormat_JComboBox = new SimpleJComboBox(false);
 	__IDFormat_JComboBox.setData ( formatChoices );
+	__IDFormat_JComboBox.setMaximumRowCount(formatChoices.size());
 	__IDFormat_JComboBox.addItemListener(this);
 	JGUIUtil.addComponent(id_JPanel, __IDFormat_JComboBox,
 		1, yId, 2, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -748,11 +773,12 @@ private void refresh ()
 	String PermitIDPostFormat = "";
 	String Year = "";
 	String Div = "";
+	String IncludeUses = "";
+	String UseApex = "";
 	String DecreeMin = "";
 	String DefaultAppropriationDate = "";
 	String DefineRightHow = "";
 	String ReadWellRights = "";
-	String UseApex = "";
 	String OnOffDefault = "";
 	String Optimization = "";
 	PropList props = __command.getCommandParameters();
@@ -769,11 +795,12 @@ private void refresh ()
 		if ( DecreeMin != null ) {
 			__DecreeMin_JTextField.setText(DecreeMin);
 		}
+		IncludeUses = props.getValue ( "IncludeUses" );
+		UseApex = props.getValue ( "UseApex" );
 		DecreeMin = props.getValue ( "DecreeMin" );
 		DefaultAppropriationDate = props.getValue ( "DefaultAppropriationDate" );
 		DefineRightHow = props.getValue ( "DefineRightHow" );
 		ReadWellRights = props.getValue ( "ReadWellRights" );
-		UseApex = props.getValue ( "UseApex" );
 		OnOffDefault = props.getValue ( "OnOffDefault" );
 		Optimization = props.getValue ( "Optimization" );
 		if ( Approach == null ) {
@@ -852,6 +879,9 @@ private void refresh ()
 				"value \"" + ReadWellRights + "\".  Select a different value or Cancel.");
 			}
 		}
+		if ( (IncludeUses != null) && (__IncludeUses_JTextField != null) ) {
+			__IncludeUses_JTextField.setText(Div);
+		}
 		if ( UseApex == null ) {
 			// Select default...
 			__UseApex_JComboBox.select ( 0 );
@@ -866,6 +896,9 @@ private void refresh ()
 				"Existing command references an invalid UseApex " +
 				"value \"" + UseApex + "\".  Select a different value or Cancel.");
 			}
+		}
+		if ( (DecreeMin != null) && (__DecreeMin_JTextField != null) ) {
+			__DecreeMin_JTextField.setText(Div);
 		}
 		if ( OnOffDefault == null ) {
 			// Select default...
@@ -913,6 +946,7 @@ private void refresh ()
 	if ( __Div_JTextField != null ) {
 		Div = __Div_JTextField.getText().trim();
 	}
+	IncludeUses = __IncludeUses_JTextField.getText().trim();
 	DecreeMin = __DecreeMin_JTextField.getText().trim();
 	DefaultAppropriationDate = __DefaultAppropriationDate_JTextField.getText().trim();
 	if ( __DefineRightHow_JComboBox != null ) {
@@ -939,6 +973,7 @@ private void refresh ()
 	props.add ( "PermitIDPostFormat=" + PermitIDPostFormat);
 	props.add ( "Year=" + Year );
 	props.add ( "Div=" + Div );
+	props.add ( "IncludeUses=" + IncludeUses );
 	props.add ( "DecreeMin=" + DecreeMin );
 	props.add ( "DefaultAppropriationDate=" + DefaultAppropriationDate );
 	props.add ( "DefineRightHow=" + DefineRightHow );

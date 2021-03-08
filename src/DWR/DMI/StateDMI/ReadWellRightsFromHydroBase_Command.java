@@ -647,7 +647,7 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List<String> validList = new ArrayList<>(15);
+	List<String> validList = new ArrayList<>(16);
 	validList.add ( "Approach" );
     validList.add ( "ID" );
     validList.add ( "PermitIDPattern" );
@@ -656,6 +656,7 @@ throws InvalidCommandParameterException
     validList.add ( "PermitIDPostFormat" );
     validList.add ( "Div" );
     validList.add ( "Year" );
+    validList.add ( "IncludeUses" );
     validList.add ( "DecreeMin" );
     validList.add ( "DefaultAppropriationDate" );
     validList.add ( "DefineRightHow" );
@@ -968,6 +969,7 @@ private List<StateMod_WellRight> readHydroBaseWellRightsForDWStationsSimple (
 	List<String> partIdList,
 	int div,
 	boolean readWellRights,
+	List<String> useTypes,
 	boolean useApex,
 	double defaultAdminNumber,
 	Date defaultApproDate,
@@ -1067,6 +1069,7 @@ private List<StateMod_WellRight> readHydroBaseWellRightsForDWStationsSimple (
 					partIdTypeList2, // will have single part, containing "WDID"
 					-1, // division as integer, not used
 					readWellRights, // TODO SAM 2016-06-11 need to figure out if used
+					useTypes, // HydroBase well right types to include
 					useApex, // TODO SAM 2016-06-11 need to figure out if used
 					defaultAdminNumber, // TODO SAM 2016-06-11 need to figure out if used
 					defaultApproDate, // TODO SAM 2016-06-11 need to figure out if used
@@ -1090,6 +1093,7 @@ private List<StateMod_WellRight> readHydroBaseWellRightsForDWStationsSimple (
 					partIdTypeList2, // will have single part, containing "Receipt"
 					-1, // division as integer, not used
 					readWellRights, // TODO SAM 2016-06-11 need to figure out if used
+					useTypes,
 					useApex, // TODO SAM 2016-06-11 need to figure out if used
 					defaultAdminNumber, // TODO SAM 2016-06-11 need to figure out if used
 					defaultApproDate, // TODO SAM 2016-06-11 need to figure out if used
@@ -1638,6 +1642,7 @@ Each part ID can be a WDID or receipt.
  * @param div
  * @param defineWellRightHow
  * @param readWellRights
+ * @param useTypes HydroBase well right use types to include (e.g, "IRR")
  * @param useApex
  * @param defaultAdminNumber
  * @param defaultApproDate
@@ -1658,6 +1663,7 @@ private List<StateMod_WellRight> readHydroBaseWellRightsForWellStationsSimple (
 	List<StateMod_Well_CollectionPartIdType> partIdTypeList,
 	int div,
 	boolean readWellRights,
+	List<String> useTypes,
 	boolean useApex,
 	double defaultAdminNumber,
 	Date defaultApproDate,
@@ -1684,6 +1690,7 @@ private List<StateMod_WellRight> readHydroBaseWellRightsForWellStationsSimple (
 				partId, // The well that is being processed (well WDID or receipt)
 				partIdType, // The well type that is being processed "WDID" or "Receipt"
 				DefineWellRightHowType.RIGHT_IF_AVAILABLE, // Always use right if available
+				useTypes, // Well right use types to include
 				useApex, // Read 
 				defaultAdminNumber,
 				defaultApproDate,
@@ -1804,9 +1811,21 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	// Populated in checkCommandParameters
 	//String Year = parameters.getValue( "Year" );
 	String Div = parameters.getValue( "Div" );
+	String IncludeUses = parameters.getValue( "IncludeUses" );
+	if ( (IncludeUses == null) || IncludeUses.isEmpty() ) {
+		// Default is to include irrigation uses
+		IncludeUses = "IRR,ALL";
+	}
+	List<String>useTypes = StringUtil.breakStringList(IncludeUses.replace(" ",""), ",", 0);
+	// Make sure uses are uppercase
+	for ( int i = 0; i < useTypes.size(); i++ ) {
+		String useType = useTypes.get(i);
+		useTypes.set(i, useType.toUpperCase());
+	}
+
 	String DecreeMin = parameters.getValue( "DecreeMin" );
 	if ( DecreeMin == null ) {
-		DecreeMin = ".0005"; // Default
+		DecreeMin = ".0005"; // Default = .2244 GPM
 	}
 	double DecreeMin_double = Double.parseDouble(DecreeMin);
 	String DefaultAppropriationDate = parameters.getValue( "DefaultAppropriationDate" );
@@ -2136,6 +2155,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				// - supplies are unique (not counted more than once)
 				// - therefore no need to check for uniqueness later
 				List<StateCU_SupplyFromGW> culocSupplyList = culoc.getGroundwaterSupplies();
+				Message.printStatus(2,routine,"Location \"" + culoc.getID() + "\" has " + culocSupplyList.size() + " well supplies.");
 				// Loop through the GW supplies.
 				List<StateMod_WellRight> smWellRightForLocationList = new ArrayList<>(); // Rights that are read and returned
 				for ( StateCU_SupplyFromGW supplyFromGW : culocSupplyList ) {
@@ -2180,6 +2200,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							partId, // the well that is being processed (well WDID or receipt)
 							partIdType, // the well type that is being processed "WDID" or "Receipt"
 							DefineWellRightHowType.RIGHT_IF_AVAILABLE, // always use right if available because important wells have rights
+							useTypes, // Use types for well rights to include
 							useApex, // from UseApex command parameter
 							defaultAdminNumber, // calculated from DefaultApproprationDate parameter
 							defaultApproDate, // from command DefaultAppropriationDate parameter
@@ -2233,6 +2254,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				addStateModRightsToProcessorRightList ( smWellRightForLocationList, processorRightList, OnOffDefault_int,
 					PermitIDPreFormat, IDFormat_int, PermitIDPostFormat,
 					warningLevel, warningCount, commandTag, status );
+				// Print a warning if the location has no water rights
+				if ( (culocSupplyList.size() > 0) && (smWellRightForLocationList.size() == 0) ) {
+					message = "Well station \"" + wellStationId + "\"" + culoc.getID() + "\" has no well water rights for " +
+						culocSupplyList.size() + " well supplies.";
+					Message.printWarning(warningLevel,
+						MessageUtil.formatMessageTag( commandTag, ++warningCount), routine, message );
+					status.addToLog ( CommandPhaseType.RUN,
+						new CommandLogRecord(CommandStatusType.WARNING,
+							message, "Check input." ) );
+				}
 			}
 		}
 		else if ( doSimpleApproach ) {
@@ -2316,6 +2347,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								partIdList, // will have a single part, which is the station ID
 								Div_int, // division as integer
 								readWellRights, // TODO SAM 2016-06-11 need to figure out if can remove
+								useTypes,
 								useApex,
 								defaultAdminNumber,
 								defaultApproDate,
@@ -2348,6 +2380,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							partIdTypeList, // the types for the parts
 							Div_int, // division as integer
 							readWellRights, // TODO SAM 2016-06-11 need to figure out if can remove
+							useTypes, // Well right use types to include
 							useApex,
 							defaultAdminNumber,
 							defaultApproDate,
@@ -2390,6 +2423,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							partIdList, // will have a single part, which is the station ID
 							Div_int, // division as integer
 							readWellRights, // TODO SAM 2016-06-11 need to figure out if can remove
+							useTypes,
 							useApex,
 							defaultAdminNumber,
 							defaultApproDate,
@@ -2883,11 +2917,12 @@ public String toString ( PropList parameters )
 	String PermitIDPostFormat = parameters.getValue ( "PermitIDPostFormat" );
 	String Year = parameters.getValue( "Year" );
 	String Div = parameters.getValue( "Div" );
+	String IncludeUses = parameters.getValue ( "IncludeUses" );
+	String UseApex = parameters.getValue( "UseApex" );
 	String DecreeMin = parameters.getValue ( "DecreeMin" );
 	String DefaultAppropriationDate = parameters.getValue( "DefaultAppropriationDate" );
 	String DefineRightHow = parameters.getValue( "DefineRightHow" );
 	String ReadWellRights = parameters.getValue( "ReadWellRights" );
-	String UseApex = parameters.getValue( "UseApex" );
 	String OnOffDefault = parameters.getValue( "OnOffDefault" );
 	String Optimization = parameters.getValue( "Optimization" );
 	
@@ -2938,6 +2973,18 @@ public String toString ( PropList parameters )
 		}
 		b.append ( "Div=\"" + Div + "\"" );
 	}
+	if ( IncludeUses != null && IncludeUses.length() > 0 ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "IncludeUses=\"" + IncludeUses + "\"" );
+	}
+	if ( UseApex != null && UseApex.length() > 0 ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "UseApex=" + UseApex );
+	}
 	if ( DecreeMin != null && DecreeMin.length() > 0 ) {
 		if ( b.length() > 0 ) {
 			b.append ( "," );
@@ -2961,12 +3008,6 @@ public String toString ( PropList parameters )
 			b.append ( "," );
 		}
 		b.append ( "ReadWellRights=" + ReadWellRights );
-	}
-	if ( UseApex != null && UseApex.length() > 0 ) {
-		if ( b.length() > 0 ) {
-			b.append ( "," );
-		}
-		b.append ( "UseApex=" + UseApex );
 	}
 	if ( OnOffDefault != null && OnOffDefault.length() > 0 ) {
 		if ( b.length() > 0 ) {

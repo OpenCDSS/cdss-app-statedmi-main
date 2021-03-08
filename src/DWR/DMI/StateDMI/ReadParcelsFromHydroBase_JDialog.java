@@ -205,6 +205,9 @@ private void initialize ( JFrame parent, ReadParcelsFromHydroBase_Command comman
     	"The resulting data can be used by other commands rather than rereading the same complex data."),
     	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
+    	"<html><b>The input period start and end should typically not be set - set the period in other commands that use the data.</b></html>"),
+    	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel (
     	"Use the WriteParcelsToFile() command to output a model/parcel/supply report that is useful for troubleshooting."),
     	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 

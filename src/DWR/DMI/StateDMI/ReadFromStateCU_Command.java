@@ -300,6 +300,7 @@ private void readCropPatternTSFromStateCU_checkCropPatternTS ( List<StateCU_Crop
 	double cds_total, ipy_total;
 	double tolerance = 1.0;	// Check to nearest integer since acreage may be written as whole number
 	int precision = 0;
+	String format = "%." + precision + "f";
 	// TODO SAM 2007-09-09 Need some utilities to help with checks
 	// Need to intelligently compute the precision from the tolerance
 	DateTime date_end;		// End of period for looping.
@@ -340,8 +341,9 @@ private void readCropPatternTSFromStateCU_checkCropPatternTS ( List<StateCU_Crop
 					new CommandLogRecord(CommandStatusType.FAILURE,
 						"Location \"" + cds_id + "\" CDS total acreage is not within 1 of IPY total in year " +
 						date.getYear() + ".  CDS Total = " +
-						StringUtil.formatString(cds_total,"%."+precision+"f") +
-						" IPY total = " + StringUtil.formatString(ipy_total,"%."+precision+"f"),
+						StringUtil.formatString(cds_total,format) +
+						" IPY total = " + StringUtil.formatString(ipy_total,format) + ", difference = " +
+						StringUtil.formatString((cds_total-ipy_total),format),
 						"Verify data processing." ) );
 			}
 		}

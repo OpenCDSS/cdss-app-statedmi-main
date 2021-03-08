@@ -468,6 +468,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			parcel_years[i] = -1;
 		}
 
+		// Check for unmodeled wells.
+		boolean checkForUnmodeledWells = true;
+
 		// Indicate that only irrigated parcels should be included (e.g., 'NO_CROP' will be ignored)
 		boolean includeOnlyIrrigatedParcels = true;
 		
@@ -1376,8 +1379,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					}
 					else if ( iloop == 2 ) {
 						Message.printStatus ( 2, routine, "Checking unmodeled wells for aggregate/system \"" + culoc_id +
-							"\" using list of WDID/permit receipt for parts." );
+							"\" using list of WDID/permit receipt for CU Location parcels." );
 					}
+
 					// The collection definitions are the same each year (same list of wells throughout the period).
 					// If the period is provided then the start and end are known.
 					// However, don't want to requery data every year because that will be slow.
@@ -1401,106 +1405,108 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					for ( int iy = 0; iy < parcelYearsForDiv.length; iy++ ) {
 						if ( ((InputStart_DateTime == null) ||(parcelYearsForDiv[iy] >= InputStart_DateTime.getYear())) &&
 							((InputEnd_DateTime == null) || (parcelYearsForDiv[iy] <= InputEnd_DateTime.getYear()))) {
-							// Get the parcels that are associated with the wells and then use the same logic as if processing parcels
-							List<HydroBase_Wells> hbWellsList = null; // List of HydroBase vw_CDSS_WellsWellToParcel records for location for all years
 							//List<Integer> parcelListForYear = new ArrayList<>();
 							int year = parcelYearsForDiv[iy];
-							//int [] parcelYearArray = new int[1]; // For one year
 
-							// Loop through the well identifiers and read the parcels associated with the wells
-							// Get the vw_CDSS_WellsWellToParcel records, which tie well WDID and permit number to parcel.
-							// This will give the list of parcels to process.
-							int iPart = -1;
-							StateCU_Location_CollectionPartIdType partIdType; // Part type for specified ID, indicates whether WDID or receipt
-							int [] wdidParts = new int[2];
-							for ( String partId : partIdList ) {
-								++iPart;
-								partIdType = partIdTypeList.get(iPart);
-								Message.printStatus ( 2, routine, "  Processing part ID \"" + partId + "\" part type " + partIdType + "." );
-								// Get the well associated with parcel
-								// - only contains well to parcel (no parcel use)
-								if ( partIdType == StateCU_Location_CollectionPartIdType.WDID ) {
-									// Split the WDID into parts in case it is not always 7 digits
-									wdidParts = HydroBase_WaterDistrict.parseWDID(partId,wdidParts);
-									wellParcelId = -1; // Not used since querying well WDID
-									wellDiv = -1; // Not used since querying well WDID
-									wellReceipt = null; // Not used since querying well WDID
-									hbWellsList = hbdmi.readWellsWellToParcelList(wellParcelId, year, wellDiv, wellReceipt,
-										wdidParts[0], wdidParts[1]);
-								    if ( hbWellsList.size() > 0 ) {
-								    	Message.printStatus ( 2, routine, "    Found " + hbWellsList.size() +
-								    		" matching well/parcel records (GW supply) for year " +
-											year + ", wd=" + wdidParts[0] + ", id=" + wdidParts[1] );
-								    }
+							if ( iloop == 1 ) {
+								// For iloop==1 the full logic occurs starting with list of wells in the collection.
+								// Get the parcels that are associated with the wells and then use the same logic as if processing parcels
+								List<HydroBase_Wells> hbWellsList = null; // List of HydroBase vw_CDSS_WellsWellToParcel records for location for all years
+								//int [] parcelYearArray = new int[1]; // For one year
 
-								    // Make sure that the diversion structure is not also a well structure in HydroBase.
-								    // - this results in confusing errors later so best to warn about now
-								    // - no need to do check for iloop=2
-								    //if ( iy == 0 ) {}
-								    if ( (iloop == 1) && (iy == 0) ) {
-								    	List<HydroBase_ParcelUseTSStructureToParcel> hbditchCheckList =
-									    	hbdmi.readParcelUseTSStructureToParcelListForStructureWdidCalYear(wdidParts[0], wdidParts[1], -1);
-								    	if ( hbditchCheckList.size() > 0 ) {
-									    	message = "CU location \"" + culoc_id + " part ID \"" + partId + 
-										    	"\" has HydroBase vw_CDSS_ParcelUseTS (as ditch) and vw_CDSS_WellsWellToParcel (as well) data records.";
-									    	Message.printWarning ( warningLevel, 
-						        		    	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-					        		    	status.addToLog ( commandPhase,
-					            		    	new CommandLogRecord(CommandStatusType.WARNING,
-					                		    	message, "A WDID should only be associated with one of the HydroBase tables. "
-					                		   			+ "Original GIS data may have inaccurate supply type.  Additional errors may result." ) );
+								// Loop through the well identifiers and read the parcels associated with the wells
+								// Get the vw_CDSS_WellsWellToParcel records, which tie well WDID and permit number to parcel.
+								// This will give the list of parcels to process.
+								int iPart = -1;
+								StateCU_Location_CollectionPartIdType partIdType; // Part type for specified ID, indicates whether WDID or receipt
+								int [] wdidParts = new int[2];
+								for ( String partId : partIdList ) {
+									++iPart;
+									partIdType = partIdTypeList.get(iPart);
+									Message.printStatus ( 2, routine, "  Processing part ID \"" + partId + "\" part type " + partIdType + "." );
+									// Get the well associated with parcel
+									// - only contains well to parcel (no parcel use)
+									if ( partIdType == StateCU_Location_CollectionPartIdType.WDID ) {
+										// Split the WDID into parts in case it is not always 7 digits
+										wdidParts = HydroBase_WaterDistrict.parseWDID(partId,wdidParts);
+										wellParcelId = -1; // Not used since querying well WDID
+										wellDiv = -1; // Not used since querying well WDID
+										wellReceipt = null; // Not used since querying well WDID
+										hbWellsList = hbdmi.readWellsWellToParcelList(wellParcelId, year, wellDiv, wellReceipt,
+											wdidParts[0], wdidParts[1]);
+								    	if ( hbWellsList.size() > 0 ) {
+								    		Message.printStatus ( 2, routine, "    Found " + hbWellsList.size() +
+								    			" matching well/parcel records (GW supply) for year " +
+												year + ", wd=" + wdidParts[0] + ", id=" + wdidParts[1] );
 								    	}
-								    }
-								}
-								else if ( partIdType == StateCU_Location_CollectionPartIdType.RECEIPT ) {
-									// Read well to parcel data for permit receipt
-									wellParcelId = -1; // Not used since querying well WDID
-									wellDiv = -1; // Not used since querying well WDID
-									wellWD = culoc.getCollectionPartIDWD(partId); // Determined up front when collection information was specified
-									wellID = -1;
-									try {
-										hbWellsList = hbdmi.readWellsWellToParcelList(wellParcelId, year, wellDiv, partId, wellWD, wellID);
-									}
-									catch ( Exception e ) {
-										// Possible to have an error with bad receipt and no WD
-										message = "Error getting well/parcel data for year " + year + ", receipt=" + partId + " (" + e + ").";
-										Message.printWarning ( warningLevel, 
-				        					MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, "    " + message );
-			        					status.addToLog ( commandPhase,
-			            					new CommandLogRecord(CommandStatusType.WARNING, message,
-			            						"Check the log file.  Verify that the well/parcel is in HydroBase.  Report to software support if necessary." ) );
-										Message.printWarning ( warningLevel, routine, e );
-										// Create an empty list to handle below
-										hbWellsList = new ArrayList<>();
-									}
-								    if ( hbWellsList.size() > 0 ) {
-								    	Message.printStatus ( 2, routine, "    Found " + hbWellsList.size() +
-								    		" matching well/parcel records (GW supply) for year " +
-											year + ", receipt=" + partId );
-								    }
-								}
 
-								// At this point have records of well/parcel.
-								// Process parcels associated with the well part being processed
-								// - if the parcel is a duplicate for the location, the parcel is added once and
-								//   the supply is added as an additional supply (supply is only added once to a parcel)
-								for ( HydroBase_Wells hbWell : hbWellsList ) {
-									// Get the ParcelUseTS to get the parcel area.
-									List<HydroBase_ParcelUseTS> hbParcelUseTSList =
-										hbdmi.readParcelUseTSList(year, -1, hbWell.getParcel_id(),
-										includeOnlyIrrigatedParcels);
-									// The following message does not provide a lot of value
-									//Message.printStatus(2, routine, "      Found " + hbParcelUseTSList.size() + " ParcelUseTS for parcel " +
-									//	hbWell.getParcel_id() );
-									for ( HydroBase_ParcelUseTS hbParcelUseTS : hbParcelUseTSList ) {
-										// Add the parcel object to the processor
-										StateCU_Parcel savedParcel = processor.getParcel(year, "" + hbWell.getParcel_id());
-										if ( savedParcel != null ) {
-											// Existing parcel.  Add the supply below but leave other information as is since previously added.
-											parcel = savedParcel;
+								    	// Make sure that the diversion structure is not also a well structure in HydroBase.
+								    	// - this results in confusing errors later so best to warn about now
+								    	// - no need to do check for iloop=2
+								    	//if ( iy == 0 ) {}
+								    	if ( (iloop == 1) && (iy == 0) ) {
+								    		List<HydroBase_ParcelUseTSStructureToParcel> hbditchCheckList =
+									    		hbdmi.readParcelUseTSStructureToParcelListForStructureWdidCalYear(wdidParts[0], wdidParts[1], -1);
+								    		if ( hbditchCheckList.size() > 0 ) {
+									    		message = "CU location \"" + culoc_id + " part ID \"" + partId + 
+										    		"\" has HydroBase vw_CDSS_ParcelUseTS (as ditch) and vw_CDSS_WellsWellToParcel (as well) data records.";
+									    		Message.printWarning ( warningLevel, 
+						        		    		MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+					        		    		status.addToLog ( commandPhase,
+					            		    		new CommandLogRecord(CommandStatusType.WARNING,
+					                		    		message, "A WDID should only be associated with one of the HydroBase tables. "
+					                		   				+ "Original GIS data may have inaccurate supply type.  Additional errors may result." ) );
+								    		}
+								    	}
+									}
+									else if ( partIdType == StateCU_Location_CollectionPartIdType.RECEIPT ) {
+										// Read well to parcel data for permit receipt
+										wellParcelId = -1; // Not used since querying well WDID
+										wellDiv = -1; // Not used since querying well WDID
+										wellWD = culoc.getCollectionPartIDWD(partId); // Determined up front when collection information was specified
+										wellID = -1;
+										try {
+											hbWellsList = hbdmi.readWellsWellToParcelList(wellParcelId, year, wellDiv, partId, wellWD, wellID);
 										}
-										else {
-											if ( iloop == 1 ) {
+										catch ( Exception e ) {
+											// Possible to have an error with bad receipt and no WD
+											message = "Error getting well/parcel data for year " + year + ", receipt=" + partId + " (" + e + ").";
+											Message.printWarning ( warningLevel, 
+				        						MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, "    " + message );
+			        						status.addToLog ( commandPhase,
+			            						new CommandLogRecord(CommandStatusType.WARNING, message,
+			            							"Check the log file.  Verify that the well/parcel is in HydroBase.  Report to software support if necessary." ) );
+											Message.printWarning ( warningLevel, routine, e );
+											// Create an empty list to handle below
+											hbWellsList = new ArrayList<>();
+										}
+								    	if ( hbWellsList.size() > 0 ) {
+								    		Message.printStatus ( 2, routine, "    Found " + hbWellsList.size() +
+								    			" matching well/parcel records (GW supply) for year " +
+												year + ", receipt=" + partId );
+								    	}
+									}
+
+									// At this point have records of well/parcel.
+									// Process parcels associated with the well part being processed
+									// - if the parcel is a duplicate for the location, the parcel is added once and
+									//   the supply is added as an additional supply (supply is only added once to a parcel)
+									for ( HydroBase_Wells hbWell : hbWellsList ) {
+										// Get the ParcelUseTS to get the parcel area.
+										List<HydroBase_ParcelUseTS> hbParcelUseTSList =
+											hbdmi.readParcelUseTSList(year, -1, hbWell.getParcel_id(),
+											includeOnlyIrrigatedParcels);
+										// The following message does not provide a lot of value
+										//Message.printStatus(2, routine, "      Found " + hbParcelUseTSList.size() + " ParcelUseTS for parcel " +
+										//	hbWell.getParcel_id() );
+										for ( HydroBase_ParcelUseTS hbParcelUseTS : hbParcelUseTSList ) {
+											// Add the parcel object to the processor
+											StateCU_Parcel savedParcel = processor.getParcel(year, "" + hbWell.getParcel_id());
+											if ( savedParcel != null ) {
+												// Existing parcel.  Add the supply below but leave other information as is since previously added.
+												parcel = savedParcel;
+											}
+											else {
 												// Only add parcels in the first loop.
 												parcel = new StateCU_Parcel();
 												parcel.setStateCULocation(culoc);
@@ -1528,24 +1534,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 													}
 												}
 											}
-										}
 										
-										if ( (iloop == 2) && (parcel == null) ) {
-											// This should should not happen.
-											// - warn and continue since can't continue check
-											message = "Checking for unmodeled wells (second loop) and could not find parcel ID " + hbWell.getParcel_id() + " for year " + year;
-											Message.printWarning ( warningLevel,
-												MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
-											status.addToLog ( commandPhase,
-												new CommandLogRecord(CommandStatusType.WARNING,
-													message, "This should not happen - report to software support." ) );
-											continue;
-										}
-
-										// Add the supply from GW, which will be the single supply from the collection.
-										// - this only detects wells that were specifically included in the collection
-										// - unmodeled wells are processed in iloop=2 below
-										if ( iloop == 1 ) {
+											// Add the supply from GW, which will be the single supply from the collection.
+											// - this only detects wells that were specifically included in the collection
+											// - unmodeled wells are processed in iloop=2 below
 											// Add the supply for the collection part type.
 											supplyFromGW = new StateCU_SupplyFromGW();
 											supplyFromGW.setDataSource("HB-WTP");
@@ -1564,97 +1556,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 												supplyFromGW.setReceipt(partId);
 											}
 											parcel.addSupply(supplyFromGW);
-										}
 
-										// Additional processing to account for well supplies that are not included in the dataset.
-										// - this is the bulk of logic that occurs for iloop=2
-										// - it is possible that there are unmodeled groundwater supplies that won't show up in any WEL or D&W;
-										//   therefore, read all wells associated with the parcel and process in a loop
-										// - all initial processing to occur in iloop=1 because parcel/well relationships may be processed
-										//   in any order and involve WEL and D&W parcel/well relationships
-										// - this slows things down a bit but will ensure that all well supplies are considered
-										// - only need to do once per parcel
-										//if ( !parcel.getHasBeenCheckedForUnmodeledWells() ) {}
-										boolean checkForUnmodeledWells = true;
-										if ( checkForUnmodeledWells && (iloop == 2) && !parcel.getHasBeenCheckedForUnmodeledWells() ) {
-											int wellParcelId2 = parcel.getIdInt(); // Use because requerying parcel for all wells
-											int wellDiv2 = -1; // Not used since querying parcel ID
-											int wellWD2 = -1; // Not used since querying parcel ID
-											int wellID2 = -1; // Not used since querying parcel ID
-											String receipt2 = null; // Not used since querying parcel ID
-											// The following uses the first 3 digits of the parcel for lookups.
-											List<HydroBase_Wells> hbWellsList2 = hbdmi.readWellsWellToParcelList(wellParcelId2, year, wellDiv2, receipt2, wellWD2, wellID2);
-											for ( HydroBase_Wells hbwell2 : hbWellsList2 ) {
-												// Same logic as for normal wells but handle as unmodeled well.
-												// - since the second pass, all well supplies for WEL and D&W will have been added in the first loop.
-												// - therefore any wells not already added are unmodeled
-
-												// TODO smalers 2021-02-15 the following may not be thorough enough since D&W unmodeled well might slip through, or maybe OK?
-												//StateCU_Location locForPart = StateCU_Location.lookupForWellCollectionPartId (
-												//	culocList, HydroBase_WaterDistrict.formWDID(hbwell2.getWD(), hbwell2.getID()), hbwell2.getReceipt() );
-
-												// Loop through well supplies for parcel.
-												// - if not found, it is unmodeled and should be added and marked as such
-												boolean supplyFound = false;
-												for ( StateCU_SupplyFromGW supplyFromGW2 : parcel.getSupplyFromGWList() ) {
-													// ID of interest depends on the existing parcel supply ID.
-													if ( !supplyFromGW2.getIsModeled() ) {
-														// Already determined the supply is not in the dataset
-														supplyFound = true;
-													}
-													else {
-														// Need to check the supply against the wells for the parcel.
-														String wdid2 = "";
-														if ( (hbwell2.getWD() > 0) && (hbwell2.getID() > 0 ) ) {
-															wdid2 = HydroBase_WaterDistrict.formWDID(hbwell2.getWD(), hbwell2.getID() );
-														}
-														String receipt2b = hbwell2.getReceipt();
-														if ( (!supplyFromGW2.getWDID().isEmpty() && supplyFromGW2.getWDID().equals(wdid2)) ||
-															(!supplyFromGW2.getReceipt().isEmpty() && supplyFromGW2.getReceipt().equals(receipt2b)) ) {
-															// Matched an existing parcel supply
-															supplyFound = true;
-															break;
-														}
-													}
-												}
-												if ( !supplyFound ) {
-													// The well identifier was not already a supply for the parcel
-													// - add the supply and indicate it is an unmodeled well
-													supplyFromGW = new StateCU_SupplyFromGW();
-													supplyFromGW.setDataSource("HB-WTP");
-													// Not in the collection since unmodeled
-													// - show collection part type for continuity with other supplies
-													supplyFromGW.setCollectionPartType(collectionPartTypeString);
-													//supplyFromGW.setCollectionPartIdType(partIdType.toString());
-													double areaIrrigFraction2 = 1.0;
-													supplyFromGW.setAreaIrrigFraction(areaIrrigFraction2); // Will recomputed later based on number of wells
-													supplyFromGW.setAreaIrrig(hbParcelUseTS.getArea()*areaIrrigFraction2);
-													// Can set the ID since a specific part ID is specified for the collection.
-													supplyFromGW.setID(partId);
-													//if ( partIdType == StateCU_Location_CollectionPartIdType.WDID ) {}
-													if ( (hbwell2.getWD() > 0) && (hbwell2.getID() > 0 ) ) {
-														supplyFromGW.setWDID(HydroBase_WaterDistrict.formWDID(hbwell2.getWD(), hbwell2.getID()));
-													}
-													//else if ( partIdType == StateCU_Location_CollectionPartIdType.RECEIPT ) {
-													else {
-														supplyFromGW.setReceipt(hbwell2.getReceipt());
-													}
-													//}
-													// Set to indicate not modeled.
-													supplyFromGW.setIsModeled(false);
-													message = "Added unmodeled GW supply for " + culoc_id + " year=" + year + " parcelId=" + hbWell.getParcel_id() +
-														" well WDID=" + supplyFromGW.getWDID() + " receipt='" + supplyFromGW.getReceipt() + "'";
-													Message.printStatus(2,routine,message);
-													parcel.addSupply(supplyFromGW);
-												}
-											}
-
-											// Indicate that the parcel has been checked for unmodeled wells.
-											// - this will improve performance when multiple wells serve a parcel
-											parcel.setHasBeenCheckedForUnmodeledWells(true);
-										}
-
-										if ( iloop == 1 ) {
 											// Also get HydroBase_ParcelUseTS for possible SW supply
 											// - necessary because a D&W may not cause the supplies to be added
 											// - this will used cached data if HydroBase >= 20200824
@@ -1709,18 +1611,125 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 											
 											// Add the parcel (and its related supplies by reference) to the CULocation parcels
 											culoc.addParcel ( parcel );
-										} // End iloop==1
 
-										if ( parcel.hasGroundWaterSupply() ) {
-											culocHasGroundWaterSupply = true;
+											if ( parcel.hasGroundWaterSupply() ) {
+												culocHasGroundWaterSupply = true;
+											}
+											if ( parcel.hasSurfaceWaterSupply() ) {
+												culocHasSurfaceWaterSupply = true;
+											}
 										}
-										if ( parcel.hasSurfaceWaterSupply() ) {
-											culocHasSurfaceWaterSupply = true;
-										}
-
 									} // end parcels
 								} // end list of well/parcel
-							} // end part id list
+							} // end iloop= 1
+							else if ( (iloop == 2) && checkForUnmodeledWells ) {
+								// Additional processing to account for well supplies that are not included in the dataset.
+								// - it is possible that there are unmodeled groundwater supplies that won't show up in any WEL or D&W;
+								//   therefore, read all wells associated with the parcel and process in a loop
+								// - all initial processing to occur in iloop=1 because parcel/well relationships may be processed
+								//   in any order and involve WEL and D&W parcel/well relationships
+								// - this slows things down a bit but will ensure that all well supplies are considered
+								// - only need to do once per parcel
+
+								// First get a list of all unique parcels associated with the location.
+								
+								List<StateCU_Parcel> parcelList = culoc.getParcelList(year);
+								
+								// Loop through the parcels and check for unmodeled well supplies
+								for ( StateCU_Parcel parcel2 : parcelList ) {
+									// Because parcel is unique for year and parcel ID, the following considers the year.
+									if ( !parcel2.getHasBeenCheckedForUnmodeledWells() ) {
+										int wellParcelId2 = parcel2.getIdInt(); // Use because requerying parcel for all wells
+										int wellDiv2 = -1; // Not used since querying parcel ID
+										int wellWD2 = -1; // Not used since querying parcel ID
+										int wellID2 = -1; // Not used since querying parcel ID
+										String receipt2 = null; // Not used since querying parcel ID
+										// The following uses the first 3 digits of the parcel for lookups.
+										List<HydroBase_Wells> hbWellsList2 = hbdmi.readWellsWellToParcelList(wellParcelId2, year, wellDiv2, receipt2, wellWD2, wellID2);
+										Message.printStatus( 2, routine, "  Found " + hbWellsList2.size() + " wells for year " + year + " and parcel ID " + parcel2.getID() );
+										for ( HydroBase_Wells hbwell2 : hbWellsList2 ) {
+											// Same logic as for normal wells but handle as unmodeled well.
+											// - since the second pass, all well supplies for WEL and D&W will have been added in the first loop.
+											// - therefore any wells not already added are unmodeled
+											List<StateCU_SupplyFromGW> supplyFromGWList = parcel2.getSupplyFromGWList();
+									    	Message.printStatus( 2, routine, "    Checking well wd=" + hbwell2.getWD() + " id=" + hbwell2.getID() +
+									    		" receipt='" + hbwell2.getReceipt() + "' against " + supplyFromGWList.size() + " supplies from GW-only collection." );
+
+											// TODO smalers 2021-02-15 the following may not be thorough enough since D&W unmodeled well might slip through, or maybe OK?
+											//StateCU_Location locForPart = StateCU_Location.lookupForWellCollectionPartId (
+											//	culocList, HydroBase_WaterDistrict.formWDID(hbwell2.getWD(), hbwell2.getID()), hbwell2.getReceipt() );
+
+											// Loop through well supplies previously determined for parcel.
+											// - if a well is not found, it did not match the original collection list,
+									    	//   is unmodeled and should be added and marked as such
+											boolean supplyFound = false;
+											boolean supplyIsUnmodeled = false;
+											StateCU_SupplyFromGW supplyFromGWFound = null; // Matched supply
+											for ( StateCU_SupplyFromGW supplyFromGW2 : supplyFromGWList ) {
+												// ID of interest depends on the existing parcel supply ID.
+												String wdid2 = "";
+												if ( (hbwell2.getWD() > 0) && (hbwell2.getID() > 0 ) ) {
+													wdid2 = HydroBase_WaterDistrict.formWDID(hbwell2.getWD(), hbwell2.getID() );
+												}
+												String receipt2b = hbwell2.getReceipt();
+												if ( (!supplyFromGW2.getWDID().isEmpty() && supplyFromGW2.getWDID().equals(wdid2)) ||
+													(!supplyFromGW2.getReceipt().isEmpty() && supplyFromGW2.getReceipt().equals(receipt2b)) ) {
+													// Matched an existing parcel supply
+													supplyFound = true;
+													supplyFromGWFound = supplyFromGW2;
+													break;
+												}
+											}
+											if ( supplyFound ) {
+												// Don't need to add a supply because was matched (may be modeled or unmodeled).
+												if ( !supplyFromGWFound.getIsModeled() ) {
+													// Message was already printed above
+													Message.printStatus( 2, routine, "      GW supply " + supplyFromGWFound.getID() +
+														" is already marked as unmodeled (parcel was checked previously for another model node)." );
+												}
+												else {
+													// Else was a modeled supply.
+													message = "      Parcel has GW supply for " + culoc_id + " year=" + year + " parcelId=" + parcel2.getID() +
+														"wdid=" + supplyFromGWFound.getWDID() + " receipt='" + supplyFromGWFound.getReceipt() + "'";
+													Message.printStatus(2,routine,message);
+												}
+											}	
+											else {
+												// The well identifier was not already a supply for the parcel
+												// - add the supply and indicate that it is an unmodeled well
+												supplyFromGW = new StateCU_SupplyFromGW();
+												supplyFromGW.setDataSource("HB-WTP");
+												// Not in the collection since unmodeled
+												// - show collection part type for continuity with other supplies
+												supplyFromGW.setCollectionPartType(collectionPartTypeString);
+												//supplyFromGW.setCollectionPartIdType(partIdType.toString());
+												// TODO smalers 2021-02-27 Don't set these - let them be computed based on counts
+												//double areaIrrigFraction2 = 1.0;
+												//supplyFromGW.setAreaIrrigFraction(areaIrrigFraction2); // Will recomputed later based on number of wells
+												//supplyFromGW.setAreaIrrig(hbParcelUseTS.getArea()*areaIrrigFraction2);
+												// Can set the ID since a specific part ID is specified for the collection.
+												//supplyFromGW.setID(partId);
+												supplyFromGW.setReceipt(hbwell2.getReceipt());
+												supplyFromGW.setID(hbwell2.getReceipt()); // Reset with WDID if available below
+												if ( (hbwell2.getWD() > 0) && (hbwell2.getID() > 0 ) ) {
+													supplyFromGW.setWDID(HydroBase_WaterDistrict.formWDID(hbwell2.getWD(), hbwell2.getID()));
+													supplyFromGW.setID(HydroBase_WaterDistrict.formWDID(hbwell2.getWD(), hbwell2.getID()));
+												}
+												// Set to indicate not modeled.
+												supplyFromGW.setIsModeled(false);
+												message = "      Added unmodeled GW supply for " + culoc_id + " year=" + year + " parcelId=" + parcel2.getID() +
+													" well WDID=" + supplyFromGW.getWDID() + " receipt='" + supplyFromGW.getReceipt() + "'";
+												Message.printStatus(2,routine,message);
+												parcel2.addSupply(supplyFromGW);
+											}
+										}
+
+										// Indicate that the parcel has been checked for unmodeled wells.
+										// - this will improve performance when multiple wells serve a parcel
+										parcel2.setHasBeenCheckedForUnmodeledWells(true);
+									}
+								}
+							} // end iloop=2
 						} // end in period of interest
 					} // end years with parcel data
 				} // end iloop == 1 or 2 and well collection specified with Well IDs

@@ -901,6 +901,28 @@ CommandWarningException, CommandException
 							Message.printStatus ( 2, routine,
 							"FillConstant " + id + "-" + cropName +
 							" " + FillStart_DateTime + " to " + FillEnd_DateTime + " (" + nfilled + " values filled).");
+							// Indicate that crop pattern time series have been filled for a year
+							// - used in StateDMI parcel report
+							// - only set if not already indicated as a set
+							// - this indicates if a fill may have occurred
+							int yearStart = 0, yearEnd = 0;
+							if ( FillStart_DateTime == null ) {
+								yearStart = yts.getDate1().getYear();
+							}
+							else {
+								yearStart = FillStart_DateTime.getYear();
+							}
+							if ( FillEnd_DateTime == null ) {
+								yearEnd = yts.getDate2().getYear();
+							}
+							else {
+								yearEnd = FillEnd_DateTime.getYear();
+							}
+							for ( int year = yearStart; year <= yearEnd; year++ ) {
+								if ( !culoc.hasSetCropPatternTSCommands(year) ) {
+									culoc.setHasFillCropPatternTSCommands(year);
+								}
+							}
 						}
 						else if ( this instanceof FillCropPatternTSRepeat_Command ) {
 							int nfilled = TSUtil.fillRepeat ( yts, FillStart_DateTime,
@@ -908,12 +930,56 @@ CommandWarningException, CommandException
 							Message.printStatus ( 2, routine,
 							"FillRepeat " + id + "-" + cropName +
 							" " + FillStart_DateTime + " to " + FillEnd_DateTime+ " (" + nfilled + " values filled)." );
+							// Indicate that crop pattern time series have been filled for a year
+							// - used in StateDMI parcel report
+							// - only set if not already indicated as a set
+							// - this indicates if a fill may have occurred
+							int yearStart = 0, yearEnd = 0;
+							if ( FillStart_DateTime == null ) {
+								yearStart = yts.getDate1().getYear();
+							}
+							else {
+								yearStart = FillStart_DateTime.getYear();
+							}
+							if ( FillEnd_DateTime == null ) {
+								yearEnd = yts.getDate2().getYear();
+							}
+							else {
+								yearEnd = FillEnd_DateTime.getYear();
+							}
+							for ( int year = yearStart; year <= yearEnd; year++ ) {
+								if ( !culoc.hasSetCropPatternTSCommands(year) ) {
+									culoc.setHasFillCropPatternTSCommands(year);
+								}
+							}
 						}
 						else if ( this instanceof FillCropPatternTSInterpolate_Command ) {
 							int nfilled = TSUtil.fillInterpolate ( yts, FillStart_DateTime,
 							FillEnd_DateTime, MaxIntervals_int, 0 );
 							Message.printStatus ( 2, routine, "FillInterpolate " + id + "-" +
 							cropName + " " + FillStart_DateTime + " to " + FillEnd_DateTime+ " (" + nfilled + " values filled)." );
+							// Indicate that crop pattern time series have been filled for a year
+							// - used in StateDMI parcel report
+							// - only set if not already indicated as a set
+							// - this indicates if a fill may have occurred
+							int yearStart = 0, yearEnd = 0;
+							if ( FillStart_DateTime == null ) {
+								yearStart = yts.getDate1().getYear();
+							}
+							else {
+								yearStart = FillStart_DateTime.getYear();
+							}
+							if ( FillEnd_DateTime == null ) {
+								yearEnd = yts.getDate2().getYear();
+							}
+							else {
+								yearEnd = FillEnd_DateTime.getYear();
+							}
+							for ( int year = yearStart; year <= yearEnd; year++ ) {
+								if ( !culoc.hasSetCropPatternTSCommands(year) ) {
+									culoc.setHasFillCropPatternTSCommands(year);
+								}
+							}
 						}
 						else if ( this instanceof FillCropPatternTSProrateAgStats_Command ) {
 							// Find a matching AgStats time series using the CU location county and
@@ -934,6 +1000,28 @@ CommandWarningException, CommandException
 								FillEnd_DateTime, fillProrate_PropList );
 							Message.printStatus ( 2, routine, "FillProrateAgStats " + id + " - " +
 							county + ", " + cropName + " (" + nfilled + " values filled)." );
+							// Indicate that crop pattern time series have been filled for a year
+							// - used in StateDMI parcel report
+							// - only set if not already indicated as a set
+							// - this indicates if a fill may have occurred
+							int yearStart = 0, yearEnd = 0;
+							if ( FillStart_DateTime == null ) {
+								yearStart = yts.getDate1().getYear();
+							}
+							else {
+								yearStart = FillStart_DateTime.getYear();
+							}
+							if ( FillEnd_DateTime == null ) {
+								yearEnd = yts.getDate2().getYear();
+							}
+							else {
+								yearEnd = FillEnd_DateTime.getYear();
+							}
+							for ( int year = yearStart; year <= yearEnd; year++ ) {
+								if ( !culoc.hasSetCropPatternTSCommands(year) ) {
+									culoc.setHasFillCropPatternTSCommands(year);
+								}
+							}
 						}
 						else if ( this instanceof FillCropPatternTSUsingWellRights_Command ) {
 							// Fill the specific crop using rights, for the requested period.
@@ -944,6 +1032,28 @@ CommandWarningException, CommandException
 									FillEnd_DateTime,
 									ParcelYear_int,
 									warning_level, warning_count, command_tag, status );
+							// Indicate that crop pattern time series have been filled for a year
+							// - used in StateDMI parcel report
+							// - only set if not already indicated as a set
+							// - this indicates if a fill may have occurred
+							int yearStart = 0, yearEnd = 0;
+							if ( FillStart_DateTime == null ) {
+								yearStart = yts.getDate1().getYear();
+							}
+							else {
+								yearStart = FillStart_DateTime.getYear();
+							}
+							if ( FillEnd_DateTime == null ) {
+								yearEnd = yts.getDate2().getYear();
+							}
+							else {
+								yearEnd = FillEnd_DateTime.getYear();
+							}
+							for ( int year = yearStart; year <= yearEnd; year++ ) {
+								if ( !culoc.hasSetCropPatternTSCommands(year) ) {
+									culoc.setHasFillCropPatternTSCommands(year);
+								}
+							}
 						}
 						didFill = true;
 					}
@@ -967,11 +1077,17 @@ CommandWarningException, CommandException
 						Constant + " " + year_start + " to " + year_end );
 					for ( int year = year_start; year <= year_end; year++ ) {
 						cupatts.setTotalArea ( year, Constant_double );
+						// Indicate that crop pattern time series have been filled for a year
+						// - used in StateDMI parcel report
+						// - only set if not already indicated as a set
+						// - this indicates if a fill may have occurred
+						if ( !culoc.hasSetCropPatternTSCommands(year) ) {
+							culoc.setHasFillCropPatternTSCommands(year);
+						}
 					}
 				}
 			}
-			else if ( (this instanceof FillCropPatternTSProrateAgStats_Command) &&
-				NormalizeTotals_boolean ) {
+			else if ( (this instanceof FillCropPatternTSProrateAgStats_Command) && NormalizeTotals_boolean ) {
 				// Need to process the crops in groups based on the list of crops in CropType
 				// (specified with * or a comma-separated list of crops).  For example, the
 				// ALFALFA, POTATOES, and SMALL_GRAINS might be processed together.
