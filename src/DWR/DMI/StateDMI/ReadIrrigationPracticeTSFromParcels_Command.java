@@ -851,7 +851,7 @@ CommandWarningException, CommandException
 				
 				if ( iloop == 2 ) {
 					Message.printStatus ( 2, routine, "Processing location ID=" + culocId + " parcelYear=" + parcelYear +
-						", have " + culoc.getParcelList(parcelYear).size() + " supplies (not all may associated with CU loc)." );
+						", have " + culoc.getParcelList(parcelYear).size() + " supplies (not all may be associated with CU loc)." );
 				
 					// Set the values in the time series to zero for the parcel year if
 					// missing.  Later, values will be added.  This will handled using the
@@ -888,7 +888,7 @@ CommandWarningException, CommandException
 					if ( yts.getDataValue(date) < 0.0 ) {
 						yts.setDataValue ( date, 0.0 );
 					}
-				}
+				} // end iloop=2
 
 				for ( StateCU_Parcel parcel : culoc.getParcelList(parcelYear) ) {
 					parcelId = parcel.getID();
@@ -905,7 +905,7 @@ CommandWarningException, CommandException
 					for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 						processIrrigationPracticeTSParcel (
 							debug,
-							doSetValues,
+							doSetValues, // Will be true if iloop=2
 							culoc,
 							ipyts,
 							parcel,
