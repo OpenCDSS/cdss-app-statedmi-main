@@ -280,22 +280,26 @@ uploadIndexHtmlFile_Table() {
 				# downloadFileArch=downloadFileParts[5]
 				# Documentation links for development and user documentation are only shown if exist
 				# - the file returned by curl is actually the index.html file
-				docDevUrl=sprintf("http://opencdss.state.co.us/statedmi/%s/doc-dev",downloadFileVersion)
-				docDevCurl=sprintf("curl --output /dev/null --silent --head --fail \"%s\"",docDevUrl)
+				docDevUrl=sprintf("https://opencdss.state.co.us/statedmi/%s/doc-dev",downloadFileVersion)
+				docDevCurl=sprintf("curl --output /dev/null --silent --head --fail \"%s/index.html\"",docDevUrl)
 				returnStatus=system(docDevCurl)
 				if ( returnStatus == 0 ) {
+					# URL file exists.
 					docDevHtml=sprintf("<a href=\"%s\">View</a>",docDevUrl)
 				}
 				else {
+					# URL file does not exist.
 					docDevHtml=""
 				}
-				docUserUrl=sprintf("http://opencdss.state.co.us/statedmi/%s/doc-user",downloadFileVersion)
-				docDevCurl=sprintf("curl --output /dev/null --silent --head --fail \"%s\"",docUserUrl)
+				docUserUrl=sprintf("https://opencdss.state.co.us/statedmi/%s/doc-user",downloadFileVersion)
+				docDevCurl=sprintf("curl --output /dev/null --silent --head --fail \"%s/index.html\"",docUserUrl)
 				returnStatus=system(docDevCurl)
 				if ( returnStatus == 0 ) {
+					# URL file exists.
 					docUserHtml=sprintf("<a href=\"%s\">View</a>",docUserUrl)
 				}
 				else {
+					# URL file does not exist.
 					docUserHtml=""
 				}
 				docApiUrl=""
