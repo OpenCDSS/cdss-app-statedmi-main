@@ -49,7 +49,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import java.io.File;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -95,6 +95,7 @@ private SimpleJComboBox __AcresSWSprinklerCol_JComboBox = null;
 private SimpleJComboBox __PumpingMaxCol_JComboBox = null;
 private SimpleJComboBox __GWModeCol_JComboBox = null;
 private SimpleJComboBox __AcresTotalCol_JComboBox = null;
+private SimpleJComboBox __RecalculateTotal_JComboBox = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;
 private SimpleJButton __help_JButton = null;
@@ -209,6 +210,7 @@ private void checkInput ()
 	String PumpingMaxCol = __PumpingMaxCol_JComboBox.getSelected();
 	String GWModeCol = __GWModeCol_JComboBox.getSelected();
 	String AcresTotalCol = __AcresTotalCol_JComboBox.getSelected();
+	String RecalculateTotal = __RecalculateTotal_JComboBox.getSelected();
 
 	__error_wait = false;
 	
@@ -262,6 +264,9 @@ private void checkInput ()
 	if ( AcresTotalCol.length() > 0 ) {
 		props.set ( "AcresTotalCol", AcresTotalCol );
 	}
+	if ( RecalculateTotal.length() > 0 ) {
+		props.set ( "RecalculateTotal", RecalculateTotal );
+	}
 	try { // This will warn the user
 		__command.checkCommandParameters( props, null, 1 );
 	}
@@ -293,6 +298,7 @@ private void commitEdits ()
 	String PumpingMaxCol = __PumpingMaxCol_JComboBox.getSelected();
 	String GWModeCol = __GWModeCol_JComboBox.getSelected();
 	String AcresTotalCol = __AcresTotalCol_JComboBox.getSelected();
+	String RecalculateTotal = __RecalculateTotal_JComboBox.getSelected();
 
 	__command.setCommandParameter( "ListFile", ListFile );
 	__command.setCommandParameter( "ID", ID );
@@ -310,6 +316,7 @@ private void commitEdits ()
 	__command.setCommandParameter ( "PumpingMaxCol", PumpingMaxCol );
 	__command.setCommandParameter ( "GWModeCol", GWModeCol );
 	__command.setCommandParameter ( "AcresTotalCol", AcresTotalCol );
+	__command.setCommandParameter ( "RecalculateTotal", RecalculateTotal );
 }
 
 /**
@@ -342,12 +349,11 @@ private void initialize (JFrame parent, SetIrrigationPracticeTSFromList_Command 
 		" using the CU Location ID to look up the location."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
+		"Use the command to override inaccurate or missing data in HydroBase."),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel (
     	"Resets will be enforced as the command is processed and can only apply to main locations, " +
     	"not aggregate/system parts."),
-       	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(paragraph, new JLabel (
-       	"Use the ReadIrrigationPracticeTSFromList() command to " +
-       	"read data that are not in HydroBase (e.g., parts of aggregates/systems)."),
        	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"A comma-delimited list file is used to supply data, with" +
@@ -366,6 +372,9 @@ private void initialize (JFrame parent, SetIrrigationPracticeTSFromList_Command 
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"Blanks in column fields will result in no change to the data."),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(paragraph, new JLabel (
+		"Surface and ground water totals will be recalculated.  Overall total will optionally be recalculted."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"It is recommended that the location of the file be " +
@@ -550,6 +559,21 @@ private void initialize (JFrame parent, SetIrrigationPracticeTSFromList_Command 
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Optional - column in file for total irrigated acres."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Recalculate total?:"),
+		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__RecalculateTotal_JComboBox = new SimpleJComboBox(false);
+	__RecalculateTotal_JComboBox.setToolTipText("Recalculate total acres from parts (default is false because total may be set by this or other set commands).");
+	List<String> recalcList = new ArrayList<>();
+	recalcList.add("");
+	recalcList.add(__command._False);
+	recalcList.add(__command._True);
+	__RecalculateTotal_JComboBox.setData ( recalcList );
+	__RecalculateTotal_JComboBox.addItemListener (this);
+	JGUIUtil.addComponent(main_JPanel, __RecalculateTotal_JComboBox,
+		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Optional - recalculate total irrigated acres (default=" + command._False + ")"),
+		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Pumping maximum column:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__PumpingMaxCol_JComboBox = new SimpleJComboBox(false);
@@ -668,6 +692,7 @@ private void refresh ()
 	String PumpingMaxCol = "";
 	String GWModeCol = "";
 	String AcresTotalCol = "";
+	String RecalculateTotal = "";
 	PropList props = __command.getCommandParameters();
 	if (__first_time) {
 		__first_time = false;
@@ -687,6 +712,7 @@ private void refresh ()
 		PumpingMaxCol = props.getValue ( "PumpingMaxCol" );
 		GWModeCol = props.getValue ( "GWModeCol" );
 		AcresTotalCol = props.getValue ( "AcresTotalCol" );
+		RecalculateTotal = props.getValue ( "RecalculateTotal" );
 		if ( ID != null ) {
 			__ID_JTextField.setText (ID);
 		}
@@ -879,6 +905,21 @@ private void refresh ()
 				__error_wait = true;
 			}
 		}
+		if ( RecalculateTotal == null ) {
+			// Select default...
+			__RecalculateTotal_JComboBox.select ( 0 );
+		}
+		else {
+			if ( JGUIUtil.isSimpleJComboBoxItem(
+				__RecalculateTotal_JComboBox, RecalculateTotal, JGUIUtil.NONE, null, null )){
+				__RecalculateTotal_JComboBox.select(RecalculateTotal);
+			}
+			else {
+				Message.printWarning ( 2, routine, "Existing command references an RecalculateTotal value \"" +
+				RecalculateTotal + "\".  Select a different value or Cancel.");
+				__error_wait = true;
+			}
+		}
 	}
 	// Regardless, reset the command from the fields...
 	ListFile = __ListFile_JTextField.getText().trim();
@@ -897,6 +938,7 @@ private void refresh ()
 	PumpingMaxCol = __PumpingMaxCol_JComboBox.getSelected();
 	GWModeCol = __GWModeCol_JComboBox.getSelected();
 	AcresTotalCol = __AcresTotalCol_JComboBox.getSelected();
+	RecalculateTotal = __RecalculateTotal_JComboBox.getSelected();
 	
 	props.add ( "ListFile=" + ListFile );
 	props.add ( "ID=" + ID );
@@ -914,6 +956,7 @@ private void refresh ()
 	props.add ( "PumpingMaxCol=" + PumpingMaxCol );
 	props.add ( "GWModeCol=" + GWModeCol );
 	props.add ( "AcresTotalCol=" + AcresTotalCol );
+	props.add ( "RecalculateTotal=" + RecalculateTotal );
 	
 	__command_JTextArea.setText( __command.toString(props) );
 	

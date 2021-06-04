@@ -25,10 +25,12 @@ package DWR.DMI.StateDMI;
 
 import javax.swing.JFrame;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
+import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Util;
 
 import RTi.Util.Message.Message;
@@ -51,11 +53,9 @@ import RTi.Util.Table.TableRecord;
 import RTi.Util.Time.DateTime;
 
 /**
-<p>
 This class initializes, checks, and runs the SetIrrigationPracticeTSFromList() command.
 The command sets irrigation practice time series to the values in the list file, as
 the command is processed.  It no longer specifies values for processing with HydroBase data.
-</p>
 */
 public class SetIrrigationPracticeTSFromList_Command 
 extends AbstractCommand implements Command
@@ -63,8 +63,8 @@ extends AbstractCommand implements Command
 	
 // Possible values for parameters...
 
-protected final String _False = "_False";
-protected final String _True = "_True";
+protected final String _False = "False";
+protected final String _True = "True";
 
 // SupplyType possible data values...
 
@@ -106,6 +106,7 @@ throws InvalidCommandParameterException
 	String PumpingMaxCol = parameters.getValue ( "PumpingMaxCol" );
 	String GWModeCol = parameters.getValue ( "GWModeCol" );
 	String AcresTotalCol = parameters.getValue ( "AcresTotalCol" );
+	String RecalculateTotal = parameters.getValue ( "RecalculateTotal" );
 	String warning = "";
 	String message;
 	
@@ -282,30 +283,35 @@ throws InvalidCommandParameterException
             new CommandLogRecord(CommandStatusType.FAILURE,
                 message, "Specify a valid column as an integer." ) );
 	}
+	if ( (RecalculateTotal != null) && !RecalculateTotal.isEmpty() && !RecalculateTotal.equalsIgnoreCase(_False) &&
+		!RecalculateTotal.equalsIgnoreCase(_True)) {
+		message = "The RecalculateTotal value (" + RecalculateTotal + ") is invalid.";
+        warning += "\n" + message;
+        status.addToLog ( CommandPhaseType.INITIALIZATION,
+            new CommandLogRecord(CommandStatusType.FAILURE,
+                message, "Specify as " + _False + "(default) or " + _True) );
+	}
 	
 	// Check for invalid parameters...
-	List<String> valid_Vector = new Vector<String>(20);
-	valid_Vector.add ( "ListFile" );
-	valid_Vector.add ( "ID" );
-	valid_Vector.add ( "IDCol" );
-	valid_Vector.add ( "SetStart" );
-	valid_Vector.add ( "SetEnd" );
-	valid_Vector.add ( "YearCol" );
-	valid_Vector.add ( "SurfaceDelEffMaxCol" );
-	valid_Vector.add ( "FloodAppEffMaxCol" );
-	valid_Vector.add ( "SprinklerAppEffMaxCol" );
-	valid_Vector.add ( "AcresGWFloodCol" );
-	valid_Vector.add ( "AcresGWSprinklerCol" );
-	valid_Vector.add ( "AcresSWFloodCol" );
-	valid_Vector.add ( "AcresSWSprinklerCol" );
-	valid_Vector.add ( "PumpingMaxCol" );
-	valid_Vector.add ( "GWModeCol" );
-	valid_Vector.add ( "AcresTotalCol" );
-	valid_Vector.add ( "InputFile1" );
-	valid_Vector.add ( "InputFile2" );
-	valid_Vector.add ( "WarnIfDifferent" );
-	valid_Vector.add ( "WarnIfSame" );
-    warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	List<String> validList = new ArrayList<>(17);
+	validList.add ( "ListFile" );
+	validList.add ( "ID" );
+	validList.add ( "IDCol" );
+	validList.add ( "SetStart" );
+	validList.add ( "SetEnd" );
+	validList.add ( "YearCol" );
+	validList.add ( "SurfaceDelEffMaxCol" );
+	validList.add ( "FloodAppEffMaxCol" );
+	validList.add ( "SprinklerAppEffMaxCol" );
+	validList.add ( "AcresGWFloodCol" );
+	validList.add ( "AcresGWSprinklerCol" );
+	validList.add ( "AcresSWFloodCol" );
+	validList.add ( "AcresSWSprinklerCol" );
+	validList.add ( "PumpingMaxCol" );
+	validList.add ( "GWModeCol" );
+	validList.add ( "AcresTotalCol" );
+	validList.add ( "RecalculateTotal" );
+    warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	// Throw an InvalidCommandParameterException in case of errors.
 	if ( warning.length() > 0 ) {		
@@ -329,7 +335,7 @@ public boolean editCommand ( JFrame parent )
 }
 
 /**
-Method to execute the setIrrigationPracticeTSFromList() command.
+Method to execute the SetIrrigationPracticeTSFromList() command.
 @param command_number Number of command in sequence.
 @exception Exception if there is an error processing the command.
 */
@@ -370,6 +376,11 @@ CommandWarningException, CommandException
 	String PumpingMaxCol = parameters.getValue ( "PumpingMaxCol" );
 	String GWModeCol = parameters.getValue ( "GWModeCol" );
 	String AcresTotalCol = parameters.getValue ( "AcresTotalCol" );
+	String RecalculateTotal = parameters.getValue ( "RecalculateTotal" );
+	boolean recalculateTotal = false; // Default
+	if ( (RecalculateTotal != null) && RecalculateTotal.equalsIgnoreCase(_True) ) {
+		recalculateTotal = true;
+	}
 	//String ProcessWhen = parameters.getValue ( "ProcessWhen" );
 	//String IrrigationMethodCol = parameters.getValue ( "IrrigationMethodCol" );
 	//String SupplyTypeCol = parameters.getValue ( "SupplyTypeCol" );
@@ -401,6 +412,25 @@ CommandWarningException, CommandException
 		status.addToLog ( CommandPhaseType.RUN,
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Run CreateIrrigationPracticeTSForCULocations() before this command." ) );
+	}
+
+	// Get the list of CU locations, used to check the data.
+	// - ok if zero length (may be the case if smaller command file rather than full IPY)
+	
+	List<StateCU_Location> culocList = null;
+	try {
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
+	}
+	catch ( Exception e ) {
+		message = "Error requesting StateCU_Location_List from processor.";
+		Message.printWarning(warningLevel,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
 	}
 	
 	// Get the supplemental crop pattern data specified with SetCropPatternTS() and
@@ -671,6 +701,7 @@ CommandWarningException, CommandException
 					continue;
 				}
 			}
+
 			// Find the StateCU_IrrigationPracticeTS instance to modify...
 			pos = StateCU_Util.indexOf(ipyList,id);
 			if ( pos < 0 ) {
@@ -683,7 +714,15 @@ CommandWarningException, CommandException
 	                    	"This command can only be used to set data at model locations (not parts of aggregate/systems)" ) );
 				continue;
 			}
-			ipy = (StateCU_IrrigationPracticeTS)ipyList.get(pos);
+			ipy = ipyList.get(pos);
+			
+			// Get the StateCU_Location to track when a set command is used.
+			int pos2 = StateCU_Util.indexOf(culocList,id);
+			StateCU_Location culoc = null;
+			if ( pos2 >= 0 ) {
+				culoc = culocList.get(pos2);
+			}
+
 			// OK to set the data...
 			// Get the data values from the table one time...
 			//++matchCount;
@@ -967,6 +1006,26 @@ CommandWarningException, CommandException
 				// This is OK because the user is not able to set these values.
 				ipy.refreshAcgw ( Year_int );
 				ipy.refreshAcsw ( Year_int );
+				if ( recalculateTotal ) {
+					// Don't need to refresh parts since done above.
+					ipy.refreshTacre ( Year_int, false, false );
+				}
+			}
+			if (
+				(culoc != null) && (
+				fill_AcresTotal ||
+				//fill_GWMode ||
+				//fill_PumpingMax ||
+				fill_AcresSWSprinkler ||
+				fill_AcresSWFlood ||
+				fill_AcresGWSprinkler ||
+				fill_AcresGWFlood //||
+				//fill_SprinklerAppEffMax ||
+				//fill_FloodAppEffMax ||
+				//fill_SurfaceDelEffMax)
+				) ) {
+				// Indicate that a set command was used for acreage for use in IPY parcel report.
+				culoc.setHasSetIrrigationPracticeTSCommands(Year_int);
 			}
 			/*
 			fill_IrrigationMethod = false;
@@ -1070,6 +1129,8 @@ CommandWarningException, CommandException
 								SetStart_int + " to " + SetEnd_int + " -> "+ AcresGWFlood_String );
 						}
 						ipy.setAcgwfl ( year, Double.parseDouble(AcresGWFlood_String));
+						// Indicate that a set command was used, used in IPY processing parcel report file to indicate area was set.
+						culoc.setHasSetIrrigationPracticeTSCommands(year);
 					}
 					if ( fill_AcresGWSprinkler) {
 						if ( year == SetStart_int ) {
@@ -1077,6 +1138,8 @@ CommandWarningException, CommandException
 								SetStart_int + " to " + SetEnd_int + " -> "+ AcresGWSprinkler_String );
 						}
 						ipy.setAcgwspr ( year, Double.parseDouble(AcresGWSprinkler_String));
+						// Indicate that a set command was used, used in IPY processing parcel report file to indicate area was set.
+						culoc.setHasSetIrrigationPracticeTSCommands(year);
 					}
 					if ( fill_AcresSWFlood) {
 						if ( year == SetStart_int ) {
@@ -1084,6 +1147,8 @@ CommandWarningException, CommandException
 								SetStart_int + " to " + SetEnd_int + " -> " + AcresSWFlood_String );
 						}
 						ipy.setAcswfl ( year, Double.parseDouble(AcresSWFlood_String));
+						// Indicate that a set command was used, used in IPY processing parcel report file to indicate area was set.
+						culoc.setHasSetIrrigationPracticeTSCommands(year);
 					}
 					if ( fill_AcresSWSprinkler) {
 						if ( year == SetStart_int ) {
@@ -1091,6 +1156,8 @@ CommandWarningException, CommandException
 								SetStart_int + " to " + SetEnd_int + " -> " + AcresSWSprinkler_String );
 						}
 						ipy.setAcswspr ( year, Double.parseDouble(AcresSWSprinkler_String));
+						// Indicate that a set command was used, used in IPY processing parcel report file to indicate area was set.
+						culoc.setHasSetIrrigationPracticeTSCommands(year);
 					}
 					if ( fill_PumpingMax ) {
 						if ( year == SetStart_int ) {
@@ -1112,6 +1179,8 @@ CommandWarningException, CommandException
 							SetStart_int + " to " + SetEnd_int + " -> "+ AcresTotal_String );
 						}
 						ipy.setTacre ( year, Double.parseDouble(AcresTotal_String));
+						// Indicate that a set command was used, used in IPY processing parcel report file to indicate area was set.
+						culoc.setHasSetIrrigationPracticeTSCommands(year);
 					}
 					/*
 					if ( ProcessWhen_int == WithParcels_int ) {
@@ -1139,6 +1208,10 @@ CommandWarningException, CommandException
 					// This is OK because the user is not able to set these values.
 					ipy.refreshAcgw ( year );
 					ipy.refreshAcsw ( year );
+					if ( recalculateTotal ) {
+						// Don't need to refresh parts since done above.
+						ipy.refreshTacre ( Year_int, false, false );
+					}
 				}
 			}
 		}
@@ -1186,6 +1259,7 @@ public String toString ( PropList parameters )
 	String PumpingMaxCol = parameters.getValue ( "PumpingMaxCol" );
 	String GWModeCol = parameters.getValue ( "GWModeCol" );
 	String AcresTotalCol = parameters.getValue ( "AcresTotalCol" );
+	String RecalculateTotal = parameters.getValue ( "RecalculateTotal" );
 	//String ProcessWhen = parameters.getValue ( "ProcessWhen" );
 	//String IrrigationMethodCol = parameters.getValue ( "IrrigationMethodCol" );
 	//String SupplyTypeCol = parameters.getValue ( "SupplyTypeCol" );
@@ -1297,6 +1371,12 @@ public String toString ( PropList parameters )
 			b.append ( "," );
 		}
 		b.append ( "AcresTotalCol=\"" + AcresTotalCol + "\"" );
+	}
+	if ( (RecalculateTotal != null) && (RecalculateTotal.length() > 0) ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "RecalculateTotal=" + RecalculateTotal );
 	}
 	/*
 	if ( (ProcessWhen != null) && (ProcessWhen.length() > 0) ) {

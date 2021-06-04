@@ -531,26 +531,30 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 		out.println(cmnt + "  Units        :  Area units");
 		out.println(cmnt + "  IrrigMeth    :  Irrigation method");
 		out.println(cmnt);
-		out.println(cmnt + "  Data Source/Use - whether or not the row of data is included in the CDS file");
+		out.println(cmnt + "  Data Source/Use - whether or not the row of data is included in the CDS and IPY files");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
 		out.println(cmnt + "  Include in CDS :  Indicates whether the parcel is included in CDS file acreage for the LocId.");
-		out.println(cmnt + "                    This will only be set after running 'ReadCropPatternTSFromParcels' command.");
-		out.println(cmnt + "                    CDS:YES = include parcel area in CDS file based on irrigated acreage parcel assignment");
+		out.println(cmnt + "                    This is set after running 'ReadCropPatternTSFromParcels' and");
+		out.println(cmnt + "                    'ReadIrrigationPracticeTSFromParcels' commands.");
+		out.println(cmnt + "                    CDS:YES = include parcel area in CDS and IPY files based on irrigated acreage parcel assignment");
 		out.println(cmnt + "                    - YES if a parcel with surface water supply - area for parcel is always included");
 		out.println(cmnt + "                    - YES if a parcel with only groundwater supply and model node is a WEL");
 		out.println(cmnt + "                    - a parcel can have CDS:YES for surface water supplies or groundwater supplies, but not both");
 		out.println(cmnt + "                    - IMPORTANT: a parcel/supply may show CDS:YES for surface water supply under GW-only model node");
 		out.println(cmnt + "                      but this is only shown in verbose report mode - the supply is only included in the D&W node.");
-		out.println(cmnt + "                    CDS:NO = do not include parcel area in CDS file based on irrigated acreage parcel assignment");
+		out.println(cmnt + "                    CDS:NO = do not include parcel area in CDS or IPY files based on irrigated acreage parcel assignment");
 		out.println(cmnt + "                    - NO if GW supply but parcel also has surface water supply");
 		out.println(cmnt + "                      - if GW only suppply WEL node, a D&W model node will include the area");
-		out.println(cmnt + "                    CDS:NA = well supply that is not included in the dataset");
+		out.println(cmnt + "                    CDS:NA = well supply that is NOT included in the dataset");
+		out.println(cmnt + "                    - for example for WEL (well only) model node, a supply ID is not in the collection list.");
 		out.println(cmnt + "                    - included in count that is used to compute area fraction, but not included in CDS area.");
 		out.println(cmnt + "                    - not included in any IPY acreage.");
-		out.println(cmnt + "                    CDS:ERR = error determining whether to include parcel area in CDS FILE (input error)");
-		out.println(cmnt + "                    CDS:UNK = unknown whether to include parcel area in CDS FILE (should not happen)");
+		out.println(cmnt + "                    CDS:ERR = error determining whether to include parcel area in CDS and IPY files (input error)");
+		out.println(cmnt + "                    CDS:UNK = unknown whether to include parcel area in CDS and IPY files (should not happen)");
 		out.println(cmnt + "                    - will have this value until crop pattern time series are processed by");
-		out.println(cmnt + "                      ReadCropPatternTSFromParcels or SetCropPatternTSFromParcels commands for location");
+		out.println(cmnt + "                      ReadCropPatternTSFromParcels/SetCropPatternTSFromParcels (CDS file)");
+		out.println(cmnt + "                      ReadIrrigationPracitceTSFromParcels/SetIrrigationPracticeTSFromParcels (IPY file)");
+		out.println(cmnt + "                      commands for location");
 		out.println(cmnt + "                    - a year may have this value if Read and Set commands do not overlap a year with irrigated lands");
 		out.println(cmnt + "  DataSrc        :  Data source for the supply data");
 		out.println(cmnt + "                    - typically from HydroBase but may enable user-supplied data");
@@ -562,14 +566,19 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 		out.println(cmnt + "                    - WEL identifier if parcel has groundwater supply only. ");
 		out.println(cmnt + "                    - ??? if the parcel has not been associated with a model location via ReadCropPatternTSFromParcels, ");
 		out.println(cmnt + "                      such as when SetCropPatternTS*() commands are used to assign data at the end of processing.");
+		out.println(cmnt + "                      When processing IPY, the ReadIrrigationPracticeTSFromParcels and SetIrrigationPracticeTS*() commands are used.");
 		out.println(cmnt + "  CDS LocId Type :  Type node type for CDS LocId, to confirm data processing. ");
 		out.println(cmnt + "                    - should match the model node location type");
-		out.println(cmnt + "                    - ??? if the parcel has not been associated with a model location via ReadCropPatternTSFromParcels, ");
+		out.println(cmnt + "                    - ??? if the parcel has not been associated with a model location via ReadCropPatternTSFromParcels(), ");
 		out.println(cmnt + "                      such as when SetCropPatternTS*() commands are used to assign data at the end of processing.");
+		out.println(cmnt + "                      When processing IPY, the ReadIrrigationPracticeTSFromParcels and SetIrrigationPracticeTS*() commands are used.");
 		out.println(cmnt + "  LocId has Set/Fill  :  Whether LocId has a SetCropPatternTS*() or FillCropPatternTS*() command");
-		out.println(cmnt + "                      :  - SET:YES or FILL:YES is shown. ");
-		out.println(cmnt + "                      :  - data will override any parcel data in this file in output. ");
-		out.println(cmnt + "                      :  - if CDS:UNK, LocId CDS data may be set by one or more StateDMI set or fill commands. ");
+		out.println(cmnt + "                         - SET:CDS if SetCropPatternTS*() command was used to set CDS acreage. ");
+		out.println(cmnt + "                         - SET:IPY if SetIrrigationPracticeTS*() command was used to set IPY acreage. ");
+		out.println(cmnt + "                         - FILL:CDS if FillCropPatternTS*() command was used to fill CDS acreage. ");
+		out.println(cmnt + "                         - FILL:IPY if FillIrrigationPracticeTS*() command was used to fill IPY acreage. ");
+		out.println(cmnt + "                         - set commands will override any parcel data in this file in output. ");
+		out.println(cmnt + "                         - if CDS:UNK, LocId CDS data may be set by one or more StateDMI set or fill commands. ");
 		out.println(cmnt);
 		out.println(cmnt + "  SW Collection Data - surface water aggregate/system data");
 		out.println(cmnt + "  --------------------------------------------------------------------------------------------------");
@@ -677,13 +686,26 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 				objectList.add(new Double(parcel.getArea()));
 				objectList.add(parcel.getAreaUnits());
 				objectList.add(parcel.getIrrigationMethod());
+				// Don't know whether CDS or IPY is being processed so check each.
+				// - command checks allow only one of CDS or IPY processing from parcels
+				// - handle separately so can troubleshoot which is set
 				if ( culoc.hasSetCropPatternTSCommands(parcel.getYear()) ) {
-					// A SetCropPatternTS command was used for the location
-					objectList.add("SET:YES");
+					// A SetCropPatternTS command was used for the location to set area
+					//objectList.add("SET:YES");
+					objectList.add("SET:CDS");
+				}
+				else if ( culoc.hasSetIrrigationPracticeTSCommands(parcel.getYear()) ) {
+					// A SetCropPatternTS command was used for the location to set area
+					//objectList.add("SET:YES");
+					objectList.add("SET:IPY");
 				}
 				else if ( culoc.hasFillCropPatternTSCommands(parcel.getYear()) ) {
-					// A FillCropPatternTS command was used for the location
-					objectList.add("FILL:YES");
+					// A FillCropPatternTS command was used for the location to set area
+					objectList.add("FILL:CDS");
+				}
+				else if ( culoc.hasFillIrrigationPracticeTSCommands(parcel.getYear()) ) {
+					// A FillIrrigationPracticeTS command was used for the location to set area
+					objectList.add("FILL:IPY");
 				}
 				else {
 					objectList.add("");

@@ -530,7 +530,8 @@ ReadCropPatternTSFromHydroBase() command, to check for empty parcel list.
 @return List of commands (as list of Command instances) after the index that match the commands in
 the neededCommandsList.  This will always return a non-null list, even if
 no commands are in the list.
-@param index The index in the command list after which to search for other commands.
+@param index The index in the command list after which to search for other commands,
+can be -1 to search all commands.
 @param processor A TSCommandProcessor with commands to search.
 @param neededCommandsList List of commands (as String) that need to be processed
 (e.g., "setWorkingDir").  Only the main command name should be defined.
@@ -578,7 +579,8 @@ defined and used in the editor dialog.
 @return List of commands (as list of Command instances) before the index that match the commands in
 the neededCommandsList.  This will always return a non-null list, even if
 no commands are in the list.
-@param index The index in the command list before which to search for other commands.
+@param index The index in the command list before which to search for other commands,
+can be the number of commands to search all commands.
 @param processor A TSCommandProcessor with commands to search.
 @param neededCommandsList List of commands (as String) that need to be processed
 (e.g., "setWorkingDir").  Only the main command name should be defined.

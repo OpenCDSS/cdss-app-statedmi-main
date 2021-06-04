@@ -385,12 +385,10 @@ CommandWarningException, CommandException
 	// Get the list of CU locations, used to check the data ...
 	
 	List<StateCU_Location> culocList = null;
-	int culocListSize = 0;
 	try {
 		@SuppressWarnings("unchecked")
 		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
 		culocList = dataList;
-		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {
 		message = "Error requesting StateCU_Location_List from processor.";

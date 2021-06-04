@@ -25,8 +25,8 @@ package DWR.DMI.StateDMI;
 
 import javax.swing.JFrame;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
 import DWR.StateCU.StateCU_Location;
@@ -50,10 +50,8 @@ import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 
 /**
-<p>
-This class initializes, checks, and runs the FillCropPatternTS*() commands.  It is extended by the
-specific fill commands.
-</p>
+This class initializes, checks, and runs the FillIrrigationPracticeTS*() commands.
+It is extended by the specific fill commands.
 */
 public abstract class FillIrrigationPracticeTS_Command
 extends AbstractCommand implements Command
@@ -84,7 +82,7 @@ Constructor.
 */
 public FillIrrigationPracticeTS_Command ()
 {	super();
-	setCommandName ( "FillCropPatternTS?" );
+	setCommandName ( "FillIrrigationPracticeTS?" );
 }
 
 /**
@@ -97,7 +95,7 @@ cross-reference to the original commands.
 */
 public void checkCommandParameters ( PropList parameters, String command_tag, int warning_level )
 throws InvalidCommandParameterException
-{	String routine = "FillAndSetCULocationClimateStationWeights_Command.checkCommandParameters";
+{	String routine = "FillAndSetIrrigationPracticeTS_Command.checkCommandParameters";
 	String ID = parameters.getValue ( "ID" );
 	String FillStart = parameters.getValue ( "FillStart" );
 	String FillEnd = parameters.getValue ( "FillEnd" );
@@ -165,18 +163,18 @@ throws InvalidCommandParameterException
 	}
 
 	// Check for invalid parameters...
-	List<String> valid_Vector = new Vector<String>(8);
-    valid_Vector.add ( "ID" );
-	valid_Vector.add ( "FillStart" );
-	valid_Vector.add ( "FillEnd" );
-	valid_Vector.add ( "DataType" );
+	List<String> validList = new ArrayList<>(8);
+    validList.add ( "ID" );
+	validList.add ( "FillStart" );
+	validList.add ( "FillEnd" );
+	validList.add ( "DataType" );
 	if ( this instanceof FillIrrigationPracticeTSRepeat_Command ) {
-		valid_Vector.add ( "FillDirection" );
-		valid_Vector.add ( "FillFlag" );
+		validList.add ( "FillDirection" );
+		validList.add ( "FillFlag" );
 	}
-	valid_Vector.add ( "MaxIntervals" );
-	valid_Vector.add ( "IfNotFound" );
-	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	validList.add ( "MaxIntervals" );
+	validList.add ( "IfNotFound" );
+	warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	if ( warning.length() > 0 ) {
 		Message.printWarning ( warning_level,
@@ -400,7 +398,7 @@ CommandWarningException, CommandException
 			yts = null;
 			boolean data_type_matched = false;
 			for ( idata_type = 0; idata_type < ndata_types; idata_type++ ) {
-				data_type = (String)data_types.get(idata_type);
+				data_type = data_types.get(idata_type);
 				// Can match a specific time series type or CropArea-AllAcreageParts
 				// to match any of the GW/SW Flood/Sprinkler components.  Be loose
 				// with the strings because the types may change to high/low efficiency.
@@ -427,6 +425,12 @@ CommandWarningException, CommandException
 						data_type + "\" using FillRepeat." );
 						TSUtil.fillRepeat ( yts, FillStart_DateTime, FillEnd_DateTime, FillDirection_int,
 							MaxIntervals_int, FillFlag );
+						for ( int year = FillStart_DateTime.getYear(); year <= FillEnd_DateTime.getYear(); year++ ) {
+							// Only indicate fill if have not used a set command.
+							if ( !culoc.hasSetIrrigationPracticeTSCommands(year)) {
+								culoc.setHasFillIrrigationPracticeTSCommands(year);
+							}
+						}
 					}
 					else if ( fillInterpolate ) {
 						Message.printStatus ( 2, routine,
@@ -434,8 +438,14 @@ CommandWarningException, CommandException
 							data_type + "\" using FillInterpolate." );
 						TSUtil.fillInterpolate ( yts, FillStart_DateTime, FillEnd_DateTime,
 							MaxIntervals_int, 0 );
+						for ( int year = FillStart_DateTime.getYear(); year <= FillEnd_DateTime.getYear(); year++ ) {
+							// Only indicate fill if have not used a set command.
+							if ( !culoc.hasSetIrrigationPracticeTSCommands(year)) {
+								culoc.setHasFillIrrigationPracticeTSCommands(year);
+							}
+						}
 					}
-					// Check to see if acreages need to be adjusted.  Only need to do this in
+					// Check to see if acreage needs to be adjusted.  Only need to do this in
 					// years that were actually modified (otherwise runs slower and generates a bunch
 					// of output).  The following will handle:
 					//   CropArea-GroundWater
@@ -485,128 +495,6 @@ CommandWarningException, CommandException
 					}
 				}
 			}
-
-			/* TODO SAM 2007-09-11 Remove if above checks out
-			if ( AdjustAcreagePartsToTotal_boolean &&
-					((data_type.length() == 0) ||
-					(StringUtil.indexOfIgnoreCase(data_type,"CropArea",0)>=0)) ) {
-				// Adjust the surface water acreage so that:
-				// TotalAcres - GWacres = SWflood + SWsprinkler
-				// 
-				// Do the adjustments using integers since that is the precision
-				// of output.
-				double Tacre, Acgwfl, Acgwspr, Acswfl, Acswspr;
-				int Tacre_int;
-				int Acgwfl_int;
-				int Acgwspr_int;
-				int Acswfl_int;
-				int Acswspr_int;
-				double Acgwfl_new;	// New computed values.
-				double Acgwspr_new;
-				double Acswfl_new;
-				double Acswspr_new;
-				double sw_target, sw_actual;
-				int sw_target_int;	// Target surface water acres
-				int sw_actual_int;	// Actual surface water acres
-				int year1 = datetime1.getYear();
-				int year2 = datetime2.getYear();
-				int tolerance = 0;	// Tolerance to compare acres, when integers
-				for ( int year = year1; year <= year2; year++ ) {
-					Tacre = ipyts.getTacre ( year );
-					Tacre_int = (int)Tacre;
-					Acgwfl = ipyts.getAcgwfl ( year );
-					Acgwfl_int = (int)Acgwfl;
-					Acgwspr = ipyts.getAcgwspr ( year );
-					Acgwspr_int = (int)Acgwspr;
-					Acswfl = ipyts.getAcswfl ( year );
-					Acswfl_int = (int)Acswfl;
-					Acswspr = ipyts.getAcswspr ( year );
-					Acswspr_int = (int)Acswspr;
-					sw_target = Tacre - Acgwfl - Acgwspr;
-					sw_target_int = (int)sw_target;
-					sw_actual = Acswfl + Acswspr;
-					sw_actual_int = (int)sw_actual;
-					if ( (Tacre_int < 0) || (Acgwfl_int < 0) ||
-							(Acgwspr_int < 0) || (Acswfl_int < 0) ||
-							(Acswspr_int < 0) ) {
-						// Missing data so skip. Should not happen if other commands have
-						// filled in other data.
-						continue;
-					}
-					if ( Math.abs(sw_target_int - sw_actual_int) > tolerance ) {
-						Message.printStatus ( 2,routine,
-							"Location \"" + id + "\" " + year +
-							" (Totalacres - GWacres) (" + sw_target_int + ") - SWacres (" + sw_actual_int + ") > " + tolerance + " (" +
-							(sw_target_int - sw_actual_int) + ").  Attempting to adjust SWacres." );
-						if ( sw_target_int < 0 ) {
-							// The groundwater acres are more than the total.  Adjust the groundwater acres
-							// down to the total.  This will mean that surface water target will be zero
-							// below.
-							Acgwfl_new = Tacre*Acgwfl/(Acgwfl + Acgwspr);
-							ipyts.setAcgwfl(year,Acgwfl_new);
-							Acgwspr_new = Tacre*Acgwspr/(Acgwfl + Acgwspr);
-							ipyts.setAcgwspr(year,Acgwspr_new);
-							Message.printStatus ( 2,routine,
-									"Location \"" + id + "\" " + year + ":  Adjusted GW acres (" +
-									(Acgwfl_int + Acgwspr_int) + ") to Total (" + Tacre_int + "). New Acgwfl="+
-									StringUtil.formatString(Acgwfl_new,"%.3f") + " Acgwspr=" +
-									StringUtil.formatString(Acgwspr_new,"%.3f") );
-							// Reset the data as if it was the previous, for consideration below...
-							Acgwfl = Acgwfl_new;
-							Acgwfl_int = (int)Acgwfl;
-							Acgwspr = Acgwspr_new;
-							Acgwspr_int = (int)Acgwspr;
-							sw_target = Tacre - Acgwfl - Acgwspr;
-							sw_target_int = (int)sw_target;
-							sw_actual = Acswfl + Acswspr;
-							sw_actual_int = (int)sw_actual;
-							if ( sw_target_int == sw_actual_int ) {
-								// Done with adjustments because the groundwater = total and surface = 0
-								continue;
-							}
-						}
-						if ( sw_actual_int == 0 ) {
-							Message.printStatus ( 2,routine,
-							"Location \"" + id + "\" " + year + ":  Can't adjust SW acres to Total-GW because SW = zero.  Attempt to adjust GW..." );
-							// Adjust the groundwater to be the total.
-							// Total = GWflood + GWsprink
-							if ( (Acgwfl_int + Acgwspr_int) == 0) {
-								Message.printWarning ( 2,
-										MessageUtil.formatMessageTag(command_tag, ++warning_count),routine,
-										"Location \"" + id + "\" " + year + ":  Can't adjust GW acres to Total (" + Tacre_int +
-										") because GW = zero." );
-								// TODO SAM 2007-06-19 Need to address issue
-								// Need some default or user preference whether to assign flood or
-								// sprinkler acreage (or a mixture) to the total
-							}
-							else {
-								Acgwfl_new = Tacre*Acgwfl/(Acgwfl + Acgwspr);
-								ipyts.setAcgwfl(year,Acgwfl_new);
-								Acgwspr_new = Tacre*Acgwspr/(Acgwfl + Acgwspr);
-								ipyts.setAcgwspr(year,Acgwspr_new);
-								Message.printStatus ( 2,routine,
-										"Location \"" + id + "\" " + year + ":  Adjusted GW acres (" +
-										(Acgwfl_int + Acgwspr_int) + ") to Total (" + Tacre_int + "). New Acgwfl="+
-										StringUtil.formatString(Acgwfl_new,"%.3f") + " Acgwspr=" +
-										StringUtil.formatString(Acgwspr_new,"%.3f") );
-							}
-						}
-						else {	// Just prorate the CDS using the fractions of the previou GW values.
-							Acswfl_new = sw_target*Acswfl/sw_actual;
-							ipyts.setAcswfl(year,Acswfl_new);
-							Acswspr_new = sw_target*Acswspr/sw_actual;
-							ipyts.setAcswspr(year,Acswspr_new);
-							Message.printStatus ( 2,routine,
-									"Location \"" + id + "\" " + year + ":  Adjusted SW acres (" +
-									sw_actual_int + ") to Total-GW (" + sw_target_int + ").  New Acswfl="+
-										StringUtil.formatString(Acswfl_new,"%.3f") + " Acswspr=" +
-										StringUtil.formatString(Acswspr_new,"%.3f") );
-						}
-					}
-
-				}
-			}
-			*/
 		}
 		
 		// If nothing was matched, perform other actions...

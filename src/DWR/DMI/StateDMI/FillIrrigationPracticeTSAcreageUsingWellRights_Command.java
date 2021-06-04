@@ -54,9 +54,7 @@ import RTi.Util.Time.DateTime;
 import RTi.Util.Time.TimeInterval;
 
 /**
-<p>
 This class initializes, checks, and runs the FillIrrigationPracticeTSAcreageUsingWellRights() command.
-</p>
 */
 public class FillIrrigationPracticeTSAcreageUsingWellRights_Command 
 extends AbstractCommand implements Command
@@ -106,6 +104,7 @@ data type in "yts".  CURRENTLY IGNORED - ALWAYS FILLED.
 @param ParcelYear_int the parcel year to use for parcel data.
 */
 private void fillIrrigationPracticeTSUsingRights (
+		StateCU_Location culoc,
 		List<YearTS> smrights_YearTS_Vector,
 		StateCU_IrrigationPracticeTS ipyts,
 		StateCU_CropPatternTS cdsts,
@@ -114,7 +113,7 @@ private void fillIrrigationPracticeTSUsingRights (
 		DateTime FillEnd_DateTime,
 		int ParcelYear_int,
 		boolean has_gwonly_supply )
-{	String routine = "fillIrrigationPracticeTSAcreageUsingWellRights.fillIrrigationPracticeTSUsingRights";
+{	String routine = "FillIrrigationPracticeTSAcreageUsingWellRights.fillIrrigationPracticeTSUsingRights";
 	Message.printStatus( 2, routine, "Filling irrigation practice acreage time series for \"" +
 		ipyts.getID() + "\" by using " + ParcelYear_int +
 		" year parcel data and rights associated with parcels.");
@@ -140,10 +139,6 @@ private void fillIrrigationPracticeTSUsingRights (
 	
 	String id = ipyts.getID();
 	YearTS Tacre_ts = ipyts.getTacreTS();
-	/* FIXME SAM 2007-10-18 Remove when code tests out.
-	YearTS Sacre_ts = ipyts.getSacreTS();
-	YearTS Gacre_ts = ipyts.getGacreTS();
-	*/
 	YearTS Acgwfl_ts = ipyts.getAcgwflTS();
 	YearTS Acgwspr_ts = ipyts.getAcgwsprTS();
 	YearTS Acswfl_ts = ipyts.getAcswflTS();
@@ -173,22 +168,6 @@ private void fillIrrigationPracticeTSUsingRights (
 		else {
 			ismissing_Tacre[iyear] = false;
 		}
-		/* FIXME SAM 2007-10-18 Remove when code tests out.
-		old_value = Sacre_ts.getDataValue ( date );
-		if ( Sacre_ts.isDataMissing(old_value)) {
-			ismissing_Sacre[iyear] = true;
-		}
-		else {
-			ismissing_Sacre[iyear] = false;
-		}
-		old_value = Gacre_ts.getDataValue ( date );
-		if ( Gacre_ts.isDataMissing(old_value)) {
-			ismissing_Gacre[iyear] = true;
-		}
-		else {
-			ismissing_Gacre[iyear] = false;
-		}
-		*/
 		old_value = Acgwfl_ts.getDataValue ( date );
 		if ( Acgwfl_ts.isDataMissing(old_value)) {
 			ismissing_Acgwfl[iyear] = true;
@@ -226,7 +205,9 @@ private void fillIrrigationPracticeTSUsingRights (
 		// Process one zero record to set all values to zero...
 		Message.printStatus( 2, routine, "There are no parcels for " + ParcelYear_int +
 			" - set all acreage to zero for set period." );
-		processSingleParcelForPeriod ( FillStart_DateTime,
+		processSingleParcelForPeriod (
+				culoc,
+				FillStart_DateTime,
 				FillEnd_DateTime,
 				false,		// No parcel rights available
 				null,		// Parcel time series
@@ -238,10 +219,6 @@ private void fillIrrigationPracticeTSUsingRights (
 				true,		// All data are zero
 				ipyts,
 				Tacre_ts,
-				/* FIXME SAM 2007-10-18 Remove when code tests out.
-				Sacre_ts,
-				Gacre_ts,
-				*/
 				Acgwfl_ts,
 				Acgwspr_ts,
 				Acswfl_ts,
@@ -293,7 +270,9 @@ private void fillIrrigationPracticeTSUsingRights (
 			}
 			// Now loop through the years to fill...
 
-			processSingleParcelForPeriod ( FillStart_DateTime,
+			processSingleParcelForPeriod (
+				culoc,
+				FillStart_DateTime,
 				FillEnd_DateTime,
 				rights_available,
 				parcel_right_ts,
@@ -305,10 +284,6 @@ private void fillIrrigationPracticeTSUsingRights (
 				false,				// Not all zero
 				ipyts,
 				Tacre_ts,
-				/* FIXME SAM 2007-10-18 Remove when code tests out.
-				Sacre_ts,
-				Gacre_ts,
-				*/
 				Acgwfl_ts,
 				Acgwspr_ts,
 				Acswfl_ts,
@@ -473,6 +448,7 @@ Process a single parcel (actual or internally assigned as zero) for the full per
 @param FillStart_DateTime Fill start.
 */
 private void processSingleParcelForPeriod (
+		StateCU_Location culoc,
 		DateTime FillStart_DateTime,
 		DateTime FillEnd_DateTime,
 		boolean rights_available,
@@ -485,10 +461,6 @@ private void processSingleParcelForPeriod (
 		boolean all_zero,
 		StateCU_IrrigationPracticeTS ipyts,
 		YearTS Tacre_ts,
-		/* FIXME SAM 2007-10-18 Remove when code tests out.
-		YearTS Sacre_ts,
-		YearTS Gacre_ts,
-		*/
 		YearTS Acgwfl_ts,
 		YearTS Acgwspr_ts,
 		YearTS Acswfl_ts,
@@ -534,87 +506,40 @@ private void processSingleParcelForPeriod (
 			parcel_area2 = parcel_area;
 		}
 		// Only fill if the original time series value was missing.
-		/* TODO SAM 2010-02-09 total is no longer set because CDS value is used
-		if ( ismissing_Tacre[iyear]) {
-			// Total acres are always incremented.
-			old_value = Tacre_ts.getDataValue(date);
-			if ( Tacre_ts.isDataMissing(old_value) ) {
-				// Need to set...
-				//Tacre_ts.setDataValue ( date, parcel_area2 );
-				//Tacre_filled = parcel_area2;
-			}
-			else {
-				// Increment...
-				//ipyts.setTacre ( year, old_value + parcel_area2 );
-				//Tacre_filled = old_value + parcel_area2;
-			}
-			Message.printStatus( 2, "", "For location " + id + " year " + year +
-				" added " + StringUtil.formatString(parcel_area2,"%.2f") + " to total area, result = " +
-				StringUtil.formatString(ipyts.getTacre(year),"%.2f") );
-		}
-		*/
 		if ( !all_zero ) {
-		// Old sprinkler acres are set based on irrigation type...
-		/* FIXME SAM 2007-10-18 Remove when code tests out.
-		if ( is_high_efficiency ) {
-			old_value = Sacre_ts.getDataValue(date);
-			if ( Sacre_ts.isDataMissing(old_value) ) {
-				// Need to set...
-				Sacre_ts.setDataValue ( date, parcel_area2 );
-			}
-			else {	// Increment...
-				Sacre_ts.setDataValue ( date, old_value + parcel_area2 );
-			}
-			Message.printStatus( 2, "", "For location " + id + " year " + year +
-					" added " + StringUtil.formatString(parcel_area2,"%.2f") + " to sprinkler area, result = " +
-					StringUtil.formatString(Sacre_ts.getDataValue(date),"%.2f") );
-		}
-		*/
-		if ( has_gw_supply ) {
-			/* FIXME SAM 2007-10-18 Remove when code tests out.
-			// Old groundwater acres are set based on whether well supplies parcel...
-			old_value = Gacre_ts.getDataValue(date);
-			if ( Gacre_ts.isDataMissing(old_value) ) {
-				// Need to set...
-				Gacre_ts.setDataValue ( date, parcel_area2 );
-			}
-			else {	// Increment...
-				Gacre_ts.setDataValue ( date, old_value + parcel_area2 );
-			}
-			Message.printStatus( 2, "", "For location " + id + " year " + year +
-					" added " + StringUtil.formatString(parcel_area2,"%.2f") + " to GW area, result = " +
-					StringUtil.formatString(Gacre_ts.getDataValue(date),"%.2f") );
-			*/
-			if ( is_high_efficiency ) {
-				old_value = Acgwspr_ts.getDataValue(date);
-				if ( Acgwspr_ts.isDataMissing(old_value) ) {
-					// Need to set...
-					Acgwspr_ts.setDataValue ( date, parcel_area2 );
+			// Old sprinkler acres are set based on irrigation type...
+			if ( has_gw_supply ) {
+				if ( is_high_efficiency ) {
+					old_value = Acgwspr_ts.getDataValue(date);
+					if ( Acgwspr_ts.isDataMissing(old_value) ) {
+						// Need to set...
+						Acgwspr_ts.setDataValue ( date, parcel_area2 );
+					}
+					else {
+						// Increment...
+						Acgwspr_ts.setDataValue ( date, old_value + parcel_area2 );
+					}
+					Message.printStatus( 2, "", "For location " + id + " year " + year +
+						" added " + StringUtil.formatString(parcel_area2,"%.2f") + " to GW sprinkler area, result = " +
+						StringUtil.formatString(Acgwspr_ts.getDataValue(date),"%.2f") );
+					culoc.setHasFillIrrigationPracticeTSCommands(year);
 				}
 				else {
-					// Increment...
-					Acgwspr_ts.setDataValue ( date, old_value + parcel_area2 );
+					old_value = Acgwfl_ts.getDataValue(date);
+					if ( Acgwfl_ts.isDataMissing(old_value) ) {
+						// Need to set...
+						Acgwfl_ts.setDataValue ( date, parcel_area2 );
+					}
+					else {
+						// Increment...
+						Acgwfl_ts.setDataValue ( date, old_value + parcel_area2 );
+					}
+					Message.printStatus( 2, "", "For location " + id + " year " + year +
+						" added " + StringUtil.formatString(parcel_area2,"%.2f") + " to GW flood area, result = " +
+						StringUtil.formatString(Acgwfl_ts.getDataValue(date),"%.2f") );
+					culoc.setHasFillIrrigationPracticeTSCommands(year);
 				}
-				Message.printStatus( 2, "", "For location " + id + " year " + year +
-					" added " + StringUtil.formatString(parcel_area2,"%.2f") + " to GW sprinkler area, result = " +
-					StringUtil.formatString(Acgwspr_ts.getDataValue(date),"%.2f") );
-				
 			}
-			else {
-				old_value = Acgwfl_ts.getDataValue(date);
-				if ( Acgwfl_ts.isDataMissing(old_value) ) {
-					// Need to set...
-					Acgwfl_ts.setDataValue ( date, parcel_area2 );
-				}
-				else {
-					// Increment...
-					Acgwfl_ts.setDataValue ( date, old_value + parcel_area2 );
-				}
-				Message.printStatus( 2, "", "For location " + id + " year " + year +
-					" added " + StringUtil.formatString(parcel_area2,"%.2f") + " to GW flood area, result = " +
-					StringUtil.formatString(Acgwfl_ts.getDataValue(date),"%.2f") );
-			}
-		}
 		} // End all_zero - the following is the fall-through
 		// Make sure to fill all groundwater with zero if necessary because result of filling
 		// should be no gaps.  The zeros will be incremented with subsequent parcel
@@ -624,14 +549,6 @@ private void processSingleParcelForPeriod (
 			//Tacre_ts.setDataValue ( date, 0.0 );
 			//Tacre_filled = 0.0;
 		}
-		/* FIXME SAM 2007-10-18 Remove when code tests out.
-		if ( Sacre_ts.isDataMissing(Sacre_ts.getDataValue(date)) ) {
-				//Sacre_ts.setDataValue ( date, 0.0 );
-		}
-		if ( Gacre_ts.isDataMissing(Gacre_ts.getDataValue(date)) ) {
-			Gacre_ts.setDataValue ( date, 0.0 );
-		}
-		*/
 		if ( Acgwfl_ts.isDataMissing(Acgwfl_ts.getDataValue(date)) ) {
 			Acgwfl_ts.setDataValue ( date, 0.0 );
 		}
@@ -649,7 +566,7 @@ private void processSingleParcelForPeriod (
 }
 
 /**
-Method to execute the fillIrrigationPracticeTSAcreageUsingWellRights() command.
+Method to execute the FillIrrigationPracticeTSAcreageUsingWellRights() command.
 @param command_number Number of command in sequence.
 @exception Exception if there is an error processing the command.
 */
@@ -986,6 +903,7 @@ CommandWarningException, CommandException
 			}
 			// Fill using rights, for the requested period.
 			fillIrrigationPracticeTSUsingRights (
+				culoc,
 				smrights_YearTS_Vector,
 				ipyts, cdsts, DataType,
 				FillStart_DateTime,

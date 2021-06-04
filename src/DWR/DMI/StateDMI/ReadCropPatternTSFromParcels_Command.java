@@ -91,18 +91,23 @@ private void addParcelArea ( boolean debug, StateCU_Location culoc, StateCU_Parc
 	double val = yts.getDataValue ( temp_DateTime );
 	int dl = 1;
 	if ( yts.isDataMissing(val) ) {
-		// Value is missing so set...
+		// Value is missing so set.
+		// The printed total below is by crop so have to add all crop totals to get location total.
 		if ( debug ) {
-			Message.printDebug ( dl, "", "  Initializing " + culoc.getID() + " from parcelId=" + parcel.getID() + " " +
-			parcelYear + " " + parcelCrop + " to " + StringUtil.formatString(areaIrrig,"%.3f") );
+			//Message.printDebug ( dl, "", "  Initializing " + culoc.getID() + " from parcelId=" + parcel.getID() + " " +
+			Message.printStatus ( 2, "", "                                                       Initializing " + culoc.getID() + " from parcelId=" + parcel.getID() + " " +
+			parcelYear + " " + parcelCrop + " areaIrrig = " + StringUtil.formatString(areaIrrig,"%.3f") );
 		}
 		yts.setDataValue ( temp_DateTime, areaIrrig );
 	}
 	else {
-		// Value is not missing.  Need to either set or add to it...
+		// Value is not missing.  Add to it.
+		// The printed total below is by crop so have to add all crop totals to get location total.
 		if ( debug ) {
-			Message.printDebug ( dl, "", "  Adding " + culoc.getID() + " from parcelId=" + parcel.getID() + " " +
-				parcelYear + " " + parcelCrop + " + " + areaIrrig + " = " +
+			//Message.printDebug ( dl, "", "  Adding " + culoc.getID() + " from parcelId=" + parcel.getID() + " " +
+			Message.printStatus ( 2, "", "                                                       Adding " + culoc.getID() + " from parcelId=" + parcel.getID() + " " +
+				parcelYear + " " + parcelCrop + " areaIrrig = " +
+				StringUtil.formatString(areaIrrig, "%.3f") + ", total = " +
 				StringUtil.formatString( (val + areaIrrig), "%.3f") );
 		}
 		yts.setDataValue ( temp_DateTime, val + areaIrrig );
@@ -421,9 +426,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				message, "Run CreateCropPatternTSForCULocations() before this command." ) );
 	}
 
-	/*
-	Get the map of parcel data for newer StateDMI.
-	*/
+	// Get the map of parcel data for newer StateDMI.
 	HashMap<String,StateCU_Parcel> parcelMap = null;
 	try {
 		@SuppressWarnings("unchecked")
@@ -527,7 +530,25 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
             new CommandLogRecord(CommandStatusType.FAILURE,
                 message, "Confirm that the HydroBase version is >= 20200720." ) );
 	}
-	
+
+	// Do not allow ReadCropPatternTSFromParcels and ReadIrrigationPracticeTSFromParcels commands
+	// to be in the same file because they do some of the same bookkeeping.
+	List<String> commandsToFind0 = new ArrayList<>();
+	commandsToFind0.add("ReadIrrigationPracticeTSFromParcels");
+	List<Command> commandList = StateDMICommandProcessorUtil.getCommandsAfterIndex(
+		-1, processor, commandsToFind0, false);
+	if ( commandList.size() > 0 ) {
+		// Found a command.
+		message = "Cannot use ReadCropPatternTSFromParcels and ReadIrrigationPracticeTSFromParcels "
+				+ "in the same command file because they each update parcel tracking data.";
+	   	Message.printWarning ( warningLevel,
+           	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+   	   	status.addToLog ( commandPhase,
+   	       	new CommandLogRecord(CommandStatusType.FAILURE,
+   	           	message, "Fix the command file." ) );
+		throw new CommandException ( message );
+	}
+		
 	if ( warning_count > 0 ) {
 		// Input error...
 		message = "Insufficient data to run command.";
@@ -543,22 +564,19 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		// This is used to print a warning.
 		// TODO smalers 2020-11-08 not needed
 		//processor.resetDataMatches ( processor.getStateCUCropPatternTSMatchList() );
-		
+
 		// Reset all StateCU_Location CDS tracking for parcels.
 		// - the assignments will be made as processing occurs
 		// - there may be more than one ReadCropPatternTSFromParcels command but only clear for the first one.
-		boolean firstCommand = false;
 		List<String> commandsToFind = new ArrayList<>();
 		commandsToFind.add("ReadCropPatternTSFromParcels");
-		List<Command> commandList = StateDMICommandProcessorUtil.getCommandsBeforeIndex(
+		commandList = StateDMICommandProcessorUtil.getCommandsBeforeIndex(
 			processor.indexOf(this), processor, commandsToFind, true);
 		if ( commandList.size() == 0 ) {
 			// No commands before this one so this is the first.
-			firstCommand = true;
-		}
-		if ( firstCommand ) {
-			// Reset the CDS indicators in all supplies
-			Message.printStatus(2,routine,"First ReadCropPatternTSFromParcels command - setting all parcel supplies to CDS:UNK");
+			// Reset the CDS indicators in all supplies.
+			Message.printStatus(2,routine,"First ReadCropPatternTSFromParcels command - setting all parcel supplies to CDS:" +
+				IncludeParcelInCdsType.UNKNOWN);
 			for ( Map.Entry<String, StateCU_Parcel> entry : parcelMap.entrySet() ) {
 				for ( StateCU_Supply supply : entry.getValue().getSupplyList() ) {
 					supply.setStateCULocationForCds(null);
@@ -683,8 +701,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					// legacy code this code won't be called for user-supplied parcel data
 					// (will already have been set in parcels).
 
-					// The StateCU_CropPatternTS is in the list.  Now check to see if the
-					// crop is in the list of time series...
+					// The StateCU_CropPatternTS is in the list.
+					// Now check to see if the crop is in the list of time series.
 					yts = cds.getCropPatternTS ( parcelCrop );
 					if ( yts == null ) {
 						// Add the crop time series.
@@ -748,7 +766,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 									// This culoc is associated with the supply via single ditch or collection.
 									// Area for supply was previously calculated as (parcel area) * (ditch percent_irrig)
 									if ( debug ) {
-										Message.printStatus(2, routine, "    SW supply " + supplyFromSW.getWDID() + " ID is in CULoc" );
+										Message.printStatus(2, routine, "    CUloc " + culoc.getID() + " year " + parcelYear +
+											" parcel ID " + parcel.getID() + " has SW supply, is a DIV or D&W.");
 									}
 									addParcelArea ( debug, culoc, parcel, yts, temp_DateTime, parcelYear, parcelYears, parcelCrop, supplyFromSW.getAreaIrrig() );
 									if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.YES ) {

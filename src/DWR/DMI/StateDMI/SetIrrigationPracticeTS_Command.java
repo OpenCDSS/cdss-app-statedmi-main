@@ -48,9 +48,7 @@ import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 
 /**
-<p>
 This class initializes, checks, and runs the SetIrrigationPracticeTS() command.
-</p>
 */
 public class SetIrrigationPracticeTS_Command extends AbstractCommand implements Command
 {
@@ -478,22 +476,6 @@ CommandWarningException, CommandException
 			AcresGWSprinkler_double = Double.parseDouble ( AcresGWSprinkler );
 		}
 		
-		/* TODO SAM 2007-09-12 Remove if not used
-		boolean fill_AcresGW = false;
-		double AcresGW_double = 0.0;
-		if ( (AcresGW != null) && (AcresGW.length() > 0) ) {
-			fill_AcresGW = true;
-			AcresGW_double = Double.parseDouble ( AcresGW );
-		}
-
-		boolean fill_AcresSprinkler = false;
-		double AcresSprinkler_double = 0.0;
-		if ( (AcresSprinkler != null) && (AcresSprinkler.length() > 0) ) {
-			fill_AcresSprinkler = true;
-			AcresSprinkler_double = Double.parseDouble ( AcresSprinkler );
-		}
-		*/
-
 		boolean fill_PumpingMax = false;
 		double PumpingMax_double = 0.0;
 		if ( (PumpingMax != null) && (PumpingMax.length() > 0) ) {
@@ -603,6 +585,8 @@ CommandWarningException, CommandException
 					ipy.setTacre ( year, AcresTotal_double );
 					// Cascade groundwater and surface water acres adjustments...
 					ipy.adjustGroundwaterAcresToTotalAcres ( date, is_gw_only );
+					// Indicate that a set command was used (only for acreage).
+					culoc.setHasSetIrrigationPracticeTSCommands(year);
 				}
 				if ( fill_AcresGWSprinkler && fill_AcresGWFlood ) {
 					// Set both to get a new GW total and then adjust based on the overall total.
@@ -619,17 +603,23 @@ CommandWarningException, CommandException
 							year + " " + ipy_id + " AcresGW -> " + ipy.getAcgw(year) );
 					// Cascade groundwater and surface water acres adjustments...
 					ipy.adjustGroundwaterAcresToTotalAcres ( date, is_gw_only );
+					// Indicate that a set command was used (only for acreage).
+					culoc.setHasSetIrrigationPracticeTSCommands(year);
 				}
 				else if ( fill_AcresGWSprinkler ) {
 					// Set the one, recompute the total, and adjust back to total...
 					Message.printStatus ( 2, routine, "Setting " +
 					year + " " + ipy_id + " AcresGWSprinkler -> "+ AcresGWSprinkler );
 					ipy.setAcgwsprAndAdjust ( year, AcresGWSprinkler_double );
+					// Indicate that a set command was used (only for acreage).
+					culoc.setHasSetIrrigationPracticeTSCommands(year);
 				}
 				else if ( fill_AcresGWFlood ) {
 					Message.printStatus ( 2, routine, "Setting " +
 					year + " " + ipy_id + " AcresGWFlood -> "+ AcresGWFlood );
 					ipy.setAcgwflAndAdjust ( year, AcresGWFlood_double );
+					// Indicate that a set command was used (only for acreage).
+					culoc.setHasSetIrrigationPracticeTSCommands(year);
 				}
 				if ( fill_AcresSWSprinkler && fill_AcresSWFlood) {
 					// Set both terms and then adjust...
@@ -643,16 +633,22 @@ CommandWarningException, CommandException
 					ipy.refreshAcsw ( year );
 					// Cascade surface water checks...
 					ipy.adjustSurfaceWaterAcresToGroundwaterAndTotalAcres ( date, is_gw_only );
+					// Indicate that a set command was used (only for acreage).
+					culoc.setHasSetIrrigationPracticeTSCommands(year);
 				}
 				else if ( fill_AcresSWSprinkler ) {
 					Message.printStatus ( 2, routine, "Setting " +
 					year + " " + ipy_id + " AcresSWSprinkler -> "+ AcresSWSprinkler );
 					ipy.setAcswsprAndAdjust ( year, AcresSWSprinkler_double );
+					// Indicate that a set command was used (only for acreage).
+					culoc.setHasSetIrrigationPracticeTSCommands(year);
 				}
 				else if ( fill_AcresSWFlood ) {
 					Message.printStatus ( 2, routine, "Setting " +
 					year + " " + ipy_id + " AcresSWFlood -> "+ AcresSWFlood );
 					ipy.setAcswflAndAdjust ( year, AcresSWFlood_double );
+					// Indicate that a set command was used (only for acreage).
+					culoc.setHasSetIrrigationPracticeTSCommands(year);
 				}
 				/* Disable - confusing to support old model
 				if ( fill_AcresGW ) {
@@ -817,20 +813,6 @@ public String toString ( PropList parameters )
 		}
 		b.append ( "AcresGWSprinkler=" + AcresGWSprinkler );
 	}
-	/* TODO SAM 2007-10-08 remove once tested - no longer supported
-	if ( AcresGW.length() > 0 ) {
-		if ( b.length() > 0 ) {
-			b.append ( "," );
-		}
-		b.append ( "AcresGW=" + AcresGW );
-	}
-	if ( AcresSprinkler.length() > 0 ) {
-		if ( b.length() > 0 ) {
-			b.append ( "," );
-		}
-		b.append ( "AcresSprinkler=" + AcresSprinkler );
-	}
-	*/
 	if ( (PumpingMax != null) && (PumpingMax.length() > 0) ) {
 		if ( b.length() > 0 ) {
 			b.append ( "," );

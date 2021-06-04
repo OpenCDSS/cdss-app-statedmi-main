@@ -49,6 +49,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -83,6 +84,7 @@ private String __working_dir = null;
 private JTextField __InputFile_JTextField = null;
 private SimpleJComboBox	__Version_JComboBox = null;
 private SimpleJComboBox	__ReadDataFrom_JComboBox = null;
+private JTextField __Tolerance_JTextField = null;
 private JTextArea __command_JTextArea=null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;	
@@ -232,6 +234,12 @@ private void checkInput () {
 			props.set("ReadDataFrom", ReadDataFrom);
 		}
 	}
+	if ( __Tolerance_JTextField != null ) {
+		String Tolerance = __Tolerance_JTextField.getText().trim();
+		if (Tolerance.length() > 0 ) {
+			props.set("Tolerance", Tolerance);
+		}
+	}
 
 	try {
 		// This will warn the user...
@@ -259,6 +267,10 @@ private void commitEdits()
 	if ( __ReadDataFrom_JComboBox != null ) {
 		String ReadDataFrom = __ReadDataFrom_JComboBox.getSelected();
 		__command.setCommandParameter("ReadDataFrom", ReadDataFrom);
+	}
+	if ( __Tolerance_JTextField != null ) {
+		String Tolerance = __Tolerance_JTextField.getText().trim();
+		__command.setCommandParameter("Tolerance", Tolerance);
 	}
 }
 
@@ -338,12 +350,15 @@ private void initialize (JFrame parent, Command command )
     		"year, crop type, and irrigated area."),
     		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 		JGUIUtil.addComponent(paragraph, new JLabel (
-			"It is recommended that crop areas be read from the acreage values (the default) " +
+			"It is recommended that crop areas are read from the acreage values (the default) " +
 			"because this will minimize roundoff errors."),
 			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 		JGUIUtil.addComponent(paragraph, new JLabel (
 			"Reading the data from total and fraction should only be used for older files that " +
 			"do not have individual crop acreage values."),
+			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		JGUIUtil.addComponent(paragraph, new JLabel (
+			"If irrigation practice time series are available, total acreage values are cross-checked."),
 			0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	}
 	else if ( __command instanceof ReadIrrigationPracticeTSFromStateCU_Command ) {
@@ -378,7 +393,7 @@ private void initialize (JFrame parent, Command command )
 	}
 
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"It is recommended that the file be specified using a path relative to the working directory."),
+		"It is recommended that the file is specified using a path relative to the working directory."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
 	if (__working_dir != null) {
         JGUIUtil.addComponent(paragraph, new JLabel ("The working directory is: "), 
@@ -434,18 +449,28 @@ private void initialize (JFrame parent, Command command )
     if ( __command instanceof ReadCropPatternTSFromStateCU_Command ) {
 	    JGUIUtil.addComponent(main_JPanel, new JLabel ("Read data from:"),
         	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	    List<String> ReadDataFrom_Vector = new Vector<String>(3);
-	    ReadDataFrom_Vector.add ( "" );
-	    ReadDataFrom_Vector.add ( __command._CropArea );
-	    ReadDataFrom_Vector.add ( __command._TotalAreaAndCropFraction );
+	    List<String> readDataFromList = new ArrayList<>(3);
+	    readDataFromList.add ( "" );
+	    readDataFromList.add ( __command._CropArea );
+	    readDataFromList.add ( __command._TotalAreaAndCropFraction );
 	    __ReadDataFrom_JComboBox = new SimpleJComboBox(false);
-	    __ReadDataFrom_JComboBox.setData ( ReadDataFrom_Vector );
+	    __ReadDataFrom_JComboBox.setData ( readDataFromList );
 	    __ReadDataFrom_JComboBox.addItemListener (this);
 	    JGUIUtil.addComponent(main_JPanel, __ReadDataFrom_JComboBox,
    		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	    JGUIUtil.addComponent(main_JPanel, new JLabel (
    		"Optional - how to read crop data (default=CropArea, total will be sum of crops)."),
    		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+
+	    JGUIUtil.addComponent(main_JPanel, new JLabel ("Tolerance:"),
+	    	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	    __Tolerance_JTextField = new JTextField (10);
+	    __Tolerance_JTextField.setToolTipText("Tolerance used to compare CDS and IPY total area.");
+	    __Tolerance_JTextField.addKeyListener (this);
+        JGUIUtil.addComponent(main_JPanel, __Tolerance_JTextField,
+		    1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+        JGUIUtil.addComponent(main_JPanel, new JLabel ("Optional - tolerance for IPY check (default=1.0)."),
+		    3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
     }
         
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"), 
@@ -527,6 +552,7 @@ private void refresh ()
 	String InputFile = "";
 	String Version = "";
 	String ReadDataFrom = "";
+	String Tolerance = "";
 	PropList props = null;
 	
 	if (__first_time) {
@@ -537,6 +563,7 @@ private void refresh ()
 		InputFile = props.getValue ( "InputFile" );
 		Version = props.getValue ( "Version" );
 		ReadDataFrom = props.getValue ( "ReadDataFrom" );
+		Tolerance = props.getValue ( "Tolerance" );
 		if ( InputFile != null ) {
 			__InputFile_JTextField.setText (InputFile);
 		}
@@ -576,6 +603,9 @@ private void refresh ()
 				}
 			}
 		}
+		if ( Tolerance != null ) {
+			__Tolerance_JTextField.setText (Tolerance);
+		}
 	}
 	// Regardless, reset the command from the fields...
 	props = new PropList(__command.getCommandName());
@@ -588,6 +618,10 @@ private void refresh ()
 	if ( __ReadDataFrom_JComboBox != null ) {
 		ReadDataFrom = __ReadDataFrom_JComboBox.getSelected();
 		props.add("ReadDataFrom=" + ReadDataFrom);
+	}
+	if ( __Tolerance_JTextField != null ) {
+		Tolerance = __Tolerance_JTextField.getText().trim();
+		props.add("Tolerance=" + Tolerance);
 	}
 	__command_JTextArea.setText( __command.toString(props) );
 	// Check the path and determine what the label on the path button should be...

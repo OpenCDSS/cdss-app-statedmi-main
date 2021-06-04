@@ -36,11 +36,12 @@ package DWR.DMI.StateDMI;
 
 import javax.swing.JFrame;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import DWR.StateCU.StateCU_CropPatternTS;
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
+import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Util;
 
 import RTi.Util.Message.Message;
@@ -59,14 +60,18 @@ import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 
 /**
-<p>
 This class initializes, checks, and runs the SetIrrigationPracticeTSTotalAcreageToCropPatternTSTotalAcreage() command.
-</p>
 */
 public class SetIrrigationPracticeTSTotalAcreageToCropPatternTSTotalAcreage_Command 
 extends AbstractCommand implements Command
 {
 	
+/**
+Values for CheckOnly parameter.
+*/
+protected final String _False = "False";
+protected final String _True = "True";
+
 /**
 Values for IfNotFound parameter.
 */
@@ -92,12 +97,13 @@ cross-reference to the original commands.
 */
 public void checkCommandParameters ( PropList parameters, String command_tag, int warning_level )
 throws InvalidCommandParameterException
-{	String routine = getClass().getName() + ".checkCommandParameters";
+{	String routine = getClass().getSimpleName() + ".checkCommandParameters";
 	String ID = parameters.getValue ( "ID" );
 	//String IncludeSurfaceWaterSupply = parameters.getValue ( "IncludeSurfaceWaterSupply" );
 	//String IncludeGroundwaterOnlySupply = parameters.getValue ( "IncludeGroundwaterOnlySupply" );
 	String SetStart = parameters.getValue ( "SetStart" );
 	String SetEnd = parameters.getValue ( "SetEnd" );
+	String CheckOnly = parameters.getValue ( "CheckOnly" );
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
 	String warning = "";
 	String message;
@@ -143,30 +149,41 @@ throws InvalidCommandParameterException
 	}
 
 	if ( (IfNotFound != null) && (IfNotFound.length() > 0) &&
-			!IfNotFound.equalsIgnoreCase(_Ignore) && !IfNotFound.equalsIgnoreCase(_Fail) &&
-			!IfNotFound.equalsIgnoreCase(_Warn) ) {
-			message = "The IfNotFound value (" + IfNotFound + ") is invalid.";
-			warning += "\n" + message;
-			status.addToLog ( CommandPhaseType.INITIALIZATION,
-				new CommandLogRecord(CommandStatusType.FAILURE,
-					message, "Specify IfNotFound as " + _Ignore + ", " + _Fail +
-					", or " + _Warn + " (default).") );
-		}
+		!IfNotFound.equalsIgnoreCase(_Ignore) && !IfNotFound.equalsIgnoreCase(_Fail) &&
+		!IfNotFound.equalsIgnoreCase(_Warn) ) {
+		message = "The IfNotFound value (" + IfNotFound + ") is invalid.";
+		warning += "\n" + message;
+		status.addToLog ( CommandPhaseType.INITIALIZATION,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Specify IfNotFound as " + _Ignore + ", " + _Fail +
+				", or " + _Warn + " (default).") );
+	}
 
-		// Check for invalid parameters...
-		List<String> valid_Vector = new Vector<String>(4);
-	    valid_Vector.add ( "ID" );
-		valid_Vector.add ( "SetStart" );
-		valid_Vector.add ( "SetEnd" );
-		valid_Vector.add ( "IfNotFound" );
-		warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	if ( (CheckOnly != null) && 
+		!CheckOnly.equalsIgnoreCase(_False) && !CheckOnly.equalsIgnoreCase(_True) &&
+		!CheckOnly.equalsIgnoreCase("") ) {
+		message = "The CheckOnly value (" + CheckOnly + ") is invalid.";
+		warning += "\n" + message;
+		status.addToLog ( CommandPhaseType.INITIALIZATION,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Specify CheckOnly as " + _False + " (default) or " + _True ) );
+	}
 
-		if ( warning.length() > 0 ) {
-			Message.printWarning ( warning_level,
-			MessageUtil.formatMessageTag(command_tag,warning_level), routine, warning );
-			throw new InvalidCommandParameterException ( warning );
-		}
-		status.refreshPhaseSeverity(CommandPhaseType.INITIALIZATION,CommandStatusType.SUCCESS);
+	// Check for invalid parameters...
+	List<String> validList = new ArrayList<>(5);
+    validList.add ( "ID" );
+	validList.add ( "SetStart" );
+	validList.add ( "SetEnd" );
+	validList.add ( "CheckOnly" );
+	validList.add ( "IfNotFound" );
+	warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
+
+	if ( warning.length() > 0 ) {
+		Message.printWarning ( warning_level,
+		MessageUtil.formatMessageTag(command_tag,warning_level), routine, warning );
+		throw new InvalidCommandParameterException ( warning );
+	}
+	status.refreshPhaseSeverity(CommandPhaseType.INITIALIZATION,CommandStatusType.SUCCESS);
 }
 
 /**
@@ -209,6 +226,11 @@ CommandWarningException, CommandException
 	//String IncludeGroundwaterOnlySupply = parameters.getValue ( "IncludeGroundwaterOnlySupply" );
 	String SetStart = parameters.getValue ( "SetStart" );
 	String SetEnd = parameters.getValue ( "SetEnd" );
+	boolean checkOnly = false; // Default
+	String CheckOnly = parameters.getValue ( "CheckOnly" );
+	if ( (CheckOnly != null) && CheckOnly.equalsIgnoreCase(_True) ) {
+		checkOnly = true;
+	}
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
 	if ( IfNotFound == null ) {
 		IfNotFound = _Warn; // Default
@@ -262,6 +284,25 @@ CommandWarningException, CommandException
 	}
 	catch ( Exception e ) {
 		message = "Error requesting StateCU_CropPatternTS_List from processor.";
+		Message.printWarning(warning_level,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+	}
+
+	// Get the list of CU locations, used to check the data.
+	// - ok if zero length (may be the case if smaller command file rather than full IPY)
+	
+	List<StateCU_Location> culocList = null;
+	try {
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
+	}
+	catch ( Exception e ) {
+		message = "Error requesting StateCU_Location_List from processor.";
 		Message.printWarning(warning_level,
 			MessageUtil.formatMessageTag( command_tag, ++warning_count),
 			routine, message );
@@ -337,18 +378,31 @@ CommandWarningException, CommandException
 		StateCU_IrrigationPracticeTS ipyts = null;
 		StateCU_CropPatternTS cdsts = null;
 		String id;	// Location ID
-		Message.printStatus ( 2, routine, "Setting irrigation practice time series for " + ipyListSize +
-				" locations for requested years " + SetStart_DateTime + " to " +
-				SetEnd_DateTime );
+		if ( checkOnly ) {
+			// Only checking values.
+			Message.printStatus ( 2, routine, "Checking irrigation practice time series total area for " + ipyListSize +
+				" locations for requested years " + SetStart_DateTime + " to " + SetEnd_DateTime );
+		}
+		else {
+			// Setting values.
+			Message.printStatus ( 2, routine, "Setting irrigation practice time series total area for " + ipyListSize +
+				" locations for requested years " + SetStart_DateTime + " to " + SetEnd_DateTime );
+		}
 		DateTime date = null, date1 = null, date2 = null; // For iteration
 		int year;
+		int ipyWarnCountMax = 50;
+		int totalWarnCountMax = 1000;
+		int ipyWarnCount; // warning count for specific IPY
+		int totalWarnCount = 0; // warning count for all locations
 		for ( int i = 0; i < ipyListSize; i++ ) {
-			ipyts =(StateCU_IrrigationPracticeTS)ipyList.get(i);
+			ipyWarnCount = 0;
+			ipyts = ipyList.get(i);
 			id = ipyts.getID();
 			if ( !id.matches(idpattern_Java) ) {
 				// Identifier does not match...
 				continue;
 			}
+
 			int pos = StateCU_Util.indexOf ( cdsList, id );
 			if ( pos < 0 ) {
 				message = "Could not find crop pattern time series matching \"" + id +
@@ -360,7 +414,15 @@ CommandWarningException, CommandException
 						message, "Verify that crop pattern time series exists for location." ) );
 				continue;
 			}
-			cdsts = (StateCU_CropPatternTS)cdsList.get(pos);
+			cdsts = cdsList.get(pos);
+
+			// Get the StateCU_Location to track when a set command is used.
+			int pos2 = StateCU_Util.indexOf(culocList,id);
+			StateCU_Location culoc = null;
+			if ( pos2 >= 0 ) {
+				culoc = culocList.get(pos2);
+			}
+
 			// Loop based on the set period or if not specified, the period of the IPY time series
 			if ( SetStart_DateTime == null ) {
 				date1 = ipyts.getDate1();
@@ -374,13 +436,128 @@ CommandWarningException, CommandException
 			else {
 				date2 = SetEnd_DateTime;
 			}
+			// TODO smalers 2021-05-31 Warn if any data are missing, can generate a lot of warnings
+			// - need to evaluate whether to have command parameter to control
+			boolean warnIfMissing = false;
 			for ( date = new DateTime(date1); date.lessThanOrEqualTo(date2); date.addYear(1)) {
 				// Set the total in the IPY from the CDS.
 				year = date.getYear();
-				ipyts.setTacre ( year, cdsts.getTotalArea(year) );
-			}
+				// Compare to 1 digit.
+				String format = "%.1f";
+				double tolerance = 1;
+				// Maximum displayed warnings, needed because UI display causes out of memory.
+				double cdsValue = cdsts.getTotalArea(year);
+				double ipyValue = ipyts.getTacre(year);
+				String cdsValueString = String.format(format, cdsValue);
+				String ipyValueString = String.format(format, ipyValue);
+				// Always do checks...
+				if ( (cdsValue < 0.0) && (ipyValue < 0.0) ) {
+					// Both are missing.
+					if ( warnIfMissing ) {
+						++ipyWarnCount;
+						++totalWarnCount;
+						message = "Location \"" + id + "\" both total area values are missing for " + date.getYear() +
+							" IPY total area = " + ipyValueString + ", CDS total area = " + cdsValueString +
+							", warning counts = " + ipyWarnCount + "," + totalWarnCount;
+						Message.printWarning(warning_level,
+							MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+						// Only create command warning if under max count so don't overload UI displays.
+						if ( (ipyWarnCount <= ipyWarnCountMax) && (totalWarnCount < totalWarnCountMax) ) {
+							// OK to display warning.
+							status.addToLog ( CommandPhaseType.RUN,
+								new CommandLogRecord(CommandStatusType.WARNING, message,
+									"Verify that data processing for crop pattern time series (*.cds) and irrigation practice time series (*.ipy) are consistent."));
+						}
+					}
+				}
+				else if ( cdsValue < 0.0 ) {
+					// Value is missing this is an issue because CDS needs to be complete.
+					++ipyWarnCount;
+					++totalWarnCount;
+					message = "Location \"" + id + "\" CDS total area value is missing for " + date.getYear() +
+						" IPY total area = " + ipyValueString + ", CDS total area = " + cdsValueString +
+						", warning counts = " + ipyWarnCount + "," + totalWarnCount;
+					Message.printWarning(warning_level,
+						MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+					// Only create command warning if under max count so don't overload UI displays.
+					if ( (ipyWarnCount <= ipyWarnCountMax) && (totalWarnCount < totalWarnCountMax) ) {
+						// OK to display warning.
+						status.addToLog ( CommandPhaseType.RUN,
+							new CommandLogRecord(CommandStatusType.WARNING, message,
+								"Verify that data processing for crop pattern time series (*.cds) and irrigation practice time series (*.ipy) are consistent."));
+					}
+				}
+				else if ( ipyValue < 0.0 ) {
+					// IPY value is missing, should normally happen in years without data.
+					if ( warnIfMissing ) {
+						++ipyWarnCount;
+						++totalWarnCount;
+						message = "Location \"" + id + "\" IPY total area value is missing for " + date.getYear() +
+							" IPY total area = " + ipyValueString + ", CDS total area = " + cdsValueString +
+							", warning counts = " + ipyWarnCount + "," + totalWarnCount;
+						Message.printWarning(warning_level,
+							MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+						// Only create command warning if under max count so don't overload UI displays.
+						if ( (ipyWarnCount <= ipyWarnCountMax) && (totalWarnCount < totalWarnCountMax) ) {
+							// OK to display warning.
+							status.addToLog ( CommandPhaseType.RUN,
+								new CommandLogRecord(CommandStatusType.WARNING, message,
+									"Verify that data processing for crop pattern time series (*.cds) and irrigation practice time series (*.ipy) are consistent."));
+						}
+					}
+				}
+				else if ( Math.abs(ipyValue - ipyValue) > tolerance ) {
+					++ipyWarnCount;
+					++totalWarnCount;
+					message = "Location \"" + id + "\" total area values are different by > " + tolerance +
+						" for " + date.getYear() +
+						" IPY total area = " + ipyValueString + ", CDS total area = " + cdsValueString +
+						", difference = " + String.format(format,(ipyValue-cdsValue)) +
+						", warning counts = " +  ipyWarnCount + "," + totalWarnCount;
+					Message.printWarning(warning_level,
+						MessageUtil.formatMessageTag( command_tag, ++warning_count), routine, message );
+					// Only create command warning if under max count so don't overload UI displays.
+					if ( (ipyWarnCount <= ipyWarnCountMax) && (totalWarnCount < totalWarnCountMax) ) {
+						// OK to display warning.
+						status.addToLog ( CommandPhaseType.RUN,
+							new CommandLogRecord(CommandStatusType.WARNING, message,
+								"Verify that data processing for crop pattern time series (*.cds) and irrigation practice time series (*.ipy) are consistent."));
+					}
+				}
+				if ( totalWarnCount == totalWarnCountMax ) {
+					// Notify about limiting the total number of warnings
+					// - print this message once at the end of displayed warnings.
+					// - don't need to print to log file - only for UI.
+					message = "Maximum warning count " + totalWarnCountMax + " has been reached for displayed warnings - see the log file for full list of warnings.";
+					status.addToLog ( CommandPhaseType.RUN,
+						new CommandLogRecord(CommandStatusType.WARNING, message,
+							"Verify that data processing for crop pattern time series (*.cds) and irrigation practice time series (*.ipy) are consistent."));
+				}
+				else if ( (ipyWarnCount == ipyWarnCountMax) && (totalWarnCount < totalWarnCountMax) ) {
+					// Notify about limiting the number of warnings
+					// - have not reached maximum total number yet
+					// - print this message once at the end of displayed warnings.
+					// - don't need to print to log file - only for UI.
+					message = "Location \"" + id + "\" limited to " + ipyWarnCountMax + " displayed warnings - see the log file for full list of warnings.";
+					status.addToLog ( CommandPhaseType.RUN,
+						new CommandLogRecord(CommandStatusType.WARNING, message,
+							"Verify that data processing for crop pattern time series (*.cds) and irrigation practice time series (*.ipy) are consistent."));
+				}
+				if ( !checkOnly ) {
+					// Set the data.
+					Message.printStatus(2, routine, "Location \"" + id + "\" year = " + year +
+						" old IPY total area = " + String.format(format, ipyts.getTacre(year)) +
+						" setting to CDS = " + String.format(format, cdsts.getTotalArea(year)));
+					ipyts.setTacre ( year, cdsts.getTotalArea(year) );
+
+					// Indicate that a set command was used for acreage.
+					if ( culoc != null ) {
+						culoc.setHasSetIrrigationPracticeTSCommands(year);
+					}
+				} // End year in IPY
+			} // End date loop
 			++matchCount;
-		}
+		} // End ipyList
 		
 		// If nothing was matched, take further action...
 
@@ -449,6 +626,7 @@ public String toString ( PropList parameters )
 	*/
 	String SetStart = parameters.getValue ( "SetStart" );
 	String SetEnd = parameters.getValue ( "SetEnd" );
+	String CheckOnly = parameters.getValue ( "CheckOnly" );
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
 	
 	StringBuffer b = new StringBuffer ();
@@ -481,6 +659,12 @@ public String toString ( PropList parameters )
 			b.append ( "," );
 		}
 		b.append ( "SetEnd=" + SetEnd );
+	}
+	if ( CheckOnly != null && CheckOnly.length() > 0 ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "CheckOnly=" + CheckOnly );
 	}
 	if ( IfNotFound != null && IfNotFound.length() > 0 ) {
 		if ( b.length() > 0 ) {
