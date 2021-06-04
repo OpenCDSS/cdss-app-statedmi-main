@@ -920,6 +920,10 @@ CommandWarningException, CommandException
 							}
 							for ( int year = yearStart; year <= yearEnd; year++ ) {
 								if ( !culoc.hasSetCropPatternTSCommands(year) ) {
+									// Indicate that crop pattern time series have been filled for a year
+									// - used in StateDMI parcel report
+									// - only set if not already indicated as a set
+									// - this indicates if a fill may have occurred
 									culoc.setHasFillCropPatternTSCommands(year);
 								}
 							}
@@ -949,6 +953,10 @@ CommandWarningException, CommandException
 							}
 							for ( int year = yearStart; year <= yearEnd; year++ ) {
 								if ( !culoc.hasSetCropPatternTSCommands(year) ) {
+									// Indicate that crop pattern time series have been filled for a year
+									// - used in StateDMI parcel report
+									// - only set if not already indicated as a set
+									// - this indicates if a fill may have occurred
 									culoc.setHasFillCropPatternTSCommands(year);
 								}
 							}
@@ -977,6 +985,10 @@ CommandWarningException, CommandException
 							}
 							for ( int year = yearStart; year <= yearEnd; year++ ) {
 								if ( !culoc.hasSetCropPatternTSCommands(year) ) {
+									// Indicate that crop pattern time series have been filled for a year
+									// - used in StateDMI parcel report
+									// - only set if not already indicated as a set
+									// - this indicates if a fill may have occurred
 									culoc.setHasFillCropPatternTSCommands(year);
 								}
 							}
@@ -1019,6 +1031,10 @@ CommandWarningException, CommandException
 							}
 							for ( int year = yearStart; year <= yearEnd; year++ ) {
 								if ( !culoc.hasSetCropPatternTSCommands(year) ) {
+									// Indicate that crop pattern time series have been filled for a year
+									// - used in StateDMI parcel report
+									// - only set if not already indicated as a set
+									// - this indicates if a fill may have occurred
 									culoc.setHasFillCropPatternTSCommands(year);
 								}
 							}
@@ -1051,6 +1067,10 @@ CommandWarningException, CommandException
 							}
 							for ( int year = yearStart; year <= yearEnd; year++ ) {
 								if ( !culoc.hasSetCropPatternTSCommands(year) ) {
+									// Indicate that crop pattern time series have been filled for a year
+									// - used in StateDMI parcel report
+									// - only set if not already indicated as a set
+									// - this indicates if a fill may have occurred
 									culoc.setHasFillCropPatternTSCommands(year);
 								}
 							}

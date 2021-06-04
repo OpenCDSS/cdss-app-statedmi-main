@@ -28,6 +28,7 @@ import javax.swing.JFrame;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
 import DWR.StateCU.IncludeParcelInCdsType;
@@ -96,16 +97,21 @@ time series.  This method is called when processing actual parcels and user-supp
 @param parcel_year Calendar year for parcel data.
 @param supply for the parcel
 @param status CommandStatus for logging
+@return the warning_count, incremented from calling code value
 */
-public static void processIrrigationPracticeTSParcel (
+private int processIrrigationPracticeTSParcelSupply (
 		boolean debug,
 		boolean doSetValues,
 		StateCU_Location culoc,
 		StateCU_IrrigationPracticeTS ipyts,
 		StateCU_Parcel parcel,
 		StateCU_Supply supply,
-		CommandStatus status) {
-	String routine = "StateDMI_Util.processIrrigationPracticeTSParcel";
+		CommandStatus status,
+		CommandPhaseType commandPhase,
+		int warningLevel,
+		String command_tag,
+		int warning_count) {
+	String routine = getClass().getSimpleName() + ".processIrrigationPracticeTSParcelSupply";
 	// Transfer the parcel data into the IrrigationPracticeTS
 
 	String culocId = culoc.getID();
@@ -115,16 +121,19 @@ public static void processIrrigationPracticeTSParcel (
 
 	StateCU_SupplyFromSW supplyFromSW = null;
 	StateCU_SupplyFromGW supplyFromGW = null;
-	boolean idIsIn = false; // Whether supply ID is in the CULocation
+	boolean supplyIdIsIn = false; // Whether supply ID is in the CULocation
 	double areaIrrigFromSupply = 0.0;
+	/* TODO smalers 2021-06-01 remove this after following code is working
+	 * - trying to be as similar to CDS code as possible for troubleshooting
 	if ( supply.isSurfaceWater() ) {
 		supplyFromSW = (StateCU_SupplyFromSW)supply;
 		areaIrrigFromSupply = supplyFromSW.getAreaIrrig();
 		// Surface supply identifiers are always WDIDs
-		idIsIn = culoc.idIsIn(supplyFromSW.getWDID());
-		if ( debug ) {
-			Message.printStatus( 2, routine, "  Processing SW supply WDID=" + supplyFromSW.getWDID() + " areaIrrig=" + areaIrrigFromSupply ); 
-		}
+		supplyIdIsIn = culoc.idIsIn(supplyFromSW.getWDID());
+		//if ( debug ) {
+			Message.printStatus( 2, routine, "           Processing SW supply WDID=" + supplyFromSW.getWDID() + " areaIrrig=" +
+				StringUtil.formatString(areaIrrigFromSupply,"%.2f") + ", parcel has GW=" + parcel.hasGroundWaterSupply() ); 
+		//}
 	}
 	else if ( supply.isGroundWater() ) {
 		supplyFromGW = (StateCU_SupplyFromGW)supply;
@@ -133,13 +142,13 @@ public static void processIrrigationPracticeTSParcel (
 		// Groundwater supply identifiers may be WDID or receipt
 		if ( culoc.isGroundwaterOnlySupplyModelNode() ) {
 			// See if the well supply matches a collection part
-			idIsIn = culoc.idIsIn(supplyFromGW.getWDID(), supplyFromGW.getReceipt());
+			supplyIdIsIn = culoc.idIsIn(supplyFromGW.getWDID(), supplyFromGW.getReceipt());
 		}
 		else {
 			// Must be a D&W where well supply is associated with a ditch
 			// - check that the ditch resulting in the well association is in the location surface water collection
 			if ( culoc.isCollection() ) {
-				idIsIn = culoc.idIsIn(supplyFromGW.getAssociatedDitchCollectionID());
+				supplyIdIsIn = culoc.idIsIn(supplyFromGW.getAssociatedDitchCollectionID());
 				// Multiply by additional fraction, depends on what CU Location is being processed
 				// - TODO smalers 2021-02-28 can't do it until set CDS location below, only used for IPY calculation.
 				//double dwFraction = parcel.getSupplyFromSWFraction(culoc.getID());
@@ -158,18 +167,20 @@ public static void processIrrigationPracticeTSParcel (
 			else {
 				// Single ditch D&W, must be in the location.
 				// dwFraction=1.0 so no need to multiply
-				idIsIn = true;
+				supplyIdIsIn = true;
 			}
 		}
-		if ( debug ) {
-			Message.printStatus( 2, routine, "  Processing GW supply WDID=" + supplyFromGW.getWDID() + " receipt=" + supplyFromGW.getReceipt() + " areaIrrig=" + areaIrrigFromSupply ); 
-		}
+		//if ( debug ) {
+			Message.printStatus( 2, routine, "           Processing GW supply WDID=" + supplyFromGW.getWDID() + " receipt=" +
+				supplyFromGW.getReceipt() + " areaIrrig=" + StringUtil.formatString(areaIrrigFromSupply,"%.2f") ); 
+		//}
 	}
 
 	if ( areaIrrigFromSupply <= 0.0 ) {
-		// No need to process...
-		return;
+		// No additional area so no need to process...
+		return warning_count;
 	}
+	*/
 	
 	boolean isHighEfficiency = false;
 	// TODO SAM 2007-06-06 Evaluate whether high efficiency irrigation
@@ -178,32 +189,71 @@ public static void processIrrigationPracticeTSParcel (
 		isHighEfficiency = true;
 	}
 	
-	// THIS LOGIC IS SIMILAR TO ReadCropPatternTSFromParcels() command so update there first and then make consistent here.
+	// THE FOLLOWING LOGIC IS SIMILAR TO ReadCropPatternTSFromParcels() command so update there first and then make consistent here.
 	// Total acres are incremented using ReadCropPatternTSFromParcels logic.
-	// - if surface parcel has surface water supply and CU Location matches, update
-	// - else groundwater only so update if CU Location matches
-
-	// Set the following to true if the supply is included in CDS and therefore also included in IPY
+	// - the CDS code processes parcels in a loop and then supplies for each parcel,
+	//   but for below the loops are in the calling code
+	// - if surface parcel has surface water supply and CU Location matches, set the total
+	// - else if GW only node set the total if the parcel supply is included in the CU location collection
+	// - additional area values are set below for IPY parts and total is checked against overall total
 	if ( parcel.hasSurfaceWaterSupply() && !culoc.isGroundwaterOnlySupplyModelNode() ) {
-		// DIV or D&W
+		// DIV or D&W 
+		if ( debug ) {
+			Message.printStatus(2, routine, "            CUloc " + culoc.getID() + " year " + parcelYear +
+				" parcel ID " + parcel.getID() + " has SW supply, is a DIV or D&W.");
+		}
+		// CDS code loops on supply here but calling code contains the loop.
 		if ( !supply.getIsModeled() ) {
 			// Supply is not modeled (is not in dataset) so skip
 			// - typically only impacts GW only node fractional areas but put here in case added for surface water also
-			Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
+			Message.printStatus( 2, routine, "           For location " + culocId + " year " + parcelYear +
 				" parcelId=" + parcelId + " skipping supply ID=" + supply.getID() +
 				" since supply is not in dataset.");
 			if ( !doSetValues ) {
-				if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN) {
+				// Set flag but don't process data.
+				//if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN) {
+					// Not setting the data values - just set the associated CDS location.
 					// CDS use is not set so set to help inform in parcels report
 					supply.setIncludeInCdsType(IncludeParcelInCdsType.NOT_MODELED);
-				}
+				//}
 			}
 		}
 		else if ( supply.isSurfaceWater() ) {
 			// May also have groundwater supply, but only count surface water in the total, similar to CDS.
-			if ( idIsIn ) {
+			supplyFromSW = (StateCU_SupplyFromSW)supply;
+			boolean doInclude = false;
+			String notIncludeMessage = "";
+			if ( culoc.isCollection() ) {
+				// Collection should ensure that parcels don't show up in more than one collection.
+				supplyIdIsIn = culoc.idIsIn(supplyFromSW.getWDID());
+				if ( supplyIdIsIn ) {
+					doInclude = true;
+				}
+				else {
+					doInclude = false;
+					notIncludeMessage = "because is a collection ID and SW supply ID " + supplyFromSW.getID() + " does not match collection part IDs";
+				}
+			}
+			else {
+				// Single DIV so only include if the surface supply ID matches the location ID
+				supplyIdIsIn = culoc.idIsIn(supplyFromSW.getWDID());
+				if ( supplyIdIsIn ) {
+					doInclude = true;
+				}
+				else {
+					doInclude = false;
+					notIncludeMessage = "because is a single ID and SW supply ID " + supplyFromSW.getID() + " does not match location ID";
+				}
+			}
+			if ( doInclude ) {
 				if ( doSetValues ) {
 					// Second pass is to set the data values.
+
+					if ( debug ) {
+						Message.printStatus(2, routine, "    CUloc " + culoc.getID() + " year " + parcelYear +
+							" parcel ID " + parcel.getID() + " has SW supply, is a DIV or D&W.");
+					}
+					areaIrrigFromSupply = supplyFromSW.getAreaIrrig();
 					// Source supply ID must match the CU Location or collection part
 					if ( ipyts.getTacre(parcelYear) < 0.0 ) {
 						ipyts.setTacre ( parcelYear, areaIrrigFromSupply );
@@ -211,19 +261,61 @@ public static void processIrrigationPracticeTSParcel (
 					else {
 						ipyts.setTacre ( parcelYear, (ipyts.getTacre(parcelYear) + areaIrrigFromSupply) );
 					}
-					Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
+					Message.printStatus( 2, routine, "           For location " + culocId + " year " + parcelYear +
 						" parcelId=" + parcelId + " added SW WDID=" + supplyFromSW.getWDID() +
 						" area " + StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to total area, result = " +
 						StringUtil.formatString(ipyts.getTacre(parcelYear),"%.2f") );
 				}
 				else {
 					// First pass is to set the relationship.
-					if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN) {
+					if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.YES ) {
+						// Should not happen, should only be set to YES once
+						String message = "CUloc " + culoc.getID() + " year " + parcelYear +
+							" parcel ID " + parcel.getID() + " supply ID " + culoc.getID() +
+							" area was previously added to IPY (location " + supply.getStateCULocationForCds().getID() + ").";
+						Message.printWarning ( warningLevel, 
+       						MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, "    " + message );
+      						status.addToLog ( commandPhase,
+          						new CommandLogRecord(CommandStatusType.WARNING, message,
+          							"Area should only be added once - ditch is included in more than one DIV or D&W model locations." ) );
+					}
+					//if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN) {
 						// CDS use is not set so set to help inform in parcels report
 						supply.setIncludeInCdsType(IncludeParcelInCdsType.YES);
 						// Need to set the following to allow D&W ditch fraction to be computed properly.
 						supply.setStateCULocationForCds(culoc);
+					//}
+				}
+			}
+			else {
+				if ( debug ) {
+					Message.printStatus(2, routine, "    Not adding CDS acreage for " + parcelYear +
+						" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
+						"\" (" + notIncludeMessage + ")" );
+				}
+				// TODO smalers 2021-01-30 new code 
+				// - supply is not included
+				// - only set to know if unknown because don't want to reset
+				if ( !doSetValues ) {
+					// Only set to unknown in first loop.
+					if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN ) {
+						supply.setIncludeInCdsType(IncludeParcelInCdsType.NO);
 					}
+				}
+			}
+		}
+		else if ( supply instanceof StateCU_SupplyFromGW ) {
+			// Parcel also has groundwater supplies that are not counted since surface water is counted
+			if ( debug ) {
+				Message.printStatus(2, routine, "    Not adding IPY acreage for " + parcelYear +
+					" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
+					"\" GW supply " + supply.getID() + " (because parcel has SW supply)");
+			}
+			// Only set to know if unknown because don't want to reset
+			if ( !doSetValues ) {
+				if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN ) {
+					supply.setStateCULocationForCds(null);
+					supply.setIncludeInCdsType(IncludeParcelInCdsType.NO);
 				}
 			}
 		}
@@ -236,28 +328,67 @@ public static void processIrrigationPracticeTSParcel (
 			Message.printStatus(2, routine, "CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " +
 				parcel.getID() + " has groundwater only for model, is WEL.");
 			Message.printStatus(2, routine, "  Skipping parcel because has surface supply (will have been added to a D&W).");
+			if ( debug ) {
+				if ( supply instanceof StateCU_SupplyFromGW ) {
+					Message.printStatus(2, routine, "    Not adding CDS acreage for " + parcelYear +
+						" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
+						"\" GW supply " + supply.getID() + " (because parcel has SW supply)");
+				}
+				else if ( supply instanceof StateCU_SupplyFromSW ) {
+					Message.printStatus(2, routine, "    Not adding CDS acreage for " + parcelYear +
+						" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
+						"\" SW supply " + supply.getID() + " (because parcel has SW supply)");
+				}
+			}
+		}
+		else {
+			// Match CDS logic.
+			// Only set if unknown because don't want to reset.
+			if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN ) {
+				supply.setStateCULocationForCds(null);
+				supply.setIncludeInCdsType(IncludeParcelInCdsType.NO);
+			}
 		}
 	}
 	//else if ( culoc.isGroundwaterOnlySupplyModelNode() ) {
 	else if ( !parcel.hasSurfaceWaterSupply() && culoc.isGroundwaterOnlySupplyModelNode() ) {
 		// WEL location with groundwater only supply
+		Message.printStatus(2, routine, "    CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " +
+			parcel.getID() + " is GW only for model, is WEL.");
 		if ( !supply.getIsModeled() ) {
-			if ( !doSetValues ) {
-				// First pass to set relationships.
+			if ( doSetValues ) {
+				// Second pass process data.
 				// Supply is not modeled (is not in dataset) so skip
 				// - typically only impacts GW only node fractional areas but put here in case added for surface water also
-				Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
-					" parcelId=" + parcelId + " skipping supply ID=" + supplyFromGW.getID() +
+				Message.printStatus( 2, routine, "           For location " + culocId + " year " + parcelYear +
+					" parcelId=" + parcelId + " skipping supply ID=" + supply.getID() +
 					" since supply is not in dataset.");
+			}
+			else {
+				// First pass to set relationships.
 				if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN) {
-					// CDS use is not set so set to help inform in parcels report
+					// CDS use is not set so set to help inform in parcels report.
 					supply.setIncludeInCdsType(IncludeParcelInCdsType.NOT_MODELED);
 				}
 			}
 		}
 		else if ( supply.isGroundWater() ) {
-			// Should always be the case
-			if ( idIsIn ) {
+			// Groundwater only so get the area from the supply.
+			supplyFromGW = (StateCU_SupplyFromGW)supply;
+			if ( debug ) {
+				Message.printStatus(2, routine, "    CUloc " + culoc.getID() + " year " + parcelYear + " parcel ID " + parcel.getID() +
+					" supply WDID " + supplyFromGW.getWDID() + " receipt " + supplyFromGW.getReceipt() );
+			}
+			// OK to check this here because collection is done by specific parts
+			supplyIdIsIn = culoc.idIsIn(supplyFromGW.getWDID(), supplyFromGW.getReceipt());
+			if ( supplyIdIsIn ) {
+				if ( debug ) {
+					Message.printStatus(2, routine, "    GW supply WDID " + supplyFromGW.getWDID() +
+						" RECEIPT '" + supplyFromGW.getReceipt() + "' is in CULoc" );
+				}
+				// This culoc is associated with the supply via single ditch or collection.
+				// Area for supply was previously calculated as (parcel area) * (ditch percent_irrig)
+				// - parcel_years is output and is the list of years with data, across all locations in the command
 				if ( doSetValues ) {
 					// Second pass is to set values.
 					// Source supply ID must match the CU Location or collection part
@@ -268,13 +399,24 @@ public static void processIrrigationPracticeTSParcel (
 					else {
 						ipyts.setTacre ( parcelYear, (ipyts.getTacre(parcelYear) + areaIrrigFromSupply) );
 					}
-					Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
+					Message.printStatus( 2, routine, "           For location " + culocId + " year " + parcelYear +
 						" parcelId=" + parcelId + " added GW WDID=" + supplyFromGW.getWDID() +
 						" receipt=" + supplyFromGW.getReceipt() + " area " + StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to total area, result = " +
 						StringUtil.formatString(ipyts.getTacre(parcelYear),"%.2f") );
 				}
 				else {
 					// First pass is to set relationships.
+					if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.YES ) {
+						// Should not happen, should only be set to YES once
+						String message = "CUloc " + culoc.getID() + " year " + parcelYear +
+							" parcel ID " + parcel.getID() + " supply ID " + culoc.getID() +
+							" area was previously added to IPY (location " + supply.getStateCULocationForCds().getID() + ").";
+						Message.printWarning ( warningLevel, 
+       						MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, "    " + message );
+      						status.addToLog ( commandPhase,
+          						new CommandLogRecord(CommandStatusType.WARNING, message,
+          							"Area should only be added once - well is included in more than one WEL model locations." ) );
+					}
 					if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN) {
 						// CDS use is not set so set to help inform in parcels report
 						supply.setIncludeInCdsType(IncludeParcelInCdsType.YES);
@@ -283,174 +425,343 @@ public static void processIrrigationPracticeTSParcel (
 					}
 				}
 			}
+			else {
+				if ( doSetValues ) {
+					if ( debug ) {
+						Message.printStatus(2, routine, "    Not adding CDS acreage for " + parcelYear +
+							" parcelID " + parcelId + " - CULoc \"" + culoc.getID() +
+							"\" (because does not have parts matching GW supply WDID " + supplyFromGW.getWDID() +
+							" RECEIPT '" + supplyFromGW.getReceipt() + "')" );
+					}
+				}
+				else {
+					// Only set to know if unknown because don't want to reset
+					if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.UNKNOWN ) {
+						supply.setIncludeInCdsType(IncludeParcelInCdsType.NO);
+					}
+				}
+			}
 		}
 	}
 	else {
+		// THIS CODE IS COPIED FROM ReadCropPatternTSFromParcels.
 		// This should not happen due to location/parcel/supply relationship in the first place
+		// This should not happen due to location/parcel/supply relationship in the first place.
+		// - there is a lot of code below to figure out why this is a data issue
 		String message = "CUloc " + culoc.getID() + " year " + parcelYear +
 			" parcel ID " + parcel.getID() + " does not appear to be DIV, D&W, or WEL based on available data.";
-		Message.printWarning ( 3, routine, message ); 
-   		status.addToLog ( CommandPhaseType.RUN,
-       		new CommandLogRecord(CommandStatusType.WARNING, message,
-       			"This may be a HydroBase data load issue.  For example, GIS data error may cause a HydroBase data load error."
-       			+ "  Use SetParcel* commands to fix input data.  See log file for more information." ) );
+		Message.printWarning ( warningLevel, 
+    		MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+		status.addToLog ( commandPhase,
+    		new CommandLogRecord(CommandStatusType.WARNING, message,
+    			"This may be a HydroBase data load issue.  For example, GIS data error may cause a HydroBase data load error."
+    			+ "  Use SetParcel* commands to fix input data.  See log file for more information." ) );
+		// Print more information to troubleshoot:
+		Message.printWarning(3, routine, "  CU Location has GW only supply based on aggregation/system (WEL): " + culoc.isGroundwaterOnlySupplyModelNode() );
+		Message.printWarning(3, routine, "  CU Location has SW supply (DIV or D&W because is not WEL): " + culoc.hasSurfaceWaterSupplyForModelNode() );
+		Message.printWarning(3, routine, "  Parcel has SW supply = " + parcel.hasSurfaceWaterSupply() );
+		Message.printWarning(3, routine, "  Parcel has " + parcel.getSupplyFromSWCount() + " SW supplies based on parcel data." );
+		if ( parcel.getSupplyFromSWCount() > 0 ) {
+			for ( StateCU_Supply supply2 : parcel.getSupplyList() ) {
+				if ( supply2 instanceof StateCU_SupplyFromSW ) {
+					supplyFromSW = (StateCU_SupplyFromSW)supply2;
+					// Any SW supply should have been added to DIV or D&W
+					Message.printWarning(3, routine, "    SW supply WDID = " + supplyFromSW.getWDID() );
+					if ( !supplyFromSW.getWDID().isEmpty() ) {
+						Message.printWarning(3, routine, "      SW supply WDID is in CU Location " +
+							culoc.getCollectionType() + "? = " +  culoc.idIsIn(supplyFromSW.getWDID()) );
+					}
+				}
+				supply2.setIncludeInCdsType(IncludeParcelInCdsType.ERROR);
+			}
+		}
+
+		Message.printWarning(3, routine, "  Parcel has GW supply = " + parcel.hasGroundWaterSupply() );
+		Message.printWarning(3, routine, "  Parcel has " + parcel.getSupplyFromGWCount() + " GW supplies based on parcel data." );
+		if ( parcel.getSupplyFromGWCount() > 0 ) {
+			for ( StateCU_Supply supply2 : parcel.getSupplyList() ) {
+				if ( supply2 instanceof StateCU_SupplyFromGW ) {
+					supplyFromGW = (StateCU_SupplyFromGW)supply2;
+					Message.printWarning(3, routine, "    GW supply WDID = " + supplyFromGW.getWDID() + " RECEIPT = '" + supplyFromGW.getReceipt() + "'" );
+					// Check to see if the well supply is in the original aggregate list for this WEL node
+					if ( !supplyFromGW.getWDID().isEmpty() ) {
+						supplyIdIsIn = culoc.idIsIn(supplyFromGW.getWDID());
+						if ( supplyIdIsIn ) {
+							Message.printWarning(3, routine, "      WDID is in CU Location " +
+								culoc.getCollectionType() + "? = " + supplyIdIsIn );
+						}
+						supplyIdIsIn = culoc.idIsIn(supplyFromGW.getReceipt());
+						if ( supplyIdIsIn ) {
+							Message.printWarning(3, routine, "      RECEIPT is in CU Location " +
+								culoc.getCollectionType() + "? = " +  culoc.idIsIn(supplyFromGW.getReceipt()) );
+						}
+					}
+				}
+				supply.setIncludeInCdsType(IncludeParcelInCdsType.ERROR);
+			}
+		}
+		if ( (parcel.getSupplyFromSWCount() + parcel.getSupplyFromGWCount()) == 0) {
+			message = "  Parcel has no supply data - could be a HydroBase data load issue."
+				+ "  Model configuration is not consistent with HydroBase data.";
+			Message.printWarning(3, routine, message );
+			Message.printWarning ( warningLevel, 
+    			MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+			status.addToLog ( commandPhase,
+    			new CommandLogRecord(CommandStatusType.WARNING, message,
+    				"Check original parcel data." ) );
+		}
 	}
 	
 	if ( !doSetValues ) {
 		// No need to do more in first pass for relationships.
-		return;
+		return warning_count;
 	}
+	
+	// Next add to the IPY component time series based on irrigation method and supply (SW and/or GW).
+	// - only set if the parcel fraction was included in the CDS above
+	// - this logic is specific to IPY processing and does not have similar code in CDS command
 
-	// Next add to the component areas.
-
-	// First apply the dwFraction to the area:
-	// - not needed for total area above but is needed below for GW area in D&W.
-	if ( supply.getIsModeled() && supply.isGroundWater() ) {
-		if ( !culoc.isGroundwaterOnlySupplyModelNode() ) {
-			// D&W GW supply
-			//if ( culoc.isCollection() ) {
-				double dwFraction = parcel.getSupplyFromSWFraction(culoc.getID());
-				//if ( debug ) {
-					Message.printStatus( 2, routine, "    GW supply WDID=" + supplyFromGW.getWDID() + " receipt=" + supplyFromGW.getReceipt()
-						+ " dwFraction=" + StringUtil.formatString(dwFraction,"%.3f") + " areaIrrigFromSupply=" +
-						StringUtil.formatString(areaIrrigFromSupply,"%.32") ); 
-				//}
-				areaIrrigFromSupply = areaIrrigFromSupply*dwFraction;
-			//}
-		}
-	}
+	// Below here, setting values in the objects (second iteration).
+	
+	//boolean includeInCds = false;
+	//if ( supply.getIncludeParcelInCdsType() == IncludeParcelInCdsType.YES ) {
+	//	includeInCds = true;
+	//}
+	//if ( !includeInCds ) {
+	//	Message.printStatus( 2, routine, "             For location " + culocId + " year " + parcelYear +
+	//		" parcelId=" + parcelId + " supply is not in CDS model node - skipping." );
+	//}
 	if ( !supply.getIsModeled() ) {
-		// Supply is not modeled (is not in dataset) so skip
-		// - this is determined in ReadParcelsFromHydroBase command.
+		Message.printStatus( 2, routine, "             For location " + culocId + " year " + parcelYear +
+			" parcelId=" + parcelId + " supply is not modeled - skipping." );
 	}
-	else if ( supply.isGroundWater() ) {
-		// Has groundwater supply
-		// - does not need to be GW only
-		// - can be associated with CU Location because of well collection in which supply ID idIsIn will match
-		// - or can be associated with parcels under wells, in which case
+	//else if ( !supplyIdIsIn ) {
+	//	Message.printStatus( 2, routine, "             For location " + culocId + " year " + parcelYear +
+	//		" parcelId=" + parcelId + " supply ID is not in model node ID - skipping." );
+	//}
+	else {
+		// The parcel/supply fraction is included as a supply.
+		// IPY tracks parcel fractions with GW supply (whether or not also SW supply)
+		// and fractions with SW only supply.
 
-		// TODO smalers 2021-01-31 dwFactor is handled in the parcel so don't need to compute here
-		// dwFactor is the areaIrrigFraction for surface water supplies, which is 1/(# ditches) for the parcel
-		// - this ensures that the well contribution to each D&W parcel part is correct
-		// double dwFactor = 1.0;
-		// if ( parcel.getSupplyFromSWCount() > 0 ) {
-		// 	dwFactor = 1.0/parcel.getSupplyFromSWCount();
-		// }
-		if ( isHighEfficiency ) {
-			// Sprinkler or drip irrigation
-			if ( ipyts.getAcgwspr(parcelYear) < 0.0 ) {
-				// TODO smalers 2020-01-23 actually the number of ditches is already accounted for in areaIrrigFromSupply.
-				// - therefore, don't multiply by dwFactor here
-				//ipyts.setAcgwspr ( parcelYear, areaIrrigFromSupply*dwFactor );
-				ipyts.setAcgwspr ( parcelYear, areaIrrigFromSupply );
-			}
-			else {
-				// TODO smalers 2020-01-23 actually the number of ditches is already accounted for in areaIrrigFromSupply.
-				// - therefore, don't multiply by dwFactor here
-				//ipyts.setAcgwspr ( parcelYear, ipyts.getAcgwspr(parcelYear) + areaIrrigFromSupply*dwFactor );
-				ipyts.setAcgwspr ( parcelYear, ipyts.getAcgwspr(parcelYear) + areaIrrigFromSupply );
-			}
-			if ( parcel.getSupplyFromSWCount() > 0 ) {
-				Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
-					" parcelId=" + parcelId +" added D&W well " +
-					//StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW sprinkler area, result = " +
-					StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to GW sprinkler area, result = " +
-					StringUtil.formatString(ipyts.getAcgwspr(parcelYear),"%.2f") );
-			}
-			else {
-				Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
-					" parcelId=" + parcelId +" added WEL well " +
-					//StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW sprinkler area, result = " +
-					StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to GW sprinkler area, result = " +
-					StringUtil.formatString(ipyts.getAcgwspr(parcelYear),"%.2f") );
-			}
+		// First apply the dwFraction to the area:
+		// - not needed for total area above but is needed below for GW area in D&W.
+		//Message.printStatus( 2, routine, "           Parcel supply fraction IS in CDS - adding SW/GW irrigation parts to IPY." );
+		/* TODO smalers 2021-06-02 done above so don't need here again
+		if ( !supply.getIsModeled() ) {
+			// Supply is not modeled (is not in dataset) so skip
+			// - this is determined in ReadParcelsFromHydroBase command.
+			Message.printStatus( 2, routine, "             For location " + culocId + " year " + parcelYear +
+				" parcelId=" + parcelId + " supply is not modeled - skipping." );
 		}
-		else {
-			// Flood irrigation
-			if ( ipyts.getAcgwfl(parcelYear) < 0.0 ) {
-				// TODO smalers 2020-01-23 actually the number of ditches is already accounted for in areaIrrigFromSupply.
-				// - therefore, don't multiply by dwFactor here
-				//ipyts.setAcgwfl ( parcelYear, areaIrrigFromSupply*dwFactor );
-				ipyts.setAcgwfl ( parcelYear, areaIrrigFromSupply );
+		*/
+		//else if ( supply.isGroundWater() ) { // }
+		if ( supply.isGroundWater() ) {
+			supplyFromGW = (StateCU_SupplyFromGW)supply;
+			areaIrrigFromSupply = supplyFromGW.getAreaIrrig();  // Need because GW acres are not added in D&W above
+			Message.printStatus( 2, routine, "             For location " + culocId + " year " + parcelYear +
+				" parcelId=" + parcelId + " GW supply is modeled - adding acreage supply parts." );
+			// Supply is GW so can be D&W or GW-only node.
+			boolean doAddGW = false;
+			if ( parcel.hasSurfaceWaterSupply() && !culoc.isGroundwaterOnlySupplyModelNode() ) {
+				// D&W GW supply - pacel/supply is not added to CDS total but GW part needs to be added below
+				//if ( culoc.isCollection() ) {
+				supplyIdIsIn = true; // Well supply from D&W is always included unless it was well-only, handled below.
+				if ( supplyIdIsIn ) {
+					// The additional fraction for groundwater acreage must be applied from D&W split.
+					// - this was not included for default/CDS processing
+					double dwFraction = parcel.getSupplyFromSWFraction(culoc.getID());
+					areaIrrigFromSupply = areaIrrigFromSupply*dwFraction;
+					//if ( debug ) {
+						Message.printStatus( 2, routine, "               GW supply WDID=" + supplyFromGW.getWDID() + " receipt=" + supplyFromGW.getReceipt()
+							+ " dwFraction=" + StringUtil.formatString(dwFraction,"%.3f") + " areaIrrigFromSupply (using D&W fraction)=" +
+							StringUtil.formatString(areaIrrigFromSupply,"%.2f") ); 
+					//}
+					doAddGW = true;
+				}
+				else {
+					Message.printStatus( 2, routine, "               For location " + culocId + " year " + parcelYear +
+						" parcelId=" + parcelId + " GW supply is not in D&W." );
+				}
+				//}
+			}
+			else if ( culoc.isGroundwaterOnlySupplyModelNode() ) {
+				// Always add if the supply ID is in the collection list
+				// supplyIdIsIn was calculated above when processing total area
+				if ( supplyIdIsIn ) {
+					doAddGW = true;
+				}
 			}
 			else {
-				// TODO smalers 2020-01-23 actually the number of ditches is already accounted for in areaIrrigFromSupply.
-				// - therefore, don't multiply by dwFactor here
-				//ipyts.setAcgwfl ( parcelYear, ipyts.getAcgwfl(parcelYear) + areaIrrigFromSupply*dwFactor );
-				ipyts.setAcgwfl ( parcelYear, ipyts.getAcgwfl(parcelYear) + areaIrrigFromSupply );
+				Message.printStatus( 2, routine, "               For location " + culocId + " year " + parcelYear +
+					" parcelId=" + parcelId + " unhandled case for GW supply." );
 			}
-			if ( parcel.getSupplyFromSWCount() > 0 ) {
-				Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
-					" parcelId=" + parcelId +" added D&W well " +
-					//StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW flood area, result = " +
-					StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to GW flood area, result = " +
-					StringUtil.formatString(ipyts.getAcgwfl(parcelYear),"%.2f") );
-			}
-			else {
-				Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
-					" parcelId=" + parcelId +" added WEL well" +
-					//StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW flood area, result = " +
-					StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to GW flood area, result = " +
-					StringUtil.formatString(ipyts.getAcgwfl(parcelYear),"%.2f") );
-			}
-		}
-	}
-	else if ( !parcel.hasGroundWaterSupply() ) {
-		// Has surface water only supply so add to SW-only acres...
-		Message.printStatus( 2, routine, "    For SW only location " + culocId + " year " + parcelYear +
-			" SW supply " + supplyFromSW.getWDID() + " idIsIn=" + idIsIn );
-		if ( idIsIn ) {
-			// Supply is associated with the single CU Location or a collection part so add to the CU Location
+		//{ inserted to make parentheses match - remove if code is re-enabled
+		//}
+		//else if ( supply.isGroundWater() ) {
+			// Supply is groundwater
+			// - does not need to be GW only parcel
+			// - can be associated with CU Location because of well collection in which supply ID supplyIdIsIn will match
+			// - or can be associated with parcels under wells, in which case
+	
+			// TODO smalers 2021-01-31 dwFactor is handled in the parcel so don't need to compute here
+			// dwFactor is the areaIrrigFraction for surface water supplies, which is 1/(# ditches) for the parcel
+			// - this ensures that the well contribution to each D&W parcel part is correct
+			// double dwFactor = 1.0;
+			// if ( parcel.getSupplyFromSWCount() > 0 ) {
+			// 	dwFactor = 1.0/parcel.getSupplyFromSWCount();
+			// }
+			if ( doAddGW ) {
 			if ( isHighEfficiency ) {
 				// Sprinkler or drip irrigation
-				if ( ipyts.getAcswspr(parcelYear) < 0.0 ) {
-					ipyts.setAcswspr ( parcelYear, areaIrrigFromSupply );
+				if ( ipyts.getAcgwspr(parcelYear) < 0.0 ) {
+					// TODO smalers 2020-01-23 actually the number of ditches is already accounted for in areaIrrigFromSupply.
+					// - therefore, don't multiply by dwFactor here
+					//ipyts.setAcgwspr ( parcelYear, areaIrrigFromSupply*dwFactor );
+					ipyts.setAcgwspr ( parcelYear, areaIrrigFromSupply );
 				}
 				else {
-					ipyts.setAcswspr ( parcelYear, ipyts.getAcswspr(parcelYear) + areaIrrigFromSupply );
+					// TODO smalers 2020-01-23 actually the number of ditches is already accounted for in areaIrrigFromSupply.
+					// - therefore, don't multiply by dwFactor here
+					//ipyts.setAcgwspr ( parcelYear, ipyts.getAcgwspr(parcelYear) + areaIrrigFromSupply*dwFactor );
+					ipyts.setAcgwspr ( parcelYear, ipyts.getAcgwspr(parcelYear) + areaIrrigFromSupply );
 				}
-				Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
-					" parcel_id=" + parcelId +" added " + StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to SW sprinkler area, result = " +
-					StringUtil.formatString(ipyts.getAcswspr(parcelYear),"%.2f") );
+				//if ( parcel.getSupplyFromSWCount() > 0 ) {
+					Message.printStatus( 2, routine, "               For location " + culocId + " year " + parcelYear +
+						" parcelId=" + parcelId +" added " +
+						//StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW sprinkler area, result = " +
+						StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to GW sprinkler area, result = " +
+						StringUtil.formatString(ipyts.getAcgwspr(parcelYear),"%.2f") );
+					/*
+				}
+				else {
+					Message.printStatus( 2, routine, "             For location " + culocId + " year " + parcelYear +
+						" parcelId=" + parcelId +" added " +
+						//StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW sprinkler area, result = " +
+						StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to GW sprinkler area, result = " +
+						StringUtil.formatString(ipyts.getAcgwspr(parcelYear),"%.2f") );
+				}
+				*/
 			}
 			else {
-				// Flood irrigation
-				if ( ipyts.getAcswfl(parcelYear) < 0.0 ) {
-					ipyts.setAcswfl ( parcelYear, areaIrrigFromSupply );
+				// Not high efficiency, therefore flood irrigation
+				if ( ipyts.getAcgwfl(parcelYear) < 0.0 ) {
+					// TODO smalers 2020-01-23 actually the number of ditches is already accounted for in areaIrrigFromSupply.
+					// - therefore, don't multiply by dwFactor here
+					//ipyts.setAcgwfl ( parcelYear, areaIrrigFromSupply*dwFactor );
+					ipyts.setAcgwfl ( parcelYear, areaIrrigFromSupply );
 				}
 				else {
-					ipyts.setAcswfl ( parcelYear, ipyts.getAcswfl(parcelYear) + areaIrrigFromSupply );
+					// TODO smalers 2020-01-23 actually the number of ditches is already accounted for in areaIrrigFromSupply.
+					// - therefore, don't multiply by dwFactor here
+					//ipyts.setAcgwfl ( parcelYear, ipyts.getAcgwfl(parcelYear) + areaIrrigFromSupply*dwFactor );
+					ipyts.setAcgwfl ( parcelYear, ipyts.getAcgwfl(parcelYear) + areaIrrigFromSupply );
 				}
-				Message.printStatus( 2, routine, "    For location " + culocId + " year " + parcelYear +
-					" parcel_id=" + parcelId +" added " + StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to SW flood area, result = " +
-					StringUtil.formatString(ipyts.getAcswfl(parcelYear),"%.2f") );
+				//if ( parcel.getSupplyFromSWCount() > 0 ) {
+					Message.printStatus( 2, routine, "               For location " + culocId + " year " + parcelYear +
+						" parcelId=" + parcelId +" added " +
+						//StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW flood area, result = " +
+						StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to GW flood area, result = " +
+						StringUtil.formatString(ipyts.getAcgwfl(parcelYear),"%.2f") );
+					/*
+				}
+				else {
+					Message.printStatus( 2, routine, "             For location " + culocId + " year " + parcelYear +
+						" parcelId=" + parcelId +" added " +
+						//StringUtil.formatString(areaIrrigFromSupply*dwFactor,"%.2f") + " to GW flood area, result = " +
+						StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to GW flood area, result = " +
+						StringUtil.formatString(ipyts.getAcgwfl(parcelYear),"%.2f") );
+				}
+				*/
+			}
+			}
+			else {
+				Message.printStatus( 2, routine, "               For location " + culocId + " year " + parcelYear +
+					" parcelId=" + parcelId + " not adding GW supply.  ERROR?" );
 			}
 		}
-	}
+		// }
+		else {
+			// Surface water supply
+			supplyFromSW = (StateCU_SupplyFromSW)supply;
+			Message.printStatus( 2, routine, "             For location " + culocId + " year " + parcelYear +
+				" parcelId=" + parcelId + " SW supply is modeled - adding acreage supply parts." );
+			if ( !parcel.hasGroundWaterSupply() ) {
+				// Parcel has surface water only supply so add to SW-only acres.
+				Message.printStatus( 2, routine, "             For SW-only parcel, location " + culocId + " year " + parcelYear +
+					" SW supply " + supplyFromSW.getWDID() + " supplyIdIsIn=" + supplyIdIsIn );
+				// supplyIdIsIn was calculated above when processing total area
+				if ( supplyIdIsIn ) {
+					// Supply is associated with the single CU Location or a collection part so add to the CU Location
+					if ( isHighEfficiency ) {
+						// Sprinkler or drip irrigation
+						if ( ipyts.getAcswspr(parcelYear) < 0.0 ) {
+							ipyts.setAcswspr ( parcelYear, areaIrrigFromSupply );
+						}
+						else {
+							ipyts.setAcswspr ( parcelYear, ipyts.getAcswspr(parcelYear) + areaIrrigFromSupply );
+						}
+						Message.printStatus( 2, routine, "               For location " + culocId + " year " + parcelYear +
+							" parcelId=" + parcelId +" added " + StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to SW sprinkler area, result = " +
+							StringUtil.formatString(ipyts.getAcswspr(parcelYear),"%.2f") );
+					}
+					else {
+						// Flood irrigation
+						if ( ipyts.getAcswfl(parcelYear) < 0.0 ) {
+							ipyts.setAcswfl ( parcelYear, areaIrrigFromSupply );
+						}
+						else {
+							ipyts.setAcswfl ( parcelYear, ipyts.getAcswfl(parcelYear) + areaIrrigFromSupply );
+						}
+						Message.printStatus( 2, routine, "               For location " + culocId + " year " + parcelYear +
+							" parcelId=" + parcelId +" added " + StringUtil.formatString(areaIrrigFromSupply,"%.2f") + " to SW flood area, result = " +
+							StringUtil.formatString(ipyts.getAcswfl(parcelYear),"%.2f") );
+					}
+				}
+			}
+			else {
+				Message.printStatus( 2, routine, "               For location " + culocId + " year " + parcelYear +
+					" parcelId=" + parcelId + " also has GW supply so not adding to SW-only area." );
+			}
+		}
+		/* TODO smalers 2021-06-02 copy to above is useful
+		else {
+			Message.printStatus( 2, routine, "             For location " + culocId + " year " + parcelYear +
+				" parcelId=" + parcelId + " unhandled case" );
+		}
+		*/
+	//} // end includeInCds
+	//else {
+	//	Message.printStatus( 2, routine, "           Parcel supply fraction IS NOT in CDS - don't add SW/GW irrigation parts to IPY." );
+	//}
 	
-	// Ensure that in a year that any data value is specified, no missing values will remain.  Zeros can be
-	// added to with other commands.  Also recompute the totals for surface water only, and for groundwater.
+		// Ensure that in a year that any data value is specified, no missing values will remain.
+		// Zeros can be added to with other commands.  Also recompute the totals for surface water only, and for groundwater.
 	
-	if ( ipyts.getAcgwfl(parcelYear) < 0.0 ) {
-		ipyts.setAcgwfl ( parcelYear, 0.0 );
-	}
-	if ( ipyts.getAcgwspr(parcelYear) < 0.0 ) {
-		ipyts.setAcgwspr ( parcelYear, 0.0 );
-	}
-	ipyts.refreshAcgw(parcelYear);
-	if ( ipyts.getAcswfl(parcelYear) < 0.0 ) {
-		ipyts.setAcswfl ( parcelYear, 0.0 );
-	}
-	if ( ipyts.getAcswspr(parcelYear) < 0.0 ) {
-		ipyts.setAcswspr ( parcelYear, 0.0 );
-	}
-	ipyts.refreshAcsw(parcelYear);
-	if ( ipyts.getTacre(parcelYear) < 0.0 ) {
-		ipyts.setTacre ( parcelYear, 0.0 );
-	}
+		if ( ipyts.getAcgwfl(parcelYear) < 0.0 ) {
+			ipyts.setAcgwfl ( parcelYear, 0.0 );
+		}
+		if ( ipyts.getAcgwspr(parcelYear) < 0.0 ) {
+			ipyts.setAcgwspr ( parcelYear, 0.0 );
+		}
+		// Refresh the GW acres
+		ipyts.refreshAcgw(parcelYear);
+
+		if ( ipyts.getAcswfl(parcelYear) < 0.0 ) {
+			ipyts.setAcswfl ( parcelYear, 0.0 );
+		}
+		if ( ipyts.getAcswspr(parcelYear) < 0.0 ) {
+			ipyts.setAcswspr ( parcelYear, 0.0 );
+		}
+		// Refresh the SW acres
+		ipyts.refreshAcsw(parcelYear);
 	
-	// Add parcels to IPY time series for filling later...
-	ipyts.addParcel ( parcel );
+		// Add parcels to IPY time series for filling later.
+		// - TODO smalers 2021-06-03 is this even needed anymore?
+		ipyts.addParcel ( parcel );
+	} // end modeled
+	
+	return warning_count;
 }
 
 /**
@@ -601,7 +912,7 @@ CommandWarningException, CommandException
 	// Year is populated in checkCommandParameters
 	//String Year = _parameters.getValue( "Year" );
 	
-	// Get the list of cu locations...
+	// Get the list of CU locations...
 	
 	List<StateCU_Location> culocList = null;
 	int culocListSize = 0;
@@ -736,6 +1047,24 @@ CommandWarningException, CommandException
             new CommandLogRecord(CommandStatusType.FAILURE,
                 message, "Confirm that the HydroBase version is >= 20200720." ) );
 	}
+
+	// Do not allow ReadCropPatternTSFromParcels and ReadIrrigationPracticeTSFromParcels commands
+	// to be in the same file because they do some of the same bookkeeping.
+	List<String> commandsToFind0 = new ArrayList<>();
+	commandsToFind0.add("ReadCropPatternTSFromParcels");
+	List<Command> commandList = StateDMICommandProcessorUtil.getCommandsAfterIndex(
+		-1, processor, commandsToFind0, false);
+	if ( commandList.size() > 0 ) {
+		// Found a command.
+		message = "Cannot use ReadCropPatternTSFromParcels and ReadIrrigationPracticeTSFromParcels "
+				+ "in the same command file because they each update parcel tracking data.";
+	   	Message.printWarning ( warningLevel,
+           	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
+   	   	status.addToLog ( commandPhase,
+   	       	new CommandLogRecord(CommandStatusType.FAILURE,
+   	           	message, "Fix the command file." ) );
+		throw new CommandException ( message );
+	}
 	
 	if ( warning_count > 0 ) {
 		// Input error...
@@ -747,6 +1076,30 @@ CommandWarningException, CommandException
 	}
 	
 	try {
+		
+		// Reset all StateCU_Location CDS tracking for parcels.
+		// - the assignments will be made as processing occurs
+		// - there may be more than one ReadCropPatternTSFromParcels command but only clear for the first one.
+		List<String> commandsToFind = new ArrayList<>();
+		commandsToFind.add("ReadIrrigationPracticeTSFromParcels");
+		commandList = StateDMICommandProcessorUtil.getCommandsBeforeIndex(
+			processor.indexOf(this), processor, commandsToFind, true);
+		if ( commandList.size() == 0 ) {
+			// No commands before this one so this is the first.
+			// Reset the CDS indicators in all supplies.
+			Message.printStatus(2,routine,"First ReadIrrigationPraciceTSFromParcels command - setting all parcel supplies to CDS:"
+				+ IncludeParcelInCdsType.UNKNOWN);
+			for ( Map.Entry<String, StateCU_Parcel> entry : parcelMap.entrySet() ) {
+				for ( StateCU_Supply supply : entry.getValue().getSupplyList() ) {
+					supply.setStateCULocationForCds(null);
+					// TODO smalers 2021-01-30 use UNK because some locations may use SetCropPatternTS so
+					// report needs to not say NO outright
+					//supply.setIncludeInCdsType(IncludeParcelInCdsType.NO);
+					supply.setIncludeInCdsType(IncludeParcelInCdsType.UNKNOWN);
+					supply.setIncludeInCdsError("");
+				}
+			}
+		}
 	
 		// Year_int is set in checkCommandParameters().  If null, get the years by querying HydroBase...
 		int [] parcelYears = null;
@@ -759,7 +1112,7 @@ CommandWarningException, CommandException
 	            	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
     	       	status.addToLog ( commandPhase,
     	           	new CommandLogRecord(CommandStatusType.FAILURE,
-    	               	message, "Report to software support.." ) );
+    	               	message, "Report to software support." ) );
 				throw new CommandException ( message );
 			}
 		}
@@ -850,8 +1203,14 @@ CommandWarningException, CommandException
 				parcelYear = parcelYears[iParcelYear]; // Year to process
 				
 				if ( iloop == 2 ) {
-					Message.printStatus ( 2, routine, "Processing location ID=" + culocId + " parcelYear=" + parcelYear +
-						", have " + culoc.getParcelList(parcelYear).size() + " supplies (not all may be associated with CU loc)." );
+					if ( culoc.getParcelList(parcelYear).size() == 0 ) {
+						Message.printStatus ( 2, routine, "Processing location ID=" + culocId + " parcelYear=" + parcelYear +
+							", has 0 irrigated parcels." );
+					}
+					else {
+						Message.printStatus ( 2, routine, "Processing location ID=" + culocId + " parcelYear=" + parcelYear +
+							", have " + culoc.getParcelList(parcelYear).size() + " parcels (not all supplies may be modeled)." );
+					}
 				
 					// Set the values in the time series to zero for the parcel year if
 					// missing.  Later, values will be added.  This will handled using the
@@ -877,6 +1236,7 @@ CommandWarningException, CommandException
 					if ( yts.getDataValue(date) < 0.0 ) {
 						yts.setDataValue ( date, 0.0 );
 					}
+					/* TODO data are refreshed below after processing
 					// Also set the totals to zero (in case no data are
 					// ever set in following code - acreage will be zero).
 					// Recompute the total groundwater from the parts...
@@ -884,10 +1244,12 @@ CommandWarningException, CommandException
 					// Recompute the total groundwater from the parts...
 					ipyts.refreshAcsw(parcelYear);
 					// Used in old and new...
-					yts = ipyts.getTacreTS();
-					if ( yts.getDataValue(date) < 0.0 ) {
-						yts.setDataValue ( date, 0.0 );
-					}
+					//yts = ipyts.getTacreTS();
+					//if ( yts.getDataValue(date) < 0.0 ) {
+						//yts.setDataValue ( date, 0.0 );
+					//}
+					ipyts.refreshTacre(parcelYear, true, true);
+					*/
 				} // end iloop=2
 
 				for ( StateCU_Parcel parcel : culoc.getParcelList(parcelYear) ) {
@@ -895,24 +1257,70 @@ CommandWarningException, CommandException
 					if ( iloop == 2 ) {
 						Message.printStatus ( 2, routine, "  Processing " + culocId + " year=" + parcelYear +
 							" parcelId=" + parcelId +
-							" parcel has GW supply=" + parcel.hasGroundWaterSupply() +
-							" parcel has SW supply=" + parcel.hasSurfaceWaterSupply() );
+							", parcel has GW supply=" + parcel.hasGroundWaterSupply() +
+							", parcel has SW supply=" + parcel.hasSurfaceWaterSupply() +
+							", culoc is GW only model node=" + culoc.isGroundwaterOnlySupplyModelNode() );
 					}
 
 					// Call utility code that has been used in earlier versions of StateDMI.
 					
 					//boolean has_gw_supply = parcel.hasGroundWaterSupply();
 					for ( StateCU_Supply supply : parcel.getSupplyList() ) {
-						processIrrigationPracticeTSParcel (
+						warning_count = processIrrigationPracticeTSParcelSupply (
 							debug,
 							doSetValues, // Will be true if iloop=2
 							culoc,
 							ipyts,
 							parcel,
 							supply,
-							status); // Applies to the supply, not parcel overall
+							status, // Applies to the supply, not parcel overall
+							commandPhase,
+							warningLevel,
+							command_tag,
+							warning_count
+						);
+					} // End parcel supplies
+				} // End parcels
+			
+				// Once all the data have been processed, refresh and check the totals.
+				if ( iloop == 2 ) {
+					// TODO smalers 2021-06-03 remove when code checks out
+					//if ( ipyts.getTacre(parcelYear) < 0.0 ) {
+						//ipyts.setTacre ( parcelYear, 0.0 );
+					//}
+					// Refresh the total acres and part totals.
+					// - missing values were set to zero above so years with data should always have all values
+					// - if there is a logic bust, the following comparison will catch it
+					/*
+					String format = "%.2f";
+					double totalBeforeRefresh = ipyts.getTacre(parcelYear);
+					String totalBeforeRefreshString = String.format(format, totalBeforeRefresh );
+					*/
+					ipyts.refreshTacre(parcelYear, true, true);
+					/* TODO smalers 2021-06-03 code copied from elsewhere and is not needed
+					double totalAfterRefresh = ipyts.getTacre(parcelYear);
+					String totalAfterRefreshString = String.format(format, totalAfterRefresh );
+					if ( Math.abs(totalAfterRefresh - totalBeforeRefresh) > 1.0 ) {
+						message = "Location \"" + culocId + "\" " + parcelYear +
+							" total " + totalBeforeRefreshString +
+							" is different from parts total " + totalAfterRefreshString + " by > 1" +
+							", GWfl=" + String.format(format,ipyts.getAcgwfl(parcelYear)) +
+							", GWspr=" + String.format(format,ipyts.getAcgwspr(parcelYear)) +
+							", GW=" + String.format(format,ipyts.getAcgw(parcelYear)) +
+							", SWfl=" + String.format(format, ipyts.getAcswfl(parcelYear)) +
+							", SWspr=" + String.format(format, ipyts.getAcswspr(parcelYear)) +
+							", SW=" + String.format(format,ipyts.getAcsw(parcelYear)) +
+							", difference=" + String.format(format, (totalAfterRefresh - totalBeforeRefresh));
+						//Message.printWarning(3, routine, message );
+						Message.printWarning ( warningLevel, 
+   							MessageUtil.formatMessageTag(command_tag, ++warning_count), routine,
+   							"      " + message );
+						status.addToLog ( commandPhase,
+   							new CommandLogRecord(CommandStatusType.WARNING, message,
+   								"Software logic problem?" ) );
 					}
-				}
+					*/
+				} // iloop=2
 			} // End parcel year
 		} // End location
 		} // End iloop

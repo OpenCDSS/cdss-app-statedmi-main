@@ -1690,7 +1690,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 												else {
 													// Else was a modeled supply.
 													message = "      Parcel has GW supply for " + culoc_id + " year=" + year + " parcelId=" + parcel2.getID() +
-														"wdid=" + supplyFromGWFound.getWDID() + " receipt='" + supplyFromGWFound.getReceipt() + "'";
+														" wdid=" + supplyFromGWFound.getWDID() + " receipt='" + supplyFromGWFound.getReceipt() + "'";
 													Message.printStatus(2,routine,message);
 												}
 											}	

@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Vector;
 
 import DWR.StateCU.StateCU_IrrigationPracticeTS;
+import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Util;
 
 import RTi.Util.Message.Message;
@@ -62,9 +63,7 @@ import RTi.Util.Table.TableRecord;
 import RTi.Util.Time.DateTime;
 
 /**
-<p>
 This class initializes, checks, and runs the SetIrrigationPracticeTSSprinklerAcreageFromList() command.
-</p>
 */
 public class SetIrrigationPracticeTSSprinklerAcreageFromList_Command 
 extends AbstractCommand implements Command
@@ -307,6 +306,25 @@ CommandWarningException, CommandException
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Run CreateIrrigationPracticeTSForCULocations() before this command." ) );
 	}
+
+	// Get the list of CU locations, used to check the data.
+	// - ok if zero length (may be the case if smaller command file rather than full IPY)
+	
+	List<StateCU_Location> culocList = null;
+	try {
+		@SuppressWarnings("unchecked")
+		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents( "StateCU_Location_List");
+		culocList = dataList;
+	}
+	catch ( Exception e ) {
+		message = "Error requesting StateCU_Location_List from processor.";
+		Message.printWarning(warning_level,
+			MessageUtil.formatMessageTag( command_tag, ++warning_count),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Report problem to software support." ) );
+	}
 	
     // Output period will be used if not specified with SetStart and SetEnd
     
@@ -453,7 +471,9 @@ CommandWarningException, CommandException
 					continue;
 				}
 			}
-			// Find the StateCU_IrrigationPracticeTS instance to modify...
+
+			// Find the StateCU_IrrigationPracticeTS instance to modify.
+
 			if ( ProcessWhen_int == Now_int ) {
 				pos = StateCU_Util.indexOf(ipyList,id);
 				if ( pos < 0 ) {
@@ -467,6 +487,14 @@ CommandWarningException, CommandException
 				}
 				ipy = (StateCU_IrrigationPracticeTS)ipyList.get(pos);
 			}
+
+			// Get the StateCU_Location to track when a set command is used.
+			int pos2 = StateCU_Util.indexOf(culocList,id);
+			StateCU_Location culoc = null;
+			if ( pos2 >= 0 ) {
+				culoc = culocList.get(pos2);
+			}
+
 			// OK to set the data...
 			// Get the data values from the table one time...
 			//++matchCount;
@@ -507,7 +535,7 @@ CommandWarningException, CommandException
 					if ( ProcessWhen_int == Now_int ) {
 						Message.printStatus ( 2, routine,
 						"Setting " + ipy_id + " AcresSprinkler " + Year_int + " -> " + AcresSprinkler_String );
-						setSprinklerAcres ( ipy, Double.parseDouble(AcresSprinkler_String), Year_int,
+						setSprinklerAcres ( culoc, ipy, Double.parseDouble(AcresSprinkler_String), Year_int,
 							command_tag, warning_level, warning_count, status );
 					}
 				}
@@ -522,7 +550,7 @@ CommandWarningException, CommandException
 								SetStart_int + " to " + SetEnd_int + " -> " + AcresSprinkler_String );
 						}
 						if ( ProcessWhen_int == Now_int ) {
-							warning_count = setSprinklerAcres ( ipy, Double.parseDouble(
+							warning_count = setSprinklerAcres ( culoc, ipy, Double.parseDouble(
 								AcresSprinkler_String), year,
 								command_tag, warning_level, warning_count, status );
 						}
@@ -555,7 +583,8 @@ This causes adjustments to be made so the acreage parts add to the total.
 @param command_tag The command tag used for logging.
 @return the count of warnings (incremented from original passed in value).
 */
-private int setSprinklerAcres ( StateCU_IrrigationPracticeTS ipyts, double Sacre_set, int year,
+private int setSprinklerAcres ( StateCU_Location culoc,
+		StateCU_IrrigationPracticeTS ipyts, double Sacre_set, int year,
 		String command_tag, int warning_level, int warning_count, CommandStatus status )
 {	String routine = "setIrrigationPracticeTSSprinklerAcreageFromList.checkTotals";
 	String message;
@@ -593,6 +622,11 @@ private int setSprinklerAcres ( StateCU_IrrigationPracticeTS ipyts, double Sacre
 	
 	ipyts.setAcgwspr ( year, Sacre_set_adjusted );
 	ipyts.setAcgwfl( year, (Acgw_prev - Sacre_set_adjusted) );
+
+	// Indicate that a set command was used.
+	if ( culoc != null ) {
+		culoc.setHasSetIrrigationPracticeTSCommands(year);
+	}
 	
 	// Now check the surface water...
 	

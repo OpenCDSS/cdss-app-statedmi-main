@@ -26,8 +26,8 @@ package DWR.DMI.StateDMI;
 import javax.swing.JFrame;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.StateCU.StateCU_BlaneyCriddle;
@@ -110,6 +110,7 @@ throws InvalidCommandParameterException
 	String InputFile = parameters.getValue ( "InputFile" );
 	String Version = parameters.getValue ( "Version" );
 	String ReadDataFrom = parameters.getValue ( "ReadDataFrom" );
+	String Tolerance = parameters.getValue ( "Tolerance" );
 	
 	String warning = "";
 	String message;
@@ -194,19 +195,27 @@ throws InvalidCommandParameterException
 	            new CommandLogRecord(CommandStatusType.FAILURE,
 	                message, "Specify ReadDataFrom as " + _CropArea + " (default) or " + _TotalAreaAndCropFraction ) );
 		}
+		if ( (Tolerance != null) && !Tolerance.isEmpty() && !StringUtil.isDouble(Tolerance) ) {
+	        message = "The value for Tolerance (" + Tolerance + ") is invalid.";
+	        warning += "\n" + message;
+	        status.addToLog ( CommandPhaseType.INITIALIZATION,
+	            new CommandLogRecord(CommandStatusType.FAILURE,
+	                message, "Specify Tolerance as a double." ) );
+		}
 	}
     
 	// Check for invalid parameters...
-	Vector<String> valid_Vector = new Vector<String>();
-	valid_Vector.add ( "InputFile" );
+	List<String> validList = new ArrayList<>();
+	validList.add ( "InputFile" );
 	if ( (this instanceof ReadCropPatternTSFromStateCU_Command) ||
 		(this instanceof ReadIrrigationPracticeTSFromStateCU_Command) ) {
-		valid_Vector.add ( "Version" );
+		validList.add ( "Version" );
 	}
 	if ( this instanceof ReadCropPatternTSFromStateCU_Command ) {
-		valid_Vector.add ( "ReadDataFrom" );
+		validList.add ( "ReadDataFrom" );
+		validList.add ( "Tolerance" );
 	}
-    warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+    warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	// Throw an InvalidCommandParameterException in case of errors.
 	if ( warning.length() > 0 ) {		
@@ -285,11 +294,12 @@ the acreage terms add up and, if specified, that the crop pattern total and
 irrigation practice total match in years with non-missing data.
 @param cds_tslist List of StateCU_CropPatternTS to check.
 @param ipy_tslist List of StateCU_IrrigationPracticeTS to check against.
+@param tolerance tolerance to compare CDS and IPY area
 @param status CommandStatus to append check warnings.
 */
 private void readCropPatternTSFromStateCU_checkCropPatternTS ( List<StateCU_CropPatternTS> cds_tslist,
-	List<StateCU_IrrigationPracticeTS> ipy_tslist, CommandStatus status )
-{	
+	List<StateCU_IrrigationPracticeTS> ipy_tslist, double tolerance, CommandStatus status )
+{	String routine = getClass().getSimpleName() + ".checkCropPatternTS";
 	int cds_size = 0;
 	if ( cds_tslist != null ) {
 		cds_size = cds_tslist.size();
@@ -298,8 +308,7 @@ private void readCropPatternTSFromStateCU_checkCropPatternTS ( List<StateCU_Crop
 	StateCU_IrrigationPracticeTS ipy_ts = null;
 	YearTS ipy_total_yts = null;
 	double cds_total, ipy_total;
-	double tolerance = 1.0;	// Check to nearest integer since acreage may be written as whole number
-	int precision = 0;
+	int precision = 1;
 	String format = "%." + precision + "f";
 	// TODO SAM 2007-09-09 Need some utilities to help with checks
 	// Need to intelligently compute the precision from the tolerance
@@ -337,14 +346,17 @@ private void readCropPatternTSFromStateCU_checkCropPatternTS ( List<StateCU_Crop
 				continue;
 			}
 			if ( Math.abs(cds_total - ipy_total) > tolerance ) {
+				String message =
+					"Location \"" + cds_id + "\" CDS total acreage is not within " +
+					String.format(format, tolerance) + " of IPY total in year " +
+					date.getYear() + ".  CDS Total = " +
+					StringUtil.formatString(cds_total,format) +
+					" IPY total = " + StringUtil.formatString(ipy_total,format) + ", difference = " +
+					StringUtil.formatString((cds_total-ipy_total),format);
 				status.addToLog ( CommandPhaseType.RUN,
-					new CommandLogRecord(CommandStatusType.FAILURE,
-						"Location \"" + cds_id + "\" CDS total acreage is not within 1 of IPY total in year " +
-						date.getYear() + ".  CDS Total = " +
-						StringUtil.formatString(cds_total,format) +
-						" IPY total = " + StringUtil.formatString(ipy_total,format) + ", difference = " +
-						StringUtil.formatString((cds_total-ipy_total),format),
+					new CommandLogRecord(CommandStatusType.FAILURE, message,
 						"Verify data processing." ) );
+				Message.printWarning(3,routine,message);
 			}
 		}
 	}
@@ -411,6 +423,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     String InputFile = parameters.getValue ( "InputFile" );
     String Version = parameters.getValue ( "Version" ); // Used with crop pattern TS
     String ReadDataFrom = parameters.getValue ( "ReadDataFrom" ); // Used with crop pattern TS
+    String Tolerance = parameters.getValue ( "Tolerance" ); // Used with crop pattern TS
+    double tolerance = 1.0; // Default, check to nearest integer since acreage may be written as whole number
+    if ( (Tolerance != null) && !Tolerance.isEmpty() ) {
+    	try {
+    		tolerance = Double.parseDouble(Tolerance);
+    	}
+    	catch ( NumberFormatException e ) {
+    	}
+    }
     
     // Get the output start and end for use with time series commands
     DateTime OutputStart_DateTime = null;
@@ -653,7 +674,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				List<StateCU_CropPatternTS> cptsList = (List<StateCU_CropPatternTS>)processor.getPropContents("StateCU_CropPatternTS_List");
 				@SuppressWarnings("unchecked")
 				List<StateCU_IrrigationPracticeTS> ipyList = (List<StateCU_IrrigationPracticeTS>)processor.getPropContents("StateCU_IrrigationPracticeTS_List");
-				readCropPatternTSFromStateCU_checkCropPatternTS ( cptsList, ipyList, status );
+				readCropPatternTSFromStateCU_checkCropPatternTS ( cptsList, ipyList, tolerance, status );
 			}
 
 			// Warn about identifiers that have been replaced in the processor list...
@@ -755,6 +776,7 @@ public String toString ( PropList parameters )
 
 	String InputFile = parameters.getValue ( "InputFile" );
 	String ReadDataFrom = parameters.getValue ( "ReadDataFrom" );
+	String Tolerance = parameters.getValue ( "Tolerance" );
 	String Version = parameters.getValue ( "Version" );
 
 	StringBuffer b = new StringBuffer ();
@@ -767,6 +789,12 @@ public String toString ( PropList parameters )
 				b.append ( ",");
 			}
 			b.append ( "ReadDataFrom=" + ReadDataFrom  );
+		}
+		if ( (Tolerance != null) && (Tolerance.length() > 0) ) {
+			if ( b.length() > 0 ) {
+				b.append ( ",");
+			}
+			b.append ( "Tolerance=" + Tolerance  );
 		}
 	}
 

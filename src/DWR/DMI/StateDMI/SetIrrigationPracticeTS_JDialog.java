@@ -277,7 +277,7 @@ private void initialize (JFrame parent, SetIrrigationPracticeTS_Command command 
     JGUIUtil.addComponent(paragraph, new JLabel ( "Blanks will result in no change to the data."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
-		"The following can typically set with no restriction because they are usually a simple set, with no subsequent filling over time:"),
+		"The following can typically be set with no restriction because they are usually a simple set, with no subsequent filling over time:"),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"   Efficiencies, groundwater mode, pumping maximum."),

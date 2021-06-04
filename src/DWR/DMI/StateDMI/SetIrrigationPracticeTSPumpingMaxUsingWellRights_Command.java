@@ -56,9 +56,7 @@ import RTi.Util.Time.TimeInterval;
 import RTi.Util.Time.TimeUtil;
 
 /**
-<p>
 This class initializes, checks, and runs the SetIrrigationPracticeTSPumpingMaxUsingWellRights() command.
-</p>
 */
 public class SetIrrigationPracticeTSPumpingMaxUsingWellRights_Command 
 extends AbstractCommand implements Command
@@ -530,8 +528,8 @@ CommandWarningException, CommandException
 				// Identifier does not match...
 				continue;
 			}
-			// Check whether location supply matches the supply types to be included...
-			if (IncludeSurfaceWaterSupply_boolean ||IncludeGroundwaterOnlySupply_boolean ) {
+			// Check whether location supply matches the supply types to be included.
+			if (IncludeSurfaceWaterSupply_boolean || IncludeGroundwaterOnlySupply_boolean ) {
 				// Need to get the CU location to check for GW-only...
 				int pos = StateCU_Util.indexOf ( culocList, id );
 				if ( pos < 0 ) {
@@ -545,7 +543,7 @@ CommandWarningException, CommandException
 							message, "Verify that well rights include parcel/and year " + ParcelYear_int) );
 					continue;
 				}
-				culoc = (StateCU_Location)culocList.get(pos);
+				culoc = culocList.get(pos);
 			}
 			if ( IncludeSurfaceWaterSupply_boolean && IncludeGroundwaterOnlySupply_boolean ) {
 				// Including both...
@@ -562,6 +560,7 @@ CommandWarningException, CommandException
 			}
 			// Set using rights, for the requested period.
 			setIrrigationPracticeTSUsingRights (
+				culoc,
 				smrights_MonthTS_Vector,
 				ipyts,
 				SetStart_DateTime,
@@ -641,13 +640,14 @@ CFS to AF/M.  If negative, use actual days per month
 @param ParcelYear_int the parcel year to use for parcel data.
 */
 private void setIrrigationPracticeTSUsingRights (
+		StateCU_Location culoc,
 		List<TS> smrights_MonthTS_Vector,
 		StateCU_IrrigationPracticeTS ipyts,
 		DateTime SetStart_DateTime,
 		DateTime SetEnd_DateTime,
 		double NumberOfDaysInMonth_double,
 		int ParcelYear_int )
-{	String routine = "setIrrigationPracticeTSPumpingMaxUsingWellRights.setIrrigationPracticeTSUsingRights";
+{	String routine = "SetIrrigationPracticeTSPumpingMaxUsingWellRights.setIrrigationPracticeTSUsingRights";
 	if ( ParcelYear_int > 0 ) {
 		Message.printStatus( 2, routine, "Setting irrigation practice pumping max time series for \"" +
 		ipyts.getID() + "\" by using " + ParcelYear_int +
@@ -728,6 +728,11 @@ private void setIrrigationPracticeTSUsingRights (
 			Mprate_ts.setDataValue ( date, max_pumping );
 			Message.printStatus ( 2, routine, "Setting " + id + " " + year + " pumping max to " +
 				StringUtil.formatString ( max_pumping, "%.2f") );
+			// DO NOT call the following since only care about setting area in IPY.
+			// Indicate that a set command was used.
+			//if ( culoc != null ) {
+				//culoc.setHasSetIrrigationPracticeTSCommands(year);
+			//}
 		}
 	}
 }

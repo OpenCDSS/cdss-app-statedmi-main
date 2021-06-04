@@ -46,8 +46,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -59,7 +59,6 @@ import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.Help.HelpViewer;
 //import RTi.Util.GUI.SimpleJComboBox;
-import RTi.Util.IO.Command;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 
@@ -80,6 +79,7 @@ private JTextField __ID_JTextField=null;
 //private SimpleJComboBox __IncludeSurfaceWaterSupply_JComboBox = null;
 private JTextField __SetStart_JTextField = null;
 private JTextField __SetEnd_JTextField = null;
+private SimpleJComboBox __CheckOnly_JComboBox = null;
 private SimpleJComboBox __IfNotFound_JComboBox = null;
 private JTextArea __command_JTextArea=null;
 private SimpleJButton __cancel_JButton = null;
@@ -130,6 +130,7 @@ private void checkInput ()
 	//String IncludeGroundwaterOnlySupply = __IncludeGroundwaterOnlySupply_JComboBox.getSelected();
 	String SetStart = __SetStart_JTextField.getText().trim();
 	String SetEnd = __SetEnd_JTextField.getText().trim();
+	String CheckOnly = __CheckOnly_JComboBox.getSelected();
 	String IfNotFound = __IfNotFound_JComboBox.getSelected();
 	__error_wait = false;
 	
@@ -151,6 +152,9 @@ private void checkInput ()
 	if ( SetEnd.length() > 0 ) {
 		props.set ( "SetEnd", SetEnd );
 	}
+    if ( CheckOnly.length() > 0 ) {
+        props.set ( "CheckOnly", CheckOnly );
+    }
     if ( IfNotFound.length() > 0 ) {
         props.set ( "IfNotFound", IfNotFound );
     }
@@ -175,6 +179,7 @@ private void commitEdits ()
 	//String IncludeGroundwaterOnlySupply = __IncludeGroundwaterOnlySupply_JComboBox.getSelected();
 	String SetStart = __SetStart_JTextField.getText().trim();
 	String SetEnd = __SetEnd_JTextField.getText().trim();
+	String CheckOnly = __CheckOnly_JComboBox.getSelected();
 	String IfNotFound = __IfNotFound_JComboBox.getSelected();
 
 	__command.setCommandParameter ( "ID", ID );
@@ -182,6 +187,7 @@ private void commitEdits ()
 	//__command.setCommandParameter ( "IncludeGroundwaterOnlySupply", IncludeGroundwaterOnlySupply );
 	__command.setCommandParameter ( "SetStart", SetStart );
 	__command.setCommandParameter ( "SetEnd", SetEnd );
+    __command.setCommandParameter ( "CheckOnly", CheckOnly );
     __command.setCommandParameter ( "IfNotFound", IfNotFound );
 }
 
@@ -190,8 +196,8 @@ Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
-private void initialize ( JFrame parent, Command command )
-{	__command = (SetIrrigationPracticeTSTotalAcreageToCropPatternTSTotalAcreage_Command)command;
+private void initialize ( JFrame parent, SetIrrigationPracticeTSTotalAcreageToCropPatternTSTotalAcreage_Command command ) {
+	__command = command;
 
 	addWindowListener(this);
 
@@ -207,6 +213,19 @@ private void initialize ( JFrame parent, Command command )
 	JPanel paragraph = new JPanel();
 	paragraph.setLayout(new GridBagLayout());
 	int yy = -1;
+	/* TODO smalers 2021-05-31 actually it is needed to use CDS total acres as base to fill
+	JGUIUtil.addComponent(paragraph, new JLabel (
+		"<html><b>This command should not be needed to set data if the ReadParcelsFromHydroBase command is used to process parcels</b></html>"),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(paragraph, new JLabel (
+	    "<html><b>because crop patterns and irrigation practice time series use the same parcel data.</b></html>"),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+	JGUIUtil.addComponent(paragraph, new JLabel (
+	    "<html><b>Use CheckOnly=True to NOT set data. Instead, compare crop pattern and irrigation practice total acreage values.</b></html>"),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
+		*/
+	JGUIUtil.addComponent(paragraph, new JLabel ( ""),
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(paragraph, new JLabel (
 		"This command sets irrigation practice total acreage " +
 		"time series values to the crop pattern total acreage time series values for each CU Location."),
@@ -215,7 +234,7 @@ private void initialize ( JFrame parent, Command command )
 		"The crop pattern time series should be read with a previous command."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		    	
 	JGUIUtil.addComponent(paragraph, new JLabel (
-		"This command does not adjust other acreage values; however, the total will be used by other commands."),
+		"This command does not adjust other acreage values; however, the total will be used by other commands when filling data."),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);	
 	JGUIUtil.addComponent(paragraph, new JLabel (
 		"The CU Location ID can contain a * wildcard pattern to match one or more time series."),
@@ -294,16 +313,31 @@ private void initialize ( JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel (
     	"Optional - end year as 4-digits (default=set all)."),
     	3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
-    
+
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Check only?:"),
+		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+        List<String> checkOnlyList = new ArrayList<>(4);
+    checkOnlyList.add ( "" );
+	checkOnlyList.add ( __command._False  );
+	checkOnlyList.add ( __command._True  );
+	__CheckOnly_JComboBox = new SimpleJComboBox(false);
+	__CheckOnly_JComboBox.setData( checkOnlyList );
+	__CheckOnly_JComboBox.addItemListener (this);
+    JGUIUtil.addComponent(main_JPanel, __CheckOnly_JComboBox,
+		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel (
+		"Optional - check but don't set data (default=" + __command._False + ")."),
+		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-        List<String> if_not_found_Vector = new Vector<String>(4);
-    if_not_found_Vector.add ( "" );
-	if_not_found_Vector.add ( __command._Ignore  );
-	if_not_found_Vector.add ( __command._Warn  );
-	if_not_found_Vector.add ( __command._Fail  );
+    List<String> ifNotFoundList = new ArrayList<>(4);
+    ifNotFoundList.add ( "" );
+	ifNotFoundList.add ( __command._Ignore  );
+	ifNotFoundList.add ( __command._Warn  );
+	ifNotFoundList.add ( __command._Fail  );
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
-	__IfNotFound_JComboBox.setData( if_not_found_Vector );
+	__IfNotFound_JComboBox.setData( ifNotFoundList );
 	__IfNotFound_JComboBox.addItemListener (this);
     JGUIUtil.addComponent(main_JPanel, __IfNotFound_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -394,6 +428,7 @@ private void refresh ()
 	//String IncludeGroundwaterOnlySupply = "";
 	String SetStart = "";
 	String SetEnd = "";
+	String CheckOnly = "";
 	String IfNotFound = "";
 	PropList props = __command.getCommandParameters();
 	if (__first_time) {
@@ -403,6 +438,7 @@ private void refresh ()
 		//IncludeGroundwaterOnlySupply = props.getValue ( "IncludeGroundwaterOnlySupply" );
 		SetStart = props.getValue ( "SetStart" );
 		SetEnd = props.getValue ( "SetEnd" );
+		CheckOnly = props.getValue ( "CheckOnly" );
 		IfNotFound = props.getValue ( "IfNotFound" );
 		if ( ID != null ) {
 			__ID_JTextField.setText(ID);
@@ -459,6 +495,22 @@ private void refresh ()
 		if ( SetEnd != null ) {
 			__SetEnd_JTextField.setText ( SetEnd );
 		}
+		if ( CheckOnly == null ) {
+			// Select default...
+			__CheckOnly_JComboBox.select ( 0 );
+		}
+		else {
+			if ( JGUIUtil.isSimpleJComboBoxItem(
+				__CheckOnly_JComboBox, CheckOnly, JGUIUtil.NONE, null, null ) ) {
+				__CheckOnly_JComboBox.select ( CheckOnly );
+			}
+			else {
+				Message.printWarning ( 1, routine,
+				"Existing command references an invalid\nCheckOnly value \""+
+				CheckOnly + "\".  Select a different value or Cancel.");
+				__error_wait = true;
+			}
+		}
 		if ( IfNotFound == null ) {
 			// Select default...
 			__IfNotFound_JComboBox.select ( 0 );
@@ -484,6 +536,7 @@ private void refresh ()
 	//IncludeGroundwaterOnlySupply = __IncludeGroundwaterOnlySupply_JComboBox.getSelected();
 	SetStart = __SetStart_JTextField.getText().trim();
 	SetEnd = __SetEnd_JTextField.getText().trim();
+	CheckOnly = __CheckOnly_JComboBox.getSelected();
 	IfNotFound = __IfNotFound_JComboBox.getSelected();
 	
 	props.add ( "ID=" + ID );
@@ -491,6 +544,7 @@ private void refresh ()
 	//props.add ( "IncludeGroundwaterOnlySupply=" + IncludeGroundwaterOnlySupply );
 	props.add ( "SetStart=" + SetStart );
 	props.add ( "SetEnd=" + SetEnd );
+	props.add ( "CheckOnly=" + CheckOnly );
 	props.add ( "IfNotFound=" + IfNotFound );
 	
 	__command_JTextArea.setText( __command.toString(props) );

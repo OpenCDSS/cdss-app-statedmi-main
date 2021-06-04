@@ -69,7 +69,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import java.io.File;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -102,8 +102,9 @@ private JTextField __OutputEnd_JTextField = null;
 private JTextField __PrecisionForArea_JTextField = null;
 private SimpleJComboBox __WriteHow_JComboBox = null;
 private SimpleJComboBox __OneLocationPerFile_JComboBox = null;
-private SimpleJComboBox __CheckData_JComboBox = null;
+private SimpleJComboBox __RecalculateTotal_JComboBox = null;
 private SimpleJComboBox __Version_JComboBox = null;
+private SimpleJComboBox __CheckData_JComboBox = null;
 private JTextArea __command_JTextArea=null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;
@@ -203,6 +204,7 @@ private void checkInput () {
 	String OutputStart = __OutputStart_JTextField.getText().trim();
 	String OutputEnd = __OutputEnd_JTextField.getText().trim();
 	String PrecisionForArea = __PrecisionForArea_JTextField.getText().trim();
+	String RecalculateTotal = __RecalculateTotal_JComboBox.getSelected();
 	String Version = __Version_JComboBox.getSelected();
 	String OneLocationPerFile = __OneLocationPerFile_JComboBox.getSelected();
 	String CheckData = __CheckData_JComboBox.getSelected();
@@ -219,6 +221,9 @@ private void checkInput () {
 	}
 	if (PrecisionForArea.length() > 0) {
 		props.set("PrecisionForArea", PrecisionForArea);
+	}
+	if ( RecalculateTotal.length() > 0 ) {
+		props.set ( "RecalculateTotal", RecalculateTotal );
 	}
 	if (Version.length() > 0) {
 		props.set("Version", Version);
@@ -253,6 +258,7 @@ private void commitEdits()
 	String OutputStart = __OutputStart_JTextField.getText().trim();
 	String OutputEnd = __OutputEnd_JTextField.getText().trim();
 	String PrecisionForArea = __PrecisionForArea_JTextField.getText().trim();
+	String RecalculateTotal = __RecalculateTotal_JComboBox.getSelected();
 	String Version = __Version_JComboBox.getSelected();
 	String OneLocationPerFile = __OneLocationPerFile_JComboBox.getSelected();
 	String CheckData = __CheckData_JComboBox.getSelected();
@@ -262,6 +268,7 @@ private void commitEdits()
 	__command.setCommandParameter("OutputStart", OutputStart);
 	__command.setCommandParameter("OutputEnd", OutputEnd);
 	__command.setCommandParameter("PrecisionForArea", PrecisionForArea);
+	__command.setCommandParameter("RecalculateTotal", RecalculateTotal);
 	__command.setCommandParameter("Version", Version);
 	__command.setCommandParameter("OneLocationPerFile", OneLocationPerFile);
 	__command.setCommandParameter("CheckData", CheckData);
@@ -368,6 +375,21 @@ private void initialize (JFrame parent, WriteIrrigationPracticeTSToStateCU_Comma
     JGUIUtil.addComponent(main_JPanel, new JLabel (
     	"Optional - default=1 to minimize roundoff errors to .1 acre."),
     	3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );            
+
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Recalculate total?:"),
+		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__RecalculateTotal_JComboBox = new SimpleJComboBox(false);
+	__RecalculateTotal_JComboBox.setToolTipText("Recalculate total acres from parts.");
+	List<String> recalcList = new ArrayList<>();
+	recalcList.add("");
+	recalcList.add(__command._False);
+	recalcList.add(__command._True);
+	__RecalculateTotal_JComboBox.setData ( recalcList );
+	__RecalculateTotal_JComboBox.addItemListener (this);
+	JGUIUtil.addComponent(main_JPanel, __RecalculateTotal_JComboBox,
+		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Optional - recalculate total irrigated acres (default=" + command._True + ")"),
+		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
             
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Version:"),
        	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -507,6 +529,7 @@ private void refresh ()
 	String OutputEnd = "";
 	String PrecisionForArea = "";
 	String WriteHow = "";
+	String RecalculateTotal = "";
 	String Version = "";
 	String OneLocationPerFile = "";
 	String CheckData = "";
@@ -521,6 +544,7 @@ private void refresh ()
 		OutputStart = props.getValue ( "OutputStart" );
 		OutputEnd = props.getValue ( "OutputEnd" );
 		PrecisionForArea = props.getValue ( "PrecisionForArea" );
+		RecalculateTotal = props.getValue ( "RecalculateTotal" );
 		Version = props.getValue ( "Version" );
 		OneLocationPerFile = props.getValue ( "OneLocationPerFile" );
 		CheckData = props.getValue ( "CheckData" );
@@ -536,6 +560,21 @@ private void refresh ()
 		}
 		if ( PrecisionForArea != null ) {
 			__PrecisionForArea_JTextField.setText ( PrecisionForArea );
+		}
+		if ( RecalculateTotal == null ) {
+			// Select default...
+			__RecalculateTotal_JComboBox.select ( 0 );
+		}
+		else {
+			if ( JGUIUtil.isSimpleJComboBoxItem(
+				__RecalculateTotal_JComboBox, RecalculateTotal, JGUIUtil.NONE, null, null )){
+				__RecalculateTotal_JComboBox.select(RecalculateTotal);
+			}
+			else {
+				Message.printWarning ( 2, routine, "Existing command references an RecalculateTotal value \"" +
+				RecalculateTotal + "\".  Select a different value or Cancel.");
+				__error_wait = true;
+			}
 		}
 		if ( Version == null ) {
 			// Select default...
@@ -607,6 +646,7 @@ private void refresh ()
 	OutputStart = __OutputStart_JTextField.getText().trim();
 	OutputEnd = __OutputEnd_JTextField.getText().trim();
 	PrecisionForArea = __PrecisionForArea_JTextField.getText().trim();
+	RecalculateTotal = __RecalculateTotal_JComboBox.getSelected();
 	Version = __Version_JComboBox.getSelected();
 	OneLocationPerFile = __OneLocationPerFile_JComboBox.getSelected();
 	CheckData = __CheckData_JComboBox.getSelected();
@@ -617,6 +657,7 @@ private void refresh ()
 	props.add("OutputStart=" + OutputStart);
 	props.add("OutputEnd=" + OutputEnd);
 	props.add("PrecisionForArea=" + PrecisionForArea);
+	props.add ( "RecalculateTotal=" + RecalculateTotal );
 	props.add("Version=" + Version);
 	props.add("OneLocationPerFile=" + OneLocationPerFile);
 	props.add("CheckData=" + CheckData);
