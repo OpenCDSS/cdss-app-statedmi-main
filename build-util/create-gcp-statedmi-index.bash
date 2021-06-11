@@ -134,7 +134,7 @@ uploadIndexHtmlFile() {
 	echo '<meta http-equiv="Pragma" content="no-cache" />' >> $indexHtmlTmpFile
 	echo '<meta http-equiv="Expires" content="0" />' >> $indexHtmlTmpFile
 	echo '<meta charset="utf-8"/>' >> $indexHtmlTmpFile
-	echo '<link id="cdss-favicon" rel="shortcut icon" href="http://opencdss.state.co.us/opencdss/images/opencdss-favicon.ico" type="image.ico">' >> $indexHtmlTmpFile
+	echo '<link id="cdss-favicon" rel="shortcut icon" href="https://opencdss.state.co.us/opencdss/images/opencdss-favicon.ico" type="image.ico">' >> $indexHtmlTmpFile
 	echo '<style>' >> $indexHtmlTmpFile
 	echo '   body { font-family: "Trebuchet MS", Helvetica, sans-serif !important; }' >> $indexHtmlTmpFile
 	echo '   table { border-collapse: collapse; }' >> $indexHtmlTmpFile
@@ -154,14 +154,14 @@ uploadIndexHtmlFile() {
 	echo '<body>' >> $indexHtmlTmpFile
 	echo '<h1>StateDMI Software Downloads</h1>' >> $indexHtmlTmpFile
 	echo '<p>' >> $indexHtmlTmpFile
-	echo '<a href="http://opencdss.state.co.us/opencdss/statedmi/">See also the OpenCDSS StateDMI page</a>, which provides additional information about StateDMI.' >> $indexHtmlTmpFile
+	echo '<a href="https://opencdss.state.co.us/opencdss/statedmi/">See also the OpenCDSS StateDMI page</a>, which provides additional information about StateDMI.' >> $indexHtmlTmpFile
 	echo '</p>' >> $indexHtmlTmpFile
-	echo '<a href="http://www.colorado.gov/pacific/cdss/statedmi">See also the CDSS StateDMI page</a>, which provides access to StateDMI releases used in State of Colorado projects.' >> $indexHtmlTmpFile
+	echo '<a href="https://www.colorado.gov/pacific/cdss/statedmi">See also the CDSS StateDMI page</a>, which provides access to StateDMI releases used in State of Colorado projects.' >> $indexHtmlTmpFile
 	echo '<p>' >> $indexHtmlTmpFile
 	echo '</p>' >> $indexHtmlTmpFile
 	echo '<p>' >> $indexHtmlTmpFile
 	echo 'The StateDMI software is available Windows 10 and Linux.' >> $indexHtmlTmpFile
-	echo 'See the latest <a href="http://opencdss.state.co.us/statedmi/latest/doc-user/appendix-install/install/">StateDMI documentation</a> for installation information (or follow a link below for specific version documentation).' >> $indexHtmlTmpFile
+	echo 'See the latest <a href="https://opencdss.state.co.us/statedmi/latest/doc-user/appendix-install/install/">StateDMI documentation</a> for installation information (or follow a link below for specific version documentation).' >> $indexHtmlTmpFile
 	echo '</p>' >> $indexHtmlTmpFile
 	echo '<p>' >> $indexHtmlTmpFile
 	echo '<ul>' >> $indexHtmlTmpFile
@@ -247,7 +247,7 @@ uploadIndexHtmlFile_Table() {
 		##		docUserUrl0="gs://opencdss.state.co.us/statedmi/${downloadFileVersion}/doc-user/index.html"
 		##		if ! gcpUtilFileExists "$docUserUrl0"; then
 		##			# Documentation is available so show link
-		##			docUserUrl="<a href="http://opencdss.state.co.us/statedmi/$downloadFileVersion/doc-user/">Doc</a>"
+		##			docUserUrl="<a href="https://opencdss.state.co.us/statedmi/$downloadFileVersion/doc-user/">Doc</a>"
 		##		else
 		##			# No documentation available
 		##			docUserUrl="-"
@@ -263,7 +263,7 @@ uploadIndexHtmlFile_Table() {
 				nparts=split(downloadFilePath,downloadFilePathParts,"/")
 				downloadFile = downloadFilePathParts[nparts]
 				downloadFileUrl=downloadFilePath
-				gsub("gs:","http:",downloadFileUrl)
+				gsub("gs:","https:",downloadFileUrl)
 				# Split the download file into parts to get other information
 				# - index is 1+
 				split(downloadFile,downloadFileParts,"_")
