@@ -7040,7 +7040,7 @@ commands list have changed.
 */
 public void contentsChanged ( ListDataEvent e )
 {
-	// The contents of the command list chagned so check the GUI state...
+	// The contents of the command list changed so check the GUI state...
 	ui_UpdateStatus ( true );	// true = also call checkGUIState();
 }
 
@@ -7471,7 +7471,7 @@ commands list have changed due to commands being added.
 */
 public void intervalAdded ( ListDataEvent e )
 {
-	// The contents of the command list chagned so check the GUI state...
+	// The contents of the command list changed so check the GUI state...
 	ui_UpdateStatus ( true );	// true = also call checkGUIState();
 }
 
@@ -7481,7 +7481,7 @@ commands list have changed due to commands being removed.
 */
 public void intervalRemoved ( ListDataEvent e )
 {
-	// The contents of the command list chagned so check the GUI state...
+	// The contents of the command list changed so check the GUI state...
 	ui_UpdateStatus ( true );	// true = also call checkGUIState();
 }
 

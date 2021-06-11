@@ -4652,7 +4652,7 @@ throws Exception
     		notifyCommandProcessorListenersOfCommandStarted ( i, size, command );
     
     		if ( command instanceof Comment_Command ) {
-    			// Comment.  Mark as processing successful.
+    			// Comment.  Mark as processing successful unless requirements were not met.
                 String commandStringUpper = command_String.toUpperCase();
                 if ( commandStringUpper.indexOf("@REQUIRE") > 0 ) {
                 	// Check @require comments for syntax errors
