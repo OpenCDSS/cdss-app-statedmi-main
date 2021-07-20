@@ -380,15 +380,17 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	// Extend the period if necessary...
 
     	DateTime date1 = new DateTime ( OutputStart_DateTime );
-    	if ( filets.getDate1().lessThan(date1) ) {
-    		date1 = new DateTime ( filets.getDate1() );
-    	}
     	DateTime date2 = new DateTime ( OutputEnd_DateTime );
-    	if ( filets.getDate2().greaterThan(date2) ) {
-    		date2 = new DateTime ( filets.getDate2() );
+    	if ( filets != null ) {
+    		if ( filets.getDate1().lessThan(date1) ) {
+    			date1 = new DateTime ( filets.getDate1() );
+    		}
+    		if ( filets.getDate2().greaterThan(date2) ) {
+    			date2 = new DateTime ( filets.getDate2() );
+    		}
+    		// This will do nothing if the period is the same as the data...
+    		filets.changePeriodOfRecord ( date1, date2 );
     	}
-    	// This will do nothing if the period is the same as the data...
-    	filets.changePeriodOfRecord ( date1, date2 );
 
     	if ( inputType.equalsIgnoreCase("HydroBase") ) {
     		// By default, fill with diversion comments...

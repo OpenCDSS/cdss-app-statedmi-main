@@ -25,8 +25,8 @@ package DWR.DMI.StateDMI;
 
 import javax.swing.JFrame;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
 import DWR.DMI.HydroBaseDMI.HydroBase_Structure;
@@ -284,23 +284,23 @@ throws InvalidCommandParameterException
 	}
 	
 	// Check for invalid parameters...
-	List<String> valid_Vector = new Vector<String>();
-    valid_Vector.add ( "ID" );
-    valid_Vector.add ( "IncludeExplicit");
-    valid_Vector.add ( "IncludeCollections" );
-    valid_Vector.add ( "ReadStart" );
-    valid_Vector.add ( "ReadEnd" );
-    valid_Vector.add ( "AverageFillFlag" );
-    valid_Vector.add ( "LEZeroInAverage" );
-    valid_Vector.add ( "UseDiversionComments" );
-    valid_Vector.add ( "PatternID" );
-    valid_Vector.add ( "FillPatternOrder" );
-    valid_Vector.add ( "PatternFillFlag" );
-    valid_Vector.add ( "FillAverageOrder" );
-    valid_Vector.add ( "AverageFillFlag" );	
-    valid_Vector.add ( "FillUsingCIU" );
-    valid_Vector.add ( "FillUsingCIUFlag" );
-	warning = StateDMICommandProcessorUtil.validateParameterNames ( valid_Vector, this, warning );
+	List<String> validList = new ArrayList<>();
+    validList.add ( "ID" );
+    validList.add ( "IncludeExplicit");
+    validList.add ( "IncludeCollections" );
+    validList.add ( "ReadStart" );
+    validList.add ( "ReadEnd" );
+    validList.add ( "AverageFillFlag" );
+    validList.add ( "LEZeroInAverage" );
+    validList.add ( "UseDiversionComments" );
+    validList.add ( "PatternID" );
+    validList.add ( "FillPatternOrder" );
+    validList.add ( "PatternFillFlag" );
+    validList.add ( "FillAverageOrder" );
+    validList.add ( "AverageFillFlag" );	
+    validList.add ( "FillUsingCIU" );
+    validList.add ( "FillUsingCIUFlag" );
+	warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	if ( warning.length() > 0 ) {
 		Message.printWarning ( warning_level,
@@ -402,16 +402,21 @@ private int fillUsingCIUFlag ( TS ts, HydroBaseDMI hbdmi,
 				message, "Confirm that only WDIDs are used for identifiers" ) );
 		return warningCount;
 	}
-	// HydroBase currently in use value
+	// HydroBase currently in use value.
 	String ciu = struct.getCiu();
-	// set the fill value
+	// Set the fill value.
 	String fillFlag = "";
-	if( FillUsingCIUFlag.equals( "Auto" )) {
+	if( FillUsingCIUFlag == null ) {
+		// Use no fill flag (default).
+		fillFlag = "";
+	}
+	else if( FillUsingCIUFlag.equals( "Auto" )) {
 		fillFlag = ciu;
 	}
 	else if( FillUsingCIUFlag.length() == 1 ) {
 		fillFlag = FillUsingCIUFlag;
 	}
+	Message.printStatus(2, routine, "FillUsingCIUFlag=" + FillUsingCIUFlag + ", will use data flag \"" + fillFlag + "\"");
 	
 	// Based on CIU string, fill missing values with
 	// flag value
