@@ -115,7 +115,7 @@ Constructor.  The command name should be set in the constructor of derived class
 */
 public SetCollectionFromList_Command ()
 {	super();
-	setCommandName ( "Set?Collection?" );
+	setCommandName ( "Set?CollectionFromList" );
 }
 
 /**
@@ -128,7 +128,7 @@ cross-reference to the original commands.
 */
 public void checkCommandParameters ( PropList parameters, String command_tag, int warning_level )
 throws InvalidCommandParameterException
-{	String routine = getClass().getName() + ".checkCommandParameters";
+{	String routine = getClass().getSimpleName() + ".checkCommandParameters";
 	String ListFile = parameters.getValue ( "ListFile" );
 	String Year = parameters.getValue ( "Year" );
 	String Div = parameters.getValue ( "Div" );
@@ -871,7 +871,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     	// Allocate an array for all locations in the list file to indicate when an
     	// aggregate/system was not matched...
     	
-    	List<String> listfile_ids = new ArrayList<String>();  // Unique list of IDs from the list file
+    	List<String> listfile_ids = new ArrayList<>();  // Unique list of IDs from the list file
     	TableRecord rec = null;
     	String id;
     	boolean found;

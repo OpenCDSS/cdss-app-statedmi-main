@@ -43,6 +43,7 @@ import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
 import DWR.StateCU.StateCU_Location;
 import DWR.StateCU.StateCU_Parcel;
 import DWR.StateCU.StateCU_SupplyFromGW;
+import DWR.StateCU.StateCU_Util;
 import DWR.StateMod.StateMod_Parcel;
 import DWR.StateMod.StateMod_Well;
 import DWR.StateMod.StateMod_WellRight;
@@ -1883,7 +1884,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				message, "Report problem to software support." ) );
 	}
 	
-	// Get the list of well rights (probably empty)...
+	// Get the list of well rights (probably empty).
 	
 	List<StateMod_WellRight> processorRightList = null;
 	try {
@@ -1901,7 +1902,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				message, "Report problem to software support." ) );
 	}
 	
-	// Get the HydroBase DMI...
+	// Get the HydroBase DMI.
 	
 	HydroBaseDMI hbdmi = null;
 	try {
@@ -1918,15 +1919,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				message, "Report problem to software support." ) );
 	}
 
-	// Get the list of CU locations...
+	// Get the list of CU locations.
 	
 	List<StateCU_Location> culocList = null;
-	int culocListSize = 0;
 	try {
 		@SuppressWarnings("unchecked")
 		List<StateCU_Location> dataList = (List<StateCU_Location>)processor.getPropContents ( "StateCU_Location_List");
 		culocList = dataList;
-		culocListSize = culocList.size();
 	}
 	catch ( Exception e ) {
 		message = "Error requesting CU location data from processor.";
@@ -1963,6 +1962,34 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			   	new CommandLogRecord(CommandStatusType.FAILURE,
 				   	message, "Use ReadParcelsFromHydroBase() before this command.") );
 	   	}
+	}
+	
+	// Do StateCU_Location and StateMod_Well must be processed together,
+	// due to integration of StateCU_Location and parcels.
+	if ( culocList.size() == 0 ) {
+		message = "No CU locations have been read.";
+		Message.printWarning(warningLevel,
+			MessageUtil.formatMessageTag( commandTag, ++warningCount),
+			routine, message );
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.WARNING,
+				message, "Read CU locations before reading parcels, in order to relate locations, parcels, and supplies.") );
+		if ( stationList.size() == 0 ) {
+			message = "No well stations have been read.  Well rights cannnot be processed.";
+			Message.printWarning(warningLevel,
+				MessageUtil.formatMessageTag( commandTag, ++warningCount),
+				routine, message );
+			status.addToLog ( CommandPhaseType.RUN,
+				new CommandLogRecord(CommandStatusType.FAILURE,
+					message, "Read well stations before reading well rights.") );
+		}
+	}
+	else if ( stationList.size() == 0 ) {
+		message = "No well stations have been read.  Well rights will be processed for CU locations (not well stations).";
+		Message.printWarning(warningLevel, routine, message ); // DO NOT increment warning count.
+		status.addToLog ( CommandPhaseType.RUN,
+			new CommandLogRecord(CommandStatusType.INFO,
+				message, "Read well stations before reading well rights to process well station rights.") );
 	}
 	
 	// Year and division are needed to uniquely identify the parcel collections.
@@ -2123,7 +2150,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	
 	if ( warningCount > 0 ) {
 		// Input error...
-		message = "Insufficient data to run command.";
+		message = "Input data has problems.";
         status.addToLog ( CommandPhaseType.RUN,
         new CommandLogRecord(CommandStatusType.FAILURE,
               message, "Check input to command." ) );
@@ -2142,6 +2169,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		boolean isSystem = false; // Is well station a system (each of which boolean will also be a collection).
 		boolean isAggregate = false; // Is well station an aggregate (each of which will also be a collection).
 		StateMod_Well well = null; // StateMod well station to process
+		StateCU_Location culoc = null; // StateCU location to process
 		//int matchCount = 0; // FIXME SAM 2009-01-19 add more checks later when no matches
 		List<HydroBase_NetAmts> hbwellrList = null; // List of rights from HydroBase for a single station (explicit or collection)
 		if ( doUseParcelsApproach ) {
@@ -2150,10 +2178,41 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			// The complexity of determining the wells to process is handled when reading parcels and their supplies.
 			// Currently can only process StateCU locations.
 			Message.printStatus(2,routine,"Reading well rights using parcels approach (direct read of well rights based on parcel supplies)");
-			for ( StateCU_Location culoc : culocList ) {
+			// StateMod well stations will be processed if available, otherwise CU locations will be processed.
+			int listSize = 0;
+			boolean doStations = false;
+			if ( stationList.size() > 0 ) {
+				listSize = stationList.size();
+				doStations = true;
+			}
+			else {
+				listSize = culocList.size();
+				doStations = false;
+			}
+			for ( int iloc = 0; iloc < listSize; iloc++ ) {
 				// Get the list of GW supplies for the model node.
 				// - supplies are unique (not counted more than once)
 				// - therefore no need to check for uniqueness later
+				if ( doStations ) {
+					// First get the station and then the CU Location.
+					well = stationList.get(iloc);
+					int cupos = StateCU_Util.indexOf(culocList, well.getID());
+					if ( cupos < 0 ) {
+						message = "Unable to find CU Location for \"" + well.getID() + "\" - cannot process well rights.";
+						Message.printWarning(warningLevel,
+							MessageUtil.formatMessageTag( commandTag, ++warningCount),routine, message );
+						status.addToLog ( CommandPhaseType.RUN,
+							new CommandLogRecord(CommandStatusType.WARNING,
+								message, "Check that well station \"" + well.getID() + "\" is in StateCU location list." ) );
+					}
+					else {
+						culoc = culocList.get(cupos);
+					}
+				}
+				else {
+					// Get the CU Location directly.
+					culoc = culocList.get(iloc);
+				}
 				List<StateCU_SupplyFromGW> culocSupplyList = culoc.getGroundwaterSupplies();
 				Message.printStatus(2,routine,"Location \"" + culoc.getID() + "\" has " + culocSupplyList.size() + " well supplies.");
 				// Loop through the GW supplies.
@@ -2169,8 +2228,20 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						// Collection type is that for the model node (e.g., aggregate or system, can be determined from the CU location)
 						collectionType = null;
 						collectionPartType = null;
-						if ( culoc.getCollectionType() != null ) {
-							collectionType = StateMod_Well_CollectionType.valueOfIgnoreCase(culoc.getCollectionType().toString());
+						if ( doStations ) {
+							// TODO smalers 2021-06-22 get a better command file from Kara to confirm functionality.
+							// - for some reason the collection type does not seem to be getting set for the location
+							//if ( well.getCollectionType() != null ) {
+							//	collectionType = StateMod_Well_CollectionType.valueOfIgnoreCase(well.getCollectionType().toString());
+							//}
+							if ( culoc.getCollectionType() != null ) {
+								collectionType = StateMod_Well_CollectionType.valueOfIgnoreCase(culoc.getCollectionType().toString());
+							}
+						}
+						else {
+							if ( culoc.getCollectionType() != null ) {
+								collectionType = StateMod_Well_CollectionType.valueOfIgnoreCase(culoc.getCollectionType().toString());
+							}
 						}
 						// Collection part type for the model node (e.g., Ditch, Well, etc., can be determined from the CU location)
 						//collectionPartType = StateMod_Well_CollectionPartType.valueOfIgnoreCase(supplyFromGW.getCollectionPartType());
