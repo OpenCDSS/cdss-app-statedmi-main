@@ -48,9 +48,7 @@ import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 
 /**
-<p>
 This class initializes, checks, and runs the CreateIrrigationPracticeTSForCULocations() command.
-</p>
 */
 public class CreateIrrigationPracticeTSForCULocations_Command extends AbstractCommand implements Command
 {
@@ -80,7 +78,7 @@ cross-reference to the original commands.
 */
 public void checkCommandParameters ( PropList parameters, String command_tag, int warning_level )
 throws InvalidCommandParameterException
-{	String routine = "CreateIrrigationPracticeTSForCULocations_Command.checkCommandParameters";
+{	String routine = getClass().getSimpleName() + ".checkCommandParameters";
 	String ID = parameters.getValue ( "ID" );
 	String IfNotFound = parameters.getValue ( "IfNotFound" );
 	String message;

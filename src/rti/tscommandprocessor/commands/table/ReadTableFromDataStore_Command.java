@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import RTi.DMI.DMI;
+import RTi.DMI.DMIDatabaseType;
 import RTi.DMI.DMISelectStatement;
 import RTi.DMI.DMIStoredProcedureData;
 import RTi.DMI.DMIUtil;
@@ -522,7 +523,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
                 // Query using the SQL string.  Expand first using ${Property} notation
                 queryString = TSCommandProcessorUtil.expandParameterValue(processor, this, Sql);
                 // Remove comments if Microsoft Access.  Otherwise leave because troubleshooting might be easier
-                if ( dmi.getDatabaseEngineType() == DMI.DBENGINE_ACCESS ) {
+                if ( dmi.getDatabaseEngineType() == DMIDatabaseType.ACCESS ) {
                     queryString = DMIUtil.removeCommentsFromSql(queryString);
                 }
                 rs = dmi.dmiSelect(queryString);
@@ -547,7 +548,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
                 queryString = TSCommandProcessorUtil.expandParameterValue(processor, this,
                     StringUtil.toString(IOUtil.fileToStringList(SqlFile_full), " "));
                 // Remove comments if Microsoft Access.  Otherwise leave because troubleshooting might be easier
-                if ( dmi.getDatabaseEngineType() == DMI.DBENGINE_ACCESS ) {
+                if ( dmi.getDatabaseEngineType() == DMIDatabaseType.ACCESS ) {
                     queryString = DMIUtil.removeCommentsFromSql(queryString);
                 }
                 rs = dmi.dmiSelect(queryString);

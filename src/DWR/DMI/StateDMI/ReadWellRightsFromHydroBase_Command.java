@@ -336,6 +336,9 @@ private void addHydroBaseRightsToStateModWellRights (
 
 /**
  * Add the list of StateMod_WellRight (from the simple approach) to the processor water right list.
+ * This is called for each model location (station).
+ * Duplicate rights are removed from within the list since no duplicates are allowed for a station,
+ * but duplicates may occur across the dataset because a well right can serve more than one model location.
  */
 private void addStateModRightsToProcessorRightList ( List<StateMod_WellRight> smWellRightList,
 	List<StateMod_WellRight> processorRightList,
@@ -349,12 +352,54 @@ private void addStateModRightsToProcessorRightList ( List<StateMod_WellRight> sm
 	//if ( (permitIDPreFormat != null) && !permitIDPreFormat.isEmpty() ) {
 		//doPermitIDPreFormat = true;
 	//}
+
+	// Remove duplicate rights:
+	// - iterate backward so the list can be modified without concurrency issues
+	// - use a second list to avoid concurrency issues
+	// Comparison uses:
+	// - structure/location ID (cannot use right ID because rights are numbered based on processing)
+	// - administration number, formatted as string with 5 digits after the decimal point
+	// - decree, formatted to 2 digits after decimal point
+	boolean found = false;
+	List<StateMod_WellRight> smWellRightList2 = new ArrayList<>();
+	// Loop through the full list of rights, which may contain duplicates.
+	for ( StateMod_WellRight aRight : smWellRightList ) {
+		found = false;
+		// Loop through the list of rights without duplicates.
+		for ( StateMod_WellRight aRight2: smWellRightList2 ) {
+			if ( aRight.equalsForOutput(aRight2) ) {
+				// Found right to be added in the second list, so don't need to add.
+				found = true;
+				break;
+			}
+		}
+		if ( found ) {
+			String message = "Water right for well station ID=" + aRight.getLocationIdentifier() +
+			" admin #=" + aRight.getAdministrationNumber() +
+			" decree=" + aRight.getDecreeString() +
+			" collection type=" + aRight.getCollectionType() +
+			" collection part ID type=" + aRight.getCollectionPartIdType() +
+			" collection part ID=" + aRight.getCollectionPartId() +
+			" matches existing right - not adding duplicate.";
+			Message.printWarning(warningLevel,
+				MessageUtil.formatMessageTag( commandTag, ++warningCount),
+				routine, message );
+		}
+		else {
+			// Add to the second list.
+			smWellRightList2.add(aRight);
+		}
+	}
+	
+	// For the remaining rights, format the right identifier,
+	// which typically depends on the count of rights,
+	// which is why duplicates needed to be removed before here.
 	boolean doPermitIDPostFormat = false;
 	if ( (permitIDPostFormat != null) && !permitIDPostFormat.isEmpty() ) {
 		doPermitIDPostFormat = true;
 	}
 	int count = 0;
-	for ( StateMod_WellRight smWellRight : smWellRightList ) {
+	for ( StateMod_WellRight smWellRight : smWellRightList2 ) {
 		++count;
 		// Format the right ID
 		StringBuilder idBuilder = new StringBuilder();
@@ -405,22 +450,22 @@ private void addStateModRightsToProcessorRightList ( List<StateMod_WellRight> sm
 		}
 		else if ( idFormat == __StationIDAutoN_int ) {
 			// Format the well right identifier as the station ID + count
-			String format = "%s%0" + ((int)(Math.log10(smWellRightList.size())) + 1) + "d";
+			String format = "%s%0" + ((int)(Math.log10(smWellRightList2.size())) + 1) + "d";
 			idBuilder.append(String.format(format,smWellRight.getCgoto(),count));
 		}
 		else if ( idFormat == __StationIDWAutoN_int ) {
 			// Format the well right identifier as the station ID + count
-			String format = "%sW%0" + ((int)(Math.log10(smWellRightList.size())) + 1) + "d";
+			String format = "%sW%0" + ((int)(Math.log10(smWellRightList2.size())) + 1) + "d";
 			idBuilder.append(String.format(format,smWellRight.getCgoto(),count));
 		}
 		else if ( idFormat == __StationID_AutoN_int ) {
 			// Format the well right identifier as the station ID + count
-			String format = "%s.%0" + ((int)(Math.log10(smWellRightList.size())) + 1) + "d";
+			String format = "%s.%0" + ((int)(Math.log10(smWellRightList2.size())) + 1) + "d";
 			idBuilder.append(String.format(format,smWellRight.getCgoto(),count));
 		}
 		else if ( idFormat == __StationIDW_AutoN_int ) {
 			// Format the well right identifier as the station ID + "W" + count
-			String format = "%sW.%0" + ((int)(Math.log10(smWellRightList.size())) + 1) + "d";
+			String format = "%sW.%0" + ((int)(Math.log10(smWellRightList2.size())) + 1) + "d";
 			idBuilder.append(String.format(format,smWellRight.getCgoto(),count));
 		}
 		// Finally post-format the permit
@@ -464,11 +509,13 @@ private void addStateModRightsToProcessorRightList ( List<StateMod_WellRight> sm
 			}
 		}
 		else {
-			// Use the default value for the administration number...
+			// Use the default value for the administration number.
 			smWellRight.setSwitch ( onOffDefault );
 		}
 	}
-	processorRightList.addAll(smWellRightList);
+
+	// Add remaining rights, should not be any duplicates.
+	processorRightList.addAll(smWellRightList2);
 }
 
 /**
