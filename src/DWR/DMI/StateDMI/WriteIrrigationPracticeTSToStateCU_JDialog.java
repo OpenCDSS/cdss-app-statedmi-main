@@ -71,7 +71,6 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
@@ -388,16 +387,16 @@ private void initialize (JFrame parent, WriteIrrigationPracticeTSToStateCU_Comma
 	__RecalculateTotal_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __RecalculateTotal_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(main_JPanel, new JLabel ("Optional - recalculate total irrigated acres (default=" + command._True + ")"),
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Optional - recalculate total irrigated acres (default=" + command._True + ")."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
             
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Version:"),
        	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List<String> version_Vector = new Vector<String>(2);
-    version_Vector.add ( "" );
-    version_Vector.add ( __command._10 );
+    List<String> version_List = new ArrayList<>(2);
+    version_List.add ( "" );
+    version_List.add ( __command._10 );
     __Version_JComboBox = new SimpleJComboBox(false);
-    __Version_JComboBox.setData ( version_Vector );
+    __Version_JComboBox.setData ( version_List );
     __Version_JComboBox.addItemListener (this);
     JGUIUtil.addComponent(main_JPanel, __Version_JComboBox,
     	1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -407,12 +406,12 @@ private void initialize (JFrame parent, WriteIrrigationPracticeTSToStateCU_Comma
      
     JGUIUtil.addComponent(main_JPanel, new JLabel ("One location per file?:"),
        	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List<String> OneLocationPerFile_Vector = new Vector<String>(3);
-    OneLocationPerFile_Vector.add ( "" );
-    OneLocationPerFile_Vector.add ( __command._False );
-    OneLocationPerFile_Vector.add ( __command._True );
+    List<String> OneLocationPerFile_List = new ArrayList<>(3);
+    OneLocationPerFile_List.add ( "" );
+    OneLocationPerFile_List.add ( __command._False );
+    OneLocationPerFile_List.add ( __command._True );
     __OneLocationPerFile_JComboBox = new SimpleJComboBox(false);
-    __OneLocationPerFile_JComboBox.setData ( OneLocationPerFile_Vector );
+    __OneLocationPerFile_JComboBox.setData ( OneLocationPerFile_List );
     __OneLocationPerFile_JComboBox.addItemListener (this);
     JGUIUtil.addComponent(main_JPanel, __OneLocationPerFile_JComboBox,
     	1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -422,12 +421,12 @@ private void initialize (JFrame parent, WriteIrrigationPracticeTSToStateCU_Comma
     
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Check data?:"),
            	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List<String> CheckData_Vector = new Vector<String>(3);
-    CheckData_Vector.add ( "" );
-    CheckData_Vector.add ( __command._False );
-    CheckData_Vector.add ( __command._True );
+    List<String> CheckData_List = new ArrayList<>(3);
+    CheckData_List.add ( "" );
+    CheckData_List.add ( __command._False );
+    CheckData_List.add ( __command._True );
     __CheckData_JComboBox = new SimpleJComboBox(false);
-    __CheckData_JComboBox.setData ( CheckData_Vector );
+    __CheckData_JComboBox.setData ( CheckData_List );
     __CheckData_JComboBox.addItemListener (this);
     JGUIUtil.addComponent(main_JPanel, __CheckData_JComboBox,
      	1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -438,12 +437,12 @@ private void initialize (JFrame parent, WriteIrrigationPracticeTSToStateCU_Comma
         
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Write how:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List<String> write_how_Vector = new Vector<String>(3);
-	write_how_Vector.add ( "" );
-	write_how_Vector.add ( __command._OverwriteFile );
-	write_how_Vector.add ( __command._UpdateFile );
+    List<String> write_how_List = new ArrayList<>(3);
+	write_how_List.add ( "" );
+	write_how_List.add ( __command._OverwriteFile );
+	write_how_List.add ( __command._UpdateFile );
 	__WriteHow_JComboBox = new SimpleJComboBox(false);
-	__WriteHow_JComboBox.setData ( write_how_Vector );
+	__WriteHow_JComboBox.setData ( write_how_List );
 	__WriteHow_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __WriteHow_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);

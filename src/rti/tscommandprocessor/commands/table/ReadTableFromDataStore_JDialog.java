@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import RTi.DMI.DMI;
+import RTi.DMI.DMIDatabaseType;
 import RTi.DMI.DMISelectStatement;
 import RTi.DMI.DMIStoredProcedureData;
 import RTi.DMI.DMIUtil;
@@ -883,7 +884,7 @@ private void populateDataStoreCatalogChoices ( DMI dmi )
     }
     else {
         // TODO SAM 2013-07-22 Improve this - it should only be shown when the master DB is used
-        if ( (dmi.getDatabaseEngineType() == DMI.DBENGINE_SQLSERVER) ) {
+        if ( (dmi.getDatabaseEngineType() == DMIDatabaseType.SQLSERVER) ) {
             try {
                 catalogList = DMIUtil.getDatabaseCatalogNames(dmi, true, notIncluded);
             }

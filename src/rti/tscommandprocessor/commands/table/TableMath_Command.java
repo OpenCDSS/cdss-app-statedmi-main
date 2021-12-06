@@ -2,22 +2,22 @@
 
 /* NoticeStart
 
-StateDMI
-StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+CDSS Time Series Processor Java Library
+CDSS Time Series Processor Java Library is a part of Colorado's Decision Support Systems (CDSS)
+Copyright (C) 1994-2019 Colorado Department of Natural Resources
 
-StateDMI is free software:  you can redistribute it and/or modify
+CDSS Time Series Processor Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-StateDMI is distributed in the hope that it will be useful,
+    CDSS Time Series Processor Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-    along with StateDMI.  If not, see <https://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with CDSS Time Series Processor Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
 
@@ -48,6 +48,7 @@ import RTi.Util.IO.PropList;
 import RTi.Util.Table.DataTable;
 import RTi.Util.Table.DataTableMath;
 import RTi.Util.Table.DataTableMathOperatorType;
+import RTi.Util.Table.TableRowConditionEvaluator;
 
 /**
 This class initializes, checks, and runs the TableMath() command.
@@ -81,6 +82,7 @@ public void checkCommandParameters ( PropList parameters, String command_tag, in
 throws InvalidCommandParameterException
 {   String TableID = parameters.getValue ( "TableID" );
     String Input1 = parameters.getValue ( "Input1" );
+    String ProcessRows = parameters.getValue ( "ProcessRows" );
     String Operator = parameters.getValue ( "Operator" );
     String Input2 = parameters.getValue ( "Input2" );
     String Output = parameters.getValue ( "Output" );
@@ -97,7 +99,26 @@ throws InvalidCommandParameterException
         status.addToLog ( CommandPhaseType.INITIALIZATION, new CommandLogRecord(CommandStatusType.FAILURE,
             message, "Provide the identifier for the table to process." ) );
     }
-    
+
+    if ( (ProcessRows != null) && !ProcessRows.isEmpty() ) {
+    	// TODO smalers 2021-08-19 need to create validation tools.
+    	String [] processRows = ProcessRows.split(",");
+    	if ( (ProcessRows != null) && !ProcessRows.isEmpty() ) {
+	    	for ( String processRow : processRows ) {
+	    		processRow = processRow.trim();
+	    		if ( processRow.equalsIgnoreCase("first") || processRow.equalsIgnoreCase("last") ) {
+	    			// OK.
+	    		}
+	    		else {
+	    			message = "The row to processed (" + processRow + ") is invalid.";
+	    			warning += "\n" + message;
+	    			status.addToLog ( CommandPhaseType.INITIALIZATION, new CommandLogRecord(CommandStatusType.FAILURE,
+	    				message, "Provide the row as \"first\" or \"last\"." ) );
+	    		}
+	    	}
+    	}
+    }
+
     if ( (Input1 == null) || Input1.equals("") ) {
         message = "The Input1 column must be specified.";
         warning += "\n" + message;
@@ -113,7 +134,7 @@ throws InvalidCommandParameterException
             message, "Provide the operator to process input." ) );
     }
     else {
-        // Make sure that the operator is known in general
+        // Make sure that the operator is known in general.
         boolean supported = false;
         try {
             operatorType = DataTableMathOperatorType.valueOfIgnoreCase(Operator);
@@ -126,7 +147,7 @@ throws InvalidCommandParameterException
                 message, "Select a supported operator using the command editor." ) );
         }
         
-        // Make sure that it is in the supported list
+        // Make sure that it is in the supported list.
         
         if ( supported ) {
             supported = false;
@@ -144,7 +165,7 @@ throws InvalidCommandParameterException
             }
         }
        
-        // Additional checks that depend on the operator
+        // Additional checks that depend on the operator.
         /* TODO SAM 2010-09-13 Add this later
         if ( supported ) {
             int nRequiredValues = -1;
@@ -212,12 +233,20 @@ throws InvalidCommandParameterException
         }*/
     }
 
-    if ( (operatorType != null) && (operatorType != DataTableMathOperatorType.TO_INTEGER) ) {
-        if ( (Input2 == null) || Input2.equals("") ) {
+    // Confirm that Input2 is specified when needed.
+    if ( operatorType != null ) {
+    	if ( DataTableMath.requiresInput2(operatorType) && ((Input2 == null) || Input2.isEmpty()) ) {
             message = "The Input2 column/value must be specified.";
             warning += "\n" + message;
             status.addToLog ( CommandPhaseType.INITIALIZATION, new CommandLogRecord(CommandStatusType.FAILURE,
                 message, "Provide a column name or numeric constant as Input2." ) );
+        }
+    	// Check the inverse.
+    	if ( ! DataTableMath.requiresInput2(operatorType) && ((Input2 != null) && !Input2.isEmpty()) ) {
+            message = "The Input2 column/value should not be specified.";
+            warning += "\n" + message;
+            status.addToLog ( CommandPhaseType.INITIALIZATION, new CommandLogRecord(CommandStatusType.FAILURE,
+                message, "Don't provide a column name or numeric constant as Input2." ) );
         }
     }
     
@@ -236,8 +265,10 @@ throws InvalidCommandParameterException
     }
     
     // Check for invalid parameters...
-    List<String> validList = new ArrayList<String>(6);
+    List<String> validList = new ArrayList<>(8);
     validList.add ( "TableID" );
+    validList.add ( "Condition" );
+    validList.add ( "ProcessRows" );
     validList.add ( "Input1" );
     validList.add ( "Operator" );
     validList.add ( "Input2" );
@@ -304,14 +335,35 @@ CommandWarningException, CommandException
     // Get the input parameters...
     
     String TableID = parameters.getValue ( "TableID" );
-    if ( (TableID != null) && !TableID.isEmpty() && (commandPhase == CommandPhaseType.RUN) && TableID.indexOf("${") >= 0 ) {
-   		TableID = TSCommandProcessorUtil.expandParameterValue(processor, this, TableID);
+   	TableID = TSCommandProcessorUtil.expandParameterValue(processor, this, TableID);
+    String Condition = parameters.getValue ( "Condition" );
+   	Condition = TSCommandProcessorUtil.expandParameterValue(processor, this, Condition);
+    String ProcessRows = parameters.getValue ( "ProcessRows" );
+   	ProcessRows = TSCommandProcessorUtil.expandParameterValue(processor, this, ProcessRows);
+    String [] processRows = new String[0];
+    boolean processAllRows = false;
+    if ( (ProcessRows != null) && !ProcessRows.isEmpty() ) {
+    	processRows = ProcessRows.split(",");
+	    for ( int i = 0; i < processRows.length; i++ ) {
+	    	processRows[i] = processRows[i].trim();
+	    	if ( processRows[i].equals("*") ) {
+	    		processAllRows = true;
+	    		break;
+	    	}
+	    }
+    }
+    if ( processAllRows ) {
+    	// Set the list of row numbers to process to empty.
+    	processRows = new String[0];
     }
     String Input1 = parameters.getValue ( "Input1" );
+   	Input1 = TSCommandProcessorUtil.expandParameterValue(processor, this, Input1);
     String Operator = parameters.getValue ( "Operator" );
     DataTableMathOperatorType operator = DataTableMathOperatorType.valueOfIgnoreCase(Operator);
     String Input2 = parameters.getValue ( "Input2" );
+   	Input2 = TSCommandProcessorUtil.expandParameterValue(processor, this, Input2);
     String Output = parameters.getValue ( "Output" );
+   	Output = TSCommandProcessorUtil.expandParameterValue(processor, this, Output);
     String NonValue = parameters.getValue ( "NonValue" );
     Double NonValue_Double = null;
     if ( (NonValue != null) && !NonValue.equals("") ) {
@@ -364,10 +416,18 @@ CommandWarningException, CommandException
     
     // Now process...
 
-    List<String> problems = new ArrayList<String>();
+    List<String> problems = new ArrayList<>();
     try {
+    	// By default will process all rows without using an evaluator.
+		TableRowConditionEvaluator evaluator = null;
+		if ( ((Condition != null) && !Condition.isEmpty()) ||
+			(processRows.length > 0)) {
+			// Process rows that match a condition:
+			// - currently this is simple logic
+			evaluator = new TableRowConditionEvaluator(table, Condition, processRows );
+		}
         DataTableMath dtm = new DataTableMath ( table );
-        dtm.math ( Input1, operator, Input2, Output, NonValue_Double, problems );
+        dtm.math ( Input1, operator, Input2, Output, NonValue_Double, evaluator, problems );
     }
     catch ( Exception e ) {
         message = "Unexpected error performing table math (" + e + ").";
@@ -425,6 +485,8 @@ public String toString ( PropList parameters )
     }
     
     String TableID = parameters.getValue( "TableID" );
+    String Condition = parameters.getValue( "Condition" );
+    String ProcessRows = parameters.getValue( "ProcessRows" );
     String Input1 = parameters.getValue( "Input1" );
     String Operator = parameters.getValue( "Operator" );
     String Input2 = parameters.getValue( "Input2" );
@@ -438,6 +500,18 @@ public String toString ( PropList parameters )
             b.append ( "," );
         }
         b.append ( "TableID=\"" + TableID + "\"" );
+    }
+    if ( (Condition != null) && (Condition.length() > 0) ) {
+        if ( b.length() > 0 ) {
+            b.append ( "," );
+        }
+        b.append ( "Condition=\"" + Condition + "\"" );
+    }
+    if ( (ProcessRows != null) && (ProcessRows.length() > 0) ) {
+        if ( b.length() > 0 ) {
+            b.append ( "," );
+        }
+        b.append ( "ProcessRows=\"" + ProcessRows + "\"" );
     }
     if ( (Input1 != null) && (Input1.length() > 0) ) {
         if ( b.length() > 0 ) {

@@ -175,20 +175,13 @@ throws InvalidCommandParameterException
                 message, "Specify the output end as blank or an integer." ) );
 	}
 
-	if ( (RecalculateTotal != null) && !RecalculateTotal.isEmpty() ) {
+	if ( (RecalculateTotal != null) && !RecalculateTotal.isEmpty() &&
+		!RecalculateTotal.equalsIgnoreCase(_False) && !RecalculateTotal.equalsIgnoreCase(_True) ) {
 		message = "The RecalculateTotal value (" + RecalculateTotal + ") is invalid.";
         warning += "\n" + message;
         status.addToLog ( CommandPhaseType.INITIALIZATION,
             new CommandLogRecord(CommandStatusType.FAILURE,
-                message, "Specify as " + _False + "(default) or " + _True) );
-	}
-
-	if ( (RecalculateTotal != null) && !RecalculateTotal.isEmpty() ) {
-		message = "The RecalculateTotal value (" + RecalculateTotal + ") is invalid.";
-        warning += "\n" + message;
-        status.addToLog ( CommandPhaseType.INITIALIZATION,
-            new CommandLogRecord(CommandStatusType.FAILURE,
-                message, "Specify as " + _False + "(default) or " + _True) );
+                message, "Specify as " + _False + " or " + _True + " (default).") );
 	}
 	
 	if ( (Version != null) && (Version.length() != 0) && !Version.equals(_10) ) {

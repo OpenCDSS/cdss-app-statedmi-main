@@ -58,6 +58,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -5784,9 +5785,6 @@ public void actionPerformed ( ActionEvent event )
 	    "You should have received a copy of the GNU General Public License\n" +
 	    "    along with StateDMI.  If not, see <https://www.gnu.org/licenses/>.\n" +
 	    " \n" +
-		"Developed with StateMod Version 12.29 (2009-08-12)\n" +
-		"Developed with StateCU Version 12\n" +
-		"\n" +
 		"Developed by the Open Water Foundation\n" +
 		"\n" +
 		"Funded by:\n" +
@@ -7113,19 +7111,21 @@ private void dataSet_UpdateList()
  * Format a URL to display help for a topic.
  * The document root is taken from StateDMI configuration properties and otherwise the
  * URL pattern follows the standard created for the documentation.
+ * Candidate URLs are formed using the software version and general "latest" version,
+ * and the first URL that returns content is returned so it can be used in the help viewer.
  * @param group a group (category) to organize items.
  * For example, the group might be "command".
  * @param item the specific item for the URL.
  * For example, the item might be a command name.
  */
 public String formatHelpViewerUrl ( String group, String item ) {
-	String routine = "formatHelpViewerUrl";
+	String routine = getClass().getSimpleName() + ".formatHelpViewerUrl";
 	// The location of the documentation is relative to root URI on the web.
     // - two locations are allowed to help transition from OWF to OpenCDSS location
 	// - use the first found URL
     String docRootUri = StateDMI.getPropValue ( "StateDMI.UserDocumentationUri" );
     String docRootUri2 = StateDMI.getPropValue ( "StateDMI.UserDocumentationUri2" );
-    List<String> docRootUriList= new ArrayList<String>(2);
+    List<String> docRootUriList= new ArrayList<>(2);
    	String version = IOUtil.getProgramVersion();
    	int pos = version.indexOf(" ");
    	if ( pos > 0 ) {
@@ -7215,7 +7215,7 @@ public String formatHelpViewerUrl ( String group, String item ) {
 			    	finally {
 			    		// Any cleanup?
 			    	}
-			    	if ( responseCode[i] < 400 ) {
+			    	if ( responseCode[i] == 200 ) {
 			    		// Looks like a valid URI to display
 			    		return docUri.toString();
 			    	}
@@ -9831,7 +9831,7 @@ private void ui_InitGUI ()
 		Message.printStatus ( 2, routine, e.toString() );
 	}
 	
-	// Set the help viewer handler
+	// Set the help viewer handler, which is used to format a URL for command help.
 	HelpViewer.getInstance().setUrlFormatter(this);
 	
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
@@ -15834,9 +15834,10 @@ private void uiAction_ShowDataSetProperties ()
 Show the datastores.
 */
 private void uiAction_ShowDataStores ()
-{   String routine = getClass().getName() + "uiAction_ShowDataStores";
+{   String routine = getClass().getSimpleName() + "uiAction_ShowDataStores";
     try {
-        new DataStores_JFrame ( "Datastores", this, __statedmiProcessor.getDataStores() );
+    	HashMap<String,String> dataStoreSubstituteMap = new HashMap<>();
+        new DataStores_JFrame ( "Datastores", this, __statedmiProcessor.getDataStores(), dataStoreSubstituteMap );
     }
     catch ( Exception e ) {
         Message.printWarning ( 1, routine, "Error displaying datastores (" + e + ")." );
