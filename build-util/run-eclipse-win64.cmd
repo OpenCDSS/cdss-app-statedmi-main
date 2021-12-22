@@ -7,6 +7,13 @@ rem   locations can be added
 rem It is assumed that the development environment follows the standard folder structure, for example:
 rem - %USERPROFILE%\cdss-dev\StateDMI\git-repos\cdss-app-statedmi-main
 
+rem Determine the script folder and workspace folder.
+rem - %~dp0 has backslash at end
+set scriptFolder=%~dp0
+set workspaceFolder=%scriptFolder%..\..\..\eclipse-workspace
+echo Batch file folder: %scriptFolder%
+echo Workspace folder: %workspaceFolder%
+
 rem Run Eclipse
 rem - the following specifically sets the VM location, which works fine if developers follow that convention
 rem - TODO smalers 2017-03-18 could change this script to fall back to using JAVA_HOME
@@ -38,8 +45,9 @@ rem If here, run Eclipse using the executable that is known to exist from above 
 rem - also set the title of the window
 rem - since 64-bit, can use a larger maximum memory value
 echo Starting Eclipse using %eclipseExe%
+rem The -data option must come before -vm, etc.
 title Eclipse configured for StateDMI 64-bit development
-%eclipseExe% -vm %javawExe% -vmargs -Xmx2408M
+%eclipseExe% -data %workspaceFolder% -vm %javawExe% -vmargs -Xmx2408M
 goto end
 
 :noeclipse

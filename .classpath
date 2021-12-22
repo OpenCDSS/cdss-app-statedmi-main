@@ -13,7 +13,6 @@
 	<classpathentry kind="lib" path="lib/apache-poi/commons-codec-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/apache-poi/commons-logging-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/apache-poi/dom4j-1.6.1.jar"/>
-	<classpathentry kind="lib" path="lib/apache-poi/log4j-1.2.13.jar"/>
 	<classpathentry kind="lib" path="lib/apache-poi/poi-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="lib/apache-poi/poi-ooxml-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="lib/apache-poi/poi-ooxml-schemas-3.9-20121203.jar"/>
@@ -21,5 +20,7 @@
 	<classpathentry kind="lib" path="lib/apache-poi/xmlbeans-2.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/apache-commons-net/commons-net-3.3.jar"/>
 	<classpathentry kind="lib" path="lib/gson/gson-2.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/apache-poi/log4j-api-2.17.0.jar"/>
+	<classpathentry kind="lib" path="lib/apache-poi/log4j-core-2.17.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
