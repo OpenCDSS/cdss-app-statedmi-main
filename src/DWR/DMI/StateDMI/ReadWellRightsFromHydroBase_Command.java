@@ -365,7 +365,8 @@ private void addStateModRightsToProcessorRightList ( List<StateMod_WellRight> sm
 	// Loop through the full list of rights, which may contain duplicates.
 	for ( StateMod_WellRight aRight : smWellRightList ) {
 		found = false;
-		// Loop through the list of rights without duplicates.
+		// Loop through the list of rights that has had duplicates removed
+		// to make sure that 'aRight' is not a duplicate.
 		for ( StateMod_WellRight aRight2: smWellRightList2 ) {
 			if ( aRight.equalsForOutput(aRight2) ) {
 				// Found right to be added in the second list, so don't need to add.
@@ -381,9 +382,7 @@ private void addStateModRightsToProcessorRightList ( List<StateMod_WellRight> sm
 			" collection part ID type=" + aRight.getCollectionPartIdType() +
 			" collection part ID=" + aRight.getCollectionPartId() +
 			" matches existing right - not adding duplicate.";
-			Message.printWarning(warningLevel,
-				MessageUtil.formatMessageTag( commandTag, ++warningCount),
-				routine, message );
+			Message.printStatus(2, routine, message );
 		}
 		else {
 			// Add to the second list.
@@ -1763,6 +1762,47 @@ private List<StateMod_WellRight> readHydroBaseWellRightsForWellStationsSimple (
 }
 
 /**
+ * Remove supplies that are not in a groundwater only location's part list.
+ * This should only be called when a groundwater only aggregate/system.
+ */
+private void removeSuppliesNotInGroundwaterOnly ( StateCU_Location culoc, StateMod_Well well,
+	List<StateCU_SupplyFromGW> culocSupplyList ) {
+	String routine = getClass().getSimpleName() + ".removeSuppliesNotInGroundwaterOnly";
+	StateMod_Well_CollectionPartType collectionPartType = well.getCollectionPartType();
+	if ( well.isCollection() && (collectionPartType == StateMod_Well_CollectionPartType.WELL) ) {
+		// Only filter if a groundwater only location:
+		// - loop backwards to avoid concurrency issue modifying the list
+		for ( int iSupply = culocSupplyList.size() - 1; iSupply >= 0; iSupply-- ) {
+			StateCU_SupplyFromGW gwSupply = culocSupplyList.get(iSupply);
+			int iPart = -1;
+			boolean found = false;
+			for ( String partId : well.getCollectionPartIDs(-1) ) {
+				++iPart;
+				List<StateMod_Well_CollectionPartIdType> partIdTypeList = well.getCollectionPartIDTypes();
+				if ( partIdTypeList.get(iPart) == StateMod_Well_CollectionPartIdType.WDID ) {
+					// Compare WDIDs.
+					if ( partId.equals(gwSupply.getWDID()) ) {
+						found = true;
+					}
+				}
+				else if ( partIdTypeList.get(iPart) == StateMod_Well_CollectionPartIdType.RECEIPT ) {
+					// Compare receipts.
+					if ( partId.equals(gwSupply.getReceipt()) ) {
+						found = true;
+					}
+				}
+			}
+			if ( !found ) {
+				// Remove the supply.
+				culocSupplyList.remove(iSupply);
+				Message.printStatus(2,routine,"Removing well supply WDID=\"" + gwSupply.getWDID() + "\" receipt=\""
+					+ gwSupply.getReceipt() + "\" since not in the collection part ID list." );
+			}
+		}
+	}
+}
+
+/**
 Method to execute the readWellRightsFromHydroBase() command.
 @param command_number Command number in sequence.
 @exception Exception if there is an error processing the command.
@@ -2240,6 +2280,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				// Get the list of GW supplies for the model node.
 				// - supplies are unique (not counted more than once)
 				// - therefore no need to check for uniqueness later
+				well = null;
+				culoc = null;
 				if ( doStations ) {
 					// First get the station and then the CU Location.
 					well = stationList.get(iloc);
@@ -2251,6 +2293,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						status.addToLog ( CommandPhaseType.RUN,
 							new CommandLogRecord(CommandStatusType.WARNING,
 								message, "Check that well station \"" + well.getID() + "\" is in StateCU location list." ) );
+						continue;
 					}
 					else {
 						culoc = culocList.get(cupos);
@@ -2260,8 +2303,11 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					// Get the CU Location directly.
 					culoc = culocList.get(iloc);
 				}
+				// The following returns only modeled supplies so don't need to call getIsModele() below.
 				List<StateCU_SupplyFromGW> culocSupplyList = culoc.getGroundwaterSupplies();
 				Message.printStatus(2,routine,"Location \"" + culoc.getID() + "\" has " + culocSupplyList.size() + " well supplies.");
+				// Remove any GW supplies that are not in collection list.
+				removeSuppliesNotInGroundwaterOnly(culoc, well, culocSupplyList);
 				// Loop through the GW supplies.
 				List<StateMod_WellRight> smWellRightForLocationList = new ArrayList<>(); // Rights that are read and returned
 				for ( StateCU_SupplyFromGW supplyFromGW : culocSupplyList ) {
@@ -2325,8 +2371,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							permitIdPreFormat, // from command PermitIDPreFormat parameter
 							smWellRightList ); // the returned right list
 
-						// Code in other approaches removes duplicate rights.
-						// However, since the supplies are distinct there is no reason to do that in this approach.
+						// Duplicate rights are removed below in the call to addStateModRightsToProcessorRightList.
 						
 						// Check whether the number of rights will overflow formatting.
 						// - this is the same as logic in the simple approach
