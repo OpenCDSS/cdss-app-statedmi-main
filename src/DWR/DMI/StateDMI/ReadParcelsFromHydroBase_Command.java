@@ -793,7 +793,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								  		supply.setID(HydroBase_WaterDistrict.formWDID( hbParcelUseTSStruct2.getStructureWD(), hbParcelUseTSStruct2.getStructureID()) );
 								  		// The supply will only be added once
 								  		// - computation of total number of supplies and corresponding fraction is computed in called code
-								  		parcel.addSupply(supply);
+								  		parcel.addSupply(supply, Message.isDebugOn);
 								  		// For logging...
 							    		//Message.printStatus ( 2, routine, "      SW: supply WDID is " + supply.getWDID() );
 							    	}
@@ -881,7 +881,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 											supplyFromGW.setID(hbWell.getReceipt());
 										}
 										supplyFromGW.setReceipt(hbWell.getReceipt());
-										parcel.addSupply(supplyFromGW);
+										parcel.addSupply(supplyFromGW,Message.isDebugOn);
 									}
 
 									// Add the parcel to the global list.
@@ -1098,7 +1098,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								  		//supplyFromSW.setID(supplyFromSW.getWDID());
 								  		supplyFromSW.setWDID(HydroBase_WaterDistrict.formWDID( hbParcelUseTSStruct2.getStructureWD(), hbParcelUseTSStruct2.getStructureID()) );
 								  		supplyFromSW.setID(HydroBase_WaterDistrict.formWDID( hbParcelUseTSStruct2.getStructureWD(), hbParcelUseTSStruct2.getStructureID()) );
-								  		parcel.addSupply(supplyFromSW);
+								  		parcel.addSupply(supplyFromSW, Message.isDebugOn);
 
 								  		// Check that surface water supply WDID is not a well.
 								  		// - could check structure type here but query wells to be more certain
@@ -1175,7 +1175,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 											supplyFromGW.setID(hbWell.getReceipt());
 										}
 										supplyFromGW.setReceipt(hbWell.getReceipt());
-										parcel.addSupply(supplyFromGW);
+										parcel.addSupply(supplyFromGW,Message.isDebugOn);
 									}
 
 									// Add to the CULocation parcels
@@ -1369,17 +1369,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					// - this is processed for both outside loops
 					// - iloop=1 processes all the wells in the collection ID list (unmodeled wells are left out if not also in D&W)
 					// - iloop=2 adds unmodeled wells, any that were not added in iloop=1
-					// - unmodeled wells need to be added as a supply to compute well fraction correctly
-					//   but are ignored
+					// - unmodeled wells need to be added as a supply to compute well fraction correctly but are otherwise ignored
 					
 					String collectionPartTypeString = "Well";
 					if ( iloop == 1 ) {
 						Message.printStatus ( 2, routine, "Processing well aggregate/system \"" + culoc_id +
-							"\" using list of WDID/permit receipt for parts (expect 1+ wells)." );
+							"\" using list of well WDID/permit receipt for parts (expect 1+ wells)." );
 					}
 					else if ( iloop == 2 ) {
 						Message.printStatus ( 2, routine, "Checking unmodeled wells for aggregate/system \"" + culoc_id +
-							"\" using list of WDID/permit receipt for CU Location parcels." );
+							"\" using list of well WDID/permit receipt for CU Location parcels." );
 					}
 
 					// The collection definitions are the same each year (same list of wells throughout the period).
@@ -1423,7 +1422,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								for ( String partId : partIdList ) {
 									++iPart;
 									partIdType = partIdTypeList.get(iPart);
-									Message.printStatus ( 2, routine, "  Processing part ID \"" + partId + "\" part type " + partIdType + "." );
+									Message.printStatus ( 2, routine, "  Processing " + culoc_id + " part ID \"" + partId + "\" part type " + partIdType + "." );
 									// Get the well associated with parcel
 									// - only contains well to parcel (no parcel use)
 									if ( partIdType == StateCU_Location_CollectionPartIdType.WDID ) {
@@ -1486,6 +1485,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 												year + ", receipt=" + partId );
 								    	}
 									}
+									else {
+											message = "    Unrecognized partIdType=" + partIdType;
+											Message.printWarning ( warningLevel, 
+				        						MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, "    " + message );
+			        						status.addToLog ( commandPhase,
+			            						new CommandLogRecord(CommandStatusType.WARNING, message,
+			            							"Check the log file.  Verify that the input." ) );
+									}
 
 									// At this point have records of well/parcel.
 									// Process parcels associated with the well part being processed
@@ -1496,11 +1503,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 										List<HydroBase_ParcelUseTS> hbParcelUseTSList =
 											hbdmi.readParcelUseTSList(year, -1, hbWell.getParcel_id(),
 											includeOnlyIrrigatedParcels);
+										if ( Message.isDebugOn ) {
+								    		Message.printStatus ( 2, routine, "      Found " + hbParcelUseTSList.size() +
+								    			" matching ParcelUseTS records." );
+										}
 										// The following message does not provide a lot of value
 										//Message.printStatus(2, routine, "      Found " + hbParcelUseTSList.size() + " ParcelUseTS for parcel " +
 										//	hbWell.getParcel_id() );
 										for ( HydroBase_ParcelUseTS hbParcelUseTS : hbParcelUseTSList ) {
-											// Add the parcel object to the processor
+											// Add the parcel object to the processor:
+											// - TODO smalers 2021-12-21 is this still needed?
 											StateCU_Parcel savedParcel = processor.getParcel(year, "" + hbWell.getParcel_id());
 											if ( savedParcel != null ) {
 												// Existing parcel.  Add the supply below but leave other information as is since previously added.
@@ -1549,13 +1561,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 											//structureView = hbdmi.readStructureViewForStructure_num(hbWell.getStructure_num());
 											// Can set the ID since a specific part ID is specified for the collection.
 											supplyFromGW.setID(partId);
+											// TODO smalers 2021-12-21 this causes an issue later because only one of the identifier parts is set:
+											// - could look up the well/permit here and set the other part
 											if ( partIdType == StateCU_Location_CollectionPartIdType.WDID ) {
 												supplyFromGW.setWDID(partId);
 											}
 											else if ( partIdType == StateCU_Location_CollectionPartIdType.RECEIPT ) {
 												supplyFromGW.setReceipt(partId);
 											}
-											parcel.addSupply(supplyFromGW);
+											Message.printStatus ( 2, routine, "        Adding GW supply matching the part ID " + partId);
+											parcel.addSupply(supplyFromGW, Message.isDebugOn);
 
 											// Also get HydroBase_ParcelUseTS for possible SW supply
 											// - necessary because a D&W may not cause the supplies to be added
@@ -1575,19 +1590,19 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 												hbdmi.readParcelUseTSStructureToParcelListForParcelIdCalYear(wdFromParcel, parcelId, year,
 												includeOnlyIrrigatedParcels);
 											if ( hbParcelUseTSStructList.size() > 0 ) {
-												Message.printStatus ( 2, routine, "    Found " + hbParcelUseTSStructList.size() +
+												Message.printStatus ( 2, routine, "        Found " + hbParcelUseTSStructList.size() +
 													" matching structure/parcel records (SW supply) for year " +
 													year + ", wdFromParcel=" + wdFromParcel + ", parcelId=" + parcelId );
 											}
 											if ( wdFromWell != wdFromParcel ) {
-												Message.printWarning(3,routine,"    WD from well (" + wdFromWell +
+												Message.printWarning(3,routine,"        WD from well (" + wdFromWell +
 													" is different than WD from parcel ID digits 2-3 (" + wdFromParcel +
 													") - also using parcel WD from well to query cached ditch ParcelUseTS.");
 												List<HydroBase_ParcelUseTSStructureToParcel> hbParcelUseTSStructList2 =
 													hbdmi.readParcelUseTSStructureToParcelListForParcelIdCalYear(wdFromWell, parcelId, year,
 													includeOnlyIrrigatedParcels);
 												if ( hbParcelUseTSStructList2.size() > 0 ) {
-													Message.printStatus ( 2, routine, "    Found " + hbParcelUseTSStructList2.size() +
+													Message.printStatus ( 2, routine, "        Found " + hbParcelUseTSStructList2.size() +
 														" matching structure/parcel records (SW supply) for year " +
 														year + ", wdFromWell=" + wdFromWell + ", parcelId=" + parcelId );
 												}
@@ -1606,11 +1621,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 												supplyFromSW.setAreaIrrigHydroBase(hbputs.getArea()*hbputs.getPercent_irrig());
 												supplyFromSW.setWDID(HydroBase_WaterDistrict.formWDID( hbputs.getStructureWD(), hbputs.getStructureID()) );
 												supplyFromSW.setID(HydroBase_WaterDistrict.formWDID( hbputs.getStructureWD(), hbputs.getStructureID()) );
-												parcel.addSupply(supplyFromSW);
+											    Message.printStatus ( 2, routine, "        Adding SW supply matching the ParcelUseTS ditch: " + supplyFromSW.getID());
+												parcel.addSupply(supplyFromSW, Message.isDebugOn);
 											}
 											
-											// Add the parcel (and its related supplies by reference) to the CULocation parcels
+											// Add the parcel (and its related supplies by reference) to the CULocation parcels.
 											culoc.addParcel ( parcel );
+											Message.printStatus ( 2, routine, "        Adding parcel ID=" + parcel.getID() + " year=" + parcel.getYear() + " to culoc " + culoc_id + " (supplies were added above).");
 
 											if ( parcel.hasGroundWaterSupply() ) {
 												culocHasGroundWaterSupply = true;
@@ -1618,7 +1635,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 											if ( parcel.hasSurfaceWaterSupply() ) {
 												culocHasSurfaceWaterSupply = true;
 											}
-										}
+										} // end parcelUseTS
 									} // end parcels
 								} // end list of well/parcel
 							} // end iloop= 1
@@ -1626,6 +1643,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 								// Additional processing to account for well supplies that are not included in the dataset.
 								// - it is possible that there are unmodeled groundwater supplies that won't show up in any WEL or D&W;
 								//   therefore, read all wells associated with the parcel and process in a loop
+								// - this is an additive step - unmodeled supplies may be added
 								// - all initial processing to occur in iloop=1 because parcel/well relationships may be processed
 								//   in any order and involve WEL and D&W parcel/well relationships
 								// - this slows things down a bit but will ensure that all well supplies are considered
@@ -1663,7 +1681,6 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 											// - if a well is not found, it did not match the original collection list,
 									    	//   is unmodeled and should be added and marked as such
 											boolean supplyFound = false;
-											boolean supplyIsUnmodeled = false;
 											StateCU_SupplyFromGW supplyFromGWFound = null; // Matched supply
 											for ( StateCU_SupplyFromGW supplyFromGW2 : supplyFromGWList ) {
 												// ID of interest depends on the existing parcel supply ID.
@@ -1672,6 +1689,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 													wdid2 = HydroBase_WaterDistrict.formWDID(hbwell2.getWD(), hbwell2.getID() );
 												}
 												String receipt2b = hbwell2.getReceipt();
+												// If WDID is available and matches, the supply is found.
+												// Else if receipt is available and matches, the supply is found.
 												if ( (!supplyFromGW2.getWDID().isEmpty() && supplyFromGW2.getWDID().equals(wdid2)) ||
 													(!supplyFromGW2.getReceipt().isEmpty() && supplyFromGW2.getReceipt().equals(receipt2b)) ) {
 													// Matched an existing parcel supply
@@ -1682,6 +1701,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 											}
 											if ( supplyFound ) {
 												// Don't need to add a supply because was matched (may be modeled or unmodeled).
+    											Message.printStatus( 2, routine, "      GW supply " + supplyFromGWFound.getID() + " is already a supply for the location.");
 												if ( !supplyFromGWFound.getIsModeled() ) {
 													// Message was already printed above
 													Message.printStatus( 2, routine, "      GW supply " + supplyFromGWFound.getID() +
@@ -1689,7 +1709,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 												}
 												else {
 													// Else was a modeled supply.
-													message = "      Parcel has GW supply for " + culoc_id + " year=" + year + " parcelId=" + parcel2.getID() +
+													message = "      Parcel has modeled GW supply for " + culoc_id + " year=" + year + " parcelId=" + parcel2.getID() +
 														" wdid=" + supplyFromGWFound.getWDID() + " receipt='" + supplyFromGWFound.getReceipt() + "'";
 													Message.printStatus(2,routine,message);
 												}
@@ -1720,7 +1740,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 												message = "      Added unmodeled GW supply for " + culoc_id + " year=" + year + " parcelId=" + parcel2.getID() +
 													" well WDID=" + supplyFromGW.getWDID() + " receipt='" + supplyFromGW.getReceipt() + "'";
 												Message.printStatus(2,routine,message);
-												parcel2.addSupply(supplyFromGW);
+												parcel2.addSupply(supplyFromGW, Message.isDebugOn);
 											}
 										}
 
