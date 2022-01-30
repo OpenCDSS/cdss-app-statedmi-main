@@ -468,7 +468,6 @@ private void refresh ()
 	String ID = "";
 	String IncludeSurfaceWaterSupply = "";
 	String IncludeGroundwaterOnlySupply = "";
-	String DataType = "";
 	String SetStart = "";
 	String SetEnd = "";
 	String FreeWaterAdministrationNumber = "";
@@ -482,7 +481,6 @@ private void refresh ()
 		ID = props.getValue ( "ID" );
 		IncludeSurfaceWaterSupply = props.getValue ( "IncludeSurfaceWaterSupply" );
 		IncludeGroundwaterOnlySupply = props.getValue ( "IncludeGroundwaterOnlySupply" );
-		DataType = props.getValue ( "DataType" );
 		SetStart = props.getValue ( "SetStart" );
 		SetEnd = props.getValue ( "SetEnd" );
 		FreeWaterAdministrationNumber = props.getValue ( "FreeWaterAdministrationNumber" );
@@ -581,7 +579,6 @@ private void refresh ()
 	props.add ( "ID=" + ID );
 	props.add ( "IncludeSurfaceWaterSupply=" + IncludeSurfaceWaterSupply);
 	props.add ( "IncludeGroundwaterOnlySupply=" + IncludeGroundwaterOnlySupply );
-	props.add ( "DataType=" + DataType );
 	props.add ( "SetStart=" + SetStart );
 	props.add ( "SetEnd=" + SetEnd );
 	props.add ( "FreeWaterAdministrationNumber=" + FreeWaterAdministrationNumber );

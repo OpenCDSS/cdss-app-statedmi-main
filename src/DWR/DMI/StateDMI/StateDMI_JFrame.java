@@ -4,7 +4,7 @@
 
 StateDMI
 StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+Copyright (C) 1997-2022 Colorado Department of Natural Resources
 
 StateDMI is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -5770,7 +5770,7 @@ public void actionPerformed ( ActionEvent event )
 		IOUtil.getProgramName() + " " + IOUtil.getProgramVersion() + "\n\n" +
 		"Creates dataset files for StateCU and StateMod.\n\n" +
 	    "StateDMI is a part of Colorado's Decision Support Systems (CDSS)\n" +
-	    "Copyright (C) 1997-2019 Colorado Department of Natural Resources\n" +
+	    "Copyright (C) 1997-2022 Colorado Department of Natural Resources\n" +
 	    " \n" +
 	    "StateDMI is free software:  you can redistribute it and/or modify\n" +
 	    "    it under the terms of the GNU General Public License as published by\n" +

@@ -4,7 +4,7 @@
 
 StateDMI
 StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+Copyright (C) 1997-2022 Colorado Department of Natural Resources
 
 StateDMI is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ public static final String PROGRAM_NAME = "StateDMI";
  *   As of version 5.0.8.dev, no zero-padding is used, although single zero is allowed.
  * - The version is used by build scripts to assign version to installers and documentation.
  */
-public static final String PROGRAM_VERSION = "5.1.3 (2021-12-23)";
+public static final String PROGRAM_VERSION = "5.1.4 (2022-01-30)";
 
 /**
 Interface for StateCU commands.
