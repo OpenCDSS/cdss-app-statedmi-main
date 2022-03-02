@@ -669,7 +669,7 @@ private void setIrrigationPracticeTSUsingRights (
 	if ( pos < 0 ) {
 		// No time series for the parcel.
 		Message.printStatus( 2, routine,
-			"No time series of rights available for location \"" + id +
+			"No time series of well water rights available for location \"" + id +
 			"\".  Setting pumping to zero for " + SetStart_DateTime + " to " + SetEnd_DateTime );
 		// Loop by year...
 		// Iterate through the full period by month...
@@ -729,6 +729,7 @@ private void setIrrigationPracticeTSUsingRights (
 			Message.printStatus ( 2, routine, "Setting " + id + " " + year + " pumping max to " +
 				StringUtil.formatString ( max_pumping, "%.2f") );
 			// DO NOT call the following since only care about setting area in IPY.
+			// Area set command information is used in reporting to help with troubleshooting.
 			// Indicate that a set command was used.
 			//if ( culoc != null ) {
 				//culoc.setHasSetIrrigationPracticeTSCommands(year);
