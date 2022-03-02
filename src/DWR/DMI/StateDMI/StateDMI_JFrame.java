@@ -168,6 +168,7 @@ import RTi.Util.Table.TableColumnType;
 import RTi.Util.Table.TableField;
 import RTi.Util.Time.TimeInterval;
 import riverside.datastore.DataStore;
+import riverside.datastore.DataStoreSubstitute;
 import riverside.datastore.DataStores_JFrame;
 import riverside.datastore.GenericDatabaseDataStore;
 import DWR.StateCU.StateCU_BlaneyCriddle_Data_JFrame;
@@ -15836,8 +15837,8 @@ Show the datastores.
 private void uiAction_ShowDataStores ()
 {   String routine = getClass().getSimpleName() + "uiAction_ShowDataStores";
     try {
-    	HashMap<String,String> dataStoreSubstituteMap = new HashMap<>();
-        new DataStores_JFrame ( "Datastores", this, __statedmiProcessor.getDataStores(), dataStoreSubstituteMap );
+    	List<DataStoreSubstitute> dataStoreSubstituteList = new ArrayList<>();
+        new DataStores_JFrame ( "Datastores", this, __statedmiProcessor.getDataStores(), dataStoreSubstituteList );
     }
     catch ( Exception e ) {
         Message.printWarning ( 1, routine, "Error displaying datastores (" + e + ")." );
