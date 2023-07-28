@@ -4,7 +4,7 @@
 
 StateDMI
 StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+Copyright (C) 1997-2023 Colorado Department of Natural Resources
 
 StateDMI is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,15 +27,14 @@ package DWR.DMI.StateDMI;
 This class initializes and runs the FillCropPatternTSInterpolate() command.
 Most functionality is implemented in the base class.
 */
-public class FillCropPatternTSInterpolate_Command extends FillCropPatternTS_Command
-{
-	
-/**
-Constructor.
-*/
-public FillCropPatternTSInterpolate_Command ()
-{	super();
-	setCommandName ( "FillCropPatternTSInterpolate" );
-}
-	
+public class FillCropPatternTSInterpolate_Command extends FillCropPatternTS_Command {
+
+	/**
+	Constructor.
+	*/
+	public FillCropPatternTSInterpolate_Command () {
+		super();
+		setCommandName ( "FillCropPatternTSInterpolate" );
+	}
+
 }
