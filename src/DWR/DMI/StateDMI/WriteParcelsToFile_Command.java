@@ -4,7 +4,7 @@
 
 StateDMI
 StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+Copyright (C) 1997-2023 Colorado Department of Natural Resources
 
 StateDMI is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,7 +43,6 @@ import DWR.StateCU.StateCU_SupplyFromSW;
 import RTi.Util.Message.Message;
 import RTi.Util.Message.MessageUtil;
 import RTi.Util.String.StringUtil;
-import RTi.Util.IO.Command;
 import RTi.Util.IO.CommandException;
 import RTi.Util.IO.CommandLogRecord;
 import RTi.Util.IO.CommandPhaseType;
@@ -58,14 +57,9 @@ import RTi.Util.IO.PropList;
 import RTi.Util.IO.AbstractCommand;
 
 /**
-<p>
-This class initializes, checks, and runs the Write*ParcelsToFile() commands.  It is an abstract
-base class that must be controlled via a derived class.  For example, the WriteCropPatternTSParcelsToFile()
-command extends this class in order to uniquely represent the command, but much of the functionality
-is in this base class.
-</p>
+This class initializes, checks, and runs the Write*ParcelsToFile() commands.
 */
-public class WriteParcelsToFile_Command extends AbstractCommand implements Command, FileGenerator
+public class WriteParcelsToFile_Command extends AbstractCommand implements FileGenerator
 {
 
 /**
@@ -84,12 +78,12 @@ protected final String _ParcelSupply = "ParcelSupply";
 List of output files that are created by this command.
 */
 private List<File> __OutputFile_List = null;
-	
+
 /**
 Constructor.
 */
-public WriteParcelsToFile_Command ()
-{	super();
+public WriteParcelsToFile_Command () {
+	super();
 	//setCommandName ( "Write?ParcelsToFile" );
 	setCommandName ( "WriteParcelsToFile" );
 }
@@ -97,23 +91,22 @@ public WriteParcelsToFile_Command ()
 /**
 Check the command parameter for valid values, combination, etc.
 @param parameters The parameters for the command.
-@param command_tag an indicator to be used when printing messages, to allow a
-cross-reference to the original commands.
+@param command_tag an indicator to be used when printing messages, to allow a cross-reference to the original commands.
 @param warning_level The warning level to use when printing parse warnings
 (recommended is 2 for initialization, and 1 for interactive command editor dialogs).
 */
 public void checkCommandParameters ( PropList parameters, String command_tag, int warning_level )
-throws InvalidCommandParameterException
-{	String OutputFile = parameters.getValue ( "OutputFile" );
+throws InvalidCommandParameterException {
+	String OutputFile = parameters.getValue ( "OutputFile" );
 	String Verbose = parameters.getValue ( "Verbose" );
 	//String Delimiter = parameters.getValue ( "Delimiter" );
 	String warning = "";
 	String message;
-	
+
     CommandProcessor processor = getCommandProcessor();
     CommandStatus status = getCommandStatus();
     status.clearLog(CommandPhaseType.INITIALIZATION);
-	
+
 	if ( (OutputFile == null) || (OutputFile.length() == 0) ) {
 		message = "The output file must be specified.";
 		warning += "\n" + message;
@@ -122,10 +115,10 @@ throws InvalidCommandParameterException
 				message, "Specify an output file." ) );
 	}
 	else {
-		String working_dir = null;		
+		String working_dir = null;
 			try {
 				Object o = processor.getPropContents ( "WorkingDir" );
-				// Working directory is available so use it...
+				// Working directory is available so use it.
 				if ( o != null ) {
 					working_dir = (String)o;
 				}
@@ -137,7 +130,7 @@ throws InvalidCommandParameterException
 					new CommandLogRecord(CommandStatusType.FAILURE,
 						message, "Software error - report to support." ) );
 			}
-	
+
 		try {
 			String adjusted_path = IOUtil.verifyPathForOS(IOUtil.adjustPath (working_dir, OutputFile));
 			File f = new File ( adjusted_path );
@@ -163,7 +156,7 @@ throws InvalidCommandParameterException
 					message, "Verify that output file and working directory paths are compatible." ) );
 		}
 	}
-    
+
 	if ( (Verbose != null) && (Verbose.length() != 0) &&
 		!Verbose.equals(_False) && !Verbose.equals(_True) ) {
         message = "The value for Verbose (" + Verbose + ") is invalid.";
@@ -173,7 +166,7 @@ throws InvalidCommandParameterException
                 message, "Specify Value as " + _False + " (default) or " + _True ) );
 	}
 
-	// Check for invalid parameters...
+	// Check for invalid parameters.
 	List<String> validList = new ArrayList<>(3);
 	validList.add ( "OutputFile" );
 	validList.add ( "FileFormat" );
@@ -182,13 +175,13 @@ throws InvalidCommandParameterException
     warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
 
 	// Throw an InvalidCommandParameterException in case of errors.
-	if ( warning.length() > 0 ) {		
+	if ( warning.length() > 0 ) {
 		Message.printWarning ( warning_level,
 			MessageUtil.formatMessageTag( command_tag, warning_level ),
 			warning );
 		throw new InvalidCommandParameterException ( warning );
 	}
-    
+
     status.refreshPhaseSeverity(CommandPhaseType.INITIALIZATION,CommandStatusType.SUCCESS);
 }
 
@@ -197,18 +190,17 @@ Edit the command.
 @param parent The parent JFrame to which the command dialog will belong.
 @return true if the command was edited (e.g., "OK" was pressed), and false if not (e.g., "Cancel" was pressed.
 */
-public boolean editCommand ( JFrame parent )
-{	// The command will be modified if changed...
+public boolean editCommand ( JFrame parent ) {
+	// The command will be modified if changed.
 	return (new WriteParcelsToFile_JDialog ( parent, this )).ok();
 }
 
-// Use parent parseCommand
+// Use parent parseCommand.
 
 /**
 Return the list of files that were created by this command.
 */
-public List<File> getGeneratedFileList ()
-{
+public List<File> getGeneratedFileList () {
 	List<File> outputFileList = getOutputFileList();
 	if ( outputFileList == null ) {
 		return new ArrayList<>();
@@ -221,8 +213,7 @@ public List<File> getGeneratedFileList ()
 /**
 Return the list of output files generated by this method.  This method is used internally.
 */
-protected List<File> getOutputFileList ()
-{
+protected List<File> getOutputFileList () {
 	return __OutputFile_List;
 }
 
@@ -234,23 +225,22 @@ Run method internal to this class, to handle running in discovery and run mode.
 @param command_phase Command phase being executed (RUN or DISCOVERY).
 */
 public void runCommand ( int command_number )
-throws InvalidCommandParameterException, CommandWarningException, CommandException
-{
+throws InvalidCommandParameterException, CommandWarningException, CommandException {
     String routine = getClass().getSimpleName() + ".runCommandInternal", message;
     int warningLevel = 2;
     String command_tag = "" + command_number;
     int warning_count = 0;
-    int log_level = 3;  // Log level for non-user warnings
+    int log_level = 3;  // Log level for non-user warnings.
     CommandPhaseType commandPhase = CommandPhaseType.RUN;
-    
-	// Check whether the processor wants output files to be created...
+
+	// Check whether the processor wants output files to be created.
 
     StateDMI_Processor processor = (StateDMI_Processor)getCommandProcessor();
 	if ( !StateDMICommandProcessorUtil.getCreateOutput(processor) ) {
 		Message.printStatus ( 2, routine,
 		"Skipping \"" + toString() + "\" because output is not being created." );
 	}
-    
+
 	CommandPhaseType command_phase = CommandPhaseType.RUN;
     CommandStatus status = getCommandStatus();
     status.clearLog(command_phase);
@@ -259,16 +249,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     String OutputFile = parameters.getValue ( "OutputFile" );
     String FileFormat = parameters.getValue ( "FileFormat" );
     if ( (FileFormat == null) || FileFormat.equals("") ) {
-    	FileFormat = _ModelParcelSupply; // Default
+    	FileFormat = _ModelParcelSupply; // Default.
     }
     String Verbose = parameters.getValue ( "Verbose" );
-    boolean verbose = false; // Default
+    boolean verbose = false; // Default.
     if ( (Verbose != null) && Verbose.equalsIgnoreCase(_True) ) {
     	verbose = true;
     }
     String Delimiter = parameters.getValue ( "Delimiter" );
     if ( (Delimiter == null) || Delimiter.equals("") ) {
-    	Delimiter = ","; // Default
+    	Delimiter = ","; // Default.
     }
 
     String OutputFile_full = OutputFile;
@@ -295,7 +285,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	   	}
 	   	if ( parcelMap == null ) {
 		   	message = "Parcel list (map) is null.";
-		   	Message.printWarning ( warningLevel, 
+		   	Message.printWarning ( warningLevel,
 			   	MessageUtil.formatMessageTag(command_tag, ++warning_count), routine, message );
 		   	status.addToLog ( commandPhase,
 			   	new CommandLogRecord(CommandStatusType.FAILURE,
@@ -307,7 +297,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         List<String> OutputComments_List = null;
         try {
         	Object o = processor.getPropContents ( "OutputComments" );
-            // Comments are available so use them...
+            // Comments are available so use them.
             if ( o != null ) {
             	@SuppressWarnings("unchecked")
 				List<String> outputCommentsList = (List<String>)o;
@@ -320,17 +310,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
             Message.printWarning(3, routine, message );
             Message.printWarning(3, routine, e );
         }
-        
-    	// Clear the filename for the FileGenerator interface
+
+    	// Clear the filename for the FileGenerator interface.
     	setOutputFileList ( null );
     	List<File> outputFileList = null; // If non-null below, then a method returned the list of files.
     	OutputFile_full = IOUtil.verifyPathForOS(
             IOUtil.toAbsolutePath(StateDMICommandProcessorUtil.getWorkingDir(processor),OutputFile) );
-        Message.printStatus ( 2, routine, "Writing list file \"" + OutputFile_full + "\"" );
 
-        // StateCU components
-        
-        /* TODO smalers 2020-10-11 remove when tests out
+        // StateCU components.
+
+        /* TODO smalers 2020-10-11 remove when tests out.
 		if ( this instanceof WriteCropPatternTSParcelsToFile_Command ) {
 			writeCropPatternTSParcelsToTextFile(OutputFile_full, Delimiter, update,
 				processor.getStateCUCropPatternTSList(), processor.getStateCULocationList(), OutputComments_List );
@@ -341,29 +330,31 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		}
 		*/
 
-        // Translate the dictionary of parcels to a list
+        // Translate the dictionary of parcels to a list:
         // - get from the map because extracting from the StateCU_Locations may result in redundancies.
         List<StateCU_Parcel> parcelList = new ArrayList<>();
 		for ( Map.Entry<String, StateCU_Parcel> entry : parcelMap.entrySet() ) {
         	parcelList.add( entry.getValue() );
         }
-        
+
+        Message.printStatus ( 2, routine, "Writing " + parcelList.size() + " parcels to file \"" + OutputFile_full + "\"" );
+
         // Initial implementation is for parcels associated with StateCU locations.
 		writeCULocationParcelsToTextFile( FileFormat, OutputFile_full, Delimiter, verbose,
 			processor.getStateCULocationList(), parcelList, OutputComments_List );
-			
-    	// Set the filename(s) for the FileGenerator interface
+
+    	// Set the filename(s) for the FileGenerator interface.
     	if ( outputFileList == null ) {
-    		// Create a list with a single file
+    		// Create a list with a single file.
     		outputFileList = new ArrayList<>(1);
     		outputFileList.add ( new File(OutputFile_full) );
-    	} // Otherwise the write method returned the list of filenames for output files
+    	} // Otherwise the write method returned the list of filenames for output files.
     	setOutputFileList ( outputFileList );
     }
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
         message = "Unexpected error writing file \"" + OutputFile_full + "\" (" + e + ").";
-        Message.printWarning ( warningLevel, 
+        Message.printWarning ( warningLevel,
         MessageUtil.formatMessageTag(command_tag, ++warning_count),
         routine, message );
         status.addToLog ( command_phase,
@@ -371,15 +362,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
                     message, "See log file for details." ) );
         throw new CommandException ( message );
     }
-    
+
     status.refreshPhaseSeverity(command_phase,CommandStatusType.SUCCESS);
 }
 
 /**
 Set the output file that is created by this command.  This is only used internally.
 */
-protected void setOutputFileList ( List<File> outputFileList )
-{
+protected void setOutputFileList ( List<File> outputFileList ) {
 	__OutputFile_List = outputFileList;
 }
 
@@ -387,8 +377,7 @@ protected void setOutputFileList ( List<File> outputFileList )
 Return the string representation of the command.
 @param parameters parameters for the command.
 */
-public String toString ( PropList parameters )
-{	
+public String toString ( PropList parameters ) {
 	if ( parameters == null ) {
 		return getCommandName() + "()";
 	}
@@ -420,7 +409,7 @@ public String toString ( PropList parameters )
 		}
 		b.append ( "Delimiter=" + Delimiter );
 	}
-	
+
 	return getCommandName() + "(" + b.toString() + ")";
 }
 
@@ -436,11 +425,11 @@ public String toString ( PropList parameters )
  */
 private void writeCULocationParcelsToTextFile ( String fileFormat, String outputFileFull, String delimiter, boolean verbose,
 	List<StateCU_Location> culocList, List<StateCU_Parcel> parcelList, List<String> outputCommentsList ) {
-	
-	// Always overwrite the file rather than update
+
+	// Always overwrite the file rather than update.
 	boolean update = false;
-	
-	// Call the general write method
+
+	// Call the general write method.
 	if ( fileFormat.equalsIgnoreCase(_ModelParcelSupply) ) {
 		writeParcelsToModelParcelSupplyFile ( outputFileFull, delimiter, update, culocList, outputCommentsList, verbose );
 	}
@@ -466,6 +455,7 @@ private void writeCULocationParcelsToTextFile ( String fileFormat, String output
  */
 private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String delimiter, boolean update,
 	List<StateCU_Location> culocList, List<String> outputCommentsList, boolean verbose ) {
+	String routine = getClass().getSimpleName() + ".writeParcelsToModelParcelSupplyFile";
 
 	List<String> newComments = new ArrayList<>();
 	List<String> commentIndicators = new ArrayList<>(1);
@@ -474,29 +464,29 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 	try {
-		// Overwrite the file
+		// Overwrite the file.
 		out = IOUtil.processFileHeaders(
 			null, outputFileFull,
 			//IOUtil.getPathUsingWorkingDir(instrfile),
 			//IOUtil.getPathUsingWorkingDir(outstrfile),
 			newComments, commentIndicators, ignoredCommentIndicators, 0);
-	
+
 		String printLine = null;
 		String cmnt = "#>";
 		String format_1 =
 			"%-12.12s %-4.4s %-11.11s %4d %-10.10s %4d %4d %-20.20s %10.3f %-4.4s %-10.10s                                     %-8.8s";
 
-		// Surface water fields - space on the left to skip over above formatting
+		// Surface water fields - space on the left to skip over above formatting.
 		String format_2 = "                                                                                                        " +
 			"%-8.8s %-8.8s %-12.12s %-4.4s          %-8.8s %3d %-8.8s %5.3f %5.3f %10.3f %-7.7s";
 
-		// Groundwater fields - data source and include align with  surface water and then space over to groundwater columns
+		// Groundwater fields - data source and include align with  surface water and then space over to groundwater columns.
 		String format_3 = "                                                                                                        %-8.8s %-8.8s %-12.12s %-4.4s             " +
 			"                                                  %-12.12s %-7.7s %-8.8s %-10.10s %4d %5.3f %5.5s %9.3f";
 
-		// Size to largest size
+		// Size to largest size.
 		List<Object> objectList = new ArrayList<>(8);
-	
+
 		out.println(cmnt);
 		out.println(cmnt + " ***************************************************************************************************");
 		out.println(cmnt + "  StateDMI Model / Parcel / Supply File - this is a diagnostics report");
@@ -634,13 +624,14 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 		out.println(cmnt + "b--------exb--exb---------exb--exb--------exb--exb--exb------------------exb--------exb--exb--------exb------exb------exb----------exb--exb------exb------exb-exb------exb---exb---exb--------exb-----exb----------exb-----exb------exb--------exb--exb---exb---exb-------ex");
 		out.println(cmnt + "EndHeader");
 		out.println(cmnt);
-	
+
 		StateCU_SupplyFromSW supplyFromSW = null;
 		StateCU_SupplyFromGW supplyFromGW = null;
-		
-		// Loop through the locations
+
+		// Loop through the locations.
 		List<StateCU_Parcel> parcelListSorted = new ArrayList<>();
 		StateCU_Parcel_Comparator parcelComparator = new StateCU_Parcel_Comparator(StateCU_Parcel_Comparator.YEAR_PARCELID);
+		Message.printStatus(2, routine, "Processing " + culocList.size() + " CU locations.");
 		for ( StateCU_Location culoc : culocList ) {
 
 			// Loop through the parcels for the location:
@@ -648,27 +639,29 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 			parcelListSorted.clear();
 			parcelListSorted.addAll(culoc.getParcelList());
 			Collections.sort(parcelListSorted, parcelComparator);
-			
+
+			Message.printStatus(2, routine, "Processing CU location \"" + culoc.getID() + "\", number of parcels = " + parcelListSorted.size() );
+
 			for ( StateCU_Parcel parcel : parcelListSorted ) {
 				if (parcel == null) {
 					continue;
 				}
-				// Make sure that the parcel's data is current.
+				// Make sure that the parcel's data is current:
 				// - TODO smalers 2020-11-05 should happen automatically when values are requested
 				parcel.recompute();
 
-				// Skip the parcel output entirely if a groundwater only node and the parcel has surface water supply
+				// Skip the parcel output entirely if a groundwater only node and the parcel has surface water supply:
 				// - in this case the parcel will have been counted with the D&W and not this WEL node
 				if ( !verbose ) {
-					// Not verbose so need to limit the output to only parcels 
+					// Not verbose so need to limit the output to only parcels
 					if ( culoc.isGroundwaterOnlySupplyModelNode() && parcel.hasSurfaceWaterSupply() ) {
 						continue;
 					}
 				}
-	
-				// line 1 - model node and parcel information
+
+				// line 1 - model node and parcel information.
 				objectList.clear();
-				// Model node
+				// Model node.
 				objectList.add(culoc.getID());
 				objectList.add("" + culoc.getLocationType());
 				if ( culoc.isCollection() ) {
@@ -677,7 +670,7 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 				else {
 					objectList.add("Single");
 				}
-				// Parcel
+				// Parcel.
 				objectList.add(new Integer(parcel.getYear()));
 				objectList.add(parcel.getID());
 				objectList.add(parcel.getDiv());
@@ -686,25 +679,25 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 				objectList.add(new Double(parcel.getArea()));
 				objectList.add(parcel.getAreaUnits());
 				objectList.add(parcel.getIrrigationMethod());
-				// Don't know whether CDS or IPY is being processed so check each.
+				// Don't know whether CDS or IPY is being processed so check each:
 				// - command checks allow only one of CDS or IPY processing from parcels
 				// - handle separately so can troubleshoot which is set
 				if ( culoc.hasSetCropPatternTSCommands(parcel.getYear()) ) {
-					// A SetCropPatternTS command was used for the location to set area
+					// A SetCropPatternTS command was used for the location to set area.
 					//objectList.add("SET:YES");
 					objectList.add("SET:CDS");
 				}
 				else if ( culoc.hasSetIrrigationPracticeTSCommands(parcel.getYear()) ) {
-					// A SetCropPatternTS command was used for the location to set area
+					// A SetCropPatternTS command was used for the location to set area.
 					//objectList.add("SET:YES");
 					objectList.add("SET:IPY");
 				}
 				else if ( culoc.hasFillCropPatternTSCommands(parcel.getYear()) ) {
-					// A FillCropPatternTS command was used for the location to set area
+					// A FillCropPatternTS command was used for the location to set area.
 					objectList.add("FILL:CDS");
 				}
 				else if ( culoc.hasFillIrrigationPracticeTSCommands(parcel.getYear()) ) {
-					// A FillIrrigationPracticeTS command was used for the location to set area
+					// A FillIrrigationPracticeTS command was used for the location to set area.
 					objectList.add("FILL:IPY");
 				}
 				else {
@@ -713,9 +706,9 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 
 				printLine = StringUtil.formatString(objectList, format_1);
 				out.println(printLine);
-			
-				// line 2 - surface supply information
-			
+
+				// line 2 - surface supply information.
+
 				for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 					if ( supply instanceof StateCU_SupplyFromSW ) {
 						supplyFromSW = (StateCU_SupplyFromSW)supply;
@@ -739,11 +732,11 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 						//objectList.add(supplyFromSW.getCollectionPartType());
 						//objectList.add(supplyFromSW.getCollectionPartIdType());
 						if ( culoc.isCollection() ) {
-							// Collection so output the collection part ID
+							// Collection so output the collection part ID.
 							objectList.add(supplyFromSW.getCollectionPartId());
 						}
 						else {
-							// Single ditch so leave the collection WDID blank
+							// Single ditch so leave the collection WDID blank.
 							objectList.add("");
 						}
 						objectList.add(new Integer(parcel.getSupplyFromSWCount()));
@@ -757,7 +750,7 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 					}
 				}
 
-				// line 3 - groundwater supply information
+				// line 3 - groundwater supply information:
 				// - only output if is a parcel that is groundwater only because
 				//   parcels with surface water are counted under D&W
 				// - this is checked at the top of the loop
@@ -792,12 +785,12 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 						objectList.add(supplyFromGW.getReceipt());
 						objectList.add(new Integer(parcel.getSupplyFromGWCount()));
 						objectList.add(new Double(1.0/parcel.getSupplyFromGWCount()));
-						// DW fraction is used in IPY calculations
+						// DW fraction is used in IPY calculations.
 						double dwFraction = 1.0;
 						if ( parcel.getSupplyFromSWCount() > 0 ) {
-							// Format here as a string because can be a blank string if not a D&W
+							// Format here as a string because can be a blank string if not a D&W.
 							//objectList.add(String.format("%5.3f", (1.0/parcel.getSupplyFromSWCount())));
-							// TODO smalers 2021-02-28 ditch multiplier is not used since well supply is only once regardless of # of ditches
+							// TODO smalers 2021-02-28 ditch multiplier is not used since well supply is only once regardless of # of ditches.
 							//objectList.add(String.format("%5.3f", 1.0));
 							dwFraction = parcel.getSupplyFromSWFraction(culoc.getID());
 							objectList.add(String.format("%5.3f",dwFraction));
@@ -805,21 +798,21 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 						else {
 							objectList.add("");
 						}
-						// The area does not consider the D&W surface water split,
+						// The area does not consider the D&W surface water split:
 						// - multiply by the additional fraction
 						objectList.add(new Double(supplyFromGW.getAreaIrrig()*dwFraction));
 						printLine = StringUtil.formatString(objectList, format_3);
 						out.println(printLine);
 					}
 					else if ( !(supply instanceof StateCU_SupplyFromSW) ) {
-						// Not surface water or groundwater so an error
+						// Not surface water or groundwater so an error:
 						// - code error that will need to be fixed
 						throw new RuntimeException("Supply type not handled - need to check code.");
 					}
 				}
 			}
 		}
-	} 
+	}
 	catch (Exception e) {
 		throw e;
 	}
@@ -850,34 +843,34 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 	ignoredCommentIndicators.add ( "#>");
 	PrintWriter out = null;
 	try {
-		// Overwrite the file
+		// Overwrite the file.
 		out = IOUtil.processFileHeaders(
 			null, outputFileFull,
 			//IOUtil.getPathUsingWorkingDir(instrfile),
 			//IOUtil.getPathUsingWorkingDir(outstrfile),
 			newComments, commentIndicators, ignoredCommentIndicators, 0);
-	
+
 		String printLine = null;
 		String cmnt = "#>";
-		String format_1 = "%6d %4d %4d %15.15s %-20.20s %10.3f %-4.4s %-10.10s"; // When no general parcel error
-		String format_1_error = format_1 + // When have a general parcel error
-			"                                                      " + // Skip surface supply data
-			"                                                                       %s"; // Skip groundwater supply and output general error
+		String format_1 = "%6d %4d %4d %15.15s %-20.20s %10.3f %-4.4s %-10.10s"; // When no general parcel error.
+		String format_1_error = format_1 + // When have a general parcel error.
+			"                                                      " + // Skip surface supply data.
+			"                                                                       %s"; // Skip groundwater supply and output general error.
 
 		// Surface water fields - space on the left to skip over above formatting
-		String format_2 = "                                                                                 " + // General parcel data
+		String format_2 = "                                                                                 " + // General parcel data.
 			"%-10.10s %6d %6.3f %8.3f %11.3f %-7.7s";
 		String format_2_error = format_2 +
-			"                                                                     %s"; // Skip groundwater supply and output general error
+			"                                                                     %s"; // Skip groundwater supply and output general error.
 
-		// Groundwater fields - data source and include align with  surface water and then space over to groundwater columns
-		String format_3 = "                                                                                                                                       " + // Skip general parcel and surface supply data
+		// Groundwater fields - data source and include align with  surface water and then space over to groundwater columns.
+		String format_3 = "                                                                                                                                       " + // Skip general parcel and surface supply data.
 			"%-10.10s %-10.10s %-12.12s %6d %6.3f %6.6s %11.3f";
-		String format_3_error = format_3 + " %s"; // Groundwater supply data and general error
+		String format_3_error = format_3 + " %s"; // Groundwater supply data and general error.
 
-		// Size to largest size
+		// Size to largest size.
 		List<Object> objectList = new ArrayList<>(8);
-	
+
 		out.println(cmnt);
 		out.println(cmnt + " ***************************************************************************************************");
 		out.println(cmnt + "  StateDMI Parcel / Supply File - this is a diagnostics report");
@@ -939,25 +932,25 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 		out.println(cmnt + "b--exb--exb--exb-------------exb------------------exb--------exb--exb--------exb--------exb----exb----exb------exb---------exb-----exb--------exb--------exb----------exb----exb----exb----exb---------exb----------");
 		out.println(cmnt + "EndHeader");
 		out.println(cmnt);
-		
-		// Create a new  parcel list and sort by year, division, district, and parcel ID
+
+		// Create a new  parcel list and sort by year, division, district, and parcel ID:
 		// - don't need to copy the parcel instances, just make a new list
 		List<StateCU_Parcel> parcelList = new ArrayList<>();
 		for ( StateCU_Parcel parcel : parcelListOrig ) {
 			parcelList.add(parcel);
 		}
-		// Sort using the comparator
+		// Sort using the comparator.
 		Collections.sort(parcelList, new StateCU_Parcel_Comparator(StateCU_Parcel_Comparator.YEAR_DIVISION_DISTRICT_PARCELID) );
-	
+
 		StateCU_SupplyFromSW supplyFromSW = null;
 		StateCU_SupplyFromGW supplyFromGW = null;
-		// Process all of the parcels
+		// Process all of the parcels.
 		for ( StateCU_Parcel parcel : parcelList ) {
 			if (parcel == null) {
 				continue;
 			}
-	
-			// line 1 - parcel information
+
+			// line 1 - parcel information.
 			objectList.clear();
 			objectList.add(new Integer(parcel.getYear()));
 			objectList.add(new Integer(parcel.getDiv()));
@@ -968,19 +961,19 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 			objectList.add(parcel.getAreaUnits());
 			objectList.add(parcel.getIrrigationMethod());
 			if ( parcel.getError().length() > 0 ) {
-				// Output the parcel error at the end
+				// Output the parcel error at the end.
 				objectList.add("ERROR: " + parcel.getError());
 				printLine = StringUtil.formatString(objectList, format_1_error);
 			}
 			else {
-				// No parcel error so don't output a bunch of whitespace
+				// No parcel error so don't output a bunch of whitespace.
 				printLine = StringUtil.formatString(objectList, format_1);
 			}
 			out.println(printLine);
-			
-			// line 2+ - supply information
+
+			// line 2+ - supply information:
 			// - list surface water supplies first, then groundwater
-			
+
 			for ( StateCU_Supply supply : parcel.getSupplyList() ) {
 				if ( supply instanceof StateCU_SupplyFromSW ) {
 					supplyFromSW = (StateCU_SupplyFromSW)supply;
@@ -991,23 +984,23 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 					objectList.add(new Double(supplyFromSW.getAreaIrrigFractionHydroBase()));
 					objectList.add(new Double(supplyFromSW.getAreaIrrig()));
 					if ( supplyFromSW.getAreaIrrigFractionHydroBase() >= 0.0 ) {
-						// Have HydroBase fraction from ReadParcelsFromHydroBase
+						// Have HydroBase fraction from ReadParcelsFromHydroBase.
 						objectList.add(supplyFromSW.getAreaIrrigFractionHydroBaseError());
 					}
 					else {
-						// Do not have HydroBase fraction from ReadParcelsFromIrrigatedLands
+						// Do not have HydroBase fraction from ReadParcelsFromIrrigatedLands.
 						objectList.add("");
 					}
 					// Only show as an error if HydroBase fraction is available:
 					// - won't be available if parcels were read from irrigated lands using
 					//   ReadParcelsFromIrrigatedLands command
 					if ( supplyFromSW.getError().length() > 0 ) {
-						// Output the parcel error at the end
+						// Output the parcel error at the end.
 						objectList.add("ERROR: " + supplyFromSW.getError());
 						printLine = StringUtil.formatString(objectList, format_2_error);
 					}
 					else {
-						// No parcel error so don't output a bunch of whitespace
+						// No parcel error so don't output a bunch of whitespace.
 						printLine = StringUtil.formatString(objectList, format_2);
 					}
 					out.println(printLine);
@@ -1023,7 +1016,7 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 					objectList.add(new Integer(parcel.getSupplyFromGWCount()));
 					objectList.add(new Double(1.0/parcel.getSupplyFromGWCount()));
 					if ( parcel.getSupplyFromSWCount() > 0 ) {
-						// Format here as a string because can be a blank string if not a D&W
+						// Format here as a string because can be a blank string if not a D&W.
 						objectList.add(String.format("%6.3f", (1.0/parcel.getSupplyFromSWCount())));
 					}
 					else {
@@ -1031,19 +1024,19 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 					}
 					objectList.add(new Double(supplyFromGW.getAreaIrrig()));
 					if ( supplyFromGW.getError().length() > 0 ) {
-						// Output the parcel error at the end
+						// Output the parcel error at the end.
 						objectList.add("ERROR: " + supplyFromGW.getError());
 						printLine = StringUtil.formatString(objectList, format_3_error);
 					}
 					else {
-						// No parcel error so don't output a bunch of whitespace
+						// No parcel error so don't output a bunch of whitespace.
 						printLine = StringUtil.formatString(objectList, format_3);
 					}
 					out.println(printLine);
 				}
 			}
 		}
-	} 
+	}
 	catch (Exception e) {
 		throw e;
 	}

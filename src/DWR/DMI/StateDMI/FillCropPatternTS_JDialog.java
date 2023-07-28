@@ -4,7 +4,7 @@
 
 StateDMI
 StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+Copyright (C) 1997-2023 Colorado Department of Natural Resources
 
 StateDMI is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ public class FillCropPatternTS_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeListener {
 
 private boolean __error_wait = false;
-private boolean __first_time = true;	
+private boolean __first_time = true;
 private JTextArea __command_JTextArea=null;
 private JTextField __ID_JTextField = null;
 private SimpleJComboBox __IncludeGroundwaterOnlySupply_JComboBox = null;
@@ -82,10 +82,11 @@ private JTextField __MaxIntervals_JTextField = null;
 private JTextField __Constant_JTextField = null;
 private SimpleJComboBox __FillDirection_JComboBox = null;
 private JTextField __FillFlag_JTextField = null;
+private JTextField __FillFlagDescription_JTextField = null;
 private SimpleJComboBox	__IfNotFound_JComboBox = null;
 private SimpleJButton __cancel_JButton = null;
-private SimpleJButton __ok_JButton = null;	
-private SimpleJButton __help_JButton = null;	
+private SimpleJButton __ok_JButton = null;
+private SimpleJButton __help_JButton = null;
 private FillCropPatternTS_Command __command = null;
 private boolean __ok = false;
 
@@ -94,8 +95,8 @@ Command editor constructor.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
-public FillCropPatternTS_JDialog ( JFrame parent, FillCropPatternTS_Command command )
-{	super(parent, true);
+public FillCropPatternTS_JDialog ( JFrame parent, FillCropPatternTS_Command command ) {
+	super(parent, true);
 	initialize ( parent, command );
 }
 
@@ -123,11 +124,11 @@ public void actionPerformed(ActionEvent event) {
 }
 
 /**
-Check the input.  If errors exist, warn the user and set the __error_wait flag
-to true.  This should be called before response() is allowed to complete.
+Check the input.  If errors exist, warn the user and set the __error_wait flag to true.
+This should be called before response() is allowed to complete.
 */
-private void checkInput ()
-{	// Put together a list of parameters to check...
+private void checkInput () {
+	// Put together a list of parameters to check.
 	PropList parameters = new PropList ( "" );
 	String ID = __ID_JTextField.getText().trim();
 	String FillStart = __FillStart_JTextField.getText().trim();
@@ -136,7 +137,7 @@ private void checkInput ()
 	String IncludeSurfaceWaterSupply = __IncludeSurfaceWaterSupply_JComboBox.getSelected();
 	String IncludeGroundwaterOnlySupply = __IncludeGroundwaterOnlySupply_JComboBox.getSelected();
 	String IfNotFound = __IfNotFound_JComboBox.getSelected();
-	
+
 	if ( ID.length() > 0 ) {
 		parameters.set ( "ID", ID );
 	}
@@ -158,7 +159,7 @@ private void checkInput ()
 	if ( IfNotFound.length() > 0 ) {
 		parameters.set ( "IfNotFound", IfNotFound );
 	}
-	
+
 	if ( __NormalizeTotals_JComboBox != null ) {
 		String NormalizeTotals = __NormalizeTotals_JComboBox.getSelected();
 		if ( NormalizeTotals.length() > 0 ) {
@@ -183,6 +184,12 @@ private void checkInput ()
 			parameters.set ( "FillFlag", FillFlag );
 		}
 	}
+	if ( __FillFlagDescription_JTextField != null ) {
+		String FillFlagDescription = __FillFlagDescription_JTextField.getText().trim();
+		if ( FillFlagDescription.length() > 0 ) {
+			parameters.set ( "FillFlagDescription", FillFlagDescription );
+		}
+	}
 	if ( __MaxIntervals_JTextField != null ) {
 		String MaxIntervals = __MaxIntervals_JTextField.getText().trim();
 		if ( MaxIntervals.length() > 0 ) {
@@ -196,9 +203,9 @@ private void checkInput ()
 		}
 	}
 	__error_wait = false;
-	
+
 	try {
-		// This will warn the user...
+		// This will warn the user.
 		__command.checkCommandParameters ( parameters, null, 1 );
 	}
 	catch ( Exception e ) {
@@ -209,11 +216,11 @@ private void checkInput ()
 }
 
 /**
-Commit the edits to the command.  In this case the command parameters have
-already been checked and no errors were detected.
+Commit the edits to the command.
+In this case the command parameters have already been checked and no errors were detected.
 */
-private void commitEdits ()
-{	String ID = __ID_JTextField.getText().trim();
+private void commitEdits () {
+	String ID = __ID_JTextField.getText().trim();
 	String FillStart = __FillStart_JTextField.getText().trim();
 	String FillEnd = __FillEnd_JTextField.getText().trim();
 	String CropType = __CropType_JTextField.getText().trim();
@@ -227,7 +234,7 @@ private void commitEdits ()
 	__command.setCommandParameter ( "IncludeSurfaceWaterSupply", IncludeSurfaceWaterSupply );
 	__command.setCommandParameter ( "IncludeGroundwaterOnlySupply", IncludeGroundwaterOnlySupply );
 	__command.setCommandParameter ( "IfNotFound", IfNotFound );
-	
+
 	if ( __NormalizeTotals_JComboBox != null ) {
 		String NormalizeTotals = __NormalizeTotals_JComboBox.getSelected();
 		__command.setCommandParameter ( "NormalizeTotals", NormalizeTotals );
@@ -244,6 +251,10 @@ private void commitEdits ()
 		String FillFlag = __FillFlag_JTextField.getText().trim();
 		__command.setCommandParameter ( "FillFlag", FillFlag );
 	}
+	if ( __FillFlagDescription_JTextField != null ) {
+		String FillFlagDescription = __FillFlagDescription_JTextField.getText().trim();
+		__command.setCommandParameter ( "FillFlagDescription", FillFlagDescription );
+	}
 	if ( __MaxIntervals_JTextField != null ) {
 		String MaxIntervals = __MaxIntervals_JTextField.getText().trim();
 		__command.setCommandParameter ( "MaxIntervals", MaxIntervals );
@@ -253,9 +264,9 @@ private void commitEdits ()
 		__command.setCommandParameter ( "Constant", Constant );
 	}
 }
-	
-public void stateChanged(ChangeEvent e)
-{	refresh();
+
+public void stateChanged(ChangeEvent e) {
+	refresh();
 }
 
 /**
@@ -263,14 +274,14 @@ Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
-private void initialize ( JFrame parent, FillCropPatternTS_Command command )
-{	__command = command;
+private void initialize ( JFrame parent, FillCropPatternTS_Command command ) {
+	__command = command;
 
 	addWindowListener(this);
 
     Insets insetsTLBR = new Insets(2,2,2,2);
 
-	// Main panel...
+	// Main panel.
 
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
@@ -281,7 +292,7 @@ private void initialize ( JFrame parent, FillCropPatternTS_Command command )
 	paragraph.setLayout(new GridBagLayout());
 	int yy = -1;
    	JGUIUtil.addComponent(paragraph, new JLabel (
-	"This command fills missing data in crop pattern time series," + 
+	"This command fills missing data in crop pattern time series," +
 	" using the CU Location ID, crop type, and year"),
 	0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	if ( __command instanceof FillCropPatternTSConstant_Command ) {
@@ -339,7 +350,7 @@ private void initialize ( JFrame parent, FillCropPatternTS_Command command )
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
 		0, ++y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
-	
+
     JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
         0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
@@ -352,7 +363,7 @@ private void initialize ( JFrame parent, FillCropPatternTS_Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Required - CU location(s) to fill (use * for wildcard)"),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
-    
+
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Crop type:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__CropType_JTextField = new JTextField ("*",10);
@@ -362,7 +373,7 @@ private void initialize ( JFrame parent, FillCropPatternTS_Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Required - specify the crops to fill (use * for wildcard, or separate by commas)."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
-    
+
 	if ( __command instanceof FillCropPatternTSConstant_Command ) {
        	JGUIUtil.addComponent(main_JPanel, new JLabel("Constant:"),
 			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -374,7 +385,7 @@ private void initialize ( JFrame parent, FillCropPatternTS_Command command )
 			"Required - constant value to use for filling."),
 			3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 	}
-    
+
     if ( __command instanceof FillCropPatternTSUsingWellRights_Command ) {
     	JGUIUtil.addComponent(main_JPanel, new JLabel ("Parcel data year:"),
     		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
@@ -386,7 +397,7 @@ private void initialize ( JFrame parent, FillCropPatternTS_Command command )
 		"Required - 4-digit year for parcel data to turn acreage on/off."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
     }
-        
+
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Include surface water supply?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     List<String> IncludeSurfaceWaterSupply_Vector = new Vector<String>(3);
@@ -401,8 +412,8 @@ private void initialize ( JFrame parent, FillCropPatternTS_Command command )
 	1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
    	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Optional - include locations with surface water supply? (default=" + __command._True + ")."),
-		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );  
-        
+		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Include groundwater only supply?:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     List<String> IncludeGroundwaterOnlySupply_Vector = new Vector<String>(3);
@@ -475,8 +486,9 @@ private void initialize ( JFrame parent, FillCropPatternTS_Command command )
 			"Optional - direction to process data (default=" + __command._Forward + ")."),
 			3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 	}
-	
-	if ( __command instanceof FillCropPatternTSRepeat_Command ) {
+
+	if ( (__command instanceof FillCropPatternTSInterpolate_Command) ||
+		(__command instanceof FillCropPatternTSRepeat_Command) ) {
        	JGUIUtil.addComponent(main_JPanel, new JLabel("Fill flag:"),
 			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 		__FillFlag_JTextField = new JTextField (10);
@@ -484,6 +496,18 @@ private void initialize ( JFrame parent, FillCropPatternTS_Command command )
        	JGUIUtil.addComponent(main_JPanel, __FillFlag_JTextField,
 			1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
        	JGUIUtil.addComponent(main_JPanel, new JLabel ("Optional - string to flag filled values (default=no flag)."),
+			3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+	}
+
+	if ( (__command instanceof FillCropPatternTSInterpolate_Command) ||
+		(__command instanceof FillCropPatternTSRepeat_Command) ) {
+       	JGUIUtil.addComponent(main_JPanel, new JLabel("Fill flag description:"),
+			0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+		__FillFlagDescription_JTextField = new JTextField (30);
+		__FillFlagDescription_JTextField.addKeyListener (this);
+       	JGUIUtil.addComponent(main_JPanel, __FillFlagDescription_JTextField,
+			1, y, 5, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+       	JGUIUtil.addComponent(main_JPanel, new JLabel ("Optional - description for fill flag (default=no flag)."),
 			3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 	}
 
@@ -499,7 +523,7 @@ private void initialize ( JFrame parent, FillCropPatternTS_Command command )
 			"Optional - specify limit on intervals to fill (default=no limit)."),
 			3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 	}
-	
+
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
@@ -516,7 +540,7 @@ private void initialize ( JFrame parent, FillCropPatternTS_Command command )
 	   	"Optional - indicate action if no match is found (default=" + __command._Warn + ")."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
-	JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"), 
+	JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__command_JTextArea = new JTextArea (4,40);
 	__command_JTextArea.setLineWrap ( true );
@@ -524,14 +548,14 @@ private void initialize ( JFrame parent, FillCropPatternTS_Command command )
 	__command_JTextArea.setEditable (false);
 	JGUIUtil.addComponent(main_JPanel,new JScrollPane(__command_JTextArea),
 		1, y, 6, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-			
-	// Refresh the contents...
+
+	// Refresh the contents.
 	refresh ();
 
-	// South JPanel: North
+	// Panel for buttons.
 	JPanel button_JPanel = new JPanel();
 	button_JPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-        JGUIUtil.addComponent(main_JPanel, button_JPanel, 
+        JGUIUtil.addComponent(main_JPanel, button_JPanel,
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
 	__ok_JButton = new SimpleJButton("OK", this);
@@ -542,7 +566,7 @@ private void initialize ( JFrame parent, FillCropPatternTS_Command command )
 	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	setTitle ( "Edit " + __command.getCommandName() + "() Command" );
-	// JDialogs do not need to be resizable...
+	// JDialogs do not need to be resizable.
 	setResizable (false);
     pack();
     JGUIUtil.center(this);
@@ -590,9 +614,9 @@ public boolean ok() {
 /**
 Refresh the command from the other text field contents.
 */
-private void refresh ()
-{	__error_wait = false;
-	String routine = "FillCropPatternTS_JDialog.refresh";
+private void refresh () {
+	__error_wait = false;
+	String routine = getClass().getSimpleName() + ".refresh";
 	String ID = "*";
 	String IncludeGroundwaterOnlySupply = "";
 	String IncludeSurfaceWaterSupply = "";
@@ -603,15 +627,16 @@ private void refresh ()
 	String ParcelYear = "";
 	String FillDirection = "";
 	String FillFlag = "";
+	String FillFlagDescription = "";
 	String MaxIntervals = "";
 	String Constant = "";
 	String IfNotFound = "";
 	PropList props = null;
-	
+
 	if (__first_time) {
 		__first_time = false;
-	
-		// Get the properties from the command
+
+		// Get the properties from the command.
 		props = __command.getCommandParameters();
 		ID = props.getValue ( "ID" );
 		IncludeGroundwaterOnlySupply = props.getValue ( "IncludeGroundwaterOnlySupply" );
@@ -623,6 +648,7 @@ private void refresh ()
 		ParcelYear = props.getValue ( "ParcelYear" );
 		FillDirection = props.getValue ( "FillDirection" );
 		FillFlag = props.getValue ( "FillFlag" );
+		FillFlagDescription = props.getValue ( "FillFlagDescription" );
 		MaxIntervals = props.getValue ( "MaxIntervals" );
 		Constant = props.getValue ( "Constant" );
 		IfNotFound = props.getValue ( "IfNotFound" );
@@ -631,7 +657,7 @@ private void refresh ()
 		}
 		if ( __IncludeSurfaceWaterSupply_JComboBox != null ) {
 			if ( IncludeSurfaceWaterSupply == null ) {
-				// Select default...
+				// Select default.
 				__IncludeSurfaceWaterSupply_JComboBox.select ( 0 );
 			}
 			else {
@@ -650,7 +676,7 @@ private void refresh ()
 		}
 		if ( __IncludeGroundwaterOnlySupply_JComboBox != null ) {
 			if ( IncludeGroundwaterOnlySupply == null ) {
-				// Select default...
+				// Select default.
 				__IncludeGroundwaterOnlySupply_JComboBox.select ( 0 );
 			}
 			else {
@@ -671,7 +697,7 @@ private void refresh ()
 		}
 		if ( __NormalizeTotals_JComboBox != null ) {
 			if ( NormalizeTotals == null ) {
-				// Select default...
+				// Select default.
 				__NormalizeTotals_JComboBox.select ( 0 );
 			}
 			else {
@@ -698,7 +724,7 @@ private void refresh ()
 		}
 		if ( __FillDirection_JComboBox != null ) {
 			if ( FillDirection == null ) {
-				// Select default...
+				// Select default.
 				__FillDirection_JComboBox.select ( 0 );
 			}
 			else {
@@ -717,6 +743,9 @@ private void refresh ()
 		if ( (__FillFlag_JTextField != null) && (FillFlag != null) ) {
 			__FillFlag_JTextField.setText ( FillFlag );
 		}
+		if ( (__FillFlagDescription_JTextField != null) && (FillFlagDescription != null) ) {
+			__FillFlagDescription_JTextField.setText ( FillFlagDescription );
+		}
 		if ( (__MaxIntervals_JTextField != null) && (MaxIntervals != null) ) {
 			__MaxIntervals_JTextField.setText ( MaxIntervals );
 		}
@@ -724,7 +753,7 @@ private void refresh ()
 			__Constant_JTextField.setText ( Constant );
 		}
 		if ( IfNotFound == null ) {
-			// Select default...
+			// Select default.
 			__IfNotFound_JComboBox.select ( 0 );
 		}
 		else {
@@ -740,7 +769,7 @@ private void refresh ()
 			}
 		}
 	}
-	// Regardless, reset the command from the fields...
+	// Regardless, reset the command from the fields.
 	props = new PropList(__command.getCommandName());
 	ID = __ID_JTextField.getText().trim();
 	props.add("ID=" + ID);
@@ -774,6 +803,10 @@ private void refresh ()
 		FillFlag = __FillFlag_JTextField.getText().trim();
 		props.add("FillFlag=" + FillFlag);
 	}
+	if ( __FillFlagDescription_JTextField != null ) {
+		FillFlag = __FillFlagDescription_JTextField.getText().trim();
+		props.add("FillFlagDescription=" + FillFlagDescription);
+	}
 	if ( __MaxIntervals_JTextField != null ) {
 		MaxIntervals = __MaxIntervals_JTextField.getText().trim();
 		props.add("MaxIntervals=" + MaxIntervals);
@@ -794,32 +827,44 @@ React to the user response.
 public void response ( boolean ok ) {
 	__ok = ok;
 	if ( ok ) {
-		// Commit the changes...
+		// Commit the changes.
 		commitEdits ();
 		if ( __error_wait ) {
-			// Not ready to close out!
+			// Not ready to close out.
 			return;
 		}
 	}
-	// Now close out...
+	// Now close out.
 	setVisible( false );
 	dispose();
 }
 
 /**
 Responds to WindowEvents.
-@param event WindowEvent object 
+@param event WindowEvent object
 */
 public void windowClosing(WindowEvent event) {
 	response (false);
 }
 
-// The following methods are all necessary because this class implements WindowListener
-public void windowActivated(WindowEvent evt)	{}
-public void windowClosed(WindowEvent evt)	{}
-public void windowDeactivated(WindowEvent evt)	{}
-public void windowDeiconified(WindowEvent evt)	{}
-public void windowIconified(WindowEvent evt)	{}
-public void windowOpened(WindowEvent evt)	{}
+// The following methods are all necessary because this class implements WindowListener.
+
+public void windowActivated(WindowEvent evt) {
+}
+
+public void windowClosed(WindowEvent evt) {
+}
+
+public void windowDeactivated(WindowEvent evt) {
+}
+
+public void windowDeiconified(WindowEvent evt) {
+}
+
+public void windowIconified(WindowEvent evt) {
+}
+
+public void windowOpened(WindowEvent evt) {
+}
 
 }

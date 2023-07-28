@@ -4,7 +4,7 @@
 
 StateDMI
 StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2022 Colorado Department of Natural Resources
+Copyright (C) 1997-2023 Colorado Department of Natural Resources
 
 StateDMI is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,7 +58,6 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -239,8 +238,8 @@ import DWR.StateMod.StateMod_WellRight_Data_JFrame;
 import DWR.DMI.HydroBaseDMI.HydroBase_Util;
 
 /**
-Main graphical user interface (GUI) class for StateDMI.  The interface provides
-menus and tools to help create files for StateCU and StateMod.
+Main graphical user interface (GUI) class for StateDMI.
+The interface provides menus and tools to help create files for StateCU and StateMod.
 */
 @SuppressWarnings("serial")
 public class StateDMI_JFrame extends JFrame
@@ -259,29 +258,28 @@ TreeSelectionListener,
 TS_ListSelector_Listener,
 WindowListener
 {
-	
+
 /**
 StateDMI session information, used to track command file open history, etc.
 */
 private StateDMISession session = null;
-	
+
 /**
 Path to resources, like graphics.
 */
 private final String __RESOURCE_PATH = "/DWR/DMI/StateDMI";
 
 /**
-Indicate the application type for the StateDMI run so that
-menus can be set for StateCU or StateMod.
+Indicate the application type for the StateDMI run so that menus can be set for StateCU or StateMod.
 See StateDMI.APP_TYPE_*
 */
 private int __appType = 0;
 
 /**
 TODO SAM 2008
-Indicate whether data set features are enabled.  For now comment out because they
-were implemented for development and are just taking up space.  The data set displays
-probably need to be in a separate tab or edge panel (tree?).
+Indicate whether data set features are enabled.
+For now comment out because they were implemented for development and are just taking up space.
+The data set displays probably need to be in a separate tab or edge panel (tree?).
 */
 private boolean __datasetFeaturesEnabled = false;
 
@@ -290,7 +288,7 @@ Label for datastores, necessary because label will be set not visible if no data
 */
 private JLabel __dataStore_JLabel = null;
 
-// TODO SAM phase in file datastore at some point
+// TODO SAM phase in file datastore at some point.
 /**
 Tabbed panel to keep datastores and input types separate.
 */
@@ -327,6 +325,7 @@ private final double __LAYOUT_COMPONENTS_FRACTION = .10, //.35,
 The command being edited is a new one, so it will be inserted in the command list.
 */
 private final int __INSERT_COMMAND = 1;
+
 /**
 The command being edited is not a new one, so the old one in the list will be updated.
 */
@@ -336,20 +335,24 @@ private final int __UPDATE_COMMAND = 2;
 StateDMI session type - unknown session type (e.g., at startup or after closing another session).
 */
 private final int __SESSION_UNKNOWN = 0;
+
 /**
 StateDMI session type - session is editing one data component (e.g., Diversions)
 with no knowledge of the full data set.
 */
 private final int __SESSION_DATA_SET_COMPONENT = 1;
+
 /**
 StateDMI session type - session is editing a full data set.
 */
 private final int __SESSION_DATA_SET = 2;
+
 /**
-StateDMI session type - session is editing commands from a command file.  The
-data set component can be "guessed" from the commands.
+StateDMI session type - session is editing commands from a command file.
+The data set component can be "guessed" from the commands.
 */
 private final int __SESSION_COMMANDS = 3;
+
 /**
 StateDMI session type that is active.
 */
@@ -385,14 +388,17 @@ TODO SAM 2007-06-26 Evaluate use
 The selected data set component, used to enable/disable menus.
 */
 private DataSetComponent __statecuSelectedComponent = null;
+
 /**
 StateMod data set (corresponds to the response file).
 */
 private StateMod_DataSet __statemodDataset = null;
+
 /**
 Tree to display the data set components (input).
 */
 private StateMod_DataSet_JTree __statemodDataset_JTree = null;
+
 /**
 The selected data set component, used to enable/disable menus.
 */
@@ -402,23 +408,25 @@ private DataSetComponent __statemodSelectedComponent = null;
 Panel for component group list.
 */
 private JPanel __list_JPanel = null;
+
 /**
-Worksheet to display the list of data objects for a component group
+Worksheet to display the list of data objects for a component group.
 */
 private JWorksheet __list_JWorksheet = null;
+
 /**
-Table model for the list
+Table model for the list.
 */
 @SuppressWarnings("rawtypes")
 private JWorksheet_AbstractRowTableModel __list_TableModel = null;
 
-// Commands-related....
+// Commands-related.
 
 //TODO SAM 2007-11-02 Evaluate putting in the processor
 /**
 Indicates whether the commands have been edited without being saved.
-This will trigger some changes in the UI, for example indicating that the commands
-have been modified and need to be saved (or cancel) before exit.
+This will trigger some changes in the UI,
+for example indicating that the commands have been modified and need to be saved (or cancel) before exit.
 */
 private boolean __commandsDirty = false;
 
@@ -428,15 +436,13 @@ The last directory selected when loading a command file.
 private String __Dir_LastCommandFileOpened = null;
 
 /**
-Use this to temporarily ignore item action performed events, necessary when
-programatically modifying the contents of combo boxes.
+Use this to temporarily ignore item action performed events, necessary when programatically modifying the contents of combo boxes.
 */
 private boolean __ignoreActionEvent = false;
 
 // TODO SAM 2007-10-19 Evaluate whether still needed with new list model.
 /**
-Use this to temporarily ignore item listener events, necessary when
-programatically modifying the contents of combo boxes.
+Use this to temporarily ignore item listener events, necessary when programatically modifying the contents of combo boxes.
 */
 private boolean __ignoreItemEvent = false;
 
@@ -444,10 +450,12 @@ private boolean __ignoreItemEvent = false;
 This is used in some cases to disable updates during bulk operations to the command list.
 */
 private boolean __ignoreListSelectionEvent = false;
+
 /**
 Last command file that was read.  Don't set until selected by the user (or on the command line).
 */
 private String __commandFileName = null;
+
 /**
 Panel for commands - title border is reset for messages.
 */
@@ -457,6 +465,7 @@ private JPanel __commands_JPanel;
 Annotated list to hold commands and display the command status.
 */
 private AnnotatedCommandJList __commands_AnnotatedCommandJList;
+
 /**
 Commands JList, to support interaction such as selecting and popup menus.
 This is a reference to the JList managed by AnnotatedList (and also the legacy string list).
@@ -480,22 +489,23 @@ List model that maps the TSCommandProcessor Command data to the command JList.
 private StateDMI_Processor_ListModel __commands_JListModel;
 
 /**
-Buffer to hold commands manipulated by cut/copy/paste - note that this is
-maintained internally and is not the same as the operating system cut/copy/paste buffer.
+Buffer to hold commands manipulated by cut/copy/paste.
+Note that this is maintained internally and is not the same as the operating system cut/copy/paste buffer.
 */
 private List<Command> __commandsCutBuffer = new ArrayList<>();
 
-// Results-related...
+// Results-related.
 
 /**
 Tree to display the data set results (output).
 */
-// FIXME SAM 2008-11-11 Evaluate whether to use
+// FIXME SAM 2008-11-11 Evaluate whether to use.
 //private StateCU_DataSet_JTree __statecuResults_JTree = null;
+
 /**
 Tree to display the data set results (output).
 */
-// FIXME SAM 2008-11-11 Evaluate whether to use
+// FIXME SAM 2008-11-11 Evaluate whether to use.
 //private StateMod_DataSet_JTree __statemodResults_JTree = null;
 
 /**
@@ -505,13 +515,13 @@ private JTabbedPane __results_JTabbedPane;
 
 //TODO SAM 2005-03-23 should the data sets have separate file lists?
 /**
-List of results output files for viewing with an editor.  This includes StateCU AND
-StateMod files (unlike data components, which are listed by model).
+List of results output files for viewing with an editor.
+This includes StateCU AND StateMod files (unlike data components, which are listed by model).
 */
 private JList<String> __resultsOutputFiles_JList = null;
+
 /**
-JList data model for final time series (basically a list of
-filenames associated with __resultsOutputFiles_JList).
+JList data model for final time series (basically a list of filenames associated with __resultsOutputFiles_JList).
 */
 private DefaultListModel<String> __resultsOutputFiles_JListModel = null;
 
@@ -524,9 +534,9 @@ private JWorksheet __resultsProblems_JWorksheet = null;
 List of results components for viewing with JWorksheets, for StateCU components.
 */
 private JList<String> __resultsStateCUComponents_JList = null;
+
 /**
-JList data model for StateCU components (basically a list of
-component names associated with __resultsStateCUComponents_JList).
+JList data model for StateCU components (basically a list of component names associated with __resultsStateCUComponents_JList).
 */
 private DefaultListModel<String> __resultsStateCUComponents_JListModel = null;
 
@@ -534,6 +544,7 @@ private DefaultListModel<String> __resultsStateCUComponents_JListModel = null;
 List of results components for viewing with JWorksheets, for StateMod components.
 */
 private JList<String> __resultsStateModComponents_JList = null;
+
 /**
 JList data model for StateCU components (basically a list of
 component names associated with __resultsStateModComponents_JList).
@@ -556,8 +567,7 @@ JList data model for final time series (a list of table identifiers associated w
 private DefaultListModel<String> __resultsTables_JListModel;
 
 /**
-List of time series selectors and associated component types, maintained
-to look up graph properties.
+List of time series selectors and associated component types, maintained to look up graph properties.
 */
 List<TS_ListSelector_JFrame>  TS_ListSelector_JFrame_List = new ArrayList<>();
 List<Integer> TS_ListSelector_JFrame_app_type_List = new ArrayList<>();
@@ -569,29 +579,29 @@ Worksheet that contains a list of processor properties.
 private JWorksheet __resultsProperties_JWorksheet = null;
 
 /**
-The command processor, which maintains a list of command objects, process
-the data, and the results.  There is only one command processor
-instance for a StateDMI session and it is kept current with the application.
-In the future, it may be possible to have, for
-example, tabs for different command files, each with a StateDMI_Processor.
+The command processor, which maintains a list of command objects, process the data, and the results.
+There is only one command processor instance for a StateDMI session and it is kept current with the application.
+In the future, it may be possible to have, for example, tabs for different command files, each with a StateDMI_Processor.
 */
 private StateDMI_Processor __statedmiProcessor = new StateDMI_Processor();
 
-// Status-area related...
+// Status-area related.
 
 /**
 General status string to indicate that the GUI is ready for user input.
 */
 private final String __STATUS_READY = "Ready";
+
 /**
-General status string to indicate that the user should wait for the GUI to
-finish a task.
+General status string to indicate that the user should wait for the GUI to finish a task.
 */
 private final String __STATUS_BUSY = "Wait";
+
 /**
 General status string to indicate that command processing is being cancelled.
 */
 private final String __STATUS_CANCELING = "Canceling";
+
 /**
 General status string to indicate that command processing has been cancelled.
 */
@@ -601,39 +611,41 @@ private final String __STATUS_CANCELLED = "Cancelled";
 Message area text field (e.g., "Processing commands...") - long and left-most.
 */
 private JTextField __message_JTextField;
+
 /**
 Progress bar to show progress of running commands in processor.
 */
 private JProgressBar __processor_JProgressBar;
+
 /**
 Progress bar to show progress of running a specific commands.
 */
 private JProgressBar __command_JProgressBar;
+
 /**
 Status area text field (e.g., "READY", "WAIT") - small and right-most.
 */
-private JTextField __status_JTextField;		
+private JTextField __status_JTextField;
 
-// General....
+// General.
 
 /**
-The initial working directory corresponding to a command file read/write or File...
-This is used when processing the list of setWorkingDir() commands
-passed to command editors.  Without the initial working directory, relative changes
-in the working directory will result in an inaccurate initial state.
+The initial working directory corresponding to a command file read/write or opened File.
+This is used when processing the list of setWorkingDir() commands passed to command editors.
+Without the initial working directory, relative changes in the working directory will result in an inaccurate initial state.
 */
 private String __initialWorkingDir = "";
 
 // Menu items that need to be modified throughout the session.
 
-// Buttons used in the main interface...
+// Buttons used in the main interface.
 
 private SimpleJButton
 	__Run_AllCommands_JButton,
 	__Run_SelectedCommands_JButton,
 	__ClearCommands_JButton;
 
-// The menu bar for all menus
+// The menu bar for all menus.
 
 JMenuBar
 	__JMenuBar = null;
@@ -656,7 +668,7 @@ The style for menus.
 */
 private int menu_style = MENU_STYLE_THREE_LEVEL;
 
-// Popup...
+// Popup menu.
 
 private JPopupMenu
 	__Commands_JPopupMenu;
@@ -684,10 +696,10 @@ private JMenuItem
 	__CommandsPopup_ConvertSelectedCommandsToComments_JMenuItem,
 	__CommandsPopup_ConvertSelectedCommandsFromComments_JMenuItem;
 
-// File...
+// File menu.
 
 private JMenu
-	// Used with StateCU and StateMod...
+	// Used with StateCU and StateMod.
 	__File_Open_JMenu = null;
 		private JMenuItem
 			__File_Open_CommandFileRecent_JMenuItem[] = null;
@@ -695,10 +707,10 @@ private JMenuItem
 	__File_Open_CommandFile_JMenuItem,
 	__File_Open_DataSet_JMenuItem;
 private JMenu
-	// Used with StateCU and StateMod...
+	// Used with StateCU and StateMod.
 	__File_Open_DataSetComponent_JMenu;
 private JMenuItem
-	// Used with StateCU...
+	// Used with StateCU.
 	//__File_Open_DataSetComponent_StateCU_Locations_JMenuItem,
 	//__File_Open_DataSetComponent_StateCU_CropCharacteristics_JMenuItem,
 	//__File_Open_DataSetComponent_StateCU_BlaneyCriddle_JMenuItem,
@@ -706,21 +718,21 @@ private JMenuItem
 	// Used with StateMod...
 	__File_Open_ModelNetwork_JMenuItem,
 	__File_New_ModelNetwork_JMenuItem,
-	// Used with StateCU and StateMod...
+	// Used with StateCU and StateMod.
 	__File_Open_HydroBase_JMenuItem;
 
 private JMenu
-	// Used with StateCU and StateMod...
+	// Used with StateCU and StateMod.
 	__File_New_JMenu,
 	__File_New_DataSet_JMenu,
-	// Used with StateCU...
+	// Used with StateCU.
 	__File_New_DataSet_StateCU_ClimateStations_JMenu;
 private JMenuItem
-	// Used with StateCU...
+	// Used with StateCU.
 	__File_New_DataSet_StateCU_ClimateStations_FromList_JMenuItem,
 	__File_New_DataSet_StateCU_ClimateStations_FromHydroBase_JMenuItem;
 private JMenu
-	// Used with StateCU...
+	// Used with StateCU.
 	__File_New_DataSet_StateCU_Structures_JMenu;
 private JMenuItem
 	__File_New_DataSet_StateCU_Structures_FromList_JMenuItem;
@@ -729,13 +741,13 @@ private JMenu
 	__File_New_DataSet_StateCU_WaterSupplyLimitedByRights_JMenu,
 	__File_New_DataSet_StateCU_RiverDepletion_JMenu,
 	__File_New_DataSet_StateCU_OtherUses_JMenu,
-	// Used with StateMod...
+	// Used with StateMod.
 	__File_New_DataSet_StateMod_Historical_JMenu,
 	__File_New_DataSet_StateMod_Demands_JMenu;
 private JMenu
-	// Used with StateCU and StateMod...
+	// Used with StateCU and StateMod.
 	__File_New_DataSetComponent_JMenu,
-	// Used with StateCU...
+	// Used with StateCU.
 	__File_New_DataSetComponent_StateCU_Locations_JMenu;
 private JMenuItem
 	__File_New_DataSetComponent_StateCU_Locations_FromList_JMenuItem;
@@ -751,19 +763,19 @@ private JMenu
 	__File_New_DataSetComponent_StateCU_ClimateStations_JMenu;
 private JMenuItem
 	__File_New_DataSetComponent_StateCU_ClimateStations_FromList_JMenuItem,
-	// Used with StateCU and StateMod...
+	// Used with StateCU and StateMod.
 	__File_New_CommandFile_JMenuItem;
 
 private JMenu
 	__File_Save_JMenu;
 
 private JMenuItem
-	__File_Save_Commands_JMenuItem,	// enable/disable based on state
+	__File_Save_Commands_JMenuItem,	// Enable/disable based on state.
 	__File_Save_CommandsAs_JMenuItem,
 
 	__File_Save_DataSet_JMenuItem;
 
-	// StateCU Level 1...
+	// StateCU Level 1.
 	//__File_Save_StateCU_All_JMenuItem,
 	//__File_Save_StateCU_Response_JMenuItem,
 	//__File_Save_StateCU_Control_JMenuItem,
@@ -775,7 +787,7 @@ private JMenuItem
 	//__File_Save_StateCU_YearlyFrostDatesTS_JMenuItem,
 	//__File_Save_StateCU_MonthlyPrecipitationTS_JMenuItem,
 
-	// StateCU Level 2...
+	// StateCU Level 2.
 	//__File_Save_StateCU_CropPatternTS_JMenuItem;
 
 private JMenu
@@ -797,7 +809,7 @@ JMenuItem
 	__File_SwitchToStateMod_JMenuItem,
 	__File_Exit_JMenuItem;
 
-	// Edit...
+	// Edit.
 
 //private JMenu
 //	__Edit_JMenu;
@@ -816,7 +828,7 @@ private JMenuItem
 	__Edit_ConvertSelectedCommandsToComments_JMenuItem = null,
 	__Edit_ConvertSelectedCommandsFromComments_JMenuItem = null;
 
-	// View menu (StateCU)...
+	// View menu (StateCU).
 
 JCheckBoxMenuItem
 	__View_DataSetManager_JCheckBoxMenuItem,
@@ -828,15 +840,14 @@ private JMenuItem
 	__View_CommandFileDiff_JMenuItem = null,
 	__View_DataStores_JMenuItem = null;
 
-	// The following are used by StateCU and StateMod...
+	// The following are used by StateCU and StateMod.
 
 private JMenu
 	__Commands_JMenu;
-	//__Commands2_JMenu;	// Only used by StateMod because there are too
-				// many data set component groups to fit in one
-				// menu on the screen.
+	// Only used by StateMod because there are too many data set component groups to fit in one menu on the screen.
+	//__Commands2_JMenu;
 
-	// Commands menu for StateCU...
+	// Commands menu for StateCU.
 
 private JMenuItem
 	__Commands_StateCU_ClimateStationsData_JMenuItem;
@@ -981,7 +992,7 @@ private JMenuItem
 	//__Commands_StateCU_IrrigationPracticeTS_SetWellSystemFromList_JMenuItem,
 	__Commands_StateCU_IrrigationPracticeTS_CreateIrrigationPracticeTSForCULocations_JMenuItem,
 	__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromStateCU_JMenuItem,
-	//TODO SAM 2005-03-07 Comment out - use what is in HydroBase
+	// TODO SAM 2005-03-07 Comment out - use what is in HydroBase.
 	//__Commands_StateCU_IrrigationPracticeTS_ReadCropPatternTSFromDBF_JMenuItem,
 	__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromHydroBase_JMenuItem,
 	__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromList_JMenuItem,
@@ -1005,24 +1016,24 @@ private JMenuItem
 	__Commands_StateCU_WellPumpingTS_JMenuItem,
 	__Commands_StateCU_DiversionRights_JMenuItem;
 
-//Commands...Datastore Processing...
+//Commands...Datastore Processing.
 private JMenu
  	__Commands_Datastore_JMenu = null;
 
-// Commands... Output File Processing...
+// Commands... Output File Processing.
 private JMenu
 	__Commands_Output_JMenu = null;
 private JMenuItem
 	__Commands_Output_SplitStateModReport_JMenuItem;
 
-// Commands... Spatial Processing...
+// Commands... Spatial Processing.
 private JMenu
 	__Commands_Spatial_JMenu = null;
 private JMenuItem
 	__Commands_Spatial_WriteTableToGeoJSON_JMenuItem,
 	__Commands_Spatial_WriteTableToShapefile_JMenuItem;
 
-// Commands... Spreadsheet Processing...
+// Commands... Spreadsheet Processing.
 
 private JMenu
 	__Commands_Spreadsheet_JMenu = null;
@@ -1095,7 +1106,7 @@ private JMenuItem
 	__Commands_General_Running_SetWorkingDir_JMenuItem = null,
 	__Commands_General_Running_WritePropertiesToFile_JMenuItem = null;
 
-//Commands (General - Test Processing)...
+//Commands (General - Test Processing).
 JMenu
     __Commands_General_TestProcessing_JMenu = null;
 JMenuItem
@@ -1105,12 +1116,12 @@ JMenuItem
     __Commands_General_TestProcessing_CreateRegressionTestCommandFile_JMenuItem = null,
     __Commands_General_TestProcessing_StartRegressionTestResultsReport_JMenuItem = null;
 
-// Commands (Table)...
+// Commands (Table).
 
 private JMenu
 	__Commands_Table_JMenu = null;
 
-// Create, Copy, Free Table
+// Create, Copy, Free Table.
 private JMenu
 	__Commands_TableCreate_JMenu = null;
 private JMenuItem
@@ -1157,7 +1168,7 @@ private JMenuItem
 	__Commands_TableManipulate_TableMath_JMenuItem,
 	__Commands_TableManipulate_TableTimeSeriesMath_JMenuItem,
 	__Commands_TableManipulate_InsertTableRow_JMenuItem,
-	__Commands_TableManipulate_SortTable_JMenuItem, 
+	__Commands_TableManipulate_SortTable_JMenuItem,
 	__Commands_TableManipulate_SplitTableRow_JMenuItem;
 
 // Output Table
@@ -1176,7 +1187,7 @@ private JMenuItem
 	__Commands_TableRunning_SetPropertyFromTable_JMenuItem,
 	__Commands_TableRunning_CopyPropertiesToTable_JMenuItem;
 
-// Commands Menu for StateMod...
+// Commands Menu for StateMod.
 
 private JMenu
 //__Commands_StateMod_ControlData_JMenu,
@@ -1525,9 +1536,9 @@ JMenuItem
 	__Commands_StateMod_WellDemandTSMonthly_LimitWellDemandTSMonthlyToRights_JMenuItem,
 	__Commands_StateMod_WellDemandTSMonthly_SortWellDemandTSMonthly_JMenuItem,
 	__Commands_StateMod_WellDemandTSMonthly_WriteWellDemandTSMonthlyToStateMod_JMenuItem,
-	
+
 	__Commands_StateMod_WellDemandTSDaily_JMenuItem;
-	
+
 // Plan Data
 // Plan Stations
 private JMenuItem
@@ -1541,7 +1552,7 @@ private JMenuItem
 	//__Commands_StateMod_PlanStations_FillPlanStation_JMenuItem,
 	//__Commands_StateMod_PlanStations_WritePlanStationsToList_JMenuItem,
 	__Commands_StateMod_PlanStations_WritePlanStationsToStateMod_JMenuItem;
-	
+
 // Plan (Well Augmentation)
 private JMenuItem
 	__Commands_StateMod_PlanWellAugmentation_ReadPlanWellAugmentationFromStateMod_JMenuItem,
@@ -1640,7 +1651,7 @@ private JMenuItem
 	__Run_RunStateCUVersion_JMenuItem,
 	__Run_RunStateModVersion_JMenuItem;
 
-	// Results menu (StateCU)...
+	// Results menu (StateCU).
 
 private JMenu
 	__Results_JMenu;
@@ -1652,7 +1663,7 @@ private JMenuItem
 	__Results_StateCU_DelayTablesData_JMenuItem,
 	__Results_StateCU_CULocationsData_JMenuItem;
 
-	// Results Menu (StateMod)...
+	// Results Menu (StateMod).
 
 private JMenuItem
 	__Results_StateMod_RiverData_JMenuItem,
@@ -1687,41 +1698,37 @@ private JMenuItem
 	__Help_ViewDocumentation_Troubleshooting_JMenuItem = null,
 	__Help_ViewTrainingMaterials_JMenuItem = null;
 
-
-
 /**
 Properties for the application, currently only containing "WorkingDir".
 */
 private PropList __props;
 
 /**
-HydroBase DMI object used for all HydroBase queries (set to
-null if the connection is not made).
+HydroBase DMI object used for all HydroBase queries (set to null if the connection is not made).
 */
 private HydroBaseDMI __hbdmi = null;
 
 /**
-Region1 strings for use with StateCU.  These are initialized in editCommand()
-and are therefore only used when editing - later need to possibly initialize based on
-a command.  For now default region1 to County and region2 to HUC from HydroBase.
+Region1 strings for use with StateCU.
+These are initialized in editCommand() and are therefore only used when editing.
+Later, need to possibly initialize based on a command.
+For now default region1 to County and region2 to HUC from HydroBase.
 */
 private List<String> __region1_List = null;
-private List<Integer> __region2_List = null;		
-						
+private List<Integer> __region2_List = null;
+
 /**
 Valid Cropchar CU methods from HydroBase.  These are used when selecting data for the StateCU CCH file.
-*/		
+*/
 private List<String> __cropcharCuMethod_List = null;
 
 /**
-Valid BlaneyCriddle CU methods from HydroBase.  These are used when selecting
-data for the StateCU KBC files.
+Valid BlaneyCriddle CU methods from HydroBase.  These are used when selecting data for the StateCU KBC files.
 */
 private List<String> __blaneyCriddleCuMethod_List = null;
 
 /**
-Valid PenManMontieth CU methods from HydroBase.  These are used when selecting
-data for the StateCU KPM files.
+Valid PenManMontieth CU methods from HydroBase.  These are used when selecting data for the StateCU KPM files.
 */
 private List<String> __penmanMonteithCuMethod_List = null;
 
@@ -1729,19 +1736,19 @@ private List<String> __penmanMonteithCuMethod_List = null;
 // listed from left to right and top to bottom as they appear in the interface.
 
 private String
-	// Buttons on the interface...
+	// Buttons on the interface.
 
 	__Button_RunAllCommands_String = "Run All Commands",
 	__Button_RunSelectedCommands_String = "Run Selected Commands",
 	__Button_ClearCommands_String = "Clear Commands",
 
-	// Popup menu...
+	// Popup menu.
 
 	__CommandsPopup_ShowCommandStatus_String = "Show Command Status (Success/Warning/Failure)",
 	__CommandsPopup_FindCommandsUsingString_String = "Find command(s) using substring...",
 	__CommandsPopup_FindCommandUsingLineNumber_String = "Find command using line number...",
 
-	// File menu...
+	// File menu.
 
 	__File_String = "File",
 
@@ -1790,7 +1797,7 @@ private String
 	__File_Save_CommandsAs_String = "Commands As ...",
 
 	__File_Save_DataSet_String = "Data Set",
-	
+
 	__File_Print_String = "Print",
 	__File_Print_Commands_String = "Commands...",
 
@@ -1803,7 +1810,7 @@ private String
 	__File_SwitchToStateMod_String = "Switch to StateMod",
 	__File_Exit_String = "Exit",
 
-	// Edit menu...
+	// Edit menu.
 
 	__Edit_CutCommands_String = "Cut Command(s)",
 	__Edit_CopyCommands_String = "Copy Command(s)",
@@ -1820,7 +1827,7 @@ private String
 	__Edit_ConvertSelectedCommandsToComments_String = "Convert selected commands to # comments",
 	__Edit_ConvertSelectedCommandsFromComments_String = "Convert selected commands from # comments",
 
-	// View menu...
+	// View menu.
 
 	__View_CommandFileDiff_String = "Command File Diff",
 	__View_DataStores_String = "Datastores",
@@ -1829,13 +1836,13 @@ private String
 	__View_ModelNetwork_String = "Model Network",
 	__View_ThreeLevelCommandsMenu_String = "Three-level Commands Menu",
 
-	// Commands Menu...
+	// Commands Menu.
 
-	// Shared...
-	
+	// Shared.
+
 	__Commands_Shared_WriteCheckFile_String = "WriteCheckFile() ...",
 
-	// StateCU sub-menus (see the first item for the file being edited)...
+	// StateCU sub-menus (see the first item for the file being edited).
 
 	__Commands_StateCU_ClimateStationsData_String =	"Climate Stations Data",
 	__Commands_StateCU_ClimateStations_String = "Climate Stations",
@@ -1873,7 +1880,7 @@ private String
 	__Commands_StateCU_BlaneyCriddle_WriteBlaneyCriddleToList_String = "WriteBlaneyCriddleToList() ...",
 	__Commands_StateCU_BlaneyCriddle_WriteBlaneyCriddleToStateCU_String = "WriteBlaneyCriddleToStateCU() ...",
 	__Commands_StateCU_BlaneyCriddle_CheckBlaneyCriddle_String = "CheckBlaneyCriddle() ...",
-	
+
 	__Commands_StateCU_PenmanMonteith_String = "Penman-Monteith Crop Coefficients",
 	__Commands_StateCU_PenmanMonteith_ReadPenmanMonteithFromStateCU_String = "ReadPenmanMonteithFromStateCU() ...",
 	__Commands_StateCU_PenmanMonteith_ReadPenmanMonteithFromHydroBase_String = "ReadPenmanMonteithFromHydroBase() ...",
@@ -1883,7 +1890,7 @@ private String
 	__Commands_StateCU_PenmanMonteith_WritePenmanMonteithToList_String = "WritePenmanMonteithToList() ...",
 	__Commands_StateCU_PenmanMonteith_WritePenmanMonteithToStateCU_String = "WritePenmanMonteithToStateCU() ...",
 	__Commands_StateCU_PenmanMonteith_CheckPenmanMonteith_String = "CheckPenmanMonteith() ...",
-	
+
 	// TODO SAM 2010-02-04 Not currently used (but was at one time)
 	//__Commands_StateCU_DelayTablesData_String = "Delay Tables Data",
 	//__Commands_StateCU_DelayTables_String = "Delay Tables",
@@ -1920,8 +1927,8 @@ private String
 	__Commands_StateCU_CULocations_WriteCULocationsToList_String = "WriteCULocationsToList() ...",
 	__Commands_StateCU_CULocations_WriteCULocationsToStateCU_String = "WriteCULocationsToStateCU() ...",
 	__Commands_StateCU_CULocations_CheckCULocations_String = "CheckCULocations() ...",
-	
-	// Parcels
+
+	// Parcels.
 
 	__Commands_StateCU_Parcels_String = "Parcels",
 	__Commands_StateCU_Parcels_ReadParcelsFromHydroBase_String = "ReadParcelsFromHydroBase() ...",
@@ -1933,11 +1940,11 @@ private String
 	__Commands_StateCU_Parcels_CheckIrrigatedLands_String = "CheckIrrigatedLands() ...",
 	__Commands_StateCU_Parcels_WriteParcelsToFile_String = "WriteParcelsToFile() ...",
 
-	// CDS - crop pattern time series
-	
+	// CDS - crop pattern time series.
+
 	__Commands_StateCU_CropPatternTS_String = "Crop Pattern TS (Yearly)",
-		// Also has a SetOutputPeriod() here
-		// Also has a SetOutputAnnualAverage() here
+		// Also has a SetOutputPeriod() here.
+		// Also has a SetOutputAnnualAverage() here.
 	__Commands_StateCU_CropPatternTS_ReadCULocationsFromList_String = __Commands_StateCU_CULocations_ReadCULocationsFromList_String,
 	__Commands_StateCU_CropPatternTS_ReadCULocationsFromStateCU_String = __Commands_StateCU_CULocations_ReadCULocationsFromStateCU_String,
 	__Commands_StateCU_CropPatternTS_SetDiversionAggregate_String = __Commands_StateCU_CULocations_SetDiversionAggregate_String,
@@ -1950,7 +1957,7 @@ private String
 	__Commands_StateCU_CropPatternTS_SetWellSystemFromList_String = __Commands_StateCU_CULocations_SetWellSystemFromList_String,
 	__Commands_StateCU_CropPatternTS_CreateCropPatternTSForCULocations_String = "CreateCropPatternTSForCULocations() ...",
 	__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromStateCU_String = "ReadCropPatternTSFromStateCU() ...",
-	// FIXME SAM 2008-12-30 Remove if not needed
+	// FIXME SAM 2008-12-30 Remove if not needed.
 	//__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromDBF_String = "OLD: ReadCropPatternTSFromDBF() ...",
 	__Commands_StateCU_CropPatternTS_SetCropPatternTSFromList_String = "SetCropPatternTSFromList() ...",
 	__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromHydroBase_String = "ReadCropPatternTSFromHydroBase() ...",
@@ -1958,12 +1965,12 @@ private String
 	__Commands_StateCU_CropPatternTS_SetCropPatternTS_String = "SetCropPatternTS() ...",
 	__Commands_StateCU_CropPatternTS_TranslateCropPatternTS_String = "TranslateCropPatternTS() ...",
 	__Commands_StateCU_CropPatternTS_RemoveCropPatternTS_String = "RemoveCropPatternTS() ...",
-	// FIXME SAM 2008-12-30 Remove if not needed
+	// FIXME SAM 2008-12-30 Remove if not needed.
 	//__Commands_StateCU_CropPatternTS_ReadAgStatsTSFromDateValue_String = "OLD: ReadAgStatsTSFromDateValue() ...",
 	__Commands_StateCU_CropPatternTS_FillCropPatternTSConstant_String = "FillCropPatternTSConstant() ...",
 	__Commands_StateCU_CropPatternTS_FillCropPatternTSRepeat_String = "FillCropPatternTSRepeat() ...",
 	__Commands_StateCU_CropPatternTS_FillCropPatternTSInterpolate_String = "FillCropPatternTSInterpolate() ...",
-	// FIXME SAM 2008-12-30 Remove if not needed
+	// FIXME SAM 2008-12-30 Remove if not needed.
 	//__Commands_StateCU_CropPatternTS_FillCropPatternTSProrateAgStats_String = "OLD: FillCropPatternTSProrateAgStats() ...",
 	__Commands_StateCU_CropPatternTS_FillCropPatternTSUsingWellRights_String = "[Legacy] FillCropPatternTSUsingWellRights() ...",
 	__Commands_StateCU_CropPatternTS_SortCropPatternTS_String = "SortCropPatternTS() ...",
@@ -1975,8 +1982,8 @@ private String
 	__Commands_StateCU_CropPatternTS_CheckCropPatternTS_String = "CheckCropPatternTS() ...",
 
 	__Commands_StateCU_IrrigationPracticeTS_String = "Irrigation Practice TS (Yearly)",
-		// Also has a setOutputPeriod() here
-		// Also has a setOutputAnnualAverage() here
+		// Also has a setOutputPeriod() here.
+		// Also has a setOutputAnnualAverage() here.
 	__Commands_StateCU_IrrigationPracticeTS_ReadCULocationsFromList_String = __Commands_StateCU_CULocations_ReadCULocationsFromList_String,
 	__Commands_StateCU_IrrigationPracticeTS_ReadCULocationsFromStateCU_String = __Commands_StateCU_CULocations_ReadCULocationsFromStateCU_String,
 	__Commands_StateCU_IrrigationPracticeTS_SetDiversionAggregate_String = __Commands_StateCU_CULocations_SetDiversionAggregate_String,
@@ -1989,7 +1996,7 @@ private String
 	__Commands_StateCU_IrrigationPracticeTS_SetWellSystemFromList_String = __Commands_StateCU_CULocations_SetWellSystemFromList_String,
 	__Commands_StateCU_IrrigationPracticeTS_CreateIrrigationPracticeTSForCULocations_String = "CreateIrrigationPracticeTSForCULocations() ...",
 	__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromStateCU_String = "ReadIrrigationPracticeTSFromStateCU() ...",
-	// TODO SAM 2005-03-07 Disable and only read from HydroBase
+	// TODO SAM 2005-03-07 Disable and only read from HydroBase.
 	//__Commands_StateCU_IrrigationPracticeTS_ReadCropPatternTSFromDBF_String =
 	//	__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromDBF_String,
 	__Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromHydroBase_String = "ReadIrrigationPracticeTSFromHydroBase() ...",
@@ -2011,35 +2018,32 @@ private String
 	__Commands_StateCU_IrrigationPracticeTS_CompareIrrigationPracticeTSFiles_String = "CompareIrrigationPracticeTSFiles() ...",
 	__Commands_StateCU_IrrigationPracticeTS_CheckIrrigationPracticeTS_String = "CheckIrrigationPracticeTS() ...",
 
-	// Reuse StateMod
-	//__Commands_StateCU_DiversionTS_String =
-	//	"Diversion TS (Monthly)",
-	//__Commands_StateCU_WellPumpingTS_String =
-	//	"Well Pumping TS (Monthly)",
-	//__Commands_StateCU_DiversionRights_String =
-	//	"Diversion Rights",
+	// Reuse StateMod.
+	//__Commands_StateCU_DiversionTS_String = "Diversion TS (Monthly)",
+	//__Commands_StateCU_WellPumpingTS_String = "Well Pumping TS (Monthly)",
+	//__Commands_StateCU_DiversionRights_String = "Diversion Rights",
 	__Commands_StateCU_DelayTableAssignment_String = "Delay Table Assignment",
 	__Commands_StateCU_DelayTableAssignment_ReadCULocationsFromStateCU_String = __Commands_StateCU_CULocations_ReadCULocationsFromStateCU_String,
 	__Commands_StateCU_DelayTableAssignment_SetCULocationDelayTableAssignmentsFromStateMod_String = "SetCULocationDelayTableAssignmentsFromStateMod() ...",
 	__Commands_StateCU_DelayTableAssignment_WriteCULocationDelayTableAssignmentsToList_String = "WriteCULocationDelayTableAssignmentsToList() ...",
 	__Commands_StateCU_DelayTableAssignment_WriteCULocationDelayTableAssignmentsToStateCU_String = "WriteCULocationDelayTableAssignmentsToStateCU() ...",
 	__Commands_StateCU_DelayTableAssignment_CheckCULocationDelayTableAssignments_String = "CheckCULocationDelayTableAssignments() ...",
-	
-	// Datastore Commands...
+
+	// Datastore Commands.
 	__Commands_Datastore_String = "Datastore Processing",
 
-	// Output File Processing Commands...
+	// Output File Processing Commands.
 
 	__Commands_Output_String = "Output File Processing",
 	__Commands_Output_SplitStateModReport_String = "SplitStateModReport()... <split StateMod report file>",
-	
-	// Spatial Commands...
+
+	// Spatial Commands.
 
 	__Commands_Spatial_String = "Spatial Processing",
 	__Commands_Spatial_WriteTableToGeoJSON_String = "WriteTableToGeoJSON()... <write table to a GeoJSON file>",
 	__Commands_Spatial_WriteTableToShapefile_String = "WriteTableToShapefile()... <write table to a Shapefile>",
-	
-	// Spreadsheet Commands...
+
+	// Spreadsheet Commands.
 
 	__Commands_Spreadsheet_String = "Spreadsheet Processing",
 	__Commands_Spreadsheet_NewExcelWorkbook_String = "NewExcelWorkbook()... <create a new Excel workbook file>",
@@ -2055,8 +2059,8 @@ private String
 	__Commands_Spreadsheet_WriteTimeSeriesToExcelBlock_String = "WriteTimeSeriesToExcelBlock()... <write 1+ time series to an Excel file as data block(s)>",
 	__Commands_Spreadsheet_CloseExcelWorkbook_String = "CloseExcelWorkbook()... <close and optionally write an Excel file>",
 
-	// General commands...
-    
+	// General commands.
+
 	__Commands_General_Comments_String = "General - Comments",
 	__Commands_General_Comments_Comment_String = "# comment(s) ...",
 	__Commands_General_Comments_StartComment_String = "/* <start comment block>",
@@ -2067,7 +2071,7 @@ private String
     __Commands_General_Comments_ExpectedStatusWarningComment_String = "#@expectedStatus Warning <used to test commands>",
     __Commands_General_Comments_RequireApplicationComment_String = "#@require application ... <check application version dependency>",
     __Commands_General_Comments_RequireDatastoreComment_String = "#@require datastore ... <check datastore version dependency>",
-	
+
 	__Commands_General_FileHandling_String = "General - File Handling",
 	__Commands_General_FileHandling_FTPGet_String = "FTPGet()... <get file(s) using FTP>",
 	__Commands_General_FileHandling_WebGet_String = "WebGet()... <get file(s) from the web>",
@@ -2080,20 +2084,20 @@ private String
 
 	__Commands_General_HydroBase_String = "General - HydroBase",
 	__Commands_General_HydroBase_OpenHydroBase_String = "OpenHydroBase() ...",
-	
+
 	__Commands_General_Logging_String = "General - Logging and Messaging",
 	__Commands_General_Logging_StartLog_String = "StartLog() ...",
 	__Commands_General_Logging_SetDebugLevel_String = "SetDebugLevel() ...",
 	__Commands_General_Logging_SetWarningLevel_String = "SetWarningLevel() ...",
 	__Commands_General_Logging_Message_String = "Message()... <print a message>",
-	
+
 	__Commands_General_Running_String = "General - Running and Properties",
 	__Commands_General_Running_SetProperty_String = "SetProperty()... <set processor property>",
 	__Commands_General_Running_FormatDateTimeProperty_String = "FormatDateTimeProperty()... <format date/time property as string property>",
 	__Commands_General_Running_FormatStringProperty_String = "FormatStringProperty()... <format a string property>",
-	// This menu is reused in different menus...
+	// This menu is reused in different menus.
 	__Commands_General_Running_SetOutputPeriod_String = "SetOutputPeriod() ...",
-	// This menu is reused in different menus...
+	// This menu is reused in different menus.
 	__Commands_General_Running_SetOutputYearType_String = "SetOutputYearType() ...",
 	__Commands_General_Running_RunCommands_String = "RunCommands()... <run a command file>",
 	__Commands_General_Running_RunProgram_String = "RunProgram()... <run external program>",
@@ -2109,18 +2113,18 @@ private String
 	__Commands_General_TestProcessing_WriteProperty_String = "WriteProperty()... <write processor property, to test software>",
 	__Commands_General_TestProcessing_CreateRegressionTestCommandFile_String = "CreateRegressionTestCommandFile()... <to test software>";
 
-	// Table Commands...
+	// Table Commands.
 
 	private String
-	
+
 	__Commands_Table_String = "Commands (Table)",
-	
+
 	// Create, Copy, Free Table
 	__Commands_TableCreate_String = "Create, Copy, Free Table",
 	__Commands_TableCreate_NewTable_String = "NewTable()... <create a new empty table>",
 	__Commands_TableCreate_CopyTable_String = "CopyTable()... <create a new table as a full/partial copy of another>",
 	__Commands_TableCreate_FreeTable_String = "FreeTable()... <free a table (will not be available to later commands)>",
-	
+
 	// Read Table
 	__Commands_TableRead_String = "Read Table",
 	__Commands_TableRead_ReadTableFromDataStore_String = "ReadTableFromDataStore()... <read a table from a database datastore>",
@@ -2130,7 +2134,7 @@ private String
 	__Commands_TableRead_ReadTableFromFixedFormatFile_String = "ReadTableFromFixedFormatFile()... <read a table from a fixed format file>",
 	__Commands_TableRead_ReadTableFromJSON_String = "ReadTableFromJSON()... <read a table from a JSON file>", //not being used
 	__Commands_TableRead_ReadTableFromXML_String = "ReadTableFromXML()... <read a table from an XML file>", //not being used
-	
+
 	// Append, Join Tables
 	__Commands_TableJoin_String = "Append, Join Tables",
 	__Commands_TableJoin_AppendTable_String = "AppendTable()... <append a table's rows to another table>",
@@ -2155,28 +2159,28 @@ private String
 	// Analyze Tables
 	__Commands_TableAnalyze_String = "Analyze Tables",
 	__Commands_TableAnalyze_CompareTables_String = "CompareTables()... <compare two tables (indicate differences)>",
-	
+
 	// Output Table
 	__Commands_TableOutput_String = "Output Table",
 	__Commands_TableOutput_WriteTableToDataStore_String = "WriteTableToDataStore()... <write a table to a database datastore>", // not being used
 	__Commands_TableOutput_WriteTableToDelimitedFile_String = "WriteTableToDelimitedFile()... <write a table to a delimited file>",
 	__Commands_TableOutput_WriteTableToExcel_String = "WriteTableToExcel()... <write a table to an Excel file>",
 	__Commands_TableOutput_WriteTableToHTML_String = "WriteTableToHTML()... <write a table to an HTML file>",
-	
+
 	// Running and Properties
 	__Commands_TableRunning_String = "Running and Properties",
 	__Commands_TableRunning_SetPropertyFromTable_String = "SetPropertyFromTable()... <set a processor property from a table>",
 	__Commands_TableRunning_CopyPropertiesToTable_String = "CopyPropertiesToTable()... <copy processor properties to a table>";
-	
-	// StateMod sub-menus (see the first item for the file being edited)...
+
+	// StateMod sub-menus (see the first item for the file being edited).
 
 	private String
-	
+
 	__Commands_StateMod_ControlData_String = "Control Data",
 	__Commands_StateMod_Response_String = "Response",
 	__Commands_StateMod_Response_ReadResponseFromStateMod_String = "ReadResponseFromStateMod() ...",
 	__Commands_StateMod_Response_WriteResponseToStateMod_String = "WriteResponseToStateMod() ...",
-	
+
 	__Commands_StateMod_Control_String = "Control",
 	__Commands_StateMod_Control_ReadControlFromStateMod_String = "ReadControlFromStateMod() ...",
 	__Commands_StateMod_Control_WriteControlToStateMod_String = "WriteControlToStateMod() ...",
@@ -2196,9 +2200,9 @@ private String
 	__Commands_StateMod_Parcels_WriteParcelsToFile_String = "WriteParcelsToFile()...",
 	__Commands_StateMod_IrrigationPracticeTS_String = "Irrigation Practice TS (Yearly)",
 	__Commands_StateMod_ConsumptiveWaterRequirementTS_String = "Consumptive Water Requirement (Monthly, Daily)",
-	
+
 	__Commands_StateMod_StreamGageData_String = "Stream Gage Data",
-	
+
 	__Commands_StateMod_StreamGageStations_String =	"Stream Gage Stations",
 	__Commands_StateMod_StreamGageStations_ReadStreamGageStationsFromList_String =
 		"ReadStreamGageStationsFromList() ...",
@@ -2223,7 +2227,7 @@ private String
 
 	__Commands_StateMod_StreamGageHistoricalTS_String = "Stream Historical TS (Monthly, Daily)",
 	__Commands_StateMod_StreamGageBaseTS_String = "Stream Natural Flow TS (Monthly, Daily)",
-		
+
 	__Commands_StateMod_DelayTableData_String = "Delay Table Data",
 	__Commands_StateMod_DelayTablesMonthly_String = "Delay Tables (Monthly)",
 	__Commands_StateMod_DelayTablesMonthly_ReadDelayTablesMonthlyFromStateMod_String =
@@ -2236,7 +2240,7 @@ private String
 	__Commands_StateMod_DelayTablesDaily_ReadDelayTablesDailyFromStateMod_String = "ReadDelayTablesDailyFromStateMod() ...",
 	__Commands_StateMod_DelayTablesDaily_WriteDelayTablesDailyToList_String = "WriteDelayTablesDailyToList() ...",
 	__Commands_StateMod_DelayTablesDaily_WriteDelayTablesDailyToStateMod_String = "WriteDelayTablesDailyToStateMod() ...",
-		
+
 	__Commands_StateMod_DiversionData_String = "Diversion Data",
 	__Commands_StateMod_DiversionStations_String = "Diversion Stations",
 	__Commands_StateMod_DiversionStations_SetOutputYearType_String = "SetOutputYearType() ...",
@@ -2401,17 +2405,17 @@ private String
 		"CheckDiversionDemandTSMonthly() ...",
 
 	__Commands_StateMod_DiversionDemandTSOverrideMonthly_String = "Diversion Demand TS Override (Monthly)",
-		
+
 	__Commands_StateMod_DiversionDemandTSAverageMonthly_String = "Diversion Demand TS (Average Monthly)",
-		
+
 	__Commands_StateMod_DiversionDemandTSDaily_String = "Diversion Demand TS (Daily)",
-	
+
 	__Commands_StateMod_PrecipitationData_String ="Precipitation Data",
 	__Commands_StateMod_PrecipitationTSMonthly_String =	"Precipitation TS (Monthly, Yearly)",
-		
+
 	__Commands_StateMod_EvaporationData_String = "Evaporation Data",
 	__Commands_StateMod_EvaporationTSMonthly_String = "Evaporation TS (Monthly, Yearly)",
-		
+
 	__Commands_StateMod_ReservoirData_String = "Reservoir Data",
 	__Commands_StateMod_ReservoirStations_String = "Reservoir Stations",
 	__Commands_StateMod_ReservoirStations_ReadReservoirStationsFromList_String =
@@ -2423,7 +2427,7 @@ private String
 	__Commands_StateMod_ReservoirStations_SetReservoirAggregate_String = "SetReservoirAggregate() ...",
 	__Commands_StateMod_ReservoirStations_SetReservoirAggregateFromList_String =
 		"SetReservoirAggregateFromList() ...",
-/* TODO SAM 2004-07-02 - need to evaluate how to aggregate reservoirs
+/* TODO SAM 2004-07-02 - need to evaluate how to aggregate reservoirs.
 	__Commands_StateMod_ReservoirStations_SetReservoirSystem_String =
 		__Commands_StateCU_CULocations_SetReservoirSystem_String,
 	__Commands_StateMod_ReservoirStations_SetReservoirSystemFromList_String =
@@ -2452,7 +2456,7 @@ private String
 		__Commands_StateMod_ReservoirStations_SetReservoirAggregate_String,
 	__Commands_StateMod_ReservoirRights_SetReservoirAggregateFromList_String =
 		__Commands_StateMod_ReservoirStations_SetReservoirAggregateFromList_String,
-	/* TODO SAM 2004-07-07 maybe support later
+	/* TODO SAM 2004-07-07 maybe support later.
 	__Commands_StateMod_ReservoirRights_SetReservoirSystem_String =
 		__Commands_StateCU_CULocations_SetReservoirSystem_String,
 	__Commands_StateMod_ReservoirRights_SetReservoirSystemFromList_String =
@@ -2468,7 +2472,7 @@ private String
 	__Commands_StateMod_ReservoirRights_WriteReservoirRightsToList_String = "WriteReservoirRightsToList() ...",
 	__Commands_StateMod_ReservoirRights_WriteReservoirRightsToStateMod_String = "WriteReservoirRightsToStateMod() ...",
 	__Commands_StateMod_ReservoirRights_CheckReservoirRights_String = "CheckReservoirRights() ...",
-	
+
 	__Commands_StateMod_ReservoirReturn_String = "Reservoir Return",
 	__Commands_StateMod_ReservoirReturn_ReadReservoirReturnFromStateMod_String = "ReadReservoirReturnFromStateMod() ...",
 	__Commands_StateMod_ReservoirReturn_WriteReservoirReturnToStateMod_String = "WriteReservoirReturnToStateMod() ...",
@@ -2516,7 +2520,7 @@ private String
 
 	__Commands_StateMod_InstreamFlowDemandTSAverageMonthly_String =
 		"Instream Flow Demand TS (Average Monthly)",
-	// Not needed (yet)...
+	// Not needed (yet).
 	//__Commands_StateMod_InstreamFlowDemandTSAverageMonthly_ReadInstreamFlowStationsFromStateMod_String =
 	//	__Commands_StateMod_InstreamFlowStations_ReadInstreamFlowStationsFromStateMod_String,
 	__Commands_StateMod_InstreamFlowDemandTSAverageMonthly_ReadInstreamFlowDemandTSAverageMonthlyFromStateMod_String =
@@ -2715,7 +2719,7 @@ private String
 		"WriteWellDemandTSMonthlyToStateMod() ...",
 	__Commands_StateMod_WellDemandTSMonthly_CheckWellDemandTSMonthly_String =
 		"CheckWellDemandTSMonthly() ...",
-		
+
 	__Commands_StateMod_WellDemandTSDaily_String = "Well Demand TS (Daily)",
 
 	__Commands_StateMod_PlanData_String = "Plan Data",
@@ -2723,15 +2727,15 @@ private String
 	__Commands_StateMod_PlanStations_ReadPlanStationsFromStateMod_String = "ReadPlanStationsFromStateMod() ...",
 	__Commands_StateMod_PlanStations_SetPlanStation_String = "SetPlanStation() ...",
 	__Commands_StateMod_PlanStations_WritePlanStationsToStateMod_String = "WritePlanStationsToStateMod() ...",
-		
+
 	__Commands_StateMod_PlanWellAugmentation_String = "Plan Well Augmentation Data",
 	__Commands_StateMod_PlanWellAugmentation_ReadPlanWellAugmentationFromStateMod_String = "ReadPlanWellAugmentationFromStateMod() ...",
 	__Commands_StateMod_PlanWellAugmentation_WritePlanWellAugmentationToStateMod_String = "WritePlanWellAugmentationToStateMod() ...",
-	
+
 	__Commands_StateMod_PlanReturn_String = "Plan Return",
 	__Commands_StateMod_PlanReturn_ReadPlanReturnFromStateMod_String = "ReadPlanReturnFromStateMod() ...",
 	__Commands_StateMod_PlanReturn_WritePlanReturnToStateMod_String = "WritePlanReturnToStateMod() ...",
-	
+
 	__Commands_StateMod_StreamEstimateData_String = "Stream Estimate Data",
 	__Commands_StateMod_StreamEstimateStations_String = "Stream Estimate Stations",
 	__Commands_StateMod_StreamEstimateStations_ReadStreamEstimateStationsFromList_String =
@@ -2807,7 +2811,7 @@ private String
 	__Commands_StateMod_Network_WriteNetworkToList_String = "WriteNetworkToList() ...",
 	__Commands_StateMod_Network_WriteNetworkToStateMod_String = "WriteNetworkToStateMod() ...",
 	__Commands_StateMod_Network_PrintNetwork_String = "PrintNetwork() ...",
-		
+
 	__Commands_StateMod_RiverNetwork_String = "River Network (used by StateMod)",
 	__Commands_StateMod_RiverNetwork_ReadNetworkFromStateMod_String = "ReadNetworkFromStateMod() ...",
 	__Commands_StateMod_RiverNetwork_CreateRiverNetworkFromNetwork_String = "CreateRiverNetworkFromNetwork() ...",
@@ -2831,13 +2835,13 @@ private String
 	__Commands_StateMod_DownstreamCallTSDaily_String = "Downstream Call TS (Daily)",
 	__Commands_StateMod_SanJuanSedimentRecoveryPlan_String = "San Juan Sediment Recovery Plan",
 	__Commands_StateMod_RioGrandeSpill_String = "Rio Grande Spill",
-		
+
 	__Commands_StateMod_SpatialData_String = "Spatial Data",
 	__Commands_StateMod_GeoViewProject_String = "GeoView Project",
 
-	// General commands same as for StateCU
-	
-	// Run menu...
+	// General commands same as for StateCU.
+
+	// Run menu.
 
 	__Run_AllCommandsCreateOutput_String = "All Commands (create all output)",
 	__Run_AllCommandsIgnoreOutput_String = "All Commands (ignore output commands)",
@@ -2869,7 +2873,7 @@ private String
 	MENU_Results_StateMod_RiverNetworkData = "River Network Data",
 	MENU_Results_StateMod_OperationalData = "Operational Data",
 
-	// Tools menu...
+	// Tools menu.
 
 	__Tools_String = "Tools",
 	__Tools_AdministrationNumberCalculator_String = "Administration Number Calculator...",
@@ -2881,7 +2885,7 @@ private String
 	__Tools_ViewLogFile_Startup_String = "Diagnostics - View Log File (Startup)...",
 	// Currently Diagnostics are added dynamically.
 
-	// Help menu...
+	// Help menu.
 
 	__Help_AboutStateDMI_String = "About StateDMI",
 	__Help_ViewDocumentation_String = "View Documentation (PDF)",
@@ -2891,12 +2895,12 @@ private String
 	__Help_ViewDocumentation_DatastoreReference_String = "View Documentation - Datastore Reference",
 	__Help_ViewDocumentation_Troubleshooting_String = "View Documentation - Troubleshooting",
 	//__Help_ViewTrainingMaterials_String = "View Training Materials",
-	
-	// Results at bottom of window
-	
+
+	// Results at bottom of window.
+
 	__Results_Table_Properties_String = "Table properties...",
 
-	// Commands list pop-up menu (may be selectively added to/removed from the popup menu)...
+	// Commands list pop-up menu (may be selectively added to/removed from the popup menu).
 
 	MENU_Popup_Edit_WithErrorChecks = "Edit Command...",
 
@@ -2919,16 +2923,15 @@ private SimpleJButton
 StateDMIMain GUI constructor.  Create the main graphical user interface.
 @param app_type the application type from the StateDMI class (APP_TYPE_XXX).
 */
-public StateDMI_JFrame ( StateDMISession session, int app_type )
-{
+public StateDMI_JFrame ( StateDMISession session, int app_type ) {
 	String rtn = "StateDMI_JFrame.constructor";
 	__appType = app_type;
 
-	// Let the message package know that the application is the top level...
+	// Let the message package know that the application is the top level.
 
 	Message.setTopLevel (this);
-	
-	// Session to track command file history and other user session properties
+
+	// Session to track command file history and other user session properties.
 	this.session = session;
 
 	String directory = System.getProperty ("user.dir") + System.getProperty("file.separator");
@@ -2940,8 +2943,8 @@ public StateDMI_JFrame ( StateDMISession session, int app_type )
 
 	ui_InitGUI();
 
-	// Open startup datastores, displaying dialog if SystemLogin or SystemPassword property is "prompt"
-	// TODO SAM 2010-09-03 migrate more input types to datastores
+	// Open startup datastores, displaying dialog if SystemLogin or SystemPassword property is "prompt".
+	// TODO SAM 2010-09-03 migrate more input types to datastores.
 	try {
 		Message.printStatus(2, rtn, "Opening datastores from StateDMI UI...");
 	    StateDMI.openDataStoresAtStartup(session,__statedmiProcessor,false);
@@ -2950,19 +2953,19 @@ public StateDMI_JFrame ( StateDMISession session, int app_type )
 	    Message.printStatus ( 1, rtn, "Error opening datastores (" + e + ")." );
 	}
 
-	// Select HydroBase database.  Force a login if the database connection cannot be made.
+	// Select HydroBase database.  Force a login if the database connection cannot be made:
 	// - this will override any startup datastores opened above
 
 	uiAction_OpenHydroBase();
 
-	// Default the working directory to the directory where the application started...
+	// Default the working directory to the directory where the application started.
 
 	Message.printStatus (1, rtn, "Ready");
-	
-	// Populate the datastore choices in the UI
-	
+
+	// Populate the datastore choices in the UI.
+
 	ui_DataStoreList_Populate ();
-	
+
 	ui_UpdateStatus(true);
 }
 
@@ -2970,28 +2973,28 @@ public StateDMI_JFrame ( StateDMISession session, int app_type )
 Process action events from the menus and buttons.
 @param event ActionEvent to process.
 */
-public void actionPerformed ( ActionEvent event )
-{	String action = event.getActionCommand();
-	String command = action;	// To keep StateDMI and TSTool code the same
+public void actionPerformed ( ActionEvent event ) {
+	String action = event.getActionCommand();
+	String command = action;	// To keep StateDMI and TSTool code the same.
 	Object o = event.getSource ();
 	String routine = "StateDMI_JFrame.actionPerformed";
 
 	if ( ui_GetIgnoreActionEvent() ) {
-		// Used when programatically modifying components and don't want an event to be handled...
+		// Used when programatically modifying components and don't want an event to be handled.
 		return;
 	}
 
-	// List the actions in order of the main GUI menus.  Popup menus are
-	// duplicates of main menu actions and are mixed throughout.  If an
-	// action takes more than a few lines of code, break out into a separate method
+	// List the actions in order of the main GUI menus.
+	// Popup menus are duplicates of main menu actions and are mixed throughout.
+	// If an action takes more than a few lines of code, break out into a separate method.
 
-	// File menu...
+	// File menu.
 
 	if ( (o == __File_Open_CommandFile_JMenuItem) || (o == __toolBarOpenButton) ) {
 		uiAction_OpenCommandFile ( null, true );
 	}
 	else if ( command.toUpperCase().endsWith(".STATEDMI")) {
-    	// StateDMI command file in recent files, treat as open
+    	// StateDMI command file in recent files, treat as open.
     	uiAction_OpenCommandFile ( command, false );
     }
 	else if ( o == __File_Open_ModelNetwork_JMenuItem ) {
@@ -3013,7 +3016,7 @@ public void actionPerformed ( ActionEvent event )
 		}
 	}
 
-	// File menu, StateCU climate...
+	// File menu, StateCU climate.
 
 	else if ( o == __File_New_DataSet_StateCU_ClimateStations_FromList_JMenuItem ){
 		uiAction_ReadStateCUClimateStationsFromList ();
@@ -3027,11 +3030,11 @@ public void actionPerformed ( ActionEvent event )
 	}
 	else if((o == __File_Save_Commands_JMenuItem) || (o == __toolBarSaveButton) ) {
 		if (__commandFileName != null) {
-			// Write without prompting for the command file name...
+			// Write without prompting for the command file name.
 			uiAction_WriteCommandFile ( __commandFileName, false );
 		}
 		else {
-			// Prompt for the command file name...
+			// Prompt for the command file name.
 			uiAction_WriteCommandFile (__commandFileName, true );
 		}
 	}
@@ -3042,26 +3045,26 @@ public void actionPerformed ( ActionEvent event )
 		uiAction_WriteDataSet ( null, true );
 	}
     else if (command.equals(__File_Print_Commands_String) ) {
-        // Get all commands as strings for printing
+        // Get all commands as strings for printing.
         try {
             new TextPrinterJob ( commandList_GetCommandStrings(true), "StateDMI Commands",
-                null, // printer name
-                "na-letter", // paper size
-                null, // paper source
-                "Landscape", // page orientation
-                .75, // left margin
-                .75, // right
-                .6, // top
-                .6, // bottom
-                0, // lines per page - let called code determine
-                null, // header
-                null, // footer
-                true, // show line count
-                true, // show page count
-                null, // print all pages
-                false, // double-sided
-                null, // print file
-                true ); // show print configuration dialog
+                null, // Printer name.
+                "na-letter", // Paper size.
+                null, // Paper source.
+                "Landscape", // Page orientation.
+                .75, // Left margin.
+                .75, // Right.
+                .6, // Top.
+                .6, // Bottom.
+                0, // Lines per page - let called code determine.
+                null, // Header.
+                null, // Footer.
+                true, // Show line count.
+                true, // Show page count.
+                null, // Print all pages.
+                false, // Double-sided.
+                null, // Print file.
+                true ); // Show print configuration dialog.
         }
         catch ( Exception e ) {
             Message.printWarning ( 1, routine, "Error printing commands (" + e + ").");
@@ -3097,9 +3100,6 @@ public void actionPerformed ( ActionEvent event )
 		//reportProp.set ( "URL",
 		//"http://hbserver/manuals/tstool_test/tstool.html" );
 		new ReportJFrame ( v, reportProp );
-		// Clean up...
-		v = null;
-		reportProp = null;
 	}
     else if ( o == __File_Properties_DataSet_JMenuItem ) {
 		// Simple text display of data set properties, including last command file that was read.
@@ -3116,7 +3116,7 @@ public void actionPerformed ( ActionEvent event )
 		String directory = fc.getSelectedFile().getPath();
 		IOUtil.setProgramWorkingDir(directory);
 		JGUIUtil.setLastFileDialogDirectory(directory);
-		// Reset to make sure the ending delimiter is removed...
+		// Reset to make sure the ending delimiter is removed.
 		__props.set ("WorkingDir", IOUtil.getProgramWorkingDir() );
 		__initialWorkingDir = __props.getValue ( "WorkingDir" );
 	}
@@ -3133,31 +3133,31 @@ public void actionPerformed ( ActionEvent event )
 		uiAction_CloseClicked();
 	}
 
-	// Edit menu...
+	// Edit menu.
 
 	else if (action.equals(__CommandsPopup_ShowCommandStatus_String) ) {
 		uiAction_ShowCommandStatus();
 	}
 	else if (action.equals (__Edit_CutCommands_String) || action.equals (MENU_Popup_Cut)) {
-		// Cut the commands and save to the buffer...
+		// Cut the commands and save to the buffer.
 		uiAction_CopyFromCommandListToCutBuffer( true );
 	}
 	else if (action.equals (__Edit_CopyCommands_String) || action.equals (MENU_Popup_Copy)) {
-		// Copy commands to the buffer...
+		// Copy commands to the buffer.
 		uiAction_CopyFromCommandListToCutBuffer( false );
 	}
 	else if (action.equals (__Edit_PasteCommands_String) ||	action.equals (MENU_Popup_Paste)) {
-		// Copy the commands buffer to the command list...
+		// Copy the commands buffer to the command list.
 		uiAction_PasteFromCutBufferToCommandList();
 	}
 	else if ( o == __ClearCommands_JButton || action.equals (__Edit_DeleteCommands_String) ||
 		action.equals (MENU_Popup_Delete)) {
 		// The commands WILL NOT remain in the cut buffer.
-		// Now clear the list of selected commands...
+		// Now clear the list of selected commands.
 		commandList_RemoveCommandsBasedOnUI();
 	}
 	else if (action.equals (__Edit_CommandFile_String)) {
-		// Edit the command file in Notepad...
+		// Edit the command file in Notepad.
 		JFileChooser fc = JFileChooserFactory.createJFileChooser( JGUIUtil.getLastFileDialogDirectory() );
 		fc.setDialogTitle("Edit Command File");
 		if (fc.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
@@ -3177,17 +3177,17 @@ public void actionPerformed ( ActionEvent event )
 	}
 	else if (action.equals (__Edit_CommandWithErrorChecking_String) ||
 		action.equals (MENU_Popup_Edit_WithErrorChecks)) {
-		// Edit the first selected command, unless a comment, in which case all are edited...
+		// Edit the first selected command, unless a comment, in which case all are edited.
 		uiAction_EditCommand ();
 	}
 	else if (action.equals (__Edit_SelectAllCommands_String) ||
 		action.equals (__CommandsPopup_SelectAll_String)) {
-		// Select all the commands in the list...
+		// Select all the commands in the list.
 		uiAction_SelectAllCommands ();
 	}
 	else if (action.equals (__Edit_DeselectAllCommands_String) ||
 		action.equals (__CommandsPopup_DeselectAll_String)) {
-		// Deselect all the commands in the list...
+		// Deselect all the commands in the list.
 		uiAction_DeselectAllCommands ();
 	}
 	else if (action.equals(__Edit_ConvertSelectedCommandsToComments_String) ) {
@@ -3197,73 +3197,73 @@ public void actionPerformed ( ActionEvent event )
 		uiAction_ConvertCommandsToComments ( false );
 	}
 
-	// View menu...
-	
+	// View menu.
+
     if ( command.equals(__View_CommandFileDiff_String) ) {
-        // Show visual diff of current command file and saved version
+        // Show visual diff of current command file and saved version.
         uiAction_ViewCommandFileDiff();
     }
 	else if ( command.equals(__View_DataStores_String) ) {
-        // Show the datastores
+        // Show the datastores.
         uiAction_ShowDataStores();
     }
     else if ( o == __View_ThreeLevelCommandsMenu_JCheckBoxMenuItem ) {
-		// This method will trigger a refresh of the menus...
-    	// TODO SAM 2007-06-25 Need to rework to have a "redrawMenus" method
+		// This method will trigger a refresh of the menus.
+    	// TODO SAM 2007-06-25 Need to rework to have a "redrawMenus" method.
     	uiAction_SwitchAppType ( getAppType() );
 	}
 
-	// StateCU Commands menu ...
+	// StateCU Commands menu.
 
-	// StateCU climate stations commands...
+	// StateCU climate stations commands.
 
 	else if ( o == __Commands_StateCU_ClimateStations_ReadClimateStationsFromList_JMenuItem){
-		// Read CU Climate Stations from a list file
+		// Read CU Climate Stations from a list file.
 		commandList_EditCommand ( __Commands_StateCU_ClimateStations_ReadClimateStationsFromList_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_ClimateStations_ReadClimateStationsFromStateCU_JMenuItem){
-		// Read CU Climate Stations from a StateCU CLI file
+		// Read CU Climate Stations from a StateCU CLI file.
 		commandList_EditCommand ( __Commands_StateCU_ClimateStations_ReadClimateStationsFromStateCU_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_ClimateStations_ReadClimateStationsFromHydroBase_JMenuItem){
-		// Read CU Climate Stations from HydroBase
+		// Read CU Climate Stations from HydroBase.
 		commandList_EditCommand ( __Commands_StateCU_ClimateStations_ReadClimateStationsFromHydroBase_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_ClimateStations_SetClimateStation_JMenuItem){
-		// Set CU Climate Station...
+		// Set CU Climate Station.
 		commandList_EditCommand ( __Commands_StateCU_ClimateStations_SetClimateStation_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_ClimateStations_FillClimateStationsFromHydroBase_JMenuItem){
-		// Fill CU Climate Stations from HydroBase
+		// Fill CU Climate Stations from HydroBase.
 		commandList_EditCommand ( __Commands_StateCU_ClimateStations_FillClimateStationsFromHydroBase_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_ClimateStations_FillClimateStation_JMenuItem){
-		// Fill CU Climate Stations
+		// Fill CU Climate Stations.
 		commandList_EditCommand ( __Commands_StateCU_ClimateStations_FillClimateStation_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_ClimateStations_SortClimateStations_JMenuItem){
-		// Sort CU Climate Stations
+		// Sort CU Climate Stations.
 		commandList_EditCommand ( __Commands_StateCU_ClimateStations_SortClimateStations_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_ClimateStations_WriteClimateStationsToList_JMenuItem){
-		// Write CU Climate Stations to CLI file
+		// Write CU Climate Stations to CLI file.
 		commandList_EditCommand ( __Commands_StateCU_ClimateStations_WriteClimateStationsToList_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_ClimateStations_WriteClimateStationsToStateCU_JMenuItem){
-		// Write CU Climate Stations to CLI file
+		// Write CU Climate Stations to CLI file.
 		commandList_EditCommand ( __Commands_StateCU_ClimateStations_WriteClimateStationsToStateCU_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( action.equals(__Commands_StateCU_ClimateStations_CheckClimateStations_String) ){
-		// Check CU Climate Stations
+		// Check CU Climate Stations.
 		commandList_EditCommand ( __Commands_StateCU_ClimateStations_CheckClimateStations_String,
 		null, __INSERT_COMMAND);
 	}
@@ -3292,25 +3292,25 @@ public void actionPerformed ( ActionEvent event )
 			ResponseJDialog.OK);
 	}
 
-	// StateCU CCH commands...
+	// StateCU CCH commands.
 
 	else if ( o == __Commands_StateCU_CropCharacteristics_ReadCropCharacteristicsFromStateCU_JMenuItem) {
-		// Read CU Locations from a StateCU CCH file...
+		// Read CU Locations from a StateCU CCH file.
 		commandList_EditCommand ( __Commands_StateCU_CropCharacteristics_ReadCropCharacteristicsFromStateCU_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_CropCharacteristics_ReadCropCharacteristicsFromHydroBase_JMenuItem) {
-		// Read CU crop characteristics from HydroBase...
+		// Read CU crop characteristics from HydroBase.
 		commandList_EditCommand ( __Commands_StateCU_CropCharacteristics_ReadCropCharacteristicsFromHydroBase_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_CropCharacteristics_SetCropCharacteristics_JMenuItem) {
-		// Set CUCropCharacteristics values using user edits...
+		// Set CUCropCharacteristics values using user edits.
 		commandList_EditCommand ( __Commands_StateCU_CropCharacteristics_SetCropCharacteristics_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_CropCharacteristics_TranslateCropCharacteristics_JMenuItem) {
-		// Translate CUCropCharacteristics crop types...
+		// Translate CUCropCharacteristics crop types.
 		commandList_EditCommand ( __Commands_StateCU_CropCharacteristics_TranslateCropCharacteristics_String,
 		null, __INSERT_COMMAND);
 	}
@@ -3319,30 +3319,30 @@ public void actionPerformed ( ActionEvent event )
 		__INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_CropCharacteristics_WriteCropCharacteristicsToList_JMenuItem) {
-		// Write CU crop characteristics to a CCH file...
+		// Write CU crop characteristics to a CCH file.
 		commandList_EditCommand ( __Commands_StateCU_CropCharacteristics_WriteCropCharacteristicsToList_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_CropCharacteristics_WriteCropCharacteristicsToStateCU_JMenuItem) {
-		// Write CU crop characteristics to a CCH file...
+		// Write CU crop characteristics to a CCH file.
 		commandList_EditCommand ( __Commands_StateCU_CropCharacteristics_WriteCropCharacteristicsToStateCU_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( action.equals(__Commands_StateCU_CropCharacteristics_CheckCropCharacteristics_String)) {
-		// Write CU crop characteristics to a CCH file...
+		// Write CU crop characteristics to a CCH file.
 		commandList_EditCommand ( __Commands_StateCU_CropCharacteristics_CheckCropCharacteristics_String,
 		null, __INSERT_COMMAND);
 	}
 
-	// StateCU Blaney-Criddle (KBC) commands...
+	// StateCU Blaney-Criddle (KBC) commands.
 
 	else if ( o == __Commands_StateCU_BlaneyCriddle_ReadBlaneyCriddleFromStateCU_JMenuItem ) {
-		// Read CU Blaney Criddle from KBC file...
+		// Read CU Blaney Criddle from KBC file.
 		commandList_EditCommand ( __Commands_StateCU_BlaneyCriddle_ReadBlaneyCriddleFromStateCU_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_BlaneyCriddle_ReadBlaneyCriddleFromHydroBase_JMenuItem) {
-		// Read CU Blaney Criddle from HydroBase...
+		// Read CU Blaney Criddle from HydroBase.
 		commandList_EditCommand ( __Commands_StateCU_BlaneyCriddle_ReadBlaneyCriddleFromHydroBase_String,
 		null, __INSERT_COMMAND);
 	}
@@ -3371,15 +3371,15 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// StateCU Penman-Monteith (KPM) commands...
+	// StateCU Penman-Monteith (KPM) commands.
 
 	else if ( o == __Commands_StateCU_PenmanMonteith_ReadPenmanMonteithFromStateCU_JMenuItem ) {
-		// Read CU Penman-Monteith from KPM file...
+		// Read CU Penman-Monteith from KPM file.
 		commandList_EditCommand ( __Commands_StateCU_PenmanMonteith_ReadPenmanMonteithFromStateCU_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_PenmanMonteith_ReadPenmanMonteithFromHydroBase_JMenuItem) {
-		// Read CU Penman-Monteith from HydroBase...
+		// Read CU Penman-Monteith from HydroBase.
 		commandList_EditCommand ( __Commands_StateCU_PenmanMonteith_ReadPenmanMonteithFromHydroBase_String,
 		null, __INSERT_COMMAND);
 	}
@@ -3408,40 +3408,38 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// StateCU CU Locations (STR) commands...
+	// StateCU CU Locations (STR) commands.
 
-	// Compare string because several menus use the same action command...
+	// Compare string because several menus use the same action command.
 	else if ( action.equals( __Commands_StateCU_CULocations_ReadCULocationsFromList_String)){
-		// Read CU Locations from a list file...
+		// Read CU Locations from a list file.
 		commandList_EditCommand ( __Commands_StateCU_CULocations_ReadCULocationsFromList_String,
 		null, __INSERT_COMMAND);
 	}
-	// Compare string because several menus use the same action command...
+	// Compare string because several menus use the same action command.
 	else if ( action.equals( __Commands_StateCU_CULocations_ReadCULocationsFromStateCU_String)) {
-		// Read CU Locations from a StateCU STR file...
+		// Read CU Locations from a StateCU STR file.
 		commandList_EditCommand ( __Commands_StateCU_CULocations_ReadCULocationsFromStateCU_String,
 		null, __INSERT_COMMAND);
 	}
-	// Compare string because several menus use the same action command...
+	// Compare string because several menus use the same action command.
 	else if ( action.equals( __Commands_StateCU_CULocations_ReadCULocationsFromStateMod_String)){
-		// Read CU Locations from a StateMod DDS or WES file...
+		// Read CU Locations from a StateMod DDS or WES file.
 		commandList_EditCommand ( __Commands_StateCU_CULocations_ReadCULocationsFromStateMod_String,
 		null, __INSERT_COMMAND );
 	}
 	else if ( o == __Commands_StateCU_CULocations_SetCULocation_JMenuItem) {
-		// Set CULocation values using user edits...
+		// Set CULocation values using user edits.
 		commandList_EditCommand ( __Commands_StateCU_CULocations_SetCULocation_String, null,
 		__INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_CULocations_SetCULocationsFromList_JMenuItem) {
-		// Set CULocation values from a list...
+		// Set CULocation values from a list.
 		commandList_EditCommand ( __Commands_StateCU_CULocations_SetCULocationsFromList_String,
 		null, __INSERT_COMMAND);
 	}
-	// Compare strings because the same command is available in several
-	// menus (put before shorter string to avoid conflict).
-	// Even though the StateCU string is used, the value of the string is
-	// the same for all instances where it is used...
+	// Compare strings because the same command is available in several menus (put before shorter string to avoid conflict).
+	// Even though the StateCU string is used, the value of the string is the same for all instances where it is used.
 	else if ( action.equals( __Commands_StateCU_CULocations_SetDiversionAggregateFromList_String)) {
 		commandList_EditCommand (__Commands_StateCU_CULocations_SetDiversionAggregateFromList_String,
 		null, __INSERT_COMMAND);
@@ -3453,152 +3451,137 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_StateCU_CULocations_SetDiversionAggregate_String,
 		null, __INSERT_COMMAND);
 	}
-	// Compare strings because the same command is available in several
-	// menus (put before shorter string to avoid conflict).
-	// Even though the StateCU string is used, the value of the string is
-	// the same for all instances where it is used...
+	// Compare strings because the same command is available in several menus (put before shorter string to avoid conflict).
+	// Even though the StateCU string is used, the value of the string is the same for all instances where it is used.
 	else if ( action.equals ( __Commands_StateCU_CULocations_SetDiversionSystemFromList_String)) {
 		commandList_EditCommand ( __Commands_StateCU_CULocations_SetDiversionSystemFromList_String,
 		null, __INSERT_COMMAND);
 	}
 	// Compare strings because the same command is available in several menus.
-	// Even though the StateCU string is used, the value of the string is
-	// the same for all instances where it is used...
+	// Even though the StateCU string is used, the value of the string is the same for all instances where it is used.
 	else if ( action.equals ( __Commands_StateCU_CULocations_SetDiversionSystem_String)) {
 		commandList_EditCommand ( __Commands_StateCU_CULocations_SetDiversionSystem_String,
 		null, __INSERT_COMMAND);
 	}
-	// Compare strings because the same command is available in several
-	// menus (put before shorter string to avoid conflict).
-	// Even though the StateMod string is used, the value of the string is
-	// the same for all instances where it is used...
+	// Compare strings because the same command is available in several menus (put before shorter string to avoid conflict).
+	// Even though the StateMod string is used, the value of the string is the same for all instances where it is used.
 	else if ( action.equals ( __Commands_StateMod_DiversionDemandTSMonthly_SetDiversionMultiStructFromList_String)) {
 		commandList_EditCommand ( __Commands_StateMod_DiversionDemandTSMonthly_SetDiversionMultiStructFromList_String,
 		null, __INSERT_COMMAND);
 	}
 	// Compare strings because the same command is available in several menus.
-	// Even though the StateMod string is used, the value of the string is
-	// the same for all instances where it is used...
+	// Even though the StateMod string is used, the value of the string is the same for all instances where it is used.
 	else if ( action.equals ( __Commands_StateMod_DiversionDemandTSMonthly_SetDiversionMultiStruct_String)) {
 		commandList_EditCommand ( __Commands_StateMod_DiversionDemandTSMonthly_SetDiversionMultiStruct_String,
 		null, __INSERT_COMMAND);
 	}
-	// Compare strings because the same command is available in several
-	// menus (put before shorter string to avoid conflict).
+	// Compare strings because the same command is available in several menus (put before shorter string to avoid conflict).
 	else if ( action.equals( __Commands_StateMod_ReservoirStations_SetReservoirAggregate_String)) {
 		commandList_EditCommand ( __Commands_StateMod_ReservoirStations_SetReservoirAggregate_String,
 		null, __INSERT_COMMAND);
 	}
-	// Compare strings because the same command is available in several
-	// menus (put before shorter string to avoid conflict).
+	// Compare strings because the same command is available in several menus (put before shorter string to avoid conflict).
 	else if ( action.equals(__Commands_StateMod_ReservoirStations_SetReservoirAggregateFromList_String)) {
 		commandList_EditCommand ( __Commands_StateMod_ReservoirStations_SetReservoirAggregateFromList_String,
 		null, __INSERT_COMMAND);
 	}
 	// Compare strings because the same command is available in several menus.
-	// Even though the StateCU string is used, the value of the string is
-	// the same for all instances where it is used...
+	// Even though the StateCU string is used, the value of the string is the same for all instances where it is used.
 	else if ( action.equals( __Commands_StateCU_CULocations_SetDiversionAggregate_String)) {
 		commandList_EditCommand (__Commands_StateCU_CULocations_SetDiversionAggregate_String,
 		null, __INSERT_COMMAND);
 	}
-	// Compare strings because the same command is available in several
-	// menus (put before shorter string to avoid conflict).
-	// Even though the StateCU string is used, the value of the string is
-	// the same for all instances where it is used...
+	// Compare strings because the same command is available in several menus (put before shorter string to avoid conflict).
+	// Even though the StateCU string is used, the value of the string is the same for all instances where it is used.
 	else if ( action.equals( __Commands_StateCU_CULocations_SetWellAggregateFromList_String)){
 		commandList_EditCommand ( __Commands_StateCU_CULocations_SetWellAggregateFromList_String,
 		null, __INSERT_COMMAND);
 	}
 	// Compare strings because the same command is available in several menus.
-	// Even though the StateCU string is used, the value of the string is
-	// the same for all instances where it is used...
+	// Even though the StateCU string is used, the value of the string is the same for all instances where it is used.
 	else if ( action.equals( __Commands_StateCU_CULocations_SetWellAggregate_String)){
 		commandList_EditCommand ( __Commands_StateCU_CULocations_SetWellAggregate_String,
 		null, __INSERT_COMMAND);
 	}
-	// Compare strings because the same command is available in several
-	// menus (put before shorter string to avoid conflict).
-	// Even though the StateCU string is used, the value of the string is
-	// the same for all instances where it is used...
+	// Compare strings because the same command is available in several menus (put before shorter string to avoid conflict).
+	// Even though the StateCU string is used, the value of the string is the same for all instances where it is used.
 	else if ( action.equals( __Commands_StateCU_CULocations_SetWellSystemFromList_String)) {
 		commandList_EditCommand (__Commands_StateCU_CULocations_SetWellSystemFromList_String,
 		null, __INSERT_COMMAND);
 	}
 	// Compare strings because the same command is available in several menus.
-	// Even though the StateCU string is used, the value of the string is
-	// the same for all instances where it is used...
+	// Even though the StateCU string is used, the value of the string is the same for all instances where it is used.
 	else if ( action.equals( __Commands_StateCU_CULocations_SetWellSystem_String)) {
 		commandList_EditCommand (__Commands_StateCU_CULocations_SetWellSystem_String,
 		null, __INSERT_COMMAND);
 	}
 	else if(o == __Commands_StateCU_CULocations_SortCULocations_JMenuItem) {
-		// Sort CULocations using the ID...
+		// Sort CULocations using the ID.
 		commandList_EditCommand ( __Commands_StateCU_CULocations_SortCULocations_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_CULocations_FillCULocationsFromList_JMenuItem ) {
-		// Fill CULocation data using available data from List...
+		// Fill CULocation data using available data from List.
 		commandList_EditCommand ( __Commands_StateCU_CULocations_FillCULocationsFromList_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_CULocations_FillCULocationsFromHydroBase_JMenuItem) {
-		// Fill CULocation data using available data from HydroBase...
+		// Fill CULocation data using available data from HydroBase.
 		commandList_EditCommand (__Commands_StateCU_CULocations_FillCULocationsFromHydroBase_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_CULocations_FillCULocation_JMenuItem) {
-		// Set CULocation values using user edits...
+		// Set CULocation values using user edits.
 		commandList_EditCommand (__Commands_StateCU_CULocations_FillCULocation_String, null,
 		__INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_CULocations_SetCULocationClimateStationWeightsFromList_JMenuItem) {
-		// Set CULocation climate station weights from a list file...
+		// Set CULocation climate station weights from a list file.
 		commandList_EditCommand (
 		__Commands_StateCU_CULocations_SetCULocationClimateStationWeightsFromList_String, null,
 		__INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_CULocations_SetCULocationClimateStationWeightsFromHydroBase_JMenuItem) {
-		// Set CULocation climate station weights from HydroBase...
+		// Set CULocation climate station weights from HydroBase.
 		commandList_EditCommand (
 		__Commands_StateCU_CULocations_SetCULocationClimateStationWeightsFromHydroBase_String, null,
 		__INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_CULocations_SetCULocationClimateStationWeights_JMenuItem) {
-		// Set CULocation climate station weights...
+		// Set CULocation climate station weights.
 		commandList_EditCommand ( __Commands_StateCU_CULocations_SetCULocationClimateStationWeights_String,
 		null, __INSERT_COMMAND );
 	}
 	else if (o == __Commands_StateCU_CULocations_FillCULocationClimateStationWeights_JMenuItem) {
-		// Fill CULocation climate station weights...
+		// Fill CULocation climate station weights.
 		commandList_EditCommand (__Commands_StateCU_CULocations_FillCULocationClimateStationWeights_String,
 		null, __INSERT_COMMAND );
 	}
 	else if ( o == __Commands_StateCU_CULocations_WriteCULocationsToList_JMenuItem) {
-		// Write CULocations out to an STR file...
+		// Write CULocations out to an STR file.
 		commandList_EditCommand ( __Commands_StateCU_CULocations_WriteCULocationsToList_String,
 			null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_CULocations_WriteCULocationsToStateCU_JMenuItem) {
-		// Write CULocations out to an STR file...
+		// Write CULocations out to an STR file.
 		commandList_EditCommand ( __Commands_StateCU_CULocations_WriteCULocationsToStateCU_String,
 			null, __INSERT_COMMAND);
 	}
 	else if ( action.equals(__Commands_StateCU_CULocations_CheckCULocations_String)) {
-		// Check CULocations...
+		// Check CULocations.
 		commandList_EditCommand ( __Commands_StateCU_CULocations_CheckCULocations_String,
 			null, __INSERT_COMMAND);
 	}
-    
-    // StateCU Parcels (experimental - as input to CDS and IPY)
+
+    // StateCU Parcels (experimental - as input to CDS and IPY).
 
 	else if ( action.equals( __Commands_StateCU_Parcels_ReadParcelsFromHydroBase_String) ) {
-		// Read parcels associated with CU Locations from HydroBase...
+		// Read parcels associated with CU Locations from HydroBase.
 		commandList_EditCommand ( __Commands_StateCU_Parcels_ReadParcelsFromHydroBase_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( action.equals( __Commands_StateCU_Parcels_ReadParcelsFromIrrigatedLands_String) ) {
-		// Read parcels associated with CU Locations from irrigated lands table...
+		// Read parcels associated with CU Locations from irrigated lands table.
 		commandList_EditCommand ( __Commands_StateCU_Parcels_ReadParcelsFromIrrigatedLands_String,
 		null, __INSERT_COMMAND);
 	}
@@ -3628,12 +3611,12 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 	else if ( action.equals( __Commands_StateCU_Parcels_WriteParcelsToFile_String) ) {
-		// Write parcels associated with CU Locations to a file...
+		// Write parcels associated with CU Locations to a file.
 		commandList_EditCommand ( __Commands_StateCU_Parcels_WriteParcelsToFile_String,
 		null, __INSERT_COMMAND);
 	}
 
-	// StateCU CDS commands...
+	// StateCU CDS commands.
 
 	else if (o == __Commands_StateCU_CropPatternTS_CreateCropPatternTSForCULocations_JMenuItem){
 		// Create crop pattern TS data for each location.
@@ -3641,166 +3624,164 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_CropPatternTS_ReadCropPatternTSFromStateCU_JMenuItem){
-		// Read CU crop patterns from a StateCU CDS file...
+		// Read CU crop patterns from a StateCU CDS file.
 		commandList_EditCommand ( __Commands_StateCU_CropPatternTS_ReadCropPatternTSFromStateCU_String,
 		null, __INSERT_COMMAND);
 	}
-	/* FIXME SAM 2008-12-30 Remove if not needed
+	/* FIXME SAM 2008-12-30 Remove if not needed.
 	else if (o == __Commands_StateCU_CropPatternTS_ReadCropPatternTSFromDBF_JMenuItem) {
-		// Read CU crop patterns from a DBF file...
+		// Read CU crop patterns from a DBF file.
 		commandList_EditCommand ( __Commands_StateCU_CropPatternTS_ReadCropPatternTSFromDBF_String,
 		null, __INSERT_COMMAND);
 	}
 	*/
 	else if (o == __Commands_StateCU_CropPatternTS_SetCropPatternTSFromList_JMenuItem) {
-		// Set CU crop patterns from a list...
+		// Set CU crop patterns from a list.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_SetCropPatternTSFromList_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_CropPatternTS_ReadCropPatternTSFromHydroBase_JMenuItem) {
-		// Read CU crop patterns from HydroBase...
+		// Read CU crop patterns from HydroBase.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromHydroBase_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_CropPatternTS_ReadCropPatternTSFromParcels_JMenuItem) {
-		// Read CU crop patterns from Parcels...
+		// Read CU crop patterns from Parcels.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromParcels_String,
 		null, __INSERT_COMMAND);
 	}
 	else if(o==__Commands_StateCU_CropPatternTS_SetCropPatternTS_JMenuItem){
-		// Set the crop pattern...
+		// Set the crop pattern.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_SetCropPatternTS_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o ==__Commands_StateCU_CropPatternTS_TranslateCropPatternTS_JMenuItem){
-		// Translate crop pattern data...
+		// Translate crop pattern data.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_TranslateCropPatternTS_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o ==__Commands_StateCU_CropPatternTS_RemoveCropPatternTS_JMenuItem){
-		// Remove crop pattern data...
+		// Remove crop pattern data.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_RemoveCropPatternTS_String,
 		null, __INSERT_COMMAND);
 	}
-	/* FIXME SAM 2008-12-30 Remove if not needed
+	/* FIXME SAM 2008-12-30 Remove if not needed.
 	else if (o == __Commands_StateCU_CropPatternTS_ReadAgStatsTSFromDateValue_JMenuItem){
-		// Read county crop statistics from DateValue...
+		// Read county crop statistics from DateValue.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_ReadAgStatsTSFromDateValue_String,
 		null, __INSERT_COMMAND);
 	}
 	*/
 	else if (o ==__Commands_StateCU_CropPatternTS_FillCropPatternTSConstant_JMenuItem){
-		// Fill CU crop patterns by interpolating...
+		// Fill CU crop patterns by interpolating.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_FillCropPatternTSConstant_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_CropPatternTS_FillCropPatternTSInterpolate_JMenuItem){
-		// Fill CU crop patterns by interpolating...
+		// Fill CU crop patterns by interpolating.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_FillCropPatternTSInterpolate_String,
 		null, __INSERT_COMMAND);
 	}
-	/* FIXME SAM 2008-12-30 Remove if not needed
+	/* FIXME SAM 2008-12-30 Remove if not needed.
 	else if (o ==__Commands_StateCU_CropPatternTS_FillCropPatternTSProrateAgStats_JMenuItem){
-		// Fill CU crop patterns by prorating AgStats...
+		// Fill CU crop patterns by prorating AgStats.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_FillCropPatternTSProrateAgStats_String,
 		null, __INSERT_COMMAND);
 	}
 	*/
 	else if (o ==__Commands_StateCU_CropPatternTS_FillCropPatternTSUsingWellRights_JMenuItem){
-		// Fill CU crop patterns by using water rights...
+		// Fill CU crop patterns by using water rights.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_FillCropPatternTSUsingWellRights_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_CropPatternTS_FillCropPatternTSRepeat_JMenuItem) {
-		// Fill CU crop patterns by repeating the value...
+		// Fill CU crop patterns by repeating the value.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_FillCropPatternTSRepeat_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_CropPatternTS_SortCropPatternTS_JMenuItem) {
-		// Sort CU crop patterns...
+		// Sort CU crop patterns.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_SortCropPatternTS_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_CropPatternTS_WriteCropPatternTSToStateCU_JMenuItem) {
-		// Write CU crop patterns to a StateCU CDS file...
+		// Write CU crop patterns to a StateCU CDS file.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_WriteCropPatternTSToStateCU_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o ==__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_JMenuItem) {
-		// Write CU crop patterns to a DateValue time series file...
+		// Write CU crop patterns to a DateValue time series file.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_WriteCropPatternTSToDateValue_String,
 		null, __INSERT_COMMAND);
 	}
 	// TODO smalers 2021-01-24 - used for supplemental data?  Not sure if it was fully ever implemented.
     /*
 	else if (o ==__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_JMenuItem) {
-		// Write CU crop pattern parcel data to file...
+		// Write CU crop pattern parcel data to file.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_WriteCropPatternParcelsToFile_String,
 		null, __INSERT_COMMAND);
 	}
 	*/
 	else if ( action.equals(__Commands_StateCU_CropPatternTS_CompareCropPatternTSFiles_String)) {
-		// Compare crop pattern time series files...
+		// Compare crop pattern time series files.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_CompareCropPatternTSFiles_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( action.equals(__Commands_StateCU_CropPatternTS_CheckCropPatternTS_String)) {
-		// Check CU crop pattern time series...
+		// Check CU crop pattern time series.
 		commandList_EditCommand (__Commands_StateCU_CropPatternTS_CheckCropPatternTS_String,
 		null, __INSERT_COMMAND);
 	}
 
-	// StateCU Irrigation Practice commands...
+	// StateCU Irrigation Practice commands.
 
-	else if (o == __Commands_StateCU_IrrigationPracticeTS_CreateIrrigationPracticeTSForCULocations_JMenuItem)
-		{
-		// Create Irrigation practice time series for CU Locations...
+	else if (o == __Commands_StateCU_IrrigationPracticeTS_CreateIrrigationPracticeTSForCULocations_JMenuItem) {
+		// Create Irrigation practice time series for CU Locations.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_CreateIrrigationPracticeTSForCULocations_String,
 		null, __INSERT_COMMAND);
 	}
-	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromStateCU_JMenuItem)
-		{
-		// Read CU irrigation practice time series from the TSP file...
+	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromStateCU_JMenuItem) {
+		// Read CU irrigation practice time series from the TSP file.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromStateCU_String,
 		null, __INSERT_COMMAND);
 	}
 	/* TODO 2005-03-07 Unneeded with new commands?
 	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadCropPatternTSFromDBF_JMenuItem)
 		{
-		// Read crop pattern TS from a DBF (needed to deal with well data)...
+		// Read crop pattern TS from a DBF (needed to deal with well data).
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_readCropPatternTSFromDBF_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadCropPatternTSFromHydroBase_JMenuItem) {
-		// Read CU crop patterns from HydroBase (needed to deal with well data)...
+		// Read CU crop patterns from HydroBase (needed to deal with well data).
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_ReadCropPatternTSFromHydroBase_String,
 		null, __INSERT_COMMAND);
 	}
 	*/
 	/*
 	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSGroundwaterAreaFromHydroBase_JMenuItem) {
-		// Read groundwater (well-irrigated parcel) area from HydroBase...
+		// Read groundwater (well-irrigated parcel) area from HydroBase.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSGroundwaterAreaFromHydroBase_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSSprinklerAreaFromHydroBase_JMenuItem){
-		// Read sprinkler parcels and area from HydroBase...
+		// Read sprinkler parcels and area from HydroBase.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSSprinklerAreaFromHydroBase_String,
 		null, __INSERT_COMMAND);
 	}
 	*/
-	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromHydroBase_JMenuItem){
-		// Read IPY area from HydroBase...
+	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromHydroBase_JMenuItem) {
+		// Read IPY area from HydroBase.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromHydroBase_String,
 		null, __INSERT_COMMAND);
 	}
-	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromList_JMenuItem)	{
-		// Read IPY area from List...
+	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromList_JMenuItem) {
+		// Read IPY area from List.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromList_String,
 		null, __INSERT_COMMAND);
 	}
-	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromParcels_JMenuItem){
-		// Read IPY area from Parcels...
+	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromParcels_JMenuItem) {
+		// Read IPY area from Parcels.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_ReadIrrigationPracticeTSFromParcels_String,
 		null, __INSERT_COMMAND);
 	}
@@ -3817,73 +3798,71 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_IrrigationPracticeTS_SetIrrigationPracticeTS_JMenuItem){
-		// Set irrigation practice time series...
+		// Set irrigation practice time series.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_SetIrrigationPracticeTS_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_IrrigationPracticeTS_SetIrrigationPracticeTSFromList_JMenuItem) {
-		// Set irrigation practice time series...
+		// Set irrigation practice time series.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_SetIrrigationPracticeTSFromList_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateCU_IrrigationPracticeTS_ReadWellRightsFromStateMod_JMenuItem){
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_ReadWellRightsFromStateMod_String,
-		null,
-		__INSERT_COMMAND);
+		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_IrrigationPracticeTS_FillIrrigationPracticeTSAcreageUsingWellRights_JMenuItem) {
-		// Fill irrigation practice time series...
+		// Fill irrigation practice time series.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_FillIrrigationPracticeTSAcreageUsingWellRights_String,
 		null, __INSERT_COMMAND);
 	}
-	else if (o == __Commands_StateCU_IrrigationPracticeTS_FillIrrigationPracticeTSInterpolate_JMenuItem)
-		{
-		// Fill irrigation practice time series...
+	else if (o == __Commands_StateCU_IrrigationPracticeTS_FillIrrigationPracticeTSInterpolate_JMenuItem) {
+		// Fill irrigation practice time series.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_FillIrrigationPracticeTSInterpolate_String,
 		null, __INSERT_COMMAND);
 	}
 	else if (o == __Commands_StateCU_IrrigationPracticeTS_FillIrrigationPracticeTSRepeat_JMenuItem) {
-		// Fill irrigation practice time series...
+		// Fill irrigation practice time series.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_FillIrrigationPracticeTSRepeat_String,
 		null, __INSERT_COMMAND);
 	}
-	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadCropPatternTSFromStateCU_JMenuItem){
-		// Read crop pattern time series from a StateCU file...
+	else if (o == __Commands_StateCU_IrrigationPracticeTS_ReadCropPatternTSFromStateCU_JMenuItem) {
+		// Read crop pattern time series from a StateCU file.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_ReadCropPatternTSFromStateCU_String,
 		null, __INSERT_COMMAND);
 	}
-	else if (o == __Commands_StateCU_IrrigationPracticeTS_SortIrrigationPracticeTS_JMenuItem ){
+	else if (o == __Commands_StateCU_IrrigationPracticeTS_SortIrrigationPracticeTS_JMenuItem ) {
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_SortIrrigationPracticeTS_String,
 		null, __INSERT_COMMAND);
 	}
-	else if (o == __Commands_StateCU_IrrigationPracticeTS_WriteIrrigationPracticeTSToDateValue_JMenuItem ){
-		// Write irrigation practice time series to a DateValue time series file...
+	else if (o == __Commands_StateCU_IrrigationPracticeTS_WriteIrrigationPracticeTSToDateValue_JMenuItem ) {
+		// Write irrigation practice time series to a DateValue time series file.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_WriteIrrigationPracticeTSToDateValue_String,
 		null, __INSERT_COMMAND);
 	}
-	else if (o == __Commands_StateCU_IrrigationPracticeTS_WriteIrrigationPracticeTSToStateCU_JMenuItem){
-		// Write irrigation practice time series to a StateCU file...
+	else if (o == __Commands_StateCU_IrrigationPracticeTS_WriteIrrigationPracticeTSToStateCU_JMenuItem) {
+		// Write irrigation practice time series to a StateCU file.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_WriteIrrigationPracticeTSToStateCU_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( action.equals(__Commands_StateCU_IrrigationPracticeTS_CompareIrrigationPracticeTSFiles_String)) {
-		// Compare irrigation practice time series files...
+		// Compare irrigation practice time series files.
 		commandList_EditCommand (__Commands_StateCU_IrrigationPracticeTS_CompareIrrigationPracticeTSFiles_String,
 		null, __INSERT_COMMAND);
 	}
-	else if (action.equals(__Commands_StateCU_IrrigationPracticeTS_CheckIrrigationPracticeTS_String)){
-		// Check irrigation practice time series to a StateCU file...
+	else if (action.equals(__Commands_StateCU_IrrigationPracticeTS_CheckIrrigationPracticeTS_String)) {
+		// Check irrigation practice time series to a StateCU file.
 		commandList_EditCommand ( __Commands_StateCU_IrrigationPracticeTS_CheckIrrigationPracticeTS_String,
 		null, __INSERT_COMMAND);
 	}
 
-	// StateCU Diversion TS... - handled with StateMod
+	// StateCU Diversion TS... - handled with StateMod.
 
-	// StateCU Well Pumping TS... - handled with StateMod
+	// StateCU Well Pumping TS... - handled with StateMod.
 
-	// StateCU Diversion rights... - handled with StateMod
+	// StateCU Diversion rights... - handled with StateMod.
 
-	// General Commands (same for both models)...
+	// General Commands (same for both models).
 
     //else if (command.equals(__Commands_General_CheckingResults_OpenCheckFile_String) ) {
     //    commandList_EditCommand ( __Commands_General_CheckingResults_OpenCheckFile_String, null, __INSERT_COMMAND );
@@ -3892,49 +3871,49 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_General_Comments_Comment_String, null, __INSERT_COMMAND );
 	}
     else if (command.equals(__Commands_General_Comments_ReadOnlyComment_String) ) {
-        // Most inserts let the editor format the command.  However, in this case the specific
-        // comment needs to be supplied.  Otherwise, the comment will be blank or the string from
-        // the menu, which has too much verbage.
+        // Most inserts let the editor format the command.
+    	// However, in this case the specific comment needs to be supplied.
+    	// Otherwise, the comment will be blank or the string from the menu, which has too much verbage.
     	List<Command> comments = new ArrayList<>(1);
         comments.add ( commandList_NewCommand("#@readOnly",true) );
         commandList_EditCommand ( __Commands_General_Comments_ReadOnlyComment_String, comments, __INSERT_COMMAND );
     }
     else if (command.equals(__Commands_General_Comments_EnabledComment_String) ) {
-        // Most inserts let the editor format the command.  However, in this case the specific
-        // comment needs to be supplied.  Otherwise, the comment will be blank or the string from
-        // the menu, which has too much verbage.
+        // Most inserts let the editor format the command.
+    	// However, in this case the specific comment needs to be supplied.
+    	// Otherwise, the comment will be blank or the string from the menu, which has too much verbage.
     	List<Command> comments = new ArrayList<>(1);
         comments.add ( commandList_NewCommand("#@enabled False",true) );
         commandList_EditCommand ( __Commands_General_Comments_EnabledComment_String, comments, __INSERT_COMMAND );
     }
     else if (command.equals(__Commands_General_Comments_ExpectedStatusFailureComment_String) ) {
-        // Most inserts let the editor format the command.  However, in this case the specific
-        // comment needs to be supplied.  Otherwise, the comment will be blank or the string from
-        // the menu, which has too much verbage.
+        // Most inserts let the editor format the command.
+    	// However, in this case the specific comment needs to be supplied.
+    	// Otherwise, the comment will be blank or the string from the menu, which has too much verbage.
     	List<Command> comments = new ArrayList<>(1);
         comments.add ( commandList_NewCommand("#@expectedStatus Failure",true) );
         commandList_EditCommand ( __Commands_General_Comments_ExpectedStatusFailureComment_String, comments, __INSERT_COMMAND );
     }
     else if (command.equals(__Commands_General_Comments_ExpectedStatusWarningComment_String) ) {
-        // Most inserts let the editor format the command.  However, in this case the specific
-        // comment needs to be supplied.  Otherwise, the comment will be blank or the string from
-        // the menu, which has too much verbage.
+        // Most inserts let the editor format the command.
+    	// However, in this case the specific comment needs to be supplied.
+    	// Otherwise, the comment will be blank or the string from the menu, which has too much verbage.
     	List<Command> comments = new ArrayList<>(1);
         comments.add ( commandList_NewCommand("#@expectedStatus Warning",true) );
         commandList_EditCommand ( __Commands_General_Comments_ExpectedStatusWarningComment_String, comments, __INSERT_COMMAND );
     }
     else if (command.equals(__Commands_General_Comments_RequireApplicationComment_String) ) {
-        // Most inserts let the editor format the command.  However, in this case the specific
-        // comment needs to be supplied.  Otherwise, the comment will be blank or the string from
-        // the menu, which has too much verbage.
+        // Most inserts let the editor format the command.
+    	// However, in this case the specific comment needs to be supplied.
+    	// Otherwise, the comment will be blank or the string from the menu, which has too much verbage.
     	List<Command> comments = new ArrayList<>(1);
         comments.add ( commandList_NewCommand("#@require application StateDMI >= X.YY.ZZ",true) );
         commandList_EditCommand ( __Commands_General_Comments_RequireApplicationComment_String, comments, __INSERT_COMMAND );
     }
     else if (command.equals(__Commands_General_Comments_RequireDatastoreComment_String) ) {
-        // Most inserts let the editor format the command.  However, in this case the specific
-        // comment needs to be supplied.  Otherwise, the comment will be blank or the string from
-        // the menu, which has too much verbage.
+        // Most inserts let the editor format the command.
+    	// However, in this case the specific comment needs to be supplied.
+    	// Otherwise, the comment will be blank or the string from the menu, which has too much verbage.
     	List<Command> comments = new ArrayList<>(1);
         comments.add ( commandList_NewCommand("#@require datastore HydroBase >= YYYYMMDD",true) );
         commandList_EditCommand ( __Commands_General_Comments_RequireDatastoreComment_String, comments, __INSERT_COMMAND );
@@ -3964,7 +3943,7 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_General_Running_Exit_String, null, __INSERT_COMMAND );
 	}
 	/*
-    else if (command.equals( __Commands_General_FileHandling_FTPGet_String)){
+    else if (command.equals( __Commands_General_FileHandling_FTPGet_String)) {
         commandList_EditCommand ( __Commands_General_FileHandling_FTPGet_String, null, __INSERT_COMMAND );
     }
     */
@@ -4041,23 +4020,23 @@ public void actionPerformed ( ActionEvent event )
         commandList_EditCommand ( __Commands_General_TestProcessing_StartRegressionTestResultsReport_String, null, __INSERT_COMMAND );
     }
 
-	// Output File Processing Commands...
-	
+	// Output File Processing Commands.
+
     else if (command.equals(__Commands_Output_SplitStateModReport_String ) ) {
     	commandList_EditCommand(__Commands_Output_SplitStateModReport_String, null, __INSERT_COMMAND );
     }
-	
-	// Spatial Commands...
-	
+
+	// Spatial Commands.
+
     else if (command.equals(__Commands_Spatial_WriteTableToGeoJSON_String ) ) {
     	commandList_EditCommand(__Commands_Spatial_WriteTableToGeoJSON_String, null, __INSERT_COMMAND );
     }
     else if (command.equals(__Commands_Spatial_WriteTableToShapefile_String ) ) {
     	commandList_EditCommand(__Commands_Spatial_WriteTableToShapefile_String, null, __INSERT_COMMAND );
     }
-	
-	// Spreadsheet Commands...
-	
+
+	// Spreadsheet Commands.
+
     else if (command.equals( __Commands_Spreadsheet_NewExcelWorkbook_String) ) {
         commandList_EditCommand ( __Commands_Spreadsheet_NewExcelWorkbook_String, null, __INSERT_COMMAND );
     }
@@ -4094,8 +4073,8 @@ public void actionPerformed ( ActionEvent event )
     else if (command.equals( __Commands_Spreadsheet_CloseExcelWorkbook_String) ) {
         commandList_EditCommand ( __Commands_Spreadsheet_CloseExcelWorkbook_String, null, __INSERT_COMMAND );
     }
-	
-	// Table Commands / Create, Copy, Free Table ...
+
+	// Table Commands / Create, Copy, Free Table.
 
     else if (command.equals( __Commands_TableCreate_NewTable_String) ) {
         commandList_EditCommand ( __Commands_TableCreate_NewTable_String, null, __INSERT_COMMAND );
@@ -4107,7 +4086,7 @@ public void actionPerformed ( ActionEvent event )
         commandList_EditCommand ( __Commands_TableCreate_FreeTable_String, null, __INSERT_COMMAND );
     }
 
-	// Table Commands / Read Table...
+	// Table Commands / Read Table.
 
     else if (command.equals( __Commands_TableRead_ReadTableFromDataStore_String) ) {
     	commandList_EditCommand( __Commands_TableRead_ReadTableFromDataStore_String, null, __INSERT_COMMAND );
@@ -4132,7 +4111,7 @@ public void actionPerformed ( ActionEvent event )
         commandList_EditCommand ( __Commands_TableRead_ReadTableFromXML_String, null, __INSERT_COMMAND );
     }*/
 
-	// Table Commands / Append/Join Tables...
+	// Table Commands / Append/Join Tables.
 
     else if (command.equals( __Commands_TableJoin_AppendTable_String) ) {
         commandList_EditCommand ( __Commands_TableJoin_AppendTable_String, null, __INSERT_COMMAND );
@@ -4141,7 +4120,7 @@ public void actionPerformed ( ActionEvent event )
         commandList_EditCommand ( __Commands_TableJoin_JoinTables_String, null, __INSERT_COMMAND );
     }
 
-	// Table Commands / Manipulate Table Values ...
+	// Table Commands / Manipulate Table Values.
 
     else if (command.equals( __Commands_TableManipulate_FormatTableDateTime_String) ) {
         commandList_EditCommand ( __Commands_TableManipulate_FormatTableDateTime_String, null, __INSERT_COMMAND );
@@ -4180,13 +4159,13 @@ public void actionPerformed ( ActionEvent event )
         commandList_EditCommand ( __Commands_TableManipulate_SortTable_String, null, __INSERT_COMMAND );
     }
 
-	// Table Commands / Analyze Tables ...
+	// Table Commands / Analyze Tables.
 
     else if (command.equals( __Commands_TableAnalyze_CompareTables_String) ) {
         commandList_EditCommand ( __Commands_TableAnalyze_CompareTables_String, null, __INSERT_COMMAND );
     }
 
-	// Table Commands / Output Table...
+	// Table Commands / Output Table.
 
     else if (command.equals( __Commands_TableOutput_WriteTableToDelimitedFile_String) ) {
         commandList_EditCommand ( __Commands_TableOutput_WriteTableToDelimitedFile_String, null, __INSERT_COMMAND );
@@ -4197,11 +4176,11 @@ public void actionPerformed ( ActionEvent event )
     else if (command.equals( __Commands_TableOutput_WriteTableToHTML_String) ) {
         commandList_EditCommand ( __Commands_TableOutput_WriteTableToHTML_String, null, __INSERT_COMMAND );
     }
-    /*else if (command.equals( __Commands_TableOutput_WriteTableToDataStore_String) ){
+    /*else if (command.equals( __Commands_TableOutput_WriteTableToDataStore_String) ) {
     	commandList_EditCommand ( __Commands_TableOutput_WriteTableToDataStore_String, null, __INSERT_COMMAND);
     }*/
 
-	// Table Commands / Running and Properties...
+	// Table Commands / Running and Properties.
 
     else if (command.equals( __Commands_TableRunning_SetPropertyFromTable_String) ) {
         commandList_EditCommand ( __Commands_TableRunning_SetPropertyFromTable_String, null, __INSERT_COMMAND );
@@ -4209,11 +4188,11 @@ public void actionPerformed ( ActionEvent event )
     else if (command.equals( __Commands_TableRunning_CopyPropertiesToTable_String) ) {
         commandList_EditCommand ( __Commands_TableRunning_CopyPropertiesToTable_String, null, __INSERT_COMMAND );
     }
-	
-	// StateMod Commands...
-	
-	// StateMod control - response file...
-	
+
+	// StateMod Commands.
+
+	// StateMod control - response file.
+
 	else if ( o == __Commands_StateMod_Response_ReadResponseFromStateMod_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_Response_ReadResponseFromStateMod_String,
 		null, __INSERT_COMMAND);
@@ -4222,9 +4201,9 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_StateMod_Response_WriteResponseToStateMod_String,
 		null, __INSERT_COMMAND);
 	}
-	
-	// StateMod control - control file...
-	
+
+	// StateMod control - control file.
+
 	else if ( o == __Commands_StateMod_Control_ReadControlFromStateMod_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_Control_ReadControlFromStateMod_String,
 		null, __INSERT_COMMAND);
@@ -4233,27 +4212,27 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_StateMod_Control_WriteControlToStateMod_String,
 		null, __INSERT_COMMAND);
 	}
-	
-	// StateMod control - output request file...
-	
+
+	// StateMod control - output request file.
+
 	else if ( action.equals(__Commands_StateMod_OutputRequest_String) ){
 		new ResponseJDialog ( this, "StateMod Output Request File",
 			"The output request file is not created with StateDMI.\n" +
 			"Instead, use an editor or other software - see the StateMod documentation for format information.",
 			ResponseJDialog.OK);
 	}
-	
-	// StateMod control - reach data file...
-	
+
+	// StateMod control - reach data file.
+
 	else if ( action.equals(__Commands_StateMod_ReachData_String) ){
 		new ResponseJDialog ( this, "StateMod Reach Data File",
 			"The reach data file is not created with StateDMI.\n" +
 			"Instead, use an editor or other software - see the StateMod documentation for format information.",
 			ResponseJDialog.OK);
 	}
-	
-	// StateCU files for StateMod...
-	
+
+	// StateCU files for StateMod.
+
 	else if ( action.equals( __Commands_StateMod_StateCUStructure_String) ){
 		new ResponseJDialog ( this,	"StateCU Structure File (for AWC)",
 		"The StateCU Structure (CU Location) file contains available water content (AWC) data for each structure.\n" +
@@ -4276,7 +4255,7 @@ public void actionPerformed ( ActionEvent event )
 		ResponseJDialog.OK);
 	}
 
-	// StateMod Stream Gage Commands...
+	// StateMod Stream Gage Commands.
 
 	else if ( o == __Commands_StateMod_StreamGageStations_ReadStreamGageStationsFromList_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_StreamGageStations_ReadStreamGageStationsFromList_String,
@@ -4323,8 +4302,8 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_StateMod_StreamGageStations_CheckStreamGageStations_String,
 		null, __INSERT_COMMAND);
 	}
-	
-	// Stream gage historical monthly time series..
+
+	// Stream gage historical monthly time series.
 
 	else if ( action.equals(__Commands_StateMod_StreamGageHistoricalTS_String) ) {
 		new ResponseJDialog ( this, "StateMod Stream Historical Time Series",
@@ -4333,9 +4312,9 @@ public void actionPerformed ( ActionEvent event )
 		"The stream gage stations file can be used as a list for input to other software.",
 		ResponseJDialog.OK);
 	}
-	
-	// Stream gage natural flow time series...
-	
+
+	// Stream gage natural flow time series.
+
 	else if ( action.equals (__Commands_StateMod_StreamGageBaseTS_String) ) {
 		new ResponseJDialog ( this, "StateMod Stream Gage Natural Flow Time Series",
 		"Stream gage natural flow time series are not created with StateDMI.\n" +
@@ -4344,40 +4323,40 @@ public void actionPerformed ( ActionEvent event )
 		ResponseJDialog.OK);
 	}
 
-	// StateMod Delay Table Commands...
+	// StateMod Delay Table Commands.
 
 	else if ( o == __Commands_StateMod_DelayTablesMonthly_ReadDelayTablesMonthlyFromStateMod_JMenuItem ) {
-		// Read StateMod Delay tables from StateMod DLY file
+		// Read StateMod Delay tables from StateMod DLY file.
 		commandList_EditCommand ( __Commands_StateMod_DelayTablesMonthly_ReadDelayTablesMonthlyFromStateMod_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateMod_DelayTablesDaily_ReadDelayTablesDailyFromStateMod_JMenuItem ) {
-		// Read StateMod Delay tables from StateMod DLY file
+		// Read StateMod Delay tables from StateMod DLY file.
 		commandList_EditCommand ( __Commands_StateMod_DelayTablesDaily_ReadDelayTablesDailyFromStateMod_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateMod_DelayTablesMonthly_WriteDelayTablesMonthlyToList_JMenuItem ) {
-		// Write Delay tables to list file
+		// Write Delay tables to list file.
 		commandList_EditCommand ( __Commands_StateMod_DelayTablesMonthly_WriteDelayTablesMonthlyToList_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateMod_DelayTablesDaily_WriteDelayTablesDailyToList_JMenuItem ) {
-		// Write Delay tables to list file
+		// Write Delay tables to list file.
 		commandList_EditCommand ( __Commands_StateMod_DelayTablesDaily_WriteDelayTablesDailyToList_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateMod_DelayTablesMonthly_WriteDelayTablesMonthlyToStateMod_JMenuItem ) {
-		// Write Delay tables to StateMod DLY file
+		// Write Delay tables to StateMod DLY file.
 		commandList_EditCommand ( __Commands_StateMod_DelayTablesMonthly_WriteDelayTablesMonthlyToStateMod_String,
 		null, __INSERT_COMMAND);
 	}
 	else if ( o == __Commands_StateMod_DelayTablesDaily_WriteDelayTablesDailyToStateMod_JMenuItem ) {
-		// Write Delay tables to StateMod DLD file
+		// Write Delay tables to StateMod DLD file.
 		commandList_EditCommand ( __Commands_StateMod_DelayTablesDaily_WriteDelayTablesDailyToStateMod_String,
 		null, __INSERT_COMMAND);
 	}
 
-	// StateMod Diversion Commands...
+	// StateMod Diversion Commands.
 
 	else if ( o == __Commands_StateMod_DiversionStations_SetOutputYearType_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_DiversionStations_SetOutputYearType_String,
@@ -4394,7 +4373,7 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_StateMod_DiversionStations_ReadDiversionStationsFromNetwork_String,
 		null, __INSERT_COMMAND);
 	}
-	// Multiple menu items initiate the same action...
+	// Multiple menu items initiate the same action.
 	else if ( (o == __Commands_StateMod_DiversionStations_ReadDiversionStationsFromStateMod_JMenuItem) ||
 		(o == __Commands_StateMod_DiversionRights_ReadDiversionStationsFromStateMod_JMenuItem) ||
 		(o == __Commands_StateMod_DiversionHistoricalTSMonthly_ReadDiversionStationsFromStateMod_JMenuItem) ||
@@ -4448,7 +4427,7 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// Diversion rights...
+	// Diversion rights.
 
 	else if ( o == __Commands_StateMod_DiversionRights_ReadDiversionRightsFromHydroBase_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_DiversionRights_ReadDiversionRightsFromHydroBase_String,
@@ -4484,7 +4463,7 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// Diversion historical time series (monthly)...
+	// Diversion historical time series (monthly).
 	else if ( o == __Commands_StateMod_DiversionHistoricalTSMonthly_ReadDiversionHistoricalTSMonthlyFromHydroBase_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_DiversionHistoricalTSMonthly_ReadDiversionHistoricalTSMonthlyFromHydroBase_String,
 		null, __INSERT_COMMAND);
@@ -4549,9 +4528,9 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_StateMod_DiversionHistoricalTSMonthly_CheckDiversionHistoricalTSMonthly_String,
 		null, __INSERT_COMMAND);
 	}
-	
-	// Historical diversion ts (daily)...
-	
+
+	// Historical diversion ts (daily).
+
 	else if ( action.equals (__Commands_StateMod_DiversionHistoricalTSDaily_String) ) {
 		new ResponseJDialog ( this, "StateMod Diversion Historical Time Series (Daily)",
 		"Daily historical diversion time series are not created with StateDMI.\n" +
@@ -4639,9 +4618,9 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_StateMod_DiversionDemandTSMonthly_CheckDiversionDemandTSMonthly_String,
 		null, __INSERT_COMMAND);
 	}
-	
-	// Daily diversion demand...
-	
+
+	// Daily diversion demand.
+
 	else if ( action.equals (__Commands_StateMod_DiversionDemandTSDaily_String) ) {
 		new ResponseJDialog ( this, "StateMod Diversion Demand Time Series (Daily)",
 		"Daily diversion demand time series are not created with StateDMI.\n" +
@@ -4650,7 +4629,7 @@ public void actionPerformed ( ActionEvent event )
 			ResponseJDialog.OK);
 	}
 
-	// Diversion demand override...
+	// Diversion demand override.
 
 	else if ( action.equals( __Commands_StateMod_DiversionDemandTSOverrideMonthly_String) ||
 		action.equals( __Commands_StateMod_DiversionDemandTSAverageMonthly_String)){
@@ -4666,7 +4645,7 @@ public void actionPerformed ( ActionEvent event )
 		ResponseJDialog.OK);
 	}
 
-	// StateMod Precipitation commands...
+	// StateMod Precipitation commands.
 
 	else if ( action.equals( __Commands_StateMod_PrecipitationTSMonthly_String) ) {
 		new ResponseJDialog ( this,	"StateMod Precipitation Time Series",
@@ -4677,7 +4656,7 @@ public void actionPerformed ( ActionEvent event )
 		ResponseJDialog.OK);
 	}
 
-	// StateMod Evaporation commands...
+	// StateMod Evaporation commands.
 
 	else if ( action.equals( __Commands_StateMod_EvaporationTSMonthly_String) ) {
 		new ResponseJDialog ( this,	"StateMod Evaporation Time Series",
@@ -4687,7 +4666,7 @@ public void actionPerformed ( ActionEvent event )
 		ResponseJDialog.OK);
 	}
 
-	// StateMod Reservoir Commands...
+	// StateMod Reservoir Commands.
 
 	else if ( (o == __Commands_StateMod_ReservoirStations_ReadReservoirStationsFromList_JMenuItem) ||
 		(o == __Commands_StateMod_ReservoirRights_ReadReservoirStationsFromList_JMenuItem) ) {
@@ -4737,7 +4716,7 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// Reservoir rights...
+	// Reservoir rights.
 
 	else if ( o == __Commands_StateMod_ReservoirRights_ReadReservoirRightsFromHydroBase_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_ReservoirRights_ReadReservoirRightsFromHydroBase_String,
@@ -4771,8 +4750,8 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_StateMod_ReservoirRights_CheckReservoirRights_String,
 		null, __INSERT_COMMAND);
 	}
-	
-	// Reservoir return commands
+
+	// Reservoir return commands.
 
 	else if ( o == __Commands_StateMod_ReservoirReturn_ReadReservoirReturnFromStateMod_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_ReservoirReturn_ReadReservoirReturnFromStateMod_String,
@@ -4783,7 +4762,7 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// StateMod Reservoir content and target time series commands...
+	// StateMod Reservoir content and target time series commands.
 
 	else if ( action.equals( __Commands_StateMod_ReservoirContentAndTargetTS_String) ){
 		new ResponseJDialog ( this,	"StateMod Reservoir Content Time Series",
@@ -4793,7 +4772,7 @@ public void actionPerformed ( ActionEvent event )
 		ResponseJDialog.OK);
 	}
 
-	// Instream flow station Commands...
+	// Instream flow station Commands.
 
 	else if ( (o == __Commands_StateMod_InstreamFlowStations_ReadInstreamFlowStationsFromList_JMenuItem) ||
 		(o == __Commands_StateMod_InstreamFlowRights_ReadInstreamFlowStationsFromList_JMenuItem) ) {
@@ -4844,7 +4823,7 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// StateMod instream flow rights...
+	// StateMod instream flow rights.
 
 	else if ( o == __Commands_StateMod_InstreamFlowRights_ReadInstreamFlowRightsFromHydroBase_JMenuItem ) {
 		commandList_EditCommand ( __Commands_StateMod_InstreamFlowRights_ReadInstreamFlowRightsFromHydroBase_String,
@@ -4880,7 +4859,7 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// StateMod Instream Flow demand TS (average monthly) commands...
+	// StateMod Instream Flow demand TS (average monthly) commands.
 
 	// SetOutputYearType() handled generically.
 	// ReadInstreamFlowStationsFromStateMod() handled elsewhere.
@@ -4906,7 +4885,7 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// StateMod Instream Flow demand TS (monthly, daily) commands...
+	// StateMod Instream Flow demand TS (monthly, daily) commands.
 
 	else if ( action.equals( __Commands_StateMod_InstreamFlowDemandTS_String) ) {
 		new ResponseJDialog ( this,	"StateMod Instream Flow Demand Time Series",
@@ -4915,7 +4894,7 @@ public void actionPerformed ( ActionEvent event )
 			ResponseJDialog.OK);
 	}
 
-	// StateMod Well Station Commands...
+	// StateMod Well Station Commands.
 
 	else if ( (o == __Commands_StateMod_WellStations_ReadWellStationsFromList_JMenuItem) ||
 		(o == __Commands_StateMod_WellRights_ReadWellStationsFromList_JMenuItem) ||
@@ -5007,14 +4986,14 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// StateMod parcel commands...
+	// StateMod parcel commands.
 
 	else if ( o == __Commands_StateMod_WellRights_ReadParcelsFromHydroBase_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_WellRights_ReadParcelsFromHydroBase_String,
 		null, __INSERT_COMMAND);
 	}
 
-	// StateMod Well right commands...
+	// StateMod Well right commands.
 
 	else if ( o == __Commands_StateMod_WellRights_ReadWellRightsFromHydroBase_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_WellRights_ReadWellRightsFromHydroBase_String,
@@ -5064,7 +5043,7 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_Shared_WriteCheckFile_String, null, __INSERT_COMMAND);
 	}
 
-	// StateMod well pumping time series (monthly)...
+	// StateMod well pumping time series (monthly).
 
 	else if ( o == __Commands_StateMod_WellHistoricalPumpingTSMonthly_ReadWellHistoricalPumpingTSMonthlyFromStateCU_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_WellHistoricalPumpingTSMonthly_ReadWellHistoricalPumpingTSMonthlyFromStateCU_String,
@@ -5131,7 +5110,7 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// StateMod Well pumping time series (daily)...
+	// StateMod Well pumping time series (daily).
 
 	else if ( action.equals( __Commands_StateMod_WellHistoricalPumpingTSDaily_String) ) {
 		new ResponseJDialog ( this, "StateMod Well Historical Pumping Time Series (Daily)",
@@ -5139,9 +5118,9 @@ public void actionPerformed ( ActionEvent event )
 		+ "Instead, use TSTool, a spreadsheet, or other software.\n", ResponseJDialog.OK);
 	}
 
-	// StateMod Well demand time series (monthly)...
+	// StateMod Well demand time series (monthly).
 
-	// other commands are handled with stations.
+	// Other commands are handled with stations.
 	else if ( o == __Commands_StateMod_WellDemandTSMonthly_ReadWellDemandTSMonthlyFromStateMod_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_WellDemandTSMonthly_ReadWellDemandTSMonthlyFromStateMod_String,
 		null, __INSERT_COMMAND);
@@ -5222,16 +5201,16 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_StateMod_WellDemandTSMonthly_CheckWellDemandTSMonthly_String,
 		null, __INSERT_COMMAND);
 	}
-	
-	// StateMod Well demand time series (daily)...
+
+	// StateMod Well demand time series (daily).
 
 	else if ( action.equals( __Commands_StateMod_WellDemandTSDaily_String) ) {
 		new ResponseJDialog ( this, "StateMod Well Demand Time Series (Daily)",
 		"Well demand time series (daily) are not created with StateDMI.\n"
 		+ "Instead, use TSTool, a spreadsheet, or other software.\n", ResponseJDialog.OK);
 	}
-	
-	// Plan station commands
+
+	// Plan station commands.
 
 	else if ( o == __Commands_StateMod_PlanStations_ReadPlanStationsFromStateMod_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_PlanStations_ReadPlanStationsFromStateMod_String,
@@ -5245,8 +5224,8 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_StateMod_PlanStations_WritePlanStationsToStateMod_String,
 		null, __INSERT_COMMAND);
 	}
-	
-	// Plan Well Augmentation commands
+
+	// Plan Well Augmentation commands.
 
 	else if ( o == __Commands_StateMod_PlanWellAugmentation_ReadPlanWellAugmentationFromStateMod_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_PlanWellAugmentation_ReadPlanWellAugmentationFromStateMod_String,
@@ -5256,8 +5235,8 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_StateMod_PlanWellAugmentation_WritePlanWellAugmentationToStateMod_String,
 		null, __INSERT_COMMAND);
 	}
-	
-	// Plan return commands
+
+	// Plan return commands.
 
 	else if ( o == __Commands_StateMod_PlanReturn_ReadPlanReturnFromStateMod_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_PlanReturn_ReadPlanReturnFromStateMod_String,
@@ -5268,9 +5247,9 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// StateMod Stream Estimate Commands...
+	// StateMod Stream Estimate Commands.
 
-	// Stream estimate stations...
+	// Stream estimate stations.
 
 	else if ( (o == __Commands_StateMod_StreamEstimateStations_ReadStreamEstimateStationsFromList_JMenuItem) ||
 		(o == __Commands_StateMod_StreamEstimateCoefficients_ReadStreamEstimateStationsFromList_JMenuItem) ) {
@@ -5325,7 +5304,7 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// StateMod Stream estimate coefficients...
+	// StateMod Stream estimate coefficients.
 
 	else if ( o == __Commands_StateMod_StreamEstimateCoefficients_ReadStreamEstimateCoefficientsFromStateMod_JMenuItem) {
 		commandList_EditCommand ( __Commands_StateMod_StreamEstimateCoefficients_ReadStreamEstimateCoefficientsFromStateMod_String,
@@ -5356,7 +5335,7 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// StateMod stream estimate time series commands...
+	// StateMod stream estimate time series commands.
 
 	else if ( action.equals( __Commands_StateMod_StreamEstimateBaseTS_String) ) {
 		new ResponseJDialog ( this,	"StateMod Stream Estimate Natural Flow Time Series",
@@ -5366,7 +5345,7 @@ public void actionPerformed ( ActionEvent event )
 			ResponseJDialog.OK);
 	}
 
-	// StateMod Network (output NET) commands...
+	// StateMod Network (output NET) commands.
 
 	else if ( o == __Commands_StateMod_Network_ReadNetworkFromStateMod_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_Network_ReadNetworkFromStateMod_String,
@@ -5421,7 +5400,7 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// StateMod River Network (output RIN) commands...
+	// StateMod River Network (output RIN) commands.
 
 	else if ( o == __Commands_StateMod_RiverNetwork_ReadNetworkFromStateMod_JMenuItem ||
 		o == __Commands_StateMod_StreamGageStations_ReadNetworkFromStateMod_JMenuItem ||
@@ -5462,8 +5441,8 @@ public void actionPerformed ( ActionEvent event )
 		null, __INSERT_COMMAND);
 	}
 
-	// StateMod operational rights commands...
-	
+	// StateMod operational rights commands.
+
 	else if ( o == __Commands_StateMod_OperationalRights_ReadOperationalRightsFromStateMod_JMenuItem){
 		commandList_EditCommand ( __Commands_StateMod_OperationalRights_ReadOperationalRightsFromStateMod_String,
 		null, __INSERT_COMMAND);
@@ -5476,9 +5455,9 @@ public void actionPerformed ( ActionEvent event )
 		commandList_EditCommand ( __Commands_StateMod_OperationalRights_WriteOperationalRightsToStateMod_String,
 		null, __INSERT_COMMAND);
 	}
-	
-	// StateMod San Juan Sediment Recovery plan commands...
-	
+
+	// StateMod San Juan Sediment Recovery plan commands.
+
 	else if ( action.equals( __Commands_StateMod_DownstreamCallTSDaily_String) ) {
 		new ResponseJDialog ( this, "StateMod Downstream Call TS (Daily)",
 		"StateDMI does not currently process downstream call time series (daily) data.\n" +
@@ -5486,17 +5465,17 @@ public void actionPerformed ( ActionEvent event )
 		ResponseJDialog.OK);
 	}
 
-	// StateMod San Juan Sediment Recovery plan commands...
-	
+	// StateMod San Juan Sediment Recovery plan commands.
+
 	else if ( action.equals( __Commands_StateMod_SanJuanSedimentRecoveryPlan_String) ) {
 		new ResponseJDialog ( this, "StateMod San Juan Sediment Recovery Plan",
 		"StateDMI does not currently process San Juan Sediment Recovery Plan data.\n" +
 		"Instead, use an editor or other software.",
 		ResponseJDialog.OK);
 	}
-	
-	// StateMod Rio Grande Spill commands...
-	
+
+	// StateMod Rio Grande Spill commands.
+
 	else if ( action.equals( __Commands_StateMod_RioGrandeSpill_String) ) {
 		new ResponseJDialog ( this, "StateMod Rio Grande Spill",
 		"StateDMI does not currently process Rio Grande spill data.\n" +
@@ -5504,8 +5483,8 @@ public void actionPerformed ( ActionEvent event )
 		ResponseJDialog.OK);
 	}
 
-	// StateMod spatial data...
-	
+	// StateMod spatial data.
+
 	else if ( action.equals( __Commands_StateMod_GeoViewProject_String) ) {
 		new ResponseJDialog ( this, "GeoView Project",
 		"StateDMI does not currently process the GeoView project file,\n" +
@@ -5514,14 +5493,14 @@ public void actionPerformed ( ActionEvent event )
 		ResponseJDialog.OK);
 	}
 
-	// Popup...
+	// Popup menu.
 
 	else if ( o == __CommandsPopup_FindCommandsUsingString_JMenuItem ) {
 		new FindInJListJDialog(this,__commands_JList,"Find Command(s)");
 		ui_CheckGUIState();
 	}
 	else if ( o == __CommandsPopup_FindCommandsUsingLineNumber_JMenuItem ) {
-		// Display a dialog to ask for the line number...
+		// Display a dialog to ask for the line number.
 		String line = new TextResponseJDialog ( this, "Find line number.",
 		"Enter the line number to find and press OK.\n" +
 		"If found, the line will be selected and all others will be deselected.\n",
@@ -5535,42 +5514,42 @@ public void actionPerformed ( ActionEvent event )
 			if ( iline <= __commands_JListModel.size() ) {
 				__commands_JList.clearSelection();
 				__commands_JList.setSelectedIndex ( iline - 1 );
-				// Make sure that the line is visible...
+				// Make sure that the line is visible.
 				__commands_JList.ensureIndexIsVisible(iline -1);
 			}
 		}
 		ui_CheckGUIState();
 	}
 
-	// Run menu...
+	// Run menu.
 
     else if ( action.equals(__Run_AllCommandsCreateOutput_String) ) {
 		// Use a string comparison because the action can be initiated
 		// from different buttons and menus but the action command is the same.
-		// Process time series and create all output from write* commands...
+		// Process time series and create all output from write* commands.
 		uiAction_RunCommands ( true, true );
 	}
     else if ( action.equals(__Run_AllCommandsIgnoreOutput_String) ) {
 		// Use a string comparison because the action can be initiated
 		// from different buttons and menus but the action command is the same.
-		// Process time series but ignore write* commands...
+		// Process time series but ignore write* commands.
 		uiAction_RunCommands ( true, false );
 	}
     else if ( action.equals(__Run_SelectedCommandsCreateOutput_String) ) {
 		// Use a string comparison because the action can be initiated
 		// from different buttons and menus but the action command is the same.
-		// Process selected commands and create all output from write* commands...
+		// Process selected commands and create all output from write* commands.
 		uiAction_RunCommands ( false, true );
 	}
     else if ( action.equals(__Run_SelectedCommandsIgnoreOutput_String) ) {
 		// Use a string comparison because the action can be initiated
 		// from different buttons and menus but the action command is the same.
-		// Process selected commands but ignore write* commands...
+		// Process selected commands but ignore write* commands.
 		uiAction_RunCommands ( false, false );
 	}
 	else if ( o == __Run_CommandsFromFile_JMenuItem ) {
-/* TODO SAM - add later
-		// Run an external command file with results NOT shown in the GUI...
+		/* TODO SAM - add later.
+		// Run an external command file with results NOT shown in the GUI.
 		JFileChooser fc = new JFileChooser();
 		fc.setDialogTitle("Select Command File - will be run externally");
 		if ( __last_directory_selected != null) {
@@ -5597,7 +5576,7 @@ public void actionPerformed ( ActionEvent event )
 				}
 			}
 		}
-*/
+		*/
 	}
 	else if (action.equals(__Run_CancelCommandProcessing_String) ) {
 		// Cancel the current processor.  This may take awhile to occur.
@@ -5614,7 +5593,7 @@ public void actionPerformed ( ActionEvent event )
 		new ProcessManagerJDialog ( this, "StateMod Version", pm );
 	}
 	else if ( o == __Run_RunStateModVersion_JMenuItem ) {
-		// Run StateMod -version
+		// Run StateMod -version.
 		String [] command_array = new String[2];
 		command_array[0] = "statemod";
 		command_array[1] = "-version";
@@ -5622,7 +5601,7 @@ public void actionPerformed ( ActionEvent event )
 		new ProcessManagerJDialog ( this, "StateMod Version", pm );
 	}
 
-	// Results menu (StateCU)...
+	// Results menu (StateCU).
 
 	// TODO - how to handle control data?
 	else if ( o == __Results_StateCU_ClimateStationsData_JMenuItem ) {
@@ -5638,7 +5617,7 @@ public void actionPerformed ( ActionEvent event )
 		results_ShowStateCULocationData();
 	}
 
-	// Results menu (StateMod)...
+	// Results menu (StateMod).
 
 	// TODO - how to handle control data?
 	else if ( o == __Results_StateMod_RiverData_JMenuItem ) {
@@ -5676,13 +5655,13 @@ public void actionPerformed ( ActionEvent event )
 		//results_ShowStateModSanJuanData ();
 	//}
 
-	// Tools menu...
+	// Tools menu.
 
 	else if ( o == __Tools_AdministrationNumberCalculator_JMenuItem ) {
 		new HydroBase_GUI_AdminNumCalculator(__statedmiProcessor.getHydroBaseDMIConnection(), this);
 	}
 	else if ( o == __Tools_CompareFiles_StateModWellRights_JMenuItem ) {
-		// Select 2 files...
+		// Select 2 files.
 		JFileChooser fc = JFileChooserFactory.createJFileChooser(JGUIUtil.getLastFileDialogDirectory() );
 		fc.setDialogTitle("Select 1st StateMod Well Rights File");
 		fc.addChoosableFileFilter( new SimpleFileFilter("wer", "StateMod Well Rights File") );
@@ -5720,8 +5699,7 @@ public void actionPerformed ( ActionEvent event )
 		}
 	}
 	else if ( o == __Tools_ListSurfaceWaterDiversions_JMenuItem ) {
-		// Loop through the diversion stations and, if not listed in
-		// the well stations, print a message to the lof file.
+		// Loop through the diversion stations and, if not listed in the well stations, print a message to the log file.
 		String id;
 		StateMod_Diversion div;
 		List div_List = __statedmiProcessor.getStateModDiversionStationList();
@@ -5743,9 +5721,9 @@ public void actionPerformed ( ActionEvent event )
 			__statedmiProcessor.getStateModDiversionStationList(), __statedmiProcessor.getStateModWellStationList() );
 	}
 	else if ( o == __Tools_ViewLogFile_Startup_JMenuItem ) {
-		// View the startup log file
+		// View the startup log file.
 		String logFile = session.getUserLogFile();
-		// Show in a simple viewer
+		// Show in a simple viewer.
 		PropList reportProp = new PropList ("Startup Log File");
 		reportProp.set ( "TotalWidth", "800" );
 		reportProp.set ( "TotalHeight", "600" );
@@ -5764,14 +5742,14 @@ public void actionPerformed ( ActionEvent event )
 		}
 	}
 
-	// Help menu...
+	// Help menu.
 
 	else if ( o == __Help_AboutStateDMI_JMenuItem ) {
 		String helpString =
 		IOUtil.getProgramName() + " " + IOUtil.getProgramVersion() + "\n\n" +
 		"Creates dataset files for StateCU and StateMod.\n\n" +
 	    "StateDMI is a part of Colorado's Decision Support Systems (CDSS)\n" +
-	    "Copyright (C) 1997-2022 Colorado Department of Natural Resources\n" +
+	    "Copyright (C) 1997-2023 Colorado Department of Natural Resources\n" +
 	    " \n" +
 	    "StateDMI is free software:  you can redistribute it and/or modify\n" +
 	    "    it under the terms of the GNU General Public License as published by\n" +
@@ -5808,47 +5786,44 @@ public void actionPerformed ( ActionEvent event )
     //else if ( command.equals ( __Help_ViewTrainingMaterials_String )) {
     //    uiAction_ViewTrainingMaterials ();
     //}
-	
+
 	// Check the GUI state and disable buttons, etc., depending on the selections that are made
-	// (for example this enables the paste menus when commands are copied)...
+	// (for example this enables the paste menus when commands are copied).
 
 	ui_UpdateStatus ( true );
 }
 
 /**
-Add a TS_ListSelector_JFrame to the list that is being managed.  This is
-necessary because the information about the selector must be saved so that it
-can be used later when creating graphs.  The generic selector has no way to
-save specific data set component information.
+Add a TS_ListSelector_JFrame to the list that is being managed.
+This is necessary because the information about the selector must be saved so that it can be used later when creating graphs.
+The generic selector has no way to save specific data set component information.
 */
-private void addTS_ListSelector_JFrame ( TS_ListSelector_JFrame selector, int app_type, int comp_type )
-{	// Add to the list being maintained...
+private void addTS_ListSelector_JFrame ( TS_ListSelector_JFrame selector, int app_type, int comp_type ) {
+	// Add to the list being maintained.
 	TS_ListSelector_JFrame_List.add ( selector );
 	TS_ListSelector_JFrame_app_type_List.add ( new Integer(app_type) );
 	TS_ListSelector_JFrame_comp_type_List.add ( new Integer(comp_type) );
-	// Listen for selector events...
+	// Listen for selector events.
 	selector.addTSListSelectorListener ( this );
 }
 
 /**
-Indicate that a command has been cancelled.  The success/failure of the command
-is not indicated (see CommandStatusProvider).
+Indicate that a command has been cancelled.  The success/failure of the command is not indicated (see CommandStatusProvider).
 @param icommand The command index (0+).
 @param ncommand The total number of commands to process
-@param command The reference to the command that has been cancelled, either the
-one that has just been processed, or potentially the next one, depending on when
-the cancel was requested.
+@param command The reference to the command that has been cancelled,
+either the one that has just been processed, or potentially the next one, depending on when the cancel was requested.
 @param percent_complete If >= 0, the value can be used to indicate progress
-running a list of commands (not the single command).  If less than zero, then
-no estimate is given for the percent complete and calling code can make its
-own determination (e.g., ((icommand + 1)/ncommand)*100).
+running a list of commands (not the single command).
+If less than zero, then no estimate is given for the percent complete and calling code can make its own determination
+(e.g., ((icommand + 1)/ncommand)*100).
 @param message A short message describing the status (e.g., "Running command ..." ).
 */
 public void commandCanceled ( int icommand, int ncommand, Command command,
-		float percent_complete, String message )
-{	String routine = "StateDMI_JFrame.commandCancelled";
-	
-	// Last refresh the results with what is available...
+		float percent_complete, String message ) {
+	String routine = getClass().getSimpleName() + ".commandCancelled";
+
+	// Last refresh the results with what is available.
 	//String command_string = command.toString();
 	ui_UpdateStatusTextFields ( 1, routine,	null, "Canceled command processing.",
 			//"Cancelled: " + command_string,
@@ -5857,31 +5832,29 @@ public void commandCanceled ( int icommand, int ncommand, Command command,
 }
 
 /**
-Indicate that a command has completed.  The success/failure of the command
-is not indicated (see CommandStatusProvider).
+Indicate that a command has completed.  The success/failure of the command is not indicated (see CommandStatusProvider).
 @param icommand The command index (0+).
 @param ncommand The total number of commands to process
 @param command The reference to the command that is starting to run,
 provided to allow future interaction with the command.
 @param percent_complete If >= 0, the value can be used to indicate progress
-running a list of commands (not the single command).  If less than zero, then
-no estimate is given for the percent complete and calling code can make its
-own determination (e.g., ((icommand + 1)/ncommand)*100).
+running a list of commands (not the single command).
+If less than zero, then no estimate is given for the percent complete and calling code can make its own determination
+(e.g., ((icommand + 1)/ncommand)*100).
 @param message A short message describing the status (e.g., "Running command ..." ).
 */
 public void commandCompleted ( int icommand, int ncommand, Command command,
-		float percent_complete, String message )
-{	String routine = "StateDMI_JFrame.commandCompleted";
+		float percent_complete, String message ) {
+	String routine = "StateDMI_JFrame.commandCompleted";
 	// Update the progress bar to indicate progress (1 to number of commands... completed).
 	__processor_JProgressBar.setValue ( icommand + 1 );
-	// For debugging...
+	// For debugging.
 	//Message.printStatus(2,getClass().getName()+".commandCompleted", "Setting processor progress bar to " + (icommand + 1));
 	__command_JProgressBar.setValue ( __command_JProgressBar.getMaximum() );
-	
+
 	if ( ((icommand + 1) == ncommand) || command instanceof Exit_Command ) {
 		// Last command has completed (or Exit()) so refresh the results.
-		// Only need to do if threaded because otherwise will handle synchronously
-		// in the uiAction_RunCommands() method...
+		// Only need to do if threaded because otherwise will handle synchronously in the uiAction_RunCommands() method.
 		String command_string = command.toString();
 		ui_UpdateStatusTextFields ( 1, routine, null, "Processed: " + command_string, __STATUS_READY );
 		if ( ui_Property_RunCommandProcessorInThread() ) {
@@ -5891,20 +5864,20 @@ public void commandCompleted ( int icommand, int ncommand, Command command,
 }
 
 /**
-Determine whether commands are equal.  To allow for multi-line commands, each
-command is stored in a list (but typically only the first String is used.
+Determine whether commands are equal.  To allow for multi-line commands,
+each command is stored in a list (but typically only the first String is used.
 @param original_command Original command as a list of String or Command.
 @param edited_command Edited command as a list of String or Command.
 */
-private boolean commandList_CommandsAreEqual(List original_command, List edited_command)
-{	if ( (original_command == null) && (edited_command != null) ) {
+private boolean commandList_CommandsAreEqual(List original_command, List edited_command) {
+	if ( (original_command == null) && (edited_command != null) ) {
 		return false;
 	}
 	else if ( (original_command != null) && (edited_command == null) ) {
 		return false;
 	}
 	else if ( (original_command == null) && (edited_command == null) ) {
-		// Should never occur???
+		// Should never occur?
 		return true;
 	}
 	int original_size = original_command.size();
@@ -5929,7 +5902,7 @@ private boolean commandList_CommandsAreEqual(List original_command, List edited_
 		else if ( edited_Object instanceof Command ) {
 			edited_String = ((Command)edited_Object).toString();
 		}
-		// Must be an exact match...
+		// Must be an exact match.
 		if ( (original_String == null) && (edited_String != null) ) {
 			return false;
 		}
@@ -5943,40 +5916,39 @@ private boolean commandList_CommandsAreEqual(List original_command, List edited_
 			return false;
 		}
 	}
-	// Must be the same...
+	// Must be the same.
 	return true;
 }
 
 /**
 Edit a command in the command list.
-@param action the string containing the event's action value.  This is checked
-for new commands.  When editing existing commands, command_List will contain
-a list of Command class instances.  Normally only the first command will be edited as
-a single-line command.  However, multiple # comment lines can be selected and edited at once.
-@param command_List If an update, this contains the current Command instances
-to edit.  If a new command, this is null and the action string will be consulted
-to construct the appropriate command.  The only time that multiple commands will
-be edited are when they are in a {# delimited comment block).
-@param mode the action to take when editing the command (__INSERT_COMMAND for a
-new command or __UPDATE_COMMAND for an existing command).
+@param action the string containing the event's action value.  This is checked for new commands.
+When editing existing commands, command_List will contain a list of Command class instances.
+Normally only the first command will be edited as a single-line command.
+However, multiple # comment lines can be selected and edited at once.
+@param command_List If an update, this contains the current Command instances to edit.
+If a new command, this is null and the action string will be consulted to construct the appropriate command.
+The only time that multiple commands will be edited are when they are in a {# delimited comment block).
+@param mode the action to take when editing the command
+(__INSERT_COMMAND for a new command or __UPDATE_COMMAND for an existing command).
 */
-private void commandList_EditCommand ( String action, List<Command> command_List, int mode )
-{	String routine = getClass().getSimpleName() + ".editCommand";
-	int dl = 1;		// Debug level
-	
+private void commandList_EditCommand ( String action, List<Command> command_List, int mode ) {
+	String routine = getClass().getSimpleName() + ".editCommand";
+	int dl = 1;		// Debug level.
+
     // Make absolutely sure that warning level 1 messages are shown to the user in a dialog.
     // This may have been turned off in command processing.
     // Should not need this if set properly in the command processor.
     //Message.setPropValue ( "ShowWarningDialog=true" );
-    
+
 	// Indicate whether the commands are a block of # comments.
 	// If so then need to use a special editor rather than typical one-line editors.
 	boolean is_comment_block = false;
 	if ( mode == __UPDATE_COMMAND ) {
 		is_comment_block = commandList_IsCommentBlock ( __statedmiProcessor,
 			command_List,
-			true,	// All must be comments
-			true );	// Comments must be contiguous
+			true,	// All must be comments.
+			true );	// Comments must be contiguous.
 	}
 	else {
 		// New command, so look for comment actions.
@@ -5995,40 +5967,35 @@ private void commandList_EditCommand ( String action, List<Command> command_List
 	}
 
 	try {
-        // Main try to help with troubleshooting, especially during
-		// transition to new command structure.
+        // Main try to help with troubleshooting, especially during transition to new command structure.
 
-		// First make sure we have a Command object to edit.  If an old-style command
-		// then it will be stored in a GenericCommand.
-		// The Command object is inserted in the processor in any case, to take advantage
-		// of processor information (such as being able to get the time series identifiers
-		// from previous commands.
-		// If a new command is being inserted and a cancel occurs, the command will simply
-		// be removed from the list.
-		// If an existing command is being updated and a cancel occurs, the changes need to
-		// be ignored.
-		
+		// First make sure we have a Command object to edit.
+		// If an old-style command then it will be stored in a GenericCommand.
+		// The Command object is inserted in the processor in any case,
+		// to take advantage of processor information (such as being able to get the time series identifiers from previous commands.
+		// If a new command is being inserted and a cancel occurs, the command will simply be removed from the list.
+		// If an existing command is being updated and a cancel occurs, the changes need to be ignored.
+
 		Command command_to_edit_original = null;	// Command being edited (original).
 		Command command_to_edit = null;	// Command being edited (clone).
 		if ( mode == __UPDATE_COMMAND ) {
-			// Get the command from the processor...
+			// Get the command from the processor.
 			if ( is_comment_block ) {
-				// Use the string-based editor dialog and then convert each
-				// comment line into a command.  Don't do anything to the command list yet
+				// Use the string-based editor dialog and then convert each comment line into a command.
+				// Don't do anything to the command list yet.
 			}
 			else {
-				// Get the original command...
+				// Get the original command.
 				command_to_edit_original = command_List.get(0);
-				// Clone it so that the edit occurs on the copy...
+				// Clone it so that the edit occurs on the copy.
 				command_to_edit = (Command)command_to_edit_original.clone();
 				Message.printStatus(2, routine, "Cloned command to edit: \"" + command_to_edit + "\"" );
-				// Remove the original command...
+				// Remove the original command.
 				int pos = commandList_IndexOf ( command_to_edit_original );
 				commandList_RemoveCommand ( command_to_edit_original );
-				// Insert the copy during the edit...
+				// Insert the copy during the edit.
 				commandList_InsertCommandAt ( command_to_edit, pos );
-				Message.printStatus(2, routine,
-					"Will edit the copy and restore to the original if the edit is cancelled.");
+				Message.printStatus(2, routine, "Will edit the copy and restore to the original if the edit is cancelled.");
 			}
 		}
 		else if ( mode == __INSERT_COMMAND ) {
@@ -6036,43 +6003,42 @@ private void commandList_EditCommand ( String action, List<Command> command_List
 				// Don't do anything here.  New comments will be inserted in code below.
 			}
 			else {
-				// New command so create a command as a place-holder for
-				// editing (filled out during the editing).
+				// New command so create a command as a place-holder for editing (filled out during the editing).
 				// Get everything before the ) in the command and then re-add the ").
 				// TODO SAM 2007-08-31 Why is this done?
 				// Need to handle:
 				//	1) Traditional commands foo(), may have leading "1: " or "[Legacy] 1:" that needs to be stripped.
 				//	2) Comments # blocks
 				//  3) Don't allow edit of /* */ comments - just insert/delete
-				// TODO smalers 2020-12-05 actions traditionally have () at end but may have some that don't have
+				// TODO smalers 2020-12-05 actions traditionally have () at end but may have some that don't have.
 				String command_string = ui_StripMenuSequencePrefix(StringUtil.getToken(action,")",0,0)+ ")");
 				if ( Message.isDebugOn ) {
 					Message.printDebug ( dl, routine,
 						"Using command factory to create new command for \"" + command_string + "\"" );
 				}
-			
+
 				command_to_edit = commandList_NewCommand( command_string, true );
 				Message.printStatus(2, routine, "Created new command to insert:  \"" + command_to_edit + "\"" );
-	        
-				// Add it to the processor at the insert point of the edit (before the first selected command...
-	        
+
+				// Add it to the processor at the insert point of the edit (before the first selected command.
+
 				commandList_InsertCommandBasedOnUI ( command_to_edit );
 				Message.printStatus(2, routine, "Inserted command for editing.");
 			}
 		}
-	
-		// Second, edit the command, whether an update or an insert...
-	
+
+		// Second, edit the command, whether an update or an insert.
+
 		boolean edit_completed = false;
 		List<String> new_comments = new ArrayList<>();	// Used if comments are edited.
 		if ( is_comment_block ) {
-			// Edit using the old-style editor...
+			// Edit using the old-style editor.
 			edit_completed = commandList_EditCommandOldStyleComments ( mode, action, command_List, new_comments );
 		}
 		else {
-		    // Editing a single one-line command...
+		    // Editing a single one-line command.
 	        try {
-	   			// Edit with the new style editors...
+	   			// Edit with the new style editors.
 	   			Message.printStatus(2, routine, "Editing Command with new-style editor.");
 	   			edit_completed = commandList_EditCommandNewStyle ( command_to_edit );
 	        }
@@ -6082,15 +6048,15 @@ private void commandList_EditCommand ( String action, List<Command> command_List
 	            edit_completed = false;
 	        }
 		}
-		
-		// Third, make sure that the edits are to be saved.  If not, restore the original
-		// copy (if an update) or discard the command (if a new insert).
+
+		// Third, make sure that the edits are to be saved.
+		// If not, restore the original copy (if an update) or discard the command (if a new insert).
 	    // If the command implements CommandDiscoverable, try to make the discovery run.
-	
+
 		if ( edit_completed ) {
 			if ( mode == __INSERT_COMMAND ) {
 				if ( is_comment_block ) {
-					// Insert the comments at the insert point...
+					// Insert the comments at the insert point.
 					commandList_InsertCommentsBasedOnUI ( new_comments );
 				}
 				else {
@@ -6100,8 +6066,7 @@ private void commandList_EditCommand ( String action, List<Command> command_List
 	                    commandList_EditCommand_RunDiscovery ( command_to_edit );
 	                }
 	                // Connect the command to the UI to handle progress when the command is run.
-	            	// TODO SAM 2009-03-23 Evaluate whether to define and interface rather than rely on
-	            	// AbstractCommand here.
+	            	// TODO SAM 2009-03-23 Evaluate whether to define and interface rather than rely on AbstractCommand here.
 	            	if ( command_to_edit instanceof AbstractCommand ) {
 	            		((AbstractCommand)command_to_edit).addCommandProgressListener ( this );
 	            	}
@@ -6130,7 +6095,7 @@ private void commandList_EditCommand ( String action, List<Command> command_List
 			}
 		}
 		else {
-	        // The edit was canceled.  If it was a new command being inserted, remove the command from the processor...
+	        // The edit was canceled.  If it was a new command being inserted, remove the command from the processor.
 			if ( mode == __INSERT_COMMAND ) {
 				if ( is_comment_block ) {
 					// No comments were inserted at start of edit.  No need to do anything.
@@ -6146,7 +6111,7 @@ private void commandList_EditCommand ( String action, List<Command> command_List
 					// The original comments will remain.  No need to do anything.
 				}
 				else {
-					// Else was an update so restore the original command...
+					// Else was an update so restore the original command.
 				    Message.printStatus(2, routine, "Edit was cancelled.  Restoring pre-edit command." );
 					int pos = commandList_IndexOf(command_to_edit);
 					commandList_RemoveCommand(command_to_edit);
@@ -6154,34 +6119,33 @@ private void commandList_EditCommand ( String action, List<Command> command_List
 				}
 			}
 		}
-		
+
 		// TODO SAM 2007-12-07 Evaluate whether to refresh the command list status?
-	    
+
 	    ui_ShowCurrentCommandListStatus();
 	}
 	catch ( Exception e2 ) {
-		// TODO SAM 2005-05-18 Evaluate handling of unexpected error... 
+		// TODO SAM 2005-05-18 Evaluate handling of unexpected error.
 		Message.printWarning(1, routine, "Unexpected error editing command (" + e2 + ")." );
 		Message.printWarning ( 3, routine, e2 );
 	}
 }
 
 /**
-Run discovery on the command. This will, for example, make available a list of time series
-to be requested with the ObjectListProvider.getObjectList() method.
+Run discovery on the command.
+This will, for example, make available a list of time series to be requested with the ObjectListProvider.getObjectList() method.
 */
-private void commandList_EditCommand_RunDiscovery ( Command command_to_edit )
-{   String routine = getClass().getName() + ".commandList_EditCommand_RunDiscovery";
-    // Run the discovery...
+private void commandList_EditCommand_RunDiscovery ( Command command_to_edit ) {
+    String routine = getClass().getSimpleName() + ".commandList_EditCommand_RunDiscovery";
+    // Run the discovery.
     Message.printStatus(2, routine, "Running discovery mode on command:  \"" + command_to_edit + "\"" );
     try {
         ((CommandDiscoverable)command_to_edit).runCommandDiscovery(__statedmiProcessor.indexOf(command_to_edit));
-        // Redraw the status area
+        // Redraw the status area.
         ui_ShowCurrentCommandListStatus();
     }
-    catch ( Exception e )
-    {
-        // For now ignore because edit-time input may not be complete...
+    catch ( Exception e ) {
+        // For now ignore because edit-time input may not be complete.
         String message = "Unable to make discover run - may be OK if partial data.";
         Message.printStatus(2, routine, message);
     }
@@ -6191,8 +6155,7 @@ private void commandList_EditCommand_RunDiscovery ( Command command_to_edit )
 Edit a new-style command, which has a custom editor.
 @param Command command_to_edit The command to edit.
 */
-private boolean commandList_EditCommandNewStyle ( Command command_to_edit )
-{
+private boolean commandList_EditCommandNewStyle ( Command command_to_edit ) {
 	return command_to_edit.editCommand(this);
 }
 
@@ -6205,8 +6168,8 @@ Edit comments using an old-style editor.
 @return true if the command edits were committed, false if canceled.
 */
 private boolean commandList_EditCommandOldStyleComments (
-		int mode, String action, List<Command> command_List, List new_comments )
-{	//else if ( action.equals(__Commands_General_Comment_String) ||
+		int mode, String action, List<Command> command_List, List new_comments ) {
+	//else if ( action.equals(__Commands_General_Comment_String) ||
 	//	command.startsWith("#") ) {
 	List<String> cv = new ArrayList<>();
 	int size = 0;
@@ -6223,7 +6186,7 @@ private boolean commandList_EditCommandOldStyleComments (
 		return false;
 	}
 	else {
-		// Transfer to the list that was passed in...
+		// Transfer to the list that was passed in.
 		int size2 = edited_cv.size();
 		for ( int i = 0; i < size2; i++ ) {
 			new_comments.add ( edited_cv.get(i) );
@@ -6233,15 +6196,14 @@ private boolean commandList_EditCommandOldStyleComments (
 }
 
 /**
-Get the list of commands to process, as a list of Command, guaranteed
-to be non-null but may be zero length.
+Get the list of commands to process, as a list of Command, guaranteed to be non-null but may be zero length.
 @return the commands as a list of Command.
 @param get_all If false, return those that are selected
-unless none are selected, in which case all are returned.  If true, all are
-returned, regardless of which are selected.
+unless none are selected, in which case all are returned.
+If true, all are returned, regardless of which are selected.
 */
-private List<Command> commandList_GetCommands ( boolean get_all )
-{	if ( __commands_JListModel.size() == 0 ) {
+private List<Command> commandList_GetCommands ( boolean get_all ) {
+	if ( __commands_JListModel.size() == 0 ) {
 		return new ArrayList<Command>();
 	}
 
@@ -6252,7 +6214,7 @@ private List<Command> commandList_GetCommands ( boolean get_all )
 	}
 
 	if ( (selected_size == 0) || get_all ) {
-		// Nothing selected or want to get all, get all...
+		// Nothing selected or want to get all, get all.
 		selected_size = __commands_JListModel.size();
 		List<Command> itemList = new ArrayList<>(selected_size);
 		for ( int i = 0; i < selected_size; i++ ) {
@@ -6261,7 +6223,7 @@ private List<Command> commandList_GetCommands ( boolean get_all )
 		return itemList;
 	}
 	else {
-		// Else something selected so get them...
+		// Else something selected so get them.
 		List<Command> itemList = new ArrayList<>(selected_size);
 		for ( int i = 0; i < selected_size; i++ ) {
 			itemList.add ( (Command)__commands_JListModel.get(selected[i]) );
@@ -6271,25 +6233,24 @@ private List<Command> commandList_GetCommands ( boolean get_all )
 }
 
 /**
-Get the list of commands to process.  If any are selected, only they will be
-returned.  If none are selected, all will be returned.
+Get the list of commands to process.
+If any are selected, only they will be returned.  If none are selected, all will be returned.
 @return the commands as a list of Command.
 */
-private List<Command> commandList_GetCommandsBasedOnUI ( )
-{	return commandList_GetCommands ( false );
+private List<Command> commandList_GetCommandsBasedOnUI ( ) {
+	return commandList_GetCommands ( false );
 }
 
 /**
 Get the list of commands to process, as a list of String.
 @return the commands as a list of String.
-@param getAll If false, return those that are selected
-unless none are selected, in which case all are returned.  If true, all are
-returned, regardless of which are selected.
+@param getAll If false, return those that are selected unless none are selected, in which case all are returned.
+If true, all are returned, regardless of which are selected.
 */
-private List<String> commandList_GetCommandStrings ( boolean getAll )
-{	// Get the Command list, will not be non-null
+private List<String> commandList_GetCommandStrings ( boolean getAll ) {
+	// Get the Command list, will not be non-null.
     List<Command> commands = commandList_GetCommands ( getAll );
-	// Convert to String instances
+	// Convert to String instances.
 	int size = commands.size();
 	List<String> strings = new ArrayList<>(size);
 	for ( int i = 0; i < size; i++ ) {
@@ -6301,8 +6262,7 @@ private List<String> commandList_GetCommandStrings ( boolean getAll )
 /**
 Return the number of commands with failure as max severity.
 */
-private int commandList_GetFailureCount()
-{
+private int commandList_GetFailureCount() {
 	int size = __commands_JListModel.size();
 	CommandStatusProvider command;
 	int failure_count = 0;
@@ -6318,8 +6278,7 @@ private int commandList_GetFailureCount()
 /**
 Return the number of commands with warnings as maximum severity.
 */
-private int commandList_GetWarningCount()
-{
+private int commandList_GetWarningCount() {
 	int size = __commands_JListModel.size();
 	CommandStatusProvider command;
 	int failure_count = 0;
@@ -6334,12 +6293,11 @@ private int commandList_GetWarningCount()
 
 /**
 Return the index position of the command from the command list.
-Currently this assumes that there is a one to one correspondence between
-items in the list and commands in the processor.
+Currently this assumes that there is a one to one correspondence between items in the list and commands in the processor.
 @param command The Command instance to determine the position in the command list.
 */
-private int commandList_IndexOf ( Command command )
-{	return __statedmiProcessor.indexOf(command);
+private int commandList_IndexOf ( Command command ) {
+	return __statedmiProcessor.indexOf(command);
 }
 
 /**
@@ -6347,39 +6305,36 @@ Insert a command at the indicated position.
 @param command The Command to insert.
 @param pos The index in the command list at which to insert.
 */
-private void commandList_InsertCommandAt ( Command command, int pos )
-{
+private void commandList_InsertCommandAt ( Command command, int pos ) {
 	__statedmiProcessor.insertCommandAt( command, pos );
 	__commands_JList.ensureIndexIsVisible ( pos );
-	// Since an insert, mark the commands list as dirty...
+	// Since an insert, mark the commands list as dirty.
 	//commandList_SetDirty(true);
 	ui_UpdateStatus ( false );
 }
 
 /**
-Insert a new command into the command list, utilizing the selected commands in the displayed
-list to determine the insert position.  If any commands are selected in the GUI, the insert will
-occur before the selection. If none are selected, the insert will occur at the end of the
-list.  For example this can occur in the following cases:
+Insert a new command into the command list, utilizing the selected commands in the displayed list to determine the insert position.
+If any commands are selected in the GUI, the insert will occur before the selection.
+If none are selected, the insert will occur at the end of the list.
+For example this can occur in the following cases:
 <ol>
 <li>	The user is interacting with the command list via command menus.</li>
-<li>	Time series identifiers are being transferred to the commands area from
-		the query results list.</li>
+<li>	Time series identifiers are being transferred to the commands area from the query results list.</li>
 </ol>
-The GUI should call this method WHENEVER a command is being inserted and
-is coded to respond to changes in the data model.
+The GUI should call this method WHENEVER a command is being inserted and is coded to respond to changes in the data model.
 @param inserted_command The command to insert.
 */
-private void commandList_InsertCommandBasedOnUI ( Command inserted_command )
-{	String routine = getClass().getSimpleName() + ".insertCommand";
+private void commandList_InsertCommandBasedOnUI ( Command inserted_command ) {
+	String routine = getClass().getSimpleName() + ".insertCommand";
 
-	// Get the selected indices from the commands...
+	// Get the selected indices from the commands.
 	int selectedIndices[] = ui_GetCommandJList().getSelectedIndices();
 	int selectedSize = selectedIndices.length;
 
 	int insert_pos = 0;
 	if (selectedSize > 0) {
-		// Insert before the first selected item...
+		// Insert before the first selected item.
 		insert_pos = selectedIndices[0];
 		__commands_JListModel.insertElementAt (	inserted_command, insert_pos );
 		Message.printStatus(2, routine, "Inserting command \"" +
@@ -6390,30 +6345,30 @@ private void commandList_InsertCommandBasedOnUI ( Command inserted_command )
 		__commands_JListModel.addElement ( inserted_command );
 		insert_pos = __commands_JListModel.size() - 1;
 	}
-	// Make sure that the list scrolls to the position that has been updated...
+	// Make sure that the list scrolls to the position that has been updated.
 	if ( insert_pos >= 0 ) {
 		__commands_JList.ensureIndexIsVisible ( insert_pos );
 	}
-	// Since an insert, mark the commands list as dirty...
+	// Since an insert, mark the commands list as dirty.
 	//commandList_SetDirty(true);
 }
 
 /**
-Insert comments into the command list, utilizing the selected commands in the displayed
-list to determine the insert position.
+Insert comments into the command list,
+utilizing the selected commands in the displayed list to determine the insert position.
 @param new_comments The comments to insert, as a list of String.
 */
-private void commandList_InsertCommentsBasedOnUI ( List<String> new_comments )
-{	String routine = getClass().getSimpleName() + ".commandList_InsertCommentsBasedOnUI";
+private void commandList_InsertCommentsBasedOnUI ( List<String> new_comments ) {
+	String routine = getClass().getSimpleName() + ".commandList_InsertCommentsBasedOnUI";
 
-	// Get the selected indices from the commands...
+	// Get the selected indices from the commands.
 	int selectedIndices[] = ui_GetCommandJList().getSelectedIndices();
 	int selectedSize = selectedIndices.length;
-	
+
 	int size = new_comments.size();
 
 	int insert_pos = 0;
-	Command inserted_command = null;	// New comment line as Command
+	Command inserted_command = null;	// New comment line as Command.
 	for ( int i = 0; i < size; i++ ) {
 		inserted_command = commandList_NewCommand (	new_comments.get(i), true );
 		if (selectedSize > 0) {
@@ -6430,32 +6385,30 @@ private void commandList_InsertCommentsBasedOnUI ( List<String> new_comments )
 			insert_pos = __commands_JListModel.size() - 1;
 		}
 	}
-	// Make sure that the list scrolls to the position that has been updated...
+	// Make sure that the list scrolls to the position that has been updated.
 	if ( insert_pos >= 0 ) {
 		__commands_JList.ensureIndexIsVisible ( insert_pos );
 	}
-	// Since an insert, mark the commands list as dirty...
+	// Since an insert, mark the commands list as dirty.
 	//commandList_SetDirty(true);
 }
 
 /**
 Determine whether a list of commands is a comment block consisting of multiple # comments.
-@param processor The TSCommandProcessor that is processing the results,
-used to check for positions of commands.
+@param processor The TSCommandProcessor that is processing the results, used to check for positions of commands.
 @param commands list of Command instances to check.
 @param allMustBeComments If true then all must be comment lines
 for true to be returned.  If false, then only one must be a comment.
 This allows a warning to be printed that only a block of ALL comments can be edited at once.
-@param must_be_contigous If true, then the comments must be contiguous
-for true to be returned.  The GUI code should check this and disallow comment edits if not contiguous.
+@param must_be_contigous If true, then the comments must be contiguous for true to be returned.
+The GUI code should check this and disallow comment edits if not contiguous.
 */
 private boolean commandList_IsCommentBlock ( StateDMI_Processor processor,
-		List commands, boolean allMustBeComments, boolean mustBeContiguous )
-{
+		List commands, boolean allMustBeComments, boolean mustBeContiguous ) {
 	int size_commands = commands.size();
 	boolean is_comment_block = true;
 	boolean is_contiguous = true;
-	// Loop through the commands to check...
+	// Loop through the commands to check.
 	Command command = null;
 	int comment_count = 0;
 	int pos_prev = -1;
@@ -6469,7 +6422,7 @@ private boolean commandList_IsCommentBlock ( StateDMI_Processor processor,
 		if ( (i > 0) && (pos != (pos_prev + 1)) ) {
 			is_contiguous = false;
 		}
-		// Save the position for the next check for contiguity...
+		// Save the position for the next check for contiguity.
 		pos_prev = pos;
 	}
 	if ( mustBeContiguous && !is_contiguous ) {
@@ -6482,15 +6435,14 @@ private boolean commandList_IsCommentBlock ( StateDMI_Processor processor,
 }
 
 /**
-Create a new Command instance given a command string.  This may be called when
-loading commands from a file or adding new commands while editing.
+Create a new Command instance given a command string.
+This may be called when loading commands from a file or adding new commands while editing.
 @param commandString Command as a string, to parse and create a Command instance.
-@param createUnknownCommandIfNotRecognized Indicate if a generic command should
-be created if not recognized.  For now this should generally be true, until all
-commands are recognized by the TSCommandFactory.
+@param createUnknownCommandIfNotRecognized Indicate if a generic command should be created if not recognized.
+For now this should generally be true, until all commands are recognized by the TSCommandFactory.
 */
-private Command commandList_NewCommand ( String commandString, boolean createUnknownCommandIfNotRecognized )
-{	int dl = 1;
+private Command commandList_NewCommand ( String commandString, boolean createUnknownCommandIfNotRecognized ) {
+	int dl = 1;
 	String routine = getClass().getSimpleName() + ".newCommand";
 	if ( Message.isDebugOn ) {
 		Message.printDebug ( dl, routine,
@@ -6509,19 +6461,17 @@ private Command commandList_NewCommand ( String commandString, boolean createUnk
 	}
 	// TODO SAM 2007-08-31 This is essentially validation.
 	// Need to evaluate for old-style commands, impacts on error-handling.
-	// New is command from the processor
+	// New is command from the processor.
 	try {
-		c.initializeCommand ( commandString, __statedmiProcessor, true ); // Full initialization
+		c.initializeCommand ( commandString, __statedmiProcessor, true ); // Full initialization.
 		if ( Message.isDebugOn ) {
 			Message.printDebug ( dl, routine, "Initialized command for \"" + commandString + "\"" );
 		}
 	}
 	catch ( Exception e ) {
-		// Absorb the warning and make the user try to deal with it in the editor
-		// dialog.  They can always cancel out.
+		// Absorb the warning and make the user try to deal with it in the editor dialog.  They can always cancel out.
 
-		// TODO SAM 2005-05-09 Need to handle parse error.  Should the editor come
-		// up with limited information?
+		// TODO SAM 2005-05-09 Need to handle parse error.  Should the editor come up with limited information?
 		Message.printWarning ( 3, routine,
 		"Unexpected error initializing command \"" + commandString + "\"." );
 		Message.printWarning ( 3, routine, e );
@@ -6530,11 +6480,11 @@ private Command commandList_NewCommand ( String commandString, boolean createUnk
 }
 
 /**
-Remove all commands in the list.  The delete is done independent of what is
-selected in the UI.  If UI selects are relevant, use cmmandList_ClearBasedOnUI.
+Remove all commands in the list.  The delete is done independent of what is selected in the UI.
+If UI selects are relevant, use cmmandList_ClearBasedOnUI.
 */
-private void commandList_RemoveAllCommands ()
-{	// Do this so that the status only needs to be updated once...
+private void commandList_RemoveAllCommands () {
+	// Do this so that the status only needs to be updated once.
 	Message.printStatus(2,"commandList_RemoveAllCommands", "Calling list model removeAllElements.");
 	__commands_JListModel.removeAllElements();
 	commandList_SetDirty ( true );
@@ -6545,26 +6495,27 @@ private void commandList_RemoveAllCommands ()
 Remove the indicated command from the command list.
 @param command The Command instance to remove from the command list.
 */
-private void commandList_RemoveCommand ( Command command )
-{	int pos = commandList_IndexOf ( command );
+private void commandList_RemoveCommand ( Command command ) {
+	int pos = commandList_IndexOf ( command );
 	__commands_JListModel.removeElementAt(pos);
 	//commandList_SetDirty(true);
 	ui_UpdateStatus ( false );
 }
 
 /*
-Remove selected command list, using the data model.  If any items are selected,
-then only those are selected.  If none are selected, then all are cleared, asking
-the user to confirm.  Items from the command list (or all if none are selected).
+Remove selected command list, using the data model.
+If any items are selected, then only those are selected.
+If none are selected, then all are cleared, asking the user to confirm.
+Items from the command list (or all if none are selected).
 Save what was cleared in the __command_cut_buffer list so that it can be used with Paste.
 */
-private void commandList_RemoveCommandsBasedOnUI ()
-{	int size = 0;
+private void commandList_RemoveCommandsBasedOnUI () {
+	int size = 0;
 	int [] selected_indices = ui_GetCommandJList().getSelectedIndices();
 	if ( selected_indices != null ) {
 		size = selected_indices.length;
 	}
-	// Uncomment for troubleshooting...
+	// Uncomment for troubleshooting.
 	//String routine = getClass().getName() + ".commandList_RemoveCommandsBasedOnUI";
 	//Message.printStatus ( 2, routine, "There are " + size +
 	//		" commands selected for remove.  If zero all will be removed." );
@@ -6577,13 +6528,13 @@ private void commandList_RemoveCommandsBasedOnUI ()
 		}
 	}
 	if ( size == 0 ) {
-		// Nothing selected so remove all...
+		// Nothing selected so remove all.
 		__commands_JListModel.removeAllElements();
 	}
 	else {
 	    // Need to remove from back of selected_indices so that removing
-		// elements will not affect the index of items before that
-		// index.  At some point need to add an undo feature.
+		// elements will not affect the index of items before that index.
+		// At some point need to add an undo feature.
 		JGUIUtil.setWaitCursor ( this, true );
 		ui_SetIgnoreItemEvent ( true );
 		ui_SetIgnoreListSelectionEvent ( true );
@@ -6605,8 +6556,7 @@ Replace a command with another.  This is used, for example, when converting comm
 @param old_command Old command to remove.
 @param new_command New command to insert in its place.
 */
-private void commandList_ReplaceCommand ( Command old_command, Command new_command )
-{
+private void commandList_ReplaceCommand ( Command old_command, Command new_command ) {
 	// Probably could get the index passed in from list operations but
 	// do the lookup through the data model to be more independent.
 	int pos_old = __statedmiProcessor.indexOf(old_command);
@@ -6614,19 +6564,18 @@ private void commandList_ReplaceCommand ( Command old_command, Command new_comma
 		// Can't find the old command so return.
 		return;
 	}
-	// Remove the old command...
+	// Remove the old command.
 	__statedmiProcessor.removeCommandAt ( pos_old );
-	// Insert the new command at the same position.  Handle the case that
-	// it is now at the end of the list.
+	// Insert the new command at the same position.  Handle the case that it is now at the end of the list.
 	if ( pos_old < __statedmiProcessor.size() ) {
-		// Have enough elements to add at the requested position...
+		// Have enough elements to add at the requested position.
 		__statedmiProcessor.insertCommandAt( new_command, pos_old );
 	}
 	else {
-		// Add at the end...
+		// Add at the end.
 		__statedmiProcessor.addCommand ( new_command );
 	}
-	// Refresh the GUI...
+	// Refresh the GUI.
 	//commandList_SetDirty ( true );
 	ui_UpdateStatus ( false );
 }
@@ -6636,8 +6585,8 @@ Replace a contiguous block of # comments with another block.
 @param old_comments list of old comments (as Command) to remove.
 @param new_comments list of new comments (as String) to insert in its place.
 */
-private void commandList_ReplaceComments ( List old_comments, List new_comments )
-{	//String routine = getClass().getName() + ".commandList_ReplaceComments";
+private void commandList_ReplaceComments ( List old_comments, List new_comments ) {
+	//String routine = getClass().getName() + ".commandList_ReplaceComments";
 	// Probably could get the index passed in from list operations but
 	// do the lookup through the data model to be more independent.
 	int pos_old = __statedmiProcessor.indexOf((Command)old_comments.get(0));
@@ -6645,8 +6594,7 @@ private void commandList_ReplaceComments ( List old_comments, List new_comments 
 		// Can't find the old command so return.
 		return;
 	}
-	// Remove the old commands.  They will shift so OK to keep removing at
-	// the single index.
+	// Remove the old commands.  They will shift so OK to keep removing at the single index.
 	int size = old_comments.size();
 	for ( int i = 0; i < size; i++ ) {
 		__statedmiProcessor.removeCommandAt ( pos_old );
@@ -6654,7 +6602,7 @@ private void commandList_ReplaceComments ( List old_comments, List new_comments 
 	// Insert the new commands at the same position.  Handle the case that it is now at the end of the list.
 	int size_new = new_comments.size();
 	if ( pos_old < __statedmiProcessor.size() ) {
-		// Have enough elements to add at the requested position...
+		// Have enough elements to add at the requested position.
 		for ( int i = 0; i < size_new; i++ ) {
 			Command new_command = commandList_NewCommand ( (String)new_comments.get(i), true );
 			//Message.printStatus ( 2, routine, "Inserting " + new_command + " at " + (pos_old + 1));
@@ -6662,14 +6610,14 @@ private void commandList_ReplaceComments ( List old_comments, List new_comments 
 		}
 	}
 	else {
-		// Add at the end...
+		// Add at the end.
 		for ( int i = 0; i < size_new; i++ ) {
 			Command new_command = commandList_NewCommand ( (String)new_comments.get(i), true );
 			//Message.printStatus ( 2, routine, "Adding " + new_command + " at end" );
 			__statedmiProcessor.addCommand ( new_command );
 		}
 	}
-	// Refresh the GUI...
+	// Refresh the GUI.
 	//commandList_SetDirty ( true );
 	ui_UpdateStatus ( false );
 }
@@ -6680,10 +6628,10 @@ Select the command and optionally position the view at the command.
 @param ensure_visible If true, the list will be scrolled to the selected item.
 This may be undesirable if selecting many items.
 */
-private void commandList_SelectCommand ( int iline, boolean ensure_visible )
-{	__commands_JList.setSelectedIndex ( iline );
+private void commandList_SelectCommand ( int iline, boolean ensure_visible ) {
+	__commands_JList.setSelectedIndex ( iline );
 	if ( ensure_visible ) {
-		// Position the list to make the selected item visible...
+		// Position the list to make the selected item visible.
 		__commands_JList.ensureIndexIsVisible(iline);
 	}
 	ui_UpdateStatus ( false);
@@ -6694,16 +6642,15 @@ Set the command file name.  This also will refresh any interface components
 that display the command file name.  It DOES NOT cause the commands to be reloaded - it is a simple setter.
 @param commandFileName Name of current command file (can be null).
 */
-private void commandList_SetCommandFileName ( String commandFileName )
-{	// Set the file name used in the TSTool UI...
+private void commandList_SetCommandFileName ( String commandFileName ) {
+	// Set the file name used in the TSTool UI.
 	__commandFileName = commandFileName;
-	// Also set the initial working directory for the processor as the
-	// parent folder of the command file...
+	// Also set the initial working directory for the processor as the parent folder of the command file.
 	if ( commandFileName != null ) {
 		File file = new File ( commandFileName );
 		commandProcessor_SetInitialWorkingDir ( file.getParent() );
 	}
-	// Update the title bar...
+	// Update the title bar.
 	ui_UpdateStatus ( false );
 }
 
@@ -6711,8 +6658,8 @@ private void commandList_SetCommandFileName ( String commandFileName )
 Indicate whether the commands have been modified.  The application title is also updated to indicate this.
 @param dirty Specify as true if the commands have been modified in some way.
 */
-private void commandList_SetDirty ( boolean dirty )
-{	__commandsDirty = dirty;
+private void commandList_SetDirty ( boolean dirty ) {
+	__commandsDirty = dirty;
 	ui_UpdateStatus ( false );
 	// TODO SAM 2007-08-31 Evaluate whether processor should have "dirty" property.
 }
@@ -6721,24 +6668,22 @@ private void commandList_SetDirty ( boolean dirty )
 // beyond basic command list insert/delete/update.
 
 /**
-Return the command processor instance that is being used.  This method should be
-called to avoid direct interaction with the processor data member.
+Return the command processor instance that is being used.
+This method should be called to avoid direct interaction with the processor data member.
 @return the TSCommandProcessor instance that is being used.
 */
-private StateDMI_Processor commandProcessor_GetCommandProcessor ()
-{
+private StateDMI_Processor commandProcessor_GetCommandProcessor () {
     return __statedmiProcessor;
 }
 
 /**
 Get the command processor table results for a table identifier.
-Typically this corresponds to a user selecting the time series from the
-results list, for further display.
+Typically this corresponds to a user selecting the time series from the results list, for further display.
 @param tableId identifier for table to display
 @return The matching table or null if not available from the processor.
 */
-private DataTable commandProcessor_GetTable ( String tableId )
-{   String message, routine = "TSTool_JFrame.commandProcessor_GetTable";
+private DataTable commandProcessor_GetTable ( String tableId ) {
+    String message, routine = getClass().getSimpleName() + ".commandProcessor_GetTable";
     if ( __statedmiProcessor == null ) {
         return null;
     }
@@ -6768,12 +6713,11 @@ private DataTable commandProcessor_GetTable ( String tableId )
 
 /**
 Get the command processor table results list.
-@return The table results list or null
-if the processor is not available.
+@return The table results list or null if the processor is not available.
 */
 @SuppressWarnings("unchecked")
-private List<DataTable> commandProcessor_GetTableResultsList()
-{   String routine = "TSTool_JFrame.commandProcessorGetTableResultsList";
+private List<DataTable> commandProcessor_GetTableResultsList() {
+    String routine = getClass().getSimpleName() + ".commandProcessorGetTableResultsList";
     Object o = null;
     try {
         o = __statedmiProcessor.getPropContents ( "TableResultsList" );
@@ -6793,27 +6737,25 @@ private List<DataTable> commandProcessor_GetTableResultsList()
 /**
 Get the working directory for a command (e.g., for editing).
 */
-private String commandProcessor_GetWorkingDirForCommand ( Command command )
-{	
+private String commandProcessor_GetWorkingDirForCommand ( Command command ) {
 	return TSCommandProcessorUtil.getWorkingDirForCommand( __statedmiProcessor, command );
 }
 
 /**
 Read and load a command file into the processor.
 @param path Absolute path to the command file to read.
-@return the number of lines that are automatically changed during the read (1 if the size is
-different after read).
+@return the number of lines that are automatically changed during the read (1 if the size is different after read).
 @exception IOException if there is an error reading the command file.
 */
 private int commandProcessor_ReadCommandFile ( String path )
-throws IOException
-{	String routine = "TSTool_JFrame.commandProcessor_ReadCommandFile";
-    // Set the command file for use with output...
+throws IOException {
+	String routine = getClass().getSimpleName() + ".commandProcessor_ReadCommandFile";
+    // Set the command file for use with output.
 	__statedmiProcessor.readCommandFile ( path,
-		true,	// Create UnknownCommand instances for unrecognized commands
-		false );// Do not append to the current processor contents
-    // Refresh the GUI list to show the status done in call to this method
-	
+		true,	// Create UnknownCommand instances for unrecognized commands.
+		false );// Do not append to the current processor contents.
+    // Refresh the GUI list to show the status done in call to this method.
+
 	// TODO SAM 2008-05-11 Evaluate whether to move this to the readCommandFile() method.
 	// If any lines in the file are different from the commands, mark the file as dirty.
 	// Changes may automatically occur during the load because of automated updates to commands.
@@ -6848,7 +6790,7 @@ throws IOException
 	        ++numAutoChanges;
 	        if ( command instanceof CommandStatusProvider ) {
 	            csp = (CommandStatusProvider)command;
-	            // FIXME SAM 2008-05-11 This message gets clobbered by re-initialization before running
+	            // FIXME SAM 2008-05-11 This message gets clobbered by re-initialization before running.
 	            // Add a message that the command was updated during load.
 	            csp.getCommandStatus().addToLog ( CommandPhaseType.INITIALIZATION,
 	                new CommandLogRecord(CommandStatusType.UNKNOWN,
@@ -6861,15 +6803,14 @@ throws IOException
 }
 
 /**
-Run the commands through the processor.  Currently this supplies the list of
-Command instances to run because the user can select the commands in the
-interface.  In the future the command processor may put together the list without
-being passed from the GUI.
+Run the commands through the processor.
+Currently this supplies the list of Command instances to run because the user can select the commands in the interface.
+In the future the command processor may put together the list without being passed from the GUI.
 @param commands List of commands to run.
 @param createOutput whether to create output (slower) or skip those commands.
 */
-private void commandProcessor_RunCommandsThreaded ( List commands, boolean createOutput )
-{	String routine = "StateDMI_JFrame.commandProcessor_RunCommandsThreaded";
+private void commandProcessor_RunCommandsThreaded ( List commands, boolean createOutput ) {
+	String routine = getClass().getSimpleName() + ".commandProcessor_RunCommandsThreaded";
 
 	PropList request_params = new PropList ( "" );
 	request_params.setUsingObject ( "CommandList", commands );
@@ -6881,8 +6822,8 @@ private void commandProcessor_RunCommandsThreaded ( List commands, boolean creat
 		Message.printStatus ( 2, routine, "Running commands in separate thread.");
 		Thread thread = new Thread ( runner );
 		thread.start();
-		// Do one update of the GUI to reflect the GUI running.  This will disable run
-		// buttons, etc. until the current run is done.
+		// Do one update of the GUI to reflect the GUI running.
+		// This will disable run buttons, etc. until the current run is done.
 		ui_CheckGUIState ();
 		// At this point the GUI will get updated if any notification fires from the processor.
 	}
@@ -6894,13 +6835,12 @@ private void commandProcessor_RunCommandsThreaded ( List commands, boolean creat
 }
 
 /**
-Run the commands through the processor.  Currently this supplies the list of
-Command instances to run because the user can select the commands in the
-interface.  In the future the command processor may put together the list without
-being passed from the GUI.
+Run the commands through the processor.
+Currently this supplies the list of Command instances to run because the user can select the commands in the interface.
+In the future the command processor may put together the list without being passed from the GUI.
 */
-private void commandProcessor_RunCommands_OLD ( List commands, boolean create_output )
-{	String routine = "StateDMI_JFrame.commandProcessorRunCommandsThreaded";
+private void commandProcessor_RunCommands_OLD ( List commands, boolean create_output ) {
+	String routine = getClass().getSimpleName() + ".commandProcessorRunCommandsThreaded";
 
 	PropList request_params = new PropList ( "" );
 	request_params.setUsingObject ( "CommandList", commands );
@@ -6926,8 +6866,8 @@ Set the command processor HydroBase instance that is opened via the GUI.
 @param hbdmi Open HydroBaseDMI instance.
 The input name is blank since it is the default HydroBaseDMI.
 */
-private void commandProcessor_SetHydroBaseDMI( HydroBaseDMI hbdmi )
-{	// Call the overloaded method that takes a processor as a parameter...
+private void commandProcessor_SetHydroBaseDMI( HydroBaseDMI hbdmi ) {
+	// Call the overloaded method that takes a processor as a parameter.
 	commandProcessor_SetHydroBaseDMI( __statedmiProcessor, hbdmi );
 }
 
@@ -6938,15 +6878,14 @@ This version is generally called by the overloaded version and when processing a
 @param hbdmi Open HydroBaseDMI instance.
 The input name is blank since it is the default HydroBaseDMI.
 */
-private void commandProcessor_SetHydroBaseDMI( CommandProcessor processor, HydroBaseDMI hbdmi )
-{	String message, routine = "StateDMI_JFrame.setCommandProcessorHydroBaseDMI";
+private void commandProcessor_SetHydroBaseDMI( CommandProcessor processor, HydroBaseDMI hbdmi ) {
+	String message, routine = getClass().getSimpleName() + ".setCommandProcessorHydroBaseDMI";
 	if ( hbdmi == null ) {
 		return;
 	}
 	PropList request_params = new PropList ( "" );
 	request_params.setUsingObject ( "HydroBaseDMI", hbdmi );
-	//CommandProcessorRequestResultsBean bean = null;
-	try { //bean =
+	try {
 		processor.processRequest( "SetHydroBaseDMI", request_params );
 	}
 	catch ( Exception e ) {
@@ -6955,13 +6894,12 @@ private void commandProcessor_SetHydroBaseDMI( CommandProcessor processor, Hydro
 	}
 }
 
-// FIXME SAM 2007-10-19 Check to see that code is enabled in processor
+// FIXME SAM 2007-10-19 Check to see that code is enabled in processor.
 /**
 Set the command processor initial working directory.
 @param dir Initial working directory.
 */
-private void commandProcessor_SetInitialWorkingDir ( String InitialWorkingDir )
-{
+private void commandProcessor_SetInitialWorkingDir ( String InitialWorkingDir ) {
 	try {
 		__statedmiProcessor.setPropContents( "InitialWorkingDir", InitialWorkingDir );
 	}
@@ -6973,27 +6911,24 @@ private void commandProcessor_SetInitialWorkingDir ( String InitialWorkingDir )
 }
 
 /**
-Indicate the progress that is occurring within a command.  This may be a chained call
-from a CommandProcessor that implements CommandListener to listen to a command.  This
-level of monitoring is useful if more than one progress indicator is present in an application UI.
+Indicate the progress that is occurring within a command.
+This may be a chained call from a CommandProcessor that implements CommandListener to listen to a command.
+This level of monitoring is useful if more than one progress indicator is present in an application UI.
 @param istep The number of steps being executed in a command (0+).
 @param nstep The total number of steps to process within a command.
 @param command The reference to the command that is starting to run,
 provided to allow future interaction with the command.
-@param percent_complete If >= 0, the value can be used to indicate progress
-running a single command (not the single command).  If less than zero, then
-no estimate is given for the percent complete and calling code can make its
-own determination (e.g., ((istep + 1)/nstep)*100).
+@param percent_complete If >= 0, the value can be used to indicate progress running a single command (not the single command).
+If less than zero, then no estimate is given for the percent complete and calling code can make its own determination (e.g., ((istep + 1)/nstep)*100).
 @param message A short message describing the status (e.g., "Running command ..." ).
 */
-public void commandProgress ( int istep, int nstep, Command command,
-		float percent_complete, String message )
-{	if ( istep == 0 ) {
+public void commandProgress ( int istep, int nstep, Command command, float percent_complete, String message ) {
+	if ( istep == 0 ) {
 		// Initialize the limits of the command progress bar.
 		__command_JProgressBar.setMinimum ( 0 );
 		__command_JProgressBar.setMaximum ( nstep );
 	}
-	// Set the current value...
+	// Set the current value.
 	__command_JProgressBar.setValue ( istep + 1 );
 }
 
@@ -7003,17 +6938,13 @@ Indicate that a command has started running.
 @param ncommand The total number of commands to process
 @param command The reference to the command that is starting to run,
 provided to allow future interaction with the command.
-@param percent_complete If >= 0, the value can be used to indicate progress
-running a list of commands (not the single command).  If less than zero, then
-no estimate is given for the percent complete and calling code can make its
-own determination (e.g., ((icommand + 1)/ncommand)*100).
+@param percent_complete If >= 0, the value can be used to indicate progress running a list of commands (not the single command).
+If less than zero, then no estimate is given for the percent complete and calling code can make its own determination (e.g., ((icommand + 1)/ncommand)*100).
 @param message A short message describing the status (e.g., "Running command ..." ).
 */
-public void commandStarted ( int icommand, int ncommand, Command command,
-		float percent_complete, String message )
-{	// commandCompleted updates the progress bar after each command.
-	// For this method, only reset the bounds of the progress bar and
-	// clear if the first command.
+public void commandStarted ( int icommand, int ncommand, Command command, float percent_complete, String message ) {
+	// commandCompleted updates the progress bar after each command.
+	// For this method, only reset the bounds of the progress bar and clear if the first command.
 	String routine = "StateDMI_JFrme.commandStarted";
 	String command_string = command.toString();
 	//int max_length = ?;
@@ -7025,30 +6956,28 @@ public void commandStarted ( int icommand, int ncommand, Command command,
 		__processor_JProgressBar.setValue ( 0 );
 		//Message.printStatus(2, getClass().getName()+".commandStarted", "Setting processor progress bar limits to 0 to " + ncommand );
 	}
-	// Always set the value for the command progres so that it shows up
-	// as zero.  The commandProgres() method will do a better job of setting
-	// the limits and current status for a specific command.
+	// Always set the value for the command progress so that it shows up // as zero.
+	// The commandProgres() method will do a better job of setting the limits and current status for a specific command.
 	__command_JProgressBar.setMinimum ( 0 );
 	__command_JProgressBar.setMaximum ( 100 );
 	__command_JProgressBar.setValue ( 0 );
 }
 
 /**
-Required by ListDataListener - receive notification when the contents of the
-commands list have changed.
+Required by ListDataListener.
+Receive notification when the contents of the commands list have changed.
 */
-public void contentsChanged ( ListDataEvent e )
-{
-	// The contents of the command list changed so check the GUI state...
+public void contentsChanged ( ListDataEvent e ) {
+	// The contents of the command list changed so check the GUI state.
 	ui_UpdateStatus ( true );	// true = also call checkGUIState();
 }
 
 /**
 Update the list in the data set area to be consistent with the current data set component.
 */
-private void dataSet_UpdateList()
-{	String routine = "StateDMI_JFrame.updateList";
-	// Create a new table model and renderer for the selected data object...
+private void dataSet_UpdateList() {
+	String routine = getClass().getSimpleName() + ".dataSet_UpdateList";
+	// Create a new table model and renderer for the selected data object.
 	if ( __appType == StateDMI.APP_TYPE_STATECU ) {
 		try {
 			__list_TableModel = new StateCU_DataSetComponent_TableModel(
@@ -7059,10 +6988,10 @@ private void dataSet_UpdateList()
 		__list_JWorksheet.setCellRenderer ( cr );
 		__list_JWorksheet.setModel ( __list_TableModel );
 		__list_JWorksheet.setColumnWidths ( cr.getColumnWidths() );
-		// Get the component group because the list is always related to the group...
+		// Get the component group because the list is always related to the group.
 		DataSetComponent component_group =
 			((StateCU_DataSetComponent_TableModel)__list_TableModel).getComponentGroup();
-		// TODO - might need better labels...
+		// TODO - might need better labels.
 		String list_source = component_group.getListSource();
 		__list_JPanel.setBorder(
 			BorderFactory.createTitledBorder (
@@ -7087,10 +7016,10 @@ private void dataSet_UpdateList()
 		__list_JWorksheet.setCellRenderer ( cr );
 		__list_JWorksheet.setModel ( __list_TableModel );
 		__list_JWorksheet.setColumnWidths ( cr.getColumnWidths() );
-		// Get the component group because the list is always related to the group...
+		// Get the component group because the list is always related to the group.
 		DataSetComponent component_group =
 			((StateMod_DataSetComponent_TableModel)	__list_TableModel).getComponentGroup();
-		// TODO - might need better labels...
+		// TODO - might need better labels.
 		String list_source = component_group.getListSource();
 		__list_JPanel.setBorder(
 			BorderFactory.createTitledBorder (
@@ -7106,22 +7035,38 @@ private void dataSet_UpdateList()
 	}
 }
 
-//TODO smalers 2018-08-28 in the future may need a lookup file to ensure portability
-//of documentation across software versions but for now assume the organization.
 /**
  * Format a URL to display help for a topic.
- * The document root is taken from StateDMI configuration properties and otherwise the
- * URL pattern follows the standard created for the documentation.
- * Candidate URLs are formed using the software version and general "latest" version,
- * and the first URL that returns content is returned so it can be used in the help viewer.
+ * The document root is taken from TSTool configuration properties and otherwise the URL pattern follows the standard created for the documentation.
  * @param group a group (category) to organize items.
  * For example, the group might be "command".
  * @param item the specific item for the URL.
  * For example, the item might be a command name.
  */
 public String formatHelpViewerUrl ( String group, String item ) {
+	return formatHelpViewerUrl ( group, item, null );
+}
+
+//TODO smalers 2018-08-28 in the future may need a lookup file to ensure portability
+//of documentation across software versions but for now assume the organization.
+/**
+ * Format a URL to display help for a topic.
+ * The document root is taken from StateDMI configuration properties and otherwise the URL pattern follows the standard created for the documentation.
+ * Candidate URLs are formed using the software version and general "latest" version,
+ * and the first URL that returns content is returned so it can be used in the help viewer.
+ * @param group a group (category) to organize items. For example, the group might be "command".
+ * @param item the specific item for the URL. For example, the item might be a command name.
+ * @param rootUrl root URL to try, useful for plugins that provide documentation in an alternative location
+ * than the defaults for an application, pass as null to ignore
+ * (e.g., "https://software.openwaterfoundation.org/tstool-zabbix-plugin/latest/doc-user").
+ * If the plugin's documentation matches TSTool's conventions (group=literal command' and item=the CommandName)
+ * the latest plugin documentation should be found by appending "command-ref/CommandName/" to the root URL.
+ * However, this does not find the documentation that matches the plugin version,
+ * which requires a plugin-specific URL formatter that implements logic similar to this method.
+ */
+public String formatHelpViewerUrl ( String group, String item, String rootUrl ) {
 	String routine = getClass().getSimpleName() + ".formatHelpViewerUrl";
-	// The location of the documentation is relative to root URI on the web.
+	// The location of the documentation is relative to root URI on the web:
     // - two locations are allowed to help transition from OWF to OpenCDSS location
 	// - use the first found URL
     String docRootUri = StateDMI.getPropValue ( "StateDMI.UserDocumentationUri" );
@@ -7133,20 +7078,20 @@ public String formatHelpViewerUrl ( String group, String item ) {
    		version = version.substring(0, pos);
    	}
     if ( docRootUri != null ) {
-    	// First replace "latest" with the software version so that specific version is shown
+    	// First replace "latest" with the software version so that specific version is shown.
     	String docRootUriVersion = docRootUri.replace("latest", version);
     	docRootUriList.add(docRootUriVersion);
     	if ( !docRootUriVersion.equals(docRootUri) ) {
-    		// Also add the URL with "latest"
+    		// Also add the URL with "latest".
     		docRootUriList.add(docRootUri);
     	}
     }
     if ( docRootUri2 != null ) {
-    	// First replace "latest" with the software version so that specific version is shown
+    	// First replace "latest" with the software version so that specific version is shown.
     	String docRootUri2Version = docRootUri2.replace("latest", version);
     	docRootUriList.add(docRootUri2Version);
     	if ( !docRootUri2Version.equals(docRootUri2) ) {
-    		// Add the URL with "latest"
+    		// Add the URL with "latest".
     		docRootUriList.add(docRootUri2);
     	}
     }
@@ -7161,22 +7106,22 @@ public String formatHelpViewerUrl ( String group, String item ) {
     	int i = -1;
     	for ( String uri : docRootUriList ) {
     		Message.printStatus(2, routine, "URI is " + uri );
-    		// Initialize response code to -1 which means unchecked
+    		// Initialize response code to -1 which means unchecked.
     		++i;
     		responseCode[i] = -1;
-	    	// Make sure the URI has a slash at end
-    		if ( (uri != null) && !uri.isEmpty() ) { 
+	    	// Make sure the URI has a slash at end.
+    		if ( (uri != null) && !uri.isEmpty() ) {
 		    	String docUri = "";
 		    	if ( !uri.endsWith("/") ) {
 		    		uri += "/";
 		    	}
-		    	// Specific documentation requests from the UI
+		    	// Specific documentation requests from the UI.
 		    	docUri = null;
 			    if ( item.equals(__Help_ViewDocumentation_ReleaseNotes_String) ) {
 			        docUri = uri + "appendix-release-notes/release-notes/";
 			    }
 			    else if ( item.equals(__Help_ViewDocumentation_UserManual_String) ) {
-			        docUri = uri; // Go to the main documentation
+			        docUri = uri; // Go to the main documentation.
 			    }
 			    else if ( item.equals(__Help_ViewDocumentation_CommandReference_String) ) {
 			        docUri = uri + "command-ref/overview/";
@@ -7187,16 +7132,16 @@ public String formatHelpViewerUrl ( String group, String item ) {
 			    else if ( item.equals(__Help_ViewDocumentation_Troubleshooting_String) ) {
 			        docUri = uri + "troubleshooting/troubleshooting/";
 			    }
-			    // Generic requests by group
+			    // Generic requests by group.
 			    else if ( group.equalsIgnoreCase("command") ) {
 			    	docUri = uri + "command-ref/" + item + "/" + item + "/";
 			    }
 			    if ( docUri != null ) {
-			    	// Now display using the default application for the file extension
+			    	// Now display using the default application for the file extension.
 			    	Message.printStatus(2, routine, "Opening documentation \"" + docUri + "\"" );
 			    	// The Desktop.browse() method will always open, even if the page does not exist,
 			    	// and it won't return the HTTP error code in this case.
-			    	// Therefore, do a check to see if the URI is available before opening in a browser
+			    	// Therefore, do a check to see if the URI is available before opening in a browser.
 			    	URL url = null;
 			    	try {
 			    		url = new URL(docUri);
@@ -7217,7 +7162,7 @@ public String formatHelpViewerUrl ( String group, String item ) {
 			    		// Any cleanup?
 			    	}
 			    	if ( responseCode[i] == 200 ) {
-			    		// Looks like a valid URI to display
+			    		// Looks like a valid URI to display.
 			    		return docUri.toString();
 			    	}
 			    	else {
@@ -7225,13 +7170,13 @@ public String formatHelpViewerUrl ( String group, String item ) {
 			    	}
 			    }
 			    else {
-			    	// URL could not be determined
+			    	// URL could not be determined.
 			    	++failCount;
 			    }
     		}
     	}
         if ( failCount == docRootUriList.size() ) {
-        	// Log the a message - show a visible dialog in calling code
+        	// Log the a message - show a visible dialog in calling code.
         	Message.printWarning(2, "",
         		"Unable to determine documentation for group \"" + group + "\" and item \"" +
         		item + "\" - all URIs that were tried return error code." );
@@ -7240,30 +7185,25 @@ public String formatHelpViewerUrl ( String group, String item ) {
 	return null;
 }
 
-protected int getAppType()
-{
+protected int getAppType() {
 	return __appType;
 }
 
 /**
-Get the commands above a command insert position.  Only the requested commands
-are returned.  Use this, for example, to get the setWorkingDir() commands above
-the insert position for a readXXX() command, so the working directory can be
-defined and used in the readXXX_Dialog.  The returned list can be processed
-by the StateDMI_Processor() constructor.
-@return List of commands above the insert point that match the commands in
-the needed_commands_List.  This will always return a non-null list, even if
-no commands are in the list.
-@param needed_commands_List list of commands that need to be processed
-(e.g., "setWorkingDir").  Only the main command name should be defined.
-@param get_all if false, only the first found item above the insert point
-is returned.  If true, all matching commands above the point are returned in
-the order from top to bottom.
+Get the commands above a command insert position.  Only the requested commands are returned.
+Use this, for example, to get the setWorkingDir() commands above the insert position for a readXXX() command,
+so the working directory can be defined and used in the readXXX_Dialog.
+The returned list can be processed by the StateDMI_Processor() constructor.
+@return List of commands above the insert point that match the commands in the needed_commands_List.
+This will always return a non-null list, even if no commands are in the list.
+@param needed_commands_List list of commands that need to be processed (e.g., "setWorkingDir").
+Only the main command name should be defined.
+@param get_all if false, only the first found item above the insert point is returned.
+If true, all matching commands above the point are returned in the order from top to bottom.
 */
 /* TODO smalers 2020-02-16 no longer used?
-public List<String> getCommandsAboveInsertPosition ( List<String> needed_commands_List, boolean get_all )
-{	// Determine the insert position, which will be the first selected
-	// command (or the end of the list if none are selected)...
+public List<String> getCommandsAboveInsertPosition ( List<String> needed_commands_List, boolean get_all ) {
+	// Determine the insert position, which will be the first selected command (or the end of the list if none are selected).
 	int selectedsize = 0;
 	int [] selected_indices = ui_GetCommandJList().getSelectedIndices();
 	if ( selected_indices != null ) {
@@ -7271,20 +7211,21 @@ public List<String> getCommandsAboveInsertPosition ( List<String> needed_command
 	}
 	int insert_pos = 0;
 	if ( selectedsize == 0 ) {
-		// The insert position is the end of the list (same as size)...
+		// The insert position is the end of the list (same as size).
 		insert_pos = __commands_JListModel.size();
 	}
-	else {	// The insert position is the first selected item...
+	else {
+		// The insert position is the first selected item.
 		insert_pos = selected_indices[0];
 	}
-	// Now search backwards matching commands for each of the requested commands...
+	// Now search backwards matching commands for each of the requested commands.
 	int size = 0;
 	if ( needed_commands_List != null ) {
 		size = needed_commands_List.size();
 	}
 	String command;
 	List<String> found_commands = new ArrayList<>();
-	// Now loop up through the command list...
+	// Now loop up through the command list.
 	for ( int ic = (insert_pos - 1); ic >= 0; ic-- ) {
 		for ( int i = 0; i < size; i++ ) {
 			command = needed_commands_List.get(i);
@@ -7293,13 +7234,13 @@ public List<String> getCommandsAboveInsertPosition ( List<String> needed_command
 				found_commands.add ( (String)__commands_JListModel.get(ic) );
 				//Message.printStatus ( 1, "", "Adding command \"" + __commands_JListModel.get(ic) + "\"" );
 				if ( !get_all ) {
-					// Don't need to search any more...
+					// Don't need to search any more.
 					break;
 				}
 			}
 		}
 	}
-	// Reverse the commands so they are listed in the order of the list...
+	// Reverse the commands so they are listed in the order of the list.
 	size = found_commands.size();
 	if ( size <= 1 ) {
 		return found_commands;
@@ -7315,11 +7256,11 @@ public List<String> getCommandsAboveInsertPosition ( List<String> needed_command
 /**
 Get the commands above the first selected row in the final list.
 If nothing is selected, return all the items.
-@return final list items above first selected item or all if
-nothing selected.  Return empty non-null list if first item is selected.
+@return final list items above first selected item or all if nothing selected.
+Return empty non-null list if first item is selected.
 */
-public List<Command> getCommandsAboveSelected ()
-{	if ( __commands_JListModel.size() == 0) {
+public List<Command> getCommandsAboveSelected () {
+	if ( __commands_JListModel.size() == 0) {
 		return new ArrayList<Command>();
 	}
 
@@ -7327,7 +7268,7 @@ public List<Command> getCommandsAboveSelected ()
 	int selectedSize = selectedIndices.length;
 
 	if ( selectedSize == 0 ) {
-		// Return all...
+		// Return all.
 		List<Command> v = new ArrayList<>();
 		int size = __commands_JListModel.size();
 		for (int i = 0; i < size; i++) {
@@ -7341,7 +7282,7 @@ public List<Command> getCommandsAboveSelected ()
 		return new ArrayList<Command>();
 	}
 	else {
-		// Return above first selected...
+		// Return above first selected.
 		List<Command> v = new ArrayList<>(selectedIndices[0] + 1);
 		for (int i = 0; i < selectedIndices[0]; i++) {
 			v.add ((Command)__commands_JListModel.get(i));
@@ -7355,41 +7296,38 @@ public List<Command> getCommandsAboveSelected ()
 Return the command file name.  This is used by the processor when creating the check file.
 @return the command file name.
 */
-public String getCommandFileName ()
-{	return __commandFileName;
+public String getCommandFileName () {
+	return __commandFileName;
 }
 
 /**
 Return the commands menu style, which defines the organization of the commands menu.
 */
-private int getCommandsMenuStyle ()
-{	int menu_style = MENU_STYLE_THREE_LEVEL;
+private int getCommandsMenuStyle () {
+	int menu_style = MENU_STYLE_THREE_LEVEL;
 	if ( !__View_ThreeLevelCommandsMenu_JCheckBoxMenuItem.isSelected() ) {
 		menu_style = MENU_STYLE_TWO_LEVEL;
 	}
 	return menu_style;
 }
 
-
 /**
-Return the initial working directory, which will be the software startup
-home, or the location of the command file read/write (a directory).
+Return the initial working directory, which will be the software startup home,
+or the location of the command file read/write (a directory).
 This directory is suitable for initializing a workflow processing run.
 @return the initial working directory, which should always be non-null.
 */
-private String getInitialWorkingDir ()
-{
+private String getInitialWorkingDir () {
 	return __initialWorkingDir;
 }
 
-// TODO SAM 2004-04-12 - need to make part of the data set at some point
+// TODO SAM 2004-04-12 - need to make part of the data set at some point.
 /**
 Return the StateMod_NodeNetwork that is currently opened.
-@return the StateMod_NodeNetwork that is currently opened, or null if not
-available.
+@return the StateMod_NodeNetwork that is currently opened, or null if not available.
 */
-public StateMod_NodeNetwork getModelNetwork ()
-{	if ( __network_JFrame == null ) {
+public StateMod_NodeNetwork getModelNetwork () {
+	if ( __network_JFrame == null ) {
 		return null;
 	}
 	return __network_JFrame.getNetwork();
@@ -7399,8 +7337,8 @@ public StateMod_NodeNetwork getModelNetwork ()
 Get the StateDMI session type as a String, suitable for output.
 @return the current StateDMI session type.
 */
-private String getSessionTypeName ()
-{	if ( __sessionType == __SESSION_DATA_SET_COMPONENT ) {
+private String getSessionTypeName () {
+	if ( __sessionType == __SESSION_DATA_SET_COMPONENT ) {
 		return "Data Set Component";
 	}
 	else if ( __sessionType == __SESSION_DATA_SET ) {
@@ -7415,30 +7353,29 @@ private String getSessionTypeName ()
 }
 
 /**
-Handle actions from the message log viewer.  In particular, when a command is
-selected and the user wants to go to the command in the interface.
+Handle actions from the message log viewer.
+In particular, when a command is selected and the user wants to go to the command in the interface.
 @param tag Tag that identifies the command.  This is of the format:
 <pre>
 <command,count>
 </pre>
-where "command" is the command number (1+) and "count" is an optional count of
-warnings for the command.
+where "command" is the command number (1+) and "count" is an optional count of warnings for the command.
 */
-public void goToMessageTag ( String tag )
-{	String command_line = "";
+public void goToMessageTag ( String tag ) {
+	String command_line = "";
 	if ( tag.indexOf(",") >= 0 ) {
 		String first_token = StringUtil.getToken(tag,",",0,0);
 		if ( first_token.equalsIgnoreCase("ProcessCommands") ) {
-			// Get the command number from the second token...
+			// Get the command number from the second token.
 			command_line = StringUtil.getToken(tag,",",0,1);
 		}
 		else {
-			// Get the command number from the first token...
+			// Get the command number from the first token.
 			command_line = StringUtil.getToken(tag,",",0,0);
 		}
 	}
 	else {
-		// Get the command number from the only tag...
+		// Get the command number from the only tag.
 		if ( StringUtil.isInteger(tag) ) {
 			command_line = tag;
 		}
@@ -7446,43 +7383,41 @@ public void goToMessageTag ( String tag )
 	if ( StringUtil.isInteger(command_line) ) {
 		int iline = StringUtil.atoi(command_line);
 		if ( (iline >= 0) && (iline < __commands_JListModel.size()) ) {
-			// Clear previous selections...
+			// Clear previous selections.
 			__commands_JList.clearSelection();
-			// Select the current tag...
+			// Select the current tag.
 			ui_SelectCommand ( iline );
-			// Position the list...
+			// Position the list.
 			__commands_JList.ensureIndexIsVisible(iline);
 		}
 	}
 	else if ( command_line.equalsIgnoreCase("EndChecks") ) {
-		// Go to last command...
+		// Go to last command.
 		int iline = __commands_JListModel.size();
-		// Clear previous selections...
+		// Clear previous selections.
 		__commands_JList.clearSelection();
-		// Select the current tag...
+		// Select the current tag.
 		ui_SelectCommand ( iline );
-		// Position the list...
+		// Position the list.
 		__commands_JList.ensureIndexIsVisible(iline);
 	}
 }
 
 /**
-Required by ListDataListener - receive notification when the contents of the
-commands list have changed due to commands being added.
+Required by ListDataListener.
+Receive notification when the contents of the commands list have changed due to commands being added.
 */
-public void intervalAdded ( ListDataEvent e )
-{
-	// The contents of the command list changed so check the GUI state...
+public void intervalAdded ( ListDataEvent e ) {
+	// The contents of the command list changed so check the GUI state.
 	ui_UpdateStatus ( true );	// true = also call checkGUIState();
 }
 
 /**
-Required by ListDataListener - receive notification when the contents of the
-commands list have changed due to commands being removed.
+Required by ListDataListener.
+Receive notification when the contents of the commands list have changed due to commands being removed.
 */
-public void intervalRemoved ( ListDataEvent e )
-{
-	// The contents of the command list changed so check the GUI state...
+public void intervalRemoved ( ListDataEvent e ) {
+	// The contents of the command list changed so check the GUI state.
 	ui_UpdateStatus ( true );	// true = also call checkGUIState();
 }
 
@@ -7490,38 +7425,37 @@ public void intervalRemoved ( ListDataEvent e )
 Handle ItemEvent events.
 @param e ItemEvent to handle.
 */
-public void itemStateChanged ( ItemEvent evt )
-{	Object o = evt.getSource();
+public void itemStateChanged ( ItemEvent evt ) {
+	Object o = evt.getSource();
 
 	if (ui_GetIgnoreItemEvent()) {
 		return;
 	}
 
 	else if ( (o == __dataStore_JComboBox) && (evt.getStateChange() == ItemEvent.SELECTED) ) {
-        // New datastore selected...
+        // New datastore selected.
         uiAction_DataStoreChoiceClicked();
     }
 	else if ( o == __View_DataSetManager_JCheckBoxMenuItem ) {
 		// TODO
 		if ( __statecuDatasetManager == null ) {
-			// Create it...
+			// Create it.
 			__statecuDatasetManager =
 			new StateCU_DataSet_JFrame ( this, __statecuDataset, "StateCU Data Set", true );
 			__statecuDatasetManager.addWindowListener ( this );
 		}
 		else {
-			// Just set it visible (need to make sure its contents
-			// are refreshed based on the current GUI state)...
+			// Just set it visible (need to make sure its contents are refreshed based on the current GUI state).
 			__statecuDatasetManager.setVisible( __View_DataSetManager_JCheckBoxMenuItem.getState() );
 		}
 	}
     else if ( o == __View_Map_JCheckBoxMenuItem ) {
 		if ( __View_Map_JCheckBoxMenuItem.isSelected() ) {
-			// User wants the map to be displayed...
+			// User wants the map to be displayed.
 			uiAction_OpenGeoView ( true );
 		}
 		else {
-			// Map is deselected.  Just set the map frame to no visible...
+			// Map is deselected.  Just set the map frame to no visible.
 			if ( __geoview_JFrame != null ) {
 				__geoview_JFrame.setVisible ( false );
 			}
@@ -7530,7 +7464,7 @@ public void itemStateChanged ( ItemEvent evt )
 	else if ( o == __View_ModelNetwork_JCheckBoxMenuItem ) {
 		if ( __View_ModelNetwork_JCheckBoxMenuItem.isSelected() ) {
 			if (__network_JFrame == null) {
-				// Network has not previously been read so prompt for a file...
+				// Network has not previously been read so prompt for a file.
 				uiAction_OpenModelNetwork ();
 			}
 			else {
@@ -7538,7 +7472,7 @@ public void itemStateChanged ( ItemEvent evt )
 			}
 		}
 		else {
-			// Just make the network invisible...
+			// Just make the network invisible.
 			if ( __network_JFrame != null ) {
 				__network_JFrame.setVisible(false);
 			}
@@ -7549,8 +7483,7 @@ public void itemStateChanged ( ItemEvent evt )
 
 /**
 Handle key pressed events.
-Most actions are handled in keyReleased() to avoid multiple key press events
-from causing problems.
+Most actions are handled in keyReleased() to avoid multiple key press events from causing problems.
 */
 public void keyPressed(KeyEvent e) {
 }
@@ -7558,17 +7491,17 @@ public void keyPressed(KeyEvent e) {
 /**
 Handle key released events.
 */
-public void keyReleased(KeyEvent event)
-{	int code = event.getKeyCode();
+public void keyReleased(KeyEvent event) {
+	int code = event.getKeyCode();
 	if ( code == KeyEvent.VK_DELETE ) {
-		// Clear a command...
+		// Clear a command.
 		if ( event.getSource() == __commands_JList ) {
 			commandList_RemoveCommandsBasedOnUI();
 		}
 	}
 	else if ( code == KeyEvent.VK_ENTER ) {
 		if ( event.getSource() == __commands_JList ) {
-			// Same as the Edit...Command event...
+			// Same as the Edit...Command event.
 			uiAction_EditCommand ();
 		}
 	}
@@ -7578,15 +7511,14 @@ public void keyTyped(KeyEvent e) {
 }
 
 /**
-Handle mouse clicked events.  If multiple clicks in the commands area, then
-edit the selected command.
+Handle mouse clicked events.  If multiple clicks in the commands area, then edit the selected command.
 */
-public void mouseClicked ( MouseEvent event )
-{	Object source = event.getSource();
+public void mouseClicked ( MouseEvent event ) {
+	Object source = event.getSource();
 	if ( source == __commands_JList ) {
 		if ( event.getClickCount() == 2 ) {
-			// Same as editing with error checks...
-			// Edit the first selected item, unless a comment, in which case all are edited...
+			// Same as editing with error checks.
+			// Edit the first selected item, unless a comment, in which case all are edited.
 			uiAction_EditCommand ();
 		}
 	}
@@ -7610,13 +7542,13 @@ Handle mouse pressed event.
 public void mousePressed(MouseEvent event) {
 	int mods = event.getModifiers();
 	Component c = event.getComponent();
-    // Popup for commands...
+    // Popup for commands.
 	if ( (c == ui_GetCommandJList()) && (__commands_JListModel.size() > 0) &&
 		((mods & MouseEvent.BUTTON3_MASK) != 0) ) {
 		Point pt = JGUIUtil.computeOptimalPosition ( event.getPoint(), c, __Commands_JPopupMenu );
 		__Commands_JPopupMenu.show ( c, pt.x, pt.y );
 	}
-    // Popup for table results list, right click since left click automatically shows table...
+    // Popup for table results list, right click since left click automatically shows table.
     else if ( (c == __resultsTables_JList) && (__resultsTables_JListModel.size() > 0) //) {//&&
         && ((mods & MouseEvent.BUTTON3_MASK) == MouseEvent.BUTTON3_MASK) ) {
         Point pt = JGUIUtil.computeOptimalPosition (event.getPoint(), c, __resultsTables_JPopupMenu );
@@ -7631,32 +7563,27 @@ public void mouseReleased(MouseEvent event) {
 }
 
 /**
- * Used for batch processing of a command file.  Checks for existence of
- * the input file and returns if no file is found.  Otherwise, all commands
- * are stored in a list and the runCommands method is run.  RunCommands will
- * run all the commands and write any output.  Returns true if successful and false
- * otherwise.
+ * Used for batch processing of a command file.
+ * Checks for existence of the input file and returns if no file is found.
+ * Otherwise, all commands are stored in a list and the runCommands method is run.
+ * RunCommands will run all the commands and write any output.  Returns true if successful and false otherwise.
  *
  * @param File
  * @return boolean
  */
-/* FIXME SAM 2007-10-22 Make this agree with TSTool
-protected boolean runCommandsFromFile(File  inFile)
-{
-	// Store the commands from the file into a vector
-	// and initialize the rest of the environment to run
-	// the commands
-	// FIXME SAM 2007-10-22 Fix consistent with TSTool
+/* FIXME SAM 2007-10-22 Make this agree with TSTool.
+protected boolean runCommandsFromFile(File  inFile) {
+	// Store the commands from the file into a list and initialize the rest of the environment to run the commands.
+	// FIXME SAM 2007-10-22 Fix consistent with TSTool.
 	//boolean fileExists = storeCommandsFromFile(inFile);
 	boolean fileExists = false;
 	if(!(fileExists))
 		return false;
-	//	run commands in batch mode
-	// both params are true since we want to run all commands
-	// and write all output that is referenced with write() commands
-	// in the command file
+	// Run commands in batch mode.
+	// Both parameters are true since we want to run all commands
+	// and write all output that is referenced with write() commands in the command file.
 	uiAction_RunCommands(true, true);
-	// FIXME SAM Need to make work like TSTool
+	// FIXME SAM Need to make work like TSTool.
 	return true;
 }
 */
@@ -7664,25 +7591,24 @@ protected boolean runCommandsFromFile(File  inFile)
 /**
 Clear the results area because a new processor run is about to start.
 */
-private void results_Clear()
-{	ui_SetIgnoreActionEvent (true);
-	// Clear the list of output files...
+private void results_Clear() {
+	ui_SetIgnoreActionEvent (true);
+	// Clear the list of output files.
 	results_OutputFiles_Clear();
-	// Clear tables
+	// Clear tables.
 	results_Tables_Clear();
-	// Clear the list of output components...
+	// Clear the list of output components.
 	results_StateCUComponents_Clear();
 	results_StateModComponents_Clear();
 	ui_SetIgnoreActionEvent( false);
 }
 
 /**
-Copy a time series list and add a total, for displays.  Only the list is
-copied, but not the data in the time series.
+Copy a time series list and add a total, for displays.
+Only the list is copied, but not the data in the time series.
 @param tslist a list of time series to process, of consistent interval.
 @param app_type Application type.
-@param comp_type Component type, used to determine the units and other
-information for the total time series.
+@param comp_type Component type, used to determine the units and other information for the total time series.
 @param dataset_location the location to use for the total time series.
 @param dataset_datasource the data source to use for the total time series.
 @param dataset_location the description to use for the total time series.
@@ -7690,8 +7616,8 @@ information for the total time series.
 */
 private <T extends TS> List<T> results_CopyTSListAndAddTotal ( List<T> tslist, int app_type, int comp_type,
 	String dataset_location, String dataset_datasource, String dataset_description )
-throws Exception
-{	int vsize = tslist.size();
+throws Exception {
+	int vsize = tslist.size();
 	List<T> v = new ArrayList<T> ( vsize );
 	for ( int i = 0; i < vsize; i++ ) {
 		v.add ( tslist.get(i) );
@@ -7717,22 +7643,22 @@ Display time series results.
 @param app_type Application type for the component.
 @param comp_type Component type for the time series.
 */
-private void results_DisplayTimeSeries ( List tslist, String initial_view, int app_type, int comp_type )
-{	String routine = "StateDMI_JFrame.displayTimeSeries";
+private void results_DisplayTimeSeries ( List tslist, String initial_view, int app_type, int comp_type ) {
+	String routine = getClass().getSimpleName() + ".results_DisplayTimeSeries";
 	try {
 		PropList graphprops = new PropList ( "TSView" );
-		// Default properties...
+		// Default properties.
 		graphprops.set ( "InitialView", initial_view );
-		// Parent window to center the graph
+		// Parent window to center the graph.
 		graphprops.setUsingObject ( "TSViewParentUIComponent", this );
-		// Set the total size of the graph window...
+		// Set the total size of the graph window.
 		graphprops.set ( "TotalWidth", "600" );
 		graphprops.set ( "TotalHeight", "400" );
-		// Set the total size of the summary window...
+		// Set the total size of the summary window.
 		graphprops.set ( "Summary.TotalWidth", "1000" );
 		graphprops.set ( "Summary.TotalHeight", "600" );
 		graphprops.set ( "GraphType=Line" );
-		// Title...
+		// Title.
 		if ( (app_type == StateDMI.APP_TYPE_STATECU) && (comp_type >= 0)  ) {
 			graphprops.set ( "TitleString", StateCU_Util.lookupTimeSeriesGraphTitle(comp_type));
 			graphprops.set ( "TSViewTitleString", StateCU_Util.lookupTimeSeriesGraphTitle(comp_type));
@@ -7745,7 +7671,7 @@ private void results_DisplayTimeSeries ( List tslist, String initial_view, int a
 			// Default...
 			graphprops.set ( "TitleString", "Time Series" );
 		}
-		// Summary properties for secondary displays (copy from summary output)...
+		// Summary properties for secondary displays (copy from summary output).
 		graphprops.set ( "DisplayFont", "Courier" );
 		graphprops.set ( "DisplaySize", "8" );
 		graphprops.set ( "PrintFont", "Courier" );
@@ -7762,23 +7688,23 @@ private void results_DisplayTimeSeries ( List tslist, String initial_view, int a
 	}
 }
 
-//TODO SAM 2009-05-08 Evaluate sorting the files - maybe need to put in a worksheet so they can be sorted
+// TODO SAM 2009-05-08 Evaluate sorting the files - maybe need to put in a worksheet so they can be sorted.
 /**
 Add the specified output file to the list of output files that can be selected for viewing.
 Only files that exist are added.  Files are added in the order of processing.
 @param file Output file generated by the processor.
 */
-private void results_OutputFiles_AddOutputFile ( File file )
-{	String filePathString = null;
+private void results_OutputFiles_AddOutputFile ( File file ) {
+	String filePathString = null;
     try {
         filePathString = file.getCanonicalPath();
     }
     catch ( IOException e ) {
-        // Should not happen
+        // Should not happen.
         return;
     }
     if ( !IOUtil.fileExists(filePathString)) {
-        // File does not exist so don't show in the list of output files
+        // File does not exist so don't show in the list of output files.
         return;
     }
     if ( JGUIUtil.indexOf(__resultsOutputFiles_JList, filePathString, false, true) < 0 ) {
@@ -7789,8 +7715,7 @@ private void results_OutputFiles_AddOutputFile ( File file )
 /**
 Clear the list of output files.  This is normally called before the commands are run.
 */
-private void results_OutputFiles_Clear()
-{
+private void results_OutputFiles_Clear() {
 	__resultsOutputFiles_JListModel.removeAllElements();
     ui_UpdateStatus ( false );
 }
@@ -7813,29 +7738,28 @@ private void results_ShowStateCUCropCharacteristicsData () {
 Show the StateCU map layers that are referenced in an existing data set.
 Set the properties on the layers to reasonable defaults.
 */
-/* TODO SAM 2007-06-26 Evaluate why not called
+/* TODO SAM 2007-06-26 Evaluate why not called.
 private void results_ShowStateCUDataSetMapLayers ()
 {	String routine = "StateDMI_JFrame.showStateCUDataSetMapLayers";
 	if ( __statecu_dataset == null ) {
 		return;
 	}
-	// First clear the map...
+	// First clear the map.
 
 	if ( __geoview_JFrame != null ) {
 		__geoview_JFrame.getGeoViewJPanel().removeAllLayerViews();
 	}
 	else {
-		// Create the map...
+		// Create the map.
 		openGeoView ( true );
 	}
 
-	// Add basins...
+	// Add basins.
 
 	String filepath;
 	String warning = "";
 	GeoLayerView layer_view = null;
-	DataSetComponent comp =
-	__statecu_dataset.getComponentForComponentType ( StateCU_DataSet.COMP_GIS_STATE );
+	DataSetComponent comp = __statecu_dataset.getComponentForComponentType ( StateCU_DataSet.COMP_GIS_STATE );
 	if ( (__geoview_JFrame != null) && (comp != null) && !comp.getDataFileName().equals("") ) {
 		filepath = __statecu_dataset.getDataFilePath ( comp.getDataFileName() );
 		if ( !StringUtil.endsWithIgnoreCase(filepath,".shp") ) {
@@ -7845,12 +7769,12 @@ private void results_ShowStateCUDataSetMapLayers ()
 		try {
 			layer_view = new GeoLayerView ( filepath, new PropList("LayerView"),
 			__geoview_JFrame.getGeoViewJPanel().getGeoView().getNumLayerViews() + 1 );
-			// Set default attributes on the layer...
+			// Set default attributes on the layer.
 			if ( layer_view.getLayer().getShapeType() == GeoLayer.LINE ) {
 				layer_view.getSymbol().setOutlineColor( GRColor.black);
 			}
 			else {
-			// Assume polygon...
+				// Assume polygon.
 				layer_view.getSymbol().setColor( new GRColor(255,240,190) );
 				layer_view.getSymbol().setOutlineColor( GRColor.black);
 			}
@@ -7866,7 +7790,7 @@ private void results_ShowStateCUDataSetMapLayers ()
 		Message.printStatus ( 1, routine, "No map layer available for states" );
 	}
 
-	// Add divisions...
+	// Add divisions.
 
 	comp = __statecu_dataset.getComponentForComponentType ( StateCU_DataSet.COMP_GIS_DIVISIONS );
 	if ( (__geoview_JFrame != null) && (comp != null) && !comp.getDataFileName().equals("") ) {
@@ -7882,7 +7806,7 @@ private void results_ShowStateCUDataSetMapLayers ()
 				layer_view.getSymbol().setColor( GRColor.black);
 			}
 			else {
-				// Assume polygon...
+				// Assume polygon.
 				layer_view.getSymbol().setColor( new GRColor(255,240,190) );
 				layer_view.getSymbol().setOutlineColor( GRColor.black);
 			}
@@ -7897,7 +7821,7 @@ private void results_ShowStateCUDataSetMapLayers ()
 		Message.printStatus ( 1, routine, "No map layer available for districts" );
 	}
 
-	// Add rivers...
+	// Add rivers.
 
 	comp = __statecu_dataset.getComponentForComponentType ( StateCU_DataSet.COMP_GIS_RIVERS );
 	if ( (__geoview_JFrame != null) && (comp != null) && !comp.getDataFileName().equals("") ) {
@@ -7922,7 +7846,7 @@ private void results_ShowStateCUDataSetMapLayers ()
 		Message.printStatus ( 1, routine, "No map layer available for rivers" );
 	}
 
-	// Add climate stations...
+	// Add climate stations.
 
 	comp = __statecu_dataset.getComponentForComponentType (	StateCU_DataSet.COMP_GIS_CLIMATE_STATIONS );
 	if ( (__geoview_JFrame != null) && (comp != null) && !comp.getDataFileName().equals("") ) {
@@ -7948,7 +7872,7 @@ private void results_ShowStateCUDataSetMapLayers ()
 		Message.printStatus ( 1, routine, "No map layer available for climate stations." );
 	}
 
-	// Add structures...
+	// Add structures.
 
 	if ( (__statecu_dataset_type != StateCU_DataSet.TYPE_CLIMATE_STATIONS) &&
 		(__statecu_dataset_type != StateCU_DataSet.TYPE_OTHER_USES) ) {
@@ -7986,8 +7910,8 @@ private void results_ShowStateCUDataSetMapLayers ()
 /**
 Display the StateCU delay table data.
 */
-private void results_ShowStateCUDelayTableData ()
-{	DataSetComponent comp = __statecuDataset.getComponentForComponentType (
+private void results_ShowStateCUDelayTableData () {
+	DataSetComponent comp = __statecuDataset.getComponentForComponentType (
 		StateCU_DataSet.COMP_DELAY_TABLES_MONTHLY);
 	if ( comp != null ) {
 		List data = (List)comp.getData();
@@ -8007,9 +7931,9 @@ private void results_ShowStateCULocationData() {
 /**
 Display the StateCU locations (this is currently a demo of a combination plot).
 */
-/* TODO SAM 2007-06-26 Evaluate why not used
-private void results_ShowStateCULocationsSAM ()
-{	// Create a list of TS and PropList for a TSProduct...
+/* TODO SAM 2007-06-26 Evaluate why not used.
+private void results_ShowStateCULocationsSAM () {
+	// Create a list of TS and PropList for a TSProduct.
 	PropList props = new PropList ( "CU Locations" );
 	Vector tslist = new Vector();
 
@@ -8017,15 +7941,15 @@ private void results_ShowStateCULocationsSAM ()
 	props.set ( "TotalHeight=800" );
 	props.set ( "InitialView=Graph" );
 
-	// Need the CU Location to get the identifier to look up...
-	//TODO- when data objects are linked don't need to look up here
+	// Need the CU Location to get the identifier to look up.
+	// TODO- when data objects are linked don't need to look up here.
 	DataSetComponent culoc_comp = __statecu_dataset.getComponentForComponentType (
 		StateCU_DataSet.COMP_CU_LOCATIONS);
 	StateCU_Location culoc = null;
 	if ( culoc_comp != null ) {
 		Vector data = (Vector)culoc_comp.getData();
 		if ( data != null ) {
-			// TODO - just a test...
+			// TODO - just a test.
 			int size = data.size();
 			for ( int i = 0; i < size; i++ ) {
 				culoc = (StateCU_Location)data.elementAt(i);
@@ -8042,10 +7966,9 @@ private void results_ShowStateCULocationsSAM ()
 	if ( culoc == null ) {
 		return;
 	}
-	Message.printStatus ( 1, "", "Displaying CU Location " +
-		culoc.getID() );
+	Message.printStatus ( 1, "", "Displaying CU Location " + culoc.getID() );
 
-	// Start with the climate data...
+	// Start with the climate data.
 
 	int sub = 1;
 	props.set ( "SubProduct " + sub + ".GraphType=Bar" );
@@ -8102,7 +8025,7 @@ private void results_ShowStateCULocationsSAM ()
 		}
 	}
 
-	// Next add Crops...
+	// Next add Crops.
 
 	++sub;
 	props.set ( "SubProduct " + sub + ".GraphType=Line" );
@@ -8137,7 +8060,7 @@ private void results_ShowStateCULocationsSAM ()
 	if ( comp != null ) {
 		Vector data = (Vector)comp.getData();
 		if ( data != null ) {
-			// Find CU location's data...
+			// Find CU location's data.
 			pos = StateCU_Util.indexOf ( data, culoc.getID() );
 			if ( pos >= 0 ) {
 				StateCU_IrrigationPracticeTS ipyts = (StateCU_IrrigationPracticeTS)data.elementAt(pos);
@@ -8172,9 +8095,9 @@ private void results_ShowStateCULocationsSAM ()
 		}
 	}
 
-	// Next add irrigation practice efficiencies, and pumping
+	// Next add irrigation practice efficiencies, and pumping.
 
-	// Finally add diversions...
+	// Finally add diversions.
 
 	++sub;
 	props.set ( "SubProduct " + sub + ".GraphType=Line" );
@@ -8197,7 +8120,7 @@ private void results_ShowStateCULocationsSAM ()
 		}
 	}
 
-	// Now create the graph...
+	// Now create the graph.
 
 	try {
 		TSProduct tsproduct = new TSProduct ( props, null );
@@ -8205,7 +8128,7 @@ private void results_ShowStateCULocationsSAM ()
 		new TSViewJFrame ( tsproduct );
 	}
 	catch ( Exception e ) {
-		Message.printWarning ( 1, "", "Unable to display results" );
+		Message.printWarning ( 1, "", "Unable to display results." );
 		Message.printWarning ( 2, "", e );
 	}
 }
@@ -8213,12 +8136,11 @@ private void results_ShowStateCULocationsSAM ()
 
 /**
 Display the StateCU monthly precipitation time series data.
-TODO - perhaps need a way to select a subset to view.
-maybe figure out what is selected in the results tree?
+TODO - perhaps need a way to select a subset to view.  Maybe figure out what is selected in the results tree?
 */
-/* TODO SAM 2007-06-26 Evaluate why not called
-private void results_ShowStateCUMonthlyPrecipitationTS ()
-{	DataSetComponent comp = __statecu_dataset.getComponentForComponentType (
+/* TODO SAM 2007-06-26 Evaluate why not called.
+private void results_ShowStateCUMonthlyPrecipitationTS () {
+	DataSetComponent comp = __statecu_dataset.getComponentForComponentType (
 		StateCU_DataSet.COMP_PRECIPITATION_TS_MONTHLY);
 	if ( comp != null ) {
 		Vector tslist = (Vector)comp.getData();
@@ -8226,8 +8148,7 @@ private void results_ShowStateCUMonthlyPrecipitationTS ()
 			PropList graphprops = new PropList ( "ts" );
 			graphprops.set ( "TotalWidth", "600" );
 			graphprops.set ( "TotalHeight", "400" );
-			graphprops.set ( "Title",
-			"Precipitation Time Series" );
+			graphprops.set ( "Title", "Precipitation Time Series" );
 			graphprops.set ( "GraphType", "Bar" );
 			graphprops.set ( "DisplayFont", "Courier" );
 			graphprops.set ( "DisplaySize", "11" );
@@ -8235,7 +8156,8 @@ private void results_ShowStateCUMonthlyPrecipitationTS ()
 			graphprops.set ( "PrintSize", "7" );
 			graphprops.set ( "PageLength", "100" );
 			graphprops.set ( "InitialView", "Graph" );
-			try {	new TSViewJFrame ( tslist, graphprops );
+			try {
+				new TSViewJFrame ( tslist, graphprops );
 			}
 			catch ( Exception e ) {
 				Message.printWarning ( 1, "showStateCUMonthlyPrecipitationTS", "Error displaying data." );
@@ -8247,12 +8169,11 @@ private void results_ShowStateCUMonthlyPrecipitationTS ()
 
 /**
 Display the StateCU monthly temperature time series data.
-TODO - perhaps need a way to select a subset to view.
-maybe figure out what is selected in the results tree?
+TODO - perhaps need a way to select a subset to view. Maybe figure out what is selected in the results tree?
 */
 /* TODO SAM 2007-06-26 Evaluate why not enabled.
-private void results_ShowStateCUTemperatureTSMonthly ()
-{	DataSetComponent comp = __statecu_dataset.getComponentForComponentType (
+private void results_ShowStateCUTemperatureTSMonthly () {
+	DataSetComponent comp = __statecu_dataset.getComponentForComponentType (
 		StateCU_DataSet.COMP_TEMPERATURE_TS_MONTHLY_AVERAGE);
 	if ( comp != null ) {
 		Vector tslist = (Vector)comp.getData();
@@ -8260,8 +8181,7 @@ private void results_ShowStateCUTemperatureTSMonthly ()
 			PropList graphprops = new PropList ( "ts" );
 			graphprops.set ( "TotalWidth", "600" );
 			graphprops.set ( "TotalHeight", "400" );
-			graphprops.set ( "Title",
-			"Monthly Average Temperature Time Series" );
+			graphprops.set ( "Title", "Monthly Average Temperature Time Series" );
 			graphprops.set ( "DisplayFont", "Courier" );
 			graphprops.set ( "DisplaySize", "11" );
 			graphprops.set ( "PrintFont", "Courier" );
@@ -8282,8 +8202,8 @@ private void results_ShowStateCUTemperatureTSMonthly ()
 /**
 Display the StateMod delay table data.
 */
-private void results_ShowStateModDelayTableData ()
-{	new StateMod_DelayTable_JFrame( __statemodDataset, null, true, false );
+private void results_ShowStateModDelayTableData () {
+	new StateMod_DelayTable_JFrame( __statemodDataset, null, true, false );
 }
 
 /**
@@ -8296,8 +8216,8 @@ private void results_ShowStateModDiversionData () {
 /**
 Display the StateMod evaporation data.
 */
-private void results_ShowStateModEvaporationData ()
-{	// TODO - Not usually that many so show all...
+private void results_ShowStateModEvaporationData () {
+	// TODO - Not usually that many so show all.
 	// Need a threshold count to force select of subset?
 	String routine = "StateDMI_JFrame.showStateModEvaporationData";
 	DataSetComponent comp2 = __statemodDataset.getComponentForComponentType (
@@ -8328,8 +8248,8 @@ private void results_ShowStateModInstreamFlowData () {
 /**
 Display the StateMod river gage station data.
 */
-private void results_ShowStateModStreamGageData ()
-{	new StateMod_StreamGage_JFrame ( __statemodDataset, (StateMod_DataSet_WindowManager)null, false );
+private void results_ShowStateModStreamGageData () {
+	new StateMod_StreamGage_JFrame ( __statemodDataset, (StateMod_DataSet_WindowManager)null, false );
 }
 
 /**
@@ -8349,8 +8269,8 @@ private void results_ShowStateModOperationalData () {
 /**
 Display the StateMod precipitation data.
 */
-private void results_ShowStateModPrecipitationData ()
-{	// TODO - Not usually that many so show all...
+private void results_ShowStateModPrecipitationData () {
+	// TODO - Not usually that many so show all.
 	// Need a threshold count to force select of subset?
 	String routine = "StateDMI_JFrame.showStateModPrecipitationData";
 	DataSetComponent comp2 = __statemodDataset.getComponentForComponentType (
@@ -8389,10 +8309,9 @@ private void results_ShowStateModWellData () {
 Add the specified component name to the list of components that can be selected for viewing.
 @param table Table generated by the processor.
 */
-private void results_StateCUComponents_AddComponents ( String componentName )
-{
+private void results_StateCUComponents_AddComponents ( String componentName ) {
     if ( JGUIUtil.indexOf(__resultsStateCUComponents_JList, componentName, false, true) < 0 ) {
-    	// Not already in the list so add it
+    	// Not already in the list so add it.
          __resultsStateCUComponents_JListModel.addElement( componentName );
     }
 }
@@ -8400,8 +8319,7 @@ private void results_StateCUComponents_AddComponents ( String componentName )
 /**
 Clear the list of StateCU components.  This is normally called before the commands are run.
 */
-private void results_StateCUComponents_Clear()
-{
+private void results_StateCUComponents_Clear() {
 	__resultsStateCUComponents_JListModel.removeAllElements();
     ui_UpdateStatus ( false );
 }
@@ -8410,8 +8328,7 @@ private void results_StateCUComponents_Clear()
 Add the specified component name to the list of components that can be selected for viewing.
 @param table Table generated by the processor.
 */
-private void results_StateModComponents_AddComponents ( String componentName )
-{
+private void results_StateModComponents_AddComponents ( String componentName ) {
     if ( JGUIUtil.indexOf(__resultsStateModComponents_JList, componentName, false, true) < 0 ) {
          __resultsStateModComponents_JListModel.addElement( componentName );
     }
@@ -8420,8 +8337,7 @@ private void results_StateModComponents_AddComponents ( String componentName )
 /**
 Clear the list of StateMod components.  This is normally called before the commands are run.
 */
-private void results_StateModComponents_Clear()
-{
+private void results_StateModComponents_Clear() {
 	__resultsStateModComponents_JListModel.removeAllElements();
     ui_UpdateStatus ( false );
 }
@@ -8430,16 +8346,14 @@ private void results_StateModComponents_Clear()
 Add the specified table to the list of tables that can be selected for viewing.
 @param tableid table identifier for table generated by the processor.
 */
-private void results_Tables_AddTable ( String tableid )
-{
+private void results_Tables_AddTable ( String tableid ) {
     __resultsTables_JListModel.addElement( tableid );
 }
 
 /**
 Clear the list of results tables.  This is normally called immediately before the commands are run.
 */
-private void results_Tables_Clear()
-{
+private void results_Tables_Clear() {
     __resultsTables_JListModel.removeAllElements();
 }
 
@@ -8447,17 +8361,16 @@ private void results_Tables_Clear()
 Handle TS_ListSelector_JFrame events.
 @param selector TS_ListSelector_JFrame instance from which the time series were selected.
 @param tslist The list of TS that were selected.
-@param action Action string that indicates which button was pressed on the
-selector ("Summary", "Table", or "Graph").
+@param action Action string that indicates which button was pressed on the selector ("Summary", "Table", or "Graph").
 */
-public void timeSeriesSelected ( TS_ListSelector_JFrame selector, List<TS> tslist, String action )
-{	// Determine the component type for the time series.
+public void timeSeriesSelected ( TS_ListSelector_JFrame selector, List<TS> tslist, String action ) {
+	// Determine the component type for the time series.
 	int vsize = TS_ListSelector_JFrame_List.size();
 	TS_ListSelector_JFrame selector_saved;
 	for ( int i = 0; i < vsize; i++ ) {
 		selector_saved = TS_ListSelector_JFrame_List.get(i);
 		if ( selector_saved == selector ) {
-			// Display the time series...
+			// Display the time series.
 			results_DisplayTimeSeries ( tslist, action,
 			TS_ListSelector_JFrame_app_type_List.get(i).intValue(),
 			TS_ListSelector_JFrame_comp_type_List.get(i).intValue() );
@@ -8467,12 +8380,11 @@ public void timeSeriesSelected ( TS_ListSelector_JFrame selector, List<TS> tslis
 }
 
 /**
-Check to make sure necessary input is available for dialogs, including lists
-of available region1 and region2 for StateCu.
+Check to make sure necessary input is available for dialogs, including lists of available region1 and region2 for StateCu.
 */
-private void ui_CheckDialogInput ()
-{	if ( __region1_List == null ) {
-		// Get the counties from HydroBase...
+private void ui_CheckDialogInput () {
+	if ( __region1_List == null ) {
+		// Get the counties from HydroBase.
 		__region1_List = new ArrayList<>();
 		if ( __hbdmi != null ) {
 			List<HydroBase_CountyRef> v = __hbdmi.getCountyRef();
@@ -8488,14 +8400,14 @@ private void ui_CheckDialogInput ()
 		}
 	}
 	if ( __region2_List == null ) {
-		// Get the HUC from HydroBase...
+		// Get the HUC from HydroBase.
 		__region2_List = new ArrayList<>();
 		if ( __hbdmi != null ) {
 			__region2_List = __hbdmi.getHUC();
 		}
 	}
 	if ( __cropcharCuMethod_List == null ) {
-		// Get the Cropchar CU methods from HydroBase...
+		// Get the Cropchar CU methods from HydroBase.
 		__cropcharCuMethod_List = new ArrayList<>();
 		if ( __hbdmi != null ) {
 			List<HydroBase_Cropchar> v = __hbdmi.getCropcharCUMethod();
@@ -8511,7 +8423,7 @@ private void ui_CheckDialogInput ()
 		}
 	}
 	if ( __blaneyCriddleCuMethod_List == null ) {
-		// Get the CU methods from HydroBase...
+		// Get the CU methods from HydroBase.
 		__blaneyCriddleCuMethod_List = new ArrayList<>();
 		if ( __hbdmi != null ) {
 			List<HydroBase_CUBlaneyCriddle> v = __hbdmi.getBlaneyCriddleCUMethod();
@@ -8527,7 +8439,7 @@ private void ui_CheckDialogInput ()
 		}
 	}
 	if ( __penmanMonteithCuMethod_List == null ) {
-		// Get the CU methods from HydroBase...
+		// Get the CU methods from HydroBase.
 		__penmanMonteithCuMethod_List = new ArrayList<>();
 		if ( __hbdmi != null ) {
 			List<HydroBase_CUPenmanMonteith> v = __hbdmi.getPenmanMonteithCUMethod();
@@ -8545,38 +8457,37 @@ private void ui_CheckDialogInput ()
 }
 
 /**
-Checks the current state of the GUI and updates components as necessary.  For
-example, if nothing is selected in the list, the Edit...Commands menus are
-disabled.  Use the JGUIUtil.setEnabled() method to simplify checks - it checks
-for null items (nulls may be present during development and during application startup).
+Checks the current state of the GUI and updates components as necessary.
+For example, if nothing is selected in the list, the Edit...Commands menus are disabled.
+Use the JGUIUtil.setEnabled() method to simplify checks.
+It checks for null items (nulls may be present during development and during application startup).
 */
-private void ui_CheckGUIState()
-{
+private void ui_CheckGUIState() {
 	//Message.printStatus(2, "ui_CheckGUIState", "Starting");
-	// First figure out if something in the list is selected...
+	// First figure out if something in the list is selected.
 	int command_list_size = 0;
 	int selected_commands_size = 0;
 	if ( __commands_JListModel != null ) {
 		command_list_size = __commands_JListModel.size();
 		selected_commands_size = JGUIUtil.selectedSize ( ui_GetCommandJList() );
 	}
-	
+
 	int dataStoreListSize = 0;
-	if ( __statedmiProcessor != null ) {		
+	if ( __statedmiProcessor != null ) {
 	    dataStoreListSize = __statedmiProcessor.getDataStores().size();
 	}
 
-	// Check the menus in the order of the GUI.  Check the popup menus as appropriate with other menus...
+	// Check the menus in the order of the GUI.  Check the popup menus as appropriate with other menus.
 
-	// File menu...
+	// File menu.
 
 	if ( __appType == StateDMI.APP_TYPE_STATECU ) {
-		// Enable/disable the main menus...
+		// Enable/disable the main menus.
 		if ( __statecuDatasetType == StateCU_DataSet.TYPE_UNKNOWN ) {
 			JGUIUtil.setEnabled ( __File_Save_JMenu, false );
 		}
 		else {
-			// Allow a save if the data set is dirty or we have never saved the data set file...
+			// Allow a save if the data set is dirty or we have never saved the data set file.
 			if ( (__statecuDataset.getDataSetFileName().equals("")) || __statecuDataset.isDirty() ||
 				__commandsDirty ){
 				JGUIUtil.setEnabled ( __File_Save_JMenu, true );
@@ -8596,7 +8507,7 @@ private void ui_CheckGUIState()
 		}
 	}
 	else if ( __appType == StateDMI.APP_TYPE_STATEMOD ) {
-		// Allow a save if the data set is dirty or we have never saved the data set file...
+		// Allow a save if the data set is dirty or we have never saved the data set file.
 		if ( (__statemodDataset != null) && ((__statemodDataset.getDataSetFileName().equals("")) ||
 				__statemodDataset.isDirty()) ||	__commandsDirty ){
 			JGUIUtil.setEnabled ( __File_Save_JMenu, true );
@@ -8608,11 +8519,11 @@ private void ui_CheckGUIState()
 		JGUIUtil.setEnabled ( __File_SwitchToStateMod_JMenuItem, false);
 	}
 
-	// Always able to open a new command file...
+	// Always able to open a new command file.
 
 	JGUIUtil.setEnabled ( __File_New_CommandFile_JMenuItem, true );
 
-	// If the list is not empty, enable the save menus...
+	// If the list is not empty, enable the save menus.
 
 	boolean enabled = false;
 	if ( command_list_size > 0 ) {
@@ -8620,7 +8531,7 @@ private void ui_CheckGUIState()
 			JGUIUtil.setEnabled ( __File_Save_Commands_JMenuItem, true );
 		}
 		else {
-			// No need to save...
+			// No need to save.
 			JGUIUtil.setEnabled ( __File_Save_Commands_JMenuItem, false );
 		}
 		JGUIUtil.setEnabled (__File_Save_CommandsAs_JMenuItem,true);
@@ -8640,7 +8551,7 @@ private void ui_CheckGUIState()
 		JGUIUtil.setEnabled ( __File_Properties_HydroBase_JMenuItem, true );
 	}
 
-	// Edit menu...
+	// Edit menu.
 
 	if ( selected_commands_size > 0 ) {
 		JGUIUtil.setEnabled ( __Edit_CutCommands_JMenuItem,true);
@@ -8667,7 +8578,7 @@ private void ui_CheckGUIState()
 		JGUIUtil.setEnabled ( __Edit_ConvertSelectedCommandsFromComments_JMenuItem,false);
 	}
 	if ( __commandsCutBuffer.size() > 0 ) {
-		// Paste button should be enabled...
+		// Paste button should be enabled.
 		JGUIUtil.setEnabled ( __Edit_PasteCommands_JMenuItem, true );
 		JGUIUtil.setEnabled ( __CommandsPopup_Paste_JMenuItem, true );
 	}
@@ -8713,7 +8624,7 @@ private void ui_CheckGUIState()
 	}
 
 	if ( (selected_commands_size >= 0) && (selected_commands_size != command_list_size) ) {
-		// Less than all are selected so allow all to be selected...
+		// Less than all are selected so allow all to be selected.
 		JGUIUtil.setEnabled ( __Edit_SelectAllCommands_JMenuItem,true);
 		JGUIUtil.setEnabled (__CommandsPopup_SelectAll_JMenuItem,true);
 	}
@@ -8722,7 +8633,7 @@ private void ui_CheckGUIState()
 		JGUIUtil.setEnabled (__CommandsPopup_SelectAll_JMenuItem,false);
 	}
 	if ( selected_commands_size > 0 ) {
-		// Some commands are selected so allow to deselect all...
+		// Some commands are selected so allow to deselect all.
 		JGUIUtil.setEnabled (__Edit_DeselectAllCommands_JMenuItem,true);
 		JGUIUtil.setEnabled(__CommandsPopup_DeselectAll_JMenuItem,true);
 	}
@@ -8731,8 +8642,8 @@ private void ui_CheckGUIState()
 		JGUIUtil.setEnabled(__CommandsPopup_DeselectAll_JMenuItem,false);
 	}
 
-	// View menu...
-	
+	// View menu.
+
 	if ( dataStoreListSize > 0 ) {
 	    JGUIUtil.setEnabled ( __View_DataStores_JMenuItem, true );
 	}
@@ -8756,7 +8667,7 @@ private void ui_CheckGUIState()
 		}
 	}
 
-	// Commands menu...
+	// Commands menu.
 
 	// TODO - are there any cases where commands would not be enabled?
 	JGUIUtil.setEnabled ( __Commands_JMenu, true );
@@ -8767,14 +8678,14 @@ private void ui_CheckGUIState()
 		ui_CheckGUIState_CommandsMenu_StateMod ();
 	}
 
-	// Run menu...
+	// Run menu.
 
 	ui_CheckGUIState_RunMenu ( command_list_size, selected_commands_size );
 
-	// Results menu...
+	// Results menu.
 
 	// If the data set type is not known, disable the Get Data, Data, and
-	// File...Save menus (check more specifically below)...
+	// File...Save menus (check more specifically below).
 
 	if ( (__appType == StateDMI.APP_TYPE_STATECU) && (__statecuDataset != null) ) {
 		JGUIUtil.setEnabled ( __Results_JMenu, true );
@@ -8788,9 +8699,9 @@ private void ui_CheckGUIState()
 		JGUIUtil.setEnabled ( __Results_JMenu, false );
 	}
 
-	// TODO - Disable menus until features are enabled...
+	// TODO - Disable menus until features are enabled.
 
-	// Not sure if this will ever make sense...
+	// Not sure if this will ever make sense.
 
 	JGUIUtil.setEnabled ( __File_Open_DataSetComponent_JMenu, false );
 
@@ -8800,21 +8711,21 @@ private void ui_CheckGUIState()
 	JGUIUtil.setEnabled ( __File_New_DataSet_JMenu, false);
 	JGUIUtil.setEnabled ( __File_New_DataSetComponent_JMenu, false);
 
-	// Not currently supported...
+	// Not currently supported.
 
 	JGUIUtil.setEnabled ( __File_Save_DataSet_JMenuItem, false );
 
-	// StateCU...
+	// StateCU.
 
-	// Disable for now since the list file works.  Don't have a HUC list in memory...
+	// Disable for now since the list file works.  Don't have a HUC list in memory.
 
 	JGUIUtil.setEnabled (
 		__Commands_StateCU_ClimateStations_ReadClimateStationsFromHydroBase_JMenuItem, false );
 
-	// Disable menus whose commands have not been enabled...
+	// Disable menus whose commands have not been enabled.
 
-	// StateMod....
-	
+	// StateMod..
+
 	//JGUIUtil.setEnabled (__Commands_StateMod_SanJuanData_JMenuItem, false );
 	//JGUIUtil.setEnabled (__Commands_StateMod_SanJuanSedimentRecoveryPlan_JMenu, false );
 	JGUIUtil.setEnabled (__Commands_StateMod_SpatialData_JMenuItem, false );
@@ -8824,21 +8735,20 @@ private void ui_CheckGUIState()
 /**
 Check the GUI state for the StateMod Commands menu.  Each Commands sub-menu item is checked.
 */
-private void ui_CheckGUIState_CommandsMenu_StateCU ()
-{	int selected_component_type = StateCU_DataSet.COMP_UNKNOWN;
+private void ui_CheckGUIState_CommandsMenu_StateCU () {
+	int selected_component_type = StateCU_DataSet.COMP_UNKNOWN;
 	int selected_component_group_type=StateCU_DataSet.COMP_UNKNOWN;
 
+	// True indicates that a commands file has been opened directly.
 	boolean show_all_commands = false;
-					// True indicates that a commands
-					// file has been opened directly.
 	if ( (__statecuDatasetType == StateCU_DataSet.TYPE_UNKNOWN) && (__statecuDataset == null) ) { // &&
 		//(__commands_file_name != null) () {
-		// User is editing commands directly without a data set...
+		// User is editing commands directly without a data set.
 		show_all_commands = true;
 	}
 	// Else rely on the data set type to enable/disable menus.
 
-	// Get the selected component and selected component group...
+	// Get the selected component and selected component group.
 
 	if ( __statecuSelectedComponent != null ) {
 		selected_component_type = __statecuSelectedComponent.getComponentType();
@@ -8850,7 +8760,7 @@ private void ui_CheckGUIState_CommandsMenu_StateCU ()
 		}
 	}
 
-	// Climate stations...
+	// Climate stations.
 
 	if ( show_all_commands ||
 		(selected_component_type == StateCU_DataSet.COMP_CLIMATE_STATIONS_GROUP) ||
@@ -8868,7 +8778,7 @@ private void ui_CheckGUIState_CommandsMenu_StateCU ()
 		JGUIUtil.setEnabled ( __Commands_StateCU_ClimateStations_JMenu, false );
 	}
 
-	// Crop characteristics menus...
+	// Crop characteristics menus.
 
 	if ( show_all_commands || (selected_component_group_type == StateCU_DataSet.COMP_CROP_CHARACTERISTICS_GROUP) ||
 		(selected_component_group_type == StateCU_DataSet.COMP_CROP_CHARACTERISTICS_GROUP) ) {
@@ -8900,7 +8810,7 @@ private void ui_CheckGUIState_CommandsMenu_StateCU ()
 		JGUIUtil.setEnabled ( __Commands_StateCU_PenmanMonteith_JMenu, false );
 	}
 
-	// CU Locations menus...
+	// CU Locations menus.
 
 	if ( show_all_commands || (selected_component_group_type == StateCU_DataSet.COMP_CU_LOCATIONS_GROUP) ||
 		(selected_component_type == StateCU_DataSet.COMP_CU_LOCATIONS_GROUP) ) {
@@ -8984,8 +8894,8 @@ private void ui_CheckGUIState_CommandsMenu_StateCU ()
 /**
 Check the GUI state for the StateMod Commands menu.  Each Commands sub-menu item is checked.
 */
-private void ui_CheckGUIState_CommandsMenu_StateMod ()
-{	// TODO 2004-06-13 SAM - need to enable this similar to StateCU
+private void ui_CheckGUIState_CommandsMenu_StateMod () {
+	// TODO 2004-06-13 SAM - need to enable this similar to StateCU.
 
 	boolean showAllCommands = true;
 	if ( showAllCommands || (__statemodDataset != null) ) {
@@ -9006,12 +8916,12 @@ private void ui_CheckGUIState_CommandsMenu_StateMod ()
 /**
 Check the GUI state for the Results menu.  Each Results sub-menu item is checked.
 */
-private void ui_CheckGUIState_ResultsMenu_StateCU ()
-{	// Control data (always disabled for now)...
+private void ui_CheckGUIState_ResultsMenu_StateCU () {
+	// Control data (always disabled for now).
 
 	JGUIUtil.setEnabled ( __Results_StateCU_ControlData_JMenuItem, false );
 
-	// Climate stations data...
+	// Climate stations data.
 
 	boolean hasdata = false;
 	if ( __statecuDataset.componentHasData(	StateCU_DataSet.COMP_CLIMATE_STATIONS) ) {
@@ -9033,7 +8943,7 @@ private void ui_CheckGUIState_ResultsMenu_StateCU ()
 		JGUIUtil.setEnabled ( __Results_StateCU_ClimateStationsData_JMenuItem, false );
 	}
 
-	// Crop characteristics...
+	// Crop characteristics.
 
 	hasdata = false;
 	if ( __statecuDataset.componentHasData( StateCU_DataSet.COMP_CROP_CHARACTERISTICS) ) {
@@ -9052,7 +8962,7 @@ private void ui_CheckGUIState_ResultsMenu_StateCU ()
 		JGUIUtil.setEnabled ( __Results_StateCU_CropCharacteristicsData_JMenuItem, false );
 	}
 
-	// CU Locations...
+	// CU Locations.
 
 	hasdata = false;
 	if ( __statecuDataset.componentHasData( StateCU_DataSet.COMP_CU_LOCATIONS) ) {
@@ -9088,10 +8998,10 @@ private void ui_CheckGUIState_ResultsMenu_StateCU ()
 /**
 Check the GUI state for the Results menu.  Each Results sub-menu item is checked.
 */
-private void ui_CheckGUIState_ResultsMenu_StateMod ()
-{	// Enable the menu if output files are available...
+private void ui_CheckGUIState_ResultsMenu_StateMod () {
+	// Enable the menu if output files are available.
 
-	/* FIXME SAM 2009-02-24 Evaluate use
+	/* FIXME SAM 2009-02-24 Evaluate use.
 	List results_files = __statedmiProcessor.getResultsFileList();
 	if ( (results_files != null) && (results_files.size() > 0) ) {
 		JGUIUtil.setEnabled ( __Results_JMenu, true );
@@ -9101,13 +9011,13 @@ private void ui_CheckGUIState_ResultsMenu_StateMod ()
 	}
 	*/
 
-/* TODO SAM 2004-10-04 need to decide how to handle components...
+	/* TODO SAM 2004-10-04 need to decide how to handle components.
 
-	// Control data (always disabled for now)...
+	// Control data (always disabled for now).
 
 	JGUIUtil.setEnabled ( __Results_StateCU_ControlData_JMenuItem, false );
 
-	// Climate stations data...
+	// Climate stations data.
 
 	boolean hasdata = false;
 	if ( __statecu_dataset.componentHasData(StateCU_DataSet.COMP_CLIMATE_STATIONS) ) {
@@ -9129,7 +9039,7 @@ private void ui_CheckGUIState_ResultsMenu_StateMod ()
 		JGUIUtil.setEnabled (__Results_StateCU_ClimateStationsData_JMenuItem, false );
 	}
 
-	// Crop characteristics...
+	// Crop characteristics.
 
 	hasdata = false;
 	if (__statecu_dataset.componentHasData(StateCU_DataSet.COMP_CROP_CHARACTERISTICS) ) {
@@ -9148,7 +9058,7 @@ private void ui_CheckGUIState_ResultsMenu_StateMod ()
 		JGUIUtil.setEnabled (__Results_StateCU_CropCharacteristicsData_JMenuItem, false );
 	}
 
-	// CU Locations...
+	// CU Locations.
 
 	hasdata = false;
 	if (__statecu_dataset.componentHasData(StateCU_DataSet.COMP_CU_LOCATIONS) ) {
@@ -9186,30 +9096,28 @@ Check the GUI state for the Run menu, enabling/disabling menus as appropriate.
 @param command_list_size The size of the command list (0+).
 @param selected_commands_size The number of commands that are selected.
 */
-private void ui_CheckGUIState_RunMenu ( int command_list_size, int selected_commands_size )
-{
-	// If the final processor is running, allow it to be cancelled and only
-	// allow one to run at a time.  If commands are available to run, the
-	// run menus are enabled above so don't interfere with that.
+private void ui_CheckGUIState_RunMenu ( int command_list_size, int selected_commands_size ) {
+	// If the final processor is running, allow it to be cancelled and only allow one to run at a time.
+	// If commands are available to run, the run menus are enabled above so don't interfere with that.
 
 	// "enable_run" indicates if run menus should be enabled, based on whether a run is already started.
-	
+
 	boolean enable_run = false;
-			
+
 	if ( (__statedmiProcessor != null) && __statedmiProcessor.getIsRunning() ) {
-		// Running, so allow cancel but not another run...
+		// Running, so allow cancel but not another run.
 		enable_run = false;
 		JGUIUtil.setEnabled (__Run_CancelCommandProcessing_JMenuItem, true);
 		JGUIUtil.setEnabled (__CommandsPopup_CancelCommandProcessing_JMenuItem,true);
 
 	}
 	else {
-		// Not running, so disable cancel, but do allow run if there are commands (see below)...
+		// Not running, so disable cancel, but do allow run if there are commands (see below).
 		enable_run = true;
 		JGUIUtil.setEnabled (__Run_CancelCommandProcessing_JMenuItem, false);
 		JGUIUtil.setEnabled (__CommandsPopup_CancelCommandProcessing_JMenuItem,false );
 	}
-	// Check the run flag below with combinations of commands, to set the state...
+	// Check the run flag below with combinations of commands, to set the state.
 	if ( enable_run && (command_list_size > 0) ) {
 		JGUIUtil.setEnabled (__Run_AllCommandsCreateOutput_JMenuItem, true);
 		JGUIUtil.setEnabled (__CommandsPopup_Run_AllCommandsCreateOutput_JMenuItem, true );
@@ -9249,25 +9157,24 @@ private void ui_CheckGUIState_RunMenu ( int command_list_size, int selected_comm
 /**
 Populate the datastore list from available processor datastores.
 */
-private void ui_DataStoreList_Populate ()
-{
+private void ui_DataStoreList_Populate () {
     __dataStore_JComboBox.removeAll();
     List<String> dataStoreNameList = new ArrayList<String>();
-    dataStoreNameList.add ( "" ); // Blank when picking input type and name separately
-    // Get all enabled datastores, even those not active - the View ... Datastores menu can be used to show errors
+    dataStoreNameList.add ( "" ); // Blank when picking input type and name separately.
+    // Get all enabled datastores, even those not active - the View ... Datastores menu can be used to show errors.
     List<DataStore> dataStoreList = __statedmiProcessor.getDataStores();
     for ( DataStore dataStore : dataStoreList ) {
         if ( dataStore.getClass().getName().endsWith(".NrcsAwdbDataStore") ||
             dataStore.getClass().getName().endsWith(".UsgsNwisDailyDataStore") ||
             dataStore.getClass().getName().endsWith(".UsgsNwisGroundwaterDataStore") ||
             dataStore.getClass().getName().endsWith(".UsgsNwisInstantaneousDataStore") ) {
-            // For now disable in the main browser since no interactive browsing ability has been implemented
+            // For now disable in the main browser since no interactive browsing ability has been implemented.
             // FIXME SAM 2012-10-26 For USGS enable when USGS site service is enabled.
             // FIXME SAM 2012-12-18 Enable with filter panel is developed specific to web services.
             continue;
         }
         else if ( dataStore.getClass().getName().endsWith(".GenericDatabaseDataStore") ) {
-            // Only populate if configured for time series
+            // Only populate if configured for time series.
             GenericDatabaseDataStore ds = (GenericDatabaseDataStore)dataStore;
             if ( !ds.hasTimeSeriesInterface(true) ) {
                 continue;
@@ -9275,13 +9182,13 @@ private void ui_DataStoreList_Populate ()
         }
         String name = dataStore.getName();
         if ( dataStore.getStatus() != 0 ) {
-        	// Show the user but make sure they know there is a problem so they avoid selecting
+        	// Show the user but make sure they know there is a problem so they avoid selecting.
         	name = name + " (ERROR)";
         }
         dataStoreNameList.add ( name );
     }
     __dataStore_JComboBox.setData(dataStoreNameList);
-    // Select the blank
+    // Select the blank.
     __dataStore_JComboBox.select("");
 }
 
@@ -9289,15 +9196,15 @@ private void ui_DataStoreList_Populate ()
 Display the StateCU results in a record-based table.
 @param componentName The name of the component to display.
 */
-private void ui_DisplayResultsStateCUComponentTable ( String componentName )
-{	String routine = "StateDMI_JFrame.displayResultsStateCUComponentTable";
+private void ui_DisplayResultsStateCUComponentTable ( String componentName ) {
+	String routine = getClass().getSimpleName() + ".ui_DisplayResultsStateCUComponentTable";
 	// List these in the order of the component groups.
 
 	if ( (componentName == null) || (componentName.length() == 0) ) {
 		return;
 	}
 
-	// Properties for the time series selector...
+	// Properties for the time series selector.
 
 	PropList tsselector_props = new PropList ( "TSSelector" );
 	tsselector_props.add ( "ActionButtons=Graph,Table,Summary" );
@@ -9331,7 +9238,7 @@ private void ui_DisplayResultsStateCUComponentTable ( String componentName )
 		new StateCU_BlaneyCriddle_Data_JFrame(this,
 			__statedmiProcessor.getStateCUBlaneyCriddleList(),titleString, editable);
 	}
-	
+
 	else if (componentName.equals(statecu_dataset.lookupComponentName(StateCU_DataSet.COMP_PENMAN_MONTEITH))) {
 		new StateCU_PenmanMonteith_Data_JFrame(this, __statedmiProcessor.getStateCUPenmanMonteithList(),titleString, editable);
 	}
@@ -9360,10 +9267,10 @@ private void ui_DisplayResultsStateCUComponentTable ( String componentName )
 			__statedmiProcessor.getStateCUCropPatternTSList(),
 			true,		// Should totals for each location be added?
 			true,		// Should a total for the entire data set be added?
-			"DataSet",	// Base identifier for totals
-			"StateDMI"),	// Data source for totals
+			"DataSet",	// Base identifier for totals.
+			"StateDMI"),	// Data source for totals.
 			tsselector_props );
-		// Manage the selector to process its actions...
+		// Manage the selector to process its actions.
 		addTS_ListSelector_JFrame ( selector, app_type, StateCU_DataSet.COMP_CROP_PATTERN_TS_YEARLY );
 	}
 
@@ -9373,10 +9280,10 @@ private void ui_DisplayResultsStateCUComponentTable ( String componentName )
 			StateCU_IrrigationPracticeTS.toTSList(
 			__statedmiProcessor.getStateCUIrrigationPracticeTSList(),
 			true,		// Should a total for the entire data set be added?
-			"DataSet",	// Base identifier for totals
-			"StateDMI"),	// Data source for totals
+			"DataSet",	// Base identifier for totals.
+			"StateDMI"),	// Data source for totals.
 			tsselector_props );
-		// Manage the selector to process its actions...
+		// Manage the selector to process its actions.
 		addTS_ListSelector_JFrame ( selector, app_type, StateCU_DataSet.COMP_IRRIGATION_PRACTICE_TS_YEARLY );
 	}
 
@@ -9393,17 +9300,17 @@ private void ui_DisplayResultsStateCUComponentTable ( String componentName )
 Display the StateMod component results in a record-based table.
 @param componentName The name of the component to display.
 */
-private void ui_DisplayResultsStateModComponentTable ( String componentName )
-{	String routine = "StateDMI_JFrame.displayResultsStateModComponentTable";
+private void ui_DisplayResultsStateModComponentTable ( String componentName ) {
+	String routine = getClass().getSimpleName() + ".ui_DisplayResultsStateModComponentTable";
 	// List these in the order of the component groups.
 
 	if ( (componentName == null) || (componentName.length() == 0) ) {
 		return;
 	}
 
-	// Properties for the time series selector...
+	// Properties for the time series selector.
 
-	// TODO smalers 2019-06-30 Need to pass JFrame to something to center on StateDMI
+	// TODO smalers 2019-06-30 Need to pass JFrame to something to center on StateDMI.
 	PropList tsselector_props = new PropList ( "TSSelector" );
 	tsselector_props.add ( "ActionButtons=Graph,Table,Summary" );
 	tsselector_props.add ( "Width=1100" );
@@ -9474,7 +9381,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 				StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY,
 				"DataSet",
 				"StateDMI",
-				"" ),	// Use default description
+				"" ),	// Use default description.
 			tsselector_props );
 		addTS_ListSelector_JFrame ( selector, app_type, StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY );
 	}
@@ -9488,7 +9395,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 				StateMod_DataSet.COMP_DIVERSION_TS_DAILY,
 				"DataSet",
 				"StateDMI",
-				"" ),	// Use default description
+				"" ),	// Use default description.
 			tsselector_props );
 		addTS_ListSelector_JFrame ( selector, app_type, StateMod_DataSet.COMP_DIVERSION_TS_DAILY );
 	}
@@ -9503,7 +9410,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 				StateMod_DataSet.COMP_DEMAND_TS_MONTHLY,
 				"DataSet",
 				"StateDMI",
-				"" ),	// Use default description
+				"" ),	// Use default description.
 			tsselector_props );
 		addTS_ListSelector_JFrame ( selector, app_type, StateMod_DataSet.COMP_DEMAND_TS_MONTHLY );
 	}
@@ -9517,7 +9424,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 				StateMod_DataSet.COMP_DEMAND_TS_DAILY,
 				"DataSet",
 				"StateDMI",
-				"" ),	// Use default description
+				"" ),	// Use default description.
 			tsselector_props );
 		addTS_ListSelector_JFrame ( selector, app_type, StateMod_DataSet.COMP_DEMAND_TS_DAILY );
 	}
@@ -9544,7 +9451,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName(
 		StateMod_DataSet.COMP_RESERVOIR_STATION_PRECIP_STATIONS))){
-		boolean isPrecip = true; // Precipitation stations
+		boolean isPrecip = true; // Precipitation stations.
 		new StateMod_ReservoirClimate_Data_JFrame( this,
 			StateMod_ReservoirClimate_Data_JFrame.createDataList(
 				__statedmiProcessor.getStateModReservoirStationList(),isPrecip), titleString, editable, true );
@@ -9552,7 +9459,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_RESERVOIR_STATION_EVAP_STATIONS))){
-		boolean isPrecip = false; // Evaporation stations
+		boolean isPrecip = false; // Evaporation stations.
 		new StateMod_ReservoirClimate_Data_JFrame( this,
 			StateMod_ReservoirClimate_Data_JFrame.createDataList(
 				__statedmiProcessor.getStateModReservoirStationList(),isPrecip), titleString, editable, false );
@@ -9576,7 +9483,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 		new StateMod_ReservoirRight_Data_JFrame(this,
 			__statedmiProcessor.getStateModReservoirRightList(), titleString, editable);
 	}
-	
+
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_RESERVOIR_RETURN))) {
 		new StateMod_Reservoir_Return_Data_JFrame( this,
@@ -9599,7 +9506,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY))) {
-		// Do not include a total since not consumptive...
+		// Do not include a total since not consumptive.
 		TS_ListSelector_JFrame selector = new TS_ListSelector_JFrame (
 			__statedmiProcessor.getStateModInstreamFlowDemandTSAverageMonthlyList(),
 			tsselector_props );
@@ -9648,7 +9555,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 				StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY,
 				"DataSet",
 				"StateDMI",
-				"" ),	// Use default description
+				"" ),	// Use default description.
 			tsselector_props );
 		addTS_ListSelector_JFrame ( selector, app_type, StateMod_DataSet.COMP_WELL_PUMPING_TS_MONTHLY );
 	}
@@ -9662,7 +9569,7 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 				StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY,
 				"DataSet",
 				"StateDMI",
-				"" ),	// Use default description
+				"" ),	// Use default description.
 			tsselector_props );
 		addTS_ListSelector_JFrame ( selector, app_type, StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY );
 	}
@@ -9680,41 +9587,40 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 		new StateMod_StreamEstimateCoefficients_Data_JFrame( this,
 			__statedmiProcessor.getStateModStreamEstimateCoefficientsList(), titleString, editable );
 	}
-	
-	// Plan stations
-	
+
+	// Plan stations.
+
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_PLANS))) {
 		new StateMod_Plan_Data_JFrame( this,
 			__statedmiProcessor.getStateModPlanStationList(), titleString, editable );
 	}
-	
-	// Plan well augmentation
-	
+
+	// Plan well augmentation.
+
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_PLAN_WELL_AUGMENTATION))) {
 		new StateMod_Plan_WellAugmentation_Data_JFrame( this,
 			__statedmiProcessor.getStateModPlanWellAugmentationList(), titleString, editable );
 	}
-	
-	// Plan return
-	
+
+	// Plan return.
+
 	else if (componentName.equals(
 		statemod_dataset.lookupComponentName( StateMod_DataSet.COMP_PLAN_RETURN))) {
 		new StateMod_Plan_Return_Data_JFrame( this,
 			__statedmiProcessor.getStateModPlanReturnList(), titleString, editable );
 	}
 
-	// Stream estimate time series are not handled by StateDMI so
-	// use TSTool or other software to display.
+	// Stream estimate time series are not handled by StateDMI so use TSTool or other software to display.
 
 	if (componentName.equals(statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_RIVER_NETWORK))) {
 		new StateMod_RiverNetworkNode_Data_JFrame( this,
 			__statedmiProcessor.getStateModRiverNetworkNodeList(), titleString);
 	}
-	
-	// Operational rights (list the first card)
-	
+
+	// Operational rights (list the first card).
+
 	if (componentName.equals(statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_OPERATION_RIGHTS))) {
 		new StateMod_OperationalRight_Data_JFrame( this,
 			__statedmiProcessor.getStateModOperationalRightList(), titleString, editable);
@@ -9732,30 +9638,29 @@ private void ui_DisplayResultsStateModComponentTable ( String componentName )
 /**
 Return the command list component.  Do it this way because the command component may evolve.
 */
-private JList ui_GetCommandJList()
-{
+private JList ui_GetCommandJList() {
     return __commands_AnnotatedCommandJList.getJList();
 }
 
 /**
 Return the directory for the last "File...Open Command File".
 */
-private String ui_GetDir_LastCommandFileOpened()
-{   String routine = "StateDMI_JFrame.ui_GetDir_LastCommandFileOpened";
+private String ui_GetDir_LastCommandFileOpened() {
+    String routine = getClass().getSimpleName() + ".ui_GetDir_LastCommandFileOpened";
 	if ( __Dir_LastCommandFileOpened != null ) {
 	    Message.printStatus ( 2, routine,
 	        "Returning last (non null) command file directory: " + __Dir_LastCommandFileOpened );
 	    return __Dir_LastCommandFileOpened;
 	}
-	    
-	// Try to get the generic dialog selection location...
+
+	// Try to get the generic dialog selection location.
 	__Dir_LastCommandFileOpened = JGUIUtil.getLastFileDialogDirectory();
     if ( __Dir_LastCommandFileOpened != null ) {
         Message.printStatus ( 2, routine,
             "Returning last command file directory from last dialog selection: " + __Dir_LastCommandFileOpened );
         return __Dir_LastCommandFileOpened;
     }
-	// This will check user.dir
+	// This will check user.dir.
 	__Dir_LastCommandFileOpened = IOUtil.getProgramWorkingDir ();
 	Message.printStatus ( 2, routine,
         "Returning last command file directory from working directory: " + __Dir_LastCommandFileOpened );
@@ -9765,51 +9670,44 @@ private String ui_GetDir_LastCommandFileOpened()
 /**
 Return whether ActionEvents should be ignored.
 */
-private boolean ui_GetIgnoreActionEvent()
-{
+private boolean ui_GetIgnoreActionEvent() {
 	return __ignoreActionEvent;
 }
 
 /**
 Return whether ItemEvents should be ignored.
 */
-private boolean ui_GetIgnoreItemEvent()
-{
+private boolean ui_GetIgnoreItemEvent() {
 	return __ignoreItemEvent;
 }
 
 /**
 Return whether ListSelectionEvents should be ignored.
 */
-private boolean ui_GetIgnoreListSelectionEvent()
-{
+private boolean ui_GetIgnoreListSelectionEvent() {
 	return __ignoreListSelectionEvent;
 }
 
-//FIXME SAM 2007-11-01 Need to use /tmp etc for a startup home if not
-//specified so the software install home is not used.
+//FIXME SAM 2007-11-01 Need to use /tmp etc for a startup home if not specified so the software install home is not used.
 /**
-Return the initial working directory, which will be the software startup
-home, or the location of new command files.
+Return the initial working directory, which will be the software startup home, or the location of new command files.
 This directory is suitable for initializing a workflow processing run.
 @return the initial working directory, which should always be non-null.
 */
-private String ui_GetInitialWorkingDir ()
-{
+private String ui_GetInitialWorkingDir () {
 	return __initialWorkingDir;
 }
 
 /**
-Get a PropList with properties needed for an old-style editor.  Mainly this is
-the WorkingDir property, with a value determined from the initial working directory
+Get a PropList with properties needed for an old-style editor.
+Mainly this is the WorkingDir property, with a value determined from the initial working directory
 and subsequent setWorkingDir() commands prior to the command being edited.
 This is needed because old style editors get the information from a PropList that is passed to the editor.
 @param command_to_edit Command that is being edited.
 @return the PropList containing a valid WorkingDir value, accurate at for the context
 of the command being edited.
 */
-private PropList ui_GetPropertiesForOldStyleEditor ( Command command_to_edit )
-{
+private PropList ui_GetPropertiesForOldStyleEditor ( Command command_to_edit ) {
 	PropList props = new PropList ( "" );
 	props.set ( "WorkingDir", commandProcessor_GetWorkingDirForCommand ( command_to_edit ) );
 	return props;
@@ -9818,8 +9716,8 @@ private PropList ui_GetPropertiesForOldStyleEditor ( Command command_to_edit )
 /**
 Initialize GUI components including menus and the main interfaces.
 */
-private void ui_InitGUI ()
-{	String routine = "StateDMI_JFrame.initGUI";
+private void ui_InitGUI () {
+	String routine = getClass().getSimpleName() + ".ui_InitGUI";
 	int initial_height = 900, initial_width = 1000;
 	int y;
 
@@ -9831,17 +9729,17 @@ private void ui_InitGUI ()
 	catch (Exception e) {
 		Message.printStatus ( 2, routine, e.toString() );
 	}
-	
+
 	// Set the help viewer handler, which is used to format a URL for command help.
 	HelpViewer.getInstance().setUrlFormatter(this);
-	
+
 	JGUIUtil.setIcon(this, JGUIUtil.getIconImage());
-	
+
 	JPanel query_JPanel = new JPanel();
     query_JPanel.setLayout(new BorderLayout());
     getContentPane().add("North", query_JPanel);
 
-	// objects used throughout the GUI layout
+	// Objects used throughout the GUI layout.
 	int buffer = 3;
 	Insets insetsNLNR = new Insets(0,buffer,0,buffer);
 	Insets insetsNNNR = new Insets(0,0,0,buffer);
@@ -9850,35 +9748,34 @@ private void ui_InitGUI ()
 	//Insets insetsTLNR = new Insets(buffer,buffer,0,buffer);
 	Insets insetsNNNN = new Insets(0,0,0,0);
 	GridBagLayout gbl = new GridBagLayout();
-	
+
 	__queryInput_JPanel = new JPanel();
 	__queryInput_JPanel.setLayout(gbl);
 	ui_SetInputPanelTitle (null, Color.black );
-	
+
     query_JPanel.add("West", __queryInput_JPanel);
 
     y=-1;
-	
+
 	__dataStore_JTabbedPane = new JTabbedPane ();
-    __dataStore_JTabbedPane.setVisible(false); // Let the initializing panel show first
-    JGUIUtil.addComponent(__queryInput_JPanel, __dataStore_JTabbedPane, 
+    __dataStore_JTabbedPane.setVisible(false); // Let the initializing panel show first.
+    JGUIUtil.addComponent(__queryInput_JPanel, __dataStore_JTabbedPane,
         0, ++y, 2, 1, 0.0, 0.0, insetsNLNN, GridBagConstraints.HORIZONTAL, GridBagConstraints.EAST);
-    // The following will display during startup to wait for datastores to initialize, and will then
-    // be set not visible...
+    // The following will display during startup to wait for datastores to initialize, and will then be set not visible.
     JPanel __dataStoreInitializing_JPanel = new JPanel();
     __dataStoreInitializing_JPanel.setLayout(gbl);
     __dataStoreInitializing_JLabel = new JLabel("<html><b>Wait...initializing data connections...</html>");
-    JGUIUtil.addComponent(__dataStoreInitializing_JPanel, __dataStoreInitializing_JLabel, 
+    JGUIUtil.addComponent(__dataStoreInitializing_JPanel, __dataStoreInitializing_JLabel,
         0, 0, 1, 2, 1.0, 0.0, insetsNNNR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-    // Add at same location and __dataStore_JTabbedPane, which is not visible at start
-    JGUIUtil.addComponent(__queryInput_JPanel, __dataStoreInitializing_JPanel, 
+    // Add at same location and __dataStore_JTabbedPane, which is not visible at start.
+    JGUIUtil.addComponent(__queryInput_JPanel, __dataStoreInitializing_JPanel,
         0, y, 2, 1, 0.0, 0.0, insetsNLNN, GridBagConstraints.HORIZONTAL, GridBagConstraints.EAST);
 
     JPanel dataStore_JPanel = new JPanel();
     dataStore_JPanel.setLayout(gbl);
     int yDataStore = -1;
     __dataStore_JLabel = new JLabel("Datastore:");
-    JGUIUtil.addComponent(dataStore_JPanel, __dataStore_JLabel, 
+    JGUIUtil.addComponent(dataStore_JPanel, __dataStore_JLabel,
         0, ++yDataStore, 1, 1, 0.0, 0.0, insetsNLNN, GridBagConstraints.NONE, GridBagConstraints.EAST);
     __dataStore_JComboBox = new SimpleJComboBox(false);
     __dataStore_JComboBox.setMaximumRowCount ( 20 );
@@ -9886,11 +9783,11 @@ private void ui_InitGUI ()
     __dataStore_JLabel.setToolTipText(tooltip);
     __dataStore_JComboBox.setToolTipText ( tooltip );
     __dataStore_JComboBox.addItemListener( this );
-    JGUIUtil.addComponent(dataStore_JPanel, __dataStore_JComboBox, 
+    JGUIUtil.addComponent(dataStore_JPanel, __dataStore_JComboBox,
         1, yDataStore, 2, 1, 1.0, 0.0, insetsNNNR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     __dataStore_JTabbedPane.addTab ( "Datastore", dataStore_JPanel );
 
-	// Add the menus...
+	// Add the menus.
 
 	__JMenuBar = new JMenuBar();
 	setJMenuBar ( __JMenuBar );
@@ -9912,12 +9809,11 @@ private void ui_InitGUI ()
 	ui_InitGUIMenus_Tools ( __JMenuBar );
 	ui_InitGUIMenus_Help ( __JMenuBar );
 
-	// Add a panel to the center of the JFrame.  The center panel is
-	// typically the only one that will resize and therefore needs to
-	// contain the resizable lists.  The layout of the panel is as follows
-	// (total grid bag width = 10).  JSplitPane use is envisisioned
-	// where there are double lines.  To do this the command list and the
-	// label for commands are in one panel.
+	// Add a panel to the center of the JFrame.
+	// The center panel is typically the only one that will resize and therefore needs to contain the resizable lists.
+	// The layout of the panel is as follows (total grid bag width = 10).
+	// JSplitPane use is envisioned where there are double lines.
+	// To do this the command list and the label for commands are in one panel.
 	//
 	// The top is shown only if data set is displayed (default is do not).
 	// +-----------++----------------++----------------------------------+
@@ -9935,7 +9831,7 @@ private void ui_InitGUI ()
 	// +-----------------------------------------------------------------+
 
 
-	// CREATE THE TOOLBAR
+	// Create the toolbar.
 
 	__toolBar = new JToolBar("StateDMI Control Buttons");
 
@@ -9949,7 +9845,7 @@ private void ui_InitGUI ()
 			insetsNNNN, false, this);
 	}
 	else {
-		// Add text-labelled tools.
+		// Add text-labeled tools.
 		__toolBarNewButton = new SimpleJButton(
 			New_CommandFile_String,
 			New_CommandFile_String,
@@ -10009,7 +9905,7 @@ private void ui_InitGUI ()
 	getContentPane().add ("North", __toolBar);
 
 	JSplitPane top_JSplitPane = null;
-	if ( __datasetFeaturesEnabled ) { 
+	if ( __datasetFeaturesEnabled ) {
 		JPanel dataset_JPanel = new JPanel();
 		dataset_JPanel.setLayout ( gbl );
 		dataset_JPanel.setBorder( BorderFactory.createTitledBorder (
@@ -10018,9 +9914,9 @@ private void ui_InitGUI ()
 		Dimension dimension = new Dimension( initial_width/2,
 			(int)(initial_height*__LAYOUT_COMPONENTS_FRACTION));
 		dataset_JPanel.setPreferredSize( dimension );
-		// Allow zero minimum?...
+		// Allow zero minimum?
 		//dataset_JPanel.setMinimumSize( dimension );
-	
+
 		JScrollPane dataset_tree_JScrollPane = null;
 		if ( __appType == StateDMI.APP_TYPE_STATECU ) {
 			__statecuDataset_JTree = new StateCU_DataSet_JTree ( this, false );
@@ -10037,12 +9933,12 @@ private void ui_InitGUI ()
 				dataset_tree_JScrollPane,
 				0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 		}
-	
+
 		//Dimension minimum_Dimension = new Dimension( 300, 100 );
 		//topsplit_JPanel.setMinimumSize( minimum_Dimension );
-	
+
 		// Top-right Data Component List
-	
+
 		__list_JPanel = new JPanel();
 		__list_JPanel.setLayout ( gbl );
 		__list_JPanel.setBorder(
@@ -10054,7 +9950,7 @@ private void ui_InitGUI ()
 	        JGUIUtil.addComponent(__list_JPanel,
 			new JScrollPane(__list_JWorksheet),
 			0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.BOTH, GridBagConstraints.WEST);
-	
+
 		top_JSplitPane = new JSplitPane ( JSplitPane.HORIZONTAL_SPLIT, dataset_JPanel, __list_JPanel);
 		top_JSplitPane.setDividerLocation ( .50 );
 	}
@@ -10064,9 +9960,9 @@ private void ui_InitGUI ()
 		top_JSplitPane.setVisible(false);
 	}
 
-	// Command list...
+	// Command list.
 
-    // Commands JPanel - 8 columns wide for grid bag layout
+    // Commands JPanel - 8 columns wide for grid bag layout.
 	__commands_JPanel = new JPanel();
     __commands_JPanel.setLayout(gbl);
 	__commands_JPanel.setBorder(
@@ -10075,7 +9971,7 @@ private void ui_InitGUI ()
 	__commands_JPanel.setPreferredSize( dimension );
 	dimension = new Dimension( 0, (int)(initial_height*__LAYOUT_COMMANDS_FRACTION));
 	__commands_JPanel.setMinimumSize( dimension );
-	
+
 	// Initialize the command processor to interact with the GUI.
 	__statedmiProcessor = new StateDMI_Processor();
 	commandProcessor_SetInitialWorkingDir ( __initialWorkingDir );
@@ -10084,26 +9980,26 @@ private void ui_InitGUI ()
 	__commands_JListModel.addListDataListener ( this );
 	__commands_AnnotatedCommandJList = new AnnotatedCommandJList ( __commands_JListModel );
 	__commands_JList = __commands_AnnotatedCommandJList.getJList();
-	// Set the font to fixed font so that similar command text lines up...
+	// Set the font to fixed font so that similar command text lines up.
 	__commands_JList.setFont ( new Font(__COMMANDS_FONT, Font.PLAIN, 12 ) );
-	// The following prototype value looks like nonsense, but should ensure
-	// that the line height accomodates both very tall characters, and those that swoop below the line.
+	// The following prototype value looks like nonsense,
+	// but should ensure that the line height accommodates both very tall characters, and those that swoop below the line.
 	//__commands_JList.setPrototypeCellValue("gjqqyAZ");
 	// FIXME SAM 2008-01-25 Is the above needed?
-	// Handling the ellipsis is dealt with in the annotated list...
+	// Handling the ellipsis is dealt with in the annotated list.
 
 	Dimension minimum_Dimension = new Dimension( 300, 100 );
 	__commands_JList.setMinimumSize( minimum_Dimension );
 	__commands_JList.addListSelectionListener(this);
 	__commands_JList.addMouseListener(this);
 	__commands_JList.addKeyListener(this);
-	
+
 	JGUIUtil.addComponent(__commands_JPanel, __commands_AnnotatedCommandJList,
 		0, 1, 10, 3, 1.0, 1.0, GridBagConstraints.BOTH, GridBagConstraints.CENTER );
 
-	// Buttons that correspond to the command list
+	// Buttons that correspond to the command list.
 
-	// Put on left because user is typically working in that area...
+	// Put on left because user is typically working in that area.
 	__Run_SelectedCommands_JButton = new SimpleJButton(__Button_RunSelectedCommands_String,
 		__Run_SelectedCommandsCreateOutput_String, this);
 	__Run_SelectedCommands_JButton.setToolTipText ( "Run only selected commands to produce results." );
@@ -10113,7 +10009,7 @@ private void ui_InitGUI ()
 	__Run_AllCommands_JButton.setToolTipText ( "Run all commands to produce results." );
 	JGUIUtil.addComponent(__commands_JPanel, __Run_AllCommands_JButton,
 		2, 5, 1, 1, 0.0, 0.0, GridBagConstraints.NONE, GridBagConstraints.EAST);
-	// Put on right because we want it to be a decision to clear...
+	// Put on right because we want it to be a decision to clear.
 	__ClearCommands_JButton = new SimpleJButton( __Button_ClearCommands_String, this);
 	__ClearCommands_JButton.setToolTipText ( "Delete selected commands, or delete all if none are selected." );
 	JGUIUtil.addComponent(__commands_JPanel, __ClearCommands_JButton,
@@ -10124,16 +10020,15 @@ private void ui_InitGUI ()
 
 	ui_InitGUIMenus_CommandsPopup ();
 
-	// Results...
+	// Results.
 
 	JPanel results_tree_JPanel = new JPanel();
 	results_tree_JPanel.setLayout ( gbl );
-	// TODO SAM 2004-02-19
-	// See if the other panels' sizes initialize without this...
+	// TODO SAM 2004-02-19 See if the other panels' sizes initialize without this.
 	//dimension = new Dimension( initial_width, initial_height/3);
 	//results_tree_JPanel.setPreferredSize( dimension );
 
-	// FIXME SAM 2008-11-11 Evaluate whether to use
+	// FIXME SAM 2008-11-11 Evaluate whether to use.
 	/*
 	if ( __appType == StateDMI.APP_TYPE_STATECU ) {
 		__statecuResults_JTree = new StateCU_DataSet_JTree ( this, true );
@@ -10157,14 +10052,14 @@ private void ui_InitGUI ()
 	results_JPanel.setBorder(
 		BorderFactory.createTitledBorder (BorderFactory.createLineBorder(Color.black),"Results") );
 	*/
-		
+
 	__results_JTabbedPane = new JTabbedPane ();
     __results_JTabbedPane.setBorder(
         BorderFactory.createTitledBorder ( BorderFactory.createLineBorder(Color.black), "Results" ));
     JGUIUtil.addComponent(center_JPanel, __results_JTabbedPane,
         0, 1, 1, 1, 1.0, 1.0, insetsNNNN, GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 
-	// Results - output files...
+	// Results - output files.
 
     JPanel results_files_JPanel = new JPanel();
     results_files_JPanel.setLayout(gbl);
@@ -10176,11 +10071,11 @@ private void ui_InitGUI ()
     __resultsOutputFiles_JList.addKeyListener ( this );
     __resultsOutputFiles_JList.addListSelectionListener ( this );
     __resultsOutputFiles_JList.addMouseListener ( this );
-    JGUIUtil.addComponent(results_files_JPanel, new JScrollPane ( __resultsOutputFiles_JList ), 
+    JGUIUtil.addComponent(results_files_JPanel, new JScrollPane ( __resultsOutputFiles_JList ),
         0, 0, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     __results_JTabbedPane.addTab ( "Output Files", results_files_JPanel );
-    
-	// Results - problems...
+
+	// Results - problems.
 
     JPanel results_problems_JPanel = new JPanel();
     results_problems_JPanel.setLayout(gbl);
@@ -10189,7 +10084,7 @@ private void ui_InitGUI ()
     	tableModel = new CommandLog_TableModel(new ArrayList<CommandLogRecord>());
     }
     catch ( Exception e ) {
-    	// Should not happen but log
+    	// Should not happen but log.
     	Message.printWarning ( 3, routine, e );
     	Message.printWarning(3, routine, "Error creating table model for problem display.");
     	throw new RuntimeException ( e );
@@ -10198,19 +10093,19 @@ private void ui_InitGUI ()
 	PropList commandStatusProps = new PropList ( "Problems" );
 	commandStatusProps.add("JWorksheet.ShowRowHeader=true");
 	commandStatusProps.add("JWorksheet.AllowCopy=true");
-	// Initialize with null table model since no initial data
+	// Initialize with null table model since no initial data.
 	JScrollWorksheet sjw = new JScrollWorksheet ( cellRenderer, tableModel, commandStatusProps );
 	__resultsProblems_JWorksheet = sjw.getJWorksheet ();
 	__resultsProblems_JWorksheet.setColumnWidths (cellRenderer.getColumnWidths(), getGraphics() );
 	__resultsProblems_JWorksheet.setPreferredScrollableViewportSize(null);
-	// Listen for mouse events to ??...
+	// Listen for mouse events to?
 	//__problems_JWorksheet.addMouseListener ( this );
 	//__problems_JWorksheet.addJWorksheetListener ( this );
-    JGUIUtil.addComponent(results_problems_JPanel, sjw, 
+    JGUIUtil.addComponent(results_problems_JPanel, sjw,
         0, 0, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     __results_JTabbedPane.addTab ( "Problems", results_problems_JPanel );
-    
- // Results: properties...
+
+    // Results: properties.
     JPanel resultsProperties_JPanel = new JPanel();
     resultsProperties_JPanel.setLayout(gbl);
     PropList_TableModel propsTableModel = null;
@@ -10220,7 +10115,7 @@ private void ui_InitGUI ()
         propsTableModel.setValueColumnName("Property Value");
     }
     catch ( Exception e ) {
-        // Should not happen but log
+        // Should not happen but log.
         Message.printWarning ( 3, routine, e );
         Message.printWarning(3, routine, "Error creating table model for problem display.");
         throw new RuntimeException ( e );
@@ -10229,23 +10124,23 @@ private void ui_InitGUI ()
     PropList propsWsProps = new PropList ( "PropertiesWS" );
     propsWsProps.add("JWorksheet.ShowRowHeader=true");
     propsWsProps.add("JWorksheet.AllowCopy=true");
-    // Initialize with null table model since no initial data
+    // Initialize with null table model since no initial data.
     JScrollWorksheet psjw = new JScrollWorksheet ( propsCellRenderer, propsTableModel, propsWsProps );
     __resultsProperties_JWorksheet = psjw.getJWorksheet ();
     __resultsProperties_JWorksheet.setColumnWidths (cellRenderer.getColumnWidths(), getGraphics() );
     __resultsProperties_JWorksheet.setPreferredScrollableViewportSize(null);
-    // Listen for mouse events to ??...
+    // Listen for mouse events to?
     //__problems_JWorksheet.addMouseListener ( this );
     //__problems_JWorksheet.addJWorksheetListener ( this );
     JGUIUtil.addComponent(resultsProperties_JPanel, new JLabel("Processor properties control processing and can be used in " +
-        "some command parameters using ${Property} notation (see command documentation)."), 
+        "some command parameters using ${Property} notation (see command documentation)."),
         0, 0, 8, 1, 0.0, 0.0, insetsNLNR, GridBagConstraints.NONE, GridBagConstraints.WEST);
-    JGUIUtil.addComponent(resultsProperties_JPanel, psjw, 
+    JGUIUtil.addComponent(resultsProperties_JPanel, psjw,
         0, 1, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     __results_JTabbedPane.addTab ( "Properties", resultsProperties_JPanel );
 
 
-	// Results StateCU output components ...
+	// Results StateCU output components.
 
     JPanel resultsStateCUComponents_JPanel = new JPanel();
     resultsStateCUComponents_JPanel.setLayout(gbl);
@@ -10255,7 +10150,7 @@ private void ui_InitGUI ()
     __resultsStateCUComponents_JList.addKeyListener ( this );
     __resultsStateCUComponents_JList.addListSelectionListener ( this );
     __resultsStateCUComponents_JList.addMouseListener ( this );
-    JGUIUtil.addComponent(resultsStateCUComponents_JPanel, new JScrollPane ( __resultsStateCUComponents_JList ), 
+    JGUIUtil.addComponent(resultsStateCUComponents_JPanel, new JScrollPane ( __resultsStateCUComponents_JList ),
         0, 0, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     __results_JTabbedPane.addTab ( "StateCU Components", resultsStateCUComponents_JPanel );
 
@@ -10267,12 +10162,12 @@ private void ui_InitGUI ()
     __resultsStateModComponents_JList.addKeyListener ( this );
     __resultsStateModComponents_JList.addListSelectionListener ( this );
     __resultsStateModComponents_JList.addMouseListener ( this );
-    JGUIUtil.addComponent(resultsStateModComponents_JPanel, new JScrollPane ( __resultsStateModComponents_JList ), 
+    JGUIUtil.addComponent(resultsStateModComponents_JPanel, new JScrollPane ( __resultsStateModComponents_JList ),
         0, 0, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     __results_JTabbedPane.addTab ( "StateMod Components", resultsStateModComponents_JPanel );
-    
-    // Results: tables...
-    
+
+    // Results: tables.
+
     JPanel results_tables_JPanel = new JPanel();
     results_tables_JPanel.setLayout(gbl);
     /*
@@ -10291,37 +10186,37 @@ private void ui_InitGUI ()
     __resultsTables_JList.addKeyListener ( this );
     __resultsTables_JList.addListSelectionListener ( this );
     __resultsTables_JList.addMouseListener ( this );
-    JGUIUtil.addComponent(results_tables_JPanel, new JScrollPane ( __resultsTables_JList ), 
+    JGUIUtil.addComponent(results_tables_JPanel, new JScrollPane ( __resultsTables_JList ),
         0, 15, 8, 5, 1.0, 1.0, insetsNLNR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     __results_JTabbedPane.addTab ( "Tables", results_tables_JPanel );
 
-	// Add the results JTree...
+	// Add the results JTree.
 
-	/* TODO SAM 2008-11-12 Evaluate whether to use
+	/* TODO SAM 2008-11-12 Evaluate whether to use.
 	JGUIUtil.addComponent(results_JPanel, results_tree_JPanel,
 		0, 3, 10, 10, 1.0, 1.0, GridBagConstraints.BOTH, GridBagConstraints.CENTER);
 		*/
 
 	JSplitPane main_JSplitPane = null;
 	if ( __datasetFeaturesEnabled ) {
-		// Include the data set pane at the top
+		// Include the data set pane at the top.
 		//main_JSplitPane = new JSplitPane ( JSplitPane.VERTICAL_SPLIT, top2_JSplitPane, results_JPanel);
 		main_JSplitPane = new JSplitPane ( JSplitPane.VERTICAL_SPLIT, top2_JSplitPane, __results_JTabbedPane);
 	}
 	else {
-		// Put commands in the top split pane and results in the bottom
+		// Put commands in the top split pane and results in the bottom.
 		//main_JSplitPane = new JSplitPane ( JSplitPane.VERTICAL_SPLIT, __commands_JPanel, results_JPanel);
 		main_JSplitPane = new JSplitPane ( JSplitPane.VERTICAL_SPLIT, __commands_JPanel, __results_JTabbedPane);
 	}
 	JGUIUtil.addComponent(center_JPanel, main_JSplitPane,
 		0, 0, 10, 10, 1.0, 1.0, GridBagConstraints.BOTH, GridBagConstraints.CENTER);
-	
-	// Popup menu for results
-	
+
+	// Popup menu for results.
+
 	ui_InitGUIMenus_ResultsPopup ();
 
-	// Bottom panel for the information TextFields.  Add this as the south
-	// panel of the main interface since it is not resizable...
+	// Bottom panel for the information TextFields.
+	// Add this as the south panel of the main interface since it is not resizable.
 
 	JPanel bottom_JPanel = new JPanel();
 	bottom_JPanel.setLayout (gbl);
@@ -10341,7 +10236,7 @@ private void ui_InitGUI ()
 	__command_JProgressBar.setStringPainted ( true );
 	JGUIUtil.addComponent(bottom_JPanel, __command_JProgressBar,
 		7, 0, 2, 1, 0.0, 0.0, GridBagConstraints.NONE, GridBagConstraints.WEST);
-	
+
 	__status_JTextField = new JTextField ( 5 );
 	__status_JTextField.setToolTipText ( "Wait = StateDMI is processing commands, Ready = ready for user input." );
 	__status_JTextField.setEditable(false);
@@ -10350,7 +10245,7 @@ private void ui_InitGUI ()
 
 	getContentPane().add ("South", bottom_JPanel);
 
-	// setup window listener
+	// Setup window listener.
 	addWindowListener (this);
 
 	if ( __datasetFeaturesEnabled ) {
@@ -10369,13 +10264,12 @@ private void ui_InitGUI ()
 }
 
 /**
-Add Check[Component] and WriteCheckFile() commands to the specified menu.  These commands are similar for
-all data components.
+Add Check[Component] and WriteCheckFile() commands to the specified menu.
+These commands are similar for all data components.
 @param menu the menu being appended to.
 @param menuName the name of the menu displayed to the user and used internally.
 */
-private void ui_InitGUIMenus_Commands_AddCheckCommands ( JMenu menu, String menuName )
-{
+private void ui_InitGUIMenus_Commands_AddCheckCommands ( JMenu menu, String menuName ) {
 	menu.addSeparator();
 	menu.add ( new SimpleJMenuItem(menuName,this));
 	menu.add ( new SimpleJMenuItem(__Commands_Shared_WriteCheckFile_String,this));
@@ -10387,8 +10281,8 @@ Setup Commands menu for a component within a group (e.g., "Stream Gage Stations"
 @param parent_JMenu The JMenu that other menus will be added to.
 @param group_String The string to be used for group menus (e.g., "Stream Gage Data").
 @param component_String The string to be used for component menus (e.g., "Stream Gage Stations").
-@param add_as_JMenuItem Indicates whether the top-level component menu should actually be added
-as a JMenuItem.  This will be the case if for some reason the component does not
+@param add_as_JMenuItem Indicates whether the top-level component menu should actually be added as a JMenuItem.
+This will be the case if for some reason the component does not
 have commands to run, and will be disabled or have a warning dialog pop up.
 @return a JMenu that should be used for subsequent menu additions for a component,
 or null if the item is added as JMenuItem (no subsequent sub-menus).
@@ -10398,28 +10292,26 @@ private JMenu ui_InitGUIMenus_Commands_AddComponentMenu (
 		JMenu parent_JMenu,
 		String group_String,
 		String component_String,
-		boolean add_as_JMenuItem)
-{	JMenu component_JMenu = null;
+		boolean add_as_JMenuItem ) {
+	JMenu component_JMenu = null;
 	if ( add_as_JMenuItem ) {
-		//
 		parent_JMenu.add( new SimpleJMenuItem(component_String, this));
 		return null;
 	}
 	if ( style == MENU_STYLE_THREE_LEVEL ) {
-		// Add the level for the component, e.g. "Stream Gage Stations"	
+		// Add the level for the component (e.g., "Stream Gage Stations").
 		parent_JMenu.add( component_JMenu = new JMenu (component_String,true));
 	}
 	else if ( style == MENU_STYLE_TWO_LEVEL ) {
-		// Add the menu for "Group Data - Component"
-		// e.g.:  "Stream Gage Data - Stream Gage Stations"
+		// Add the menu for "Group Data - Component" (e.g., "Stream Gage Data - Stream Gage Stations")
 		String dash = " - ";
 		parent_JMenu.addSeparator();
 		parent_JMenu.add( component_JMenu = new JMenu (group_String + dash + component_String,true));
 	}
-	// Add menu item at the top, consistent for all styles...
+	// Add menu item at the top, consistent for all styles.
 	String dash = " - ";
 	component_JMenu.add( new SimpleJMenuItem(
-			// group_String + dash +     // Seems too long
+			// group_String + dash +     // Seems too long.
 			"<HTML><B>" + component_String + dash + "Commands</B></HTML>", this));
 	component_JMenu.addSeparator ();
 	component_JMenu.addSeparator ();
@@ -10441,9 +10333,8 @@ private JMenu ui_InitGUIMenus_Commands_AddGroupMenu (
 		int style,
 		JMenu parent_JMenu,
 		String group_String,
-		boolean add_as_JMenuItem)
-{	if ( add_as_JMenuItem ) {
-		//
+		boolean add_as_JMenuItem ) {
+	if ( add_as_JMenuItem ) {
 		parent_JMenu.add( new SimpleJMenuItem(group_String, this));
 		return null;
 	}
@@ -10453,7 +10344,7 @@ private JMenu ui_InitGUIMenus_Commands_AddGroupMenu (
 		parent_JMenu.add( group_JMenu =	new JMenu(group_String, true) );
 	}
 	else if ( style == MENU_STYLE_TWO_LEVEL ) {
-		// The group and component are shown in the same menu when the component is added...
+		// The group and component are shown in the same menu when the component is added.
 		group_JMenu = parent_JMenu;
 	}
 	return group_JMenu;
@@ -10464,41 +10355,41 @@ Initialize the general command menus.  These can be used with StateMod or StateC
 @param style Menu style (see MENU_STYLE_*).
 @param parent_JMenu The JMenu to which submenus should be attached.
 */
-private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
-{	parent_JMenu.addSeparator();
+private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu ) {
+	parent_JMenu.addSeparator();
 	parent_JMenu.addSeparator();
 
-	// Commands - Datastore Processing
-	JMenu Commands_Datastore_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( 
+	// Commands - Datastore Processing.
+	JMenu Commands_Datastore_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 			style, parent_JMenu, __Commands_Datastore_String, false);
-	Commands_Datastore_JMenu.add(__Commands_TableRead_ReadTableFromDataStore_JMenuItem = 
+	Commands_Datastore_JMenu.add(__Commands_TableRead_ReadTableFromDataStore_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromDataStore_String, this));
-	
+
 	parent_JMenu.addSeparator();
 
-	// Commands - Output File Processing
-	JMenu Commands_Output_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( 
+	// Commands - Output File Processing.
+	JMenu Commands_Output_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 			style, parent_JMenu, __Commands_Output_String, false);
-	Commands_Output_JMenu.add(__Commands_Output_SplitStateModReport_JMenuItem = 
+	Commands_Output_JMenu.add(__Commands_Output_SplitStateModReport_JMenuItem =
 			new SimpleJMenuItem(__Commands_Output_SplitStateModReport_String, this));
 
 	parent_JMenu.addSeparator();
-	
-	// Commands - Spatial Processing
-	JMenu Commands_Spatial_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( 
+
+	// Commands - Spatial Processing.
+	JMenu Commands_Spatial_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 			style, parent_JMenu, __Commands_Spatial_String, false);
-	Commands_Spatial_JMenu.add(__Commands_Spatial_WriteTableToGeoJSON_JMenuItem = 
+	Commands_Spatial_JMenu.add(__Commands_Spatial_WriteTableToGeoJSON_JMenuItem =
 			new SimpleJMenuItem(__Commands_Spatial_WriteTableToGeoJSON_String, this));
-	Commands_Spatial_JMenu.add(__Commands_Spatial_WriteTableToShapefile_JMenuItem = 
+	Commands_Spatial_JMenu.add(__Commands_Spatial_WriteTableToShapefile_JMenuItem =
 			new SimpleJMenuItem(__Commands_Spatial_WriteTableToShapefile_String, this));
-	
+
 	parent_JMenu.addSeparator();
 
-	// Commands - Spreadsheet Processing 
+	// Commands - Spreadsheet Processing.
 
 	JMenu Commands_Spreadsheet_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 			style, parent_JMenu, __Commands_Spreadsheet_String, false);
-	Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_NewExcelWorkbook_JMenuItem = 
+	Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_NewExcelWorkbook_JMenuItem =
 			new SimpleJMenuItem(__Commands_Spreadsheet_NewExcelWorkbook_String, this));
 	Commands_Spreadsheet_JMenu.addSeparator();
 	Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_ReadExcelWorkbook_JMenuItem =
@@ -10527,12 +10418,12 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 	Commands_Spreadsheet_JMenu.addSeparator();
 	Commands_Spreadsheet_JMenu.add( __Commands_Spreadsheet_CloseExcelWorkbook_JMenuItem =
 	        new SimpleJMenuItem( __Commands_Spreadsheet_CloseExcelWorkbook_String, this ) );
-	    
+
 
 	parent_JMenu.addSeparator();
-	parent_JMenu.addSeparator();	
-	
-	// General - Comments...
+	parent_JMenu.addSeparator();
+
+	// General - Comments.
 
 	JMenu Commands_General_Comments_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 		style, parent_JMenu, __Commands_General_Comments_String, false );
@@ -10557,42 +10448,41 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 		new SimpleJMenuItem( __Commands_General_Comments_RequireApplicationComment_String, this));
 	Commands_General_Comments_JMenu.add( __Commands_General_Comments_RequireDatastoreComment_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_Comments_RequireDatastoreComment_String, this));
-	
-	// General - File Handling...
-	
+
+	// General - File Handling.
+
 	JMenu Commands_General_FileHandling_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 		style, parent_JMenu, __Commands_General_FileHandling_String, false );
 	//Commands_General_Logging_JMenu.add( __Commands_General_FileHandling_FTPGet_JMenuItem =
 	//	new SimpleJMenuItem( __Commands_General_FileHandling_FTPGet_String, this));
-	Commands_General_FileHandling_JMenu.add( __Commands_General_FileHandling_FTPGet_JMenuItem = 
+	Commands_General_FileHandling_JMenu.add( __Commands_General_FileHandling_FTPGet_JMenuItem =
 			new SimpleJMenuItem(__Commands_General_FileHandling_FTPGet_String, this));
-	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_WebGet_JMenuItem = 
+	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_WebGet_JMenuItem =
 			new SimpleJMenuItem(__Commands_General_FileHandling_WebGet_String, this));
 	Commands_General_FileHandling_JMenu.addSeparator();
-	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_AppendFile_JMenuItem = 
+	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_AppendFile_JMenuItem =
 			new SimpleJMenuItem(__Commands_General_FileHandling_AppendFile_String, this));
-	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_CopyFile_JMenuItem = 
+	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_CopyFile_JMenuItem =
 			new SimpleJMenuItem(__Commands_General_FileHandling_CopyFile_String, this));
-	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_ListFiles_JMenuItem = 
+	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_ListFiles_JMenuItem =
 			new SimpleJMenuItem(__Commands_General_FileHandling_ListFiles_String, this));
 	Commands_General_FileHandling_JMenu.add( __Commands_General_FileHandling_RemoveFile_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_FileHandling_RemoveFile_String, this));
 	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_MergeListFileColumns_JMenuItem =
 		new SimpleJMenuItem(__Commands_General_FileHandling_MergeListFileColumns_String, this));
 	Commands_General_FileHandling_JMenu.addSeparator();
-	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_UnzipFile_JMenuItem = 
+	Commands_General_FileHandling_JMenu.add(__Commands_General_FileHandling_UnzipFile_JMenuItem =
 			new SimpleJMenuItem(__Commands_General_FileHandling_UnzipFile_String, this));
-	
-	
+
 	// General - HydroBase
-	
+
 	JMenu Commands_General_HydroBase_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 		style, parent_JMenu, __Commands_General_HydroBase_String, false );
 	Commands_General_HydroBase_JMenu.add( __Commands_General_HydroBase_OpenHydroBase_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_HydroBase_OpenHydroBase_String, this));
-	
+
 	// General - Logging
-	
+
 	JMenu Commands_General_Logging_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 		style, parent_JMenu, __Commands_General_Logging_String, false );
 	Commands_General_Logging_JMenu.add( __Commands_General_Logging_StartLog_JMenuItem =
@@ -10602,11 +10492,11 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 	Commands_General_Logging_JMenu.add( __Commands_General_Logging_SetWarningLevel_JMenuItem =
 		new SimpleJMenuItem ( __Commands_General_Logging_SetWarningLevel_String, this));
 	Commands_General_Logging_JMenu.addSeparator();
-	Commands_General_Logging_JMenu.add(__Commands_General_Logging_Message_JMenuItem = 
+	Commands_General_Logging_JMenu.add(__Commands_General_Logging_Message_JMenuItem =
 			new SimpleJMenuItem(__Commands_General_Logging_Message_String, this));
-	
+
 	// General - Running
-	
+
 	JMenu Commands_General_Running_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
 		style, parent_JMenu, __Commands_General_Running_String, false );
 //	Commands_General_Running_JMenu.add( __Commands_General_Running_SetProperty_JMenuItem =
@@ -10615,11 +10505,11 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 		new SimpleJMenuItem( __Commands_General_Running_SetOutputPeriod_String, this));
 	Commands_General_Running_JMenu.add( __Commands_General_Running_SetOutputYearType_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_Running_SetOutputYearType_String, this));
-	Commands_General_Running_JMenu.add(__Commands_General_Running_SetProperty_JMenuItem = 
+	Commands_General_Running_JMenu.add(__Commands_General_Running_SetProperty_JMenuItem =
 			new SimpleJMenuItem(__Commands_General_Running_SetProperty_String, this));
-	Commands_General_Running_JMenu.add(__Commands_General_Running_FormatDateTimeProperty_JMenuItem = 
+	Commands_General_Running_JMenu.add(__Commands_General_Running_FormatDateTimeProperty_JMenuItem =
 			new SimpleJMenuItem(__Commands_General_Running_FormatDateTimeProperty_String, this));
-	Commands_General_Running_JMenu.add(__Commands_General_Running_FormatStringProperty_JMenuItem = 
+	Commands_General_Running_JMenu.add(__Commands_General_Running_FormatStringProperty_JMenuItem =
 			new SimpleJMenuItem(__Commands_General_Running_FormatStringProperty_String, this));
 	Commands_General_Running_JMenu.addSeparator();
 	Commands_General_Running_JMenu.add ( __Commands_General_Running_WritePropertiesToFile_JMenuItem =
@@ -10638,7 +10528,7 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 		new SimpleJMenuItem( __Commands_General_Running_Exit_String, this));
 	Commands_General_Running_JMenu.add( __Commands_General_Running_SetWorkingDir_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_Running_SetWorkingDir_String, this));
-	
+
 	// General - Test Processing...
 
 	JMenu Commands_General_TestProcessing_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (
@@ -10650,15 +10540,13 @@ private void ui_InitGUIMenus_Commands_General ( int style, JMenu parent_JMenu )
 		new SimpleJMenuItem ( __Commands_General_TestProcessing_CreateRegressionTestCommandFile_String, this));
 	Commands_General_TestProcessing_JMenu.add( __Commands_General_TestProcessing_StartRegressionTestResultsReport_JMenuItem =
 		new SimpleJMenuItem( __Commands_General_TestProcessing_StartRegressionTestResultsReport_String, this));
-	
-	
 }
 
 /**
 Define the popup menu for the commands area.
 */
-private void ui_InitGUIMenus_CommandsPopup ()
-{	// Pop-up menu to manipulate commands...
+private void ui_InitGUIMenus_CommandsPopup () {
+	// Pop-up menu to manipulate commands.
 	__Commands_JPopupMenu = new JPopupMenu("Command Actions");
 	__Commands_JPopupMenu.add( __CommandsPopup_ShowCommandStatus_JMenuItem =
 		new SimpleJMenuItem ( __CommandsPopup_ShowCommandStatus_String,	__CommandsPopup_ShowCommandStatus_String, this ) );
@@ -10707,19 +10595,18 @@ private void ui_InitGUIMenus_CommandsPopup ()
 /**
 Initialize the Commands menu for StateCU.
 */
-private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
-{	if ( menuBar != null ) {
-		// Initialization...
+private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style ) {
+	if ( menuBar != null ) {
+		// Initialization.
 		__Commands_JMenu = new JMenu("Commands", true);
 		menuBar.add ( __Commands_JMenu );
 	}
 
 	boolean show_all_commands = false; // True indicates that a command file has been opened directly.
 	if ( (__statecuDatasetType == StateCU_DataSet.TYPE_UNKNOWN) && (__statecuDataset == null) ) {
-		// Startup or user is editing commands directly without a data
-		// set.  If at initialization, all menus will be available but
-		// will be disabled.  If a command file is opened directly,
-		// then the GUI state will be checked and menus will be enabled.
+		// Startup or user is editing commands directly without a data set.
+		// If at initialization, all menus will be available but will be disabled.
+		// If a command file is opened directly, then the GUI state will be checked and menus will be enabled.
 		show_all_commands = true;
 	}
 
@@ -10727,23 +10614,23 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 
 	// Control file submenu... (will there be commands?).
 
-	// CU Locations Submenu
+	// CU Locations Submenu.
 
 	if ( __statecuDatasetType == StateCU_DataSet.TYPE_OTHER_USES ) {
-		// Only for other uses...
+		// Only for other uses.
 		return;
 	}
 
-	// Below for everything except other uses...
-	// Need for all other levels...
+	// Below for everything except other uses.
+	// Need for all other levels.
 
 	// Climate stations data.
 
 	JMenu Commands_StateCU_ClimateStationsData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateCU_ClimateStationsData_String, false );
-	
-	// Climate Stations
-	
+
+	// Climate Stations.
+
 	JMenu Commands_StateCU_ClimateStations_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateCU_ClimateStationsData_JMenu, __Commands_StateCU_ClimateStationsData_String,
 		__Commands_StateCU_ClimateStations_String, false );
@@ -10781,29 +10668,29 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateCU_ClimateStations_JMenu,
 		__Commands_StateCU_ClimateStations_CheckClimateStations_String);
 
-	// Climate Stations - Temperature Time Series
-	
+	// Climate Stations - Temperature Time Series.
+
 	ui_InitGUIMenus_Commands_AddComponentMenu (	style, Commands_StateCU_ClimateStationsData_JMenu,
 		__Commands_StateCU_ClimateStationsData_String, __Commands_StateCU_ClimateStations_TemperatureTS_String,
 		true );
-	
-	// Climate Stations - Frost Date Time Series
-	
+
+	// Climate Stations - Frost Date Time Series.
+
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateCU_ClimateStationsData_JMenu,
 		__Commands_StateCU_ClimateStationsData_String, __Commands_StateCU_ClimateStations_FrostDatesTS_String,
 		true );
-	
-	// Climate Stations - Precipitation Time Series
-	
+
+	// Climate Stations - Precipitation Time Series.
+
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateCU_ClimateStationsData_JMenu,
-		__Commands_StateCU_ClimateStationsData_String,__Commands_StateCU_ClimateStations_PrecipitationTS_String, true );	
-	
-	// Crop Characteristics and coefficients Data
+		__Commands_StateCU_ClimateStationsData_String,__Commands_StateCU_ClimateStations_PrecipitationTS_String, true );
+
+	// Crop Characteristics and coefficients Data.
 
 	JMenu Commands_StateCU_CropCharacteristicsData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateCU_CropCharacteristicsData_String, false );
-	
-	// Crop characteristics
+
+	// Crop characteristics.
 
 	JMenu Commands_StateCU_CropCharacteristics_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateCU_CropCharacteristicsData_JMenu, __Commands_StateCU_CropCharacteristicsData_String,
@@ -10836,7 +10723,7 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateCU_CropCharacteristics_JMenu,
 		__Commands_StateCU_CropCharacteristics_CheckCropCharacteristics_String);
 
-	// Blaney-Criddle Crop Coefficients Submenu
+	// Blaney-Criddle Crop Coefficients Submenu.
 
 	JMenu Commands_StateCU_BlaneyCriddle_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateCU_CropCharacteristicsData_JMenu,	__Commands_StateCU_CropCharacteristicsData_String,
@@ -10862,8 +10749,8 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 		new SimpleJMenuItem(__Commands_StateCU_BlaneyCriddle_WriteBlaneyCriddleToStateCU_String,this));
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateCU_BlaneyCriddle_JMenu,
 		__Commands_StateCU_BlaneyCriddle_CheckBlaneyCriddle_String);
-	
-	// Penman-Monteith Crop Coefficients Submenu
+
+	// Penman-Monteith Crop Coefficients Submenu.
 
 	JMenu Commands_StateCU_PenmanMonteith_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateCU_CropCharacteristicsData_JMenu,	__Commands_StateCU_CropCharacteristicsData_String,
@@ -10889,13 +10776,13 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 		new SimpleJMenuItem(__Commands_StateCU_PenmanMonteith_WritePenmanMonteithToStateCU_String,this));
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateCU_PenmanMonteith_JMenu,
 		__Commands_StateCU_PenmanMonteith_CheckPenmanMonteith_String);
-	
-	// CU Locations Data...
+
+	// CU Locations Data.
 
 	JMenu Commands_StateCU_CULocationsData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateCU_CULocationsData_String, false );
 
-	// CU Locations
+	// CU Locations.
 
 	JMenu Commands_StateCU_CULocations_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateCU_CULocationsData_JMenu, __Commands_StateCU_CULocationsData_String,
@@ -10968,7 +10855,7 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 		__Commands_StateCU_CULocations_CheckCULocations_String);
 
 	if ( show_all_commands || (__statecuDatasetType >= StateCU_DataSet.TYPE_STRUCTURES) ) {
-		// Parcels submenu
+		// Parcels submenu.
 
 		JMenu Commands_StateCU_Parcels_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 			Commands_StateCU_CULocationsData_JMenu, __Commands_StateCU_Parcels_String,
@@ -11003,7 +10890,7 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 	}
 
 	if ( show_all_commands || (__statecuDatasetType >= StateCU_DataSet.TYPE_STRUCTURES) ) {
-		// Crop Patterns Submenu
+		// Crop Patterns Submenu.
 
 		JMenu Commands_StateCU_CropPatternTS_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 			Commands_StateCU_CULocationsData_JMenu, __Commands_StateCU_CULocationsData_String,
@@ -11040,7 +10927,7 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 		Commands_StateCU_CropPatternTS_JMenu.add(
 			__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromStateCU_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromStateCU_String,this));
-		/* FIXME SAM 2008-12-30 Remove if not needed
+		/* FIXME SAM 2008-12-30 Remove if not needed.
 		Commands_StateCU_CropPatternTS_JMenu.add(
 			__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromDBF_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_CropPatternTS_ReadCropPatternTSFromDBF_String,this));
@@ -11064,7 +10951,7 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 			__Commands_StateCU_CropPatternTS_RemoveCropPatternTS_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_CropPatternTS_RemoveCropPatternTS_String,this) );
 		Commands_StateCU_CropPatternTS_JMenu.addSeparator();
-		/* FIXME SAM 2008-12-30 Remove if not needed
+		/* FIXME SAM 2008-12-30 Remove if not needed.
 		Commands_StateCU_CropPatternTS_JMenu.add (
 			__Commands_StateCU_CropPatternTS_ReadAgStatsTSFromDateValue_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_CropPatternTS_ReadAgStatsTSFromDateValue_String,this) );
@@ -11075,7 +10962,7 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 		Commands_StateCU_CropPatternTS_JMenu.add(
 			__Commands_StateCU_CropPatternTS_FillCropPatternTSInterpolate_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_CropPatternTS_FillCropPatternTSInterpolate_String,this));
-		/* FIXME SAM 2008-12-30 Remove if not needed
+		/* FIXME SAM 2008-12-30 Remove if not needed.
 		 Commands_StateCU_CropPatternTS_JMenu.add(
 			__Commands_StateCU_CropPatternTS_FillCropPatternTSProrateAgStats_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateCU_CropPatternTS_FillCropPatternTSProrateAgStats_String,this));
@@ -11113,7 +11000,7 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 	}
 
 	if ( show_all_commands || (__statecuDatasetType >= StateCU_DataSet.TYPE_WATER_SUPPLY_LIMITED) ) {
-		// Irrigation practice Time Series Submenu
+		// Irrigation practice Time Series Submenu.
 
 		JMenu Commands_StateCU_IrrigationPracticeTS_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 			Commands_StateCU_CULocationsData_JMenu, __Commands_StateCU_CULocationsData_String,
@@ -11218,57 +11105,56 @@ private void ui_InitGUIMenus_Commands_StateCU ( JMenuBar menuBar, int style )
 			new SimpleJMenuItem(__Commands_StateCU_IrrigationPracticeTS_CompareIrrigationPracticeTSFiles_String,this));
 		ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateCU_IrrigationPracticeTS_JMenu,
 			__Commands_StateCU_IrrigationPracticeTS_CheckIrrigationPracticeTS_String);
-		
-		// Diversion rights
-		
+
+		// Diversion rights.
+
 		Commands_StateCU_CULocationsData_JMenu.addSeparator();
 		ui_InitGUIMenus_Commands_StateMod_DiversionRights ( style, Commands_StateCU_CULocationsData_JMenu );
-		
-		// Diversion time series
-		
+
+		// Diversion time series.
+
 		ui_InitGUIMenus_Commands_StateMod_DiversionHistoricalTSMonthly ( style,
 			Commands_StateCU_CULocationsData_JMenu );
-		
-		// Well rights
-		
+
+		// Well rights.
+
 		ui_InitGUIMenus_Commands_StateMod_WellRights ( style,
 			Commands_StateCU_CULocationsData_JMenu );
-		
+
 		// Well pumping time series
-		
+
 		ui_InitGUIMenus_Commands_StateMod_WellHistoricalPumpingTSMonthly ( style,
 			Commands_StateCU_CULocationsData_JMenu );
 	}
 
-	/* TODO SAM 2009-06-08 Move to above to have the order make more sense - evaluate whether OK
+	/* TODO SAM 2009-06-08 Move to above to have the order make more sense - evaluate whether OK.
 	if ( show_all_commands || (__statecuDatasetType >= StateCU_DataSet.TYPE_WATER_SUPPLY_LIMITED_BY_WATER_RIGHTS) ) {
 		ui_InitGUIMenus_Commands_StateMod_DiversionRights ( style, Commands_StateCU_CULocationsData_JMenu );
 	}
 	*/
 
-	// General Commands Submenu
-	
+	// General Commands Submenu.
+
 	ui_InitGUIMenus_Commands_General ( style, __Commands_JMenu );
-	
 }
 
 /**
 Initialize the Commands menu for StateMod.
 */
-private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
-{	if ( menuBar != null ) {
-		// Initialization...
+private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style ) {
+	if ( menuBar != null ) {
+		// Initialization.
 		__Commands_JMenu = new JMenu("Commands", true);
 		__Commands_JMenu.setToolTipText(
 			"Insert new commands before first selected command or at end if no commands are selected.");
 		menuBar.add ( __Commands_JMenu );
 	}
 
-	// Control Data...
+	// Control Data.
 	JMenu Commands_StateMod_ControlData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateMod_ControlData_String, false );
-	
-	// Response...
+
+	// Response.
 	__Commands_StateMod_Response_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_ControlData_JMenu, __Commands_StateMod_Response_String,
 		__Commands_StateMod_Response_String, false );
@@ -11279,8 +11165,8 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	__Commands_StateMod_Response_JMenu.add(
 		__Commands_StateMod_Response_WriteResponseToStateMod_JMenuItem =
 		new SimpleJMenuItem(__Commands_StateMod_Response_WriteResponseToStateMod_String,this));
-	
-	// Control...
+
+	// Control.
 	__Commands_StateMod_Control_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_ControlData_JMenu, __Commands_StateMod_Control_String,
 		__Commands_StateMod_Control_String, false );
@@ -11291,27 +11177,27 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	__Commands_StateMod_Control_JMenu.add(
 		__Commands_StateMod_Control_WriteControlToStateMod_JMenuItem =
 		new SimpleJMenuItem(__Commands_StateMod_Control_WriteControlToStateMod_String,this));
-	
-	// Output Request...
+
+	// Output Request.
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_ControlData_JMenu,
 		__Commands_StateMod_ControlData_String, __Commands_StateMod_OutputRequest_String, true );
-	
-	// Reach Data...
+
+	// Reach Data.
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_ControlData_JMenu,
 		__Commands_StateMod_ControlData_String, __Commands_StateMod_ReachData_String, true );
-	
-	// Consumptive Use Data...
+
+	// Consumptive Use Data.
 
 	JMenu Commands_StateMod_ConsumptiveUseData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateMod_ConsumptiveUseData_String, false );
-	
-	// StateCU Structure file...
+
+	// StateCU Structure file.
 
 	ui_InitGUIMenus_Commands_AddComponentMenu (	style, Commands_StateMod_ConsumptiveUseData_JMenu,
 		__Commands_StateMod_DiversionData_String, __Commands_StateMod_StateCUStructure_String, true );
 
 	//if ( show_all_commands || (__statecuDatasetType >= StateCU_DataSet.TYPE_STRUCTURES) ) {
-		// Parcels submenu
+		// Parcels submenu.
 
 		JMenu Commands_StateMod_Parcels_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 			Commands_StateMod_ConsumptiveUseData_JMenu, __Commands_StateCU_Parcels_String,
@@ -11344,24 +11230,24 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	        __Commands_StateMod_Parcels_WriteParcelsToFile_JMenuItem =
 			new SimpleJMenuItem(__Commands_StateMod_Parcels_WriteParcelsToFile_String,this));
 	//}
-	
-	//Irrigation practice, yearly...
+
+	// Irrigation practice, yearly.
 
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_ConsumptiveUseData_JMenu,
 		__Commands_StateMod_DiversionData_String, __Commands_StateMod_IrrigationPracticeTS_String,true );
 
-	// Consumptive water requirement, monthly and daily...
+	// Consumptive water requirement, monthly and daily.
 
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_ConsumptiveUseData_JMenu,
 		__Commands_StateMod_DiversionData_String, __Commands_StateMod_ConsumptiveWaterRequirementTS_String,true );
 
-	// Stream Gage Data...
+	// Stream Gage Data.
 
 	JMenu Commands_StateMod_StreamGageData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateMod_StreamGageData_String, false );
-	
-	// Stream Gage Station Data...
-	
+
+	// Stream Gage Station Data.
+
 	JMenu Commands_StateMod_StreamGageStations_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_StreamGageData_JMenu, __Commands_StateMod_StreamGageData_String,
 		__Commands_StateMod_StreamGageStations_String, false );
@@ -11405,23 +11291,23 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateMod_StreamGageStations_JMenu,
 		__Commands_StateMod_StreamGageStations_CheckStreamGageStations_String);
 
-	// Stream Gage Data - Historical TS (Monthly)...
+	// Stream Gage Data - Historical TS (Monthly).
 
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_StreamGageData_JMenu,
 		__Commands_StateMod_StreamGageData_String, __Commands_StateMod_StreamGageHistoricalTS_String, true );
-	
-	// Stream Gage Data - Natural flow TS (Monthly)...
-	
+
+	// Stream Gage Data - Natural flow TS (Monthly).
+
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_StreamGageData_JMenu,
 		__Commands_StateMod_StreamGageData_String, __Commands_StateMod_StreamGageBaseTS_String, true );
 
-	// Delay Table Data...
-	
+	// Delay Table Data.
+
 	JMenu Commands_StateMod_DelayTableData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateMod_DelayTableData_String, false );
-	
-	// Delay Table Data... Monthly...
-	
+
+	// Delay Table Data... Monthly.
+
 	JMenu Commands_StateMod_DelayTablesMonthly_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_DelayTableData_JMenu,	__Commands_StateMod_DelayTableData_String,
 			__Commands_StateMod_DelayTablesMonthly_String, false );
@@ -11438,8 +11324,8 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 		new SimpleJMenuItem(__Commands_StateMod_DelayTablesMonthly_WriteDelayTablesMonthlyToStateMod_String,this));
 	//ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateMod_DelayTablesMonthly_JMenu,
 	//	__Commands_StateMod_DelayTablesMonthly_CheckDelayTablesMonthly_String);
-	
-	// Delay Table Data... Daily...
+
+	// Delay Table Data... Daily.
 
 	JMenu Commands_StateMod_DelayTablesDaily_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_DelayTableData_JMenu, __Commands_StateMod_DelayTableData_String,
@@ -11457,12 +11343,12 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	//ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateMod_DelayTablesDaily_JMenu,
 	//	__Commands_StateMod_DelayTablesMonthly_CheckDelayTablesDaily_String);
 
-	// Diversion Data...
+	// Diversion Data.
 
 	JMenu Commands_StateMod_DiversionData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateMod_DiversionData_String, false );
 
-	// Diversion stations...
+	// Diversion stations.
 
 	JMenu Commands_StateMod_DiversionStations_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_DiversionData_JMenu, __Commands_StateMod_DiversionData_String,
@@ -11529,20 +11415,20 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateMod_DiversionStations_JMenu,
 		__Commands_StateMod_DiversionStations_CheckDiversionStations_String);
 
-	// Diversion rights...
-	
+	// Diversion rights.
+
 	ui_InitGUIMenus_Commands_StateMod_DiversionRights ( style, Commands_StateMod_DiversionData_JMenu );
 
-	// Diversion historical time series, monthly...
+	// Diversion historical time series, monthly.
 
 	ui_InitGUIMenus_Commands_StateMod_DiversionHistoricalTSMonthly ( style, Commands_StateMod_DiversionData_JMenu );
 
-	// Diversion historical ts daily
+	// Diversion historical ts daily.
 
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_DiversionData_JMenu,
 		__Commands_StateMod_DiversionData_String, __Commands_StateMod_DiversionHistoricalTSDaily_String, true );
 
-	// Diversion demand time series, monthly...
+	// Diversion demand time series, monthly.
 
 	JMenu Commands_StateMod_DiversionDemandTSMonthly_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_DiversionData_JMenu, __Commands_StateMod_DiversionData_String,
@@ -11639,48 +11525,48 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 		new SimpleJMenuItem(__Commands_StateMod_DiversionDemandTSMonthly_WriteDiversionDemandTSMonthlyToStateMod_String,this));
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateMod_DiversionDemandTSMonthly_JMenu,
 		__Commands_StateMod_DiversionDemandTSMonthly_CheckDiversionDemandTSMonthly_String);
-	
-	// Diversion demand TS (daily)...
-	
+
+	// Diversion demand TS (daily).
+
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_DiversionData_JMenu,
 		__Commands_StateMod_DiversionData_String, __Commands_StateMod_DiversionDemandTSDaily_String, true );
 
-	// Diversion demands override, monthly...
+	// Diversion demands override, monthly.
 
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_DiversionData_JMenu,
 		__Commands_StateMod_DiversionData_String, __Commands_StateMod_DiversionDemandTSOverrideMonthly_String,true );
 
-	// Diversion demands, average monthly...
+	// Diversion demands, average monthly.
 
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_DiversionData_JMenu,
 		__Commands_StateMod_DiversionData_String, __Commands_StateMod_DiversionDemandTSAverageMonthly_String,true );
 
-	// Precipitation Data...
+	// Precipitation Data.
 
 	JMenu Commands_StateMod_PrecipitationData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateMod_PrecipitationData_String, false );
-	
-	// Precipitation time series (monthly, yearly)...
-	
+
+	// Precipitation time series (monthly, yearly).
+
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_PrecipitationData_JMenu,
 		__Commands_StateMod_PrecipitationData_String,__Commands_StateMod_PrecipitationTSMonthly_String,true );
-	
-	// Evaporation Data...
-	
+
+	// Evaporation Data.
+
 	JMenu Commands_StateMod_EvaporationData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu (	style,
 		__Commands_JMenu, __Commands_StateMod_EvaporationData_String, false );
-	
-	// Evaporation time series (monthly, yearly)...
+
+	// Evaporation time series (monthly, yearly).
 
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_EvaporationData_JMenu,
 		__Commands_StateMod_EvaporationData_String,	__Commands_StateMod_EvaporationTSMonthly_String,true );
 
-	// Reservoir Data...
+	// Reservoir Data.
 
 	JMenu Commands_StateMod_ReservoirData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateMod_ReservoirData_String, false );
 
-	// Reservoir Stations...
+	// Reservoir Stations.
 
 	JMenu Commands_StateMod_ReservoirStations_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_ReservoirData_JMenu, __Commands_StateMod_ReservoirData_String,
@@ -11699,7 +11585,7 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 		new SimpleJMenuItem(__Commands_StateMod_ReservoirStations_SetReservoirAggregate_String,this));
 	Commands_StateMod_ReservoirStations_JMenu.add(
 		new SimpleJMenuItem(__Commands_StateMod_ReservoirStations_SetReservoirAggregateFromList_String,this));
-	/* TODO SAM 2004-07-07 maybe enable later
+	/* TODO SAM 2004-07-07 maybe enable later.
 	Commands_StateMod_ReservoirStations_JMenu.add(
 		__Commands_StateMod_ReservoirStations_SetReservoirSystem_JMenuItem=
 		new SimpleJMenuItem(__Commands_StateMod_ReservoirStations_SetReservoirSystem_String,this));
@@ -11735,7 +11621,7 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateMod_ReservoirStations_JMenu,
 		__Commands_StateMod_ReservoirStations_CheckReservoirStations_String);
 
-	// Reservoir rights...
+	// Reservoir rights.
 
 	JMenu Commands_StateMod_ReservoirRights_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_ReservoirData_JMenu, __Commands_StateMod_ReservoirData_String,
@@ -11751,7 +11637,7 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 		new SimpleJMenuItem(__Commands_StateMod_ReservoirRights_SetReservoirAggregate_String,this));
 	Commands_StateMod_ReservoirRights_JMenu.add(
 		new SimpleJMenuItem(__Commands_StateMod_ReservoirRights_SetReservoirAggregateFromList_String,this));
-	/* TODO SAM 2004-07-07 has not traditionally been used but might be..
+	/* TODO SAM 2004-07-07 has not traditionally been used but might be.
 	Commands_StateMod_ReservoirRights_JMenu.add(
 		__Commands_StateMod_ReservoirRights_SetReservoirSystem_JMenuItem=
 		new SimpleJMenuItem(__Commands_StateMod_ReservoirRights_SetReservoirSystem_String,this));
@@ -11787,9 +11673,9 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 		new SimpleJMenuItem(__Commands_StateMod_ReservoirRights_WriteReservoirRightsToStateMod_String,this));
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateMod_ReservoirRights_JMenu,
 		__Commands_StateMod_ReservoirRights_CheckReservoirRights_String);
-	
-	// Reservoir return...
-	
+
+	// Reservoir return.
+
 	JMenu Commands_StateMod_ReservoirReturn_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_ReservoirData_JMenu, __Commands_StateMod_ReservoirReturn_String,
 		__Commands_StateMod_ReservoirReturn_String, false );
@@ -11801,18 +11687,18 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 		__Commands_StateMod_ReservoirReturn_WriteReservoirReturnToStateMod_JMenuItem =
 		new SimpleJMenuItem(__Commands_StateMod_ReservoirReturn_WriteReservoirReturnToStateMod_String,this));
 
-	// Reservoir content and target time series...
+	// Reservoir content and target time series.
 
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_ReservoirData_JMenu,
 		__Commands_StateMod_ReservoirData_String, __Commands_StateMod_ReservoirContentAndTargetTS_String, true );
 
-	// Instream Flow Data...
-	
+	// Instream Flow Data.
+
 	JMenu Commands_StateMod_InstreamFlowData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateMod_InstreamFlowData_String, false );
-	
-	// Instream Flow Stations...
-	
+
+	// Instream Flow Stations.
+
 	JMenu Commands_StateMod_InstreamFlowStations_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_InstreamFlowData_JMenu, __Commands_StateMod_InstreamFlowData_String,
 		__Commands_StateMod_InstreamFlowStations_String,false );
@@ -11891,7 +11777,7 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateMod_InstreamFlowRights_JMenu,
 		__Commands_StateMod_InstreamFlowRights_CheckInstreamFlowRights_String);
 
-	// StateMod ... Instream Flow Demand TS (Average Monthly)...
+	// StateMod ... Instream Flow Demand TS (Average Monthly).
 
 	JMenu Commands_StateMod_InstreamFlowDemandTSAverageMonthly_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu (
 		style, Commands_StateMod_InstreamFlowData_JMenu, __Commands_StateMod_InstreamFlowData_String,
@@ -11899,7 +11785,7 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	Commands_StateMod_InstreamFlowDemandTSAverageMonthly_JMenu.add(
 		new SimpleJMenuItem(__Commands_General_Running_SetOutputYearType_String, this));
 	Commands_StateMod_InstreamFlowDemandTSAverageMonthly_JMenu.addSeparator ();
-	/* TODO SAM 2004-07-08 - see if data from rights is enough
+	/* TODO SAM 2004-07-08 - see if data from rights is enough.
 	Commands_StateMod_InstreamFlowDemandTSAverageMonthly_JMenu.add (
 		__Commands_StateMod_InstreamFlowDemandTSAverageMonthly_ReadInstreamFlowStationsFromStateMod_JMenuItem =
 		new SimpleJMenuItem(
@@ -11936,18 +11822,18 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 		this));
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateMod_InstreamFlowDemandTSAverageMonthly_JMenu,
 		__Commands_StateMod_InstreamFlowDemandTSAverageMonthly_CheckInstreamFlowDemandTSAverageMonthly_String);
-	
-	// Instream flow Demand (Monthly)
+
+	// Instream flow Demand (Monthly).
 
 	ui_InitGUIMenus_Commands_AddComponentMenu (	style, Commands_StateMod_InstreamFlowData_JMenu,
 		__Commands_StateMod_InstreamFlowData_String, __Commands_StateMod_InstreamFlowDemandTS_String, true );
 
-	// Well Data...
-	
+	// Well Data.
+
 	JMenu Commands_StateMod_WellData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateMod_WellData_String, false );
 
-	// Well stations...
+	// Well stations.
 
 	JMenu Commands_StateMod_WellStations_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_WellData_JMenu, __Commands_StateMod_WellData_String,
@@ -12026,20 +11912,20 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateMod_WellStations_JMenu,
 		__Commands_StateMod_WellStations_CheckWellStations_String);
 
-	// Well rights...
+	// Well rights.
 
 	ui_InitGUIMenus_Commands_StateMod_WellRights ( style, Commands_StateMod_WellData_JMenu );
 
-	// Well historical pumping TS (Monthly)...
-	
+	// Well historical pumping TS (Monthly).
+
 	ui_InitGUIMenus_Commands_StateMod_WellHistoricalPumpingTSMonthly ( style, Commands_StateMod_WellData_JMenu );
 
-	// Well historical pumping time series (daily)...
+	// Well historical pumping time series (daily).
 
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_WellData_JMenu,
 		__Commands_StateMod_WellData_String, __Commands_StateMod_WellHistoricalPumpingTSDaily_String, true );
 
-	// Well demand time series, monthly...
+	// Well demand time series, monthly.
 
 	JMenu Commands_StateMod_WellDemandTSMonthly_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_WellData_JMenu, __Commands_StateMod_WellData_String,
@@ -12134,14 +12020,14 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 		new SimpleJMenuItem(__Commands_StateMod_WellDemandTSMonthly_WriteWellDemandTSMonthlyToStateMod_String,this));
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateMod_WellDemandTSMonthly_JMenu,
 			__Commands_StateMod_WellDemandTSMonthly_CheckWellDemandTSMonthly_String);
-	
-	// Well demand time series (daily)...
+
+	// Well demand time series (daily).
 
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_WellData_JMenu,
 		__Commands_StateMod_WellData_String, __Commands_StateMod_WellDemandTSDaily_String, true );
-	
-	// Plan stations...
-	
+
+	// Plan stations.
+
 	JMenu Commands_StateMod_PlanData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 			__Commands_JMenu, __Commands_StateMod_PlanData_String, false );
 	JMenu Commands_StateMod_PlanStations_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
@@ -12158,9 +12044,9 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	Commands_StateMod_PlanStations_JMenu.add (
 		__Commands_StateMod_PlanStations_WritePlanStationsToStateMod_JMenuItem =
 		new SimpleJMenuItem(__Commands_StateMod_PlanStations_WritePlanStationsToStateMod_String,this));
-	
-	// Plan well augmentation...
-	
+
+	// Plan well augmentation.
+
 	JMenu Commands_StateMod_PlanWellAugmentation_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_PlanData_JMenu, __Commands_StateMod_PlanData_String,
 		__Commands_StateMod_PlanWellAugmentation_String, false );
@@ -12172,8 +12058,8 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 		__Commands_StateMod_PlanWellAugmentation_WritePlanWellAugmentationToStateMod_JMenuItem =
 		new SimpleJMenuItem(__Commands_StateMod_PlanWellAugmentation_WritePlanWellAugmentationToStateMod_String,this));
 
-	// Plan return...
-	
+	// Plan return.
+
 	JMenu Commands_StateMod_PlanReturn_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_PlanData_JMenu, __Commands_StateMod_PlanReturn_String,
 		__Commands_StateMod_PlanReturn_String, false );
@@ -12184,13 +12070,13 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	Commands_StateMod_PlanReturn_JMenu.add (
 		__Commands_StateMod_PlanReturn_WritePlanReturnToStateMod_JMenuItem =
 		new SimpleJMenuItem(__Commands_StateMod_PlanReturn_WritePlanReturnToStateMod_String,this));
-	
-	// Stream Estimate Data...
+
+	// Stream Estimate Data.
 
 	JMenu Commands_StateMod_StreamEstimateData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateMod_StreamEstimateData_String, false );
 
-	// Stream estimate stations...
+	// Stream estimate stations.
 
 	JMenu Commands_StateMod_StreamEstimateStations_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_StreamEstimateData_JMenu, __Commands_StateMod_StreamEstimateData_String,
@@ -12235,7 +12121,7 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateMod_StreamEstimateStations_JMenu,
 		__Commands_StateMod_StreamEstimateStations_CheckStreamEstimateStations_String);
 
-	// Stream estimate coefficients...
+	// Stream estimate coefficients.
 
 	JMenu Commands_StateMod_StreamEstimateCoefficients_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu (
 		style, Commands_StateMod_StreamEstimateData_JMenu, __Commands_StateMod_StreamEstimateData_String,
@@ -12278,17 +12164,17 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateMod_StreamEstimateCoefficients_JMenu,
 		__Commands_StateMod_StreamEstimateCoefficients_CheckStreamEstimateCoefficients_String);
 
-	// Stream estimate baseflow TS...
+	// Stream estimate baseflow TS.
 
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_StreamEstimateData_JMenu,
 		__Commands_StateMod_StreamEstimateData_String, __Commands_StateMod_StreamEstimateBaseTS_String, true );
 
-	// River Network Data...
-	
+	// River Network Data.
+
 	JMenu Commands_StateMod_RiverNetworkData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateMod_RiverNetworkData_String, false );
-	
-	// Network (StateMod GUI/StateDMI)
+
+	// Network (StateMod GUI/StateDMI).
 
 	JMenu Commands_StateMod_Network_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_RiverNetworkData_JMenu, __Commands_StateMod_RiverNetworkData_String,
@@ -12318,9 +12204,7 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	Commands_StateMod_Network_JMenu.add(__Commands_StateMod_Network_FillNetworkFromHydroBase_JMenuItem=
 		new SimpleJMenuItem(__Commands_StateMod_Network_FillNetworkFromHydroBase_String,this));
 	Commands_StateMod_Network_JMenu.addSeparator ();
-	/* TODO SAM 2006-06-13
-	Need to decide if this is one list with a node type column or separate
-	list files for each node type.
+	/* TODO SAM 2006-06-13 Need to decide if this is one list with a node type column or separate list files for each node type.
 	__Commands_StateMod_Network_JMenu.add(__Commands_StateMod_Network_WriteNetworkToList_JMenuItem=
 		new SimpleJMenuItem(__Commands_StateMod_Network_WriteNetworkToList_String,this));
 	*/
@@ -12329,7 +12213,7 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	Commands_StateMod_Network_JMenu.addSeparator ();
 	Commands_StateMod_Network_JMenu.add(__Commands_StateMod_Network_PrintNetwork_JMenuItem =
 		new SimpleJMenuItem(__Commands_StateMod_Network_PrintNetwork_String,this));
-	
+
 	JMenu Commands_StateMod_RiverNetwork_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_RiverNetworkData_JMenu, __Commands_StateMod_RiverNetworkData_String,
 		__Commands_StateMod_RiverNetwork_String,false );
@@ -12366,11 +12250,11 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	ui_InitGUIMenus_Commands_AddCheckCommands ( Commands_StateMod_RiverNetwork_JMenu,
 			__Commands_StateMod_RiverNetwork_CheckRiverNetwork_String);
 
-	// Operational Data...
+	// Operational Data.
 	JMenu Commands_StateMod_OperationalData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateMod_OperationalData_String, false );
-	
-	// Operational rights...
+
+	// Operational rights.
 	__Commands_StateMod_OperationalRights_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		Commands_StateMod_OperationalData_JMenu, __Commands_StateMod_OperationalData_String,
 		__Commands_StateMod_OperationalRights_String, false );
@@ -12385,34 +12269,34 @@ private void ui_InitGUIMenus_Commands_StateMod ( JMenuBar menuBar, int style )
 	__Commands_StateMod_OperationalRights_JMenu.add(
 		__Commands_StateMod_OperationalRights_WriteOperationalRightsToStateMod_JMenuItem=
 		new SimpleJMenuItem(__Commands_StateMod_OperationalRights_WriteOperationalRightsToStateMod_String,this));
-	
-	// Downstream call...
-	
+
+	// Downstream call.
+
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_OperationalData_JMenu,
 		__Commands_StateMod_OperationalData_String, __Commands_StateMod_DownstreamCallTSDaily_String, true );
-	
-	// SanJuan recovery...
-	
+
+	// SanJuan recovery.
+
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_OperationalData_JMenu,
 			__Commands_StateMod_OperationalData_String, __Commands_StateMod_SanJuanSedimentRecoveryPlan_String, true );
-	
-	// Rio Grande spill...
-	
+
+	// Rio Grande spill.
+
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_OperationalData_JMenu,
 		__Commands_StateMod_OperationalData_String, __Commands_StateMod_RioGrandeSpill_String, true );
 
-	// Spatial Data...
-	
+	// Spatial Data.
+
 	JMenu Commands_StateMod_SpatialData_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 		__Commands_JMenu, __Commands_StateMod_SpatialData_String, false );
-	
-	// GeoView Project File...
-	
+
+	// GeoView Project File.
+
 	ui_InitGUIMenus_Commands_AddComponentMenu ( style, Commands_StateMod_SpatialData_JMenu,
 		__Commands_StateMod_SpatialData_String, __Commands_StateMod_GeoViewProject_String, true );
-	
-	// General Commands Submenu
-	
+
+	// General Commands Submenu.
+
 	ui_InitGUIMenus_Commands_General ( style, __Commands_JMenu );
 }
 
@@ -12422,8 +12306,7 @@ These can be used with StateMod or StateCU.
 @param style Menu style (see MENU_STYLE_*).
 @param parent_JMenu The JMenu to which submenus should be attached.
 */
-private void ui_InitGUIMenus_Commands_StateMod_DiversionHistoricalTSMonthly ( int style, JMenu parent_JMenu )
-{
+private void ui_InitGUIMenus_Commands_StateMod_DiversionHistoricalTSMonthly ( int style, JMenu parent_JMenu ) {
 	JMenu Commands_StateMod_DiversionHistoricalTSMonthly_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu (
 		style, parent_JMenu, __Commands_StateMod_DiversionData_String,
 		__Commands_StateMod_DiversionHistoricalTSMonthly_String, false );
@@ -12460,7 +12343,7 @@ private void ui_InitGUIMenus_Commands_StateMod_DiversionHistoricalTSMonthly ( in
 		__Commands_StateMod_DiversionHistoricalTSMonthly_ReadDiversionHistoricalTSMonthlyFromStateMod_JMenuItem =
 		new SimpleJMenuItem(__Commands_StateMod_DiversionHistoricalTSMonthly_ReadDiversionHistoricalTSMonthlyFromStateMod_String,
 		this));
-	/* TODO SAM 2007-06-26 - need to add fill
+	/* TODO SAM 2007-06-26 - need to add fill.
 	Commands_StateMod_DiversionHistoricalTSMonthly_JMenu.addSeparator ();
 	Commands_StateMod_DiversionHistoricalTSMonthly_JMenu.add (
 		__Commands_StateMod_DiversionHistoricalTSMonthly_fillDiversionRight_JMenuItem =
@@ -12523,8 +12406,7 @@ Initialize the StateMod diversion rights command menus.  These can be used with 
 @param style Menu style (see MENU_STYLE_*).
 @param parent_JMenu The JMenu to which submenus should be attached.
 */
-private void ui_InitGUIMenus_Commands_StateMod_DiversionRights ( int style, JMenu parent_JMenu )
-{
+private void ui_InitGUIMenus_Commands_StateMod_DiversionRights ( int style, JMenu parent_JMenu ) {
 	JMenu Commands_StateMod_DiversionRights_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		parent_JMenu, __Commands_StateMod_DiversionData_String,
 		__Commands_StateMod_DiversionRights_String, false );
@@ -12583,8 +12465,7 @@ These can be used with StateMod or StateCU.
 @param style Menu style (see MENU_STYLE_*).
 @param parent_JMenu The JMenu to which submenus should be attached.
 */
-private void ui_InitGUIMenus_Commands_StateMod_WellHistoricalPumpingTSMonthly ( int style, JMenu parent_JMenu )
-{
+private void ui_InitGUIMenus_Commands_StateMod_WellHistoricalPumpingTSMonthly ( int style, JMenu parent_JMenu ) {
 	JMenu Commands_StateMod_WellHistoricalPumpingTSMonthly_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu (
 		style, parent_JMenu, __Commands_StateMod_WellData_String,
 		__Commands_StateMod_WellHistoricalPumpingTSMonthly_String, false );
@@ -12613,14 +12494,14 @@ private void ui_InitGUIMenus_Commands_StateMod_WellHistoricalPumpingTSMonthly ( 
 		__Commands_StateMod_WellHistoricalPumpingTSMonthly_ReadWellHistoricalPumpingTSMonthlyFromStateCU_JMenuItem =
 		new SimpleJMenuItem(__Commands_StateMod_WellHistoricalPumpingTSMonthly_ReadWellHistoricalPumpingTSMonthlyFromStateCU_String,
 		this));
-	/* TODO - maybe support later
+	/* TODO - maybe support later.
 	__Commands_StateMod_WellHistoricalPumpingTSMonthly_JMenu.add (
 		__Commands_StateMod_WellHistoricalPumpingTSMonthly_ReadWellHistoricalPumpingTSMonthlyFromStateMod_JMenuItem =
 		new SimpleJMenuItem(
 		__Commands_StateMod_WellHistoricalPumpingTSMonthly_ReadWellHistoricalPumpingTSMonthlyFromStateMod_String,
 		this));
 	*/
-	/* TODO - need to add fill
+	/* TODO - need to add fill.
 	__Commands_StateMod_WellHistoricalPumpingTSMonthly_JMenu.addSeparator ();
 	__Commands_StateMod_WellHistoricalPumpingTSMonthly_JMenu.add (
 		__Commands_StateMod_WellHistoricalPumpingTSMonthly_FillWellRight_JMenuItem =
@@ -12691,8 +12572,7 @@ Initialize the StateMod well rights command menus.  These can be used with State
 @param style Menu style (see MENU_STYLE_*).
 @param parent_JMenu The JMenu to which submenus should be attached.
 */
-private void ui_InitGUIMenus_Commands_StateMod_WellRights ( int style, JMenu parent_JMenu )
-{
+private void ui_InitGUIMenus_Commands_StateMod_WellRights ( int style, JMenu parent_JMenu ) {
 	JMenu Commands_StateMod_WellRights_JMenu = ui_InitGUIMenus_Commands_AddComponentMenu ( style,
 		parent_JMenu, __Commands_StateMod_WellData_String, __Commands_StateMod_WellRights_String, false );
 	Commands_StateMod_WellRights_JMenu.add (
@@ -12753,139 +12633,137 @@ private void ui_InitGUIMenus_Commands_StateMod_WellRights ( int style, JMenu par
  */
 private void ui_InitGUIMenus_Commands_Table ( JMenuBar menuBar, int style ) {
 	if ( menuBar != null ) {
-		// Initialization...
+		// Initialization.
 		menuBar.add( __Commands_Table_JMenu = new JMenu( __Commands_Table_String, true));
 		__Commands_Table_JMenu.setToolTipText("Insert command into commands list (above first selected command, or at end).");
 	}
 
-	// TODO evaluate whether needed
+	// TODO evaluate whether needed.
 	//boolean show_all_commands = false; // True indicates that a command file has been opened directly.
 	if ( (__statecuDatasetType == StateCU_DataSet.TYPE_UNKNOWN) && (__statecuDataset == null) ) {
-		// Startup or user is editing commands directly without a data
-		// set.  If at initialization, all menus will be available but
-		// will be disabled.  If a command file is opened directly,
-		// then the GUI state will be checked and menus will be enabled.
+		// Startup or user is editing commands directly without a data set.
+		// If at initialization, all menus will be available but will be disabled.
+		// If a command file is opened directly, then the GUI state will be checked and menus will be enabled.
 		//show_all_commands = true;
 	}
 
-	// Response file submenu... (will there be commands?).
+	// Response file submenu (will there be commands?).
 
-	// Control file submenu... (will there be commands?).
+	// Control file submenu (will there be commands?).
 
-	// CU Locations Submenu
+	// CU Locations Submenu.
 
 	if ( __statecuDatasetType == StateCU_DataSet.TYPE_OTHER_USES ) {
-		// Only for other uses...
+		// Only for other uses.
 		return;
 	}
-	
-	// Add group menu for Create, Copy, Free Table >
-	JMenu Commands_TableCreate_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style, 
+
+	// Add group menu for Create, Copy, Free Table.
+	JMenu Commands_TableCreate_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 			__Commands_Table_JMenu, __Commands_TableCreate_String, false );
 	// Add Commands
-	Commands_TableCreate_JMenu.add( __Commands_TableCreate_NewTable_JMenuItem = 
+	Commands_TableCreate_JMenu.add( __Commands_TableCreate_NewTable_JMenuItem =
 			new SimpleJMenuItem( __Commands_TableCreate_NewTable_String, this ));
-	Commands_TableCreate_JMenu.add( __Commands_TableCreate_CopyTable_JMenuItem = 
+	Commands_TableCreate_JMenu.add( __Commands_TableCreate_CopyTable_JMenuItem =
 			new SimpleJMenuItem( __Commands_TableCreate_CopyTable_String, this ));
-	// ---- 
+	// ----
 	Commands_TableCreate_JMenu.addSeparator();
-	Commands_TableCreate_JMenu.add( __Commands_TableCreate_FreeTable_JMenuItem = 
+	Commands_TableCreate_JMenu.add( __Commands_TableCreate_FreeTable_JMenuItem =
 			new SimpleJMenuItem( __Commands_TableCreate_FreeTable_String, this ));
-	 
-	// Add group menu for Read Table >
+
+	// Add group menu for Read Table.
 	JMenu Commands_TableRead_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu ( style,
 			__Commands_Table_JMenu, __Commands_TableRead_String, false );
-	// Add Commands
-	Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromDataStore_JMenuItem = 
+	// Add Commands.
+	Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromDataStore_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromDataStore_String, this));
-	Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromDBF_JMenuItem = 
+	Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromDBF_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromDBF_String, this));
-	Commands_TableRead_JMenu.add( __Commands_TableRead_ReadTableFromDelimitedFile_JMenuItem = 
+	Commands_TableRead_JMenu.add( __Commands_TableRead_ReadTableFromDelimitedFile_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromDelimitedFile_String, this));
-	Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromExcel_JMenuItem = 
+	Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromExcel_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromExcel_String, this));
-	Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromFixedFormatFile_JMenuItem = 
+	Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromFixedFormatFile_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromFixedFormatFile_String, this));
-	/*Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromJSON_JMenuItem = 
+	/*Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromJSON_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromJSON_String, this));
-	Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromXML_JMenuItem = 
+	Commands_TableRead_JMenu.add(__Commands_TableRead_ReadTableFromXML_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableRead_ReadTableFromXML_String, this));*/
-	
-	// Add group menu for Append, Join Tables >
-	JMenu Commands_TableJoin_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style, 
+
+	// Add group menu for Append, Join Tables.
+	JMenu Commands_TableJoin_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style,
 			__Commands_Table_JMenu, __Commands_TableJoin_String, false);
-	// Add Commands
-	Commands_TableJoin_JMenu.add(__Commands_TableJoin_AppendTable_JMenuItem = 
+	// Add Commands.
+	Commands_TableJoin_JMenu.add(__Commands_TableJoin_AppendTable_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableJoin_AppendTable_String, this));
-	Commands_TableJoin_JMenu.add(__Commands_TableJoin_JoinTables_JMenuItem = 
+	Commands_TableJoin_JMenu.add(__Commands_TableJoin_JoinTables_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableJoin_JoinTables_String, this));
-	
-	// Add group menu for Manipulate Table Values >
-	JMenu Commands_TableManipulate_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style, 
+
+	// Add group menu for Manipulate Table Values.
+	JMenu Commands_TableManipulate_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style,
 			__Commands_Table_JMenu, __Commands_TableManipulate_String, false);
-	// Add Commands
-	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_InsertTableColumn_JMenuItem = 
+	// Add Commands.
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_InsertTableColumn_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableManipulate_InsertTableColumn_String, this));
-	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_DeleteTableColumns_JMenuItem = 
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_DeleteTableColumns_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableManipulate_DeleteTableColumns_String, this));
-	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_DeleteTableRows_JMenuItem = 
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_DeleteTableRows_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableManipulate_DeleteTableRows_String, this));
-	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_FormatTableString_JMenuItem = 
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_FormatTableString_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableManipulate_FormatTableString_String, this));
-	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_ManipulateTableString_JMenuItem = 
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_ManipulateTableString_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableManipulate_ManipulateTableString_String, this));
-	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_SetTableValues_JMenuItem = 
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_SetTableValues_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableManipulate_SetTableValues_String, this));
-	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_SplitTableColumn_JMenuItem = 
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_SplitTableColumn_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableManipulate_SplitTableColumn_String, this));
-	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_TableMath_JMenuItem = 
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_TableMath_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableManipulate_TableMath_String, this));
-	/*Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_TableTimeSeriesMath_JMenuItem = 
+	/*Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_TableTimeSeriesMath_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableManipulate_TableTimeSeriesMath_String, this));*/
 	Commands_TableManipulate_JMenu.addSeparator();
-	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_InsertTableRow_JMenuItem = 
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_InsertTableRow_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableManipulate_InsertTableRow_String, this));
-	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_SortTable_JMenuItem = 
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_SortTable_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableManipulate_SortTable_String, this));
-	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_SplitTableRow_JMenuItem = 
+	Commands_TableManipulate_JMenu.add(__Commands_TableManipulate_SplitTableRow_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableManipulate_SplitTableRow_String, this));
 
-	// Add group menu for Append, Join Tables >
-	JMenu Commands_TableAnalyze_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style, 
+	// Add group menu for Append, Join Tables.
+	JMenu Commands_TableAnalyze_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style,
 			__Commands_Table_JMenu, __Commands_TableAnalyze_String, false);
-	// Add Commands
-	Commands_TableAnalyze_JMenu.add(__Commands_TableAnalyze_CompareTables_JMenuItem = 
+	// Add Commands.
+	Commands_TableAnalyze_JMenu.add(__Commands_TableAnalyze_CompareTables_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableAnalyze_CompareTables_String, this));
-	
-	// Add group menu for Output Table >
-	JMenu Commands_TableOutput_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style, 
+
+	// Add group menu for Output Table.
+	JMenu Commands_TableOutput_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style,
 			__Commands_Table_JMenu, __Commands_TableOutput_String, false);
 	// Add Commands
-	/*Commands_TableOutput_JMenu.add(__Commands_TableOutput_WriteTableToDataStore_JMenuItem = 
+	/*Commands_TableOutput_JMenu.add(__Commands_TableOutput_WriteTableToDataStore_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableOutput_WriteTableToDataStore_String, this));*/
-	Commands_TableOutput_JMenu.add(__Commands_TableOutput_WriteTableToDelimitedFile_JMenuItem = 
+	Commands_TableOutput_JMenu.add(__Commands_TableOutput_WriteTableToDelimitedFile_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableOutput_WriteTableToDelimitedFile_String, this));
-	Commands_TableOutput_JMenu.add(__Commands_TableOutput_WriteTableToExcel_JMenuItem = 
+	Commands_TableOutput_JMenu.add(__Commands_TableOutput_WriteTableToExcel_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableOutput_WriteTableToExcel_String, this));
-	Commands_TableOutput_JMenu.add(__Commands_TableOutput_WriteTableToHTML_JMenuItem = 
+	Commands_TableOutput_JMenu.add(__Commands_TableOutput_WriteTableToHTML_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableOutput_WriteTableToHTML_String, this));
-	
-	// Add group menu for Running and Properties >
-	JMenu Commands_TableRunning_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style, 
+
+	// Add group menu for Running and Properties.
+	JMenu Commands_TableRunning_JMenu = ui_InitGUIMenus_Commands_AddGroupMenu( style,
 			__Commands_Table_JMenu, __Commands_TableRunning_String, false);
 	// Add Commands
-	Commands_TableRunning_JMenu.add(__Commands_TableRunning_SetPropertyFromTable_JMenuItem = 
+	Commands_TableRunning_JMenu.add(__Commands_TableRunning_SetPropertyFromTable_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableRunning_SetPropertyFromTable_String, this));
-	Commands_TableRunning_JMenu.add(__Commands_TableRunning_CopyPropertiesToTable_JMenuItem = 
+	Commands_TableRunning_JMenu.add(__Commands_TableRunning_CopyPropertiesToTable_JMenuItem =
 			new SimpleJMenuItem(__Commands_TableRunning_CopyPropertiesToTable_String, this));
-	
 }
 
 /**
 Initialize the Edit menu.
 */
-private void ui_InitGUIMenus_Edit ( JMenuBar menuBar )
-{	JMenu edit_JMenu = new JMenu ("Edit", true);
+private void ui_InitGUIMenus_Edit ( JMenuBar menuBar ) {
+	JMenu edit_JMenu = new JMenu ("Edit", true);
 	menuBar.add (edit_JMenu);
 	edit_JMenu.add( __Edit_CutCommands_JMenuItem = new SimpleJMenuItem ( __Edit_CutCommands_String, this ) );
 	edit_JMenu.add( __Edit_CopyCommands_JMenuItem = new SimpleJMenuItem ( __Edit_CopyCommands_String, this ));
@@ -12915,35 +12793,34 @@ private void ui_InitGUIMenus_Edit ( JMenuBar menuBar )
 
 /**
 Initialize the file menu.
-@param menuBar The JMenuBar for the application.  If null, assume that the
-menus have been set up previously and now the "Save" menu sub-menus are being
-added for the current data set type.
+@param menuBar The JMenuBar for the application.
+If null, assume that the menus have been set up previously and now the "Save" menu sub-menus are being added for the current data set type.
 */
-private void ui_InitGUIMenus_File ( JMenuBar menuBar )
-{	JMenu fileJMenu = null;
+private void ui_InitGUIMenus_File ( JMenuBar menuBar ) {
+	JMenu fileJMenu = null;
 	if ( menuBar != null ) {
 		fileJMenu = new JMenu (__File_String, true);
 	}
 
 	if ( menuBar != null ) {
-		// Adding menus for the first time...
+		// Adding menus for the first time.
 
-		// First add the Open...
+		// First add the Open.
 		fileJMenu.add( __File_Open_JMenu = new JMenu ( __File_Open_String ));
 		// Open...Command File...
 		__File_Open_JMenu.add( __File_Open_CommandFile_JMenuItem =
 			new SimpleJMenuItem( __File_Open_CommandFile_String,this));
 		__File_Open_JMenu.addSeparator();
-		// Open...DataSet
+		// Open...DataSet.
 		if ( __datasetFeaturesEnabled ) {
 			__File_Open_JMenu.addSeparator();
 			__File_Open_JMenu.add( __File_Open_DataSet_JMenuItem =
 				new SimpleJMenuItem (__File_Open_DataSet_String,this) );
-	
+
 			__File_Open_JMenu.add( __File_Open_DataSetComponent_JMenu =
 				new JMenu (__File_Open_DataSetComponent_String ) );
 			if ( __appType == StateDMI.APP_TYPE_STATECU ) {
-				// StateCU components
+				// StateCU components.
 				__File_Open_DataSetComponent_JMenu.add(
 				new SimpleJMenuItem( __File_Open_DataSetComponent_StateCU_Locations_String, this));
 				__File_Open_DataSetComponent_JMenu.add(
@@ -12961,18 +12838,18 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 		    __File_Open_JMenu.add( __File_Open_CommandFileRecent_JMenuItem[i] =
 		    	new SimpleJMenuItem( "", this ) );
 	    }
-	    
+
 		__File_Open_JMenu.addSeparator ();
 		__File_Open_JMenu.add( __File_Open_ModelNetwork_JMenuItem =
 			new SimpleJMenuItem(__File_Open_ModelNetwork_String,this));
 		__File_Open_JMenu.addSeparator ();
 		__File_Open_JMenu.add( __File_Open_HydroBase_JMenuItem =
 			new SimpleJMenuItem(__File_Open_HydroBase_String,this));
-		
+
 		ui_InitGUIMenus_File_OpenRecentFiles();
 
 		//
-		// DataSet menus...
+		// DataSet menus.
 		//
 		__File_New_JMenu = new JMenu(MENU_File_New);
 		fileJMenu.add(__File_New_JMenu);
@@ -12993,7 +12870,7 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 				MENU_File_New_DataSet_StateCU_ClimateStations_FromHydroBase,this);
 				__File_New_DataSet_StateCU_ClimateStations_JMenu.add(
 				__File_New_DataSet_StateCU_ClimateStations_FromHydroBase_JMenuItem );
-	
+
 				__File_New_DataSet_StateCU_Structures_JMenu = new JMenu(MENU_File_New_DataSet_StateCU_Structures );
 				__File_New_DataSet_JMenu.add(__File_New_DataSet_StateCU_Structures_JMenu);
 				__File_New_DataSet_StateCU_Structures_FromList_JMenuItem
@@ -13001,7 +12878,7 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 				MENU_File_New_DataSet_StateCU_Structures_FromList,this);
 				__File_New_DataSet_StateCU_Structures_JMenu.add(
 				__File_New_DataSet_StateCU_Structures_FromList_JMenuItem);
-	
+
 				__File_New_DataSet_StateCU_WaterSupplyLimited_JMenu=
 				new JMenu(MENU_File_New_DataSet_StateCU_WaterSupplyLimited);
 				__File_New_DataSet_StateCU_WaterSupplyLimited_JMenu.setEnabled ( false );
@@ -13027,7 +12904,7 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 				__File_New_DataSet_JMenu.add(__File_New_DataSet_StateMod_Demands_JMenu);
 			}
 			//
-			// DataSetComponent menus...
+			// DataSetComponent menus.
 			//
 			__File_New_DataSetComponent_JMenu =	new JMenu(MENU_File_New_DataSetComponent);
 			__File_New_JMenu.add(__File_New_DataSetComponent_JMenu);
@@ -13077,7 +12954,7 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 	}
 	if ( __appType == StateDMI.APP_TYPE_STATECU ) {
 		if ( menuBar != null ) {
-			// Define the main Save button for the first time around...
+			// Define the main Save button for the first time around.
 			fileJMenu.add ( __File_Save_JMenu =	new JMenu(__File_Save_String) );
 		}
 		// Now add the sub-menus...
@@ -13089,17 +12966,16 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 		if ( __datasetFeaturesEnabled ) {
 			__File_Save_JMenu.add (
 				__File_Save_DataSet_JMenuItem = new SimpleJMenuItem(__File_Save_DataSet_String, this));
-	
-			/* TODO - SAM 2004-02-27 figure out what to do with this later
+
+			/* TODO - SAM 2004-02-27 figure out what to do with this later.
 			__File_Save_StateCU_All_JMenuItem = new SimpleJMenuItem(MENU_File_Save_StateCU_All,	this);
 			__File_Save_JMenu.add (	__File_Save_StateCU_All_JMenuItem );
 			__File_Save_JMenu.addSeparator ();
 			__File_Save_StateCU_Response_JMenuItem = new SimpleJMenuItem(
 				MENU_File_Save_StateCU_Response,this);
 			__File_Save_JMenu.add (	__File_Save_StateCU_Response_JMenuItem );
-			__File_Save_StateCU_Control_JMenuItem = new SimpleJMenuItem(
-				MENU_File_Save_StateCU_Control,	this);
-	
+			__File_Save_StateCU_Control_JMenuItem = new SimpleJMenuItem( MENU_File_Save_StateCU_Control, this);
+
 			if ( __statecu_dataset_type == StateCU_DataSet.TYPE_OTHER_USES ) {
 			}
 			else {
@@ -13127,43 +13003,43 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 					new SimpleJMenuItem( MENU_File_Save_StateCU_MonthlyPrecipitationTS, this);
 				__File_Save_JMenu.add( __File_Save_StateCU_MonthlyPrecipitationTS_JMenuItem);
 			}
-	
-			// Level 2 (Structures)...
-	
+
+			// Level 2 (Structures).
+
 			if ( __statecu_dataset_type == StateCU_DataSet.TYPE_STRUCTURES ) {
 				__File_Save_JMenu.addSeparator();
 				__File_Save_StateCU_CropPatternTS_JMenuItem =
 					new SimpleJMenuItem(MENU_File_Save_StateCU_CropPatternTS,this);
 				__File_Save_JMenu.add (	__File_Save_StateCU_CropPatternTS_JMenuItem );
 			}
-	
-			// Level 3 (Water Supply Limited)...
-	
+
+			// Level 3 (Water Supply Limited).
+
 			if ( __statecu_dataset_type == StateCU_DataSet.TYPE_WATER_SUPPLY_LIMITED ) {
 				__File_Save_JMenu.addSeparator();
 			}
-	
-			// Level 4 (Water Supply Limited by Water Rights)...
-	
+
+			// Level 4 (Water Supply Limited by Water Rights).
+
 			if ( __statecu_dataset_type == StateCU_DataSet.TYPE_WATER_SUPPLY_LIMITED_BY_WATER_RIGHTS ) {
 				__File_Save_JMenu.addSeparator();
 			}
-	
-			// Level 5 (River Depletion)...
-	
+
+			// Level 5 (River Depletion).
+
 			if ( __statecu_dataset_type == StateCU_DataSet.TYPE_RIVER_DEPLETION) {
 				__File_Save_JMenu.addSeparator();
 			}
 			*/
 		}
-		
+
 		fileJMenu.add( __File_Print_JMenu=new JMenu(__File_Print_String,true));
 	    __File_Print_JMenu.add ( __File_Print_Commands_JMenuItem =
 	        new SimpleJMenuItem( __File_Print_Commands_String,__File_Print_Commands_String, this ) );
 	}
 	else if ( __appType == StateDMI.APP_TYPE_STATEMOD ) {
 		if ( menuBar != null ) {
-			// Define the main Save button for the first time around...
+			// Define the main Save button for the first time around.
 			fileJMenu.add ( __File_Save_JMenu =	new JMenu(__File_Save_String) );
 		}
 
@@ -13173,8 +13049,7 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 			new SimpleJMenuItem( __File_Save_CommandsAs_String, this));
 
 		if ( __datasetFeaturesEnabled ) {
-			/* TODO
-			// Now add the sub-menus...
+			/* TODO Now add the sub-menus.
 			__File_Save_StateCU_DataSet_JMenuItem = new SimpleJMenuItem(
 				MENU_File_Save_StateCU_DataSet, this);
 			__File_Save_JMenu.add ( __File_Save_StateCU_DataSet_JMenuItem );
@@ -13186,7 +13061,7 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 			__File_Save_JMenu.add ( __File_Save_StateCU_Response_JMenuItem );
 			__File_Save_StateCU_Control_JMenuItem = new SimpleJMenuItem(
 				MENU_File_Save_StateCU_Control,	this);
-	
+
 			if ( __statecu_dataset_type == StateCU_DataSet.TYPE_OTHER_USES ) {
 			}
 			else {
@@ -13222,7 +13097,7 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 	}
 
 	if ( menuBar == null ) {
-		// No further setup is required...
+		// No further setup is required.
 		return;
 	}
 
@@ -13234,7 +13109,7 @@ private void ui_InitGUIMenus_File ( JMenuBar menuBar )
 		__File_Properties_JMenu.add ( __File_Properties_DataSet_JMenuItem =
 			new SimpleJMenuItem( __File_Properties_DataSet_String,this));
 	}
-	// TODO smalers 2019-06-26 need to remove
+	// TODO smalers 2019-06-26 need to remove.
 	//fileJMenu.add(__File_SetWorkingDirectory_JMenuItem = new SimpleJMenuItem( __File_SetWorkingDirectory_String, this));
 
 	fileJMenu.addSeparator();
@@ -13262,8 +13137,8 @@ private void ui_InitGUIMenus_File_OpenRecentFiles(){
 		}
 		else{
 			// Long filenames will make the menu unwieldy so show the front and the back
-			// TODO Find a way to replace parts of the path with "..." to shorten the menu
-			// Myabe add as an IOUtil method
+			// TODO Find a way to replace parts of the path with "..." to shorten the menu.
+			// Maybe add as an IOUtil method.
 			filename = history.get(i);
 		}
 		__File_Open_CommandFileRecent_JMenuItem[i].setText(filename);
@@ -13274,13 +13149,13 @@ private void ui_InitGUIMenus_File_OpenRecentFiles(){
 /**
 Initialize the Help menu.
 */
-private void ui_InitGUIMenus_Help ( JMenuBar menuBar )
-{	JMenu helpJMenu = new JMenu("Help", true);
+private void ui_InitGUIMenus_Help ( JMenuBar menuBar ) {
+	JMenu helpJMenu = new JMenu("Help", true);
 	helpJMenu.add( __Help_AboutStateDMI_JMenuItem = new SimpleJMenuItem(__Help_AboutStateDMI_String, this));
 	File docFile = new File(IOUtil.verifyPathForOS(IOUtil.getApplicationHomeDir() + "/doc/UserManual/StateDMI.pdf",true));
 	if ( docFile.exists() ) {
 		helpJMenu.addSeparator();
-	    // Old single-PDF help document
+	    // Old single-PDF help document.
 	    helpJMenu.add ( __Help_ViewDocumentation_JMenuItem = new SimpleJMenuItem(__Help_ViewDocumentation_String,this));
 		//helpJMenu.add ( __Help_ViewTrainingMaterials_JMenuItem = new SimpleJMenuItem(__Help_ViewTrainingMaterials_String,this));
 	}
@@ -13300,12 +13175,12 @@ private void ui_InitGUIMenus_Help ( JMenuBar menuBar )
 
 	menuBar.add(helpJMenu);
 }
-	
+
 /**
 Define the popup menus for results other than StateCU and StateMod.
 */
-private void ui_InitGUIMenus_ResultsPopup ()
-{	__resultsTables_JPopupMenu = new JPopupMenu("Table Results Actions");
+private void ui_InitGUIMenus_ResultsPopup () {
+	__resultsTables_JPopupMenu = new JPopupMenu("Table Results Actions");
     ActionListener_ResultsTables tables_l = new ActionListener_ResultsTables();
     __resultsTables_JPopupMenu = new JPopupMenu("Table Results Actions");
     __resultsTables_JPopupMenu.add( new SimpleJMenuItem ( __Results_Table_Properties_String, tables_l ) );
@@ -13314,21 +13189,21 @@ private void ui_InitGUIMenus_ResultsPopup ()
 /**
 Initialize the Results menu for StateCU.
 */
-private void ui_InitGUIMenus_Results_StateCU ( JMenuBar menuBar )
-{	if ( menuBar != null ) {
+private void ui_InitGUIMenus_Results_StateCU ( JMenuBar menuBar ) {
+	if ( menuBar != null ) {
 		__Results_JMenu = new JMenu("Results", true);
 		__Results_JMenu.setToolTipText ( "Use the Results choices at the bottom of the window." );
 		menuBar.add(__Results_JMenu);
 	}
 
-	// All data sets need the following...
+	// All data sets need the following.
 
 	__Results_StateCU_ControlData_JMenuItem = new SimpleJMenuItem(
 		MENU_Results_StateCU_ControlData,this);
 	__Results_JMenu.add ( __Results_StateCU_ControlData_JMenuItem );
 
 	if ( __statecuDatasetType == StateCU_DataSet.TYPE_OTHER_USES ) {
-		// All the files for Other Uses...
+		// All the files for Other Uses.
 	}
 
 	if ( __statecuDatasetType != StateCU_DataSet.TYPE_OTHER_USES ) {
@@ -13357,67 +13232,67 @@ private void ui_InitGUIMenus_Results_StateCU ( JMenuBar menuBar )
 /**
 Initialize the Results menu for StateMod.
 */
-private void ui_InitGUIMenus_Results_StateMod ( JMenuBar menuBar )
-{	if ( menuBar != null ) {
+private void ui_InitGUIMenus_Results_StateMod ( JMenuBar menuBar ) {
+	if ( menuBar != null ) {
 		__Results_JMenu = new JMenu("Results", true);
 		__Results_JMenu.setToolTipText ("Use the Results choices at the bottom of the window." );
 		menuBar.add(__Results_JMenu);
 	}
 
-	// River Data...
+	// River Data.
 
 	__Results_StateMod_RiverData_JMenuItem = new SimpleJMenuItem(MENU_Results_StateMod_RiverData,this);
 	__Results_JMenu.add(__Results_StateMod_RiverData_JMenuItem);
 
-	// Delay Table Data...
+	// Delay Table Data.
 
 	__Results_StateMod_DelayTableData_JMenuItem = new SimpleJMenuItem(
 		MENU_Results_StateMod_DelayTableData,this);
 	__Results_JMenu.add(__Results_StateMod_DelayTableData_JMenuItem);
 
-	// Diversion Data...
+	// Diversion Data.
 
 	__Results_StateMod_DiversionData_JMenuItem = new SimpleJMenuItem(
 		MENU_Results_StateMod_DiversionData,this);
 	__Results_JMenu.add(__Results_StateMod_DiversionData_JMenuItem);
 
-	// Precipitation Data...
+	// Precipitation Data.
 
 	__Results_StateMod_PrecipitationData_JMenuItem = new SimpleJMenuItem(
 		MENU_Results_StateMod_PrecipitationData,this);
 	__Results_JMenu.add(__Results_StateMod_PrecipitationData_JMenuItem);
 
-	// Evaporation Data...
+	// Evaporation Data.
 
 	__Results_StateMod_EvaporationData_JMenuItem = new SimpleJMenuItem(
 		MENU_Results_StateMod_EvaporationData,this);
 	__Results_JMenu.add(__Results_StateMod_EvaporationData_JMenuItem);
 
-	// Reservoir Data...
+	// Reservoir Data.
 
 	__Results_StateMod_ReservoirData_JMenuItem = new SimpleJMenuItem(
 		MENU_Results_StateMod_ReservoirData,this);
 	__Results_JMenu.add(__Results_StateMod_ReservoirData_JMenuItem);
 
-	// InstreamFlow Data...
+	// InstreamFlow Data.
 
 	__Results_StateMod_InstreamFlowData_JMenuItem = new SimpleJMenuItem(
 		MENU_Results_StateMod_InstreamFlowData,this);
 	__Results_JMenu.add(__Results_StateMod_InstreamFlowData_JMenuItem);
 
-	// Well Data...
+	// Well Data.
 
 	__Results_StateMod_WellData_JMenuItem = new SimpleJMenuItem(
 		MENU_Results_StateMod_WellData,this);
 	__Results_JMenu.add(__Results_StateMod_WellData_JMenuItem);
 
-	// RiverNetwork Data...
+	// RiverNetwork Data.
 
 	__Results_StateMod_RiverNetworkData_JMenuItem = new SimpleJMenuItem(
 		MENU_Results_StateMod_RiverNetworkData,this);
 	__Results_JMenu.add(__Results_StateMod_RiverNetworkData_JMenuItem);
 
-	// Operational Data...
+	// Operational Data.
 
 	__Results_StateMod_OperationalData_JMenuItem = new SimpleJMenuItem(
 		MENU_Results_StateMod_OperationalData,this);
@@ -13427,8 +13302,8 @@ private void ui_InitGUIMenus_Results_StateMod ( JMenuBar menuBar )
 /**
 Initialize the Insert menu.
 */
-private void ui_InitGUIMenus_Run ( JMenuBar menuBar )
-{	if ( menuBar != null ) {
+private void ui_InitGUIMenus_Run ( JMenuBar menuBar ) {
+	if ( menuBar != null ) {
 		__Run_JMenu = new JMenu ("Run", true);
 	}
 	__Run_JMenu.add ( __Run_AllCommandsCreateOutput_JMenuItem =
@@ -13458,8 +13333,8 @@ private void ui_InitGUIMenus_Run ( JMenuBar menuBar )
 /**
 Initialize the Tools menu.
 */
-private void ui_InitGUIMenus_Tools ( JMenuBar menuBar )
-{	__Tools_JMenu = new JMenu(__Tools_String, true);
+private void ui_InitGUIMenus_Tools ( JMenuBar menuBar ) {
+	__Tools_JMenu = new JMenu(__Tools_String, true);
 
 	__Tools_JMenu.add ( __Tools_AdministrationNumberCalculator_JMenuItem =
 		new SimpleJMenuItem (__Tools_AdministrationNumberCalculator_String, this ));
@@ -13474,18 +13349,18 @@ private void ui_InitGUIMenus_Tools ( JMenuBar menuBar )
 		new SimpleJMenuItem ( __Tools_ListSurfaceWaterDiversions_String, this ));
 	__Tools_JMenu.add ( __Tools_ListWellStationRightTotals_JMenuItem =
 		new SimpleJMenuItem (__Tools_ListWellStationRightTotals_String, this ));
-	
+
 	__Tools_JMenu.addSeparator();
 	__Tools_JMenu.add ( __Tools_HydrobaseParcelWaterSupply_JMenuItem =
 		new SimpleJMenuItem (__Tools_HydrobaseParcelWaterSupply_String, this ));
 
-	/* TODO SAM 2010-01-15 Enable later
+	/* TODO SAM 2010-01-15 Enable later.
 	__Tools_JMenu.addSeparator();
 	__Tools_JMenu.add ( __Tools_MergeListFileColumns_JMenuItem =
 		new SimpleJMenuItem ( __Tools_MergeListFileColumns_String, this ));
 		*/
 
-	// Attach the diagnostics menu and set up the listener for the log file viewer...
+	// Attach the diagnostics menu and set up the listener for the log file viewer.
 
 	__Tools_JMenu.addSeparator();
 	Message.addMessageLogListener ( this );
@@ -13500,13 +13375,13 @@ private void ui_InitGUIMenus_Tools ( JMenuBar menuBar )
 /**
 Initialize the View menu.
 */
-private void ui_InitGUIMenus_View ( JMenuBar menuBar )
-{	JMenu viewJMenu = new JMenu ("View", true);
+private void ui_InitGUIMenus_View ( JMenuBar menuBar ) {
+	JMenu viewJMenu = new JMenu ("View", true);
 	menuBar.add (viewJMenu);
-	
+
     viewJMenu.add ( __View_CommandFileDiff_JMenuItem=new SimpleJMenuItem( __View_CommandFileDiff_String, this));
     __View_CommandFileDiff_JMenuItem.setToolTipText("Use visual diff program to compare current commands with last saved version.");
-    
+
 	viewJMenu.add ( __View_DataStores_JMenuItem=new SimpleJMenuItem( __View_DataStores_String, this));
 
 	viewJMenu.add ( __View_Map_JCheckBoxMenuItem = new JCheckBoxMenuItem(__View_Map_String) );
@@ -13525,7 +13400,7 @@ private void ui_InitGUIMenus_View ( JMenuBar menuBar )
 			viewJMenu.add(__View_DataSetManager_JCheckBoxMenuItem );
 		}
 	}
-	
+
 	viewJMenu.add ( __View_ThreeLevelCommandsMenu_JCheckBoxMenuItem =
 		new JCheckBoxMenuItem(__View_ThreeLevelCommandsMenu_String) );
 	__View_ThreeLevelCommandsMenu_JCheckBoxMenuItem.setState ( true );
@@ -13544,12 +13419,12 @@ Load a command file and display in the command list.
 @param command_file Full path to command file to load.
 @param runOnLoad If true, the commands will be run after loading.
 */
-private void ui_LoadCommandFile ( String command_file, boolean runOnLoad )
-{   String routine = "StateDMI_JFrame.ui_LoadCommandFile";
-    int numAutoChanges = 0; // Number of lines automatically changed during load
+private void ui_LoadCommandFile ( String command_file, boolean runOnLoad ) {
+    String routine = "StateDMI_JFrame.ui_LoadCommandFile";
+    int numAutoChanges = 0; // Number of lines automatically changed during load.
     try {
         numAutoChanges = commandProcessor_ReadCommandFile ( command_file );
-        // Add CommandProgressListener for each command so GUI can listen to command progress
+        // Add CommandProgressListener for each command so GUI can listen to command progress.
         List<Command> commands = __statedmiProcessor.getCommands();
         int commandsSize = 0;
         if ( commands != null ) {
@@ -13558,13 +13433,12 @@ private void ui_LoadCommandFile ( String command_file, boolean runOnLoad )
         Command command = null;
         for ( int i = 0; i < commandsSize; i++ ) {
         	command = commands.get(i);
-        	// TODO SAM 2009-03-23 Evaluate whether to define and interface rather than rely on
-        	// AbstractCommand here.
+        	// TODO SAM 2009-03-23 Evaluate whether to define and interface rather than rely on AbstractCommand here.
         	if ( command instanceof AbstractCommand ) {
         		((AbstractCommand)command).addCommandProgressListener ( this );
         	}
         }
-        // Repaint the list to reflect the status of the commands...
+        // Repaint the list to reflect the status of the commands.
         ui_ShowCurrentCommandListStatus();
     }
     catch ( FileNotFoundException e ) {
@@ -13581,10 +13455,10 @@ private void ui_LoadCommandFile ( String command_file, boolean runOnLoad )
         return;
     }
     catch ( Exception e ) {
-        // FIXME SAM 2007-10-09 Perhaps should revert to previous
-        // data model contents?  For now allow partical contents to be displayed.
+        // FIXME SAM 2007-10-09 Perhaps should revert to previous data model contents?
+    	// For now allow partical contents to be displayed.
         //
-        // Error opening the file (should not happen but maybe a read permissions problem)...
+        // Error opening the file (should not happen but maybe a read permissions problem).
         Message.printWarning ( 1, routine,
         "Unexpected error reading command file \"" + command_file +
         "\".  Displaying commands that could be read." );
@@ -13596,7 +13470,7 @@ private void ui_LoadCommandFile ( String command_file, boolean runOnLoad )
     if ( numAutoChanges == 0 ) {
         commandList_SetDirty(false);
     }
-    // Clear the old results...
+    // Clear the old results.
     results_Clear();
     ui_UpdateStatusTextFields ( 2, null, null, "Use the Run menu/buttons to run the commands.", __STATUS_READY );
     __processor_JProgressBar.setValue ( 0 );
@@ -13605,21 +13479,19 @@ private void ui_LoadCommandFile ( String command_file, boolean runOnLoad )
     if ( runOnLoad ) {
         // Run all commands and create output.
         uiAction_RunCommands ( true, true );
-        // This will update the status text fields
+        // This will update the status text fields.
     }
 }
 
 /**
-Indicate whether running commands should occur in a thread.
-The default is always true.
+Indicate whether running commands should occur in a thread. The default is always true.
 @return true if the commands should be run in a thread, false if not.
 */
-private boolean ui_Property_RunCommandProcessorInThread()
-{
+private boolean ui_Property_RunCommandProcessorInThread() {
 	//String RunCommandProcessorInThread_String =
 	    //__props.getValue ( TSTool_Options_JDialog.TSTool_RunCommandProcessorInThread );
 	// FIXME SAM 2008-01-25 Evaluate whether StateDMI needs a Tools...Options menu.
-	String RunCommandProcessorInThread_String = "True";    
+	String RunCommandProcessorInThread_String = "True";
 	if ( (RunCommandProcessorInThread_String != null) &&
 			RunCommandProcessorInThread_String.equalsIgnoreCase("False") ) {
 		return false;
@@ -13632,12 +13504,11 @@ private boolean ui_Property_RunCommandProcessorInThread()
 
 /**
 Select the command and position the display at the command.
-This is used, for example, with the log file viewer, when pointing
-back to a command that generated a log message.
+This is used, for example, with the log file viewer, when pointing back to a command that generated a log message.
 @param iline Command position (0+).
 */
-private void ui_SelectCommand ( int iline )
-{	__commands_JList.setSelectedIndex ( iline );
+private void ui_SelectCommand ( int iline ) {
+	__commands_JList.setSelectedIndex ( iline );
 	ui_UpdateStatus ( true );
 }
 
@@ -13645,68 +13516,61 @@ private void ui_SelectCommand ( int iline )
 Set the directory for the last "File...Open Command File".
 @param Dir_LastCommandFileOpened Directory for last command file opened.
 */
-private void ui_SetDir_LastCommandFileOpened ( String Dir_LastCommandFileOpened )
-{
+private void ui_SetDir_LastCommandFileOpened ( String Dir_LastCommandFileOpened ) {
 	__Dir_LastCommandFileOpened = Dir_LastCommandFileOpened;
-	// Also set the last directory opened by a dialog...
+	// Also set the last directory opened by a dialog.
 	JGUIUtil.setLastFileDialogDirectory(Dir_LastCommandFileOpened);
 }
 
 /**
-Set whether ActionEvents should be ignored (or not).  In general they should
-not be ignored but in some cases when programatically modifying data models
+Set whether ActionEvents should be ignored (or not).
+In general they should not be ignored but in some cases when programatically modifying data models
 the spurious events do not need to trigger other actions.
 @param ignore whether to ignore ActionEvents.
 */
-private void ui_SetIgnoreActionEvent ( boolean ignore )
-{
+private void ui_SetIgnoreActionEvent ( boolean ignore ) {
 	__ignoreActionEvent = ignore;
 }
 
 /**
-Set whether ItemEvents should be ignored (or not).  In general they should
-not be ignored but in some cases when programatically modifying data models
+Set whether ItemEvents should be ignored (or not).
+In general they should not be ignored but in some cases when programatically modifying data models
 the spurious events do not need to trigger other actions.
 @param ignore whether to ignore ActionEvents.
 */
-private void ui_SetIgnoreItemEvent ( boolean ignore )
-{
+private void ui_SetIgnoreItemEvent ( boolean ignore ) {
 	__ignoreItemEvent = ignore;
 }
 
 /**
-Set whether ListSelectionEvents should be ignored (or not).  In general they should
-not be ignored but in some cases when programatically modifying data models
+Set whether ListSelectionEvents should be ignored (or not).
+In general they should not be ignored but in some cases when programatically modifying data models
 the spurious events do not need to trigger other actions.
 @param ignore whether to ignore ActionEvents.
 */
-private void ui_SetIgnoreListSelectionEvent ( boolean ignore )
-{
+private void ui_SetIgnoreListSelectionEvent ( boolean ignore ) {
 	__ignoreListSelectionEvent = ignore;
 }
 
 /**
-Set the initial working directory, which will be the software startup home or
-the location where the command file has been read/saved.
+Set the initial working directory,
+which will be the software startup home or the location where the command file has been read/saved.
 @param initialWorkingDir The initial working directory (should be non-null).
 */
-private void ui_SetInitialWorkingDir ( String initialWorkingDir )
-{	String routine = getClass().getName() + ".ui_SetInitialWorkingDir";
-	Message.printStatus(2, routine, "Setting the initial working directory to \"" +
-			initialWorkingDir + "\"" );
+private void ui_SetInitialWorkingDir ( String initialWorkingDir ) {
+	String routine = getClass().getSimpleName() + ".ui_SetInitialWorkingDir";
+	Message.printStatus(2, routine, "Setting the initial working directory to \"" + initialWorkingDir + "\"" );
 	__initialWorkingDir = initialWorkingDir;
-	// Also set in the processor...
+	// Also set in the processor.
 	commandProcessor_SetInitialWorkingDir ( initialWorkingDir );
 }
 
 /**
 Set the title of the input panel.
-@param title the title for the input/query panel.  If null, use the default of "Input/Query Options..." with
-a black border.
+@param title the title for the input/query panel.  If null, use the default of "Input/Query Options..." with a black border.
 @param color color of the line border.
 */
-private void ui_SetInputPanelTitle ( String title, Color color )
-{
+private void ui_SetInputPanelTitle ( String title, Color color ) {
     if ( title == null ) {
         title = "Input/Query Options";
         color = Color.black;
@@ -13716,12 +13580,11 @@ private void ui_SetInputPanelTitle ( String title, Color color )
 }
 
 /**
-Update the command list to show the current status.  This is called after all commands
-have been processed in run mode(), when a command has been edited(), and when loading
-commands from a file.
+Update the command list to show the current status.
+This is called after all commands have been processed in run mode(), when a command has been edited(),
+and when loading commands from a file.
 */
-private void ui_ShowCurrentCommandListStatus ()
-{
+private void ui_ShowCurrentCommandListStatus () {
     __commands_AnnotatedCommandJList.repaint();
 }
 
@@ -13737,21 +13600,20 @@ Normally this is only called in when adding and editing a new command.
 @param menuString a menu label with or without the prefix
 @return the stripped menu label
 */
-private String ui_StripMenuSequencePrefix ( String menuString )
-{
-	// First strip "[Legacy]"
+private String ui_StripMenuSequencePrefix ( String menuString ) {
+	// First strip "[Legacy]".
 	if ( menuString.startsWith("[Legacy]") ) {
 		// Strip it
 		menuString = menuString.substring(8).trim();
 	}
 
-	// Next strip number
+	// Next strip number.
 	if ( menuString.charAt(1) == ':') {
 		// Strip it
 		return menuString.substring(2).trim();
 	}
 	else {
-		// Just return
+		// Just return.
 		return menuString;
 	}
 }
@@ -13775,10 +13637,9 @@ Update the main status information when the list contents have changed.  Interfa
 @param checkGuiState If true, then the checkGUIState() method is also called,
 which checks many interface settings.
 */
-private void ui_UpdateStatus ( boolean checkGuiState )
-{
-	// Title bar (command file name)...
-	
+private void ui_UpdateStatus ( boolean checkGuiState ) {
+	// Title bar (command file name).
+
 	String app_type = "";
 	if ( __appType == StateDMI.APP_TYPE_STATECU ) {
 		app_type = "StateCU";
@@ -13788,7 +13649,7 @@ private void ui_UpdateStatus ( boolean checkGuiState )
 	}
 	String session_type = "";
 	if ( __datasetFeaturesEnabled ) {
-		// Might be in data set mode
+		// Might be in data set mode.
 		if ( __sessionType != __SESSION_UNKNOWN ) {
 			session_type = getSessionTypeName();
 			if ( __sessionType == __SESSION_DATA_SET ) {
@@ -13797,7 +13658,7 @@ private void ui_UpdateStatus ( boolean checkGuiState )
 						StateCU_DataSet.lookupDataSetName ( __statecuDatasetType ) + " " + session_type;
 				}
 				else if ( __appType == StateDMI.APP_TYPE_STATEMOD ) {
-					// StateMod does not really have data set types like StateCU...
+					// StateMod does not really have data set types like StateCU.
 					//StateMod_DataSet.lookupDataSetName ( __statemod_dataset_type ) + " " +session_type;
 					//session_type = " "+StateMod_DataSet.NAME_UNKNOWN;
 					session_type = "";
@@ -13810,7 +13671,7 @@ private void ui_UpdateStatus ( boolean checkGuiState )
 		setTitle ( "StateDMI (" + app_type + session_type + ")" );
 	}
 	else {
-		// Always processing command file
+		// Always processing command file.
 		if ( __commandFileName == null ) {
 			setTitle ( "StateDMI (" + app_type + session_type + ") - no commands saved");
 		}
@@ -13824,8 +13685,8 @@ private void ui_UpdateStatus ( boolean checkGuiState )
 		}
 	}
 
-	// Commands....
-	
+	// Commands.
+
 	int selected_indices[] = ui_GetCommandJList().getSelectedIndices();
 	int selected_size = 0;
 	if ( selected_indices != null ) {
@@ -13840,40 +13701,39 @@ private void ui_UpdateStatus ( boolean checkGuiState )
 		commandList_GetFailureCount() + " with failures, " +
 		commandList_GetWarningCount() + " with warnings)") );
 	}
-	
-	// Update the text fields with the information from above...
+
+	// Update the text fields with the information from above.
 	// Currently no need since set directly above.
 	//ui_UpdateStatusTextFields ( -1, "StateDMI_JFrame.updateStatus", commands_label, null, __STATUS_READY );
 
 	// FIXME SAM 2008-11-11 Why is this called no matter what is passed in for the parameter?
-	// Update GUI state if requested...
+	// Update GUI state if requested.
 	//if ( checkGuiState ) {
 		ui_CheckGUIState ();
 	//}
 }
 
 /**
-Update the text fields at the bottom of the main interface.  This does NOT update
-all text fields like the number of commands, etc.
-@param level Message level.  If > 0 and the message is not null, call
-Message.printStatus() to record a message.
+Update the text fields at the bottom of the main interface.
+This does NOT update all text fields like the number of commands, etc.
+@param level Message level.  If > 0 and the message is not null, call Message.printStatus() to record a message.
 @param routine Routine name used if Message.printStatus() is called.
-@param commandPanelStatus If not null, update the __commands_JPanel border to
-contain this text.  If null, leave the contents as previously shown.  Specify "" to clear the text.
-@param message If not null, update the __message_JTextField to contain this
-text.  If null, leave the contents as previously shown.  Specify "" to clear the text.
-@param status If not null, update the __status_JTextField to contain
-this text.  If null, leave the contents as previously shown.  Specify "" to clear the text.
+@param commandPanelStatus If not null, update the __commands_JPanel border to contain this text.
+If null, leave the contents as previously shown.  Specify "" to clear the text.
+@param message If not null, update the __message_JTextField to contain this text.
+If null, leave the contents as previously shown.  Specify "" to clear the text.
+@param status If not null, update the __status_JTextField to contain this text.
+If null, leave the contents as previously shown.  Specify "" to clear the text.
 */
-private void ui_UpdateStatusTextFields ( int level, String routine, 
-				String commandPanelStatus, String message, String status )
-{	if ( (level > 0) && (message != null) ) {
-		// Print a status message to the messaging system...
+private void ui_UpdateStatusTextFields ( int level, String routine,
+				String commandPanelStatus, String message, String status ) {
+	if ( (level > 0) && (message != null) ) {
+		// Print a status message to the messaging system.
 		Message.printStatus ( 1, routine, message );
 	}
 	if ( message != null ) {
-		// If the message is too long it makes the progress bar get
-		// small (even though the progress bar is not resizable).  Set to a reasonable length...
+		// If the message is too long it makes the progress bar get small (even though the progress bar is not resizable).
+		// Set to a reasonable length.
 		if ( message.length() > 120 ) {
 			__message_JTextField.setText (message.substring(0,120) + "...");
 		}
@@ -13893,13 +13753,12 @@ private void ui_UpdateStatusTextFields ( int level, String routine,
 /**
 Handle "File...Exit" and X actions.
 */
-private void uiAction_CloseClicked ()
-{	// If the commands are dirty, see if they want to save them...
-	// This code is also in openCommandFile - might be able to remove
-	// copy once all actions are implemented...
+private void uiAction_CloseClicked () {
+	// If the commands are dirty, see if they want to save them.
+	// This code is also in openCommandFile - might be able to remove copy once all actions are implemented.
 	if ( __commandsDirty ) {
 		if ( __commandFileName == null ) {
-			// Have not been saved before...
+			// Have not been saved before.
 			int x = ResponseJDialog.NO;
 			if ( __commands_JListModel.size() > 0 ) {
 				x = new ResponseJDialog ( this,
@@ -13912,14 +13771,14 @@ private void uiAction_CloseClicked ()
 				return;
 			}
 			else if ( x == ResponseJDialog.YES ) {
-				// Prompt for the name and then save...
+				// Prompt for the name and then save.
 				uiAction_WriteCommandFile ( __commandFileName, true);
 			}
 		}
 		else {
-			// A command file exists...  Warn the user.  They can save to the existing file name or can
-			// cancel and File...Save As... to a different name.
-			// Have not been saved before...
+			// A command file exists...  Warn the user.
+			// They can save to the existing file name or can cancel and File...Save As... to a different name.
+			// Have not been saved before.
 			int x = ResponseJDialog.NO;
 			if ( __commands_JListModel.size() > 0 ) {
 				x = new ResponseJDialog ( this, IOUtil.getProgramName(),
@@ -13934,10 +13793,10 @@ private void uiAction_CloseClicked ()
 			else if ( x == ResponseJDialog.YES ) {
 				uiAction_WriteCommandFile (__commandFileName, false);
 			}
-			// Else if No will just exit below...
+			// Else if No will just exit below.
 		}
 	}
-	// Now make sure the user wants to exit - they might have a lot of data processed...
+	// Now make sure the user wants to exit - they might have a lot of data processed.
 	int x = new ResponseJDialog (this, "Exit StateDMI", "Are you sure you want to exit StateDMI?",
 		ResponseJDialog.YES| ResponseJDialog.NO).response();
 	if (x == ResponseJDialog.YES) {
@@ -13954,42 +13813,40 @@ private void uiAction_CloseClicked ()
 
 /**
 Convert selected commands to/from comments.  When converting to commands:
-Each Command instance is retrieved, its command string is taken from the Command, and
-a new GenericCommand is create, and the original Command is replaced in the list.
-When converting from commands, the GenericCommand is retrieved, a new Command instance
-is created, the original Command is replaced.
+Each Command instance is retrieved, its command string is taken from the Command,
+and a new GenericCommand is create, and the original Command is replaced in the list.
+When converting from commands, the GenericCommand is retrieved, a new Command instance is created, the original Command is replaced.
 @param to_comment If true, convert commands to comments, if false, from comments.
 */
-private void uiAction_ConvertCommandsToComments ( boolean to_comment )
-{	int selected_indexes[] = ui_GetCommandJList().getSelectedIndices();
+private void uiAction_ConvertCommandsToComments ( boolean to_comment ) {
+	int selected_indexes[] = ui_GetCommandJList().getSelectedIndices();
 	int selected_size = JGUIUtil.selectedSize ( ui_GetCommandJList() );
 	String old_command_string = null;
 	Command old_command = null;
 	Command new_command = null;
-	// It is OK to loop through each item below.  Even though the items in
-	// the data model will change, if a command is replaced each time, the
-	// indices will still be relevant.
+	// It is OK to loop through each item below.  Even though the items in the data model will change,
+	// if a command is replaced each time, the indices will still be relevant.
 	for ( int i = 0; i < selected_size; i++ ) {
 		old_command = (Command)__commands_JListModel.get(selected_indexes[i]);
 		old_command_string = (String)old_command.toString();
 		if ( to_comment ) {
-			// Replace the current command with a new string that has the comment character...
+			// Replace the current command with a new string that has the comment character.
 			new_command = commandList_NewCommand(
-					"# " + old_command_string,	// New command as comment
+					"# " + old_command_string,	// New command as comment.
 					true );	// Create the command even if not recognized.
 			commandList_ReplaceCommand ( old_command, new_command );
 		}
 		else {
-		    // Remove comment...
+		    // Remove comment.
 			if ( old_command_string.startsWith("#") ) {
 				new_command = commandList_NewCommand(
-					old_command_string.substring(1).trim(),	// New command as comment
+					old_command_string.substring(1).trim(),	// New command as comment.
 					true );	// Create the command even if not recognized.
 				commandList_ReplaceCommand ( old_command, new_command );
 			}
 		}
 	}
-	// Mark the commands as dirty...
+	// Mark the commands as dirty.
 	if ( selected_size > 0 ) {
 		commandList_SetDirty ( true );
 	}
@@ -13997,14 +13854,12 @@ private void uiAction_ConvertCommandsToComments ( boolean to_comment )
 
 /**
 Get the selected commands from the commands list, clone a copy, and save in the cut buffer.
-The commands can then be pasted into the command list with
-uiAction_PasteFromCutBufferToCommandList.
-@param remove_original If true, then this is a Cut operation and the original
-commands should be removed from the list.  If false, a copy is made but the original
-commands will remain in the list.
+The commands can then be pasted into the command list with uiAction_PasteFromCutBufferToCommandList.
+@param remove_original If true, then this is a Cut operation and the original commands should be removed from the list.
+If false, a copy is made but the original commands will remain in the list.
 */
-private void uiAction_CopyFromCommandListToCutBuffer ( boolean remove_original )
-{	int size = 0;
+private void uiAction_CopyFromCommandListToCutBuffer ( boolean remove_original ) {
+	int size = 0;
 	int [] selected_indices = ui_GetCommandJList().getSelectedIndices();
 	if ( selected_indices != null ) {
 		size = selected_indices.length;
@@ -14013,18 +13868,18 @@ private void uiAction_CopyFromCommandListToCutBuffer ( boolean remove_original )
 		return;
 	}
 
-	// Clear what may previously have been in the cut buffer...
+	// Clear what may previously have been in the cut buffer.
 	__commandsCutBuffer.clear();
 
-	// Transfer Command instances to the cut buffer...
-	Command command = null;	// Command instance to process
+	// Transfer Command instances to the cut buffer.
+	Command command = null;	// Command instance to process.
 	for ( int i = 0; i < size; i++ ) {
 		command = (Command)__commands_JListModel.get(selected_indices[i]);
 		__commandsCutBuffer.add ( (Command)command.clone() );
 	}
-	
+
 	if ( remove_original ) {
-		// If removing, delete the selected commands from the list...
+		// If removing, delete the selected commands from the list.
 		commandList_RemoveCommandsBasedOnUI();
 	}
 }
@@ -14032,12 +13887,11 @@ private void uiAction_CopyFromCommandListToCutBuffer ( boolean remove_original )
 /**
 The datastore choice has been clicked so process the event.
 The only entry point to this method is if the user actually clicks on the choice.
-In this case, the input type/name choices will be set to blank because the user has
-made a decision to work with a datastore.  If they subsequently choose to work with an input type, then
-they would select an input and the datastore choice would be blanked.
+In this case, the input type/name choices will be set to blank because the user has made a decision to work with a datastore.
+If they subsequently choose to work with an input type, then they would select an input and the datastore choice would be blanked.
 */
-private void uiAction_DataStoreChoiceClicked()
-{   //String routine = getClass().getSimpleName() + ".uiAction_DataStoreChoiceClicked";
+private void uiAction_DataStoreChoiceClicked() {
+    //String routine = getClass().getSimpleName() + ".uiAction_DataStoreChoiceClicked";
     /*if ( __dataStore_JComboBox == null ) {
         if ( Message.isDebugOn ) {
             Message.printDebug ( 1, routine, "Datastore has been selected but GUI is not yet initialized - no action taken in response to datastore selection.");
@@ -14050,13 +13904,13 @@ private void uiAction_DataStoreChoiceClicked()
     String selectedDataStoreName = __dataStore_JComboBox.getSelected();
     Message.printStatus(2, routine, "Selected datastore \"" + selectedDataStoreName + "\"." );
     if ( selectedDataStoreName.equals("") ) {
-        // Selected blank for some reason - do nothing
+        // Selected blank for some reason - do nothing.
         return;
     }
     DataStore selectedDataStore = ui_GetSelectedDataStore();
-    // This will select blank input type and name so that the focus is on the selected datastore...
+    // This will select blank input type and name so that the focus is on the selected datastore.
     uiAction_InputTypeChoiceClicked(selectedDataStore);
-    // Now fully initialize the input/query information based on the datastore
+    // Now fully initialize the input/query information based on the datastore.
     try {
         if ( selectedDataStore instanceof ColoradoHydroBaseRestDataStore ) {
             uiAction_SelectDataStore_ColoradoHydroBaseRest ( (ColoradoHydroBaseRestDataStore)selectedDataStore );
@@ -14110,8 +13964,8 @@ private void uiAction_DataStoreChoiceClicked()
 /**
 Deselect all commands in the commands list.  This occurs in response to a user selecting a menu choice.
 */
-private void uiAction_DeselectAllCommands()
-{	__commands_JList.clearSelection();
+private void uiAction_DeselectAllCommands() {
+	__commands_JList.clearSelection();
 	// TODO SAM 2007-08-31 Should add list seletion listener to handle updateStatus call.
 	ui_UpdateStatus ( false );
 }
@@ -14123,12 +13977,11 @@ Carry out the edit command action, triggered by:
 <li>	Pressing the enter key on the command list.</li>
 <li>	Double-clicking on a command in the command list.</li>
 </ol>
-This method will call the uiAction_EditCommand() method with a list of
-commands that were selected to be edited.  Multiple commands may be edited if
-a block of # delimited comments.
+This method will call the uiAction_EditCommand() method with a list of commands that were selected to be edited.
+Multiple commands may be edited if a block of # delimited comments.
 */
-private void uiAction_EditCommand ()
-{	int selected_size = 0;
+private void uiAction_EditCommand () {
+	int selected_size = 0;
 	int [] selected = ui_GetCommandJList().getSelectedIndices();
 	if ( selected != null ) {
 		selected_size = selected.length;
@@ -14137,10 +13990,9 @@ private void uiAction_EditCommand ()
 		Command command = (Command)__commands_JListModel.get(selected[0]);
 		List<Command> v = null;
 		if ( command instanceof Comment_Command ) {
-			// Allow multiple lines to be edited in a comment...
+			// Allow multiple lines to be edited in a comment.
 			// This is handled in the called method, which brings up a multi-line editor for comments.
-            // Only edit the contiguous # block. The first one is a # but stop adding when lines no longer
-			// start with #
+            // Only edit the contiguous # block. The first one is a # but stop adding when lines no longer start with #.
 			v = new ArrayList ( selected_size );
 			for ( int i = 0; i < selected_size; i++ ) {
 				command = (Command)__commands_JListModel.get(selected[i]);
@@ -14152,7 +14004,7 @@ private void uiAction_EditCommand ()
 			}
 		}
 		else {
-            // Commands are one line...
+            // Commands are one line.
 			v = new ArrayList<>(1);
 			v.add ( command );
 		}
@@ -14161,16 +14013,15 @@ private void uiAction_EditCommand ()
 }
 
 /**
-Create a new command file.  If any existing commands have been modified the
-user has the option of saving.  Then, the existing commands are cleared and the
-command file name is reset to null.
+Create a new command file.  If any existing commands have been modified the user has the option of saving.
+Then, the existing commands are cleared and the command file name is reset to null.
 */
-private void uiAction_NewCommandFile ()
-{	// See whether the old commands need to be cleared...
+private void uiAction_NewCommandFile () {
+	// See whether the old commands need to be cleared.
 	// This same code is in openCommandFile() - may be able to combine once all actions are in place.
 	if ( __commandsDirty ) {
 		if ( __commandFileName == null ) {
-			// Have not been saved before...
+			// Have not been saved before.
 			int x = ResponseJDialog.NO;
 			if ( __commands_JListModel.size() > 0 ) {
 				x = new ResponseJDialog ( this, IOUtil.getProgramName(),
@@ -14182,14 +14033,14 @@ private void uiAction_NewCommandFile ()
 				return;
 			}
 			else if ( x == ResponseJDialog.YES ) {
-				// Prompt for the name and then save...
+				// Prompt for the name and then save.
 				uiAction_WriteCommandFile ( __commandFileName, true);
 			}
 		}
 		else {
-			// A command file exists...  Warn the user.  They can save to the existing file name or
-			// can cancel and File...Save As... to a different name.
-			// Have not been saved before...
+			// A command file exists...  Warn the user.
+			// They can save to the existing file name or can cancel and File...Save As... to a different name.
+			// Have not been saved before.
 			int x = ResponseJDialog.NO;
 			if ( __commands_JListModel.size() > 0 ) {
 				x = new ResponseJDialog ( this,	IOUtil.getProgramName(),
@@ -14203,31 +14054,30 @@ private void uiAction_NewCommandFile ()
 			else if ( x == ResponseJDialog.YES ) {
 				uiAction_WriteCommandFile ( __commandFileName,false);
 			}
-			// Else if No will clear below...
+			// Else if No will clear below.
 		}
 	}
 
-	// Now clear the commands and reset the name to null...
+	// Now clear the commands and reset the name to null.
 
 	commandList_RemoveAllCommands ();
 	commandList_SetDirty ( false );	// deleteCommands() sets to true but
-					// since we are clearing the name, the
-					// commands re not dirty
+					// since we are clearing the name, the commands re not dirty.
 	commandList_SetCommandFileName ( null );
 	results_Clear();
 }
 
 /**
-Open a command file and read into the list of commands.  A check is made to
-see if the list contains anything and if it does the user is prompted as to
+Open a command file and read into the list of commands.
+A check is made to see if the list contains anything and if it does the user is prompted as to
 whether need to save the previous commands.
 */
 private void uiAction_OpenCommandFile ( String commandFile, boolean runDiscoveryOnLoad)
 {	String routine = getClass().getSimpleName() + ".uiAction_OpenCommandFile";
-	// See whether the old commands need to be cleared...
+	// See whether the old commands need to be cleared.
 	if ( __commandsDirty ) {
 		if ( __commandFileName == null ) {
-			// Have not been saved before...
+			// Have not been saved before.
 			int x = ResponseJDialog.NO;
 			if ( __commands_JListModel.size() > 0 ) {
 				x = new ResponseJDialog ( this, IOUtil.getProgramName(),
@@ -14239,13 +14089,13 @@ private void uiAction_OpenCommandFile ( String commandFile, boolean runDiscovery
 				return;
 			}
 			else if ( x == ResponseJDialog.YES ) {
-				// Prompt for the name and then save...
+				// Prompt for the name and then save.
 				uiAction_WriteCommandFile ( __commandFileName, true);
 			}
 		}
 		else {
-			// A command file exists...  Warn the user.  They can save to the existing file name or can cancel and
-			// File...Save As... to a different name.
+			// A command file exists...  Warn the user.
+			// They can save to the existing file name or can cancel and File...Save As... to a different name.
 			int x = ResponseJDialog.NO;
 			if ( __commands_JListModel.size() > 0 ) {
 			    if ( __statedmiProcessor.getReadOnly() ) {
@@ -14273,11 +14123,11 @@ private void uiAction_OpenCommandFile ( String commandFile, boolean runDiscovery
 			else if ( x == ResponseJDialog.YES ) {
 				uiAction_WriteCommandFile ( __commandFileName,false);
 			}
-			// Else if No or OK will clear below before opening the other file...
+			// Else if No or OK will clear below before opening the other file.
 		}
 	}
 
-	// Get the file.  Do not clear the list until the file has been chosen and is readable...
+	// Get the file.  Do not clear the list until the file has been chosen and is readable.
 	if( commandFile == null){
 		String initial_dir = ui_GetDir_LastCommandFileOpened();
 		Message.printStatus ( 2, routine, "Initial directory for browsing:  \"" + initial_dir + "\"" );
@@ -14290,12 +14140,12 @@ private void uiAction_OpenCommandFile ( String commandFile, boolean runDiscovery
 		fc.addChoosableFileFilter(sff);
 		fc.setFileFilter(sff);
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-			// If the user approves a selection do the following...
+			// If the user approves a selection do the following.
 			String directory = fc.getSelectedFile().getParent();
 			String path = fc.getSelectedFile().getPath();
 
 			// TODO - is this necessary in Swing?
-			// Set the "WorkingDir" property, which will NOT contain a trailing separator...
+			// Set the "WorkingDir" property, which will NOT contain a trailing separator.
 			IOUtil.setProgramWorkingDir(directory);
 			ui_SetDir_LastCommandFileOpened(directory);
 			__props.set ("WorkingDir=" + IOUtil.getProgramWorkingDir());
@@ -14304,24 +14154,24 @@ private void uiAction_OpenCommandFile ( String commandFile, boolean runDiscovery
 				"Working directory (and initial working directory) from command file is \"" +
 				IOUtil.getProgramWorkingDir() );
 			this.session.pushHistory(path);
-			// Update the recent files in the File...Open menu, for the next menu access
+			// Update the recent files in the File...Open menu, for the next menu access.
 			ui_InitGUIMenus_File_OpenRecentFiles();
 			// Load but do not automatically run.
 			ui_LoadCommandFile ( path, false );
 		}
 	}
 	else{
-		// Set some state information, similar to above, but no need to update menus since picking from visible choice
-    	// TODO SAM 2014-12-19 maybe this information should be saved in the TSToolSession instance
+		// Set some state information, similar to above, but no need to update menus since picking from visible choice.
+    	// TODO SAM 2014-12-19 maybe this information should be saved in the TSToolSession instance.
     	File f = new File(commandFile);
     	String directory = f.getParent();
 		IOUtil.setProgramWorkingDir(directory);
 		ui_SetDir_LastCommandFileOpened(directory);
 		__props.set ("WorkingDir=" + IOUtil.getProgramWorkingDir());
 		ui_SetInitialWorkingDir ( __props.getValue ( "WorkingDir" ) );
-		// Save in the session
+		// Save in the session.
 		this.session.pushHistory(commandFile);
-		// Update the recent files in the File...Open menu, for the next menu access
+		// Update the recent files in the File...Open menu, for the next menu access.
 		ui_InitGUIMenus_File_OpenRecentFiles();
     	// Load but do not automatically run.
     	ui_LoadCommandFile ( commandFile, false);
@@ -14348,13 +14198,13 @@ private void uiAction_OpenGeoView ( boolean is_visible )
 			true );
 		}
 		else {
-			// No existing GeoView so create one...
+			// No existing GeoView so create one.
 			__geoview_JFrame = new GeoViewJFrame ( this, null );
 			__geoview_JFrame.setVisible ( is_visible );
-			// Add a window listener so StateDMI can listen for when the GeoView closes...
+			// Add a window listener so StateDMI can listen for when the GeoView closes.
 			__geoview_JFrame.addWindowListener ( this );
 			JGUIUtil.center ( __geoview_JFrame );
-			// Make sure it is selected...
+			// Make sure it is selected.
 			__View_Map_JCheckBoxMenuItem.setSelected (true );
 		}
 	}
@@ -14372,14 +14222,13 @@ private void uiAction_OpenHydroBase ()
 	Message.printStatus(2, routine, "Opening HydroBase using configuration properties in \"" +
 		HydroBase_Util.getConfigurationFile() + "\"" );
 	String hbcfg = HydroBase_Util.getConfigurationFile();
-	// FIXME SAM 2008-11-19 Fix similar to TSTool where batch is separate
+	// FIXME SAM 2008-11-19 Fix similar to TSTool where batch is separate.
 	if ( IOUtil.isBatch() || StateDMI.runGUIWithSelectedCommandFile  ) {
-		// Running in batch mode or without a main GUI so automatically
-		// open HydroBase from the TSTool.cfg file information...
-		// Get the input needed to process the file...
+		// Running in batch mode or without a main GUI so automatically open HydroBase from the TSTool.cfg file information.
+		// Get the input needed to process the file.
 		PropList props = null;
 		if ( IOUtil.fileExists(hbcfg) ) {
-			// Use the configuration file to get HydroBase properties...
+			// Use the configuration file to get HydroBase properties.
 			try {
 				props = HydroBase_Util.readConfiguration(hbcfg);
 			}
@@ -14393,9 +14242,8 @@ private void uiAction_OpenHydroBase ()
 		}
 
 		try {
-			// Now open the database...
-			// This uses the guest login.  If properties were not
-			// found, then default HydroBase information will be used.
+			// Now open the database.
+			// This uses the guest login.  If properties were not found, then default HydroBase information will be used.
 			__hbdmi = new HydroBaseDMI ( props );
 			__hbdmi.open();
 		}
@@ -14406,13 +14254,12 @@ private void uiAction_OpenHydroBase ()
 		}
 	}
 	else {
-		// Display the dialog to select the database.  This is a modal dialog
-		// that will not allow anything else to occur until the information is
-		// entered.  Use a PropList to pass information because there are a
-		// lot of parameters and the list may change in the future.
-		
+		// Display the dialog to select the database.
+		// This is a modal dialog that will not allow anything else to occur until the information is entered.
+		// Use a PropList to pass information because there are a lot of parameters and the list may change in the future.
+
 		if ( !IOUtil.fileExists(hbcfg) ) {
-			// No HydroBase configuration file so don't create the connection
+			// No HydroBase configuration file so don't create the connection.
 			__hbdmi = null;
 			return;
 		}
@@ -14422,26 +14269,24 @@ private void uiAction_OpenHydroBase ()
 		props.set ( "ShowWaterDivisions", "false" );
 		props.set ( "ShowModels", "true" );
 
-		// Pass in the previous HydroBaseDMI so that its information can be
-		// displayed as the initial values...
+		// Pass in the previous HydroBaseDMI so that its information can be displayed as the initial values.
 
 		SelectHydroBaseJDialog selectHydroBaseJDialog = null;
 		try {
 			selectHydroBaseJDialog = new SelectHydroBaseJDialog ( this, __hbdmi, props );
 
-			// After getting to here, the dialog has been closed.  The
-			// HydroBaseDMI from the dialog can be retrieved and used...
+			// After getting to here, the dialog has been closed.  The HydroBaseDMI from the dialog can be retrieved and used.
 
 			__hbdmi = selectHydroBaseJDialog.getHydroBaseDMI();
-			// Set the HydroBaseDMI for the command processor...
+			// Set the HydroBaseDMI for the command processor.
 			commandProcessor_SetHydroBaseDMI ( __hbdmi );
 
 			if ( __hbdmi == null ) {
 				Message.printWarning ( 1, routine, "HydroBase features will be disabled." );
 			}
-			
+
 			// Define datastores if indicated in the HydroBase selector dialog.
-			
+
 			if ( selectHydroBaseJDialog.getDefineHydroBaseDatastore() ) {
 				// Unlike TSTool there are not input filter UI elements to coordinate with.
 				// Therefore just add or replace the datastore matching name 'HydroBase'.
@@ -14456,8 +14301,8 @@ private void uiAction_OpenHydroBase ()
 			}
 			Message.printStatus(2, routine, "After opening HydroBase version datastore HydroBaseDMI is open:  " + __hbdmi.isOpen());
 			Message.printStatus(2, routine, "After opening HydroBase version datastore HydroBaseDMI is closed:  " + __hbdmi.getConnection().isClosed());
-			
-			// Set the initial model to that specified by the user...
+
+			// Set the initial model to that specified by the user.
 			String model = selectHydroBaseJDialog.getSelectedModel();
 			if ( model.equalsIgnoreCase("StateCU") ) {
 				uiAction_SwitchAppType ( StateDMI.APP_TYPE_STATECU );
@@ -14471,15 +14316,14 @@ private void uiAction_OpenHydroBase ()
 			Message.printWarning ( 2, routine, e );
 			__hbdmi = null;
 		}
-		ui_CheckGUIState();	// To update File...Properties...HydroBase
+		ui_CheckGUIState();	// To update File...Properties...HydroBase.
 	}
 }
 
 /**
  * Open a HydroBase datastore given its name.
  * @param baseName base datastore name, should be 'HydroBase'.
- * @param version database version to add to baseName, empty for 'HydroBase' and format 'YYYYMMDD' for
- * datastore 'HydroBaseYYYYMMDD'.
+ * @param version database version to add to baseName, empty for 'HydroBase' and format 'YYYYMMDD' for datastore 'HydroBaseYYYYMMDD'.
  * @param dmi HydroBaseDMI to use in the datastore.
  */
 private void uiAction_OpenHydroBaseDataStore(String baseName, String version, HydroBaseDMI dmi) {
@@ -14504,17 +14348,16 @@ private void uiAction_OpenHydroBaseDataStore(String baseName, String version, Hy
 
 		if ( dataStore != null ) {
 			// Close the existing datastore/database.
-			// Actually don't need to do anything because resetting below will replace
-			// the datastore instance in the processor.
+			// Actually don't need to do anything because resetting below will replace the datastore instance in the processor.
 			Message.printStatus(2, routine, "Detected exising datastore name \"" + name
 				+ "\" - will replace in processor.");
 		}
 
-		// Open the new datastore
+		// Open the new datastore.
 		ds = new HydroBaseDataStore( name, description, dmi );
 		// TODO smalers 2021-01-03 don't set a message because it is interpreted as an error.
 		//ds.setStatusMessage("Opened based on SelectHydroBase login dialog input.");
-		// Set the datastore in the processor
+		// Set the datastore in the processor.
 		// TODO SAM 2021-01-03 property does not handled boolean so call method directly.
 		//this.__statedmiProcessor.setPropContents ( "DataStore", ds );
 		boolean closeOld = false;
@@ -14529,14 +14372,14 @@ private void uiAction_OpenHydroBaseDataStore(String baseName, String version, Hy
 /**
 Create a new model network file and display.
 */
-private void uiAction_OpenModelNetwork ()
-{	String routine = "StateDMI_JFrame.openModelNetwork";
+private void uiAction_OpenModelNetwork () {
+	String routine = getClass().getSimpleName() + ".uiAction_openModelNetwork";
 
-	// If the network exists, clear it...
+	// If the network exists, clear it.
 
 	StateMod_NodeNetwork network = getModelNetwork();
 	if ( (__network_JFrame != null) && (network != null) && __network_JFrame.isDirty() ) {
-		// Warn the user to save...
+		// Warn the user to save.
 		int x = ResponseJDialog.NO;
 		if ( __commands_JListModel.size() > 0 ) {
 			x = new ResponseJDialog ( this,	IOUtil.getProgramName(),
@@ -14547,18 +14390,18 @@ private void uiAction_OpenModelNetwork ()
 			return;
 		}
 
-		// Close the old frame...
+		// Close the old frame.
 
 		__network_JFrame.dispose();
 	}
 
-	// Now prompt for the new file...
+	// Now prompt for the new file.
 
 	JFileChooser fc = JFileChooserFactory.createJFileChooser ( JGUIUtil.getLastFileDialogDirectory() );
 	fc.setDialogTitle("Select Model Network File");
 	SimpleFileFilter sff = new SimpleFileFilter("net", "Makenet Network File");
 	fc.addChoosableFileFilter(sff);
-	// TODO SAM 2007-06-26 Evaluate why not used
+	// TODO SAM 2007-06-26 Evaluate why not used.
 	//SimpleFileFilter xml_sff = new SimpleFileFilter("net","StateMod XML Network File");
 	fc.addChoosableFileFilter(sff);
 	fc.setFileFilter(sff);
@@ -14585,17 +14428,16 @@ private void uiAction_OpenModelNetwork ()
 }
 
 /**
-Select a new model network file and open the model network GUI with the
-ability to create a new network.
+Select a new model network file and open the model network GUI with the ability to create a new network.
 */
 private void uiAction_OpenNewModelNetwork() {
-	String routine = "StateDMI_JFrame.openNewModelNetwork()";
+	String routine = getClass().getSimpleName() + ".uiAction_OpenNewModelNetwork()";
 
-	// If the network exists, clear it
+	// If the network exists, clear it.
 	StateMod_NodeNetwork network = getModelNetwork();
 
 	if ((__network_JFrame != null) && (network != null) && __network_JFrame.isDirty()) {
-		// Warn the user to save
+		// Warn the user to save.
 		int x = ResponseJDialog.NO;
 		if (__commands_JListModel.size() > 0) {
 			x = new ResponseJDialog(this, IOUtil.getProgramName(),
@@ -14606,7 +14448,7 @@ private void uiAction_OpenNewModelNetwork() {
 			return;
 		}
 
-		// Close the old frame
+		// Close the old frame.
 		__network_JFrame.dispose();
 	}
 
@@ -14624,15 +14466,15 @@ private void uiAction_OpenNewModelNetwork() {
 }
 
 /**
-Open a StateCU response file and read into memory.  A check is made to see if
-StateDMI contains a modified data set and if it does the user is prompted as to
+Open a StateCU response file and read into memory.
+A check is made to see if StateDMI contains a modified data set and if it does the user is prompted as to
 whether they want to save the previous data.
 */
-private void uiAction_OpenStateCUDataSet ( )
-{	String routine = "StateDMI_JFrame.openStateCUDataSet";
-	// See whether the old commands need to be cleared...
+private void uiAction_OpenStateCUDataSet ( ) {
+	String routine = getClass().getSimpleName() + ".uiAction_OpenStateCUDataSet";
+	// See whether the old commands need to be cleared.
 	if ( (__statecuDataset != null) && __statecuDataset.isDirty() ) {
-		// Have not been saved before...
+		// Have not been saved before.
 		int x = ResponseJDialog.NO;
 		if ( __commands_JListModel.size() > 0 ) {
 			x = new ResponseJDialog ( this,
@@ -14650,14 +14492,13 @@ private void uiAction_OpenStateCUDataSet ( )
 		}
 	}
 
-	// Get the file.  Do not clear the current data set until the file has
-	// been chosen is readable...
+	// Get the file.  Do not clear the current data set until the file has been chosen is readable.
 
 	JFileChooser fc = JFileChooserFactory.createJFileChooser(JGUIUtil.getLastFileDialogDirectory() );
 	fc.setDialogTitle("Open StateCU Data Set");
 	fc.setAcceptAllFileFilterUsed ( false );
 	SimpleFileFilter xml_sff = null;
-	/* TODO SAM 2004-02-19 Enable when convince State to track...
+	/* TODO SAM 2004-02-19 Enable when convince State to track.
 		new SimpleFileFilter("xml", "StateCU Data Set File");
 		fc.addChoosableFileFilter(xml_sff);
 	*/
@@ -14665,23 +14506,22 @@ private void uiAction_OpenStateCUDataSet ( )
 	fc.addChoosableFileFilter(rcu_sff);
 	fc.setFileFilter(rcu_sff);
 	if ( fc.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
-		// Cancel...
+		// Cancel.
 		return;
 	}
-	// If the user approves a selection do the following...
+	// If the user approves a selection do the following.
 
 	String directory = fc.getSelectedFile().getParent();
 	String path = fc.getSelectedFile().getPath();
 
-	// Set the "WorkingDir" property, which will NOT contain a
-	// trailing separator...
+	// Set the "WorkingDir" property, which will NOT contain a trailing separator.
 
 	IOUtil.setProgramWorkingDir(directory);
 	JGUIUtil.setLastFileDialogDirectory(directory);
 	__props.set ("WorkingDir=" + IOUtil.getProgramWorkingDir());
 	__initialWorkingDir = __props.getValue ( "WorkingDir" );
 
-	// Read all the data...
+	// Read all the data.
 	StateCU_DataSet new_dataset = null;
 	FileFilter ff = fc.getFileFilter();
 	try {
@@ -14696,43 +14536,42 @@ private void uiAction_OpenStateCUDataSet ( )
 		__statecuDataset_JTree.setDataSet ( new_dataset );
 		__statecuDataset_JTree.displayDataSet ();
 
-		// FIXME SAM 2008-11-11 Evaluate whether to use
+		// FIXME SAM 2008-11-11 Evaluate whether to use.
 		//__statecuResults_JTree.clear ();
 		//__statecuResults_JTree.setDataSet ( new_dataset );
 		//__statecuResults_JTree.displayDataSet ();
 	}
 	catch ( Exception e ) {
-		// Error opening the file (should not happen but maybe a read permissions problem)...
+		// Error opening the file (should not happen but maybe a read permissions problem).
 		Message.printWarning ( 1, routine, "Error opening file \"" + path + "\"" );
 		Message.printWarning ( 2, routine, e );
 		return;
 	}
 	__statecuDataset = new_dataset;
 	__statecuDatasetType = __statecuDataset.getDataSetType();
-	// Reset the menus...
+	// Reset the menus.
 	uiAction_ResetMenusForDataSetType();
-	// Add the map layers...
-	// TODO - comment out for now for performance...
+	// Add the map layers.
+	// TODO - comment out for now for performance.
 	//showStateCUDataSetMapLayers ();
-	// Successfully have read a data set so now go ahead and update the state of the GUI...
+	// Successfully have read a data set so now go ahead and update the state of the GUI.
 	//deleteCommands ();
 	//setCommandsDirty(false);
 
-	// New data set has been opened or there was a cancel/error and the old
-	// data set remains.
+	// New data set has been opened or there was a cancel/error and the old data set remains.
 	ui_UpdateStatus ( true );
 }
 
 /**
-Open a StateMod response file (or data set file) and read the data set into
-memory.  A check is made to see if StateDMI contains a modified data set and if
+Open a StateMod response file (or data set file) and read the data set into memory.
+A check is made to see if StateDMI contains a modified data set and if
 it does the user is prompted as to whether they want to save the previous data.
 */
-private void uiAction_OpenStateModDataSet ()
-{	String routine = "StateDMI_JFrame.openStateModDataSet";
-	// See whether the old commands need to be cleared...
+private void uiAction_OpenStateModDataSet () {
+	String routine = getClass().getSimpleName() + ".uiAction_OpenStateModDataSet";
+	// See whether the old commands need to be cleared.
 	if ( (__statemodDataset != null) && __statemodDataset.isDirty() ) {
-		// Have not been saved before...
+		// Have not been saved before.
 		int x = ResponseJDialog.NO;
 		if ( __commands_JListModel.size() > 0 ) {
 			x = new ResponseJDialog ( this,
@@ -14750,13 +14589,13 @@ private void uiAction_OpenStateModDataSet ()
 		}
 	}
 
-	// Get the file.  Do not clear the current data set until the file has been chosen is readable...
+	// Get the file.  Do not clear the current data set until the file has been chosen is readable.
 
 	JFileChooser fc = JFileChooserFactory.createJFileChooser(JGUIUtil.getLastFileDialogDirectory() );
 	fc.setAcceptAllFileFilterUsed ( false );
 	fc.setDialogTitle("Open StateMod Data Set");
 	SimpleFileFilter xml_sff = null;
-	/* TODO SAM 2004-02-19
+	/* TODO SAM 2004-02-19.
 		new SimpleFileFilter("xml", "StateMod Data Set File");
 		fc.addChoosableFileFilter(xml_sff);
 	*/
@@ -14769,16 +14608,16 @@ private void uiAction_OpenStateModDataSet ()
 	String directory = fc.getSelectedFile().getParent();
 	String path = fc.getSelectedFile().getPath();
 
-	// Set the "WorkingDir" property, which will NOT contain a trailing separator...
+	// Set the "WorkingDir" property, which will NOT contain a trailing separator.
 	IOUtil.setProgramWorkingDir(directory);
 	JGUIUtil.setLastFileDialogDirectory(directory);
 	__props.set ("WorkingDir=" + IOUtil.getProgramWorkingDir());
 	__initialWorkingDir = __props.getValue ( "WorkingDir" );
 
-	// Read all the data...
+	// Read all the data.
 	StateMod_DataSet new_dataset = null;
-	// TODO - does not seem to work?...
-	// Hide so that progress is shown in the main GUI...
+	// TODO - does not seem to work?
+	// Hide so that progress is shown in the main GUI.
 	fc.setVisible ( false );
 	FileFilter ff = fc.getFileFilter();
 	try {
@@ -14787,11 +14626,11 @@ private void uiAction_OpenStateModDataSet ()
 			//new_dataset =StateMod_DataSet.readXMLFile ( path,true );
 		}
 		else if ( ff == rsp_sff ) {
-			// TODO - unlike StateCU, declare an instance first...
+			// TODO - unlike StateCU, declare an instance first.
 			new_dataset = new StateMod_DataSet ( StateMod_DataSet.TYPE_UNKNOWN );
-			new_dataset.readStateModFile( path,	true, // read data
-			true, // read time series
-			true, // using a GUI
+			new_dataset.readStateModFile( path,	true, // Read data.
+			true, // Read time series.
+			true, // Using a GUI.
 			this );
 		}
 		__sessionType = __SESSION_DATA_SET;
@@ -14799,26 +14638,26 @@ private void uiAction_OpenStateModDataSet ()
 		__statemodDataset_JTree.setDataSet ( new_dataset );
 		__statemodDataset_JTree.displayDataSet ();
 
-		// FIXME SAM 2008-11-11 Evaluate whether to use
+		// FIXME SAM 2008-11-11 Evaluate whether to use.
 		//__statemodResults_JTree.clear ();
 		//__statemodResults_JTree.setDataSet ( new_dataset );
 		//__statemodResults_JTree.displayDataSet ();
 	}
 	catch ( Exception e ) {
-		// Error opening the file (should not happen but maybe a read permissions problem)...
+		// Error opening the file (should not happen but maybe a read permissions problem).
 		Message.printWarning ( 1, routine, "Error opening file \"" + path + "\"" );
 		Message.printWarning ( 2, routine, e );
 		return;
 	}
 	__statemodDataset = new_dataset;
-	// TODO SAM 2007-06-26 Evaluate use
+	// TODO SAM 2007-06-26 Evaluate use.
 	//__statemod_dataset_type = __statemod_dataset.getDataSetType();
-	// Reset the menus...
+	// Reset the menus.
 	uiAction_ResetMenusForDataSetType();
-	// Add the map layers...
+	// Add the map layers.
 	// TODO -  need to read and display the GeoView project file.
 	//showStateModDataSetMapLayers ();
-	// Successfully have read a data set so now go ahead and update the state of the GUI...
+	// Successfully have read a data set so now go ahead and update the state of the GUI.
 	//deleteCommands ();
 	//setCommandsDirty(false);
 	// New data set has been opened or there was a cancel/error and the old data set remains.
@@ -14826,15 +14665,14 @@ private void uiAction_OpenStateModDataSet ()
 }
 
 /**
-Paste the cut buffer containing Command instances that were previously cut or
-copied, inserting after the selected item.
+Paste the cut buffer containing Command instances that were previously cut or copied, inserting after the selected item.
 */
-private void uiAction_PasteFromCutBufferToCommandList ()
-{	// Default selected to zero (empty list)...
+private void uiAction_PasteFromCutBufferToCommandList () {
+	// Default selected to zero (empty list).
 	int last_selected = -1;
 	int list_size = __commands_JListModel.size();
 
-	// Get the list of selected items...
+	// Get the list of selected items.
 	int [] selected_indices = ui_GetCommandJList().getSelectedIndices();
 	int selectedsize = 0;
 	if ( selected_indices != null ) {
@@ -14844,12 +14682,12 @@ private void uiAction_PasteFromCutBufferToCommandList ()
 		last_selected = selected_indices[selectedsize - 1];
 	}
 	else if ( list_size != 0 ) {
-		// Nothing selected so set to last item in list...
+		// Nothing selected so set to last item in list.
 		last_selected = list_size - 1;
 	}
-	// Else, nothing in list so will insert at beginning
+	// Else, nothing in list so will insert at beginning.
 
-	// Transfer the cut buffer starting at one after the last selection...
+	// Transfer the cut buffer starting at one after the last selection.
 
 	int buffersize = __commandsCutBuffer.size();
 
@@ -14868,13 +14706,13 @@ private void uiAction_PasteFromCutBufferToCommandList ()
 /**
 Read a list file for climate stations and create a new data set.
 */
-private void uiAction_ReadStateCUClimateStationsFromList ()
-{	String routine = "StateDMI_JFrame.readStateCUClimateStationsFromList";
+private void uiAction_ReadStateCUClimateStationsFromList () {
+	String routine = getClass().getSimpleName() + ".uiAction_ReadStateCUClimateStationsFromList";
 /*
-	// See whether the old commands need to be cleared...
+	// See whether the old commands need to be cleared.
 	if ( __dataDirty ) {
 		if ( __commands_file_name == null ) {
-			// Have not been saved before...
+			// Have not been saved before.
 			int x = ResponseJDialog.NO;
 			if ( __commands_JListModel.size() > 0 ) {
 				x = new ResponseJDialog ( this, IOUtil.getProgramName(), "Do you want to save the commands?",
@@ -14884,15 +14722,14 @@ private void uiAction_ReadStateCUClimateStationsFromList ()
 				return;
 			}
 			else if ( x == ResponseJDialog.YES ) {
-				// Prompt for the name and then save...
+				// Prompt for the name and then save.
 				writeCommandFile ( __commands_file_name, true);
 			}
 		}
 		else {
-			// A command file exists...  Warn the user.  They can
-			// save to the existing file name or can cancel and
-			// File...Save As... to a different name.
-			// Have not been saved before...
+			// A command file exists...  Warn the user.
+			// They can save to the existing file name or can cancel and File...Save As... to a different name.
+			// Have not been saved before.
 			int x = ResponseJDialog.NO;
 			if ( __commands_JListModel.size() > 0 ) {
 				x = new ResponseJDialog ( this, IOUtil.getProgramName(),
@@ -14905,11 +14742,11 @@ private void uiAction_ReadStateCUClimateStationsFromList ()
 			else if ( x == ResponseJDialog.YES ) {
 				writeCommandFile ( __commands_file_name,false);
 			}
-			// Else if No will clear below before opening the other file...
+			// Else if No will clear below before opening the other file.
 		}
 	}
 */
-	// Get the base name for the new data set...
+	// Get the base name for the new data set.
 
 	String basename = "test";
 	while ( true ) {
@@ -14924,7 +14761,7 @@ private void uiAction_ReadStateCUClimateStationsFromList ()
 		// Could also put here a selector for the data set type (monthly, daily).
 		// Could also put here a selection for the map file.
 		if ( basename == null ) {
-			// Cancelled out so don't initialize a new data set...
+			// Cancelled out so don't initialize a new data set.
 			return;
 		}
 		basename = basename.trim();
@@ -14937,7 +14774,7 @@ private void uiAction_ReadStateCUClimateStationsFromList ()
 		}
 	}
 
-	// Get the file.  Do not clear the list until the file has been chosen and is readable...
+	// Get the file.  Do not clear the list until the file has been chosen and is readable.
 
 	JFileChooser fc = JFileChooserFactory.createJFileChooser(JGUIUtil.getLastFileDialogDirectory() );
 	fc.setDialogTitle( "Open Climate Stations List File (identifiers in first column)");
@@ -14947,8 +14784,8 @@ private void uiAction_ReadStateCUClimateStationsFromList ()
 	if (fc.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
 		return;
 	}
-	/* TODO SAM 2007-06-26 Evaluate why not enabled
-	// If the user approves a selection do the following...
+	/* TODO SAM 2007-06-26 Evaluate why not enabled.
+	// If the user approves a selection do the following.
 	String directory = fc.getSelectedFile().getParent();
 	String filename = fc.getSelectedFile().getName();
 	String path = fc.getSelectedFile().getPath();
@@ -14961,14 +14798,14 @@ private void uiAction_ReadStateCUClimateStationsFromList ()
 		br = new BufferedReader( new FileReader(path) );
 	}
 	catch ( Exception e ) {
-		// Error opening the file (should not happen but maybe a read permissions problem)...
+		// Error opening the file (should not happen but maybe a read permissions problem).
 		Message.printWarning ( 1, routine, "Error opening file \"" + path + "\"" );
 		Message.printWarning ( 2, routine, e );
 		return;
 	}
 	*/
 /*
-			// Successfully have a file so now go ahead and remove the list contents and update the list...
+			// Successfully have a file so now go ahead and remove the list contents and update the list.
 			deleteCommands ();
 			setCommandFileName(path);
 			String line;
@@ -14989,16 +14826,16 @@ private void uiAction_ReadStateCUClimateStationsFromList ()
 			}
 */
 
-	// Get the output directory (hard-code for now)...
+	// Get the output directory (hard-code for now).
 
 	//String dataset_dir = "C:\\TEMP";
 
-	// If here, reset the state of the GUI to reflect that a new data set type is now active...
+	// If here, reset the state of the GUI to reflect that a new data set type is now active.
 
 	__statecuDatasetType = StateCU_DataSet.TYPE_CLIMATE_STATIONS;
 	uiAction_ResetMenusForDataSetType();
 
-	// Declare a new data set...
+	// Declare a new data set.
 
 	// TODO - handle exception
 	//__statecu_dataset = new StateCU_DataSet ( __statecu_dataset_type, dataset_dir, basename );
@@ -15011,13 +14848,13 @@ private void uiAction_ReadStateCUClimateStationsFromList ()
 /**
 Read a list file for climate stations and create a new data set.
 */
-private void uiAction_ReadStateCUStructuresFromList ()
-{	//String routine = "StateDMI_JFrame.readStateCUStructuresFromList";
+private void uiAction_ReadStateCUStructuresFromList () {
+	//String routine = "StateDMI_JFrame.readStateCUStructuresFromList";
 /*
-	// See whether the old commands need to be cleared...
+	// See whether the old commands need to be cleared.
 	if ( __dataDirty ) {
 		if ( __commands_file_name == null ) {
-			// Have not been saved before...
+			// Have not been saved before.
 			int x = ResponseJDialog.NO;
 			if ( __commands_JListModel.size() > 0 ) {
 				x = new ResponseJDialog ( this, IOUtil.getProgramName(), "Do you want to save the commands?",
@@ -15027,15 +14864,14 @@ private void uiAction_ReadStateCUStructuresFromList ()
 				return;
 			}
 			else if ( x == ResponseJDialog.YES ) {
-				// Prompt for the name and then save...
+				// Prompt for the name and then save.
 				writeCommandFile ( __commands_file_name, true);
 			}
 		}
 		else {
-			// A command file exists...  Warn the user.  They can
-			// save to the existing file name or can cancel and
-			// File...Save As... to a different name.
-			// Have not been saved before...
+			// A command file exists...  Warn the user.
+			// They can save to the existing file name or can cancel and File...Save As... to a different name.
+			// Have not been saved before.
 			int x = ResponseJDialog.NO;
 			if ( __commands_JListModel.size() > 0 ) {
 				x = new ResponseJDialog ( this, IOUtil.getProgramName(),
@@ -15048,12 +14884,12 @@ private void uiAction_ReadStateCUStructuresFromList ()
 			else if ( x == ResponseJDialog.YES ) {
 				writeCommandFile ( __commands_file_name,false);
 			}
-			// Else if No will clear below before opening the other file...
+			// Else if No will clear below before opening the other file.
 		}
 	}
 */
 
-	// Get the file.  Do not clear the list until the file has been chosen and is readable...
+	// Get the file.  Do not clear the list until the file has been chosen and is readable.
 
 	JFileChooser fc = JFileChooserFactory.createJFileChooser(JGUIUtil.getLastFileDialogDirectory() );
 	fc.setDialogTitle( "Open Structure List File (identifiers in first column)");
@@ -15063,8 +14899,8 @@ private void uiAction_ReadStateCUStructuresFromList ()
 	if (fc.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
 		return;
 	}
-	/* TODO SAM 2007-06-26 Evaluate why this is not enabled
-	// If the user approves a selection do the following...
+	/* TODO SAM 2007-06-26 Evaluate why this is not enabled.
+	// If the user approves a selection do the following.
 	String directory = fc.getSelectedFile().getParent();
 	String path = fc.getSelectedFile().getPath();
 
@@ -15075,14 +14911,14 @@ private void uiAction_ReadStateCUStructuresFromList ()
 		JGUIUtil.setLastFileDialogDirectory ( directory );
 	}
 	catch ( Exception e ) {
-		// Error opening the file (should not happen but maybe a read permissions problem)...
+		// Error opening the file (should not happen but maybe a read permissions problem).
 		Message.printWarning ( 1, routine, "Error opening file \"" + path + "\"" );
 		Message.printWarning ( 2, routine, e );
 		return;
 	}
 	*/
 /*
-			// Successfully have a file so now go ahead and remove the list contents and update the list...
+			// Successfully have a file so now go ahead and remove the list contents and update the list.
 			deleteCommands ();
 			setCommandFileName(path);
 			String line;
@@ -15102,38 +14938,36 @@ private void uiAction_ReadStateCUStructuresFromList ()
 				Message.printWarning (2, routine, e );
 			}
 */
-	// If here, reset the state of the GUI to reflect that a new data set type is now active...
+	// If here, reset the state of the GUI to reflect that a new data set type is now active.
 	uiAction_ResetMenusForDataSetType();
 	// New file has been opened or there was a cancel/error and the old list remains.
 	ui_UpdateStatus ( true );
 }
 
 /**
-Reset the menus for the data set type.  Assume that the data set has been
-discarded and that menus can be reset based only on the data set type.
+Reset the menus for the data set type.
+Assume that the data set has been discarded and that menus can be reset based only on the data set type.
 */
-private void uiAction_ResetMenusForDataSetType ()
-{	// First remove the listeners from the JFrame using the list of
-	// menus that were added previously.  Using a list is easier than
-	// duplicating logic and tracking individual components.
+private void uiAction_ResetMenusForDataSetType () {
+	// First remove the listeners from the JFrame using the list of menus that were added previously.
+	// Using a list is easier than duplicating logic and tracking individual components.
 
-	Message.printStatus ( 1, "StateDMI_JFrame.resetMenusForDataSetType",
-		"Resetting menus for data set type." );
+	Message.printStatus ( 1, "StateDMI_JFrame.resetMenusForDataSetType", "Resetting menus for data set type." );
 	// TODO
 /*
 	int size = __dataset_menu_List.size();
 	for ( int i = 0; i < size; i++ ) {
-		// Remove the ActionListeners from this JFrame for each menu...
+		// Remove the ActionListeners from this JFrame for each menu.
 		removeListener( (JMenuItem)__dataset_menu_List.elementAt(i));
 	}
 */
-	// Remove the submenus but not the top-level menus themselves...
+	// Remove the submenus but not the top-level menus themselves.
 
 	__File_Save_JMenu.removeAll();
 	__Results_JMenu.removeAll();
 	__Commands_JMenu.removeAll();
 
-	// Now reinitialize the menus
+	// Now reinitialize the menus.
 
 	if ( __appType == StateDMI.APP_TYPE_STATECU ) {
 		ui_InitGUIMenus_File ( null );	// Defines the Save menus.
@@ -15149,71 +14983,67 @@ private void uiAction_ResetMenusForDataSetType ()
 }
 
 /**
-Run the commands in the command list.  These time series are saved in
-__statedmiProcessor and are then available for export, analysis, or viewing.  This
-method should only be called if there are commands in the command list.
-@param runAllCommands If false, then only the selected commands are run.  If
-true, then all commands are run.
-@param createOutput If true, then all write* methods are processed by the
-TSEngine.  If false, only the time series in memory remain at the end and can
-be viewed.  The former is suitable for batch files, both for the GUI.
+Run the commands in the command list.
+These time series are saved in __statedmiProcessor and are then available for export, analysis, or viewing.
+This method should only be called if there are commands in the command list.
+@param runAllCommands If false, then only the selected commands are run.  If true, then all commands are run.
+@param createOutput If true, then all write* methods are processed by the processor.
+If false, only the time series in memory remain at the end and can be viewed.
+The former is suitable for batch files, both for the GUI.
 */
-private void uiAction_RunCommands ( boolean runAllCommands, boolean createOutput )
-{	String routine = "StateDMI_JFrame.uiAction_RunCommands";
+private void uiAction_RunCommands ( boolean runAllCommands, boolean createOutput ) {
+	String routine = getClass().getSimpleName() + ".uiAction_RunCommands";
 	ui_UpdateStatusTextFields ( 1, routine, null, "Running commands...", __STATUS_BUSY);
 	results_Clear ();
 	System.gc();
-	// Get commands to run (all or selected)...
+	// Get commands to run (all or selected).
 	List commands = commandList_GetCommands ( runAllCommands );
 	// The limits of the command progress bar are handled in commandStarted().
 	// Run the commands in the processor instance.
 	if ( ui_Property_RunCommandProcessorInThread() ) {
 		// Run the commands in a thread.
 		commandProcessor_RunCommandsThreaded ( commands, createOutput );
-		// Results are displayed when CommandProcessorListener.commandCompleted()
-		// detects that the last command is complete.
+		// Results are displayed when CommandProcessorListener.commandCompleted() detects that the last command is complete.
 	}
 }
 
 /**
-Display the results generated by a run.  Currently this only provides a list
-of the output files and output components.  Eventually it may also display/update the data set JTree.
-This is handled as a "pinch point" in hand-off from the processor and the UI, to try
-to gracefully handle displaying output.
+Display the results generated by a run.
+Currently this only provides a list of the output files and output components.
+Eventually it may also display/update the data set JTree.
+This is handled as a "pinch point" in hand-off from the processor and the UI, to try to gracefully handle displaying output.
 */
-private void uiAction_RunCommands_ShowResults()
-{	Message.printStatus ( 1, "StateDMI_JFrame.uiAction_RunCommands_DisplayResults", "Displaying results..." );
+private void uiAction_RunCommands_ShowResults() {
+	Message.printStatus ( 1, getClass().getSimpleName() + ".uiAction_RunCommands_DisplayResults", "Displaying results..." );
 
-	// This method may be called from a thread different than the Swing thread.  To
-	// avoid bad behavior in GUI components (like the results list having big gaps),
+	// This method may be called from a thread different than the Swing thread.
+	// To avoid bad behavior in GUI components (like the results list having big gaps),
 	// use the following to queue up GUI actions on the Swing thread.
-	
+
 	Runnable r = new Runnable() {
 		public void run() {
             // Close the regression results report if it is open (have to do here because
-            // layers of recursion can occur when running a command file)...
+            // layers of recursion can occur when running a command file).
             StateDMICommandProcessorUtil.closeRegressionTestReportFile();
 			results_Clear();
-			// Display the results in the results area for user selection...
+			// Display the results in the results area for user selection.
 			uiAction_RunCommands_ShowResultsOutputFiles();
 			uiAction_RunCommands_ShowResultsProblems();
 			uiAction_RunCommands_ShowResultsProperties();
 			uiAction_RunCommands_ShowResultsStateCUComponents ();
 			uiAction_RunCommands_ShowResultsStateModComponents ();
 			uiAction_RunCommands_ShowResultsTables();
-			// TODO SAM 2005-01-18 need to enable JTree
+			// TODO SAM 2005-01-18 need to enable JTree.
 			//ui_displayResultsComponentTree();
-            
-            // Repaint the list to reflect the status of the commands...
+
+            // Repaint the list to reflect the status of the commands.
             ui_ShowCurrentCommandListStatus ();
 		}
 	};
-	if ( SwingUtilities.isEventDispatchThread() )
-	{
+	if ( SwingUtilities.isEventDispatchThread() ) {
 		r.run();
 	}
-	else 
-	{
+	else {
 		SwingUtilities.invokeLater ( r );
 	}
 }
@@ -15221,10 +15051,10 @@ private void uiAction_RunCommands_ShowResults()
 /**
 Display the list of output files from the commands.
 */
-private void uiAction_RunCommands_ShowResultsOutputFiles()
-{	// Loop through the commands.  For any that implement the FileGenerator interface,
+private void uiAction_RunCommands_ShowResultsOutputFiles() {
+	// Loop through the commands.  For any that implement the FileGenerator interface,
 	// get the output file names and add to the list.
-	// Only add a file if not already in the list
+	// Only add a file if not already in the list.
 	//Message.printStatus ( 2, "uiAction_RunCommands_ShowResultsOutputFiles", "Entering method.");
 	int size = __commands_JListModel.size();
 	Command command;
@@ -15241,7 +15071,7 @@ private void uiAction_RunCommands_ShowResultsOutputFiles()
 			}
 		}
 	}
-	// Now add to the list
+	// Now add to the list.
 	ui_SetIgnoreActionEvent(false);
 	//Message.printStatus ( 2, "uiAction_RunCommands_ShowResultsOutputFiles", "Leaving method.");
 }
@@ -15249,23 +15079,23 @@ private void uiAction_RunCommands_ShowResultsOutputFiles()
 /**
 Display the list of problems from the commands.
 */
-private void uiAction_RunCommands_ShowResultsProblems()
-{	String routine = getClass().getSimpleName() + ".uiAction_RunCommands_ShowResultsProblems";
+private void uiAction_RunCommands_ShowResultsProblems() {
+	String routine = getClass().getSimpleName() + ".uiAction_RunCommands_ShowResultsProblems";
 	//Message.printStatus ( 2, routine, "Entering method.");
 	try {
-		// Get all of the command log messages from all commands for all run phases...
+		// Get all of the command log messages from all commands for all run phases.
         List commands = __statedmiProcessor.getCommands();
         // For normal commands, the log records will be for the specific command.
         // For RunCommand() commands, the log records will include commands in the command file that was run.
         CommandPhaseType [] commandPhases = { CommandPhaseType.RUN }; // If show discovery it can be confusing with ${Property}, etc.
         CommandStatusType [] statusTypes = new CommandStatusType[2];
-        // List failures first
+        // List failures first.
         statusTypes[0] = CommandStatusType.FAILURE;
         statusTypes[1] = CommandStatusType.WARNING;
 		List logRecordList = CommandStatusUtil.getLogRecordList ( commands, commandPhases, statusTypes );
 		Message.printStatus( 2, routine, "There were " + logRecordList.size() + " problems processing the commands.");
 		// Create a new table model for the problem list.
-		// TODO SAM 2009-03-01 Evaluate whether should just update data in existing table model (performance?)
+		// TODO SAM 2009-03-01 Evaluate whether should just update data in existing table model (performance?).
 		CommandLog_TableModel tableModel = new CommandLog_TableModel ( logRecordList );
 		CommandLog_CellRenderer cellRenderer = new CommandLog_CellRenderer( tableModel );
 		__resultsProblems_JWorksheet.setCellRenderer ( cellRenderer );
@@ -15284,11 +15114,11 @@ private void uiAction_RunCommands_ShowResultsProblems()
 /**
 Display the list of properties from the command processor.
 */
-private void uiAction_RunCommands_ShowResultsProperties()
-{   String routine = getClass().getSimpleName() + ".uiAction_RunCommands_ShowResultsProperties";
+private void uiAction_RunCommands_ShowResultsProperties() {
+    String routine = getClass().getSimpleName() + ".uiAction_RunCommands_ShowResultsProperties";
     try {
         // Create a new table model for the command processor properties.
-        // TODO SAM 2009-03-01 Evaluate whether should just update data in existing table model (performance?)
+        // TODO SAM 2009-03-01 Evaluate whether should just update data in existing table model (performance?).
         StateDMI_Processor processor = commandProcessor_GetCommandProcessor();
         Collection<String> propertyNames = processor.getPropertyNameList(true, true);
         PropList props = new PropList("processor");
@@ -15323,23 +15153,23 @@ private void uiAction_RunCommands_ShowResultsProperties()
 }
 
 /**
-Display the results of a run as a list of StateCU components.  The user can then select
-an item to display the results in a worksheet.  The action events will trigger
-a call to displayResultsComponentTable().
+Display the results of a run as a list of StateCU components.
+The user can then select an item to display the results in a worksheet.
+The action events will trigger a call to displayResultsComponentTable().
 */
-private void uiAction_RunCommands_ShowResultsStateCUComponents ()
-{	//String routine = "StateDMI_JFrame.uiAction_RunCommands_ShowResultsStateCUComponents";
+private void uiAction_RunCommands_ShowResultsStateCUComponents () {
+	//String routine = "StateDMI_JFrame.uiAction_RunCommands_ShowResultsStateCUComponents";
 	List v = null;
-	// A data set instance is needed to lookup information
+	// A data set instance is needed to lookup information.
 	StateCU_DataSet statecu_dataset = null;
 	try {
 		statecu_dataset = new StateCU_DataSet ();
 	}
 	catch ( Exception e ) {
-		// Should not happen
+		// Should not happen.
 	}
 
-	// Don't want to generate item events as combo boxes are modified...
+	// Don't want to generate item events as combo boxes are modified.
 
 	ui_SetIgnoreActionEvent (true);
 
@@ -15351,8 +15181,7 @@ private void uiAction_RunCommands_ShowResultsStateCUComponents ()
 			statecu_dataset.lookupComponentName(StateCU_DataSet.COMP_CLIMATE_STATIONS));
 	}
 
-	// Climate station time series are not handled by StateDMI.  Use
-	// TSTool or some other software to view.
+	// Climate station time series are not handled by StateDMI.  Use TSTool or some other software to view.
 
 	v = __statedmiProcessor.getStateCUCropCharacteristicsList();
 	if ( (v != null) && (v.size() > 0) ) {
@@ -15365,14 +15194,14 @@ private void uiAction_RunCommands_ShowResultsStateCUComponents ()
 		results_StateCUComponents_AddComponents(
 			statecu_dataset.lookupComponentName(StateCU_DataSet.COMP_BLANEY_CRIDDLE));
 	}
-	
+
 	v = __statedmiProcessor.getStateCUPenmanMonteithList();
 	if ( (v != null) && (v.size() > 0) ) {
 		results_StateCUComponents_AddComponents(
 			statecu_dataset.lookupComponentName(StateCU_DataSet.COMP_PENMAN_MONTEITH));
 	}
 
-	// StateMod delay tables are also used by StateCU
+	// StateMod delay tables are also used by StateCU.
 	v = __statedmiProcessor.getStateModDelayTableList( TimeInterval.MONTH );
 	if ( (v != null) && (v.size() > 0) ) {
 		results_StateCUComponents_AddComponents(
@@ -15402,28 +15231,28 @@ private void uiAction_RunCommands_ShowResultsStateCUComponents ()
 	}
 
 	// The intervening files are not handled in StateDMI as part of StateCU data sets.
-	
+
 	ui_SetIgnoreActionEvent (false);
 }
 
 /**
-Display the results of a run as a list of StateMod components.  The user can then select
-an item to display the results in a worksheet.  The action events will trigger
-a call to displayResultsComponentTable().
+Display the results of a run as a list of StateMod components.
+The user can then select an item to display the results in a worksheet.
+The action events will trigger a call to displayResultsComponentTable().
 */
-private void uiAction_RunCommands_ShowResultsStateModComponents ()
-{	String routine = "StateDMI_JFrame.uiAction_RunCommands_ShowResultsStateModComponents";
+private void uiAction_RunCommands_ShowResultsStateModComponents () {
+	String routine = getClass().getSimpleName() + ".uiAction_RunCommands_ShowResultsStateModComponents";
 	List v = null;
-	// Need instance for lookup method
+	// Need instance for lookup method.
 	StateMod_DataSet statemod_dataset = null;
 	try {
 		statemod_dataset = new StateMod_DataSet ();
 	}
 	catch ( Exception e ) {
-		// Should not happen
+		// Should not happen.
 	}
 
-	// Don't want to generate item events as combo boxes are modified...
+	// Don't want to generate item events as combo boxes are modified.
 
 	ui_SetIgnoreActionEvent (true);
 
@@ -15488,11 +15317,9 @@ private void uiAction_RunCommands_ShowResultsStateModComponents ()
 			statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_DEMAND_TS_DAILY));
 	}
 
-	// The other diversion time series are not handled by StateDMI
-	// and should be displayed with TSTool or other software.
+	// The other diversion time series are not handled by StateDMI and should be displayed with TSTool or other software.
 
-	// Precipitation and evaporation time series are not handled by
-	// StateDMI and should be displayed with TSTool or other software.
+	// Precipitation and evaporation time series are not handled by StateDMI and should be displayed with TSTool or other software.
 
 	v = __statedmiProcessor.getStateModReservoirStationList();
 	if ( (v != null) && (v.size() > 0) ) {
@@ -15510,15 +15337,14 @@ private void uiAction_RunCommands_ShowResultsStateModComponents ()
 			statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_RESERVOIR_STATION_COLLECTIONS));
 	}
 
-	// Reservoir time series are not handled by StateDMI and should
-	// be displayed with TSTool or other software.
+	// Reservoir time series are not handled by StateDMI and should be displayed with TSTool or other software.
 
 	v = __statedmiProcessor.getStateModReservoirRightList();
 	if ( (v != null) && (v.size() > 0) ) {
 		results_StateModComponents_AddComponents(
 			statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_RESERVOIR_RIGHTS));
 	}
-	
+
 	v = __statedmiProcessor.getStateModReservoirReturnList();
 	if ( (v != null) && (v.size() > 0) ) {
 		results_StateModComponents_AddComponents(
@@ -15543,8 +15369,7 @@ private void uiAction_RunCommands_ShowResultsStateModComponents ()
 			statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_INSTREAM_DEMAND_TS_AVERAGE_MONTHLY));
 	}
 
-	// Instream flow demand time series (monthly, daily) are not handled by
-	// StateDMI and should be displayed with TSTool or other software.
+	// Instream flow demand time series (monthly, daily) are not handled by StateDMI and should be displayed with TSTool or other software.
 
 	v = __statedmiProcessor.getStateModWellStationList();
 	if ( (v != null) && (v.size() > 0) ) {
@@ -15576,21 +15401,20 @@ private void uiAction_RunCommands_ShowResultsStateModComponents ()
 			statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_WELL_DEMAND_TS_MONTHLY) );
 	}
 
-	// Well daily time series are not handled by StateDMI and should be
-	// displayed with TSTool or other software.
-	
+	// Well daily time series are not handled by StateDMI and should be displayed with TSTool or other software.
+
 	v = __statedmiProcessor.getStateModPlanStationList();
 	if ( (v != null) && (v.size() > 0) ) {
 		results_StateModComponents_AddComponents(
 			statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_PLANS));
 	}
-	
+
 	v = __statedmiProcessor.getStateModPlanWellAugmentationList();
 	if ( (v != null) && (v.size() > 0) ) {
 		results_StateModComponents_AddComponents(
 			statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_PLAN_WELL_AUGMENTATION));
 	}
-	
+
 	v = __statedmiProcessor.getStateModPlanReturnList();
 	if ( (v != null) && (v.size() > 0) ) {
 		results_StateModComponents_AddComponents(
@@ -15609,24 +15433,23 @@ private void uiAction_RunCommands_ShowResultsStateModComponents ()
 			statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_STREAMESTIMATE_COEFFICIENTS));
 	}
 
-	// Stream estimate series are not handled by StateDMI and should
-	// be displayed with TSTool or other software.
+	// Stream estimate series are not handled by StateDMI and should be displayed with TSTool or other software.
 
 	v = __statedmiProcessor.getStateModRiverNetworkNodeList();
 	if ( (v != null) && (v.size() > 0) ) {
 		results_StateModComponents_AddComponents(
 			statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_RIVER_NETWORK));
 	}
-	
-	// Operational rights
-	
+
+	// Operational rights.
+
 	v = __statedmiProcessor.getStateModOperationalRightList();
 	if ( (v != null) && (v.size() > 0) ) {
 		results_StateModComponents_AddComponents(
 			statemod_dataset.lookupComponentName(StateMod_DataSet.COMP_OPERATION_RIGHTS));
 	}
 
-	// The other files are not currently handled by StateDMI...
+	// The other files are not currently handled by StateDMI.
 
 	ui_SetIgnoreActionEvent ( false );
 }
@@ -15634,8 +15457,8 @@ private void uiAction_RunCommands_ShowResultsStateModComponents ()
 /**
 Display the table results.
 */
-private void uiAction_RunCommands_ShowResultsTables()
-{   // Get the list of tables from the processor.
+private void uiAction_RunCommands_ShowResultsTables() {
+    // Get the list of tables from the processor.
     List<DataTable> tableList = commandProcessor_GetTableResultsList();
     int size = 0;
     if ( tableList != null ) {
@@ -15643,7 +15466,7 @@ private void uiAction_RunCommands_ShowResultsTables()
     }
     ui_SetIgnoreActionEvent(true);
     DataTable table;
-    // Use HTML only when needed to show a zero size table
+    // Use HTML only when needed to show a zero size table.
     String htmlStart = "<html><span style=\"color:red;font-weight:bold\">", htmlStart2;
     String htmlEnd = "</span></html>", htmlEnd2;
     int nRows, nCols;
@@ -15660,7 +15483,7 @@ private void uiAction_RunCommands_ShowResultsTables()
         results_Tables_AddTable ( htmlStart2 + (i + 1) + ") " + table.getTableID() +
             " - " + nRows + " rows, " + nCols +
             " columns" + htmlEnd2 );
-        
+
     }
     ui_SetIgnoreActionEvent(false);
 }
@@ -15668,16 +15491,15 @@ private void uiAction_RunCommands_ShowResultsTables()
 /**
 Select all commands in the commands list.  This occurs in response to a user selecting a menu choice.
 */
-private void uiAction_SelectAllCommands()
-{	JGUIUtil.selectAll(__commands_JList);
+private void uiAction_SelectAllCommands() {
+	JGUIUtil.selectAll(__commands_JList);
 	ui_UpdateStatus ( true );
 }
 
 /**
 Display the status of the selected command(s).
 */
-private void uiAction_ShowCommandStatus()
-{
+private void uiAction_ShowCommandStatus() {
   SwingUtilities.invokeLater(new Runnable() {
     public void run() {
       try {
@@ -15689,7 +15511,7 @@ private void uiAction_ShowCommandStatus()
         hTMLViewer.setSize(700,600);
         hTMLViewer.setVisible(true);
       }
-      catch(Throwable t){
+      catch(Throwable t) {
         Message.printWarning(1, "uiAction_ShowCommandStatus", "Problem showing Command status");
         String routine = "StateDMI_JFrame.showCommandStatus";
         Message.printWarning(2, routine, t);
@@ -15699,23 +15521,21 @@ private void uiAction_ShowCommandStatus()
 }
 
 /**
- * Gets Commands status in HTML - this is currently only a helper for
- * the above method.  Rename if it will be used generically.
+ * Gets Commands status in HTML - this is currently only a helper for the above method.  Rename if it will be used generically.
  * @return
  */
-private String uiAction_ShowCommandStatus_GetCommandsStatus()
-{
+private String uiAction_ShowCommandStatus_GetCommandsStatus() {
 	List commands = commandList_GetCommandsBasedOnUI();
-  String html = CommandStatusUtil.getHTMLStatusReport(commands);	
+  String html = CommandStatusUtil.getHTMLStatusReport(commands);
   return html;
 }
 
 /**
-Display a window showing the data set properties.  Output is formatted
-appropriately for a StateCU or a StateMod data set, or a command file.
+Display a window showing the data set properties.
+Output is formatted appropriately for a StateCU or a StateMod data set, or a command file.
 */
-private void uiAction_ShowDataSetProperties ()
-{	PropList reportProp = new PropList ("Data Set Properties");
+private void uiAction_ShowDataSetProperties () {
+	PropList reportProp = new PropList ("Data Set Properties");
 	reportProp.set ( "TotalWidth", "600" );
 	reportProp.set ( "TotalHeight", "300" );
 	reportProp.set ( "DisplayFont", "Courier" );
@@ -15724,7 +15544,7 @@ private void uiAction_ShowDataSetProperties ()
 	reportProp.set ( "PrintSize", "7" );
 	reportProp.set ( "Title", "Data Set Properties" );
 	reportProp.setUsingObject ( "ParentUIComponent", this );
-	List<String> v = new ArrayList<String>(4);
+	List<String> v = new ArrayList<>(4);
 	String tab = "    ";
 	v.add ( "StateDMI Data Set Properties" );
 	v.add ( "" );
@@ -15739,7 +15559,7 @@ private void uiAction_ShowDataSetProperties ()
 			v.add ( "The following summary reflects the most recent commands that were processed." );
 		}
 		else {
-			// A data set is loaded...
+			// A data set is loaded.
 			v.add ( "Data set type:  " + __statecuDataset.getDataSetName() );
 			if ( __statecuDataset.getDataSetFileName().equals("")){
 				v.add ( "Data set file:  NOT SAVED AS DATA SET.");
@@ -15765,13 +15585,13 @@ private void uiAction_ShowDataSetProperties ()
 		}
 		v.add ( tab + __initialWorkingDir );
 		if ( __statedmiProcessor == null ) {
-			// No processor exists...
+			// No processor exists.
 			v.add ( "" );
 			v.add ( "Commands have not been processed." );
 		}
 		else {
-			// Display information about the objects that are available from the last processing run...
-			// Output period...
+			// Display information about the objects that are available from the last processing run.
+			// Output period.
 			v.add ( "" );
 			if ( __commandsDirty ) {
 				v.add ( "Results of the last run (commands have been modified and need to be rerun):" );
@@ -15788,7 +15608,7 @@ private void uiAction_ShowDataSetProperties ()
 			else {
 				v.add( "Output period:   not specified.");
 			}
-			// Print a table showing the number of objects...
+			// Print a table showing the number of objects.
 			int n_CULocations = __statedmiProcessor.getStateCULocationList().size();
 			int n_CUCropCharacteristics = __statedmiProcessor.getStateCUCropCharacteristicsList().size();
 			int n_BlaneyCriddle = __statedmiProcessor.getStateCUBlaneyCriddleList().size();
@@ -15803,26 +15623,16 @@ private void uiAction_ShowDataSetProperties ()
 			v.add ( "Model    Data Set Component              Objects");
 			// TODO SAM 2004-04-10 Enable the file when a data set is used.
 			//"Objects     File");
-			v.add ( "-----------------------------------------" +
-			"--------------------------------------------------");
-			v.add ( "StateCU  Climate Stations                  " +
-			StringUtil.formatString( n_CUClimateStations,"%5d") );
-			v.add ( "StateCU  Crop Characteristics              " +
-			StringUtil.formatString(n_CUCropCharacteristics,"%5d"));
-			v.add ( "StateCU  Blaney-Criddle Crop Coeff.        " +
-			StringUtil.formatString(n_BlaneyCriddle,"%5d"));
-			v.add ( "StateCU  Penman-Monteith Crop Coeff.       " +
-				StringUtil.formatString(n_PenmanMonteith,"%5d"));
-			v.add ( "StateCU  Delay Tables (Monthly)            " +
-			StringUtil.formatString(n_SMDelayTablesMonthly,"%5d"));
-			v.add ( "StateCU  Delay Tables (Daily)              " +
-				StringUtil.formatString(n_SMDelayTablesDaily,"%5d"));
-			v.add ( "StateCU  CU Locations                      " +
-			StringUtil.formatString (n_CULocations, "%5d"));
-			v.add ( "StateCU    CU Loc. w/ Crop Pattern TS      " +
-			StringUtil.formatString( n_CUCropPatternTS,"%5d") );
-			v.add ( "StateCU    CU Loc. w/ Irrig. Practice TS   " +
-			StringUtil.formatString( n_CUIrrigationPracticeTS,"%5d") );
+			v.add ( "-------------------------------------------------------------------------------------------");
+			v.add ( "StateCU  Climate Stations                  " + StringUtil.formatString( n_CUClimateStations,"%5d") );
+			v.add ( "StateCU  Crop Characteristics              " + StringUtil.formatString(n_CUCropCharacteristics,"%5d"));
+			v.add ( "StateCU  Blaney-Criddle Crop Coeff.        " + StringUtil.formatString(n_BlaneyCriddle,"%5d"));
+			v.add ( "StateCU  Penman-Monteith Crop Coeff.       " + StringUtil.formatString(n_PenmanMonteith,"%5d"));
+			v.add ( "StateCU  Delay Tables (Monthly)            " + StringUtil.formatString(n_SMDelayTablesMonthly,"%5d"));
+			v.add ( "StateCU  Delay Tables (Daily)              " + StringUtil.formatString(n_SMDelayTablesDaily,"%5d"));
+			v.add ( "StateCU  CU Locations                      " + StringUtil.formatString (n_CULocations, "%5d"));
+			v.add ( "StateCU    CU Loc. w/ Crop Pattern TS      " + StringUtil.formatString( n_CUCropPatternTS,"%5d") );
+			v.add ( "StateCU    CU Loc. w/ Irrig. Practice TS   " + StringUtil.formatString( n_CUIrrigationPracticeTS,"%5d") );
 		}
 	}
 	else if ( __appType == StateDMI.APP_TYPE_STATEMOD ) {
@@ -15834,8 +15644,8 @@ private void uiAction_ShowDataSetProperties ()
 /**
 Show the datastores.
 */
-private void uiAction_ShowDataStores ()
-{   String routine = getClass().getSimpleName() + "uiAction_ShowDataStores";
+private void uiAction_ShowDataStores () {
+    String routine = getClass().getSimpleName() + "uiAction_ShowDataStores";
     try {
     	List<DataStoreSubstitute> dataStoreSubstituteList = new ArrayList<>();
         new DataStores_JFrame ( "Datastores", this, __statedmiProcessor.getDataStores(), dataStoreSubstituteList );
@@ -15849,28 +15659,27 @@ private void uiAction_ShowDataStores ()
 Show an output file using the appropriate display software/editor.
 @param selected Path to selected output file.
 */
-private void uiAction_ShowResultsOutputFile ( String selected )
-{   String routine = getClass().getName() + ".uiAction_ShowResultsOutputFile";
+private void uiAction_ShowResultsOutputFile ( String selected ) {
+    String routine = getClass().getName() + ".uiAction_ShowResultsOutputFile";
     if ( selected == null ) {
-        // May be the result of some UI event...
+        // May be the result of some UI event.
         return;
     }
-    // Display the selected file...
+    // Display the selected file.
     if ( !( new File( selected ).isAbsolute() ) ) {
         selected = IOUtil.getPathUsingWorkingDir( selected );
     }
-    // First try the application that is configured...
+    // First try the application that is configured.
     // TODO SAM 2011-03-31 What if a TSTool command file has been expanded?
     try {
         Desktop desktop = Desktop.getDesktop();
         desktop.open ( new File(selected) );
     }
     catch ( Exception e ) {
-        // Else display as text (will show up in courier fixed width
-        // font, which looks better than the html browser).
+        // Else display as text (will show up in courier fixed width font, which looks better than the html browser).
         try {
             if ( IOUtil.isUNIXMachine() ) {
-                // Use a built in viewer (may be slow)...
+                // Use a built in viewer (may be slow).
                 PropList reportProp = new PropList ("Output File");
                 reportProp.set ( "TotalWidth", "800" );
                 reportProp.set ( "TotalHeight", "600" );
@@ -15884,7 +15693,7 @@ private void uiAction_ShowResultsOutputFile ( String selected )
                 new ReportJFrame ( null, reportProp );
             }
             else {
-                // Rely on Notepad on Windows...
+                // Rely on Notepad on Windows.
                 String [] command_array = new String[2];
                 command_array[0] = "notepad";
                 command_array[1] = IOUtil.getPathUsingWorkingDir(selected);
@@ -15904,20 +15713,19 @@ private void uiAction_ShowResultsOutputFile ( String selected )
 Show a table using the built in display component.
 @param selected table display string for the table to display "#) TableID - other information...".
 */
-private void uiAction_ShowResultsTable ( String selected )
-{   String routine = getClass().getSimpleName() + ".uiAction_ShowResultsTable";
+private void uiAction_ShowResultsTable ( String selected ) {
+    String routine = getClass().getSimpleName() + ".uiAction_ShowResultsTable";
     if ( selected == null ) {
-        // May be the result of some UI event...
+        // May be the result of some UI event.
         return;
     }
-    // Display the table...
+    // Display the table.
     String tableId = "";
     try {
         tableId = uiAction_ShowResultsTable_GetTableID ( selected );
         DataTable table = commandProcessor_GetTable ( tableId );
         if ( table == null ) {
-            Message.printWarning (1, routine,
-                "Unable to get table \"" + tableId + "\" from processor to view." );  
+            Message.printWarning (1, routine, "Unable to get table \"" + tableId + "\" from processor to view." );
         }
         new DataTable_JFrame ( this, "Table \"" + tableId + "\"", table );
     }
@@ -15930,15 +15738,14 @@ private void uiAction_ShowResultsTable ( String selected )
 /**
 Helper method to get the table identifier from the displayed table results list string.
 */
-private String uiAction_ShowResultsTable_GetTableID ( String tableDisplayString )
-{
+private String uiAction_ShowResultsTable_GetTableID ( String tableDisplayString ) {
     // Determine the table identifier from the displayed string, which will always have at least one
-    // dash, but table identifiers may also have a dash
+    // dash, but table identifiers may also have a dash.
     if ( tableDisplayString == null ) {
         return null;
     }
-    int pos1 = tableDisplayString.indexOf( ")"); // Count at start of string
-    int pos2 = tableDisplayString.indexOf( " -"); // Break between ID
+    int pos1 = tableDisplayString.indexOf( ")"); // Count at start of string.
+    int pos2 = tableDisplayString.indexOf( " -"); // Break between ID.
     String tableId = tableDisplayString.substring(pos1+1,pos2).trim();
     return tableId;
 }
@@ -15946,8 +15753,8 @@ private String uiAction_ShowResultsTable_GetTableID ( String tableDisplayString 
 /**
 Show the properties for a table.
 */
-private void uiAction_ShowTableProperties ()
-{   String routine = getClass().getSimpleName() + "uiAction_ShowTableProperties";
+private void uiAction_ShowTableProperties () {
+    String routine = getClass().getSimpleName() + "uiAction_ShowTableProperties";
     try {
         // Simple text display of HydroBase properties.
         PropList reportProp = new PropList ("Table Properties");
@@ -15959,20 +15766,20 @@ private void uiAction_ShowTableProperties ()
         reportProp.set ( "PrintSize", "7" );
         reportProp.set ( "Title", "Table Properties" );
         List<String> v = new ArrayList<>();
-        // Get the table of interest
+        // Get the table of interest.
         if ( __resultsTables_JList.getModel().getSize() > 0 ) {
             // If something is selected, show properties for the selected.  Otherwise, show properties for all.
             // TODO SAM 2012-10-12 Add intelligence to select based on mouse click?
             int [] sel = __resultsTables_JList.getSelectedIndices();
             if ( sel.length == 0 ) {
-                // Process all
+                // Process all.
                 sel = new int[__resultsTables_JList.getModel().getSize()];
                 for ( int i = 0; i < sel.length; i++ ) {
                     sel[i] = i;
                 }
             }
             for ( int i = 0; i < sel.length; i++ ) {
-                // TODO SAM 2012-10-15 Evaluate putting this in DataTable class for general use
+                // TODO SAM 2012-10-15 Evaluate putting this in DataTable class for general use.
                 String displayString = __resultsTables_JList.getModel().getElementAt(sel[i]);
                 String tableId = uiAction_ShowResultsTable_GetTableID ( displayString );
                 DataTable t = commandProcessor_GetTable ( tableId );
@@ -15982,7 +15789,7 @@ private void uiAction_ShowTableProperties ()
                 	StringBuilder b = new StringBuilder();
                 	b.append("   Column[" + ifld + "] name=\"" + t.getFieldName(ifld) + "\" type=");
                 	if ( t.isColumnArray(t.getFieldDataType(ifld))) {
-                		// Array column
+                		// Array column.
                 		b.append("Array of " + TableColumnType.valueOf(t.getFieldDataType(ifld) - TableField.DATA_TYPE_ARRAY_BASE));
                 	}
                 	else {
@@ -15993,7 +15800,7 @@ private void uiAction_ShowTableProperties ()
                 }
             }
         }
-        reportProp.setUsingObject ( "ParentUIComponent", this ); // Use so that interactive graphs are displayed on same screen as TSTool main GUI
+        reportProp.setUsingObject ( "ParentUIComponent", this ); // Use so that interactive graphs are displayed on same screen as TSTool main GUI.
         new ReportJFrame ( v, reportProp );
     }
     catch ( Exception e ) {
@@ -16013,18 +15820,17 @@ private void uiAction_SwitchAppType ( int app_type )
 	if ( app_type == StateDMI.APP_TYPE_STATECU ) {
 		Message.printStatus ( 1, routine, "Switching to StateCU..." );
 		if ( __statemodDataset != null ) {
-			// Currently don't know how to handle swapping out a
-			// data set (but can handle commands-only swap)...
+			// Currently don't know how to handle swapping out a data set (but can handle commands-only swap).
 			Message.printWarning ( 1, routine,
 			"To access StateCU features after a StateMod data set has been loaded,\n" +
 			"you currently must restart StateDMI with the -statecu option.");
 			return;
 		}
-		// First remove the old menus...
+		// First remove the old menus.
 		__Commands_JMenu.removeAll();
 		__Run_JMenu.removeAll();
 		__Results_JMenu.removeAll();
-		// Now initialize the appropriate menus...
+		// Now initialize the appropriate menus.
 		__appType = app_type;
 		ui_InitGUIMenus_Commands_StateCU ( null, getCommandsMenuStyle() );
 		ui_InitGUIMenus_Run ( null );
@@ -16034,51 +15840,48 @@ private void uiAction_SwitchAppType ( int app_type )
 	else if ( app_type == StateDMI.APP_TYPE_STATEMOD ) {
 		Message.printStatus ( 1, routine, "Switching to StateMod..." );
 		if ( __statecuDataset != null ) {
-			// Currently don't know how to handle swapping out a
-			// data set (but can handle commands-only swap)...
+			// Currently don't know how to handle swapping out a data set (but can handle commands-only swap).
 			Message.printWarning ( 1, routine,
 			"To access StateMod features after a StateCU data set has been loaded,\n" +
 			"you currently must restart StateDMI with the -statemod option.");
 		}
-		// First remove the old menus...
+		// First remove the old menus.
 		__Commands_JMenu.removeAll();
 		__Run_JMenu.removeAll();
 		__Results_JMenu.removeAll();
-		// Now initialize the appropriate menus...
+		// Now initialize the appropriate menus.
 		__appType = app_type;
 		ui_InitGUIMenus_Commands_StateMod ( null, getCommandsMenuStyle() );
 		ui_InitGUIMenus_Run ( null );
 		ui_InitGUIMenus_Results_StateMod ( null );
 		Message.printStatus ( 1, routine, "Menus are now set for StateMod." );
 	}
-	// Update the title bar and check the state of the GUI...
+	// Update the title bar and check the state of the GUI.
 	ui_UpdateStatus ( true );
 }
 
 /**
-StateDMI -test is being run and the File...Test menu has been pressed.  Launch test code
+StateDMI -test is being run and the File...Test menu has been pressed.  Launch test code.
 */
-private void uiAction_Test()
-{
+private void uiAction_Test() {
 	new Beta_CreateNaturalFlowShapefile();
 }
 
 /**
 List the total rights for each well structure, using the well rights that are in memory.
 */
-void uiAction_Tool_ListWellStationRightTotals ()
-{	String routine = "StateDMI_JFrame.toolListWellStationRightTotals";
+void uiAction_Tool_ListWellStationRightTotals () {
+	String routine = getClass().getSimpleName() + ".toolListWellStationRightTotals";
 	List<StateMod_WellRight> SMWellRight_List = __statedmiProcessor.getStateModWellRightList();
 	int size_wer = SMWellRight_List.size();
 	if ( size_wer == 0 ) {
-		Message.printWarning ( 1, routine,
-			"Well rights must first be processed (e.g., read well rights with a command." );
+		Message.printWarning ( 1, routine, "Well rights must first be processed (e.g., read well rights with a command." );
 		return;
 	}
 	// Loop through the well rights.  For each right, try to find a matching
 	// well station in the temporary list.  If one is found, increment the well station's capacity,
 	// which represents the total of the decrees for this report.  If a well is not found,
-	// add a new tempororary well station.  Finally, print all the IDs and associated decree totals.
+	// add a new temporary well station.  Finally, print all the IDs and associated decree totals.
 	String id;
 	StateMod_WellRight wer;
 	StateMod_Well wes = null;
@@ -16093,7 +15896,7 @@ void uiAction_Tool_ListWellStationRightTotals ()
 			continue;
 		}
 		id = wer.getCgoto();
-		// Find the matching well station...
+		// Find the matching well station.
 		size_wes = wes_List.size();
 		found = false;
 		for ( int iwes = 0; iwes < size_wes; iwes++ ) {
@@ -16104,7 +15907,7 @@ void uiAction_Tool_ListWellStationRightTotals ()
 			}
 		}
 		if ( !found ) {
-			// Add a new well station...
+			// Add a new well station.
 			wes = new StateMod_Well ( false );
 			wes.setID ( id );
 			wes_List.add ( wes );
@@ -16156,7 +15959,7 @@ private void uiAction_ViewCommandFileDiff () {
 	if ( IOUtil.fileExists(diffProgram) ) {
 		// Diff program exists so save a temporary file with UI commands and then compare with file version.
 		// Run the diff program on the input and output files
-		// (they should have existed because the button will have been disabled if not)
+		// (they should have existed because the button will have been disabled if not).
 		String file1Path = this.__commandFileName;
 		if ( file1Path == null ) {
 	         new ResponseJDialog ( this, IOUtil.getProgramName(),
@@ -16164,7 +15967,7 @@ private void uiAction_ViewCommandFileDiff () {
                   ResponseJDialog.OK).response();
 	         return;
 		}
-		// Write the commands to a temporary file
+		// Write the commands to a temporary file.
 		String tempCommandFile = IOUtil.tempFileName();
 		File f = new File(tempCommandFile);
 		String tempFolder = f.getParent();
@@ -16176,13 +15979,13 @@ private void uiAction_ViewCommandFileDiff () {
 			Message.printWarning(1, "", "Error saving commands to temporary file for diff (" + e + ")" );
 			return;
 		}
-		// Run the diff program
+		// Run the diff program.
 		String [] programAndArgsList = { diffProgram, file1Path, file2Path };
 		try {
 			ProcessManager pm = new ProcessManager ( programAndArgsList,
-					0, // No timeout
-	                null, // Exit status indicator
-	                false, // Use command shell
+					0, // No timeout.
+	                null, // Exit status indicator.
+	                false, // Use command shell.
 	                new File(tempFolder) );
 			Thread t = new Thread ( pm );
             t.start();
@@ -16200,15 +16003,15 @@ private void uiAction_ViewCommandFileDiff () {
 View the documentation by displaying using the desktop application.
 @param command the string from the action event (menu string).
 */
-private void uiAction_ViewDocumentation ( String command )
-{   String routine = getClass().getSimpleName() + ".uiAction_ViewDocumentation";
+private void uiAction_ViewDocumentation ( String command ) {
+    String routine = getClass().getSimpleName() + ".uiAction_ViewDocumentation";
 	if ( command.equals ( __Help_ViewDocumentation_String )) {
-		// Legacy PDF documentation
-		// The location of the documentation is relative to the application home
+		// Legacy PDF documentation.
+		// The location of the documentation is relative to the application home.
 		String docFileName = IOUtil.getApplicationHomeDir() + "/doc/UserManual/StateDMI.pdf";
-    	// Convert for the operating system
+    	// Convert for the operating system.
     	docFileName = IOUtil.verifyPathForOS(docFileName, true);
-    	// Now display using the default application for the file extension
+    	// Now display using the default application for the file extension.
     	Message.printStatus(2, routine, "Opening documentation \"" + docFileName + "\"" );
     	try {
         	Desktop desktop = Desktop.getDesktop();
@@ -16219,7 +16022,7 @@ private void uiAction_ViewDocumentation ( String command )
     	}
 	}
 	else {
-		// New online documentation
+		// New online documentation.
 		String docUri = formatHelpViewerUrl("", command);
 	    if ( docUri != null ) {
 	        try {
@@ -16231,22 +16034,22 @@ private void uiAction_ViewDocumentation ( String command )
 	        }
 	    }
 	    else {
-			// Not able to open either URI
+			// Not able to open either URI.
 	    	Message.printWarning(1, "", "Unable to determine URL for documentation for \"" + command + "\"." );
-	    }	
+	    }
 	}
 }
 
 /**
 View the training materials by displaying in file browser.
 */
-private void uiAction_ViewTrainingMaterials ()
-{   String routine = getClass().getName() + ".uiAction_ViewTrainingMaterials";
-    // The location of the documentation is relative to the application home
+private void uiAction_ViewTrainingMaterials () {
+    String routine = getClass().getName() + ".uiAction_ViewTrainingMaterials";
+    // The location of the documentation is relative to the application home.
     String trainingFolderName = IOUtil.getApplicationHomeDir() + "/doc/Training";
-    // Convert for the operating system
+    // Convert for the operating system.
     trainingFolderName = IOUtil.verifyPathForOS(trainingFolderName, true);
-    // Now display using the default application for the file extension
+    // Now display using the default application for the file extension.
     Message.printStatus(2, routine, "Opening training material folder \"" + trainingFolderName + "\"" );
     try {
         Desktop desktop = Desktop.getDesktop();
@@ -16259,22 +16062,22 @@ private void uiAction_ViewTrainingMaterials ()
 }
 
 /**
-Write the current command file list (all lines, whether selected or not) to
-the specified file.  Do not prompt for header comments (and do not add).
-@param prompt_for_file If true, prompt for the file name rather than using the
-value that is passed.  An extension of .StateDMI is enforced.
+Write the current command file list (all lines, whether selected or not) to the specified file.
+Do not prompt for header comments (and do not add).
+@param prompt_for_file If true, prompt for the file name rather than using the value that is passed.
+An extension of .StateDMI is enforced.
 @param file Command file to write.
 */
-private void uiAction_WriteCommandFile ( String file, boolean prompt_for_file )
-{	String routine = "StateDMI_JFrame.uiAction_WriteCommandFile";
+private void uiAction_WriteCommandFile ( String file, boolean prompt_for_file ) {
+	String routine = "StateDMI_JFrame.uiAction_WriteCommandFile";
     String directory = null;
 	if ( prompt_for_file ) {
 		JFileChooser fc = JFileChooserFactory.createJFileChooser(ui_GetDir_LastCommandFileOpened() );
 		fc.setDialogTitle("Save Command File");
-		// Default name...
+		// Default name.
 		File default_file = new File("commands.statedmi");
 		fc.setSelectedFile ( default_file );
-		
+
 		List<String> extensions = new ArrayList<>();
 		extensions.add("statedmi");
 		extensions.add("StateDMI");
@@ -16285,32 +16088,31 @@ private void uiAction_WriteCommandFile ( String file, boolean prompt_for_file )
 			file = fc.getSelectedFile().getPath();
 			IOUtil.enforceFileExtension ( file, extensions );
 			ui_SetDir_LastCommandFileOpened( directory );
-		}		
+		}
 		else {
-		    // Did not approve...
+		    // Did not approve.
 			return;
 		}
 	}
-	// Now write the file...
+	// Now write the file.
 	try {
 	    PrintWriter out = new PrintWriter(new FileOutputStream(file));
 		int size = __commands_JListModel.size();
 		for (int i = 0; i < size; i++) {
 			out.println(((Command)__commands_JListModel.get(i)).toString());
 		}
-	
+
 		out.close();
 		commandList_SetDirty(false);
 		commandList_SetCommandFileName ( file );
-		
+
 		// Save the file in the history
 		this.session.pushHistory(file);
 		// Do this here because the write may be in a sequence of steps.
 		ui_InitGUIMenus_File_OpenRecentFiles();
 
 		if ( directory != null ) {
-			// Set the "WorkingDir" property, which will NOT
-			// contain a trailing separator...
+			// Set the "WorkingDir" property, which will NOT contain a trailing separator.
 			IOUtil.setProgramWorkingDir(directory);
 			ui_SetDir_LastCommandFileOpened(directory);
 			__props.set ("WorkingDir=" + IOUtil.getProgramWorkingDir());
@@ -16321,7 +16123,7 @@ private void uiAction_WriteCommandFile ( String file, boolean prompt_for_file )
 		Message.printWarning (1, routine, "Error writing file:\n\"" + file + "\"");
 		// Leave the dirty flag the previous value.
 	}
-	// Update the status information...
+	// Update the status information.
 	ui_UpdateStatus ( false );
 }
 
@@ -16345,12 +16147,12 @@ comments (and do not add).  The files related to the data set are not written.
 @param prompt_for_file If true, prompt for the file name rather than using the value that is passed.
 @param file Data set (XML) file to write.
 */
-private void uiAction_WriteDataSet ( String file, boolean prompt_for_file )
-{	String directory = null;
+private void uiAction_WriteDataSet ( String file, boolean prompt_for_file ) {
+	String directory = null;
 	if ( prompt_for_file ) {
 		JFileChooser fc = JFileChooserFactory.createJFileChooser(JGUIUtil.getLastFileDialogDirectory() );
 		fc.setDialogTitle("Save Data Set File");
-		// Default name...
+		// Default name.
 		File default_file = null;
 		if ( __appType == StateDMI.APP_TYPE_STATECU ) {
 			if ( !__statecuDataset.getBaseName().equals("") ) {
@@ -16373,7 +16175,7 @@ private void uiAction_WriteDataSet ( String file, boolean prompt_for_file )
 		directory = fc.getSelectedFile().getParent();
 		file = fc.getSelectedFile().getPath();
 	}
-	// Now write the file...
+	// Now write the file.
 	try {
 		if ( __appType == StateDMI.APP_TYPE_STATECU ) {
 			StateCU_DataSet.writeXMLFile ( null, file, __statecuDataset, null );
@@ -16382,8 +16184,7 @@ private void uiAction_WriteDataSet ( String file, boolean prompt_for_file )
 		//setCommandsDirty(false);
 		//setCommandFileName ( file );
 
-		// Set the "WorkingDir" property, which will NOT
-		// contain a trailing separator...
+		// Set the "WorkingDir" property, which will NOT contain a trailing separator.
 		IOUtil.setProgramWorkingDir(directory);
 		JGUIUtil.setLastFileDialogDirectory(directory);
 		__props.set ("WorkingDir=" + IOUtil.getProgramWorkingDir());
@@ -16393,7 +16194,7 @@ private void uiAction_WriteDataSet ( String file, boolean prompt_for_file )
 		Message.printWarning (1, "writeDataSetFile", "Error writing file:\n\"" + file + "\"");
 		// Leave the dirty flag the previous value.
 	}
-	// Update the status information...
+	// Update the status information.
 	ui_UpdateStatus ( true );
 }
 
@@ -16401,17 +16202,16 @@ private void uiAction_WriteDataSet ( String file, boolean prompt_for_file )
 Handle ListSelectionListener events.
 @param event ListSelectionEvent to process.
 */
-public void valueChanged ( ListSelectionEvent e )
-{	
-	// e.getSource() apparently does not return __commands_JList - it must
-	// return a different component so don't check the object address...
+public void valueChanged ( ListSelectionEvent e ) {
+	// e.getSource() apparently does not return __commands_JList.
+	// It must return a different component so don't check the object address.
 	if ( ui_GetIgnoreListSelectionEvent() ) {
 		return;
 	}
     Object component = e.getSource();
     if ( component == __resultsOutputFiles_JList ) {
         if ( !e.getValueIsAdjusting() ) {
-            // User is done adjusting selection so do the display...
+            // User is done adjusting selection so do the display.
             ListSelectionModel lsm = __resultsOutputFiles_JList.getSelectionModel();
             int minIndex = lsm.getMinSelectionIndex();
             int maxIndex = lsm.getMaxSelectionIndex();
@@ -16424,7 +16224,7 @@ public void valueChanged ( ListSelectionEvent e )
     }
     else if ( component == __resultsStateCUComponents_JList ) {
         if ( !e.getValueIsAdjusting() ) {
-            // User is done adjusting selection so do the display...
+            // User is done adjusting selection so do the display.
             ListSelectionModel lsm = __resultsStateCUComponents_JList.getSelectionModel();
             int minIndex = lsm.getMinSelectionIndex();
             int maxIndex = lsm.getMaxSelectionIndex();
@@ -16437,7 +16237,7 @@ public void valueChanged ( ListSelectionEvent e )
     }
     else if ( component == __resultsStateModComponents_JList ) {
         if ( !e.getValueIsAdjusting() ) {
-            // User is done adjusting selection so do the display...
+            // User is done adjusting selection so do the display.
             ListSelectionModel lsm = __resultsStateModComponents_JList.getSelectionModel();
             int minIndex = lsm.getMinSelectionIndex();
             int maxIndex = lsm.getMaxSelectionIndex();
@@ -16450,7 +16250,7 @@ public void valueChanged ( ListSelectionEvent e )
     }
     else if ( component == __resultsTables_JList ) {
         if ( !e.getValueIsAdjusting() ) {
-            // User is done adjusting selection so do the display...
+            // User is done adjusting selection so do the display.
             ListSelectionModel lsm = __resultsTables_JList.getSelectionModel();
             int minIndex = lsm.getMinSelectionIndex();
             int maxIndex = lsm.getMaxSelectionIndex();
@@ -16469,75 +16269,71 @@ public void valueChanged ( ListSelectionEvent e )
 Handle TreeSelectionListener events.
 @param event TreeSelectionEvent to process.
 */
-public void valueChanged ( TreeSelectionEvent event )
-{	// For now just want to know when something changes so the GUI state can be checked...
+public void valueChanged ( TreeSelectionEvent event ) {
+	// For now just want to know when something changes so the GUI state can be checked.
 	Object o = event.getSource();
 	if ( (__appType == StateDMI.APP_TYPE_STATECU) && (o == __statecuDataset_JTree) ) {
 		// User has selected a new component for editing/processing.
-		// Only act on the first one...
+		// Only act on the first one.
 		SimpleJTree_Node selected_node = __statecuDataset_JTree.getSelectedNode();
 		// Only operate on groups...
 		DataSetComponent comp = (DataSetComponent)selected_node.getData();
 		if (	// TODO !comp.isGroup() ||
-			// Allow individual components so that menus can be specifically enabled/disabled
+			// Allow individual components so that menus can be specifically enabled/disabled.
 			(comp.getComponentType()== StateCU_DataSet.COMP_CONTROL_GROUP)){
-			// No need to display a list...
+			// No need to display a list.
 			return;
 		}
 		__statecuSelectedComponent = comp;
 		if ( __commandsDirty ) {
-			// TODO - need to check to see if commands, etc.,
-			// need to be saved before going to the next component group.
+			// TODO - need to check to see if commands, etc., need to be saved before going to the next component group.
 		}
 
-		// Update the list...
+		// Update the list.
 		dataSet_UpdateList();
 	}
 	else if ((__appType == StateDMI.APP_TYPE_STATEMOD) && (o == __statemodDataset_JTree) ) {
-		// User has selected a new component for editing/processing.  Only act on the first one...
+		// User has selected a new component for editing/processing.  Only act on the first one.
 		SimpleJTree_Node selected_node = __statemodDataset_JTree.getSelectedNode();
-		// Only operate on groups...
+		// Only operate on groups.
 		DataSetComponent comp = (DataSetComponent)selected_node.getData();
 		if (	// TODO !cucomp.isGroup() ||
-			// Allow individual components so that menus can be specifically enabled/disabled
+			// Allow individual components so that menus can be specifically enabled/disabled.
 			(comp.getComponentType()== StateMod_DataSet.COMP_CONTROL_GROUP)){
-			// No need to display a list...
+			// No need to display a list.
 			return;
 		}
 		__statemodSelectedComponent = comp;
 		if ( __commandsDirty ) {
-			// TODO - need to check to see if commands, etc.,
-			// need to be saved before going to the next component group.
+			// TODO - need to check to see if commands, etc., need to be saved before going to the next component group.
 		}
 
-		// Update the list...
+		// Update the list.
 		dataSet_UpdateList();
 	}
 	// This updates the menus to disable/enable based on the selected data component.
 	ui_UpdateStatus ( true );
 }
 
-public void windowActivated(WindowEvent e)
-{
+public void windowActivated(WindowEvent e) {
 }
 
 /**
 Handle the closing of this window and the model network window because the GUI state is related.
 */
-public void windowClosing(WindowEvent e)
-{	// Verify before the window is closed...
+public void windowClosing(WindowEvent e) {
+	// Verify before the window is closed.
 	Component c = e.getComponent();
 	if ( c == __network_JFrame ) {
-		// Model network window is closing so turn off the model network window view (check it on
-		// to view it).
+		// Model network window is closing so turn off the model network window view (check it on to view it).
 		__View_ModelNetwork_JCheckBoxMenuItem.setState(false);
 		// Enable the File...New...Model Network (only want one of these open at a time).
 		JGUIUtil.setEnabled ( __File_New_ModelNetwork_JMenuItem, true );
 	}
 	if ( c == this ) {
-		// Check model network window - if it is open, give the user the option to save the results
+		// Check model network window - if it is open, give the user the option to save the results.
 		if ( (__network_JFrame != null) && (__network_JFrame.isDirty() ) ) {
-			// Changes have been made in the network and need to give the use the chance to save
+			// Changes have been made in the network and need to give the use the chance to save.
 			int x = new ResponseJDialog ( this, "Network has not been saved.",
 				"The network has edits that have not been saved.\n" +
 				"Continue with exit and discard changes?",
@@ -16551,49 +16347,43 @@ public void windowClosing(WindowEvent e)
 	}
 }
 
-public void windowClosed(WindowEvent e)
-{	// Get the window that is being closed.  If it is the __geoview_JFrame,
-	// then set the __geoview_JFrame instance to null.
+public void windowClosed(WindowEvent e) {
+	// Get the window that is being closed.  If it is the __geoview_JFrame, then set the __geoview_JFrame instance to null.
 	Component c = e.getComponent();
 	if ( (__geoview_JFrame != null) && (c == __geoview_JFrame) ) {
-		// GeoView...
+		// GeoView.
 		__geoview_JFrame = null;
 		__View_Map_JCheckBoxMenuItem.setSelected ( false );
 	}
 	else if ( (__statecuDatasetManager != null) && (c == __statecuDatasetManager) ) {
-		// StateCU data set manager...
+		// StateCU data set manager.
 		__statecuDatasetManager = null;
 		__View_DataSetManager_JCheckBoxMenuItem.setSelected ( false );
 	}
 }
 
-public void windowDeactivated(WindowEvent e)
-{
+public void windowDeactivated(WindowEvent e) {
 }
 
-public void windowDeiconified(WindowEvent e)
-{
+public void windowDeiconified(WindowEvent e) {
 }
 
-public void windowIconified(WindowEvent e)
-{
+public void windowIconified(WindowEvent e) {
 }
 
-public void windowOpened(WindowEvent e)
-{
+public void windowOpened(WindowEvent e) {
 }
 
 /**
 Internal class to handle action events from table results list.
 */
-private class ActionListener_ResultsTables implements ActionListener
-{
+private class ActionListener_ResultsTables implements ActionListener {
     /**
     Handle a group of actions for the ensemble popup menu.
     @param event Event to handle.
     */
-    public void actionPerformed (ActionEvent event)
-    {   String command = event.getActionCommand();
+    public void actionPerformed (ActionEvent event) {
+        String command = event.getActionCommand();
 
         if ( command.equals(__Results_Table_Properties_String) ) {
             uiAction_ShowTableProperties();

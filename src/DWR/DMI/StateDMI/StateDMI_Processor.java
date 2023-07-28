@@ -6378,16 +6378,9 @@ throws Exception
     __propertyHashmap.clear();
     // Define some standard properties
     __propertyHashmap.put ( "ComputerName", InetAddress.getLocalHost().getHostName() ); // Useful for messages
-    boolean newTZ = true;
-    if ( newTZ ) {
-        // Use new time zone class
-    	ZonedDateTime now = ZonedDateTime.now();
-    	__propertyHashmap.put ( "ComputerTimezone", now.getZone().getId() ); // America/Denver, etc.
-    }
-    else {
-    	// Use old time zone approach
-    	__propertyHashmap.put ( "ComputerTimezone", TimeUtil.getLocalTimeZoneAbbr(TimeUtil.LOOKUP_TIME_ZONE_ALWAYS) ); // America/Denver, etc.
-    }
+    // Use new time zone class.
+    ZonedDateTime now = ZonedDateTime.now();
+    __propertyHashmap.put ( "ComputerTimezone", now.getZone().getId() ); // America/Denver, etc.
     __propertyHashmap.put ( "InstallDir", IOUtil.getApplicationHomeDir() );
     __propertyHashmap.put ( "InstallDirURL", "file:///" + IOUtil.getApplicationHomeDir().replace("\\", "/") );
     // Temporary directory useful in some cases

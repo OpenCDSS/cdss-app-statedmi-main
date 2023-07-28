@@ -4,7 +4,7 @@
 
 StateDMI
 StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+Copyright (C) 1997-2023 Colorado Department of Natural Resources
 
 StateDMI is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -74,22 +74,22 @@ private JTextField __SetEnd_JTextField = null;
 private SimpleJComboBox __ProcessWhen_JComboBox = null;
 private JTextField __CropPattern_JTextField = null;
 private SimpleJComboBox __IrrigationMethod_JComboBox = null;
-private SimpleJComboBox __SupplyType_JComboBox = null; // Only enabled if enableStateDMIPre050000=true
+private SimpleJComboBox __SupplyType_JComboBox = null; // Only enabled if enableStateDMIPre050000=true.
 private SimpleJComboBox __SetToMissing_JComboBox = null;
 private SimpleJComboBox	__IfNotFound_JComboBox = null;
 private SimpleJButton __cancel_JButton = null;
-private SimpleJButton __ok_JButton = null;	
-private SimpleJButton __help_JButton = null;	
+private SimpleJButton __ok_JButton = null;
+private SimpleJButton __help_JButton = null;
 private SetCropPatternTS_Command __command = null;
 private boolean __ok = false;
-private boolean enableStateDMIPre050000 = true; // Set to true for features < StateDMI 5.00.00
+private boolean enableStateDMIPre050000 = true; // Set to true for features < StateDMI 5.00.00.
 
 /**
 Command editor constructor.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
-public SetCropPatternTS_JDialog (JFrame parent, Command command) {
+public SetCropPatternTS_JDialog (JFrame parent, SetCropPatternTS_Command command) {
 	super(parent, true);
 	initialize (parent, command );
 }
@@ -98,8 +98,8 @@ public SetCropPatternTS_JDialog (JFrame parent, Command command) {
 Responds to ActionEvents.
 @param event ActionEvent object
 */
-public void actionPerformed(ActionEvent event)
-{	Object o = event.getSource();
+public void actionPerformed(ActionEvent event) {
+	Object o = event.getSource();
 
 	if ( o == __cancel_JButton ) {
 		response (false);
@@ -117,11 +117,12 @@ public void actionPerformed(ActionEvent event)
 }
 
 /**
-Check the input.  If errors exist, warn the user and set the __error_wait flag
-to true.  This should be called before response() is allowed to complete.
+Check the input.
+If errors exist, warn the user and set the __error_wait flag to true.
+This should be called before response() is allowed to complete.
 */
-private void checkInput ()
-{	// Put together a list of parameters to check...
+private void checkInput () {
+	// Put together a list of parameters to check.
 	PropList parameters = new PropList ( "" );
 	String ID = __ID_JTextField.getText().trim();
 	String SetStart = __SetStart_JTextField.getText().trim();
@@ -133,7 +134,7 @@ private void checkInput ()
 	String IfNotFound = __IfNotFound_JComboBox.getSelected();
 
 	__error_wait = false;
-	
+
 	if ( ID.length() > 0 ) {
 		parameters.set ( "ID", ID );
 	}
@@ -165,7 +166,7 @@ private void checkInput ()
         parameters.set ( "IfNotFound", IfNotFound );
     }
 	try {
-		// This will warn the user...
+		// This will warn the user.
 		__command.checkCommandParameters ( parameters, null, 1 );
 	}
 	catch ( Exception e ) {
@@ -176,11 +177,11 @@ private void checkInput ()
 }
 
 /**
-Commit the edits to the command.  In this case the command parameters have
-already been checked and no errors were detected.
+Commit the edits to the command.
+In this case the command parameters have already been checked and no errors were detected.
 */
-private void commitEdits ()
-{	String ID = __ID_JTextField.getText().trim();
+private void commitEdits () {
+	String ID = __ID_JTextField.getText().trim();
 	String SetStart = __SetStart_JTextField.getText().trim();
 	String SetEnd = __SetEnd_JTextField.getText().trim();
 	String CropPattern = __CropPattern_JTextField.getText().trim();
@@ -205,16 +206,16 @@ private void commitEdits ()
 /**
 Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
-@param command Vector of String containing the command.
+@param command List of String containing the command.
 */
-private void initialize (JFrame parent, Command command )
-{	__command = (SetCropPatternTS_Command)command;
+private void initialize (JFrame parent, SetCropPatternTS_Command command ) {
+	__command = command;
 
 	addWindowListener(this);
 
     Insets insetsTLBR = new Insets(2,2,2,2);
 
-	// Main panel...
+	// Main panel.
 
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
@@ -282,7 +283,7 @@ private void initialize (JFrame parent, Command command )
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
 		0, ++y, 7, 1, 0, 1, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
-	
+
     JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
         0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
@@ -336,8 +337,8 @@ private void initialize (JFrame parent, Command command )
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
         "Optional - set data to missing (no crops) - can then be filled."),
-        3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );        
-        
+        3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Process when:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     List<String> processWhenList = new ArrayList<>(3);
@@ -352,7 +353,7 @@ private void initialize (JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Optional - indicate when to process the data (default=" + __command._Now + ")."),
 		3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
-    
+
     JGUIUtil.addComponent(main_JPanel, new JLabel ("If not found:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IfNotFound_JComboBox = new SimpleJComboBox(false);
@@ -393,9 +394,9 @@ private void initialize (JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, new JLabel (
         "Used with StateDMI < 5.x - irrigation method for crops."),
         3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
-    
+
     if ( this.enableStateDMIPre050000 ) {
-    	// TODO smalers 2021-01-18 not needed for crop pattern TS
+    	// TODO smalers 2021-01-18 not needed for crop pattern TS.
     	JGUIUtil.addComponent(main_JPanel, new JLabel ("Supply type:"),
        		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     	List<String> SupplyTypeList = new ArrayList<>(3);
@@ -416,7 +417,7 @@ private void initialize (JFrame parent, Command command )
     JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
         0, ++y, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
-	JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"), 
+	JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__command_JTextArea = new JTextArea (4,50);
 	__command_JTextArea.setLineWrap ( true );
@@ -424,11 +425,11 @@ private void initialize (JFrame parent, Command command )
 	__command_JTextArea.setEditable (false);
 	JGUIUtil.addComponent(main_JPanel, new JScrollPane(__command_JTextArea),
 		1, y, 6, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-			
-	// South JPanel: North
+
+	// Panel for buttons.
 	JPanel button_JPanel = new JPanel();
 	button_JPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-    JGUIUtil.addComponent(main_JPanel, button_JPanel, 
+    JGUIUtil.addComponent(main_JPanel, button_JPanel,
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
 	__ok_JButton = new SimpleJButton("OK", this);
@@ -439,7 +440,7 @@ private void initialize (JFrame parent, Command command )
 	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	setTitle ( "Edit " + __command.getCommandName() + "() Command" );
-	// JDialogs do not need to be resizable...
+	// JDialogs do not need to be resizable.
 	setResizable (false);
     pack();
     JGUIUtil.center(this);
@@ -458,8 +459,8 @@ public void itemStateChanged (ItemEvent e) {
 /**
 Respond to KeyEvents.
 */
-public void keyPressed (KeyEvent event)
-{	int code = event.getKeyCode();
+public void keyPressed (KeyEvent event) {
+	int code = event.getKeyCode();
 
 	if (code == KeyEvent.VK_ENTER) {
 		refresh ();
@@ -470,12 +471,11 @@ public void keyPressed (KeyEvent event)
 	}
 }
 
-public void keyReleased (KeyEvent event)
-{	refresh();
+public void keyReleased (KeyEvent event) {
+	refresh();
 }
 
-public void keyTyped (KeyEvent event)
-{
+public void keyTyped (KeyEvent event) {
 }
 
 /**
@@ -489,9 +489,9 @@ public boolean ok() {
 /**
 Refresh the command from the other text field contents.
 */
-private void refresh ()
-{	__error_wait = false;
-	String routine = "setCropPatternTS_JDialog.refresh";
+private void refresh () {
+	__error_wait = false;
+	String routine = getClass().getSimpleName() + ".refresh";
 	String ID = "";
 	String SetStart = "";
 	String SetEnd = "";
@@ -502,11 +502,11 @@ private void refresh ()
 	String ProcessWhen = "";
 	String IfNotFound = "";
 	PropList props = null;
-	
+
 	if (__first_time) {
 		__first_time = false;
-	
-		// Get the properties from the command
+
+		// Get the properties from the command.
 		props = __command.getCommandParameters();
 		ID = props.getValue ( "ID" );
 		SetStart = props.getValue ( "SetStart" );
@@ -517,7 +517,7 @@ private void refresh ()
 		SetToMissing = props.getValue ( "SetToMissing" );
 		ProcessWhen = props.getValue ( "ProcessWhen" );
 		IfNotFound = props.getValue ( "IfNotFound" );
-		// Display existing content...
+		// Display existing content.
 		if ( ID != null ) {
 			__ID_JTextField.setText(ID);
 		}
@@ -531,7 +531,7 @@ private void refresh ()
 			__CropPattern_JTextField.setText(CropPattern);
 		}
 		if ( IrrigationMethod == null ) {
-			// Select default...
+			// Select default.
 			__IrrigationMethod_JComboBox.select ( 0 );
 		}
 		else {
@@ -548,7 +548,7 @@ private void refresh ()
 		}
 		if ( this.enableStateDMIPre050000 ) {
 			if ( SupplyType == null ) {
-				// Select default...
+				// Select default.
 				__SupplyType_JComboBox.select ( 0 );
 			}
 			else {
@@ -565,7 +565,7 @@ private void refresh ()
 			}
 		}
 		if ( SetToMissing == null ) {
-			// Select default...
+			// Select default.
 			__SetToMissing_JComboBox.select ( 0 );
 		}
 		else {
@@ -574,14 +574,14 @@ private void refresh ()
 				__SetToMissing_JComboBox.select ( SetToMissing );
 			}
 			else {
-				Message.printWarning ( 1, routine,	
+				Message.printWarning ( 1, routine,
 				"Existing command references an invalid\nSetToMissing value \"" +
 				SetToMissing + "\".  Select a different value or Cancel.");
 				__error_wait = true;
 			}
 		}
 		if ( ProcessWhen == null ) {
-			// Select default...
+			// Select default.
 			__ProcessWhen_JComboBox.select ( 0 );
 		}
 		else {
@@ -597,7 +597,7 @@ private void refresh ()
 			}
 		}
 		if ( IfNotFound == null ) {
-			// Select default...
+			// Select default.
 			__IfNotFound_JComboBox.select ( 0 );
 		}
 		else {
@@ -622,7 +622,7 @@ private void refresh ()
 	SetToMissing = __SetToMissing_JComboBox.getSelected();
 	ProcessWhen = __ProcessWhen_JComboBox.getSelected();
 	IfNotFound = __IfNotFound_JComboBox.getSelected();
-	
+
 	props = new PropList(__command.getCommandName());
 	props.add("ID=" + ID);
 	props.add("SetStart=" + SetStart);
@@ -646,32 +646,44 @@ React to the user response.
 public void response ( boolean ok ) {
 	__ok = ok;
 	if ( ok ) {
-		// Commit the changes...
+		// Commit the changes.
 		commitEdits ();
 		if ( __error_wait ) {
-			// Not ready to close out!
+			// Not ready to close out.
 			return;
 		}
 	}
-	// Now close out...
+	// Now close out.
 	setVisible( false );
 	dispose();
 }
 
 /**
 Responds to WindowEvents.
-@param event WindowEvent object 
+@param event WindowEvent object
 */
 public void windowClosing(WindowEvent event) {
 	response (false);
 }
 
-// The following methods are all necessary because this class implements WindowListener
-public void windowActivated(WindowEvent evt)	{}
-public void windowClosed(WindowEvent evt)	{}
-public void windowDeactivated(WindowEvent evt)	{}
-public void windowDeiconified(WindowEvent evt)	{}
-public void windowIconified(WindowEvent evt)	{}
-public void windowOpened(WindowEvent evt)	{}
+// The following methods are all necessary because this class implements WindowListener.
+
+public void windowActivated(WindowEvent evt) {
+}
+
+public void windowClosed(WindowEvent evt) {
+}
+
+public void windowDeactivated(WindowEvent evt) {
+}
+
+public void windowDeiconified(WindowEvent evt) {
+}
+
+public void windowIconified(WindowEvent evt) {
+}
+
+public void windowOpened(WindowEvent evt) {
+}
 
 }

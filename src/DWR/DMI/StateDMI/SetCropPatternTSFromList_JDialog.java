@@ -4,7 +4,7 @@
 
 StateDMI
 StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+Copyright (C) 1997-2023 Colorado Department of Natural Resources
 
 StateDMI is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -49,9 +49,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import java.io.File;
-
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
@@ -71,15 +70,15 @@ Editor for the SetCropPatternTSFromList() command.
 public class SetCropPatternTSFromList_JDialog extends JDialog
 implements ActionListener, ItemListener, KeyListener, WindowListener
 {
-	
+
 	private final String __AddWorkingDirectory = "Abs";
 	private final String __RemoveWorkingDirectory = "Rel";
 
-private boolean __error_wait = false;	// To track errors
-private boolean __first_time = true;	// Indicate first time display
-private boolean __ok = false;	// Indicate whether OK has been pressed
-private JTextArea __command_JTextArea=null;// For command
-private JTextField __ListFile_JTextField = null;// List file
+private boolean __error_wait = false;	// To track errors.
+private boolean __first_time = true;	// Indicate first time display.
+private boolean __ok = false;	// Indicate whether OK has been pressed.
+private JTextArea __command_JTextArea=null;// For command.
+private JTextField __ListFile_JTextField = null;// List file.
 private JTextField __ID_JTextField = null;
 private SimpleJComboBox __IDCol_JComboBox = null;
 private JTextField __SetStart_JTextField = null;
@@ -90,12 +89,14 @@ private SimpleJComboBox __AreaCol_JComboBox = null;
 private SimpleJComboBox __IrrigationMethodCol_JComboBox = null;
 private SimpleJComboBox __SupplyTypeCol_JComboBox = null;
 private SimpleJComboBox __ProcessWhen_JComboBox = null;
+private JTextField __SetFlag_JTextField = null;
+private JTextField __SetFlagDescription_JTextField = null;
 private SimpleJButton __cancel_JButton = null;
-private SimpleJButton __ok_JButton = null;	
-private SimpleJButton __help_JButton = null;	
+private SimpleJButton __ok_JButton = null;
+private SimpleJButton __help_JButton = null;
 private SimpleJButton __browse_JButton = null;
 private SimpleJButton __path_JButton = null;
-private String __working_dir = null;	
+private String __working_dir = null;
 private SetCropPatternTSFromList_Command __command = null;
 
 /**
@@ -103,8 +104,8 @@ Command editor constructor.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
-public SetCropPatternTSFromList_JDialog (JFrame parent, SetCropPatternTSFromList_Command command)
-{	super(parent, true);
+public SetCropPatternTSFromList_JDialog (JFrame parent, SetCropPatternTSFromList_Command command) {
+	super(parent, true);
 	initialize (parent, command);
 }
 
@@ -112,8 +113,8 @@ public SetCropPatternTSFromList_JDialog (JFrame parent, SetCropPatternTSFromList
 Responds to ActionEvents.
 @param event ActionEvent object
 */
-public void actionPerformed(ActionEvent event)
-{	Object o = event.getSource();
+public void actionPerformed(ActionEvent event) {
+	Object o = event.getSource();
 
 	if ( o == __browse_JButton ) {
 		String last_directory_selected = JGUIUtil.getLastFileDialogDirectory();
@@ -135,11 +136,11 @@ public void actionPerformed(ActionEvent event)
 			String directory = fc.getSelectedFile().getParent();
 			String filename = fc.getSelectedFile().getName();
 			String path = fc.getSelectedFile().getPath();
-			
+
 			if (filename == null || filename.equals("")) {
 				return;
 			}
-	
+
 			if (path != null) {
 				// Convert path to relative path by default.
 				try {
@@ -183,11 +184,12 @@ public void actionPerformed(ActionEvent event)
 }
 
 /**
-Check the input.  If errors exist, warn the user and set the __error_wait flag
-to true.  This should be called before response() is allowed to complete.
+Check the input.
+If errors exist, warn the user and set the __error_wait flag to true.
+This should be called before response() is allowed to complete.
 */
-private void checkInput ()
-{	String ListFile = __ListFile_JTextField.getText().trim();
+private void checkInput () {
+	String ListFile = __ListFile_JTextField.getText().trim();
 	String ID = __ID_JTextField.getText().trim();
 	String SetStart = __SetStart_JTextField.getText().trim();
 	String SetEnd = __SetEnd_JTextField.getText().trim();
@@ -195,12 +197,14 @@ private void checkInput ()
 	String IDCol = __IDCol_JComboBox.getSelected();
 	String CropTypeCol = __CropTypeCol_JComboBox.getSelected();
 	String AreaCol = __AreaCol_JComboBox.getSelected();
-	String ProcessWhen = __ProcessWhen_JComboBox.getSelected();
 	String IrrigationMethodCol = __IrrigationMethodCol_JComboBox.getSelected();
 	String SupplyTypeCol = __SupplyTypeCol_JComboBox.getSelected();
+	String ProcessWhen = __ProcessWhen_JComboBox.getSelected();
+	String SetFlag = __SetFlag_JTextField.getText().trim();
+	String SetFlagDescription = __SetFlagDescription_JTextField.getText().trim();
 
 	PropList props = new PropList ( "" );
-	
+
 	if ( ListFile.length() > 0 ) {
 		props.set ( "ListFile", ListFile );
 	}
@@ -225,18 +229,24 @@ private void checkInput ()
 	if ( AreaCol.length() > 0 ) {
 		props.set ( "AreaCol", AreaCol );
 	}
-	if ( ProcessWhen.length() > 0 ) {
-		props.set ( "ProcessWhen", ProcessWhen );
-	}
 	if ( IrrigationMethodCol.length() > 0 ) {
 		props.set ( "IrrigationMethodCol", IrrigationMethodCol );
 	}
 	if ( SupplyTypeCol.length() > 0 ) {
 		props.set ( "SupplyTypeCol", SupplyTypeCol );
 	}
+	if ( ProcessWhen.length() > 0 ) {
+		props.set ( "ProcessWhen", ProcessWhen );
+	}
+	if ( SetFlag.length() > 0 ) {
+		props.set ( "SetFlag", SetFlag );
+	}
+	if ( SetFlagDescription.length() > 0 ) {
+		props.set ( "SetFlagDescription", SetFlagDescription );
+	}
 	__error_wait = false;
 	try {
-		// This will warn the user
+		// This will warn the user.
 		__command.checkCommandParameters( props, null, 1 );
 	}
 	catch ( Exception e ) {
@@ -246,11 +256,10 @@ private void checkInput ()
 }
 
 /**
-Commit the edits to the command.  In this case the command parameters have
-already been checked and no errors were detected.
+Commit the edits to the command.
+In this case the command parameters have already been checked and no errors were detected.
 */
-private void commitEdits ()
-{	
+private void commitEdits () {
 	String ListFile = __ListFile_JTextField.getText().trim();
 	String ID = __ID_JTextField.getText().trim();
 	String SetStart = __SetStart_JTextField.getText().trim();
@@ -259,9 +268,11 @@ private void commitEdits ()
 	String IDCol = __IDCol_JComboBox.getSelected();
 	String CropTypeCol = __CropTypeCol_JComboBox.getSelected();
 	String AreaCol = __AreaCol_JComboBox.getSelected();
-	String ProcessWhen = __ProcessWhen_JComboBox.getSelected();
 	String IrrigationMethodCol = __IrrigationMethodCol_JComboBox.getSelected();
 	String SupplyTypeCol = __SupplyTypeCol_JComboBox.getSelected();
+	String ProcessWhen = __ProcessWhen_JComboBox.getSelected();
+	String SetFlag = __SetFlag_JTextField.getText().trim();
+	String SetFlagDescription = __SetFlagDescription_JTextField.getText().trim();
 
 	__command.setCommandParameter( "ListFile", ListFile );
 	__command.setCommandParameter( "ID", ID );
@@ -271,9 +282,11 @@ private void commitEdits ()
 	__command.setCommandParameter ( "IDCol", IDCol );
 	__command.setCommandParameter ( "CropTypeCol", CropTypeCol );
 	__command.setCommandParameter ( "AreaCol", AreaCol );
-	__command.setCommandParameter ( "ProcessWhen", ProcessWhen );
 	__command.setCommandParameter ( "IrrigationMethodCol", IrrigationMethodCol );
 	__command.setCommandParameter ( "SupplyTypeCol", SupplyTypeCol );
+	__command.setCommandParameter ( "ProcessWhen", ProcessWhen );
+	__command.setCommandParameter ( "SetFlag", SetFlag );
+	__command.setCommandParameter ( "SetFlagDescription", SetFlagDescription );
 }
 
 /**
@@ -287,10 +300,10 @@ private void initialize (JFrame parent, SetCropPatternTSFromList_Command command
 	__working_dir = StateDMICommandProcessorUtil.getWorkingDirForCommand ( processor, __command );
 
 	addWindowListener(this);
-	
+
     Insets insetsTLBR = new Insets(2,2,2,2);
 
-	// Main panel...
+	// Main panel.
 
 	JPanel main_JPanel = new JPanel();
 	main_JPanel.setLayout(new GridBagLayout());
@@ -334,17 +347,17 @@ private void initialize (JFrame parent, SetCropPatternTSFromList_Command command
     JGUIUtil.addComponent(paragraph, new JLabel (
 		"It is recommended that the location of the file be " +
 		"specified using a path relative to the working directory."),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
     JGUIUtil.addComponent(paragraph, new JLabel ( ""),
-		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);		
+		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.BOTH, GridBagConstraints.WEST);
 	if (__working_dir != null) {
-       	JGUIUtil.addComponent(paragraph, new JLabel ("The working directory is: " + __working_dir), 
+       	JGUIUtil.addComponent(paragraph, new JLabel ("The working directory is: " + __working_dir),
 		0, ++yy, 7, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	}
 
 	JGUIUtil.addComponent(main_JPanel, paragraph,
 		0, ++y, 7, 1, 0, 0, 5, 0, 10, 0, GridBagConstraints.NONE, GridBagConstraints.WEST);
-	
+
     JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
         0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
@@ -352,7 +365,7 @@ private void initialize (JFrame parent, SetCropPatternTSFromList_Command command
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__ListFile_JTextField = new JTextField (35);
 	__ListFile_JTextField.addKeyListener (this);
-    // Input file layout fights back with other rows so put in its own panel
+    // Input file layout fights back with other rows so put in its own panel.
 	JPanel InputFile_JPanel = new JPanel();
 	InputFile_JPanel.setLayout(new GridBagLayout());
     JGUIUtil.addComponent(InputFile_JPanel, __ListFile_JTextField,
@@ -362,7 +375,7 @@ private void initialize (JFrame parent, SetCropPatternTSFromList_Command command
     JGUIUtil.addComponent(InputFile_JPanel, __browse_JButton,
 		1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
 	if ( __working_dir != null ) {
-		// Add the button to allow conversion to/from relative path...
+		// Add the button to allow conversion to/from relative path.
 		__path_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
 		JGUIUtil.addComponent(InputFile_JPanel, __path_JButton,
 			2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -400,29 +413,29 @@ private void initialize (JFrame parent, SetCropPatternTSFromList_Command command
 		"Optional - ending year to set data (default=output period)."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
-    List<String> column_Vector = new Vector<String>(100);
-    List<String> column2_Vector = new Vector<String>(101);
-	column2_Vector.add ( "" );
+    List<String> columnList = new ArrayList<>(100);
+    List<String> column2List = new ArrayList<>(101);
+	column2List.add ( "" );
 	for ( int i = 1; i <= 100; i++ ) {
-		column_Vector.add ( "" + i );
-		column2_Vector.add ( "" + i );
+		columnList.add ( "" + i );
+		column2List.add ( "" + i );
 	}
 
     JGUIUtil.addComponent(main_JPanel,new JLabel("CU location ID column:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IDCol_JComboBox = new SimpleJComboBox(false);
-	__IDCol_JComboBox.setData ( column_Vector );
+	__IDCol_JComboBox.setData ( columnList );
 	__IDCol_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __IDCol_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
     JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Required - column in file for CU location ID."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
-    
+
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Year column:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__YearCol_JComboBox = new SimpleJComboBox(false);
-	__YearCol_JComboBox.setData ( column2_Vector );
+	__YearCol_JComboBox.setData ( column2List );
 	__YearCol_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __YearCol_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -433,7 +446,7 @@ private void initialize (JFrame parent, SetCropPatternTSFromList_Command command
     JGUIUtil.addComponent(main_JPanel, new JLabel("Crop type column:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__CropTypeCol_JComboBox = new SimpleJComboBox(false);
-	__CropTypeCol_JComboBox.setData ( column2_Vector );
+	__CropTypeCol_JComboBox.setData ( column2List );
 	__CropTypeCol_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __CropTypeCol_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -444,7 +457,7 @@ private void initialize (JFrame parent, SetCropPatternTSFromList_Command command
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Area (ACRE):"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__AreaCol_JComboBox = new SimpleJComboBox(false);
-	__AreaCol_JComboBox.setData ( column2_Vector );
+	__AreaCol_JComboBox.setData ( column2List );
 	__AreaCol_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __AreaCol_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -455,18 +468,18 @@ private void initialize (JFrame parent, SetCropPatternTSFromList_Command command
 	JGUIUtil.addComponent(main_JPanel, new JLabel ("Irrigation method column:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__IrrigationMethodCol_JComboBox = new SimpleJComboBox(false);
-	__IrrigationMethodCol_JComboBox.setData ( column2_Vector );
+	__IrrigationMethodCol_JComboBox.setData ( column2List );
 	__IrrigationMethodCol_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __IrrigationMethodCol_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(main_JPanel, new JLabel (
 		"Optional - column in file for irrigation method (column containg SPRINKLER, FLOOD)."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
-	
+
 	JGUIUtil.addComponent(main_JPanel, new JLabel ("Supply type column:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__SupplyTypeCol_JComboBox = new SimpleJComboBox(false);
-	__SupplyTypeCol_JComboBox.setData ( column2_Vector );
+	__SupplyTypeCol_JComboBox.setData ( column2List );
 	__SupplyTypeCol_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __SupplyTypeCol_JComboBox,
 		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
@@ -474,23 +487,43 @@ private void initialize (JFrame parent, SetCropPatternTSFromList_Command command
 		"Optional - column in file for supply type (column containing " +
 		__command._Ground + " or " + __command._Surface + ")."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
-	
+
     JGUIUtil.addComponent(main_JPanel, new JLabel ("Process when?:"),
 	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-    List<String> ProcessWhen_Vector = new Vector<String>(3);
-    ProcessWhen_Vector.add("");
-    ProcessWhen_Vector.add(__command._Now);
-	ProcessWhen_Vector.add(__command._WithParcels);
+    List<String> ProcessWhenList = new ArrayList<String>(3);
+    ProcessWhenList.add("");
+    ProcessWhenList.add(__command._Now);
+	ProcessWhenList.add(__command._WithParcels);
 	__ProcessWhen_JComboBox = new SimpleJComboBox(false);
-	__ProcessWhen_JComboBox.setData ( ProcessWhen_Vector );
+	__ProcessWhen_JComboBox.setData ( ProcessWhenList );
 	__ProcessWhen_JComboBox.addItemListener (this);
 	JGUIUtil.addComponent(main_JPanel, __ProcessWhen_JComboBox,
 	1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	JGUIUtil.addComponent(main_JPanel, new JLabel (
 	"Optional - when to process the data (default=" + __command._Now + ")."),
 	3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
-	
-	JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"), 
+
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Set flag:"),
+		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__SetFlag_JTextField = new JTextField (10);
+	__SetFlag_JTextField.addKeyListener (this);
+        JGUIUtil.addComponent(main_JPanel, __SetFlag_JTextField,
+		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel (
+		"Optional - flag for data values that are set (default=no flag)."),
+		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+
+    JGUIUtil.addComponent(main_JPanel, new JLabel ("Set flag description:"),
+		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__SetFlagDescription_JTextField = new JTextField (30);
+	__SetFlagDescription_JTextField.addKeyListener (this);
+        JGUIUtil.addComponent(main_JPanel, __SetFlagDescription_JTextField,
+		1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel (
+		"Optional - description for set flag (default=no flag)."),
+		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
+
+	JGUIUtil.addComponent(main_JPanel, new JLabel ("Command:"),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__command_JTextArea = new JTextArea (4,40);
 	__command_JTextArea.setLineWrap ( true );
@@ -499,13 +532,13 @@ private void initialize (JFrame parent, SetCropPatternTSFromList_Command command
 	JGUIUtil.addComponent(main_JPanel, new JScrollPane(__command_JTextArea),
 		1, y, 6, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
-	// Refresh the contents...
+	// Refresh the contents.
 	refresh ();
 
-	// South JPanel: North
+	// Panel for buttons.
 	JPanel button_JPanel = new JPanel();
 	button_JPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-        JGUIUtil.addComponent(main_JPanel, button_JPanel, 
+        JGUIUtil.addComponent(main_JPanel, button_JPanel,
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
 	__ok_JButton = new SimpleJButton("OK", this);
@@ -516,11 +549,11 @@ private void initialize (JFrame parent, SetCropPatternTSFromList_Command command
 	__help_JButton.setToolTipText("Show command documentation in web browser");
 
 	setTitle ( "Edit " + __command.getCommandName() + "() Command" );
-	// JDialogs do not need to be resizable...
+	// JDialogs do not need to be resizable.
 	setResizable (false);
     pack();
     JGUIUtil.center(this);
-	refresh();	// Sets the __path_JButton status
+	refresh();	// Sets the __path_JButton status.
     super.setVisible(true);
 }
 
@@ -546,7 +579,7 @@ public void keyPressed (KeyEvent event) {
 		}
 	}
 	else {
-		// One of the combo boxes...
+		// One of the combo boxes.
 		refresh();
 	}
 }
@@ -555,21 +588,22 @@ public void keyReleased (KeyEvent event) {
 	refresh();
 }
 
-public void keyTyped (KeyEvent event) {}
+public void keyTyped (KeyEvent event) {
+}
 
 /**
 Indicate if the user pressed OK (cancel otherwise).
 @return true if the edits were committed, false if the user cancelled.
 */
-public boolean ok ()
-{	return __ok;
+public boolean ok () {
+	return __ok;
 }
 
 /**
 Refresh the command from the other text field contents.
 */
-private void refresh ()
-{	String routine = "setCropPatternTSFromList.refresh";
+private void refresh () {
+	String routine = getClass().getSimpleName() + ".refresh";
 	String ListFile = "";
 	String ID = "";
 	String IDCol = "";
@@ -578,9 +612,11 @@ private void refresh ()
 	String YearCol = "";
 	String CropTypeCol = "";
 	String AreaCol = "";
-	String ProcessWhen = "";
 	String IrrigationMethodCol = "";
 	String SupplyTypeCol = "";
+	String ProcessWhen = "";
+	String SetFlag = "";
+	String SetFlagDescription = "";
 	PropList props = __command.getCommandParameters();
 	if (__first_time) {
 		__first_time = false;
@@ -592,9 +628,11 @@ private void refresh ()
 		YearCol = props.getValue ( "YearCol" );
 		CropTypeCol = props.getValue ( "CropTypeCol" );
 		AreaCol = props.getValue ( "AreaCol" );
-		ProcessWhen = props.getValue ( "ProcessWhen" );
 		IrrigationMethodCol = props.getValue ( "IrrigationMethodCol" );
 		SupplyTypeCol = props.getValue ( "SupplyTypeCol" );
+		ProcessWhen = props.getValue ( "ProcessWhen" );
+		SetFlag = props.getValue ( "SetFlag" );
+		SetFlagDescription = props.getValue ( "SetFlagDescription" );
 		if ( ID != null ) {
 			__ID_JTextField.setText (ID);
 		}
@@ -608,7 +646,7 @@ private void refresh ()
 			__SetEnd_JTextField.setText(SetEnd);
 		}
 		if ( YearCol == null ) {
-			// Select default...
+			// Select default.
 			__YearCol_JComboBox.select ( 0 );
 		}
 		else {
@@ -623,7 +661,7 @@ private void refresh ()
 			}
 		}
 		if ( IDCol == null ) {
-			// Select default...
+			// Select default.
 			__IDCol_JComboBox.select ( 0 );
 		}
 		else {
@@ -638,7 +676,7 @@ private void refresh ()
 			}
 		}
 		if ( CropTypeCol == null ) {
-			// Select default...
+			// Select default.
 			__CropTypeCol_JComboBox.select ( 0 );
 		}
 		else {
@@ -653,7 +691,7 @@ private void refresh ()
 			}
 		}
 		if ( AreaCol == null ) {
-			// Select default...
+			// Select default.
 			__AreaCol_JComboBox.select ( 0 );
 		}
 		else {
@@ -666,23 +704,8 @@ private void refresh ()
 				__error_wait = true;
 			}
 		}
-		if ( ProcessWhen == null ) {
-			// Select default...
-			__ProcessWhen_JComboBox.select ( 0 );
-		}
-		else {
-			if ( JGUIUtil.isSimpleJComboBoxItem(
-				__ProcessWhen_JComboBox, ProcessWhen, JGUIUtil.NONE, null, null )){
-				__ProcessWhen_JComboBox.select(	ProcessWhen);
-			}
-			else {
-				Message.printWarning ( 2, routine, "Existing command references an ProcessWhen value \"" +
-				ProcessWhen + "\".  Select a different value or Cancel.");
-				__error_wait = true;
-			}
-		}
 		if ( IrrigationMethodCol == null ) {
-			// Select default...
+			// Select default.
 			__IrrigationMethodCol_JComboBox.select ( 0 );
 		}
 		else {
@@ -697,7 +720,7 @@ private void refresh ()
 			}
 		}
 		if ( SupplyTypeCol == null ) {
-			// Select default...
+			// Select default.
 			__SupplyTypeCol_JComboBox.select ( 0 );
 		}
 		else {
@@ -711,8 +734,29 @@ private void refresh ()
 				__error_wait = true;
 			}
 		}
+		if ( ProcessWhen == null ) {
+			// Select default.
+			__ProcessWhen_JComboBox.select ( 0 );
+		}
+		else {
+			if ( JGUIUtil.isSimpleJComboBoxItem(
+				__ProcessWhen_JComboBox, ProcessWhen, JGUIUtil.NONE, null, null )){
+				__ProcessWhen_JComboBox.select(	ProcessWhen);
+			}
+			else {
+				Message.printWarning ( 2, routine, "Existing command references an ProcessWhen value \"" +
+				ProcessWhen + "\".  Select a different value or Cancel.");
+				__error_wait = true;
+			}
+		}
+		if ( SetFlag != null ) {
+			__SetFlag_JTextField.setText(SetFlag);
+		}
+		if ( SetFlagDescription != null ) {
+			__SetFlagDescription_JTextField.setText(SetFlagDescription);
+		}
 	}
-	// Regardless, reset the command from the fields...
+	// Regardless, reset the command from the fields.
 	ListFile = __ListFile_JTextField.getText().trim();
 	ID = __ID_JTextField.getText().trim();
 	SetStart = __SetStart_JTextField.getText().trim();
@@ -721,10 +765,12 @@ private void refresh ()
 	IDCol = __IDCol_JComboBox.getSelected();
 	CropTypeCol = __CropTypeCol_JComboBox.getSelected();
 	AreaCol = __AreaCol_JComboBox.getSelected();
-	ProcessWhen = __ProcessWhen_JComboBox.getSelected();
 	IrrigationMethodCol = __IrrigationMethodCol_JComboBox.getSelected();
 	SupplyTypeCol = __SupplyTypeCol_JComboBox.getSelected();
-	
+	ProcessWhen = __ProcessWhen_JComboBox.getSelected();
+	SetFlag = __SetFlag_JTextField.getText().trim();
+	SetFlagDescription = __SetFlagDescription_JTextField.getText().trim();
+
 	props.add ( "ListFile=" + ListFile );
 	props.add ( "ID=" + ID );
 	props.add ( "SetStart=" + SetStart);
@@ -733,13 +779,15 @@ private void refresh ()
 	props.add ( "IDCol=" + IDCol );
 	props.add ( "CropTypeCol=" + CropTypeCol );
 	props.add ( "AreaCol=" + AreaCol );
-	props.add ( "ProcessWhen=" + ProcessWhen );
 	props.add ( "IrrigationMethodCol=" + IrrigationMethodCol );
 	props.add ( "SupplyTypeCol=" + SupplyTypeCol );
-	
+	props.add ( "ProcessWhen=" + ProcessWhen );
+	props.add ( "SetFlag=" + SetFlag );
+	props.add ( "SetFlagDescription=" + SetFlagDescription );
+
 	__command_JTextArea.setText( __command.toString(props) );
-	
-	// Check the path and determine what the label on the path button should be...
+
+	// Check the path and determine what the label on the path button should be.
 	if (__path_JButton != null) {
 		if ( (ListFile != null) && !ListFile.isEmpty() ) {
 			__path_JButton.setEnabled ( true );
@@ -761,40 +809,50 @@ private void refresh ()
 
 /**
 React to the user response.
-@param ok if false, then the edit is cancelled.  If true, the edit is committed
-and the dialog is closed.
+@param ok if false, then the edit is cancelled.  If true, the edit is committed and the dialog is closed.
 */
-private void response ( boolean ok )
-{	
-	__ok = ok;	// Save to be returned by ok()
+private void response ( boolean ok ) {
+	__ok = ok;	// Save to be returned by ok().
 	if ( ok ) {
-		// Commit the changes...
+		// Commit the changes.
 		commitEdits ();
 		if ( __error_wait ) {
-			// Not ready to close out!
+			// Not ready to close out.
 			Message.printStatus(2, "", "error_wait=true");
 			return;
 		}
 	}
-	// Now close out...
+	// Now close out.
 	setVisible( false );
 	dispose();
 }
 
 /**
 Responds to WindowEvents.
-@param event WindowEvent object 
+@param event WindowEvent object
 */
 public void windowClosing(WindowEvent event) {
 	response (false);
 }
 
-// The following methods are all necessary because this class implements WindowListener
-public void windowActivated(WindowEvent evt)	{}
-public void windowClosed(WindowEvent evt)	{}
-public void windowDeactivated(WindowEvent evt)	{}
-public void windowDeiconified(WindowEvent evt)	{}
-public void windowIconified(WindowEvent evt)	{}
-public void windowOpened(WindowEvent evt)	{}
+// The following methods are all necessary because this class implements WindowListener.
+
+public void windowActivated(WindowEvent evt) {
+}
+
+public void windowClosed(WindowEvent evt) {
+}
+
+public void windowDeactivated(WindowEvent evt) {
+}
+
+public void windowDeiconified(WindowEvent evt) {
+}
+
+public void windowIconified(WindowEvent evt) {
+}
+
+public void windowOpened(WindowEvent evt) {
+}
 
 }
