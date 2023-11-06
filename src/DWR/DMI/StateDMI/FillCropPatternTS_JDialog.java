@@ -804,7 +804,7 @@ private void refresh () {
 		props.add("FillFlag=" + FillFlag);
 	}
 	if ( __FillFlagDescription_JTextField != null ) {
-		FillFlag = __FillFlagDescription_JTextField.getText().trim();
+		FillFlagDescription = __FillFlagDescription_JTextField.getText().trim();
 		props.add("FillFlagDescription=" + FillFlagDescription);
 	}
 	if ( __MaxIntervals_JTextField != null ) {
