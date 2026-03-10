@@ -631,7 +631,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			}
 			// Set the default identifier length in the processor.
 			if ( wdidLength > 0 ) {
-				getCommandProcessor().setPropContents("WDIDLength", new Integer(wdidLength) );
+				getCommandProcessor().setPropContents("WDIDLength", Integer.valueOf(wdidLength) );
 			}
 
 			// Warn about identifiers that have been replaced in the list...

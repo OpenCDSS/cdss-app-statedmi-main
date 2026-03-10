@@ -552,10 +552,10 @@ public Object [] createTableColumns ( DataTable table, Workbook wb, Sheet sheet,
                 		// Assume column headings are integers
                         // Double to integer - use an offset to help make sure integer value is correct
                         if ( cellValueDouble >= 0.0 ) {
-                        	columnNames[columnIndex] = "" + new Integer((int)(cellValueDouble + .0001));
+                        	columnNames[columnIndex] = "" + Integer.valueOf((int)(cellValueDouble + .0001));
                         }
                         else {
-                        	columnNames[columnIndex] = "" + new Integer((int)(cellValueDouble - .0001));
+                        	columnNames[columnIndex] = "" + Integer.valueOf((int)(cellValueDouble - .0001));
                         }
                 	}
                 	else {
@@ -721,7 +721,7 @@ public Object [] createTableColumns ( DataTable table, Workbook wb, Sheet sheet,
     }
     Object [] o = new Object[2];
     o[0] = columnNames;
-    o[1] = new Integer(firstDataRow);
+    o[1] = Integer.valueOf(firstDataRow);
     return o;
 }
 
@@ -1169,10 +1169,10 @@ throws FileNotFoundException, IOException
                     Message.printStatus(2, routine, "Cell string value=\"" + cellValueString + "\"" );
                     if ( isBoolean ) {
                     	if ( cellValueString.equals("1") || cellValueString.equalsIgnoreCase("Yes") || cellValueString.equalsIgnoreCase("True") ) {
-                    		map.put(propertyName, new Boolean(true));
+                    		map.put(propertyName, Boolean.valueOf(true));
                     	}
                     	else {
-                    		map.put(propertyName, new Boolean(false));
+                    		map.put(propertyName, Boolean.valueOf(false));
                     	}
                     }
                     else if ( isDateTime ) {
@@ -1227,7 +1227,7 @@ throws FileNotFoundException, IOException
                         }
                         Message.printStatus(2, routine, "Cell numeric value=" + cellValueDouble );
                         if ( isInteger ) {
-                        	map.put(propertyName,new Integer((int)cellValueDouble));
+                        	map.put(propertyName,Integer.valueOf((int)cellValueDouble));
                         }
                         else if ( isBoolean ) {
                         	int i = (int)cellValueDouble;
@@ -1235,7 +1235,7 @@ throws FileNotFoundException, IOException
                         	if ( i != 0 ) {
                         		b = true;
                         	}
-                        	map.put(propertyName,new Boolean(b));
+                        	map.put(propertyName,Boolean.valueOf(b));
                         }
                         else {
                         	// Default is double
@@ -1253,10 +1253,10 @@ throws FileNotFoundException, IOException
                     Message.printStatus(2, routine, "Cell boolean value=" + cellValueBoolean );
                     if ( isInteger ) {
                     	if ( cellValueBoolean ) {
-                    		map.put(propertyName,new Integer(1));
+                    		map.put(propertyName,Integer.valueOf(1));
                     	}
                     	else {
-                    		map.put(propertyName,new Integer(0));
+                    		map.put(propertyName,Integer.valueOf(0));
                     	}
                     }
                     map.put(propertyName,cellValueBoolean);
@@ -1643,7 +1643,7 @@ throws FileNotFoundException, IOException
                     else if ( tableColumnTypes[ikey] == TableField.DATA_TYPE_DOUBLE ) {
                         // Parse to the double
                         try {
-                            table.setFieldValue(iRowOut, iColOut, new Double(cellValueString), true);
+                            table.setFieldValue(iRowOut, iColOut, Double.valueOf(cellValueString), true);
                         }
                         catch ( NumberFormatException e ) {
                             // Set to NaN
@@ -1653,7 +1653,7 @@ throws FileNotFoundException, IOException
                     else if ( tableColumnTypes[ikey] == TableField.DATA_TYPE_INT ) {
                         // Parse to the boolean
                         if ( cellValueString.equalsIgnoreCase("True") || cellValueString.equals("1") ) {
-                            table.setFieldValue(iRowOut, iColOut, new Integer(1), true);
+                            table.setFieldValue(iRowOut, iColOut, Integer.valueOf(1), true);
                         }
                         else {
                             // Set to null
@@ -1731,7 +1731,7 @@ throws FileNotFoundException, IOException
                         Message.printStatus(2, routine, "Cell numeric value=" + cellValueDouble );
                         if ( tableColumnTypes[ikey] == TableField.DATA_TYPE_DOUBLE ) {
                             // Double to double
-                            table.setFieldValue(iRowOut, iColOut, new Double(cellValueDouble), true);
+                            table.setFieldValue(iRowOut, iColOut, Double.valueOf(cellValueDouble), true);
                         }
                         else if ( tableColumnTypes[ikey] == TableField.DATA_TYPE_STRING ) {
                             // Double to string
@@ -1740,10 +1740,10 @@ throws FileNotFoundException, IOException
                         else if ( tableColumnTypes[ikey] == TableField.DATA_TYPE_INT ) {
                             // Double to integer - use an offset to help make sure integer value is correct
                             if ( cellValueDouble >= 0.0 ) {
-                                table.setFieldValue(iRowOut, iColOut, new Integer((int)(cellValueDouble + .0001)), true);
+                                table.setFieldValue(iRowOut, iColOut, Integer.valueOf((int)(cellValueDouble + .0001)), true);
                             }
                             else {
-                                table.setFieldValue(iRowOut, iColOut, new Integer((int)(cellValueDouble - .0001)), true);
+                                table.setFieldValue(iRowOut, iColOut, Integer.valueOf((int)(cellValueDouble - .0001)), true);
                             }
                         }
                         else {
@@ -1768,10 +1768,10 @@ throws FileNotFoundException, IOException
                     }
                     else if ( tableColumnTypes[ikey] == TableField.DATA_TYPE_DOUBLE ) {
                         if ( cellValueBoolean ) {
-                            table.setFieldValue(iRowOut, iColOut, new Double(1.0), true);
+                            table.setFieldValue(iRowOut, iColOut, Double.valueOf(1.0), true);
                         }
                         else {
-                            table.setFieldValue(iRowOut, iColOut, new Double(0.0), true);
+                            table.setFieldValue(iRowOut, iColOut, Double.valueOf(0.0), true);
                         }
                     }
                     else {
@@ -1923,7 +1923,7 @@ public boolean rowShouldBeIncluded ( Row row, int iRow, int colStart, int colEnd
                 else if ( tableColumnTypes[iColOut] == TableField.DATA_TYPE_DOUBLE ) {
                     // Parse to the double
                     try {
-                        table.setFieldValue(iRowOut, iColOut, new Double(cellValueString), true);
+                        table.setFieldValue(iRowOut, iColOut, Double.valueOf(cellValueString), true);
                     }
                     catch ( NumberFormatException e ) {
                         // Set to NaN
@@ -1933,7 +1933,7 @@ public boolean rowShouldBeIncluded ( Row row, int iRow, int colStart, int colEnd
                 else if ( tableColumnTypes[iColOut] == TableField.DATA_TYPE_INT ) {
                     // Parse to the boolean
                     if ( cellValueString.equalsIgnoreCase("True") || cellValueString.equals("1") ) {
-                        table.setFieldValue(iRowOut, iColOut, new Integer(1), true);
+                        table.setFieldValue(iRowOut, iColOut, Integer.valueOf(1), true);
                     }
                     else {
                         // Set to null
@@ -2019,10 +2019,10 @@ public boolean rowShouldBeIncluded ( Row row, int iRow, int colStart, int colEnd
                     else if ( tableColumnTypes[iColOut] == TableField.DATA_TYPE_INT ) {
                         // Double to integer - use an offset to help make sure integer value is correct
                         if ( cellValueDouble >= 0.0 ) {
-                            // Eval and set table.setFieldValue(iRowOut, iColOut, new Integer((int)(cellValueDouble + .0001)), true);
+                            // Eval and set table.setFieldValue(iRowOut, iColOut, Integer.valueOf((int)(cellValueDouble + .0001)), true);
                         }
                         else {
-                            // Eval and set table.setFieldValue(iRowOut, iColOut, new Integer((int)(cellValueDouble - .0001)), true);
+                            // Eval and set table.setFieldValue(iRowOut, iColOut, Integer.valueOf((int)(cellValueDouble - .0001)), true);
                         }
                     }
                     else {
@@ -2047,10 +2047,10 @@ public boolean rowShouldBeIncluded ( Row row, int iRow, int colStart, int colEnd
                 }
                 else if ( tableColumnTypes[iColOut] == TableField.DATA_TYPE_DOUBLE ) {
                     if ( cellValueBoolean ) {
-                        table.setFieldValue(iRowOut, iColOut, new Double(1.0), true);
+                        table.setFieldValue(iRowOut, iColOut, Double.valueOf(1.0), true);
                     }
                     else {
-                        table.setFieldValue(iRowOut, iColOut, new Double(0.0), true);
+                        table.setFieldValue(iRowOut, iColOut, Double.valueOf(0.0), true);
                     }
                 }
                 else {

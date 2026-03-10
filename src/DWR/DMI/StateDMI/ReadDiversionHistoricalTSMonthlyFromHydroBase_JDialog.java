@@ -4,7 +4,7 @@
 
 StateDMI
 StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+Copyright (C) 1997-2026 Colorado Department of Natural Resources
 
 StateDMI is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,19 +20,6 @@ You should have received a copy of the GNU General Public License
     along with StateDMI.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
-
-// ----------------------------------------------------------------------------
-// readDiversionHistoricalTSFromHydroBase_JDialog
-// ----------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-// ----------------------------------------------------------------------------
-// History: 
-// 2007-02-06	Kurt Tometich, RTi		Initial version for separation
-//								of command from the StateDMI processor.
-// 								REVISIT: need to move the Daily Diversion
-//								code out of here and into a new command.
-// 2007-02-27	SAM, RTi		Clean up code based on Eclipse feedback.
-// ----------------------------------------------------------------------------
 
 package DWR.DMI.StateDMI;
 
@@ -81,16 +68,17 @@ implements ActionListener, ItemListener, KeyListener, WindowListener, ChangeList
 
 private boolean __error_wait = false;
 private boolean __first_time = true;
-private boolean __ok = false;		// Indicates whether OK button
-										// has been pressed.
+private boolean __ok = false;
+
 private JTextField __ID_JTextField=null;
 private SimpleJComboBox __IncludeExplicit_JComboBox = null;
 private SimpleJComboBox __IncludeCollections_JComboBox = null;
 private SimpleJComboBox __LEZeroInAverage_JComboBox = null;
 private SimpleJComboBox __UseDiversionComments_JComboBox = null;
+private SimpleJComboBox __FillCarryForward_JComboBox = null;
 private SimpleJComboBox __FillUsingCIU_JComboBox = null;
 private JTextField __ReadStart_JTextField = null;
-private JTextArea __command_JTextArea = null;	//Command as JTextField
+private JTextArea __command_JTextArea = null;
 private JTextField __ReadEnd_JTextField = null;
 private JTextField __PatternID_JTextField = null;
 private SimpleJComboBox __FillPatternOrder_JComboBox = null;
@@ -156,6 +144,7 @@ private void checkInput ()
 	String PatternFillFlag = __PatternFillFlag_JTextField.getText().trim();
 	String FillAverageOrder=__FillAverageOrder_JComboBox.getSelected();
 	String AverageFillFlag = __AverageFillFlag_JTextField.getText().trim();
+	String FillCarryForward = __FillCarryForward_JComboBox.getSelected();
 	String FillUsingCIU = __FillUsingCIU_JComboBox.getSelected();
 	String FillUsingCIUFlag = __FillUsingCIUFlag_JTextField.getText().trim();
 	
@@ -188,6 +177,9 @@ private void checkInput ()
 	}
 	if ( FillAverageOrder.length() > 0 ) {
 		props.set ( "FillAverageOrder", FillAverageOrder );
+	}
+	if ( FillCarryForward.length() > 0 ) {
+		props.set( "FillCarryForward", FillCarryForward );
 	}
 	if ( FillUsingCIU.length() > 0 ) {
 		props.set( "FillUsingCIU", FillUsingCIU );
@@ -230,6 +222,7 @@ private void commitEdits ()
 	String PatternFillFlag = __PatternFillFlag_JTextField.getText().trim();
 	String FillAverageOrder=__FillAverageOrder_JComboBox.getSelected();
 	String AverageFillFlag = __AverageFillFlag_JTextField.getText().trim();
+	String FillCarryForward = __FillCarryForward_JComboBox.getSelected();
 	String FillUsingCIU = __FillUsingCIU_JComboBox.getSelected();
 	String FillUsingCIUFlag = __FillUsingCIUFlag_JTextField.getText().trim();
 	
@@ -246,6 +239,7 @@ private void commitEdits ()
 	__command.setCommandParameter ( "PatternFillFlag", PatternFillFlag );
 	__command.setCommandParameter ( "FillAverageOrder", FillAverageOrder );
 	__command.setCommandParameter ( "AverageFillFlag", AverageFillFlag );	
+	__command.setCommandParameter ( "FillCarryForward", FillCarryForward );
 	__command.setCommandParameter ( "FillUsingCIU", FillUsingCIU );
 	__command.setCommandParameter ( "FillUsingCIUFlag", FillUsingCIUFlag );
 }
@@ -371,6 +365,20 @@ private void initialize (	JFrame parent, Command command )
 		"Optional - use diversion comments for more zero values? (default=" + __command._True + ")."),
 		3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
 
+    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Fill using carry forward:"), 
+    	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
+	__FillCarryForward_JComboBox = new SimpleJComboBox ( false );
+	__FillCarryForward_JComboBox.setToolTipText ( "Fill diversion records read from HydroBase using the carry forward methodology." );
+	__FillCarryForward_JComboBox.addItem ( "" );
+	__FillCarryForward_JComboBox.addItem ( __command._False);
+	__FillCarryForward_JComboBox.addItem ( __command._True );
+	__FillCarryForward_JComboBox.addItemListener ( this );
+    JGUIUtil.addComponent(main_JPanel, __FillCarryForward_JComboBox,
+    	1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+    JGUIUtil.addComponent(main_JPanel, new JLabel(
+    	"Optional - fill using carry forward methodology? (default=" + __command._True + ")."), 
+    	3, y, 4, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
+        
     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Fill using CIU:"), 
     	0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	__FillUsingCIU_JComboBox = new SimpleJComboBox ( false );
@@ -559,6 +567,7 @@ private void refresh ()
 	String PatternFillFlag = "";
 	String FillAverageOrder = "";
 	String AverageFillFlag = "";
+	String FillCarryForward = "";
 	String FillUsingCIU = "";
 	String FillUsingCIUFlag = "";
 	__error_wait = false;
@@ -579,6 +588,7 @@ private void refresh ()
 		PatternFillFlag = props.getValue ( "PatternFillFlag");
 		FillAverageOrder = props.getValue ( "FillAverageOrder");
 		AverageFillFlag = props.getValue ( "AverageFillFlag");
+		FillCarryForward = props.getValue( "FillCarryForward" );
 		FillUsingCIU = props.getValue( "FillUsingCIU" );
 		FillUsingCIUFlag = props.getValue( "FillUsingCIUFlag" );
 		
@@ -699,6 +709,22 @@ private void refresh ()
 		if ( AverageFillFlag != null ) {
 			__AverageFillFlag_JTextField.setText(AverageFillFlag);
 		}
+		if ( FillCarryForward == null ) {
+			// Select default...
+			__FillCarryForward_JComboBox.select ( 0 );
+		}
+		else {
+			if ( JGUIUtil.isSimpleJComboBoxItem(
+				__FillCarryForward_JComboBox, FillCarryForward, JGUIUtil.NONE, null, null ) ) {
+				__FillCarryForward_JComboBox.select ( FillCarryForward );
+			}
+			else {
+				Message.printWarning ( 1, routine,
+				"Existing command references an invalid\n" + "FillCarryForward value \""+
+				FillCarryForward + "\".  Select a different value or Cancel.");
+				__error_wait = true;
+			}
+		}
 		if ( FillUsingCIU == null ) {
 			// Select default...
 			__FillUsingCIU_JComboBox.select ( 0 );
@@ -743,6 +769,7 @@ private void refresh ()
 	PatternFillFlag = __PatternFillFlag_JTextField.getText().trim();
 	FillAverageOrder=__FillAverageOrder_JComboBox.getSelected();
 	AverageFillFlag = __AverageFillFlag_JTextField.getText().trim();
+	FillCarryForward = __FillCarryForward_JComboBox.getSelected();
 	FillUsingCIU = __FillUsingCIU_JComboBox.getSelected();
 	FillUsingCIUFlag = __FillUsingCIUFlag_JTextField.getText().trim();
 	// Add params to the propList
@@ -759,6 +786,7 @@ private void refresh ()
 	props.add ( "PatternFillFlag=" + PatternFillFlag );
 	props.add ( "FillAverageOrder=" + FillAverageOrder );
 	props.add ( "AverageFillFlag=" + AverageFillFlag );
+	props.add ( "FillCarryForward=" + FillCarryForward );
 	props.add ( "FillUsingCIU=" + FillUsingCIU );
 	props.add ( "FillUsingCIUFlag=" + FillUsingCIUFlag );
 	

@@ -113,11 +113,11 @@ throws InvalidCommandParameterException
     String IfRequirementsNotMet = parameters.getValue ( "IfRequirementsNotMet" );
 	String warning = "";
     String message;
-	
+
 	CommandProcessor processor = getCommandProcessor();
     CommandStatus status = getCommandStatus();
     status.clearLog(CommandPhaseType.INITIALIZATION);
-	
+
 	if ( (InputFile == null) || (InputFile.length() == 0) ) {
         message = "The input file must be specified.";
 		warning += "\n" + message;
@@ -127,7 +127,7 @@ throws InvalidCommandParameterException
 	}
 	else if ( InputFile.indexOf("${") < 0 ) {
 		String working_dir = null;
-	
+
 		try {
 			Object o = processor.getPropContents ( "WorkingDir" );
 			// Working directory is available so use it...
@@ -177,7 +177,7 @@ throws InvalidCommandParameterException
                         ", or " + _True) );
     }
     */
-    
+
     if ( (ExpectedStatus != null) && (ExpectedStatus.length() == 0) &&
         !ExpectedStatus.equalsIgnoreCase(_Unknown) &&
         !ExpectedStatus.equalsIgnoreCase(_Success) &&
@@ -190,7 +190,7 @@ throws InvalidCommandParameterException
                         message, "Specify an expected status of " + _Unknown + ", " + _Success + ", " +
                         _Warning + ", or " + _Failure) );
     }
-    
+
     if ( (ShareDataStores != null) && (ShareDataStores.length() == 0) &&
         //!ShareDataStores.equalsIgnoreCase(_Copy) &&
         !ShareDataStores.equalsIgnoreCase(_DoNotShare) &&
@@ -255,7 +255,7 @@ CommandWarningException, CommandException
 	int warning_count = 0;
 	int warning_level = 2;
 	String command_tag = "" + command_number;
-	
+
 	CommandProcessor processor = getCommandProcessor();
     CommandStatus status = getCommandStatus();
     status.clearLog(CommandPhaseType.RUN);
@@ -274,10 +274,10 @@ CommandWarningException, CommandException
     }
     // TODO smalers 2021-01-04 does not allow user changes?
 	String AppendResults = parameters.getValue ( "AppendResults" );
-	
+
 	if ( warning_count > 0 ) {
 		message = "There were " + warning_count + " warnings about command parameters.";
-		Message.printWarning ( warning_level, 
+		Message.printWarning ( warning_level,
 		MessageUtil.formatMessageTag(command_tag, ++warning_count),
 		routine, message );
 		throw new InvalidCommandParameterException ( message );
@@ -492,7 +492,7 @@ CommandWarningException, CommandException
 		Message.printWarning ( 3, routine, e );
 		message = "Unexpected error processing command file \"" + InputFile + "\", full path=\"" +
 		    InputFile_full + "\" (" + e + ").";
-		Message.printWarning ( warning_level, 
+		Message.printWarning ( warning_level,
 		MessageUtil.formatMessageTag(command_tag, ++warning_count),
 		routine, message );
 		throw new CommandException ( message );
@@ -530,19 +530,19 @@ public String toString ( PropList props )
         if ( b.length() > 0 ) {
             b.append ( "," );
         }
-        b.append ( "ExpectedStatus=" + ExpectedStatus );
+        b.append ( "ExpectedStatus=\"" + ExpectedStatus + "\"");
     }
     if ( (ShareDataStores != null) && (ShareDataStores.length() > 0) ) {
         if ( b.length() > 0 ) {
             b.append ( "," );
         }
-        b.append ( "ShareDataStores=" + ShareDataStores );
+        b.append ( "ShareDataStores=\"" + ShareDataStores + "\"");
     }
     if ( (IfRequirementsNotMet != null) && (IfRequirementsNotMet.length() > 0) ) {
         if ( b.length() > 0 ) {
             b.append ( "," );
         }
-        b.append ( "IfRequirementsNotMet=" + IfRequirementsNotMet );
+        b.append ( "IfRequirementsNotMet=\"" + IfRequirementsNotMet + "\"");
     }
 	return getCommandName() + "(" + b.toString() + ")";
 }

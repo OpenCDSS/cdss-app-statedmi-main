@@ -1,23 +1,23 @@
-// WriteTableToHTML_JDialog - editor for WriteTableToHTML command
+// WriteTableToHTML_JDialog - editor dialog for WriteTableToHTML command
 
 /* NoticeStart
 
-StateDMI
-StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+CDSS Time Series Processor Java Library
+CDSS Time Series Processor Java Library is a part of Colorado's Decision Support Systems (CDSS)
+Copyright (C) 1994-2024 Colorado Department of Natural Resources
 
-StateDMI is free software:  you can redistribute it and/or modify
+CDSS Time Series Processor Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-StateDMI is distributed in the hope that it will be useful,
+CDSS Time Series Processor Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-    along with StateDMI.  If not, see <https://www.gnu.org/licenses/>.
+    along with CDSS Time Series Processor Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
 
@@ -50,8 +50,9 @@ import javax.swing.SwingConstants;
 import java.io.File;
 import java.util.List;
 
-import DWR.DMI.StateDMI.StateDMI_Processor;
+//import rti.tscommandprocessor.core.TSCommandProcessor;
 import rti.tscommandprocessor.core.TSCommandProcessorUtil;
+import DWR.DMI.StateDMI.StateDMI_Processor;
 import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleFileFilter;
@@ -70,7 +71,7 @@ implements ActionListener, ItemListener, KeyListener, WindowListener
 
 private final String __AddWorkingDirectory = "Abs";
 private final String __RemoveWorkingDirectory = "Rel";
-	
+
 private SimpleJButton __browse_JButton = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __ok_JButton = null;
@@ -90,8 +91,8 @@ Command editor constructor.
 @param parent JFrame class instantiating this class.
 @param command Command to edit
 */
-public WriteTableToHTML_JDialog ( JFrame parent, WriteTableToHTML_Command command )
-{	super(parent, true);
+public WriteTableToHTML_JDialog ( JFrame parent, WriteTableToHTML_Command command ) {
+	super(parent, true);
 	initialize ( parent, command );
 }
 
@@ -99,8 +100,8 @@ public WriteTableToHTML_JDialog ( JFrame parent, WriteTableToHTML_Command comman
 Responds to ActionEvents.
 @param event ActionEvent object
 */
-public void actionPerformed( ActionEvent event )
-{	Object o = event.getSource();
+public void actionPerformed( ActionEvent event ) {
+	Object o = event.getSource();
 
 	if ( o == __browse_JButton ) {
 		String last_directory_selected = JGUIUtil.getLastFileDialogDirectory();
@@ -114,14 +115,14 @@ public void actionPerformed( ActionEvent event )
 		fc.setDialogTitle("Select HTML File to Write");
 	    SimpleFileFilter sff_html = new SimpleFileFilter("html", "HTML File");
 	    fc.addChoosableFileFilter(sff_html);
-		
+
 		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 			String directory = fc.getSelectedFile().getParent();
-			String path = fc.getSelectedFile().getPath(); 
-	
+			String path = fc.getSelectedFile().getPath();
+
 			if (path != null) {
 				if ( fc.getFileFilter() == sff_html ) {
-					// Enforce extension...
+					// Enforce extension.
 					path = IOUtil.enforceFileExtension(path, "html");
 				}
 				// Convert path to relative path by default.
@@ -169,17 +170,17 @@ public void actionPerformed( ActionEvent event )
 }
 
 /**
-Check the input.  If errors exist, warn the user and set the __error_wait flag
-to true.  This should be called before response() is allowed to complete.
+Check the input.  If errors exist, warn the user and set the __error_wait flag to true.
+This should be called before response() is allowed to complete.
 */
-private void checkInput ()
-{	// Put together a list of parameters to check...
+private void checkInput () {
+	// Put together a list of parameters to check.
 	PropList parameters = new PropList ( "" );
 	String OutputFile = __OutputFile_JTextField.getText().trim();
     String TableID = __TableID_JComboBox.getSelected();
 
 	__error_wait = false;
-	
+
 	if ( OutputFile.length() > 0 ) {
 		parameters.set ( "OutputFile", OutputFile );
 	}
@@ -187,7 +188,7 @@ private void checkInput ()
         parameters.set ( "TableID", TableID );
     }
 	try {
-	    // This will warn the user...
+	    // This will warn the user.
 		__command.checkCommandParameters ( parameters, null, 1 );
 	}
 	catch ( Exception e ) {
@@ -198,11 +199,10 @@ private void checkInput ()
 }
 
 /**
-Commit the edits to the command.  In this case the command parameters have
-already been checked and no errors were detected.
+Commit the edits to the command.  In this case the command parameters have already been checked and no errors were detected.
 */
-private void commitEdits ()
-{   String TableID = __TableID_JComboBox.getSelected();   
+private void commitEdits () {
+    String TableID = __TableID_JComboBox.getSelected();
 	String OutputFile = __OutputFile_JTextField.getText().trim();
     __command.setCommandParameter ( "TableID", TableID );
 	__command.setCommandParameter ( "OutputFile", OutputFile );
@@ -213,8 +213,8 @@ Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.
 */
-private void initialize ( JFrame parent, WriteTableToHTML_Command command )
-{	__command = command;
+private void initialize ( JFrame parent, WriteTableToHTML_Command command ) {
+	__command = command;
 	CommandProcessor processor = __command.getCommandProcessor();
 	__working_dir = TSCommandProcessorUtil.getWorkingDirForCommand ( processor, __command );
 
@@ -233,18 +233,18 @@ private void initialize ( JFrame parent, WriteTableToHTML_Command command )
 		0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	 if ( __working_dir != null ) {
      	JGUIUtil.addComponent(main_JPanel, new JLabel (
-		"The working directory is: " + __working_dir ), 
+		"The working directory is: " + __working_dir ),
 		0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
 	 }
      JGUIUtil.addComponent(main_JPanel, new JSeparator(SwingConstants.HORIZONTAL),
 		0, ++y, 8, 1, 0, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
-     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Output file to write:" ), 
+     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Output file to write:" ),
 		0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
 	 __OutputFile_JTextField = new JTextField ( 50 );
 	 __OutputFile_JTextField.setToolTipText("Specify the path to the output file or use ${Property} notation");
 	 __OutputFile_JTextField.addKeyListener ( this );
-	    // Output file layout fights back with other rows so put in its own panel
+	    // Output file layout fights back with other rows so put in its own panel.
 		JPanel OutputFile_JPanel = new JPanel();
 		OutputFile_JPanel.setLayout(new GridBagLayout());
 	    JGUIUtil.addComponent(OutputFile_JPanel, __OutputFile_JTextField,
@@ -254,29 +254,30 @@ private void initialize ( JFrame parent, WriteTableToHTML_Command command )
 	    JGUIUtil.addComponent(OutputFile_JPanel, __browse_JButton,
 			1, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
 		if ( __working_dir != null ) {
-			// Add the button to allow conversion to/from relative path...
+			// Add the button to allow conversion to/from relative path.
 			__path_JButton = new SimpleJButton(	__RemoveWorkingDirectory,this);
 			JGUIUtil.addComponent(OutputFile_JPanel, __path_JButton,
 				2, 0, 1, 1, 0.0, 0.0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.CENTER);
 		}
 		JGUIUtil.addComponent(main_JPanel, OutputFile_JPanel,
 			1, y, 6, 1, 1.0, 0.0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
-     
-     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Table to write:" ), 
+
+     JGUIUtil.addComponent(main_JPanel, new JLabel ( "Table to write:" ),
          0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
-     __TableID_JComboBox = new SimpleJComboBox ( true ); // Allow edits to specify ${Property}
+     __TableID_JComboBox = new SimpleJComboBox ( true ); // Allow edits to specify ${Property}.
      __TableID_JComboBox.setToolTipText("Select the table to write or use ${Property} notation");
      List<String> TableIDs = TSCommandProcessorUtil.getTableIdentifiersFromCommandsBeforeCommand(
          (StateDMI_Processor)__command.getCommandProcessor(), __command );
      __TableID_JComboBox.setData(TableIDs);
      __TableID_JComboBox.addItemListener ( this );
-     __TableID_JComboBox.addKeyListener ( this ); // Because editable text field
+     __TableID_JComboBox.addKeyListener ( this ); // Because editable text field.
+     __TableID_JComboBox.getJTextComponent().addKeyListener ( this );
      JGUIUtil.addComponent(main_JPanel, __TableID_JComboBox,
          1, y, 2, 1, 1, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST);
      JGUIUtil.addComponent(main_JPanel, new JLabel ("Required - table identifier."),
     	 3, y, 3, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.WEST );
-     
-    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Command:" ), 
+
+    JGUIUtil.addComponent(main_JPanel, new JLabel ( "Command:" ),
         0, ++y, 1, 1, 0, 0, insetsTLBR, GridBagConstraints.NONE, GridBagConstraints.EAST);
     __command_JTextArea = new JTextArea ( 4, 50 );
     __command_JTextArea.setLineWrap ( true );
@@ -285,10 +286,10 @@ private void initialize ( JFrame parent, WriteTableToHTML_Command command )
     JGUIUtil.addComponent(main_JPanel, new JScrollPane(__command_JTextArea),
     	1, y, 6, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST);
 
-	// South Panel: North
+	// Panel for buttons.
 	JPanel button_JPanel = new JPanel();
 	button_JPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-    JGUIUtil.addComponent(main_JPanel, button_JPanel, 
+    JGUIUtil.addComponent(main_JPanel, button_JPanel,
 		0, ++y, 8, 1, 1, 0, insetsTLBR, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER);
 
 	__ok_JButton = new SimpleJButton("OK", this);
@@ -299,7 +300,7 @@ private void initialize ( JFrame parent, WriteTableToHTML_Command command )
 	__cancel_JButton.setToolTipText("Cancel without saving changes to command");
 	button_JPanel.add ( __help_JButton = new SimpleJButton("Help", this) );
 	__help_JButton.setToolTipText("Show command documentation in web browser");
-	
+
     refresh();
 
 	setTitle ( "Edit " + __command.getCommandName() + " Command" );
@@ -313,16 +314,15 @@ private void initialize ( JFrame parent, WriteTableToHTML_Command command )
 Handle ItemEvent events.
 @param e ItemEvent to handle.
 */
-public void itemStateChanged (ItemEvent e)
-{
+public void itemStateChanged (ItemEvent e) {
     refresh();
 }
 
 /**
 Respond to KeyEvents.
 */
-public void keyPressed ( KeyEvent event )
-{	int code = event.getKeyCode();
+public void keyPressed ( KeyEvent event ) {
+	int code = event.getKeyCode();
 
 	if ( code == KeyEvent.VK_ENTER ) {
 		refresh ();
@@ -333,33 +333,34 @@ public void keyPressed ( KeyEvent event )
 	}
 }
 
-public void keyReleased ( KeyEvent event )
-{	// Only refresh if the event is in the file TextField...
+public void keyReleased ( KeyEvent event ) {
+	// Only refresh if the event is in the file TextField.
 	refresh();
 }
 
-public void keyTyped ( KeyEvent event ) {;}
+public void keyTyped ( KeyEvent event ) {
+}
 
 /**
 Indicate if the user pressed OK (cancel otherwise).
 @return true if the edits were committed, false if the user canceled.
 */
-public boolean ok ()
-{	return __ok;
+public boolean ok () {
+	return __ok;
 }
 
 /**
 Refresh the command from the other text field contents.
 */
-private void refresh ()
-{	String routine = getClass().getSimpleName() + "_JDialog.refresh";
+private void refresh () {
+	String routine = getClass().getSimpleName() + ".refresh";
 	String OutputFile = "";
     String TableID = "";
 	__error_wait = false;
 	PropList parameters = null;
 	if ( __first_time ) {
 		__first_time = false;
-		// Get the parameters from the command...
+		// Get the parameters from the command.
 		parameters = __command.getCommandParameters();
 		OutputFile = parameters.getValue ( "OutputFile" );
         TableID = parameters.getValue ( "TableID" );
@@ -367,7 +368,7 @@ private void refresh ()
 			__OutputFile_JTextField.setText (OutputFile);
 		}
         if ( TableID == null ) {
-            // Select default...
+            // Select default.
             if ( __TableID_JComboBox.getItemCount() > 0 ) {
                 __TableID_JComboBox.select ( 0 );
             }
@@ -384,7 +385,7 @@ private void refresh ()
             }
         }
 	}
-	// Regardless, reset the command from the fields...
+	// Regardless, reset the command from the fields.
 	OutputFile = __OutputFile_JTextField.getText().trim();
     TableID = __TableID_JComboBox.getSelected();
 	parameters = new PropList ( __command.getCommandName() );
@@ -392,12 +393,8 @@ private void refresh ()
 	if ( TableID != null ) {
 	    parameters.add ( "TableID=" + TableID );
 	}
-	__command_JTextArea.setText( __command.toString ( parameters ) );
-	if ( (OutputFile == null) || (OutputFile.length() == 0) ) {
-		if ( __path_JButton != null ) {
-			__path_JButton.setEnabled ( false );
-		}
-	}
+	__command_JTextArea.setText( __command.toString ( parameters ).trim() );
+	// Check the path and determine what the label on the path button should be.
 	if ( __path_JButton != null ) {
 		if ( (OutputFile != null) && !OutputFile.isEmpty() ) {
 			__path_JButton.setEnabled ( true );
@@ -421,17 +418,17 @@ private void refresh ()
 React to the user response.
 @param ok if false, then the edit is canceled.  If true, the edit is committed and the dialog is closed.
 */
-private void response ( boolean ok )
-{	__ok = ok;	// Save to be returned by ok()
+private void response ( boolean ok ) {
+	__ok = ok;	// Save to be returned by ok().
 	if ( ok ) {
-		// Commit the changes...
+		// Commit the changes.
 		commitEdits ();
 		if ( __error_wait ) {
-			// Not ready to close out!
+			// Not ready to close out.
 			return;
 		}
 	}
-	// Now close out...
+	// Now close out.
 	setVisible( false );
 	dispose();
 }
@@ -440,15 +437,26 @@ private void response ( boolean ok )
 Responds to WindowEvents.
 @param event WindowEvent object
 */
-public void windowClosing( WindowEvent event )
-{	response ( false );
+public void windowClosing( WindowEvent event ) {
+	response ( false );
 }
 
-public void windowActivated( WindowEvent evt ){;}
-public void windowClosed( WindowEvent evt ){;}
-public void windowDeactivated( WindowEvent evt ){;}
-public void windowDeiconified( WindowEvent evt ){;}
-public void windowIconified( WindowEvent evt ){;}
-public void windowOpened( WindowEvent evt ){;}
+public void windowActivated( WindowEvent evt ) {
+}
+
+public void windowClosed( WindowEvent evt ) {
+}
+
+public void windowDeactivated( WindowEvent evt ) {
+}
+
+public void windowDeiconified( WindowEvent evt ) {
+}
+
+public void windowIconified( WindowEvent evt ) {
+}
+
+public void windowOpened( WindowEvent evt ) {
+}
 
 }

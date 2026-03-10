@@ -180,12 +180,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     String InsertRow = parameters.getValue ( "InsertRow" );
     Integer insertRow = null;
     if ( (InsertRow != null) && !InsertRow.equals("") ) {
-        insertRow = new Integer(InsertRow);
+        insertRow = Integer.valueOf(InsertRow);
     }
     String InsertCount = parameters.getValue ( "InsertCount" );
     Integer insertCount = null;
     if ( (InsertCount != null) && !InsertCount.equals("") ) {
-        insertCount = new Integer(InsertCount);
+        insertCount = Integer.valueOf(InsertCount);
     }
     String ColumnValues = parameters.getValue ( "ColumnValues" );
     // Used LinkedHashMap because want insert order to be retained in new columns, if columns are created

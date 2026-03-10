@@ -198,7 +198,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     CommandProcessor processor = getCommandProcessor();
 	CommandStatus status = getCommandStatus();
 	CommandPhaseType commandPhase = CommandPhaseType.RUN;
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {
@@ -216,6 +216,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     setOutputFile ( null );
 	
 	String OutputFile = parameters.getValue ( "OutputFile" );
+    if ( (OutputFile != null) && !OutputFile.isEmpty() && (commandPhase == CommandPhaseType.RUN) && OutputFile.indexOf("${") >= 0 ) {
+    	OutputFile = TSCommandProcessorUtil.expandParameterValue(processor, this, OutputFile);
+    }
 	String Worksheets = parameters.getValue ( "Worksheets" );
 	String [] worksheets = null;
 	if ( (Worksheets != null) && !Worksheets.isEmpty() ) {
@@ -374,13 +377,13 @@ public String toString ( PropList parameters )
 		if ( b.length() > 0 ) {
 			b.append ( "," );
 		}
-		b.append ( "IfFound=" + IfFound );
+		b.append ( "IfFound=\"" + IfFound + "\"");
 	}
     if ( (KeepOpen != null) && (KeepOpen.length() > 0) ) {
         if ( b.length() > 0 ) {
             b.append ( "," );
         }
-        b.append ( "KeepOpen=" + KeepOpen );
+        b.append ( "KeepOpen=\"" + KeepOpen + "\"");
     }
 	return getCommandName() + "(" + b.toString() + ")";
 }

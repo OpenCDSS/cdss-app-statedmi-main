@@ -29,8 +29,6 @@ import DWR.DMI.HydroBaseDMI.HydroBaseDMI;
 import DWR.DMI.HydroBaseDMI.HydroBase_StructureView;
 import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 import DWR.DMI.HydroBaseDMI.HydroBase_Wells;
-import DWR.DMI.StateDMI.StateDMI_Processor;
-import DWR.StateCU.StateCU_Supply;
 import rti.tscommandprocessor.core.TSCommandProcessorUtil;
 
 import java.util.ArrayList;
@@ -174,7 +172,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	CommandProcessor processor = getCommandProcessor();
     CommandStatus status = getCommandStatus();
     CommandPhaseType commandPhase = CommandPhaseType.RUN;
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {
@@ -409,7 +407,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			//Message.printStatus(2, routine, "Getting column number for \"" + columnName + "\"");
 			columnNum = table.getFieldIndex(columnName);
 			// Successfully looked up the column number so add to the list of column numbers.
-			swIdColNumList.add(new Integer(columnNum));
+			swIdColNumList.add(Integer.valueOf(columnNum));
 			//Message.printStatus(2, routine, "column number for \"" + columnName + "\" is " + columnNum);
 		}
 		catch ( Exception e ) {
@@ -434,14 +432,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			//Message.printStatus(2, routine, "Getting column number for \"" + columnName + "\"");
 			columnNum = table.getFieldIndex(columnName);
 			// Successfully looked up the column number so add to the list of column numbers.
-			gwIdColNumList.add(new Integer(columnNum));
+			gwIdColNumList.add(Integer.valueOf(columnNum));
 			//Message.printStatus(2, routine, "column number for \"" + columnName + "\" is " + columnNum);
 
 			String columnName2 = "GW_TYPE" + igw;
 			//Message.printStatus(2, routine, "Getting column number for \"" + columnName2 + "\"");
 			columnNum = table.getFieldIndex(columnName2);
 			// Successfully looked up the column number so add to the list of column numbers.
-			gwIdTypeColNumList.add(new Integer(columnNum));
+			gwIdTypeColNumList.add(Integer.valueOf(columnNum));
 			//Message.printStatus(2, routine, "column number for \"" + columnName2 + "\" is " + columnNum);
 		}
 		catch ( Exception e ) {

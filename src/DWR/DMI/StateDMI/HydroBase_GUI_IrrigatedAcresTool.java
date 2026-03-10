@@ -316,17 +316,6 @@ private List<StateMod_Well> filterWellCollections ( List<StateMod_Well> wellStat
 }
 
 /**
-Cleans up member variables.
-*/
-public void finalize()
-throws Throwable {
-	__dmi = null;
-	__statusJTextField = null;
-	__divParcelWorksheet = null;
-	super.finalize();
-}
-
-/**
 Get the parcel year to use with diversions, from the parcel year field.
 */
 private int getDiversionParcelYear ()

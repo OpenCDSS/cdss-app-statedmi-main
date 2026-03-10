@@ -34,9 +34,10 @@ set eclipseTryExe="C:\Program Files\Eclipse\eclipse-java-2019-03\eclipse.exe"
 echo Checking %eclipseTryExe%
 if exist %eclipseTryExe% set eclipseExe=%eclipseTryExe%
 rem If a newer version or a different drive is available, try it here.
-rem set eclipseTryExe="C:\Program Files (x86)\eclipse-java-neon-3-win32\eclipse\eclipse.exe"
+rem The following is used for StateDMI 6.0.0+
+set eclipseTryExe="C:\Program Files\Eclipse\eclipse-java-2022-06\eclipse.exe"
 rem echo Checking %eclipseTryExe%
-rem if exist %eclipseTryExe% set eclipseExe=%eclipseTryExe%
+if exist %eclipseTryExe% set eclipseExe=%eclipseTryExe%
 rem The eclipseExe variable already contains surrounding double quotes so don't need to use below.
 if not exist %eclipseExe% goto noeclipse
 
@@ -46,6 +47,9 @@ rem - a symbolic link was defined from jdk8 to the specific version to generaliz
 set javawExe=""
 echo Checking for Java in standard locations, oldest supported versions first...
 set javawTryExe="c:\Program Files\Java\jdk8\bin\javaw.exe"
+echo Checking %javawTryExe%
+if exist %javawTryExe% set javawExe=%javawTryExe%
+set javawTryExe="c:\Program Files\Java\jdk11\bin\javaw.exe"
 echo Checking %javawTryExe%
 if exist %javawTryExe% set javawExe=%javawTryExe%
 rem The javawExe variable already contains surrounding double quotes so don't need to use below.

@@ -185,7 +185,7 @@ public static void appendToRegressionTestReport(CommandProcessor processor, bool
     	int col = -1;
     	try {
     		col = __regressionTestTable.getFieldIndex("Num");
-    		rec.setFieldValue(col, new Integer(__regressionTestLineCount));
+    		rec.setFieldValue(col, Integer.valueOf(__regressionTestLineCount));
     	}
     	catch ( Exception e ) {
     		// Just ignore setting
@@ -1337,7 +1337,7 @@ public static List<Object> getTagValues ( CommandProcessor processor, String tag
                 commandString.substring(pos)," \t", StringUtil.DELIM_SKIP_BLANKS);
             if ( parts.size() == 1 ) {
                 // No value to the tag so
-                tagValues.add ( new Boolean(true) );
+                tagValues.add ( Boolean.valueOf(true) );
             }
             else {
                 // Add as a string - note that this value may contain multiple values separated by

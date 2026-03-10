@@ -401,7 +401,7 @@ private int [] getWaterDistrictsForWells( List<StateCU_Location> culocList, Hash
    		if ( StringUtil.isInteger(culocid.substring(0,2)) ) {
    			// Only add the water district once
    			boolean found = false;
-   			Integer wd = new Integer(culocid.substring(0,2));
+   			Integer wd = Integer.valueOf(culocid.substring(0,2));
    			for ( Integer iwd : wdList ) {
    				if ( wd.equals(iwd ) ) {
    					found = true;
@@ -419,7 +419,7 @@ private int [] getWaterDistrictsForWells( List<StateCU_Location> culocList, Hash
    	Set<Entry<String, String>> entrySet = receiptWDMap.entrySet();
    	for ( Entry<String,String> entry : entrySet ) {
    		boolean found = false;
-   		Integer wd = new Integer(entry.getValue());
+   		Integer wd = Integer.valueOf(entry.getValue());
    		for ( Integer iwd : wdList ) {
    			if ( wd.equals(iwd ) ) {
    				found = true;
@@ -1135,13 +1135,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
    							}
    							else {
    								// Set the WD to -1, will be filled later through an additional database query
-    							partIdWDsForCuloc.add(new Integer(-1));
+    							partIdWDsForCuloc.add(Integer.valueOf(-1));
    							}
    						}
    						else {
    							// Set the WD, mostly for information since used for Well part ID of receipt
     						String wd = partIds.get(iPart).substring(0,2);
-    						partIdWDsForCuloc.add(new Integer(wd));
+    						partIdWDsForCuloc.add(Integer.valueOf(wd));
    						}
     					if ( partIdTypeForCuloc == null ) {
     						message = "CU Location collection \"" + culoc_id + "\" part ID \"" + partIds.get(iPart) +
@@ -1180,7 +1180,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
    						partId = partIds.get(iPart);
     					String wd = partId.substring(0,2);
     					try {
-    						partIdWDsForCuloc.add(new Integer(wd));
+    						partIdWDsForCuloc.add(Integer.valueOf(wd));
     					}
     					catch ( NumberFormatException e ) {
     						// Not a WDID
@@ -1192,7 +1192,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		  						new CommandLogRecord(CommandStatusType.FAILURE,
 			  						message, "Report problem to software support." ) );
 	  						// Add a value to keep lists aligned.
-    						partIdWDsForCuloc.add(new Integer(-1));
+    						partIdWDsForCuloc.add(Integer.valueOf(-1));
     					}
     				}
     				culoc.setCollectionPartIDs ( partIds, partIdTypesForCuloc, partIdWDsForCuloc );
@@ -1408,13 +1408,13 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
    								}
    								else {
    									// Set the WD to -1, will be filled later through an additional database query
-    								partIdWDsForWell.add(new Integer(-1));
+    								partIdWDsForWell.add(Integer.valueOf(-1));
    								}
    							}
    							else {
    								// Set the WD, mostly for information since used for Well part ID of receipt
     							String wd = partIds.get(iPart).substring(0,2);
-    							partIdWDsForWell.add(new Integer(wd));
+    							partIdWDsForWell.add(Integer.valueOf(wd));
    							}
     						if ( partIdTypeForWell == null ) {
     							message = "StateMod well collection \"" + sm_id + "\" part ID \"" + partIds.get(iPart) +
@@ -1629,7 +1629,7 @@ throws Exception {
    						receipt = wellForReceipt.getReceipt();
    						if ( (receipt != null) && (receipt.equals(partId)) ) {
    							// Found a receipt.  Set the corresponding WD in the collection part.
-   							culoc.getCollectionPartIDWDs().set(i, new Integer(wellForReceipt.getWD()));
+   							culoc.getCollectionPartIDWDs().set(i, Integer.valueOf(wellForReceipt.getWD()));
    							found = true;
    							break;
    						}
@@ -1681,7 +1681,7 @@ throws Exception {
    		// Get the first 2 characters
    		// - if an integer, assume the ID starts with a WDID that can be used to extract WD
    		if ( StringUtil.isInteger(smwellid.substring(0,2)) ) {
-   			wdList.add(new Integer(smwellid.substring(0,2)));
+   			wdList.add(Integer.valueOf(smwellid.substring(0,2)));
    		}
    	}
    	int [] wdArray = new int[wdList.size()];
@@ -1718,7 +1718,7 @@ throws Exception {
    						receipt = wellForReceipt.getReceipt();
    						if ( (receipt != null) && (receipt.equals(partId)) ) {
    							// Found a receipt.  Set the corresponding WD in the collection part.
-   							smwell.getCollectionPartIDWDs().set(i, new Integer(wellForReceipt.getWD()));
+   							smwell.getCollectionPartIDWDs().set(i, Integer.valueOf(wellForReceipt.getWD()));
    							found = true;
    							break;
    						}

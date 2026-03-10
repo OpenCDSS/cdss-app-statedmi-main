@@ -398,7 +398,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	CommandProcessor processor = getCommandProcessor();
     CommandStatus status = getCommandStatus();
     CommandPhaseType commandPhase = CommandPhaseType.RUN;
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {
@@ -709,7 +709,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         if ( (BlockMinColumnProperty != null) && !BlockMinColumnProperty.equals("") ) {
             request_params = new PropList ( "" );
             request_params.setUsingObject ( "PropertyName", BlockMinColumnProperty );
-            request_params.setUsingObject ( "PropertyValue", new Integer(this.blockMinColumn) );
+            request_params.setUsingObject ( "PropertyValue", Integer.valueOf(this.blockMinColumn) );
             try {
                 processor.processRequest( "SetProperty", request_params);
             }
@@ -726,7 +726,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         if ( (BlockMinRowProperty != null) && !BlockMinRowProperty.equals("") ) {
             request_params = new PropList ( "" );
             request_params.setUsingObject ( "PropertyName", BlockMinRowProperty );
-            request_params.setUsingObject ( "PropertyValue", new Integer(this.blockMinRow) );
+            request_params.setUsingObject ( "PropertyValue", Integer.valueOf(this.blockMinRow) );
             try {
                 processor.processRequest( "SetProperty", request_params);
             }
@@ -743,7 +743,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         if ( (BlockMaxColumnProperty != null) && !BlockMaxColumnProperty.equals("") ) {
             request_params = new PropList ( "" );
             request_params.setUsingObject ( "PropertyName", BlockMaxColumnProperty );
-            request_params.setUsingObject ( "PropertyValue", new Integer(this.blockMaxColumn) );
+            request_params.setUsingObject ( "PropertyValue", Integer.valueOf(this.blockMaxColumn) );
             try {
                 processor.processRequest( "SetProperty", request_params);
             }
@@ -760,7 +760,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         if ( (BlockMaxRowProperty != null) && !BlockMaxRowProperty.equals("") ) {
             request_params = new PropList ( "" );
             request_params.setUsingObject ( "PropertyName", BlockMaxRowProperty );
-            request_params.setUsingObject ( "PropertyValue", new Integer(this.blockMaxRow) );
+            request_params.setUsingObject ( "PropertyValue", Integer.valueOf(this.blockMaxRow) );
             try {
                 processor.processRequest( "SetProperty", request_params);
             }

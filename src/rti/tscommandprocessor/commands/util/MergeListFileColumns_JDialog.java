@@ -282,26 +282,6 @@ private void commitEdits ()
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	__ListFile_JTextField = null;
-	__OutputFile_JTextField = null;
-	__browse_JButton = null;
-	__browse2_JButton = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command = null;
-	__ok_JButton = null;
-	__path_JButton = null;
-	__path2_JButton = null;
-	__parent_JFrame = null;
-	__working_dir = null;
-	super.finalize ();
-}
-
-/**
 Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit and possibly run.

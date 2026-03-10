@@ -248,7 +248,7 @@ private void formatWellRightIds ( List<StateMod_WellRight> smrights, String perm
 		for ( StateMod_Right smright : smrights ) {
 			if ( idmap.get(smright.getIdentifier()) == null ) {
 				// Not found so add to the list
-				idmap.put(smright.getIdentifier(), new Integer(0) );
+				idmap.put(smright.getIdentifier(), Integer.valueOf(0) );
 			}
 		}
 		// Now loop through again and assign the identifier
@@ -261,7 +261,7 @@ private void formatWellRightIds ( List<StateMod_WellRight> smrights, String perm
 			idCount = idCount + 1;
 			smWellRight.setID(String.format("%s.%02d", id, idCount));
 			// Update the count to increase the counter
-			idmap.put(id, new Integer(idCount) );
+			idmap.put(id, Integer.valueOf(idCount) );
 		}
 	}
 	// Loop through each right and, if originating from a well permit, format as requested

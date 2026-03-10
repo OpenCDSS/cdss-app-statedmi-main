@@ -156,7 +156,7 @@ CommandWarningException, CommandException
 	CommandProcessor processor = getCommandProcessor();
     CommandStatus status = getCommandStatus();
     CommandPhaseType commandPhase = CommandPhaseType.RUN;
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {
@@ -175,6 +175,9 @@ CommandWarningException, CommandException
 	PropList parameters = getCommandParameters();
 
 	String OutputFile = parameters.getValue ( "OutputFile" );
+   	if ( (commandPhase == CommandPhaseType.RUN) && (OutputFile != null) && OutputFile.indexOf("${") >= 0 ) {
+   		OutputFile = TSCommandProcessorUtil.expandParameterValue(processor, this, OutputFile);
+   	}
 	String Worksheet = parameters.getValue ( "Worksheet" );
     List<String> worksheetList = new ArrayList<String>();
     if ( (Worksheet != null) && !Worksheet.isEmpty() ) {
@@ -388,19 +391,19 @@ public String toString ( PropList props )
         if ( b.length() > 0 ) {
             b.append ( "," );
         }
-        b.append ( "KeepOpen=" + KeepOpen );
+        b.append ( "KeepOpen=\"" + KeepOpen + "\"");
     }
     if ( (FreezePaneColumnRightOfSplit != null) && (FreezePaneColumnRightOfSplit.length() > 0) ) {
         if ( b.length() > 0 ) {
             b.append ( "," );
         }
-        b.append ( "FreezePaneColumnRightOfSplit=" + FreezePaneColumnRightOfSplit );
+        b.append ( "FreezePaneColumnRightOfSplit=\"" + FreezePaneColumnRightOfSplit + "\"" );
     }
     if ( (FreezePaneRowBelowSplit != null) && (FreezePaneRowBelowSplit.length() > 0) ) {
         if ( b.length() > 0 ) {
             b.append ( "," );
         }
-        b.append ( "FreezePaneRowBelowSplit=" + FreezePaneRowBelowSplit );
+        b.append ( "FreezePaneRowBelowSplit=\"" + FreezePaneRowBelowSplit + "\"");
     }
 	return getCommandName() + "(" + b.toString() + ")";
 }

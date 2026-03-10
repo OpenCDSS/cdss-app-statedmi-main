@@ -430,7 +430,7 @@ public CellStyle getStyle ( int col, Float value )
 		return getStyle ( col, (Double)null );
 	}
 	else {
-		return getStyle ( col, new Double(value) );
+		return getStyle ( col, Double.valueOf(value) );
 	}
 }
 
@@ -452,7 +452,7 @@ public CellStyle getStyle ( int col, Integer value )
 		return getStyle ( col, (Long)null );
 	}
 	else {
-		return getStyle ( col, new Long(value) );
+		return getStyle ( col, Long.valueOf(value) );
 	}
 }
 

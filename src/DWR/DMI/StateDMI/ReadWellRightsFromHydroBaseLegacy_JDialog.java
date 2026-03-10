@@ -303,33 +303,8 @@ public void stateChanged(ChangeEvent e) {
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	__ID_JTextField = null;
-	__IDFormat_JComboBox = null;
-	__AdminNumClasses_JTextField = null;
-	__Year_JTextField = null;
-	__InputStart_JTextField = null;
-	__InputEnd_JTextField = null;
-	__Div_JTextField = null;
-	__DefaultAppropriationDate_JTextField = null;
-	__DefineRightHow_JComboBox = null;
-	__ReadWellRights_JComboBox = null;
-	__UseApex_JComboBox = null;
-	__OnOffDefault_JComboBox = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command_Vector = null;
-	__ok_JButton = null;
-	super.finalize ();
-}
-
-/**
 Return the text for the command.
-@return the text for the command or null if there is a problem with the 
-command.
+@return the text for the command or null if there is a problem with the command.
 */
 public List<String> getText () {
 	if ((__command_Vector != null) && ((__command_Vector.size() == 0) ||

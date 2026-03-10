@@ -161,7 +161,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     CommandStatus status = getCommandStatus();
 	CommandProcessor processor = getCommandProcessor();
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
     CommandPhaseType commandPhase = CommandPhaseType.RUN;
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");

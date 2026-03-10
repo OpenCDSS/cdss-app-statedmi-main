@@ -392,20 +392,6 @@ private void fillPageLayoutOptions ( )
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command = null;
-	__InputFile_JTextField = null;
-	__IfNotFound_JComboBox = null;
-	__ok_JButton = null;
-	super.finalize ();
-}
-
-/**
 Return the short page size, including only the string before the note.
 */
 private String getShortPaperSize ( String longPaperSize )

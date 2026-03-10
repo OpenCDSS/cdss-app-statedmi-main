@@ -330,30 +330,6 @@ private void databaseTypeSelected(String databaseType) {
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	__OdbcDsn_JComboBox = null;
-	__DatabaseServer_JComboBox = null;
-	__DatabaseName_JComboBox = null;
-	__InputName_JTextField = null;
-	__RunMode_JComboBox = null;
-	__UseStoredProcedures_JComboBox = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command = null;
-	__ok_JButton = null;
-	__databaseType_JComboBox = null;
-	__holdServer = null;
-	__holdName = null;
-	__holdStoredProcedures = null;
-	__serverNames = null;
-	
-	super.finalize ();
-}
-
-/**
 Instantiates the GUI components.
 @param parent JFrame class instantiating this class.
 @param command Command to edit.

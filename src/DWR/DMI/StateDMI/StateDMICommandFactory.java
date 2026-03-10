@@ -4,7 +4,7 @@
 
 StateDMI
 StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+Copyright (C) 1997-2026 Colorado Department of Natural Resources
 
 StateDMI is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -96,46 +96,46 @@ import rti.tscommandprocessor.commands.util.UnzipFile_Command;
 import rti.tscommandprocessor.commands.util.WebGet_Command;
 import rti.tscommandprocessor.commands.util.WritePropertiesToFile_Command;
 import RTi.Util.String.StringUtil;
+import cdss.app.statedmi.commands.util.CreateRegressionTestCommandFile_Command;
+import cdss.app.statedmi.commands.util.StartRegressionTestResultsReport_Command;
 
 /**
-This class instantiates Commands for StateDMI processing.  The full command name
-is required, but parameters are not because parsing does not occur.
+This class instantiates Commands for StateDMI processing.
+The full command name is required, but parameters are not because parsing does not occur.
 */
 public class StateDMICommandFactory implements CommandFactory
 {
-	
+
 /**
-Return a new command, based on the command name.  DO NOT create an
-UnknownCommand if the command is not recognized.
+Return a new command, based on the command name.
+DO NOT create an UnknownCommand if the command is not recognized.
 @return a new command, based on the command name.
 @param command_string The command string to process.
 @throws UnknownCommandException if the command name is not recognized.
 */
 public Command newCommand ( String command_string )
-throws UnknownCommandException
-{
+throws UnknownCommandException {
 	return newCommand ( command_string, false );
 }
 
 /**
 Return a new command, based on the command name.
 @return a new command, based on the command name.
-@param commandString The command string to process.  The command string can
-contain parameters but they are not parsed.  At a minimum, the command string needs
-to be of the form "CommandName()" or "TS Alias = CommandName()".
-@param createUnknownCommandIfNotRecognized If true and the command is
-not recognized, create an UnknownCommand instance that holds the command string.
+@param commandString The command string to process.
+The command string can contain parameters but they are not parsed.
+At a minimum, the command string needs to be of the form "CommandName()" or "TS Alias = CommandName()".
+@param createUnknownCommandIfNotRecognized If true and the command is not recognized,
+create an UnknownCommand instance that holds the command string.
 This is useful for code that is being migrated to the full command class design.
-@throws UnknownCommandException if the command name is not recognized
-(and createUnknownCommandIfNotRecognized=false).
+@throws UnknownCommandException if the command name is not recognized (and createUnknownCommandIfNotRecognized=false).
 */
 public Command newCommand ( String commandString, boolean createUnknownCommandIfNotRecognized )
-throws UnknownCommandException
-{	String routine = getClass().getSimpleName() + ".newCommand";
+throws UnknownCommandException {
+	String routine = getClass().getSimpleName() + ".newCommand";
 	commandString = commandString.trim();
 
-	// Comment commands...
-	
+	// Comment commands.
+
 	if ( commandString.trim().startsWith("#") ) {
 	    return new Comment_Command ();
 	}
@@ -146,7 +146,7 @@ throws UnknownCommandException
 	    return new CommentBlockEnd_Command ();
 	}
 
-	// "a" commands
+	// "a" commands.
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "AggregateWellRights") ){
 		return new AggregateWellRights_Command ();
 	}
@@ -156,12 +156,12 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "AppendNetwork") ){
 		return new AppendNetwork_Command ();
 	}
-	
+
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "AppendTable") ) {
         return new AppendTable_Command ();
     }
 
-	// "c" commands ...
+	// "c" commands.
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"CalculateDiversionDemandTSMonthlyAsMax") ) {
 		return new CalculateDiversionDemandTSMonthlyAsMax_Command ();
 	}
@@ -300,24 +300,24 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase(commandString,"CreateRiverNetworkFromNetwork") ) {
 		return new CreateRiverNetworkFromNetwork_Command ();
 	}
-	
-	// "d" commands...
-	
+
+	// "d" commands.
+
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "DeleteTableColumns") ) {
         return new DeleteTableColumns_Command ();
     }
     else if ( StringUtil.startsWithIgnoreCase( commandString, "DeleteTableRows") ) {
         return new DeleteTableRows_Command ();
     }
-	
-	// "e" commands ...
+
+	// "e" commands.
 	else if ( StringUtil.startsWithIgnoreCase(commandString,"Exit") ||
 	    StringUtil.startsWithIgnoreCase(commandString,"Exit")) {
 		return new Exit_Command ();
 	}
-	
-	// "f" commands ...
-	
+
+	// "f" commands.
+
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"FillClimateStationsFromHydroBase") ) {
 		return new FillClimateStationsFromHydroBase_Command ();
 	}
@@ -495,23 +495,23 @@ throws UnknownCommandException
 	else if (StringUtil.startsWithIgnoreCase( commandString, "FTPGet") ) {
 		return new FTPGet_Command ();
 	}
-	
-	// "i" commands...
+
+	// "i" commands.
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "InsertTableColumn") ) {
         return new InsertTableColumn_Command ();
     }
     else if ( StringUtil.startsWithIgnoreCase( commandString, "InsertTableRow") ) {
         return new InsertTableRow_Command ();
     }
-	
-	// "j" commands...
+
+	// "j" commands.
 
     else if ( StringUtil.startsWithIgnoreCase( commandString, "JoinTables") ) {
         return new JoinTables_Command ();
     }
-	
-	// "l" commands...
-	
+
+	// "l" commands.
+
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"LimitDiversionDemandTSMonthlyToRights") ){
 		return new LimitDiversionDemandTSMonthlyToRights_Command ();
 	}
@@ -531,8 +531,8 @@ throws UnknownCommandException
 		return new ListFiles_Command ();
 	}
 
-	// "m" commands...
-	
+	// "m" commands.
+
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ManipulateTableString") ) {
         return new ManipulateTableString_Command ();
     }
@@ -545,9 +545,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "Message") ) {
 		return new Message_Command ();
 	}
-	
-	// "n" commands...
-	
+
+	// "n" commands.
+
 	else if ( StringUtil.startsWithIgnoreCase(commandString,"NewTable") ) {
         return new NewTable_Command ();
     }
@@ -555,20 +555,20 @@ throws UnknownCommandException
         return new NewExcelWorkbook_Command ();
     }
 
-	// "o" commands...
-	
+	// "o" commands.
+
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"OpenHydroBase") ){
 		return new OpenHydroBase_Command ();
 	}
-	
-	// "p" commands...
-	
+
+	// "p" commands.
+
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"PrintNetwork") ){
 		return new PrintNetwork_Command ();
 	}
 
-	// "r" commands...
-	
+	// "r" commands.
+
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadBlaneyCriddleFromHydroBase")) {
 		return new ReadBlaneyCriddleFromHydroBase_Command();
 	}
@@ -590,7 +590,7 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadCropCharacteristicsFromStateCU")) {
 		return new ReadCropCharacteristicsFromStateCU_Command();
 	}
-	/* TODO SAM 2009-01-03 Evaluate if needed
+	/* TODO SAM 2009-01-03 Evaluate if needed.
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadCropPatternTSFromDBF")) {
 		return new ReadCropPatternTSFromDBF_Command();
 	}
@@ -619,14 +619,15 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadCULocationsFromStateMod")) {
 		return new ReadCULocationsFromStateMod_Command();
 	}
-	// Put this before the default monthly.  For legacy commands, the string Interval=Day would have
-	// been in the command so can check for this to determine what command to instantiate
+	// Put this before the default monthly.
+	// For legacy commands, the string Interval=Day would have been in the command so can
+	// check for this to determine what command to instantiate.
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadDelayTablesDailyFromStateMod") ||
 		(StringUtil.startsWithIgnoreCase( commandString, "ReadDelayTablesFromStateMod") &&
 		StringUtil.indexOfIgnoreCase(commandString,"Interval=Day",0) > 0) ) {
 		return new ReadDelayTablesDailyFromStateMod_Command();
 	}
-	// Default is monthly, but new commands created by the GUI should be the longer name
+	// Default is monthly, but new commands created by the GUI should be the longer name.
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "ReadDelayTablesFromStateMod") ||
 		StringUtil.startsWithIgnoreCase( commandString, "ReadDelayTablesMonthlyFromStateMod")) {
 		return new ReadDelayTablesMonthlyFromStateMod_Command();
@@ -829,9 +830,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "RunR")) {
 		return new RunR_Command();
 	}
-	
-	// "s" commands...
-	
+
+	// "s" commands.
+
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"SetBlaneyCriddle") ) {
 		return new SetBlaneyCriddle_Command ();
 	}
@@ -1150,9 +1151,9 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"StartRegressionTestResultsReport") ) {
 		return new StartRegressionTestResultsReport_Command ();
 	}
-	
-	// "t" commands...
-	
+
+	// "t" commands.
+
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "TableMath") ) {
         return new TableMath_Command ();
     }
@@ -1171,14 +1172,14 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"TranslatePenmanMonteith") ) {
 		return new TranslatePenmanMonteith_Command ();
 	}
-	
-	// "u" commands...
-	
+
+	// "u" commands.
+
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "UnzipFile" ) ) {
 		return new UnzipFile_Command ();
 	}
-	
-	// "w" commands...
+
+	// "w" commands.
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WebGet") ) {
         return new WebGet_Command ();
     }
@@ -1206,7 +1207,7 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteCropCharacteristicsToStateCU")) {
 		return new WriteCropCharacteristicsToStateCU_Command();
 	}
-	/* TODO smalers 2020-10-11 enable if need for troubleshooting
+	/* TODO smalers 2020-10-11 enable if need for troubleshooting.
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteCropPatternTSParcelsToFile")) {
 		return new WriteCropPatternTSParcelsToFile_Command();
 	}
@@ -1236,8 +1237,9 @@ throws UnknownCommandException
 		StringUtil.startsWithIgnoreCase( commandString, "WriteDailyDelayTablesToList") ) { // Old
 		return new WriteDelayTablesDailyToList_Command();
 	}
-	// Put this before the default monthly.  For legacy commands, the string Interval=Day would have
-	// been in the command so can check for this to determine what command to instantiate
+	// Put this before the default monthly.
+	// For legacy commands, the string Interval=Day would have been in the command so can
+	// check for this to determine what command to instantiate
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteDelayTablesDailyToStateMod") ||
 		(StringUtil.startsWithIgnoreCase( commandString, "WriteDelayTablesToStateMod") &&
 		StringUtil.indexOfIgnoreCase(commandString,"Interval=Day",0) > 0) ) {
@@ -1247,8 +1249,8 @@ throws UnknownCommandException
 		StringUtil.startsWithIgnoreCase( commandString, "WriteMonthlyDelayTablesToList") ) { //Old
 		return new WriteDelayTablesMonthlyToList_Command();
 	}
-	
-	// Default is monthly, but new commands created by the GUI should be the longer name
+
+	// Default is monthly, but new commands created by the GUI should be the longer name.
 	else if ( StringUtil.startsWithIgnoreCase( commandString, "WriteDelayTablesToStateMod") ||
 		StringUtil.startsWithIgnoreCase( commandString, "WriteDelayTablesMonthlyToStateMod")) {
 		return new WriteDelayTablesMonthlyToStateMod_Command();
@@ -1406,11 +1408,11 @@ throws UnknownCommandException
 	else if ( StringUtil.startsWithIgnoreCase( commandString,"WriteWellStationsToStateMod") ) {
 		return new WriteWellStationsToStateMod_Command ();
 	}
-	
-	// Did not match a command...
+
+	// Did not match a command.
 
 	if ( createUnknownCommandIfNotRecognized ) {
-		// Create an unknown command...
+		// Create an unknown command.
 		Command c = new UnknownCommand ();
 		c.setCommandString( commandString );
         Message.printStatus ( 2, routine, "Creating UnknownCommand for unknown command \"" +

@@ -195,7 +195,7 @@ throws CommandWarningException, CommandException
 	CommandProcessor processor = getCommandProcessor();
 	CommandPhaseType commandPhase = CommandPhaseType.RUN;
 	CommandStatus status = getCommandStatus();
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {

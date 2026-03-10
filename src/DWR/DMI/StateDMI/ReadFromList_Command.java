@@ -309,7 +309,7 @@ throws Exception
 	
 	// Set the default identifier length in the processor.
 	if ( defaultWdidLength > 0 ) {
-		getCommandProcessor().setPropContents("WDIDLength", new Integer(defaultWdidLength) );
+		getCommandProcessor().setPropContents("WDIDLength", Integer.valueOf(defaultWdidLength) );
 	}
 	
 	return warning_count;
@@ -360,7 +360,7 @@ throws Exception
 	
 	// Set the default identifier length in the processor.
 	if ( defaultWdidLength > 0 ) {
-		getCommandProcessor().setPropContents("WDIDLength", new Integer(defaultWdidLength) );
+		getCommandProcessor().setPropContents("WDIDLength", Integer.valueOf(defaultWdidLength) );
 	}
 	
 	return warning_count;
@@ -411,7 +411,7 @@ throws Exception
 	
 	// Set the default identifier length in the processor.
 	if ( defaultWdidLength > 0 ) {
-		getCommandProcessor().setPropContents("WDIDLength", new Integer(defaultWdidLength) );
+		getCommandProcessor().setPropContents("WDIDLength", Integer.valueOf(defaultWdidLength) );
 	}
 	
 	return warning_count;
@@ -565,7 +565,7 @@ throws Exception
 	
 	// Set the default identifier length in the processor.
 	if ( defaultWdidLength > 0 ) {
-		getCommandProcessor().setPropContents("WDIDLength", new Integer(defaultWdidLength) );
+		getCommandProcessor().setPropContents("WDIDLength", Integer.valueOf(defaultWdidLength) );
 	}
 
 	// Warn about identifiers that have been replaced in the well station list.

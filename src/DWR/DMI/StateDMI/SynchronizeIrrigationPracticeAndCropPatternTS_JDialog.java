@@ -161,26 +161,8 @@ private void checkInput ()
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	__ID_JTextField = null;
-	__SynchronizeMethod_JComboBox = null;
-	__GWOnlyGWAcreage_JComboBox = null;
-	__DivAndWellGWAcreage_JComboBox = null;
-	__SprinklerAcreage_JComboBox = null;
-	__cancel_JButton = null;
-	__command_JTextArea = null;
-	__command_Vector = null;
-	__ok_JButton = null;
-	super.finalize ();
-}
-
-/**
 Return the text for the command.
-@return the text for the command or null if there is a problem with the 
-command.
+@return the text for the command or null if there is a problem with the command.
 */
 public List<String> getText () {
 	if ((__command_Vector != null) && ((__command_Vector.size() == 0) ||

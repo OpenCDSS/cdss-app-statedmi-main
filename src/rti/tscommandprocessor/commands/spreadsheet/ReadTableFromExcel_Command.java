@@ -540,7 +540,7 @@ throws FileNotFoundException, IOException
                         else if ( tableColumnTypes[iColOut] == TableField.DATA_TYPE_DOUBLE ) {
                             // Parse to the double
                             try {
-                                table.setFieldValue(iRowOut, iColOut, new Double(cellValueString), true);
+                                table.setFieldValue(iRowOut, iColOut, Double.valueOf(cellValueString), true);
                             }
                             catch ( NumberFormatException e ) {
                                 // Set to NaN
@@ -550,7 +550,7 @@ throws FileNotFoundException, IOException
                         else if ( tableColumnTypes[iColOut] == TableField.DATA_TYPE_INT ) {
                             // Parse to the boolean
                             if ( cellValueString.equalsIgnoreCase("True") || cellValueString.equals("1") ) {
-                                table.setFieldValue(iRowOut, iColOut, new Integer(1), true);
+                                table.setFieldValue(iRowOut, iColOut, Integer.valueOf(1), true);
                             }
                             else {
                                 // Set to null
@@ -632,7 +632,7 @@ throws FileNotFoundException, IOException
                             cellValueObject = cellValueDouble; // For try/catch
                             if ( tableColumnTypes[iColOut] == TableField.DATA_TYPE_DOUBLE ) {
                                 // Double to double
-                                table.setFieldValue(iRowOut, iColOut, new Double(cellValueDouble), true);
+                                table.setFieldValue(iRowOut, iColOut, Double.valueOf(cellValueDouble), true);
                             }
                             else if ( tableColumnTypes[iColOut] == TableField.DATA_TYPE_STRING ) {
                                 // Double to string - have to format number because Java will use exponential notation
@@ -641,10 +641,10 @@ throws FileNotFoundException, IOException
                             else if ( tableColumnTypes[iColOut] == TableField.DATA_TYPE_INT ) {
                                 // Double to integer - use an offset to help make sure integer value is correct
                                 if ( cellValueDouble >= 0.0 ) {
-                                    table.setFieldValue(iRowOut, iColOut, new Integer((int)(cellValueDouble + .0001)), true);
+                                    table.setFieldValue(iRowOut, iColOut, Integer.valueOf((int)(cellValueDouble + .0001)), true);
                                 }
                                 else {
-                                    table.setFieldValue(iRowOut, iColOut, new Integer((int)(cellValueDouble - .0001)), true);
+                                    table.setFieldValue(iRowOut, iColOut, Integer.valueOf((int)(cellValueDouble - .0001)), true);
                                 }
                             }
                             else {
@@ -669,10 +669,10 @@ throws FileNotFoundException, IOException
                         }
                         else if ( tableColumnTypes[iColOut] == TableField.DATA_TYPE_DOUBLE ) {
                             if ( cellValueBoolean ) {
-                                table.setFieldValue(iRowOut, iColOut, new Double(1.0), true);
+                                table.setFieldValue(iRowOut, iColOut, Double.valueOf(1.0), true);
                             }
                             else {
-                                table.setFieldValue(iRowOut, iColOut, new Double(0.0), true);
+                                table.setFieldValue(iRowOut, iColOut, Double.valueOf(0.0), true);
                             }
                         }
                         else {
@@ -798,7 +798,7 @@ CommandWarningException, CommandException
 
 	CommandProcessor processor = getCommandProcessor();
     CommandStatus status = getCommandStatus();
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {
@@ -991,7 +991,7 @@ CommandWarningException, CommandException
                 int rowCount = table.getNumberOfRecords();
                 PropList request_params = new PropList ( "" );
                 request_params.setUsingObject ( "PropertyName", RowCountProperty );
-                request_params.setUsingObject ( "PropertyValue", new Integer(rowCount) );
+                request_params.setUsingObject ( "PropertyValue", Integer.valueOf(rowCount) );
                 try {
                     processor.processRequest( "SetProperty", request_params);
                 }

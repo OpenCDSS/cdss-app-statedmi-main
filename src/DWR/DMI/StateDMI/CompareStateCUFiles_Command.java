@@ -402,7 +402,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				diffText.addAll(diffText1);
 				if ( diffText1.size() > 0 ) {
 					diffIds.add(cds1.getID());
-					diffCount.add(new Integer(diffText1.size()));
+					diffCount.add(Integer.valueOf(diffText1.size()));
 				}
 			}
 			
@@ -448,7 +448,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 				diffText.addAll(diffText1);
 				if ( diffText1.size() > 0 ) {
 					diffIds.add(ipy1.getID());
-					diffCount.add(new Integer(diffText1.size()));
+					diffCount.add(Integer.valueOf(diffText1.size()));
 				}
 			}
 			

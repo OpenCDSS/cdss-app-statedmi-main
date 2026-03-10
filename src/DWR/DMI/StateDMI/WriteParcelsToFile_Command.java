@@ -671,12 +671,12 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 					objectList.add("Single");
 				}
 				// Parcel.
-				objectList.add(new Integer(parcel.getYear()));
+				objectList.add(Integer.valueOf(parcel.getYear()));
 				objectList.add(parcel.getID());
 				objectList.add(parcel.getDiv());
 				objectList.add(parcel.getWD());
 				objectList.add(parcel.getCrop());
-				objectList.add(new Double(parcel.getArea()));
+				objectList.add(Double.valueOf(parcel.getArea()));
 				objectList.add(parcel.getAreaUnits());
 				objectList.add(parcel.getIrrigationMethod());
 				// Don't know whether CDS or IPY is being processed so check each:
@@ -739,11 +739,11 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 							// Single ditch so leave the collection WDID blank.
 							objectList.add("");
 						}
-						objectList.add(new Integer(parcel.getSupplyFromSWCount()));
+						objectList.add(Integer.valueOf(parcel.getSupplyFromSWCount()));
 						objectList.add(supplyFromSW.getWDID());
-						objectList.add(new Double(supplyFromSW.getAreaIrrigFraction()));
-						objectList.add(new Double(supplyFromSW.getAreaIrrigFractionHydroBase()));
-						objectList.add(new Double(supplyFromSW.getAreaIrrig()));
+						objectList.add(Double.valueOf(supplyFromSW.getAreaIrrigFraction()));
+						objectList.add(Double.valueOf(supplyFromSW.getAreaIrrigFractionHydroBase()));
+						objectList.add(Double.valueOf(supplyFromSW.getAreaIrrig()));
 						objectList.add(supplyFromSW.getAreaIrrigFractionHydroBaseError());
 						printLine = StringUtil.formatString(objectList, format_2);
 						out.println(printLine);
@@ -783,8 +783,8 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 						objectList.add(supplyFromGW.getCollectionPartIdType());
 						objectList.add(supplyFromGW.getWDID());
 						objectList.add(supplyFromGW.getReceipt());
-						objectList.add(new Integer(parcel.getSupplyFromGWCount()));
-						objectList.add(new Double(1.0/parcel.getSupplyFromGWCount()));
+						objectList.add(Integer.valueOf(parcel.getSupplyFromGWCount()));
+						objectList.add(Double.valueOf(1.0/parcel.getSupplyFromGWCount()));
 						// DW fraction is used in IPY calculations.
 						double dwFraction = 1.0;
 						if ( parcel.getSupplyFromSWCount() > 0 ) {
@@ -800,7 +800,7 @@ private void writeParcelsToModelParcelSupplyFile ( String outputFileFull, String
 						}
 						// The area does not consider the D&W surface water split:
 						// - multiply by the additional fraction
-						objectList.add(new Double(supplyFromGW.getAreaIrrig()*dwFraction));
+						objectList.add(Double.valueOf(supplyFromGW.getAreaIrrig()*dwFraction));
 						printLine = StringUtil.formatString(objectList, format_3);
 						out.println(printLine);
 					}
@@ -952,12 +952,12 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 
 			// line 1 - parcel information.
 			objectList.clear();
-			objectList.add(new Integer(parcel.getYear()));
-			objectList.add(new Integer(parcel.getDiv()));
-			objectList.add(new Integer(parcel.getWD()));
-			objectList.add(new Integer(parcel.getID()));
+			objectList.add(Integer.valueOf(parcel.getYear()));
+			objectList.add(Integer.valueOf(parcel.getDiv()));
+			objectList.add(Integer.valueOf(parcel.getWD()));
+			objectList.add(Integer.valueOf(parcel.getID()));
 			objectList.add(parcel.getCrop());
-			objectList.add(new Double(parcel.getArea()));
+			objectList.add(Double.valueOf(parcel.getArea()));
 			objectList.add(parcel.getAreaUnits());
 			objectList.add(parcel.getIrrigationMethod());
 			if ( parcel.getError().length() > 0 ) {
@@ -979,10 +979,10 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 					supplyFromSW = (StateCU_SupplyFromSW)supply;
 					objectList.clear();
 					objectList.add(supplyFromSW.getWDID());
-					objectList.add(new Integer(parcel.getSupplyFromSWCount()));
-					objectList.add(new Double(supplyFromSW.getAreaIrrigFraction()));
-					objectList.add(new Double(supplyFromSW.getAreaIrrigFractionHydroBase()));
-					objectList.add(new Double(supplyFromSW.getAreaIrrig()));
+					objectList.add(Integer.valueOf(parcel.getSupplyFromSWCount()));
+					objectList.add(Double.valueOf(supplyFromSW.getAreaIrrigFraction()));
+					objectList.add(Double.valueOf(supplyFromSW.getAreaIrrigFractionHydroBase()));
+					objectList.add(Double.valueOf(supplyFromSW.getAreaIrrig()));
 					if ( supplyFromSW.getAreaIrrigFractionHydroBase() >= 0.0 ) {
 						// Have HydroBase fraction from ReadParcelsFromHydroBase.
 						objectList.add(supplyFromSW.getAreaIrrigFractionHydroBaseError());
@@ -1013,8 +1013,8 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 					objectList.add(supplyFromGW.getCollectionPartIdType());
 					objectList.add(supplyFromGW.getWDID());
 					objectList.add(supplyFromGW.getReceipt());
-					objectList.add(new Integer(parcel.getSupplyFromGWCount()));
-					objectList.add(new Double(1.0/parcel.getSupplyFromGWCount()));
+					objectList.add(Integer.valueOf(parcel.getSupplyFromGWCount()));
+					objectList.add(Double.valueOf(1.0/parcel.getSupplyFromGWCount()));
 					if ( parcel.getSupplyFromSWCount() > 0 ) {
 						// Format here as a string because can be a blank string if not a D&W.
 						objectList.add(String.format("%6.3f", (1.0/parcel.getSupplyFromSWCount())));
@@ -1022,7 +1022,7 @@ private void writeParcelsToParcelSupplyFile ( String outputFileFull, String deli
 					else {
 						objectList.add("");
 					}
-					objectList.add(new Double(supplyFromGW.getAreaIrrig()));
+					objectList.add(Double.valueOf(supplyFromGW.getAreaIrrig()));
 					if ( supplyFromGW.getError().length() > 0 ) {
 						// Output the parcel error at the end.
 						objectList.add("ERROR: " + supplyFromGW.getError());

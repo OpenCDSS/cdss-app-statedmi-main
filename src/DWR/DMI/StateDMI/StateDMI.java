@@ -4,7 +4,7 @@
 
 StateDMI
 StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2023 Colorado Department of Natural Resources
+Copyright (C) 1997-2026 Colorado Department of Natural Resources
 
 StateDMI is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ public static final String PROGRAM_NAME = "StateDMI";
  *   As of version 5.0.8.dev, no zero-padding is used, although single zero is allowed.
  * - The version is used by build scripts to assign version to installers and documentation.
  */
-public static final String PROGRAM_VERSION = "5.2.0 (2023-11-06)";
+public static final String PROGRAM_VERSION = "6.0.0 (2026-03-05)";
 
 /**
 Interface for StateCU commands.
@@ -137,7 +137,6 @@ public static String getArgs() {
 	}
 	return arguments;
 }
-
 
 /**
 Return the command file that is being processed, or null if not being run in batch mode.
@@ -223,8 +222,7 @@ private static void initialize2 () {
 
 	if ( __statedmiInstallHome == null ) {
 		__statedmiInstallHome = "\\CDSS";
-		Message.printWarning ( 1, routine,
-		"-home was not specified on the command line.  Assuming \"" + __statedmiInstallHome + "\"" );
+		Message.printWarning ( 1, routine, "-home was not specified on the command line.  Assuming \"" + __statedmiInstallHome + "\"" );
 	}
 
 	// Set up the units conversion data.
@@ -449,7 +447,7 @@ throws ClassNotFoundException, IllegalAccessException, InstantiationException, E
             Message.printStatus(2, routine, "Getting class for name \"" + className + "\"" );
             Class clazz = Class.forName( className );
             Message.printStatus(2, routine, "Creating instance of class \"" + className + "\"" );
-        	factory = (DataStoreFactory)clazz.newInstance();
+        	factory = (DataStoreFactory)clazz.getDeclaredConstructor().newInstance();
 
         	// Check for a login of "prompt".
         	String systemLogin = dataStoreProps.getValue("SystemLogin");

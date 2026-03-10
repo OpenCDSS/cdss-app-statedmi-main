@@ -4,7 +4,7 @@
 
 StateDMI
 StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2023 Colorado Department of Natural Resources
+Copyright (C) 1997-2026 Colorado Department of Natural Resources
 
 StateDMI is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -5749,7 +5749,7 @@ public void actionPerformed ( ActionEvent event ) {
 		IOUtil.getProgramName() + " " + IOUtil.getProgramVersion() + "\n\n" +
 		"Creates dataset files for StateCU and StateMod.\n\n" +
 	    "StateDMI is a part of Colorado's Decision Support Systems (CDSS)\n" +
-	    "Copyright (C) 1997-2023 Colorado Department of Natural Resources\n" +
+	    "Copyright (C) 1997-2026 Colorado Department of Natural Resources\n" +
 	    " \n" +
 	    "StateDMI is free software:  you can redistribute it and/or modify\n" +
 	    "    it under the terms of the GNU General Public License as published by\n" +
@@ -5801,8 +5801,8 @@ The generic selector has no way to save specific data set component information.
 private void addTS_ListSelector_JFrame ( TS_ListSelector_JFrame selector, int app_type, int comp_type ) {
 	// Add to the list being maintained.
 	TS_ListSelector_JFrame_List.add ( selector );
-	TS_ListSelector_JFrame_app_type_List.add ( new Integer(app_type) );
-	TS_ListSelector_JFrame_comp_type_List.add ( new Integer(comp_type) );
+	TS_ListSelector_JFrame_app_type_List.add ( Integer.valueOf(app_type) );
+	TS_ListSelector_JFrame_comp_type_List.add ( Integer.valueOf(comp_type) );
 	// Listen for selector events.
 	selector.addTSListSelectorListener ( this );
 }
@@ -6815,7 +6815,7 @@ private void commandProcessor_RunCommandsThreaded ( List commands, boolean creat
 	PropList request_params = new PropList ( "" );
 	request_params.setUsingObject ( "CommandList", commands );
 	request_params.setUsingObject ( "InitialWorkingDir", ui_GetInitialWorkingDir() );
-	request_params.setUsingObject ( "CreateOutput", new Boolean(createOutput) );
+	request_params.setUsingObject ( "CreateOutput", Boolean.valueOf(createOutput) );
 	try {
 		StateDMI_Processor_ThreadRunner runner =
 		new StateDMI_Processor_ThreadRunner ( __statedmiProcessor, request_params );
@@ -6845,7 +6845,7 @@ private void commandProcessor_RunCommands_OLD ( List commands, boolean create_ou
 	PropList request_params = new PropList ( "" );
 	request_params.setUsingObject ( "CommandList", commands );
 	request_params.setUsingObject ( "InitialWorkingDir", getInitialWorkingDir() );
-	request_params.setUsingObject ( "CreateOutput", new Boolean(create_output) );
+	request_params.setUsingObject ( "CreateOutput", Boolean.valueOf(create_output) );
 	try {
 		StateDMI_Processor_ThreadRunner runner =
 		new StateDMI_Processor_ThreadRunner ( __statedmiProcessor, request_params );
@@ -7540,17 +7540,17 @@ public void mouseExited(MouseEvent event) {
 Handle mouse pressed event.
 */
 public void mousePressed(MouseEvent event) {
-	int mods = event.getModifiers();
+	int mods = event.getModifiersEx();
 	Component c = event.getComponent();
     // Popup for commands.
 	if ( (c == ui_GetCommandJList()) && (__commands_JListModel.size() > 0) &&
-		((mods & MouseEvent.BUTTON3_MASK) != 0) ) {
+		((mods & MouseEvent.BUTTON3_DOWN_MASK) != 0) ) {
 		Point pt = JGUIUtil.computeOptimalPosition ( event.getPoint(), c, __Commands_JPopupMenu );
 		__Commands_JPopupMenu.show ( c, pt.x, pt.y );
 	}
     // Popup for table results list, right click since left click automatically shows table.
     else if ( (c == __resultsTables_JList) && (__resultsTables_JListModel.size() > 0) //) {//&&
-        && ((mods & MouseEvent.BUTTON3_MASK) == MouseEvent.BUTTON3_MASK) ) {
+        && ((mods & MouseEvent.BUTTON3_DOWN_MASK) == MouseEvent.BUTTON3_DOWN_MASK) ) {
         Point pt = JGUIUtil.computeOptimalPosition (event.getPoint(), c, __resultsTables_JPopupMenu );
         __resultsTables_JPopupMenu.show ( c, pt.x, pt.y );
     }

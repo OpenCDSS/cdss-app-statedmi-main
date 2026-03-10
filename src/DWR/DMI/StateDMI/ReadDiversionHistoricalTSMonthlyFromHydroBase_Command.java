@@ -4,7 +4,7 @@
 
 StateDMI
 StateDMI is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1997-2019 Colorado Department of Natural Resources
+Copyright (C) 1997-2026 Colorado Department of Natural Resources
 
 StateDMI is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ import RTi.Util.Time.DateTime;
 /**
 This class initializes, checks, and runs the ReadDiversionHistoricalTSMonthlyFromHydroBase() command.
 */
-public class ReadDiversionHistoricalTSMonthlyFromHydroBase_Command 
+public class ReadDiversionHistoricalTSMonthlyFromHydroBase_Command
 extends AbstractCommand implements Command
 {
 /**
@@ -79,28 +79,28 @@ private DateTime __ReadEnd_DateTime = null;
 /**
 Constructor.
 */
-public ReadDiversionHistoricalTSMonthlyFromHydroBase_Command ()
-{	super();
+public ReadDiversionHistoricalTSMonthlyFromHydroBase_Command () {
+	super();
 	setCommandName ( "ReadDiversionHistoricalTSMonthlyFromHydroBase" );
 }
 
 /**
 Check the command parameter for valid values, combination, etc.
 @param parameters The parameters for the command.
-@param command_tag an indicator to be used when printing messages, to allow a
-cross-reference to the original commands.
+@param command_tag an indicator to be used when printing messages, to allow a cross-reference to the original commands.
 @param warning_level The warning level to use when printing parse warnings
 (recommended is 2 for initialization, and 1 for interactive command editor dialogs).
 */
 public void checkCommandParameters ( PropList parameters, String command_tag, int warning_level )
-throws InvalidCommandParameterException
-{	String routine = getClass().getName() + ".checkCommandParameters";
+throws InvalidCommandParameterException {
+	String routine = getClass().getName() + ".checkCommandParameters";
 	// parameters
-	String ID = parameters.getValue( "ID" ); 
-	String ReadStart = parameters.getValue( "ReadStart" ); 
-	String ReadEnd = parameters.getValue( "ReadEnd" ); 
-	String AverageFillFlag = parameters.getValue( "AverageFillFlag" ); 
-	String PatternFillFlag = parameters.getValue( "PatternFillFlag" ); 
+	String ID = parameters.getValue( "ID" );
+	String ReadStart = parameters.getValue( "ReadStart" );
+	String ReadEnd = parameters.getValue( "ReadEnd" );
+	String AverageFillFlag = parameters.getValue( "AverageFillFlag" );
+	String PatternFillFlag = parameters.getValue( "PatternFillFlag" );
+	String FillCarryForward = parameters.getValue( "FillCarryForward" );
 	String FillUsingCIU = parameters.getValue( "FillUsingCIU" );
 	String FillUsingCIUFlag = parameters.getValue( "FillUsingCIUFlag" );
 	String IncludeExplicit = parameters.getValue( "IncludeExplicit" );
@@ -111,10 +111,10 @@ throws InvalidCommandParameterException
 	String FillAverageOrder = parameters.getValue( "FillAverageOrder" );
 	String warning = "";
 	String message;
-	
+
     CommandStatus status = getCommandStatus();
     status.clearLog(CommandPhaseType.INITIALIZATION);
-	
+
 	if ( (ID == null) || (ID.length() == 0) ) {
 		message = "An identifier or pattern must be specified.";
 		warning += "\n" + message;
@@ -122,7 +122,7 @@ throws InvalidCommandParameterException
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Specify the identifier pattern to match." ) );
 	}
-	
+
 	__ReadStart_DateTime = null;
 	__ReadEnd_DateTime = null;
 	if ( ReadStart != null && !ReadStart.equals("") &&
@@ -211,6 +211,15 @@ throws InvalidCommandParameterException
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Specify the UseDiversionComments value as " + _False + " (default) or " + _True + "." ) );
 	}
+	if ( FillCarryForward != null && !FillCarryForward.equals("") &&
+		!(FillCarryForward.equalsIgnoreCase(_True)) &&
+		!(FillCarryForward.equalsIgnoreCase(_False))) {
+		message = "The fill carry forward parameter (" + FillCarryForward + ") is invalid.";
+		warning += "\n" + message;
+		status.addToLog ( CommandPhaseType.INITIALIZATION,
+			new CommandLogRecord(CommandStatusType.FAILURE,
+				message, "Specify the FillCarryForward value as " + _False + " (default) or " + _True + "." ) );
+	}
 	if ( FillUsingCIU != null && !FillUsingCIU.equals("") &&
 		!(FillUsingCIU.equalsIgnoreCase(_True)) &&
 		!(FillUsingCIU.equalsIgnoreCase(_False))) {
@@ -282,8 +291,8 @@ throws InvalidCommandParameterException
 			}
 		}
 	}
-	
-	// Check for invalid parameters...
+
+	// Check for invalid parameters.
 	List<String> validList = new ArrayList<>();
     validList.add ( "ID" );
     validList.add ( "IncludeExplicit");
@@ -297,7 +306,8 @@ throws InvalidCommandParameterException
     validList.add ( "FillPatternOrder" );
     validList.add ( "PatternFillFlag" );
     validList.add ( "FillAverageOrder" );
-    validList.add ( "AverageFillFlag" );	
+    validList.add ( "AverageFillFlag" );
+    validList.add ( "FillCarryForward" );
     validList.add ( "FillUsingCIU" );
     validList.add ( "FillUsingCIUFlag" );
 	warning = StateDMICommandProcessorUtil.validateParameterNames ( validList, this, warning );
@@ -318,13 +328,12 @@ Creates a Property List with information needed to fill a Time Series with a con
 @param fillFlagDesc description for the fill flag
 @return PropList List that contains information on filling a constant value for the given Time Series and dates.
  */
-private PropList createFillConstantPropList( TS inputTS, String fillFlag, String fillFlagDesc)
-{
+private PropList createFillConstantPropList ( TS inputTS, String fillFlag, String fillFlagDesc ) {
 	if( inputTS == null ) {
 		return null;
 	}
-	
-	// Create the PropList
+
+	// Create the PropList.
 	PropList prop = new PropList( "List to fill TS with constant value");
 	if ( fillFlag != null && !fillFlag.equals("") ) {
 		prop.add( "FillFlag=" + fillFlag);
@@ -332,18 +341,17 @@ private PropList createFillConstantPropList( TS inputTS, String fillFlag, String
 	if ( fillFlagDesc != null && !fillFlagDesc.equals("") ) {
 		prop.add( "FillFlagDescription=" + fillFlagDesc);
 	}
-	
+
 	return prop;
 }
 
 /**
 Edit the command.
 @param parent The parent JFrame to which the command dialog will belong.
-@return true if the command was edited (e.g., "OK" was pressed), and false if
-not (e.g., "Cancel" was pressed.
+@return true if the command was edited (e.g., "OK" was pressed), and false if not (e.g., "Cancel" was pressed.
 */
-public boolean editCommand ( JFrame parent )
-{	// The command will be modified if changed...
+public boolean editCommand ( JFrame parent ) {
+	// The command will be modified if changed.
 	return (new ReadDiversionHistoricalTSMonthlyFromHydroBase_JDialog ( parent, this )).ok();
 }
 
@@ -359,18 +367,18 @@ Fills the given time series with constant values based on the CIU flag.
 @param ignore_lezero Indicates whether or not to ignore less than zero values when computing averages.
 */
 private int fillUsingCIUFlag ( TS ts, HydroBaseDMI hbdmi,
-		String FillUsingCIUFlag, DateTime start, DateTime end, 
-		String command_tag, int warningLevel, int warningCount, CommandStatus status, int ignore_lezero )
-{	String message = null;
+		String FillUsingCIUFlag, DateTime start, DateTime end,
+		String command_tag, int warningLevel, int warningCount, CommandStatus status, int ignore_lezero ) {
+	String message = null;
 	if ( ts == null || hbdmi == null ) {
 		return warningCount;
-	}		
+	}
 	if ( command_tag == null ) {
 		command_tag = "";
 	}
 
 	String routine = "readDiversionHistoricalTSMonthlyFromHydroBase.fillUsingCIUFlag";
-	// get CIU flag value from HydroBase
+	// Get the CIU flag value from HydroBase.
 	String TSID_Location_part = ts.getLocation();
 	HydroBase_Structure struct = null;
 	int [] wdid_parts = null;
@@ -417,23 +425,21 @@ private int fillUsingCIUFlag ( TS ts, HydroBaseDMI hbdmi,
 		fillFlag = FillUsingCIUFlag;
 	}
 	Message.printStatus(2, routine, "FillUsingCIUFlag=" + FillUsingCIUFlag + ", will use data flag \"" + fillFlag + "\"");
-	
-	// Based on CIU string, fill missing values with
-	// flag value
+
+	// Based on CIU string, fill missing values with the flag value:
 	// H = "Historical structure"
 	// I = "Inactive structure"
 	if( ciu.equalsIgnoreCase( "H" ) || ciu.equalsIgnoreCase( "I" )) {
-		// Recalculate TS Limits
+		// Recalculate TS Limits.
 		recalculateLimits( ts, start, end, ignore_lezero);
-		// Fill missing data values at end of period with zeros
+		// Fill missing data values at end of period with zeros.
 		try {
-			// get the nearest data point from the end of the period
-			TSData tmpTSData = TSUtil.findNearestDataPoint(ts, start, end, true); //reverse
+			// Get the nearest data point from the end of the period.
+			TSData tmpTSData = TSUtil.findNearestDataPoint(ts, start, end, true); // Reverse.
 			if( tmpTSData != null) {
-				String fillDesc = ""; // TODO SAM 2016-05-15 could set this to something useful
+				String fillDesc = ""; // TODO SAM 2016-05-15 could set this to something useful.
 				PropList const_prop = createFillConstantPropList(ts, fillFlag, fillDesc );
-				// fill time series with zeros from last non-missing value
-				// until the end of the period.
+				// Fill time series with zeros from last non-missing value until the end of the period.
 				TSUtil.fillConstant(ts, start, end, 0, const_prop);
 			}
 		} catch (Exception e) {
@@ -445,20 +451,19 @@ private int fillUsingCIUFlag ( TS ts, HydroBaseDMI hbdmi,
 			status.addToLog ( CommandPhaseType.RUN,
 				new CommandLogRecord(CommandStatusType.FAILURE,
 					message, "Check previous warnings and the log file." ) );
-		}	
+		}
 	}
 	// N = "Non-existent structure"
 	else if( ciu.equalsIgnoreCase( "N" )) {
-		// Recalculate TS Limits
+		// Recalculate TS Limits.
 		recalculateLimits( ts, start, end, ignore_lezero );
 		try {
 			TSData tmpTSData = TSUtil.findNearestDataPoint(ts, start, end, false);
 			if( tmpTSData != null) {
-				// Create propList for fill command
-				String fillDesc = ""; // TODO SAM 2016-05-15 could set this to something useful
+				// Create propList for fill command.
+				String fillDesc = ""; // TODO SAM 2016-05-15 could set this to something useful.
 				PropList const_prop = createFillConstantPropList(ts, fillFlag, fillDesc );
-				// fill time series with zero's from first non-missing value
-				// until the beginning of the period.
+				// Fill time series with zero's from first non-missing value until the beginning of the period.
 				TSUtil.fillConstant(ts, start, end, 0, const_prop);
 			}
 		}
@@ -482,8 +487,7 @@ private int fillUsingCIUFlag ( TS ts, HydroBaseDMI hbdmi,
 @param date2 Ending DateTime to use for recalculation.
 @param ignore_lezero_flag Indicates whether or not to ignore values less than zero.
 */
-private void recalculateLimits (TS ts, DateTime date1, DateTime date2, int ignore_lezero_flag )
-{
+private void recalculateLimits (TS ts, DateTime date1, DateTime date2, int ignore_lezero_flag ) {
 	String routine = "readDiversionHistoricalTSMonthlyFromHydroBase.recalculateLimits";
 	try {
 		ts.setDataLimitsOriginal ( new MonthTSLimits((MonthTS)ts, date1, date2, ignore_lezero_flag ) );
@@ -501,20 +505,20 @@ Method to execute the readDiversionHistoricalTSMonthlyFromHydroBase() command.
 */
 public void runCommand ( int command_number )
 throws InvalidCommandParameterException,
-CommandWarningException, CommandException
-{	String message, routine = getClass().getName() + ".runCommand";
+CommandWarningException, CommandException {
+	String message, routine = getClass().getName() + ".runCommand";
 	int warningLevel = 2;
 	String command_tag = "" + command_number;
 	String interval = "Month";
-    int log_level = 3;  // Log level for non-user warnings
+    int log_level = 3;  // Log level for non-user warnings.
     int warningCount = 0;
-	
+
     CommandPhaseType commandPhase = CommandPhaseType.RUN;
 	StateDMI_Processor processor = (StateDMI_Processor)getCommandProcessor();
 	CommandStatus status = getCommandStatus();
 	status.clearLog(CommandPhaseType.RUN);
-	
-	// Get the input needed to process the file...
+
+	// Get the input needed to process the file.
 	PropList parameters = getCommandParameters();
 	String ID = parameters.getValue ( "ID" );
 	if ( ID == null ) {
@@ -544,11 +548,12 @@ CommandWarningException, CommandException
 	String FillAverageOrder = parameters.getValue ( "FillAverageOrder" );
 	String AverageFillFlag = parameters.getValue ( "AverageFillFlag" );
 	String PatternFillFlag = parameters.getValue ( "PatternFillFlag" );
+	String FillCarryForward = parameters.getValue ( "FillCarryForward" );
 	String FillUsingCIU = parameters.getValue ( "FillUsingCIU" );
 	String FillUsingCIUFlag = parameters.getValue ( "FillUsingCIUFlag" );
-	
-   // Output period will be used if not specified with SetStart and SetEnd
-    
+
+    // Output period will be used if not specified with SetStart and SetEnd.
+
     DateTime OutputStart_DateTime = null;
     try {
     	OutputStart_DateTime = (DateTime)processor.getPropContents ( "OutputStart");
@@ -556,7 +561,7 @@ CommandWarningException, CommandException
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
         message = "Error requesting OutputStart (" + e + ").";
-        Message.printWarning ( warningLevel, 
+        Message.printWarning ( warningLevel,
         MessageUtil.formatMessageTag(command_tag, ++warningCount),
         routine, message );
         status.addToLog ( commandPhase,
@@ -570,7 +575,7 @@ CommandWarningException, CommandException
 	catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
         message = "Error requesting OutputEnd (" + e + ").";
-        Message.printWarning ( warningLevel, 
+        Message.printWarning ( warningLevel,
         MessageUtil.formatMessageTag(command_tag, ++warningCount),
         routine, message );
         status.addToLog ( commandPhase,
@@ -579,7 +584,7 @@ CommandWarningException, CommandException
     }
 	if ( OutputStart_DateTime == null ) {
         message = "The output start has not been specified.";
-        Message.printWarning ( warningLevel, 
+        Message.printWarning ( warningLevel,
         MessageUtil.formatMessageTag(command_tag, ++warningCount),
         routine, message );
         status.addToLog ( commandPhase,
@@ -588,7 +593,7 @@ CommandWarningException, CommandException
 	}
 	if ( OutputEnd_DateTime == null ) {
         message = "The output end has not been specified.";
-        Message.printWarning ( warningLevel, 
+        Message.printWarning ( warningLevel,
         MessageUtil.formatMessageTag(command_tag, ++warningCount),
         routine, message );
         status.addToLog ( commandPhase,
@@ -596,12 +601,12 @@ CommandWarningException, CommandException
                 message, "Specify the output end with SetOutputPeriod() prior to this command." ) );
 	}
 
-	// Initialize properties for filling...
+	// Initialize properties for filling.
 	PropList average_fill_props = new PropList ( "fill" );
 	average_fill_props.set ( "FillFlag", AverageFillFlag );
 	PropList pattern_fill_props = new PropList ( "fill" );
 	pattern_fill_props.set ( "FillFlag", PatternFillFlag );
-	
+
 	boolean IncludeExplicit_boolean = true;
 	if ( IncludeExplicit.equalsIgnoreCase(_False) ) {
 		IncludeExplicit_boolean = false;
@@ -612,18 +617,18 @@ CommandWarningException, CommandException
 	}
 	int ignore_lezero_flag = 0;
 	if ( LEZeroInAverage.equalsIgnoreCase(_False) ) {
-		// Ignore the values...
+		// Ignore the values.
 		pattern_fill_props.set ( "IgnoreLessThanOrEqualZero", _True );
 		ignore_lezero_flag = TSLimits.IGNORE_LESS_THAN_OR_EQUAL_ZERO;
 	}
 	else {
-		// Do not ignore the values...
+		// Do not ignore the values.
 		pattern_fill_props.set ( "IgnoreLessThanOrEqualZero", _False );
 	}
-	
+
 	DateTime ReadStart_DateTime = null, ReadEnd_DateTime = null;
 	if ( ReadStart == null ) {
-		// Use the output date/time (even if null)...
+		// Use the output date/time (even if null).
 		ReadStart_DateTime = OutputStart_DateTime;
 	}
 	else {
@@ -635,7 +640,7 @@ CommandWarningException, CommandException
 		}
 	}
 	if ( ReadEnd == null ) {
-		// Use the output date/time (even if null)...
+		// Use the output date/time (even if null).
 		ReadEnd_DateTime = OutputEnd_DateTime;
 	}
 	else {
@@ -659,9 +664,9 @@ CommandWarningException, CommandException
 		FillAverageOrder_int = Integer.parseInt  (FillAverageOrder);
 		fill_average = true;
 	}
-	
-	// Get the list of diversion stations...
-	
+
+	// Get the list of diversion stations.
+
 	List<StateMod_Diversion> stationList = null;
 	int stationListSize = 0;
 	try {
@@ -679,9 +684,9 @@ CommandWarningException, CommandException
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Report problem to software support." ) );
 	}
-	
-	// Get the HydroBase DMI...
-	
+
+	// Get the HydroBase DMI.
+
 	HydroBaseDMI hbdmi = null;
 	try {
 		Object o = processor.getPropContents( "HydroBaseDMI");
@@ -696,30 +701,39 @@ CommandWarningException, CommandException
 			new CommandLogRecord(CommandStatusType.FAILURE,
 				message, "Report problem to software support." ) );
 	}
-	
+
     if ( warningCount > 0 ) {
         message = "There were " + warningCount + " warnings about command input.";
-        Message.printWarning ( warningLevel, 
+        Message.printWarning ( warningLevel,
         MessageUtil.formatMessageTag(command_tag, ++warningCount),
         routine, message );
         throw new InvalidCommandParameterException ( message );
     }
 
     try {
-    	int compType = StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY; // No daily support yet
+    	// Set the HydroBase read properties:
+    	// - this is used to control reading when not handled here
+    	
+    	PropList hydrobaseReadProps = new PropList ( "HydroBase" );
+    	if ( (FillCarryForward != null) && !FillCarryForward.isEmpty() ) {
+    		// Default if not set is True, handled in the readTimeSeries code.
+    		hydrobaseReadProps.set ( "FillDivRecordsCarryForward=" + FillCarryForward );
+    	}
+    	
+    	int compType = StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY; // No daily support yet.
 		StateMod_Diversion div = null;
 		MonthTS ts = null; // Total time series, either for an explicit structure the sum for a collection.
 		MonthTS sumts = null; // The sum of time series for an aggregate, without filling, used to
 						// compute the original data limits so that they can be used later in other
 						// fill commands.
-		TSIdent tsident = null; 	// TSIDent for time series
+		TSIdent tsident = null; 	// TSIDent for time series.
 		MonthTS pts = null; // Part time series, to add to ts.
 		List<String> parts = null;
-		int psize = 0; // Number of parts in a collection
-		int iparts = 0; // Index for iterating through parts
-		int part_count = 0; // Counter (1+) of parts in a collection
-		String part_id = ""; // Identifier for a part in a collection
-		int [] wdid_parts = new int[2];	// Parts when a WDID is parsed
+		int psize = 0; // Number of parts in a collection.
+		int iparts = 0; // Index for iterating through parts.
+		int part_count = 0; // Counter (1+) of parts in a collection.
+		String part_id = ""; // Identifier for a part in a collection.
+		int [] wdid_parts = new int[2];	// Parts when a WDID is parsed.
 		StateMod_Diversion_CollectionType collection_type = null;
 		boolean fillUsingCIU = false;
 		String id;	// Diversion ID.
@@ -731,35 +745,32 @@ CommandWarningException, CommandException
 			div = stationList.get(i);
 			id = div.getID();
 			if ( !id.matches(ID_Java) ) {
-				// Do not read...
+				// Do not read.
 				continue;
 			}
-	
+
 			if ( !IncludeCollections_boolean && div.isCollection() ) {
-				// Ignore diversion stations that are collections...
-				// Messages could be excessive if multiple read
-				// commands are used so don't print for now...
+				// Ignore diversion stations that are collections.
+				// Messages could be excessive if multiple read commands are used so don't print for now.
 				//Message.printStatus ( 2, routine,
 				//"Not reading time series for \"" + id +
 				//"\" (it is a collection)." );
 				continue;
 			}
-	
+
 			if ( !IncludeExplicit_boolean && !div.isCollection() ) {
-				// Ignore diversion stations are explicit...
-				// Messages could be excessive if multiple read
-				// commands are used so don't print for now...
+				// Ignore diversion stations are explicit.
+				// Messages could be excessive if multiple read commands are used so don't print for now.
 				//Message.printStatus ( 2, routine,
 				//"Not reading time series for \"" + id +
 				//"\" (it is explicit)." );
 				continue;
 			}
-	
-			// Read the time series from HydroBase.  If an aggregate or
-			// system, read each time series and aggregate...
-	
+
+			// Read the time series from HydroBase.  If an aggregate or system, read each time series and aggregate.
+
 			if ( div.isCollection() ) {
-				// Aggregate or system...
+				// Aggregate or system.
 				Message.printStatus ( 2, routine, "Reading diversion time series for diversion " +
 				div.getCollectionType() + " \"" + id + "\"" );
 				psize = 0;
@@ -779,14 +790,12 @@ CommandWarningException, CommandException
 					Message.printStatus ( 2, routine, "Reading diversion time series for \"" + id +
 					"\" (part " + (iparts + 1) + ": "+part_id +")");
 					try {
-						// Parse out the WDID...
+						// Parse out the WDID.
 						HydroBase_WaterDistrict.parseWDID(part_id,wdid_parts);
 					}
 					catch ( Exception e ) {
-						// Not a WDID - this is an error because
-						// valid structures are expected as parts of an aggregate...
-						message = "Location \"" + id + "\" (part " +
-						(iparts + 1) + ": " + part_id + ") that is not a WDID.";
+						// Not a WDID - this is an error because valid structures are expected as parts of an aggregate.
+						message = "Location \"" + id + "\" (part " + (iparts + 1) + ": " + part_id + ") that is not a WDID.";
 						Message.printWarning(warningLevel,
 							MessageUtil.formatMessageTag( command_tag, ++warningCount),
 							routine, message );
@@ -795,13 +804,13 @@ CommandWarningException, CommandException
 								message, "Verify that collection parts are WDIDs." ) );
 						continue;
 					}
-					blank_ts_created = false;	// Reset below
+					blank_ts_created = false;	// Reset below.
 					try {
-						// Read the part...
+						// Read the part.
+						String reqUnits = null;
 						pts = (MonthTS)hbdmi.readTimeSeries( part_id + ".DWR.DivTotal." + interval,
-							ReadStart_DateTime, ReadEnd_DateTime, null, true, null );
-						// If the read start and end were specified, make sure the time series
-						// has a period of the output period...
+							ReadStart_DateTime, ReadEnd_DateTime, reqUnits, true, hydrobaseReadProps );
+						// If the read start and end were specified, make sure the time series has a period of the output period.
 						if ( (pts != null) && (((ReadStart_DateTime != null) &&
 							ReadStart_DateTime.greaterThan(OutputStart_DateTime)) ||
 							((ReadEnd_DateTime != null) &&
@@ -811,10 +820,10 @@ CommandWarningException, CommandException
 					}
 					catch ( Exception e ) {
 						// It is possible that a diversion time series is not in HydroBase so make
-						// non-fatal and add a time series with missing data.  Do so by setting to
-						// null and handling below...
+						// non-fatal and add a time series with missing data.
+						// Do so by setting to null and handling below.
 						pts = null;
-						// Can be confusing to users so only show in debug mode...
+						// Can be confusing to users so only show in debug mode.
 						if ( Message.isDebugOn ) {
 							Message.printWarning ( 3, routine, e);
 						}
@@ -824,15 +833,13 @@ CommandWarningException, CommandException
 						"Could not read diversion time series data from HydroBase for " + id +
 						" (part " + (iparts + 1) + ": " +
 						part_id + ") - setting to missing.  May need to reset total." );
-						// TODO SAM 2009-01-24 Evaluate whether a warning
-						// Make non-fatal for now...
+						// TODO SAM 2009-01-24 Evaluate whether a warning.
+						// Make non-fatal for now.
 						//++warning_count;
 						//continue;
 						//
-						// Create a missing time series so that
-						// diversion comments can be found -
-						// this may actually occur when no
-						// monthly data are available...
+						// Create a missing time series so that diversion comments can be found.
+						// This may actually occur when no monthly data are available.
 						blank_ts_created = true;
 						try {
 							tsident = new TSIdent ( part_id, "DWR",
@@ -861,9 +868,9 @@ CommandWarningException, CommandException
 						pts.setDate2Original( OutputEnd_DateTime);
 						pts.allocateDataSpace();
 					}
-					// By here have a part to process...
+					// By here have a part to process.
 					++part_count;
-					// Fill with diversion comments...
+					// Fill with diversion comments.
 					if ( (pts != null) && UseDiversionComments.equalsIgnoreCase(_True) ) {
 						try {
 							HydroBase_Util.fillTSUsingDiversionComments( hbdmi, pts, null, null );
@@ -876,26 +883,26 @@ CommandWarningException, CommandException
 							status.addToLog ( CommandPhaseType.RUN,
 								new CommandLogRecord(CommandStatusType.FAILURE,
 									message, "Report problem to software support." ) );
-						}		
+						}
 					}
-					// check for CIU flag
+					// Check for CIU flag.
 					if ( pts != null && FillUsingCIU != null && FillUsingCIU.equalsIgnoreCase( _True) ) {
 						fillUsingCIU = true;
-						warningCount = fillUsingCIUFlag( pts, hbdmi, 
+						warningCount = fillUsingCIUFlag( pts, hbdmi,
 							FillUsingCIUFlag, OutputStart_DateTime, OutputEnd_DateTime,
 							command_tag, warningLevel, warningCount, status, ignore_lezero_flag );
 					}
-					
+
 					// Set the original data limits on the part.
-					// This is needed when doing filling on the part...
+					// This is needed when doing filling on the part.
 					if ( (fill_pattern || fill_average) && !fillUsingCIU ) {
 						recalculateLimits(pts, OutputStart_DateTime, OutputEnd_DateTime, ignore_lezero_flag );
 					}
-	
-					// Initialize the total time series if necessary...
-	
+
+					// Initialize the total time series if necessary.
+
 					if ( !ts_initialized && (pts != null) ) {
-						// Just use the time series that was returned.
+						// Just use the time series that was returned:
 						// - this ensures that the main data for the time series is in place
 						// - TODO smalers 2021-01-17 is this confusing and possibly fragile?
 						ts = pts;
@@ -903,20 +910,20 @@ CommandWarningException, CommandException
 						id + " time series to first part (" + part_id + ") time series with period " + ts.getDate1() + " to " + ts.getDate2() + "." );
 						Message.printStatus ( 2, routine, "Output time series will initially have the data for first part, with other parts added.");
 						ts_initialized = true;
-						// Set the identifier and name to that of the collection...
+						// Set the identifier and name to that of the collection.
 						ts.getIdentifier().setLocation(id);
 						ts.setDescription ( id + " Diversion " + collection_type );
-	
-						// Also create a copy for the sum that is used to calculate the original limits...
-	
+
+						// Also create a copy for the sum that is used to calculate the original limits.
+
 						sumts = (MonthTS)ts.clone();
 					}
-	
+
 					// Add the part to the raw data total so that
 					// averages can be computed based on the total of the original data.
 					// sumts was cloned from the initial time series above so only add parts 2+.
 					if ( (sumts != null) && (pts != null) && (part_count > 1) ) {
-						// Add the part time series to the full time series...
+						// Add the part time series to the full time series.
 						try {
 							Message.printStatus ( 2, routine, "Adding part \"" + (iparts + 1) + ": " + part_id +
 							"\" diversion TS to unfilled main TS \""+ id + "\" - used with statistics." );
@@ -930,17 +937,16 @@ CommandWarningException, CommandException
 							//++warning_count;
 						}
 					}
-	
+
 					// If requested, fill the part before adding it to the sum.
 					// Do not process if a blank part was created because errors will occur.
 					// This will also fill the initial time series part since ts=pts above.
-	
+
 					if ( (pts != null) && !blank_ts_created && (fill_pattern || fill_average) ) {
-						// Need to fill with one or both in the requested order...
+						// Need to fill with one or both in the requested order.
 						for(int ifill = 1; ifill <= 2; ifill++){
 							if ( ifill == FillPatternOrder_int ) {
-								// Fill pattern.  This will throw an exception if the
-								// pattern is not found.  Let the exception cause the command to stop.
+								// Fill pattern.  This will throw an exception if the pattern is not found.  Let the exception cause the command to stop.
 								try {
 									warningCount =
 									processor.fillTSPattern ( pts, routine, PatternID, id, part_id,
@@ -952,7 +958,7 @@ CommandWarningException, CommandException
 								}
 							}
 							else if(ifill == FillAverageOrder_int ){
-								// Fill with monthly average...
+								// Fill with monthly average.
 								try {
 									warningCount = processor.fillTSMonthlyAverage (
 									command_tag, warningCount, (MonthTS)pts, routine,
@@ -965,10 +971,10 @@ CommandWarningException, CommandException
 							}
 						}// End filling.
 					}
-	
-					// Accumulate the data.  This logic follows the old watright logic.i
+
+					// Accumulate the data.  This logic follows the old watright logic.
 					// Let the all-missing time series go through because it will add to the history and description.
-	
+
 					if ( (pts != null) && (part_count > 1) && (ts != pts) ) {
 						// Add the part time series to the full time series.
 						// - only add the 2nd and greater parts since first part is used to initialize the output time series.
@@ -991,35 +997,33 @@ CommandWarningException, CommandException
 						}
 					}
 				}
-	
-				// Calculate the limits on the collection's time series 
-				// for use when filling with historical averages.  This does
-				// include the zero's from CIU filling.
+
+				// Calculate the limits on the collection's time series for use when filling with historical averages.
+				// This does include the zero's from CIU filling.
 				if ( compType == StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY ) {
 					recalculateLimits ( ts, OutputStart_DateTime, OutputEnd_DateTime, ignore_lezero_flag );
 				}
-			} // End collection
+			} // End collection.
 			else {
-				// Single ditch...
+				// Single ditch.
 				Message.printStatus ( 2, routine, "Reading diversion time series for \"" + id + "\"" );
 				is_wdid = true;
 				try {
-					// Parse out the WDID...
+					// Parse out the WDID.
 					HydroBase_WaterDistrict.parseWDID(id,wdid_parts);
 				}
 				catch ( Exception e ) {
-					// Not a WDID - non-fatal, just ignore the diversion...
-					Message.printStatus ( 2, routine, "Not reading diversion \"" + id +
-					"\" - does not appear to be a WDID." );
+					// Not a WDID - non-fatal, just ignore the diversion.
+					Message.printStatus ( 2, routine, "Not reading diversion \"" + id + "\" - does not appear to be a WDID." );
 					is_wdid = false;
 				}
 				if ( is_wdid ) {
-					// WDID is valid so try to read...
+					// WDID is valid so try to read.
 					try {
+						String reqUnits = null;
 						ts = (MonthTS)hbdmi.readTimeSeries ( id + ".DWR.DivTotal." +interval,
-							ReadStart_DateTime, ReadEnd_DateTime, null, true, null );
-						// If the read start and end were specified, make sure the time series
-						// has a period of the output period...
+							ReadStart_DateTime, ReadEnd_DateTime, reqUnits, true, hydrobaseReadProps );
+						// If the read start and end were specified, make sure the time series has a period of the output period.
 						if ( (ts != null) && (((ReadStart_DateTime != null)&&
 							ReadStart_DateTime.greaterThan(OutputStart_DateTime)) ||
 							((ReadEnd_DateTime != null) &&
@@ -1033,13 +1037,13 @@ CommandWarningException, CommandException
 						if ( Message.isDebugOn ) {
 							Message.printWarning ( 3, routine, e );
 						}
-						// Not fatal because aggregates and other nodes may not be in HydroBase...
+						// Not fatal because aggregates and other nodes may not be in HydroBase.
 						//++warning_count;
-						// TODO SAM 2009-01-24 Evaluate whether warning status log should be added
+						// TODO SAM 2009-01-24 Evaluate whether warning status log should be added.
 						ts = null;
 					}
 				}
-	
+
 				blank_ts_created = false;
 				if ( ts == null ) {
 					if ( compType == StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY ) {
@@ -1058,7 +1062,7 @@ CommandWarningException, CommandException
 									message, "Report problem to software support." ) );
 						}
 					}
-					/* TODO SAM 2011-01-16 Need to enable
+					/* TODO SAM 2011-01-16 Need to enable.
 					else {
 						ts = new DayTS ();
 						ts.setDataUnits ( StateMod_DataSet.lookupTimeSeriesDataUnits(compType) );
@@ -1096,8 +1100,8 @@ CommandWarningException, CommandException
 					"found for requested ID \"" + id + "\".  Adding an empty time series." );
 					blank_ts_created = true;
 				}
-	
-				// Will always have a time series by here...
+
+				// Will always have a time series by here.
 				if ( is_wdid && UseDiversionComments.equalsIgnoreCase(_True)) {
 					try {
 						HydroBase_Util.fillTSUsingDiversionComments ( hbdmi, ts, null, null );
@@ -1111,32 +1115,29 @@ CommandWarningException, CommandException
 									message, "Report problem to software support." ) );
 					}
 				}
-				// Check for CIU flag
+				// Check for CIU flag.
 				if ( is_wdid && FillUsingCIU != null && FillUsingCIU.equalsIgnoreCase( "true" ) ) {
-					warningCount = fillUsingCIUFlag( ts, hbdmi, 
+					warningCount = fillUsingCIUFlag( ts, hbdmi,
 						FillUsingCIUFlag, OutputStart_DateTime, OutputEnd_DateTime,
 						command_tag, warningLevel, warningCount, status, ignore_lezero_flag );
 				}
-				// Calculate the limits for use when filling with historical averages...
-	
+				// Calculate the limits for use when filling with historical averages.
+
 				if ( compType == StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY && !fillUsingCIU ) {
 					recalculateLimits ( ts, OutputStart_DateTime, OutputEnd_DateTime, ignore_lezero_flag );
 				}
-			} // End single ditch
-	
-			// TODO SAM 2005-08-13 Can this be removed?  Or are there cases that could still
-			// cause the following to be executed?
+			} // End single ditch.
+
+			// TODO SAM 2005-08-13 Can this be removed?  Or are there cases that could still cause the following to be executed?
 			// Final fall-through.
-			// If the time series is null, create a blank one to keep the
-			// sequence the same with the diversion identifiers...
-	
+			// If the time series is null, create a blank one to keep the sequence the same with the diversion identifiers.
+
 			if ( ts == null ) {
 				if ( compType == StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY ) {
 					ts = new MonthTS ();
 					ts.setDataUnits (  StateMod_DataSet.lookupTimeSeriesDataUnits( compType ));
 					try {
-						tsident = new TSIdent ( id, "DWR",
-							StateMod_DataSet.lookupTimeSeriesDataType(compType),"Month", "" );
+						tsident = new TSIdent ( id, "DWR", StateMod_DataSet.lookupTimeSeriesDataType(compType),"Month", "" );
 					} catch (Exception e) {
 						message = "Error creating time series identifier for \"" + id + "\" (" + e + ").";
 						Message.printWarning(warningLevel,
@@ -1147,7 +1148,7 @@ CommandWarningException, CommandException
 								message, "Report problem to software support." ) );
 					}
 				}
-				/* TODO SAM 2011-01-16 Need to finish
+				/* TODO SAM 2011-01-16 Need to finish.
 				else {
 					ts = new DayTS ();
 					ts.setDataUnits ( StateMod_DataSet.lookupTimeSeriesDataUnits(compType) );
@@ -1185,26 +1186,24 @@ CommandWarningException, CommandException
 				//	Message.printStatus ( 2, routine, "ID \"" + id + "\" not requested from " +
 				//	"HydroBase.  Adding an empty diversion time series." );
 				//}
-				//else {	
+				//else
 					Message.printStatus ( 2, routine,
-					"No diversion time series data found for requested ID \"" +
-					id + "\".  Adding an empty time series." );
+					"No diversion time series data found for requested ID \"" + id + "\".  Adding an empty time series." );
 				//}
 			}
-	
-			// Add the time series to the list...
-	
+
+			// Add the time series to the list.
+
 			if ( compType == StateMod_DataSet.COMP_DIVERSION_TS_MONTHLY ) {
 				processor.findAndAddSMDiversionTSMonthly ( ts, true );
-				// Save a backup copy used when constraining to water rights...
+				// Save a backup copy used when constraining to water rights.
 				if ( processor.__need_diversion_ts_monthly_copy ) {
-					// If an explicit station, add the total...
+					// If an explicit station, add the total.
 					if ( !div.isCollection() ) {
 						processor.findAndAddSMDiversionTSMonthly2 ( (MonthTS)ts.clone(), true );
 					}
 					else {
-						// For a collection add the original sum (no need to clone since this is
-						// the only place that the data will be used)...
+						// For a collection add the original sum (no need to clone since this is the only place that the data will be used).
 						processor.findAndAddSMDiversionTSMonthly2 ( sumts, true );
 					}
 				}
@@ -1214,7 +1213,7 @@ CommandWarningException, CommandException
     catch ( Exception e ) {
         Message.printWarning ( log_level, routine, e );
         message = "Unexpected error reading diversion historical time series (" + e + ").";
-        Message.printWarning ( warningLevel, 
+        Message.printWarning ( warningLevel,
         MessageUtil.formatMessageTag(command_tag, ++warningCount),
         routine, message );
         status.addToLog ( CommandPhaseType.RUN,
@@ -1222,15 +1221,14 @@ CommandWarningException, CommandException
                  message, "See log file for details." ) );
         throw new CommandException ( message );
     }
-    
+
     status.refreshPhaseSeverity(CommandPhaseType.RUN,CommandStatusType.SUCCESS);
 }
 
 /**
 Return the string representation of the command.
 */
-public String toString ( PropList props )
-{	
+public String toString ( PropList props ) {
 	if ( props == null ) {
 		return getCommandName() + "()";
 	}
@@ -1246,9 +1244,10 @@ public String toString ( PropList props )
 	String PatternFillFlag = props.getValue ( "PatternFillFlag");
 	String FillAverageOrder = props.getValue ( "FillAverageOrder");
 	String AverageFillFlag = props.getValue ( "AverageFillFlag");
+	String FillCarryForward = props.getValue( "FillCarryForward" );
 	String FillUsingCIU = props.getValue( "FillUsingCIU" );
 	String FillUsingCIUFlag = props.getValue( "FillUsingCIUFlag" );
-	
+
 	StringBuffer b = new StringBuffer ();
 
 	if ( ID != null && ID.length() > 0 ) {
@@ -1260,8 +1259,7 @@ public String toString ( PropList props )
 		}
 		b.append ( "IncludeExplicit=" + IncludeExplicit );
 	}
-	if ( IncludeCollections != null && 
-		 IncludeCollections.length() > 0 ) {
+	if ( IncludeCollections != null && IncludeCollections.length() > 0 ) {
 		if ( b.length() > 0 ) {
 			b.append ( "," );
 		}
@@ -1278,6 +1276,12 @@ public String toString ( PropList props )
 			b.append ( "," );
 		}
 		b.append ( "UseDiversionComments=" + UseDiversionComments );
+	}
+	if ( FillCarryForward != null && FillCarryForward.length() > 0 ) {
+		if ( b.length() > 0 ) {
+			b.append ( "," );
+		}
+		b.append ( "FillCarryForward=\"" + FillCarryForward + "\"" );
 	}
 	if ( FillUsingCIU != null && FillUsingCIU.length() > 0 ) {
 		if ( b.length() > 0 ) {
@@ -1333,7 +1337,7 @@ public String toString ( PropList props )
 		}
 		b.append ( "AverageFillFlag=\"" + AverageFillFlag + "\"" );
 	}
-	
+
 	return getCommandName() + "(" + b.toString() + ")";
 }
 

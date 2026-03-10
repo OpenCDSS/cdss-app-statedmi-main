@@ -269,7 +269,7 @@ throws InvalidCommandParameterException
 					message, "Specify ScaleXY as a number.") );
 		}
 		else {
-			__scaleXY = new Double(ScaleXY);
+			__scaleXY = Double.valueOf(ScaleXY);
 		}
 	}
 	
@@ -292,7 +292,7 @@ throws InvalidCommandParameterException
 						message, "Specify ScaleXY as shiftX,shiftY numbers.") );
 			}
 			else {
-				__shiftX = new Double(shiftParts[0].trim());
+				__shiftX = Double.valueOf(shiftParts[0].trim());
 			}
 			if ( !StringUtil.isDouble(shiftParts[1].trim()) ) {
 				message = "The ShiftXY value for Y (" + shiftParts[1].trim() + ") is invalid.";
@@ -302,7 +302,7 @@ throws InvalidCommandParameterException
 						message, "Specify ScaleXY as shiftX,shiftY numbers.") );
 			}
 			else {
-				__shiftY = new Double(shiftParts[1].trim());
+				__shiftY = Double.valueOf(shiftParts[1].trim());
 			}
 		}
 	}

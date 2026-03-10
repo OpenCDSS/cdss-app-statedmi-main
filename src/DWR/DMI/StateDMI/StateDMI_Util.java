@@ -1028,10 +1028,10 @@ public static HashMap<Integer,List<Integer>> readParcelYearMapForDivisions (
 					continue;
 				}
 			}
-			yearList.add(new Integer(year));
+			yearList.add(Integer.valueOf(year));
 		}
 		Collections.sort(yearList);
-		parcelMap.put(new Integer(div), yearList);
+		parcelMap.put(Integer.valueOf(div), yearList);
 	}
 	return parcelMap;
 }
@@ -1114,7 +1114,7 @@ public static int [] readParcelYearListFromParcels ( HashMap<String,StateCU_Parc
 			}
 		}
 		if ( !found ) {
-			years.add(new Integer(year));
+			years.add(Integer.valueOf(year));
 		}
 	}
 	

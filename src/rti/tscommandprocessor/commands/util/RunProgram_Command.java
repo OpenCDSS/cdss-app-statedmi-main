@@ -300,7 +300,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     CommandProcessor processor = getCommandProcessor();
     CommandPhaseType commandPhase = CommandPhaseType.RUN;
 	CommandStatus status = getCommandStatus();
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {
@@ -525,7 +525,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         if ( (ExitCodeProperty != null) && !ExitCodeProperty.isEmpty() ) {
             PropList request_params = new PropList ( "" );
             request_params.setUsingObject ( "PropertyName", ExitCodeProperty );
-            request_params.setUsingObject ( "PropertyValue", new Integer(pm.getExitStatus()) );
+            request_params.setUsingObject ( "PropertyValue", Integer.valueOf(pm.getExitStatus()) );
             try {
                 processor.processRequest( "SetProperty", request_params);
             }
@@ -811,7 +811,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
             if ( (OutputCheckWarningCountProperty != null) && !OutputCheckWarningCountProperty.isEmpty() ) {
                 PropList request_params = new PropList ( "" );
                 request_params.setUsingObject ( "PropertyName", OutputCheckWarningCountProperty );
-                request_params.setUsingObject ( "PropertyValue", new Integer(outputWarningCount) );
+                request_params.setUsingObject ( "PropertyValue", Integer.valueOf(outputWarningCount) );
                 try {
                     processor.processRequest( "SetProperty", request_params);
                 }
@@ -828,7 +828,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
             if ( (OutputCheckFailureCountProperty != null) && !OutputCheckFailureCountProperty.isEmpty() ) {
                 PropList request_params = new PropList ( "" );
                 request_params.setUsingObject ( "PropertyName", OutputCheckFailureCountProperty );
-                request_params.setUsingObject ( "PropertyValue", new Integer(outputFailureCount) );
+                request_params.setUsingObject ( "PropertyValue", Integer.valueOf(outputFailureCount) );
                 try {
                     processor.processRequest( "SetProperty", request_params);
                 }

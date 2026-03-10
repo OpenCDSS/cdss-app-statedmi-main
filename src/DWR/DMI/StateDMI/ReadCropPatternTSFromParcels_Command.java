@@ -155,7 +155,7 @@ private void addToParcelYears ( int parcelYear, List<Integer> parcelYears )
 	}
 	if ( !found ) {
 		// Add a new parcel year
-		parcelYears.add ( new Integer(parcelYear) );
+		parcelYears.add ( Integer.valueOf(parcelYear) );
 	}
 }
 
@@ -326,7 +326,7 @@ private HashMap<Integer,List<Integer>> getParcelYearMapForDivisions ( List<State
 				}
 			}
 			if ( !found ) {
-				yearList.add(new Integer(year));
+				yearList.add(Integer.valueOf(year));
 			}
 		}
 	}
@@ -335,7 +335,7 @@ private HashMap<Integer,List<Integer>> getParcelYearMapForDivisions ( List<State
 		// Create each list and add the the map.
 		// - sort the years
 		Collections.sort(divParcelYears[i]);
-		parcelMap.put(new Integer(i + 1), divParcelYears[i]);
+		parcelMap.put(Integer.valueOf(i + 1), divParcelYears[i]);
 	}
 	return parcelMap;
 }
@@ -1000,7 +1000,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		for ( int i = 0; i < divParcelYearsString.length; i++ ) {
 			int div = i + 1;
 			// Format divisions from the in-memory parcel data.
-			List<Integer> divYears = divParcelYears.get(new Integer(div));
+			List<Integer> divYears = divParcelYears.get(Integer.valueOf(div));
 			divParcelYearsString[i] = new StringBuffer();
 			for ( Integer iyear : divYears ) {
 				if ( divParcelYearsString[i].length() > 0 ) {
@@ -1010,7 +1010,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			}
 			divParcelYearsString[i].insert ( 0, "all years from location/parcel data " + div + " in output period: " );
 			// Format divisions from the HydroBase data.
-			divYears = divHydroBaseParcelYears.get(new Integer(div));
+			divYears = divHydroBaseParcelYears.get(Integer.valueOf(div));
 			divHydroBaseParcelYearsString[i] = new StringBuffer();
 			for ( Integer iyear : divYears ) {
 				if ( divHydroBaseParcelYearsString[i].length() > 0 ) {
@@ -1093,7 +1093,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 					// Get the division.
 					int div = HydroBase_WaterDistrict.lookupWaterDivisionIdForDistrict(waterDistrictList, wd);
 					// Get the parcel years for the division.
-					parcelYearsToZero = divParcelYears.get(new Integer(div));
+					parcelYearsToZero = divParcelYears.get(Integer.valueOf(div));
 					parcelYearsToZeroString = divParcelYearsString[div - 1].toString();
 				}
 				Message.printStatus( 2, routine,

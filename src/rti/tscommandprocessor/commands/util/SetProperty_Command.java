@@ -380,7 +380,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
 	CommandProcessor processor = getCommandProcessor();
     CommandStatus status = getCommandStatus();
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {
@@ -480,7 +480,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			    }
 			    else if ( PropertyType.equalsIgnoreCase(_Double) ) {
 			    	if ( setNaN ) {
-			    		Property_Object = new Double(Double.NaN);
+			    		Property_Object = Double.valueOf(Double.NaN);
 			    	}
 			    	else if ( !setNull ) {
 			    		// Set a number value
@@ -488,15 +488,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			    		// Do math operations if specified
 			    		if ( (Add != null) && !Add.isEmpty() ) {
 			    			Double d = (Double)Property_Object;
-			    			Property_Object = new Double(d.doubleValue() + Double.parseDouble(Add));
+			    			Property_Object = Double.valueOf(d.doubleValue() + Double.parseDouble(Add));
 			    		}
 			    		else if ( (Subtract != null) && !Subtract.isEmpty() ) {
 			    			Double d = (Double)Property_Object;
-			    			Property_Object = new Double(d.doubleValue() - Double.parseDouble(Subtract));
+			    			Property_Object = Double.valueOf(d.doubleValue() - Double.parseDouble(Subtract));
 			    		}
 			    		else if ( (Multiply != null) && !Multiply.isEmpty() ) {
 			    			Double d = (Double)Property_Object;
-			    			Property_Object = new Double(d.doubleValue()*Double.parseDouble(Multiply));
+			    			Property_Object = Double.valueOf(d.doubleValue()*Double.parseDouble(Multiply));
 			    		}
 			    		else if ( (Divide != null) && !Divide.isEmpty() ) {
 			    			Double d = (Double)Property_Object;
@@ -505,7 +505,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			    				// TODO sam 2017-03-25 should this throw an exception?
 			    			}
 			    			else {
-			    				Property_Object = new Double(d.doubleValue()/Double.parseDouble(Divide));
+			    				Property_Object = Double.valueOf(d.doubleValue()/Double.parseDouble(Divide));
 			    			}
 			    		}
 			    	}
@@ -516,15 +516,15 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			    		// Do math operations if specified
 			    		if ( (Add != null) && !Add.isEmpty() ) {
 			    			Integer i = (Integer)Property_Object;
-			    			Property_Object = new Integer(i.intValue() + Integer.parseInt(Add));
+			    			Property_Object = Integer.valueOf(i.intValue() + Integer.parseInt(Add));
 			    		}
 			    		else if ( (Subtract != null) && !Subtract.isEmpty() ) {
 			    			Integer i = (Integer)Property_Object;
-			    			Property_Object = new Integer(i.intValue() - Integer.parseInt(Subtract));
+			    			Property_Object = Integer.valueOf(i.intValue() - Integer.parseInt(Subtract));
 			    		}
 			    		else if ( (Multiply != null) && !Multiply.isEmpty() ) {
 			    			Integer i = (Integer)Property_Object;
-			    			Property_Object = new Integer(i.intValue()*Integer.parseInt(Multiply));
+			    			Property_Object = Integer.valueOf(i.intValue()*Integer.parseInt(Multiply));
 			    		}
 			    		else if ( (Divide != null) && !Divide.isEmpty() ) {
 			    			Integer i = (Integer)Property_Object;
@@ -533,7 +533,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			    				// TODO sam 2017-03-25 evaluate whether to throw an exception
 			    			}
 			    			else {
-			    				Property_Object = new Integer(i.intValue()/Integer.parseInt(Divide));
+			    				Property_Object = Integer.valueOf(i.intValue()/Integer.parseInt(Divide));
 			    			}
 			    		}
 			    	}
@@ -598,16 +598,16 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	    		// Set the property type according to the request so that code that asks for discovery
 	    		// objects and then filters on type will have the correct type
 	    		if ( PropertyType.equalsIgnoreCase(_Boolean) ) {
-	    			Property_Object = new Boolean(true);
+	    			Property_Object = Boolean.valueOf(true);
 	    		}
 	    		else if ( PropertyType.equalsIgnoreCase(_DateTime) ) {
 	    			Property_Object = new DateTime(DateTime.DATE_CURRENT);
 	    		}
 	    		else if ( PropertyType.equalsIgnoreCase(_Double) ) {
-	    			Property_Object = new Double(1.0);
+	    			Property_Object = Double.valueOf(1.0);
 	    		}
 	    		else if ( PropertyType.equalsIgnoreCase(_Integer) ) {
-	    			Property_Object = new Integer(1);
+	    			Property_Object = Integer.valueOf(1);
 	    		}
 	    		else {
 	    			Property_Object = "";
@@ -678,7 +678,7 @@ public String toString ( PropList props )
         if ( b.length() > 0 ) {
             b.append ( "," );
         }
-        b.append ( "PropertyType=" + PropertyType );
+        b.append ( "PropertyType=\"" + PropertyType + "\"");
     }
 	if ( (PropertyValue != null) && (PropertyValue.length() > 0) ) {
 		if ( b.length() > 0 ) {
@@ -690,25 +690,25 @@ public String toString ( PropList props )
 		if ( b.length() > 0 ) {
 			b.append ( "," );
 		}
-		b.append ( "SetEmpty=" + SetEmpty );
+		b.append ( "SetEmpty=\"" + SetEmpty + "\"");
 	}
 	if ( (SetNaN != null) && (SetNaN.length() > 0) ) {
 		if ( b.length() > 0 ) {
 			b.append ( "," );
 		}
-		b.append ( "SetNaN=" + SetNaN );
+		b.append ( "SetNaN=\"" + SetNaN + "\"");
 	}
 	if ( (SetNull != null) && (SetNull.length() > 0) ) {
 		if ( b.length() > 0 ) {
 			b.append ( "," );
 		}
-		b.append ( "SetNull=" + SetNull );
+		b.append ( "SetNull=\"" + SetNull + "\"");
 	}
 	if ( (RemoveProperty != null) && (RemoveProperty.length() > 0) ) {
 		if ( b.length() > 0 ) {
 			b.append ( "," );
 		}
-		b.append ( "RemoveProperty=" + RemoveProperty );
+		b.append ( "RemoveProperty=\"" + RemoveProperty + "\"");
 	}
 	if ( (Add != null) && (Add.length() > 0) ) {
 		if ( b.length() > 0 ) {
@@ -726,13 +726,13 @@ public String toString ( PropList props )
 		if ( b.length() > 0 ) {
 			b.append ( "," );
 		}
-		b.append ( "Multiply=" + Multiply );
+		b.append ( "Multiply=\"" + Multiply + "\"");
 	}
 	if ( (Divide != null) && (Divide.length() > 0) ) {
 		if ( b.length() > 0 ) {
 			b.append ( "," );
 		}
-		b.append ( "Divide=" + Divide );
+		b.append ( "Divide=\"" + Divide + "\"");
 	}
 	return getCommandName() + "(" + b.toString() + ")";
 }
