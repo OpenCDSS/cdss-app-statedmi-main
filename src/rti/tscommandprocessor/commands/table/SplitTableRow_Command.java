@@ -243,7 +243,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     CommandStatus status = getCommandStatus();
     CommandPhaseType commandPhase = CommandPhaseType.RUN;
 	CommandProcessor processor = getCommandProcessor();
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {
@@ -651,8 +651,8 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 							// First copy the original row contents
 							TableRecord newRec = new TableRecord(table.getRecord(irec));
 							// Next set the values in the new record
-							newRec.setFieldValue(startCol, new Double(segStart));
-							newRec.setFieldValue(endCol, new Double(segEnd));
+							newRec.setFieldValue(startCol, Double.valueOf(segStart));
+							newRec.setFieldValue(endCol, Double.valueOf(segEnd));
 							int irecInsert = irec + numRowsAdded + 1;
 							table.insertRecord(irecInsert, newRec, true);
 							++numRowsAdded;

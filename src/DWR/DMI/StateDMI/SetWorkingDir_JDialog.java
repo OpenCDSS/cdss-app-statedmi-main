@@ -211,25 +211,8 @@ private void checkInput ()
 }
 
 /**
-Free memory for garbage collection.
-*/
-protected void finalize ()
-throws Throwable {
-	__browseJButton = null;
-	__dirJTextField = null;
-	__browseJButton = null;
-	__cancelJButton = null;
-	__commandJTextField = null;
-	__commandVector = null;
-	__okJButton = null;
-	__working_dir = null;
-	super.finalize ();
-}
-
-/**
 Return the text for the command.
-@return the text for the command or null if there is a problem with the
-command.
+@return the text for the command or null if there is a problem with the command.
 */
 public List<String> getText () { 
 	if (__commandVector == null) {

@@ -330,7 +330,7 @@ private HashMap<String,Boolean> initializeIdYearMap( List<StateCU_CropPatternTS>
 					// - set to false to indicate that the id/year has not yet been processed
 					mapKey = id + "-" + year;
 					if ( IdYearMap.get(mapKey) == null ) {
-						IdYearMap.put(mapKey, new Boolean(false));
+						IdYearMap.put(mapKey, Boolean.valueOf(false));
 					}
 				}
 			}
@@ -914,7 +914,7 @@ throws Exception {
 			// Zero the crops first so that set data are new values.
 			setCropPatternTSToZero(cds, setstart, setend);
 			// Indicate that the ID and year have been processed so won't be zeroed again.
-			idYearHasBeenProcessedMap.put(mapKey,new Boolean(true));
+			idYearHasBeenProcessedMap.put(mapKey,Boolean.valueOf(true));
 		}
 		cds.setCropArea ( crop_type, year, area, setFlag );
 

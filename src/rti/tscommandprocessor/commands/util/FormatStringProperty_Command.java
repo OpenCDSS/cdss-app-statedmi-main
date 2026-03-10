@@ -243,7 +243,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     
     CommandProcessor processor = getCommandProcessor();
     CommandStatus status = getCommandStatus();
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {
@@ -311,10 +311,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			propObject = DateTime.parse(stringProp);
     		}
     		else if ( propertyType.equalsIgnoreCase(_Double) ) {
-    			propObject = new Double(stringProp);
+    			propObject = Double.valueOf(stringProp);
     		}
     		else if ( propertyType.equalsIgnoreCase(_Integer) ) {
-    			propObject = new Integer(stringProp);
+    			propObject = Integer.valueOf(stringProp);
     		}
     		else {
     			// Default
@@ -344,10 +344,10 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     			propertyObject = new DateTime(DateTime.DATE_CURRENT);
     		}
     		else if ( propertyType.equalsIgnoreCase(_Double) ) {
-    			propertyObject = new Double(1.0);
+    			propertyObject = Double.valueOf(1.0);
     		}
     		else if ( propertyType.equalsIgnoreCase(_Integer) ) {
-    			propertyObject = new Integer(1);
+    			propertyObject = Integer.valueOf(1);
     		}
     		else {
     			propertyObject = "";

@@ -3192,10 +3192,10 @@ public Object getPropContents ( String prop ) throws Exception
 {
 	if ( prop.equalsIgnoreCase("CreateOutput") ) {
 		if ( getCreateOutput() ) {
-			return new Boolean("True");
+			return Boolean.valueOf("True");
 		}
 		else {
-			return new Boolean("False");
+			return Boolean.valueOf("False");
 		}
 	}
 	else if ( prop.equalsIgnoreCase("CommandFileName") ) {
@@ -3237,13 +3237,13 @@ public Object getPropContents ( String prop ) throws Exception
 		return cuPenmanMonteithMethodList;
 	}
 	else if ( prop.equalsIgnoreCase("DefaultWDIDLength") ) {
-		return new Integer(__defaultWdidLength);
+		return Integer.valueOf(__defaultWdidLength);
 	}
     else if ( prop.equalsIgnoreCase("DebugLevelLogFile") ) {
-        return new Integer(Message.getDebugLevel(Message.LOG_OUTPUT));
+        return Integer.valueOf(Message.getDebugLevel(Message.LOG_OUTPUT));
     }
     else if ( prop.equalsIgnoreCase("DebugLevelScreen") ) {
-        return new Integer(Message.getDebugLevel(Message.TERM_OUTPUT));
+        return Integer.valueOf(Message.getDebugLevel(Message.TERM_OUTPUT));
     }
 	else if ( prop.equalsIgnoreCase("HUCList") ) {
 		// Get the list of HUC basin identifiers, for use in dialogs
@@ -3284,7 +3284,7 @@ public Object getPropContents ( String prop ) throws Exception
 		return __OutputYearType;
 	}
 	else if ( prop.equalsIgnoreCase("NeedToCopyDiversionHistoricalTSMonthly") ) {
-		return new Boolean(__need_diversion_ts_monthly_copy);
+		return Boolean.valueOf(__need_diversion_ts_monthly_copy);
 	}
 	else if ( prop.equalsIgnoreCase("StateCU_BlaneyCriddle_List") ) {
 		return getStateCUBlaneyCriddleList();
@@ -3409,10 +3409,10 @@ public Object getPropContents ( String prop ) throws Exception
         return getPropContents_TableResultsList();
     }
     else if ( prop.equalsIgnoreCase("WarningLevelLogFile") ) {
-        return new Integer(Message.getWarningLevel(Message.LOG_OUTPUT));
+        return Integer.valueOf(Message.getWarningLevel(Message.LOG_OUTPUT));
     }
     else if ( prop.equalsIgnoreCase("WarningLevelScreen") ) {
-        return new Integer(Message.getWarningLevel(Message.TERM_OUTPUT));
+        return Integer.valueOf(Message.getWarningLevel(Message.TERM_OUTPUT));
     }
 	else if ( prop.equalsIgnoreCase("WorkingDir") ) {
 		return getWorkingDir();
@@ -6431,7 +6431,7 @@ throws Exception
     catch ( NumberFormatException e ) {
     	programVersionNumber = -1.0;
     }
-    __propertyHashmap.put ( "ProgramVersionNumber", new Double(programVersionNumber) );
+    __propertyHashmap.put ( "ProgramVersionNumber", Double.valueOf(programVersionNumber) );
     
     // First clear user-defined properties.
     // FIXME SAM 2008-10-14 Evaluate whether needed like TSTool

@@ -451,7 +451,7 @@ throws InvalidCommandParameterException, CommandWarningException
 	CommandProcessor processor = getCommandProcessor();
     CommandStatus status = getCommandStatus();
     CommandPhaseType commandPhase = CommandPhaseType.RUN;
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {
@@ -495,6 +495,9 @@ throws InvalidCommandParameterException, CommandWarningException
         }
     }
 	String OutputFile = parameters.getValue ( "OutputFile" );
+    if ( (OutputFile != null) && !OutputFile.isEmpty() && (commandPhase == CommandPhaseType.RUN) && OutputFile.indexOf("${") >= 0 ) {
+   		OutputFile = TSCommandProcessorUtil.expandParameterValue(processor, this, OutputFile);
+    }
 	String Worksheet = parameters.getValue ( "Worksheet" );
     if ( (Worksheet != null) && !Worksheet.isEmpty() && (commandPhase == CommandPhaseType.RUN) && Worksheet.indexOf("${") >= 0 ) {
     	Worksheet = TSCommandProcessorUtil.expandParameterValue(processor, this, Worksheet);
@@ -880,7 +883,7 @@ public String toString ( PropList props )
         if ( b.length() > 0 ) {
             b.append ( "," );
         }
-        b.append ( "ExcelColumnNames=" + ExcelColumnNames );
+        b.append ( "ExcelColumnNames=\"" + ExcelColumnNames + "\"" );
     }
     if ( (ColumnIncludeFilters != null) && (ColumnIncludeFilters.length() > 0) ) {
         if ( b.length() > 0 ) {
@@ -904,7 +907,7 @@ public String toString ( PropList props )
         if ( b.length() > 0 ) {
             b.append ( "," );
         }
-        b.append ( "KeepOpen=" + KeepOpen );
+        b.append ( "KeepOpen=\"" + KeepOpen + "\"" );
     }
     if ( (ColumnCellTypes != null) && (ColumnCellTypes.length() > 0) ) {
         if ( b.length() > 0 ) {

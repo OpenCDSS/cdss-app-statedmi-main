@@ -129,17 +129,6 @@ public LegacyReturnFlow ( String id, int n, double eff, String default_table )
 }
 
 /**
-Finalize before garbage collection.
-*/
-protected void finalize ()
-throws Throwable
-{	__return_id = null;
-	__return_percent = null;
-	__return_table = null;
-	super.finalize();
-}
-
-/**
 Return the default return table ID for a location.
 @return the default return table ID for a location.
 */

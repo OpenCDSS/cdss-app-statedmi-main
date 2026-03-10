@@ -198,7 +198,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	
     CommandProcessor processor = getCommandProcessor();
 	CommandStatus status = getCommandStatus();
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {
@@ -376,7 +376,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
                 if ( doResponseCodeProperty ) {
                     PropList request_params = new PropList ( "" );
                     request_params.setUsingObject ( "PropertyName", ResponseCodeProperty );
-                    request_params.setUsingObject ( "PropertyValue", new Integer(code) );
+                    request_params.setUsingObject ( "PropertyValue", Integer.valueOf(code) );
                     try {
                         processor.processRequest( "SetProperty", request_params);
                     }

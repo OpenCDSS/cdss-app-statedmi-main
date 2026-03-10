@@ -366,7 +366,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	int warning_count = 0;
     
     CommandStatus status = getCommandStatus();
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
 	CommandProcessor processor = getCommandProcessor();
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");

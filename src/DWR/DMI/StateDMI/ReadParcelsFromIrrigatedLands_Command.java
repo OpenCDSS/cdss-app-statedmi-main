@@ -175,7 +175,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	StateDMI_Processor processor = (StateDMI_Processor)getCommandProcessor();
     CommandStatus status = getCommandStatus();
     CommandPhaseType commandPhase = CommandPhaseType.RUN;
-    Boolean clearStatus = new Boolean(true); // Default.
+    Boolean clearStatus = Boolean.valueOf(true); // Default.
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {
@@ -410,7 +410,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			//Message.printStatus(2, routine, "Getting column number for \"" + columnName + "\"");
 			columnNum = table.getFieldIndex(columnName);
 			// Successfully looked up the column number so add to the list of column numbers.
-			swIdColNumList.add(new Integer(columnNum));
+			swIdColNumList.add(Integer.valueOf(columnNum));
 			//Message.printStatus(2, routine, "column number for \"" + columnName + "\" is " + columnNum);
 		}
 		catch ( Exception e ) {
@@ -435,14 +435,14 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 			//Message.printStatus(2, routine, "Getting column number for \"" + columnName + "\"");
 			columnNum = table.getFieldIndex(columnName);
 			// Successfully looked up the column number so add to the list of column numbers.
-			gwIdColNumList.add(new Integer(columnNum));
+			gwIdColNumList.add(Integer.valueOf(columnNum));
 			//Message.printStatus(2, routine, "column number for \"" + columnName + "\" is " + columnNum);
 
 			String columnName2 = "GW_TYPE" + igw;
 			//Message.printStatus(2, routine, "Getting column number for \"" + columnName2 + "\"");
 			columnNum = table.getFieldIndex(columnName2);
 			// Successfully looked up the column number so add to the list of column numbers.
-			gwIdTypeColNumList.add(new Integer(columnNum));
+			gwIdTypeColNumList.add(Integer.valueOf(columnNum));
 			//Message.printStatus(2, routine, "column number for \"" + columnName2 + "\" is " + columnNum);
 		}
 		catch ( Exception e ) {

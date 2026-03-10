@@ -667,7 +667,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 						}
 					}
 					if ( !found ) {
-						divList.add(new Integer(wdDiv));
+						divList.add(Integer.valueOf(wdDiv));
 					}
 				}
 			}

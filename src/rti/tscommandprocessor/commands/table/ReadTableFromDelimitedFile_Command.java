@@ -293,7 +293,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
 	CommandProcessor processor = getCommandProcessor();
     CommandStatus status = getCommandStatus();
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {
@@ -499,7 +499,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
             int rowCount = table.getNumberOfRecords();
             request_params = new PropList ( "" );
             request_params.setUsingObject ( "PropertyName", RowCountProperty );
-            request_params.setUsingObject ( "PropertyValue", new Integer(rowCount) );
+            request_params.setUsingObject ( "PropertyValue", Integer.valueOf(rowCount) );
             try {
                 processor.processRequest( "SetProperty", request_params);
             }

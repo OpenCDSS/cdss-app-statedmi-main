@@ -111,10 +111,9 @@ public void commandRemoved ( int index0, int index1 )
 Finalize the class before garbage collection.
 */
 protected void finalize ()
-throws Throwable
-{	// Remove the listener from the processor
+throws Throwable {
+	// Remove the listener from the processor
 	__processor.removeCommandListListener ( this );
-	super.finalize();
 }
 
 /**

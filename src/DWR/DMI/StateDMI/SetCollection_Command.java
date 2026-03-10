@@ -487,7 +487,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
    						}
    						else {
    							// Set the WD to -1, will be filled later through an additional database query
-    						partIdWDList.add(new Integer(-1));
+    						partIdWDList.add(Integer.valueOf(-1));
    						}
     				}
     				else {
@@ -497,7 +497,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
     					// Set the WD, mostly for information since used for Well part ID of receipt
     					try {
     						String wd = partId.substring(0,2);
-    						partIdWDList.add(new Integer(wd));
+    						partIdWDList.add(Integer.valueOf(wd));
     					}
     					catch ( NumberFormatException e ) {
     						// Not a WDID
@@ -509,7 +509,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 		  						new CommandLogRecord(CommandStatusType.FAILURE,
 			  						message, "Report problem to software support." ) );
 	  						// Add a value to keep lists aligned.
-    						partIdWDList.add(new Integer(-1));
+    						partIdWDList.add(Integer.valueOf(-1));
     					}
     				}
     			}
@@ -738,7 +738,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         						// No wells, see if there is a set.
    								String wd = receiptWDMap.get(partId);
    								if ( wd != null ) {
-    								partIdWDsForWell.add(new Integer(wellsForReceipt.get(0).getWD()));
+    								partIdWDsForWell.add(Integer.valueOf(wellsForReceipt.get(0).getWD()));
    								}
    								else {
    									// Set the WD to -1.
@@ -750,12 +750,12 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
    									status.addToLog ( command_phase,
    										new CommandLogRecord(CommandStatusType.WARNING,
    											message, "Specify the WellReceiptWaterDistrictMap parameter." ) );
-   									partIdWDsForWell.add(new Integer(-1));
+   									partIdWDsForWell.add(Integer.valueOf(-1));
    								}
         					}
         					else {
         						// Have a well record and can determine the WD for the receipt
-    							partIdWDsForWell.add(new Integer(wellsForReceipt.get(0).getWD()));
+    							partIdWDsForWell.add(Integer.valueOf(wellsForReceipt.get(0).getWD()));
         					}
         				}
         				else {
@@ -763,7 +763,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
         					partIdList.add(partId);
         					partIdTypeList.add(StateMod_Well_CollectionPartIdType.WDID);
         					// The WD for the part is based on the first 2 digits of the WDID
-   							partIdWDsForWell.add(new Integer(partId.substring(0,2)));
+   							partIdWDsForWell.add(Integer.valueOf( (partId.substring(0,2))));
         				}
         			}
         		}

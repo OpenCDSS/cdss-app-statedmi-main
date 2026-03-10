@@ -4,19 +4,19 @@
 
 CDSS Time Series Processor Java Library
 CDSS Time Series Processor Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 1994-2019 Colorado Department of Natural Resources
+Copyright (C) 1994-2025 Colorado Department of Natural Resources
 
 CDSS Time Series Processor Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS Time Series Processor Java Library is distributed in the hope that it will be useful,
+CDSS Time Series Processor Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS Time Series Processor Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
@@ -25,8 +25,9 @@ package rti.tscommandprocessor.commands.table;
 
 import javax.swing.JFrame;
 
-import DWR.DMI.StateDMI.StateDMI_Processor;
+//import rti.tscommandprocessor.core.TSCommandProcessor;
 import rti.tscommandprocessor.core.TSCommandProcessorUtil;
+import DWR.DMI.StateDMI.StateDMI_Processor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +49,7 @@ import RTi.Util.IO.PropList;
 import RTi.Util.Table.DataTable;
 import RTi.Util.Table.DataTableMath;
 import RTi.Util.Table.DataTableMathOperatorType;
+import RTi.Util.Table.TableField;
 import RTi.Util.Table.TableRowConditionEvaluator;
 
 /**
@@ -55,7 +57,7 @@ This class initializes, checks, and runs the TableMath() command.
 */
 public class TableMath_Command extends AbstractCommand implements Command
 {
-    
+
 /**
 Values for NonValue parameter.
 */
@@ -65,31 +67,31 @@ protected final String _Null = "Null";
 /**
 Constructor.
 */
-public TableMath_Command ()
-{   super();
+public TableMath_Command () {
+    super();
     setCommandName ( "TableMath" );
 }
 
 /**
 Check the command parameter for valid values, combination, etc.
 @param parameters The parameters for the command.
-@param command_tag an indicator to be used when printing messages, to allow a
-cross-reference to the original commands.
+@param command_tag an indicator to be used when printing messages, to allow a cross-reference to the original commands.
 @param warning_level The warning level to use when printing parse warnings
 (recommended is 2 for initialization, and 1 for interactive command editor dialogs).
 */
 public void checkCommandParameters ( PropList parameters, String command_tag, int warning_level )
-throws InvalidCommandParameterException
-{   String TableID = parameters.getValue ( "TableID" );
+throws InvalidCommandParameterException {
+    String TableID = parameters.getValue ( "TableID" );
     String Input1 = parameters.getValue ( "Input1" );
     String ProcessRows = parameters.getValue ( "ProcessRows" );
     String Operator = parameters.getValue ( "Operator" );
     String Input2 = parameters.getValue ( "Input2" );
     String Output = parameters.getValue ( "Output" );
+    String OutputType = parameters.getValue ( "OutputType" );
     String NonValue = parameters.getValue ( "NonValue" );
     String warning = "";
     String message;
-    
+
     CommandStatus status = getCommandStatus();
     status.clearLog(CommandPhaseType.INITIALIZATION);
 
@@ -146,9 +148,9 @@ throws InvalidCommandParameterException
             status.addToLog ( CommandPhaseType.INITIALIZATION, new CommandLogRecord(CommandStatusType.FAILURE,
                 message, "Select a supported operator using the command editor." ) );
         }
-        
+
         // Make sure that it is in the supported list.
-        
+
         if ( supported ) {
             supported = false;
             List<DataTableMathOperatorType> operators = DataTableMath.getOperatorChoices();
@@ -164,9 +166,9 @@ throws InvalidCommandParameterException
                     message, "Select a supported operator using the command editor." ) );
             }
         }
-       
+
         // Additional checks that depend on the operator.
-        /* TODO SAM 2010-09-13 Add this later
+        /* TODO SAM 2010-09-13 Add this later.
         if ( supported ) {
             int nRequiredValues = -1;
             try {
@@ -178,7 +180,7 @@ throws InvalidCommandParameterException
                 status.addToLog ( CommandPhaseType.INITIALIZATION,new CommandLogRecord(CommandStatusType.FAILURE,
                     message, "Contact software support." ) );
             }
-            
+
             if ( nRequiredValues >= 1 ) {
                 if ( (Input1 == null) || Input1.equals("") ) {
                     message = "Value1 must be specified for the statistic.";
@@ -193,7 +195,7 @@ throws InvalidCommandParameterException
                         message, "Specify Value1 as a number." ) );
                 }
             }
-            
+
             if ( nRequiredValues >= 2 ) {
                 if ( (Input2 == null) || Input2.equals("") ) {
                     message = "Value2 must be specified for the statistic.";
@@ -208,7 +210,7 @@ throws InvalidCommandParameterException
                         message, "Specify Value2 as a number." ) );
                 }
             }
-            
+
             if ( nRequiredValues == 3 ) {
                 if ( (Output == null) || Output.equals("") ) {
                     message = "Value3 must be specified for the statistic.";
@@ -223,12 +225,12 @@ throws InvalidCommandParameterException
                         message, "Specify Value3 as a number." ) );
                 }
             }
-    
+
             if ( nRequiredValues > 3 ) {
                 message = "A maximum of 3 values are supported as input to statistic computation.";
                 warning += "\n" + message;
                 status.addToLog ( CommandPhaseType.INITIALIZATION, new CommandLogRecord(CommandStatusType.FAILURE,
-                    message, "Refer to documentation for statistic.  Contact software support if necessary." ) ); 
+                    message, "Refer to documentation for statistic.  Contact software support if necessary." ) );
             }
         }*/
     }
@@ -249,23 +251,30 @@ throws InvalidCommandParameterException
                 message, "Don't provide a column name or numeric constant as Input2." ) );
         }
     }
-    
+
     if ( (Output == null) || Output.equals("") ) {
         message = "The output column must be specified.";
         warning += "\n" + message;
         status.addToLog ( CommandPhaseType.INITIALIZATION, new CommandLogRecord(CommandStatusType.FAILURE,
             message, "Provide a column name for output." ) );
     }
-    
+
+    if ( (OutputType != null) && !OutputType.isEmpty() && (TableField.lookupDataType(OutputType) < 0) ) {
+        message = "The output type (" + OutputType + ") is invalid";
+        warning += "\n" + message;
+        status.addToLog ( CommandPhaseType.INITIALIZATION, new CommandLogRecord(CommandStatusType.FAILURE,
+            message, "Specify a valid output type using the command editor choices." ) );
+    }
+
     if ( (NonValue != null) && !NonValue.equals("") && !NonValue.equals(_NaN) && !NonValue.equals(_Null) ) {
         message = "The NonValue value is invalid.";
         warning += "\n" + message;
         status.addToLog ( CommandPhaseType.INITIALIZATION, new CommandLogRecord(CommandStatusType.FAILURE,
             message, "Specify NonValue as " + _NaN + " or " + _Null + " (default)." ) );
     }
-    
-    // Check for invalid parameters...
-    List<String> validList = new ArrayList<>(8);
+
+    // Check for invalid parameters.
+    List<String> validList = new ArrayList<>(9);
     validList.add ( "TableID" );
     validList.add ( "Condition" );
     validList.add ( "ProcessRows" );
@@ -273,16 +282,17 @@ throws InvalidCommandParameterException
     validList.add ( "Operator" );
     validList.add ( "Input2" );
     validList.add ( "Output" );
+    validList.add ( "OutputType" );
     validList.add ( "NonValue" );
     warning = TSCommandProcessorUtil.validateParameterNames ( validList, this, warning );
-    
+
     if ( warning.length() > 0 ) {
         Message.printWarning ( warning_level,
         MessageUtil.formatMessageTag(command_tag,warning_level),
         warning );
         throw new InvalidCommandParameterException ( warning );
     }
-    
+
     status.refreshPhaseSeverity(CommandPhaseType.INITIALIZATION,CommandStatusType.SUCCESS);
 }
 
@@ -291,14 +301,14 @@ Edit the command.
 @param parent The parent JFrame to which the command dialog will belong.
 @return true if the command was edited (e.g., "OK" was pressed), and false if not (e.g., "Cancel" was pressed.
 */
-public boolean editCommand ( JFrame parent )
-{   List<String> tableIDChoices =
+public boolean editCommand ( JFrame parent ) {
+    List<String> tableIDChoices =
         TSCommandProcessorUtil.getTableIdentifiersFromCommandsBeforeCommand(
             (StateDMI_Processor)getCommandProcessor(), this);
     return (new TableMath_JDialog ( parent, this, tableIDChoices )).ok();
 }
 
-// Parse command is in the base class
+// Parse command is in the base class.
 
 /**
 Method to execute the command.
@@ -307,17 +317,17 @@ Method to execute the command.
 */
 public void runCommand ( int command_number )
 throws InvalidCommandParameterException,
-CommandWarningException, CommandException
-{   String message, routine = getClass().getSimpleName() + ".runCommand";
+CommandWarningException, CommandException {
+    String message, routine = getClass().getSimpleName() + ".runCommand";
     int warning_level = 2;
     String command_tag = "" + command_number;
     int warning_count = 0;
     //int log_level = 3;  // Level for non-use messages for log file.
-    
+
     CommandProcessor processor = getCommandProcessor();
     CommandStatus status = getCommandStatus();
     CommandPhaseType commandPhase = CommandPhaseType.RUN;
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.TRUE; // Default.
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {
@@ -325,15 +335,15 @@ CommandWarningException, CommandException
     	}
     }
     catch ( Exception e ) {
-    	// Should not happen
+    	// Should not happen.
     }
     if ( clearStatus ) {
 		status.clearLog(commandPhase);
 	}
     PropList parameters = getCommandParameters();
-    
-    // Get the input parameters...
-    
+
+    // Get the input parameters.
+
     String TableID = parameters.getValue ( "TableID" );
    	TableID = TSCommandProcessorUtil.expandParameterValue(processor, this, TableID);
     String Condition = parameters.getValue ( "Condition" );
@@ -364,6 +374,13 @@ CommandWarningException, CommandException
    	Input2 = TSCommandProcessorUtil.expandParameterValue(processor, this, Input2);
     String Output = parameters.getValue ( "Output" );
    	Output = TSCommandProcessorUtil.expandParameterValue(processor, this, Output);
+    String OutputType = parameters.getValue ( "OutputType" );
+    Message.printStatus(2, routine, "Output=\"" + Output + "\" OutputType=\"" + OutputType + "\"");
+    int outputType = -1;
+    if ( (OutputType != null) && !OutputType.isEmpty() ) {
+    	outputType = TableField.lookupDataType(OutputType);
+    }
+    Message.printStatus(2, routine, "OutputType=\"" + OutputType + "\" outputType=" + outputType);
     String NonValue = parameters.getValue ( "NonValue" );
     Double NonValue_Double = null;
     if ( (NonValue != null) && !NonValue.equals("") ) {
@@ -378,7 +395,7 @@ CommandWarningException, CommandException
     PropList request_params = null;
     CommandProcessorRequestResultsBean bean = null;
     if ( (TableID != null) && !TableID.equals("") ) {
-        // Get the table to be updated
+        // Get the table to be updated.
         request_params = new PropList ( "" );
         request_params.set ( "TableID", TableID );
         try {
@@ -404,54 +421,53 @@ CommandWarningException, CommandException
             table = (DataTable)o_Table;
         }
     }
-    
+
     if ( warning_count > 0 ) {
-        // Input error...
+        // Input error.
         message = "Insufficient data to run command.";
         status.addToLog ( CommandPhaseType.RUN,
         new CommandLogRecord(CommandStatusType.FAILURE, message, "Check input to command." ) );
         Message.printWarning(3, routine, message );
         throw new CommandException ( message );
     }
-    
-    // Now process...
+
+    // Now process.
 
     List<String> problems = new ArrayList<>();
     try {
     	// By default will process all rows without using an evaluator.
 		TableRowConditionEvaluator evaluator = null;
-		if ( ((Condition != null) && !Condition.isEmpty()) ||
-			(processRows.length > 0)) {
+		if ( ((Condition != null) && !Condition.isEmpty()) || (processRows.length > 0)) {
 			// Process rows that match a condition:
 			// - currently this is simple logic
 			evaluator = new TableRowConditionEvaluator(table, Condition, processRows );
 		}
         DataTableMath dtm = new DataTableMath ( table );
-        dtm.math ( Input1, operator, Input2, Output, NonValue_Double, evaluator, problems );
+        dtm.math ( Input1, operator, Input2, Output, outputType, NonValue_Double, evaluator, problems );
     }
     catch ( Exception e ) {
         message = "Unexpected error performing table math (" + e + ").";
-        Message.printWarning ( warning_level, 
+        Message.printWarning ( warning_level,
             MessageUtil.formatMessageTag(command_tag, ++warning_count),routine, message );
         Message.printWarning ( 3, routine, e );
         status.addToLog ( CommandPhaseType.RUN, new CommandLogRecord(CommandStatusType.FAILURE,
             message, "Check log file for details." ) );
         throw new CommandException ( message );
     }
-    
-    int MaxWarnings_int = 500; // Limit the problems to 500 to prevent command overload
+
+    int MaxWarnings_int = 500; // Limit the problems to 500 to prevent command overload.
     int problemsSize = problems.size();
     int problemsSizeOutput = problemsSize;
     String ProblemType = "TableMath";
     if ( (MaxWarnings_int > 0) && (problemsSize > MaxWarnings_int) ) {
-        // Limit the warnings to the maximum
+        // Limit the warnings to the maximum.
         problemsSizeOutput = MaxWarnings_int;
     }
     if ( problemsSizeOutput < problemsSize ) {
         message = "Performing table math had " + problemsSize + " warnings - only " + problemsSizeOutput + " are listed.";
         Message.printWarning ( warning_level,
             MessageUtil.formatMessageTag(command_tag,++warning_count),routine,message );
-        // No recommendation since it is a user-defined check
+        // No recommendation since it is a user-defined check.
         // FIXME SAM 2009-04-23 Need to enable using the ProblemType in the log.
         status.addToLog ( CommandPhaseType.RUN,new CommandLogRecord(CommandStatusType.WARNING, ProblemType, message, "" ) );
     }
@@ -459,92 +475,39 @@ CommandWarningException, CommandException
         message = problems.get(iprob);
         Message.printWarning ( warning_level,
             MessageUtil.formatMessageTag(command_tag,++warning_count),routine,message );
-        // No recommendation since it is a user-defined check
+        // No recommendation since it is a user-defined check.
         // FIXME SAM 2009-04-23 Need to enable using the ProblemType in the log.
         status.addToLog ( CommandPhaseType.RUN,new CommandLogRecord(CommandStatusType.WARNING, ProblemType, message, "" ) );
     }
-    
+
     if ( warning_count > 0 ) {
         message = "There were " + warning_count + " warnings processing the command.";
         Message.printWarning ( warning_level,
             MessageUtil.formatMessageTag(command_tag, ++warning_count),routine,message);
         throw new CommandWarningException ( message );
     }
-    
+
     status.refreshPhaseSeverity(CommandPhaseType.RUN,CommandStatusType.SUCCESS);
 }
 
 /**
 Return the string representation of the command.
-@param parameters parameters for the command.
+@param parameters to include in the command
+@return the string representation of the command
 */
-public String toString ( PropList parameters )
-{   
-    if ( parameters == null ) {
-        return getCommandName() + "()";
-    }
-    
-    String TableID = parameters.getValue( "TableID" );
-    String Condition = parameters.getValue( "Condition" );
-    String ProcessRows = parameters.getValue( "ProcessRows" );
-    String Input1 = parameters.getValue( "Input1" );
-    String Operator = parameters.getValue( "Operator" );
-    String Input2 = parameters.getValue( "Input2" );
-    String Output = parameters.getValue( "Output" );
-    String NonValue = parameters.getValue( "NonValue" );
-        
-    StringBuffer b = new StringBuffer ();
-
-    if ( (TableID != null) && (TableID.length() > 0) ) {
-        if ( b.length() > 0 ) {
-            b.append ( "," );
-        }
-        b.append ( "TableID=\"" + TableID + "\"" );
-    }
-    if ( (Condition != null) && (Condition.length() > 0) ) {
-        if ( b.length() > 0 ) {
-            b.append ( "," );
-        }
-        b.append ( "Condition=\"" + Condition + "\"" );
-    }
-    if ( (ProcessRows != null) && (ProcessRows.length() > 0) ) {
-        if ( b.length() > 0 ) {
-            b.append ( "," );
-        }
-        b.append ( "ProcessRows=\"" + ProcessRows + "\"" );
-    }
-    if ( (Input1 != null) && (Input1.length() > 0) ) {
-        if ( b.length() > 0 ) {
-            b.append ( "," );
-        }
-        b.append ( "Input1=\"" + Input1 + "\"" );
-    }
-    if ( (Operator != null) && (Operator.length() > 0) ) {
-        if ( b.length() > 0 ) {
-            b.append ( "," );
-        }
-        b.append ( "Operator=\"" + Operator + "\"" );
-    }
-    if ( (Input2 != null) && (Input2.length() > 0) ) {
-        if ( b.length() > 0 ) {
-            b.append ( "," );
-        }
-        b.append ( "Input2=\"" + Input2 + "\"");
-    }
-    if ( (Output != null) && (Output.length() > 0) ) {
-        if ( b.length() > 0 ) {
-            b.append ( "," );
-        }
-        b.append ( "Output=\"" + Output + "\"" );
-    }
-    if ( (NonValue != null) && (NonValue.length() > 0) ) {
-        if ( b.length() > 0 ) {
-            b.append ( "," );
-        }
-        b.append ( "NonValue=" + NonValue );
-    }
-    
-    return getCommandName() + "(" + b.toString() + ")";
+public String toString ( PropList parameters ) {
+	String [] parameterOrder = {
+    	"TableID",
+    	"Condition",
+    	"ProcessRows",
+    	"Input1",
+    	"Operator",
+    	"Input2",
+    	"Output",
+    	"OutputType",
+    	"NonValue"
+	};
+	return this.toString(parameters, parameterOrder);
 }
 
 }

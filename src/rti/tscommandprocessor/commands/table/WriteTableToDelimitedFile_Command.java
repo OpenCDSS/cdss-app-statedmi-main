@@ -329,7 +329,7 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 	
 	CommandStatus status = getCommandStatus();
 	CommandPhaseType commandPhase = CommandPhaseType.RUN;
-    Boolean clearStatus = new Boolean(true); // default
+    Boolean clearStatus = Boolean.valueOf(true); // default
     try {
     	Object o = processor.getPropContents("CommandsShouldClearRunStatus");
     	if ( o != null ) {
@@ -347,6 +347,9 @@ throws InvalidCommandParameterException, CommandWarningException, CommandExcepti
 
     // Get the table information  
     String OutputFile = parameters.getValue ( "OutputFile" );
+    if ( (OutputFile != null) && !OutputFile.isEmpty() && (commandPhase == CommandPhaseType.RUN) ) {
+    	OutputFile = TSCommandProcessorUtil.expandParameterValue(processor, this, OutputFile);
+    }
     OutputFile_full = OutputFile;
     String TableID = parameters.getValue ( "TableID" );
     if ( (TableID != null) && !TableID.isEmpty() && (commandPhase == CommandPhaseType.RUN) ) {
@@ -516,13 +519,13 @@ public String toString ( PropList parameters )
         if ( b.length() > 0 ) {
             b.append ( "," );
         }
-        b.append ( "WriteHeaderComments=" + WriteHeaderComments );
+        b.append ( "WriteHeaderComments=\"" + WriteHeaderComments + "\"" );
     }
     if ( (AlwaysQuoteStrings != null) && (AlwaysQuoteStrings.length() > 0) ) {
         if ( b.length() > 0 ) {
             b.append ( "," );
         }
-        b.append ( "AlwaysQuoteStrings=" + AlwaysQuoteStrings );
+        b.append ( "AlwaysQuoteStrings=\"" + AlwaysQuoteStrings + "\"" );
     }
     if ( (NewlineReplacement != null) && (NewlineReplacement.length() > 0) ) {
         if ( b.length() > 0 ) {
